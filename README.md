@@ -63,6 +63,24 @@ templates/              Standard templates for all future blueprint documents
 reviews/                Independent reviews and final dispositions
 ```
 
+## Foundation Documents
+
+- `PLATFORM_MANIFEST.md`
+- `00-Foundation/PLATFORM_CANON.md`
+- `00-Foundation/CONSTITUTION.md`
+- `00-Foundation/GUIDING_PRINCIPLES.md`
+- `00-Foundation/DECISION_FRAMEWORK.md`
+- `00-Foundation/PLATFORM_VALUES.md`
+- `00-Foundation/PRODUCT_PHILOSOPHY.md`
+- `00-Foundation/UX_PHILOSOPHY.md`
+- `00-Foundation/ENGINEERING_PHILOSOPHY.md`
+- `00-Foundation/ARCHITECTURE_PRINCIPLES.md`
+- `00-Foundation/NAMING_STANDARDS.md`
+- `00-Foundation/DOCUMENT_GOVERNANCE.md`
+- `00-Foundation/AI_PHILOSOPHY.md`
+- `00-Foundation/SECURITY_PHILOSOPHY.md`
+- `00-Foundation/GLOSSARY.md`
+
 ## Document Lifecycle
 
 Every authoritative document uses this lifecycle:

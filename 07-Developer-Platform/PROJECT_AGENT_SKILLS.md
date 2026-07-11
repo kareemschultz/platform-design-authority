@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DEV-005
 title: Project Agent Skills
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -63,7 +63,7 @@ Creates a constrained design-system-aware generation brief for v0 and reviews ge
 1. Identify a repeated procedure, checklist, or specialized review.
 2. Confirm it is not a stable fact better placed in `CLAUDE.md`.
 3. Identify source documents and authority.
-4. Write a concise `SKILL.md` with a precise description.
+4. Write a concise skill entry file with a precise description.
 5. Add supporting files only when they reduce repeated context.
 6. Restrict model invocation for consequential workflows.
 7. Test automatic and manual triggering.

@@ -1,92 +1,136 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 ---
 
 # Founder Decision Register
 
 ## Purpose
 
-Record business decisions that architecture cannot safely infer. Technical documents may recommend an option, but these decisions require explicit founder ratification because they affect legal structure, commercial risk, financing, launch scope, and customer promises.
+Record business decisions architecture cannot safely infer. Recommendations remain provisional until explicit founder ratification and required professional review.
 
-## Decision FDR-001 — Initial Tenant Payment Operating Model
+## FDR-001 — Initial Tenant Payment Operating Model
 
-**Recommended and provisionally adopted:** direct tenant-merchant contracts, as proposed by ADR-0015.
+**Status:** Open — recommended and provisionally adopted.
 
-The platform supplies payment software and adapters. Each tenant contracts directly with its bank, wallet, or acquiring provider. The platform does not initially pool, custody, or settle tenant funds and does not act as payment facilitator or merchant of record.
+Recommended: direct tenant-provider merchant contracts under ADR-0015. The platform supplies software and adapters. Each tenant contracts directly with its bank, wallet, or acquiring provider. The platform does not initially pool, custody, settle tenant funds, act as payment facilitator, or act as merchant of record.
 
-**Founder ratification required before:** selecting production payment providers or publishing payment-service claims.
+**Ratification required before:** production provider selection, contracts, or public payment-service claims.
 
-## Decision FDR-002 — Platform Operating Legal Entity
+## FDR-002 — Platform Operating Legal Entity
 
-**Status:** Open.
+**Status:** Open — critical path.
 
-Current operating context is Guyana-first, with existing Guyana-based businesses and customers. The repository does not yet identify which legal entity will own the platform intellectual property, contract with SaaS customers, employ or engage staff, receive subscription revenue, contract with cloud and payment providers, or bear data-controller and support obligations.
-
-Required founder inputs:
+Decide:
 
 - Legal entity name and jurisdiction
-- Ownership of source code and trademarks
-- Contracting and invoicing entity
-- Tax registration and banking arrangements
-- Whether customer contracts may be signed by a current business or a new platform company
-- Intended Caribbean or international expansion structure
+- Source-code and trademark ownership
+- Customer contracting and invoicing entity
+- Tax registration and banking
+- Staff and contractor engagement
+- Data-controller and support obligations
+- Caribbean and international expansion structure
 
-**Block:** no billing-provider or merchant-of-record decision may be ratified until this is answered and reviewed by qualified legal and tax advisers.
+**Block:** billing provider, marketplace paid phase, merchant-of-record, platform payout, and several provider contracts cannot be ratified before qualified legal and tax review.
 
-## Decision FDR-003 — Platform Billing and Settlement Currency
+## FDR-003 — Platform Billing and Settlement Currency
 
 **Status:** Open with operating assumptions.
 
-Known product requirements:
+Known requirements:
 
-- GYD is a first-class operational and reporting currency.
-- USD and additional currencies must be supported.
+- GYD is first-class.
+- USD and additional currencies are supported.
 - Tenant transactions may use multiple currencies and split tenders.
 
-Still to decide:
+Decide platform invoice currencies, bank and settlement currencies, FX source, rounding, gains/losses, tax-invoice presentation, and refund policy.
 
-- Currency in which the platform invoices Guyana customers
-- Whether international customers are billed in USD or local currency
-- Bank account and settlement currencies of the platform entity
-- FX source, rounding, gains and losses, tax-invoice presentation, and refund policy
+## FDR-004 — First Retail Beachhead Scope
 
-The product must not hardcode a single billing currency before this decision.
+**Status:** Open — recommended and provisionally adopted.
 
-## Decision FDR-004 — First Retail Beachhead Scope
+Recommended first slice: POS, catalog, inventory, cash/register control, Party/customer basics, stored value, prototype tax pack, payment adapter seam, audit, entitlements, permissions, offline continuity, and Finance handoff.
 
-**Recommended and provisionally adopted:** the controlled first slice is POS, catalog, inventory, cash/register control, Party/customer basics, stored value, tax calculation seam, payment adapter seam, audit, entitlements, permissions, offline continuity, and financial handoff.
+The production native storefront, customer recurring agreements, memberships, advanced loyalty, full General Ledger, financial statements, self-checkout, and autonomous AI are outside the first slice.
 
-The native reference storefront is **not** required for the first operational pilot. The first slice may include connector contracts and an online-order ingestion stub, but not a full production storefront.
+**Ratification required before:** the first-slice package is marked In Review or implementation scope is contractually committed.
 
-Tenant recurring commerce and memberships are **after** the first slice unless a verified collection rail and a named pilot customer require them.
+## FDR-005 — Repository Visibility and Documentation License
 
-**Founder ratification required before:** first-slice specifications are marked In Review.
+**Status:** Open — repository currently public.
 
-## Decision FDR-005 — Repository Visibility
+Decide:
 
-**Status:** Operational decision pending.
+- Public thought leadership versus private competitive asset
+- Paths safe for public disclosure
+- Temporary reviewer access
+- Documentation license
+- Contribution policy
+- Security and roadmap redaction
 
-The repository was made public to support independent review. Before returning it to private or keeping it public, decide:
+No secrets, customer identities, private premium-source code, license keys, or production security details may be committed regardless of visibility.
 
-- Whether the blueprint is intended to become public thought leadership or an internal competitive asset
-- Which security, commercial, and roadmap details are safe to disclose
-- Whether external reviewers receive temporary access instead
-- Licensing and contribution terms for public content
+## FDR-006 — Platform Payment Terminal Strategy
 
-No secrets, customer identities, or production security details may be committed regardless of visibility.
+**Status:** Open.
+
+Decide whether the first paid pilot supports:
+
+- Cash only plus wallet/request-to-pay
+- Customer-owned standalone terminals with manual reference entry
+- Semi-integrated terminals
+- Fully integrated terminals
+- No card-terminal commitment until a certified provider exists
+
+Required evidence: named pilot need, provider support, certification, settlement, refund/reversal behavior, offline behavior, device support, cost, and legal review.
+
+## FDR-007 — Initial Provider Coverage Beyond MMG
+
+**Status:** Open.
+
+Decide which provider categories are required before pilot:
+
+- MMG or another wallet/request-to-pay provider
+- Card/acquiring provider
+- Bank transfer or payment-link provider
+- Email and SMS providers
+- Identity enterprise provider
+- Tax or fiscal provider
+
+A category may be represented by a simulator until the pilot requires production certification.
+
+## FDR-008 — Marketplace Paid Phase
+
+**Status:** Open; free-listings-first is recommended.
+
+Decide whether and when the platform may bill for publisher listings or execute publisher payouts. Phase 3 requires the legal entity, tax model, contracting role, payout provider, accounting, refunds, chargebacks, reserves, sanctions, and regulatory review.
+
+Until ratified, the marketplace supports private and free listings or direct publisher billing only.
+
+## FDR-009 — Premium UI and Marketing Asset Governance
+
+**Status:** Operating direction accepted; license scope verification remains required.
+
+Direction:
+
+- Tailwind and source-owned shadcn/ui form the web UI foundation.
+- Magic UI Pro and shadcn/studio premium assets may accelerate marketing and selected product surfaces.
+- Private credentials, license keys, and prohibited redistributable bundles remain outside the public repository.
+
+Before implementation, confirm the purchasing person or entity, permitted products, seats, redistribution, and renewal terms.
 
 ## Governance
 
-A founder decision is closed only when:
+A decision closes only when:
 
-1. The selected option and effective date are recorded.
+1. Selected option, owner, effective date, and status are recorded.
 2. Affected ADRs and specifications are updated.
-3. Legal, tax, regulatory, security, and commercial reviews are attached where required.
+3. Required legal, tax, regulatory, security, accounting, and commercial evidence is attached.
 4. Contradictory assumptions are removed.
+5. The decision is represented in implementation and customer claims.
 
-Architecture documents must reference this register rather than silently inventing business facts.
+Architecture documents reference this register rather than inventing business facts.

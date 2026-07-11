@@ -2,10 +2,15 @@
 name: form-wizard-design
 description: Design or review forms, field groups, searchable selects, multi-selects, bulk edits, repeatable sections, conditional fields, wizards, steppers, validation, and offline form behavior.
 context: fork
-allowed-tools: Read Grep Glob
+agent: Explore
+disallowed-tools: Write Edit Bash NotebookEdit
 ---
 
 # Form and Wizard Design Skill
+
+## Safety
+
+This is a read-only design and review skill. Mutation and shell tools are removed while active.
 
 ## Governing Documents
 
@@ -13,6 +18,7 @@ allowed-tools: Read Grep Glob
 - `09-UX/ADVANCED_INTERFACE_PATTERNS.md`
 - `09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
 - `09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
+- `09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
 - `02-Architecture/TANSTACK_DECISION_MATRIX.md`
 
 ## Choose the Form Shape
@@ -72,4 +78,4 @@ Define:
 
 ## Output
 
-Produce a form schema outline, interaction sequence, state model, validation matrix, accessibility plan, mobile/offline behavior, and acceptance tests. Flag any business rule that has been placed in client-only code.
+Produce a form schema outline, interaction sequence, state model, validation matrix, accessibility plan, mobile/offline behavior, and acceptance tests. Flag any business rule placed in client-only code.

@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ARC-014
 title: First Slice API and Event Contracts
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
-related_adrs: [ADR-0016]
+related_adrs: [ADR-0016, ADR-0017]
 ---
 
 # First Slice API and Event Contracts
@@ -114,16 +114,16 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | `POST /v1/receipts/{receiptId}/reissue` | `commerce.receipt.reissue` |
 | `POST /v1/receipts/{receiptId}/void` | `commerce.receipt.void` |
 
-### Payments
+### Payment
 
 | Method and path | Permission |
 |---|---|
-| `POST /v1/payment-intents` | `engine.payment-intent.create` |
-| `POST /v1/payment-intents/{id}/confirm` | `engine.payment-intent.confirm` |
-| `POST /v1/payment-intents/{id}/refund` | `engine.payment-intent.refund` |
-| `POST /v1/payment-intents/{id}/reverse` | `engine.payment-intent.reverse` |
-| `GET /v1/payment-intents/{id}` | `engine.payment-intent.read` |
-| `POST /v1/payment-reconciliations` | `engine.payment-reconciliation.create` |
+| `POST /v1/payment-intents` | `payment.intent.create` |
+| `POST /v1/payment-intents/{id}/confirm` | `payment.intent.confirm` |
+| `POST /v1/payment-intents/{id}/refund` | `payment.intent.refund` |
+| `POST /v1/payment-intents/{id}/reverse` | `payment.intent.reverse` |
+| `GET /v1/payment-intents/{id}` | `payment.intent.read` |
+| `POST /v1/payment-reconciliations` | `payment.reconciliation.create` |
 
 ### Stored Value
 
@@ -194,6 +194,8 @@ Every consequential command declares idempotency, authorization, entitlement, st
 | `commerce.return.completed.v1` | Commerce Domain |
 | `commerce.register.opened.v1` | Commerce Domain |
 | `commerce.register.closed.v1` | Commerce Domain |
+| `payment.intent.captured.v1` | Payment Engine |
+| `payment.intent.uncertain.v1` | Payment Engine |
 | `commerce.stored-value-instrument.issued.v1` | Stored Value and Customer Balances |
 | `commerce.stored-value-redemption.captured.v1` | Stored Value and Customer Balances |
 | `developer.webhook-delivery.failed.v1` | Webhooks and Event Delivery |
@@ -201,7 +203,7 @@ Every consequential command declares idempotency, authorization, entitlement, st
 | `security.privacy-request.received.v1` | Privacy Rights and Retention |
 | `security.privacy-case.closed.v1` | Privacy Rights and Retention |
 
-The owning specification is the only canonical definition. This document references events and must not create duplicate registry definitions.
+The owning specification is the only canonical definition. This document references events and never redefines them.
 
 ## Error Model
 

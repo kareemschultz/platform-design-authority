@@ -1,7 +1,7 @@
 ---
 document_id: PDA-PLT-010
 title: Notifications and Communication
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
@@ -11,7 +11,9 @@ last_reviewed: 2026-07-10
 
 ## Purpose
 
-Define a shared service for in-app notifications, email, SMS, push, messaging channels, webhooks, and other user or system communications.
+Define a shared service for in-app notifications, email, SMS, push, messaging channels, and other communications directed to people or governed conversational endpoints.
+
+External system-to-system webhook subscriptions, signing, retry, replay, and delivery administration are owned by the Developer Platform in `07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md`.
 
 ## Communication Types
 
@@ -22,13 +24,13 @@ Define a shared service for in-app notifications, email, SMS, push, messaging ch
 - Reminder
 - Marketing communication
 - Internal collaboration message
-- Customer, supplier, or employee communication
-- System-to-system webhook
+- Customer, supplier, employee, or partner communication
+- Provider-mediated conversational message where explicitly supported
 
 ## Core Capabilities
 
 - Templates and localized content
-- Recipient resolution by user, role, team, branch, customer, supplier, or employee
+- Recipient resolution by user, role, team, branch, Party role, customer, supplier, or employee
 - Channel selection and fallback
 - Preference and consent management
 - Scheduling, batching, digesting, and quiet hours
@@ -48,6 +50,8 @@ Define a shared service for in-app notifications, email, SMS, push, messaging ch
 6. Delivery retries must avoid duplicate or misleading messages.
 7. Notification preferences may exist at platform, tenant, organization, event, channel, and user levels with explicit precedence.
 8. AI-generated outbound communication must be labeled or reviewed according to tenant policy and risk.
+9. Notification delivery does not grant access to the referenced business record.
+10. External webhook delivery must not be implemented through this service as an informal notification channel.
 
 ## Notification Lifecycle
 
@@ -80,8 +84,7 @@ Templates must support:
 - `platform.notification.requested.v1`
 - `platform.notification.delivered.v1`
 - `platform.notification.failed.v1`
-- `platform.communication.preference-changed.v1`
-- `platform.webhook.delivery-failed.v1`
+- `platform.communication-preference.changed.v1`
 
 ## Observability
 

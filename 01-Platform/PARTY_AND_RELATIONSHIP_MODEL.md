@@ -1,11 +1,11 @@
 ---
 document_id: PDA-PLT-021
 title: Party and Relationship Model
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
-related_adrs: [ADR-0007]
+related_adrs: [ADR-0007, ADR-0014]
 ---
 
 # Party and Relationship Model
@@ -29,13 +29,13 @@ Required attributes:
 - Party ID
 - Tenant ID
 - Party type: Person or Organization
-- Display name
-- Legal or primary name
+- Display name or privacy-safe replacement
+- Legal or primary name where retained
 - Status
 - Created and updated timestamps
 - Provenance and source
 - Privacy classification
-- Merge and duplicate state
+- Merge, erasure, and duplicate state
 
 ### Person
 
@@ -57,18 +57,19 @@ Each contact point records:
 - Effective dates
 - Visibility and disclosure classification
 - Source and confidence
+- Retention and erasure behavior
 
 ### Address
 
 A structured postal, physical, mailing, billing, shipping, registered, service, or other address.
 
-Addresses may be shared or copied into immutable transaction snapshots where legal and operational history requires exact preservation.
+Addresses may be shared or copied into historical transaction snapshots where legal and operational history requires exact preservation. Every snapshot declares its retention purpose and privacy-transformation behavior.
 
 ### Party Identifier
 
 An identifier issued by a government, registry, external platform, customer, supplier, or internal system.
 
-Each identifier records type, issuing authority, jurisdiction, value protection, effective period, verification, and provenance.
+Each identifier records type, issuing authority, jurisdiction, value protection, effective period, verification, provenance, classification, and retention policy.
 
 ### Party Relationship
 
@@ -81,9 +82,9 @@ A directed, effective-dated relationship between parties, such as:
 - Franchise operator and franchisor
 - Partner and managed customer
 - Beneficial owner and organization
-- Household or family relationship where an approved industry workflow requires it
+- Household or family relationship where an approved workflow requires it
 
-Relationship types must be registered and permission-aware.
+Relationship types must be registered, permission-aware, and purpose-limited.
 
 ### Domain Role
 
@@ -91,8 +92,8 @@ A domain-owned record that references a Party and adds behavior specific to that
 
 Examples:
 
-- Customer Account
-- Supplier Account
+- Customer Relationship Profile
+- Supplier Commercial Profile
 - Employment
 - Contractor Engagement
 - Partner Account
@@ -109,6 +110,7 @@ The Party capability owns:
 - Party-to-party relationships
 - Duplicate detection candidates
 - Merge records and identity links
+- Role-scoped privacy state and subject linkage
 
 Domains own:
 
@@ -117,15 +119,15 @@ Domains own:
 - Employment, compensation, leave, and performance
 - Marketing segments and campaign behavior
 - Financial balances, postings, and tax treatment
-- Transaction-specific participant snapshots
+- Stored-value accounts and transaction-specific participant snapshots
 
 ## Historical Snapshots
 
 Business transactions must not depend on later edits to Party data where history matters.
 
-Orders, invoices, payroll records, tax documents, contracts, and shipments may preserve immutable snapshots of names, addresses, identifiers, and contact information used at the time of the transaction.
+Orders, invoices, payroll records, tax documents, contracts, shipments, and stored-value entries may preserve snapshots of names, addresses, identifiers, or contact information used at the time of the transaction.
 
-The snapshot references the Party but remains historically stable.
+The snapshot references the Party but remains economically stable. Under ADR-0014, non-retention-bound identifiers may later be irreversibly pseudonymized, generalized, redacted, or restricted without changing the transaction's amounts, dates, tax, legal entity, or other business facts.
 
 ## Identity Linking
 
@@ -156,7 +158,7 @@ Duplicate detection may use:
 - External source identifiers
 - Domain-specific evidence
 
-Automated matching produces candidates, not silent merges.
+Automated matching produces candidates, not silent merges. Restricted identifiers are compared through approved protected mechanisms.
 
 ## Merge Workflow
 
@@ -165,7 +167,7 @@ A merge must:
 1. Identify survivor and merged Party IDs.
 2. Display affected domain roles and records.
 3. Require permission and risk-based approval.
-4. Preserve aliases, identifiers, sources, and history.
+4. Preserve aliases, identifiers, sources, privacy state, and history.
 5. Repoint domain-role references through approved application commands.
 6. Publish merge events.
 7. Record the operator, evidence, reason, and timestamp.
@@ -175,10 +177,12 @@ A merge must:
 
 - Party data is tenant-scoped by default.
 - Sensitive identifiers require encryption, masking, and purpose-based access.
-- Search results must apply field and record permissions.
+- Search results apply field and record permissions.
 - Consent is not inferred from the existence of a contact point.
-- Privacy requests must traverse Party data and all linked domain roles.
-- Export and deletion behavior must respect legal holds and statutory retention.
+- Privacy requests traverse Party data and all linked domain roles.
+- Erasure is scoped by role, purpose, tenant, legal entity, and record class.
+- A Party with a retained employee role and erasable customer role is not globally deleted.
+- Export, pseudonymization, and deletion respect legal holds and statutory retention.
 - Global cross-tenant identity correlation is prohibited without a separate approved design.
 
 ## APIs
@@ -196,6 +200,8 @@ Representative operations:
 - Propose duplicate
 - Merge Parties
 - Link or unlink authentication identity
+- Apply role-scoped privacy transformation
+- Export subject and linked roles
 
 Domains create or change role records through their own APIs.
 
@@ -207,9 +213,10 @@ Domains create or change role records through their own APIs.
 - `party.address.changed.v1`
 - `party.relationship.created.v1`
 - `party.relationship.ended.v1`
-- `party.duplicate-detected.v1`
-- `party.parties.merged.v1`
-- `party.identity-linked.v1`
+- `party.duplicate.detected.v1`
+- `party.record.merged.v1`
+- `party.identity-link.created.v1`
+- `party.privacy-state.changed.v1`
 
 ## Offline Behavior
 
@@ -224,6 +231,8 @@ Requirements:
 - Locally captured provenance
 - Restricted sensitive identifiers
 - Transaction snapshots preserved even if Party records are later merged
+- Privacy tombstones and purge acknowledgements
+- Lease expiry for devices that do not reconnect
 
 ## Reporting and Search
 
@@ -236,7 +245,7 @@ The Party capability provides shared identity projections and relationship trave
 - Field-level survivorship rules
 - Cross-tenant marketplace and network identities
 - Legal-entity relationship to tenant and organization hierarchy
-- Industry-specific party types that should remain role records rather than new Party types
+- Industry-specific Party types that should remain role records rather than new Party types
 
 ## Validation Scenarios
 
@@ -244,4 +253,5 @@ The Party capability provides shared identity projections and relationship trave
 - One person is employee, customer contact, and authenticated user with separate permissions and role lifecycles.
 - A transaction preserves an old billing address after the Party address changes.
 - A duplicate merge preserves audit, identifiers, and all domain-role references.
+- A customer role is erased while an employment role remains restricted and valid.
 - A privacy export includes shared Party data and linked domain-role data without exposing another tenant.

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -62,7 +62,7 @@ Text must scale with user and browser settings. Fixed values are defaults, not c
 |---|---:|
 | `radius.none` | 0 px |
 | `radius.sm` | 4 px |
-| `radius.md` | 8 px |
+| `radius.medium` | 8 px |
 | `radius.lg` | 12 px |
 | `radius.xl` | 16 px |
 | `radius.full` | 9999 px |
@@ -97,14 +97,14 @@ The web shell begins with Tailwind-compatible viewport breakpoints:
 | Token | Minimum width |
 |---|---:|
 | `screen.sm` | 640 px |
-| `screen.md` | 768 px |
+| `screen.medium` | 768 px |
 | `screen.lg` | 1024 px |
 | `screen.xl` | 1280 px |
 | `screen.2xl` | 1536 px |
 
 Reusable components should use container-aware behavior when their layout depends on the available component width rather than the whole viewport.
 
-Task rules take precedence over breakpoint labels. A drawer may become a full page earlier than `md`; a table may become a focused list based on content width.
+Task rules take precedence over breakpoint labels. A drawer may become a full page earlier than the medium breakpoint; a table may become a focused list based on content width.
 
 ## Touch Targets
 

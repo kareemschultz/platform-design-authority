@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft",
+  "exemptions": [
+    {
+      "path": "README.md",
+      "rule": "document_front_matter",
+      "reason": "GitHub repository landing page; governed content is limited to navigation and summary and must link authoritative documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-11"
+    },
+    {
+      "path": "CLAUDE.md",
+      "rule": "document_front_matter",
+      "reason": "Tool-discovery contract requires conventional root filename and minimal parser-safe content; authority is derived from linked governed documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-11"
+    },
+    {
+      "path": "reviews/FABLE5_THIRD_AUDIT_V1.md",
+      "rule": "document_front_matter",
+      "reason": "Immutable independent evidence file registered through PDA-REV-005 rather than edited after delivery.",
+      "owner": "Platform Design Authority",
+      "review_date": "2027-07-11",
+      "registration_document": "reviews/FABLE5_THIRD_AUDIT_REGISTRATION.md"
+    }
+  ]
+}

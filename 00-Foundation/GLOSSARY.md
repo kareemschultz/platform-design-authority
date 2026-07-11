@@ -1,10 +1,11 @@
 ---
 document_id: PDA-FND-014
 title: Platform Glossary
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
+related_adrs: [ADR-0007, ADR-0013, ADR-0014, ADR-0015]
 ---
 
 # Platform Glossary
@@ -29,19 +30,19 @@ A discrete ability the platform provides to a user, organization, integration, o
 
 ### Module
 
-A packaged grouping of related capabilities. The term must not be used when “domain,” “capability,” “engine,” or “extension” is more precise.
+A commercially or operationally packaged grouping of related capabilities. A module is not automatically an independently deployed service. Use “domain,” “capability,” “engine,” “extension,” or “bundle” when more precise.
 
 ### Engine
 
-Reusable domain-neutral logic consumed by multiple domains, such as pricing, tax, workflow, approvals, documents, or notifications.
+Reusable domain-neutral business logic consumed by multiple domains, such as pricing, tax, workflow, approvals, loyalty, fiscalization, documents, or AI orchestration. An engine must not silently become the authoritative owner of domain transactions.
 
 ### Platform Service
 
-A shared technical or operational service required across the platform, such as identity, audit, search, jobs, configuration, files, or observability.
+A shared technical or operational service required across the platform, such as identity, Party, audit, search, jobs, configuration, files, privacy, quotas, or observability.
 
 ### Industry Pack
 
-A governed assembly of capabilities, workflows, terminology, reports, templates, integrations, dashboards, permissions, and defaults tailored to an industry without creating an avoidable source-code fork.
+A governed assembly of capabilities, workflows, terminology, reports, templates, integrations, dashboards, permissions, jurisdiction controls, and defaults tailored to an industry without creating an avoidable source-code fork.
 
 ### Workspace
 
@@ -55,7 +56,15 @@ An independently installed addition that uses published platform contracts. Exte
 
 A governed connection between the platform and an external system, device, service, or data source.
 
-## Organization and Tenancy Terms
+## Party and Organization Terms
+
+### Party
+
+A stable tenant-scoped representation of a real-world person or organization. Party owns shared identity and relationships, while business domains own role-specific behavior.
+
+### Domain Role
+
+A domain-owned record that links to a Party and adds context such as Customer Relationship Profile, Supplier Commercial Profile, Employment, or Partner Account.
 
 ### Tenant
 
@@ -101,7 +110,7 @@ An authorized intermediary that may brand, sell, configure, support, and adminis
 
 ### Entitlement
 
-The organization-level right to use a capability, usually derived from subscription, contract, trial, grant, or partner policy.
+The organization-level right to use a capability, usually derived from a Platform Subscription, contract, trial, grant, or partner policy.
 
 ### Permission
 
@@ -127,6 +136,14 @@ An operational control used to release, test, or disable implementation behavior
 
 A commercial bundle of entitlements, limits, support, and service terms.
 
+### Platform Subscription
+
+The commercial contract through which a tenant, partner, or reseller buys access to the Business Operating Platform. Use this qualified term when confusion with tenant-sold recurring services is possible.
+
+### Recurring Agreement
+
+A Commerce-owned agreement through which a tenant sells a membership, retainer, service plan, recurring donation, replenishment program, tuition plan, or other recurring promise to its own customer.
+
 ### Add-on
 
 An optional commercially packaged capability or service attached to a base plan or domain bundle.
@@ -139,6 +156,28 @@ A measured dimension used for limits, analytics, or billing, such as active user
 
 A maximum or threshold applied by entitlement or policy.
 
+## Payment and Value Terms
+
+### Payment Rail
+
+A method or provider network used to transfer or evidence value, such as cash, bank transfer, card, wallet, direct debit, or request-to-pay.
+
+### Stored Value
+
+A monetary obligation issued by a tenant to a customer, including gift cards, store credit, refund credit, or prepaid balances. Commerce owns the operational stored-value ledger.
+
+### Loyalty Value
+
+Non-cash points or benefits governed by a loyalty program. Loyalty value is not automatically money, stored value, or an account receivable.
+
+### Payment Facilitator or Aggregator
+
+An operating model in which a platform or sponsor onboards sub-merchants and may control merchant processing, settlement, KYC, reserves, or related regulated obligations. The platform does not assume this role in the initial architecture.
+
+### Direct Tenant Merchant Contract
+
+The initial payment model in which each tenant contracts directly with its bank, wallet, or acquiring provider while the platform supplies software, protected credentials, orchestration, and reconciliation.
+
 ## Data and Architecture Terms
 
 ### Authoritative Source
@@ -147,7 +186,7 @@ The domain or system responsible for the official current state and rules of a r
 
 ### Projection
 
-A derived, non-authoritative representation optimized for reading, search, reporting, analytics, integration, or offline use.
+A derived, non-authoritative representation optimized for reading, search, reporting, analytics, integration, webhook delivery, or offline use.
 
 ### Command
 
@@ -159,11 +198,19 @@ A versioned statement that a completed business or platform fact occurred.
 
 ### Ledger
 
-An append-oriented record of consequential entries whose history must remain trustworthy, typically corrected by reversal or adjustment rather than deletion.
+An append-oriented record of consequential entries whose economic or evidentiary history remains trustworthy, typically corrected by reversal or adjustment rather than deletion.
+
+### Privacy Transformation
+
+A governed deletion, restriction, generalization, redaction, or irreversible pseudonymization of identity attributes that preserves required business and evidentiary facts under ADR-0014.
+
+### Deletion Journal
+
+An append-oriented record of privacy-transformation tasks, targets, retries, acknowledgements, exceptions, and evidence.
 
 ### Master Data
 
-Shared, relatively stable business entities such as products, parties, locations, units, currencies, and accounts that require governance and consistent identity.
+Shared, relatively stable business entities such as products, Parties, locations, units, currencies, and accounts that require governance and consistent identity.
 
 ### Transaction Data
 

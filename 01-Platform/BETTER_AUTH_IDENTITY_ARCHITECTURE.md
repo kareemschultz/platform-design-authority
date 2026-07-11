@@ -1,18 +1,18 @@
 ---
 document_id: PDA-PLT-020
 title: Better Auth Identity Architecture
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
-related_adrs: [ADR-0006]
+related_adrs: [ADR-0006, ADR-0007, ADR-0016]
 ---
 
 # Better Auth Identity Architecture
 
 ## Purpose
 
-Define how Better Auth will provide authentication, sessions, account management, second-factor verification, passkeys, social sign-in, enterprise federation, service credentials, and identity lifecycle capabilities while the platform retains ownership of tenant hierarchy, authorization, entitlements, approvals, and business policy.
+Define how Better Auth provides authentication, sessions, account management, second-factor verification, passkeys, social sign-in, enterprise federation, service credentials, and identity lifecycle capabilities while the platform retains ownership of tenant hierarchy, Party identity, authorization, entitlements, approvals, and business policy.
 
 ## Architectural Position
 
@@ -32,10 +32,11 @@ It owns:
 - SCIM protocol endpoints where enabled
 - API keys, bearer tokens, JWTs, OIDC provider, and device authorization where approved
 
-The Platform Identity and Authorization layers own:
+The Platform Identity, Party, and Authorization layers own:
 
 - Canonical tenant, partner, organization, legal-entity, branch, and location hierarchy
-- Workforce, customer, supplier, and external-party records
+- Canonical people, organizations, contact points, and domain-role links
+- Workforce, customer, supplier, and external-party role records
 - Business roles, permissions, resource scopes, segregation of duties, and policy evaluation
 - Entitlements, plans, limits, and capability access
 - Delegated administration and support access
@@ -81,7 +82,7 @@ The Better Auth two-factor plugin supports:
 - Temporary lockout after repeated failed verification
 - Passwordless-account compatibility through explicit configuration
 
-Platform policy will determine:
+Platform policy determines:
 
 - Which users must enroll
 - Which roles require phishing-resistant factors
@@ -95,9 +96,9 @@ A critical implementation detail is that Better Auth does not automatically plac
 
 ### Passkeys
 
-Passkeys will be supported through Better Auth's passkey plugin.
+Passkeys are supported through Better Auth's passkey plugin.
 
-Platform policy must define:
+Platform policy defines:
 
 - Discoverable versus non-discoverable credentials
 - User-verification requirements
@@ -172,14 +173,14 @@ Platform rules:
 
 - Platform administration remains the user-facing control plane.
 - Better Auth administrative endpoints are wrapped by platform permissions and audit.
-- Support impersonation must include reason, approval, scope, banner, expiry, and original-actor evidence.
-- Identity administration must not silently alter workforce or business-party records.
+- Support impersonation includes reason, approval, scope, banner, expiry, and original-actor evidence.
+- Identity administration must not silently alter Party, workforce, or other business-role records.
 
 ### API Keys and Machine Authentication
 
 Better Auth's API-key plugin may be used for customer, integration, developer, and extension credentials.
 
-Each key must define:
+Each key defines:
 
 - Owning tenant and application
 - Name and owner
@@ -200,11 +201,11 @@ Bearer and JWT plugins may be used for selected API and interoperability scenari
 
 Rules:
 
-- Browser sessions should prefer secure cookies rather than long-lived bearer tokens in client storage.
-- JWTs must be short-lived and include only necessary claims.
-- Business permissions and entitlements must not be treated as permanently accurate merely because they appear in a JWT.
-- Token revocation, key rotation, audience, issuer, algorithm, and clock-skew policy must be explicit.
-- Sensitive authorization should be re-evaluated server-side.
+- Browser sessions prefer secure cookies rather than long-lived bearer tokens in client storage.
+- JWTs are short-lived and include only necessary claims.
+- Business permissions and entitlements are not treated as permanently accurate merely because they appear in a JWT.
+- Token revocation, key rotation, audience, issuer, algorithm, and clock-skew policy are explicit.
+- Sensitive authorization is re-evaluated server-side.
 
 ### OIDC Provider
 
@@ -251,13 +252,13 @@ Use secure, HTTP-only cookies with:
 
 ### Mobile Sessions
 
-React Native and Expo clients must use the approved Better Auth client integration or a thin platform adapter. Session tokens and refresh material must be stored using Expo SecureStore or platform keychain facilities, never unencrypted general storage.
+React Native and Expo clients use the approved Better Auth client integration or a thin platform adapter. Session tokens and refresh material are stored using Expo SecureStore or platform keychain facilities, never unencrypted general storage.
 
 ### Edge and Offline Sessions
 
 Offline operational authority is not the same as an online Better Auth session.
 
-The platform will issue signed, expiring offline leases containing limited tenant, device, operator, capability, and policy context. Reconnection requires session and authorization revalidation before queued operations are accepted.
+The platform issues signed, expiring offline leases containing limited tenant, device, operator, capability, and policy context. Reconnection requires session and authorization revalidation before queued operations are accepted.
 
 ### Session Context
 
@@ -303,12 +304,13 @@ Recommended linkage:
 BetterAuthUser
   └── PlatformIdentityLink
        ├── TenantMembership
-       ├── WorkforcePerson or ExternalParty reference
+       ├── Party reference
+       ├── Optional domain-role reference
        ├── Delegations
        └── Authorization assignments
 ```
 
-Do not make the Better Auth user record the employee record, customer record, or canonical party record.
+Do not make the Better Auth user record the employee record, customer record, supplier record, or canonical Party record.
 
 ## Security Requirements
 
@@ -326,20 +328,20 @@ Do not make the Better Auth user record the employee record, customer record, or
 
 ## Event Integration
 
-Map Better Auth lifecycle hooks into platform events such as:
+Better Auth lifecycle hooks map into Platform Identity events such as:
 
-- `identity.user.registered.v1`
-- `identity.session.created.v1`
-- `identity.session.revoked.v1`
-- `identity.factor.enrolled.v1`
-- `identity.factor.removed.v1`
-- `identity.passkey.registered.v1`
-- `identity.sso.signed-in.v1`
-- `identity.account.recovery-completed.v1`
-- `identity.api-key.created.v1`
-- `identity.user.suspended.v1`
+- `platform.user.registered.v1`
+- `platform.session.created.v1`
+- `platform.session.revoked.v1`
+- `platform.authentication-factor.enrolled.v1`
+- `platform.authentication-factor.removed.v1`
+- `platform.passkey.registered.v1`
+- `platform.sso-session.created.v1`
+- `platform.account-recovery.completed.v1`
+- `platform.api-key.created.v1`
+- `platform.user.suspended.v1`
 
-Hooks must publish through the platform outbox or another reliable boundary where business reactions depend on them.
+Hooks publish through the platform outbox or another reliable boundary where business reactions depend on them.
 
 ## Required Evaluation
 
@@ -360,6 +362,8 @@ Before production ratification, validate:
 - Tenant isolation and authorization separation
 
 ## Source References
+
+Dated verification and official URLs are maintained in `19-Appendices/BETTER_AUTH_VERIFICATION-2026-07-10.md`.
 
 - Better Auth Introduction
 - Better Auth Session Management

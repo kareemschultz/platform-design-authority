@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 NUMBERED_SECTION = re.compile(r"^\d{2}-")
 ADR_FILE = re.compile(r"^ADR-\d{4}-[A-Z0-9-]+\.md$")
-SPEC_FILE = re.compile(r"^[A-Z0-9_]+\.md$")
+SPEC_FILE = re.compile(r"^[A-Z0-9_]+(?:-\d{4}-\d{2}-\d{2})?\.md$")
 DOCUMENT_ID = re.compile(r"^(?:PDA-[A-Z]+-\d{3}|ADR-\d{4})$")
 VALID_STATUSES = {
     "Planned",
@@ -93,7 +93,10 @@ def validate_documents() -> list[str]:
             if not ADR_FILE.fullmatch(path.name):
                 errors.append(f"{rel}: ADR filename does not match required pattern")
         elif path.name != "README.md" and not SPEC_FILE.fullmatch(path.name):
-            errors.append(f"{rel}: specification filename must use uppercase snake case")
+            errors.append(
+                f"{rel}: specification filename must use uppercase snake case; "
+                "a trailing ISO date is allowed only for inherently periodic evidence"
+            )
 
     for document_id, paths in ids.items():
         if len(paths) > 1:

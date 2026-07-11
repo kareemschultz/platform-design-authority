@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-021
 title: Sales Handbook
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -12,6 +12,12 @@ last_reviewed: 2026-07-11
 ## Purpose
 
 Define qualification, discovery, demonstration, solution fit, pricing, proposals, security and legal claims, contracting, and delivery handoff.
+
+## Company-Stage Note
+
+This is a founding-stage operating design. It describes the process the company must establish as sales activity begins; it does not imply that a staffed sales organization, published pricing, certifications, customer references, or production capabilities already exist.
+
+Approved specifications under `13-Commercial/` are authoritative for editions, entitlements, billing, partners, services, marketplace, and contractual money flows. This handbook summarizes operating behavior and cannot override them.
 
 ## Qualification
 

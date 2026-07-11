@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DEV-005
 title: Project Agent Skills
-version: 0.1.1
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -11,84 +11,125 @@ last_reviewed: 2026-07-11
 
 ## Purpose
 
-Define project-local reusable skills for Claude Code, compatible agent-skill tooling, and other coding agents without allowing skills to override repository authority, security, scope, or review requirements.
+Define project-local reusable skills for Claude Code, compatible Agent Skills tooling, and other coding agents without allowing skills to override repository authority, security, scope, or review requirements.
 
 ## Architectural Position
 
 A skill is a reusable procedure or focused body of guidance loaded when relevant. It is not an ADR, permission grant, implementation authority, or substitute for reading the governing specification.
 
-Project skills live under `.claude/skills/<skill-name>/SKILL.md`. The skill format follows Anthropic's documented project-skill location and the open Agent Skills convention. Other agents may consume equivalent content through adapters, but the Markdown source remains repository-controlled.
+Project skills live under `.claude/skills/<skill-name>/SKILL.md`. Other agents may consume equivalent content through adapters, but this repository remains authoritative for the project-specific procedure.
 
-## Initial Skill Set
+## Current Skill Set
 
-### `frontend-architecture`
+### Governance and Blueprint Skills
 
-Plans and reviews Next.js, TanStack, Expo, state ownership, component boundaries, design tokens, white label, accessibility, and offline behavior.
+#### `spec-author`
 
-### `ui-pattern-audit`
+Authors or revises governed specifications, checks ownership, propagates decisions, and runs documentation governance.
 
-Adversarial review of information hierarchy, progressive disclosure, overlays, tabs, drawers, menus, states, accessibility, and responsive behavior.
+#### `adr-author`
 
-### `dashboard-design`
+Creates durable architecture decisions with options, consequences, controls, validation, and propagation.
 
-Turns business questions and data shape into metric definitions, visualizations, filters, drill-downs, alerts, and action layers.
+#### `consistency-auditor`
 
-### `form-wizard-design`
+Runs an adversarial read-only review for contradictions, ownership drift, registry mismatch, first-slice scope drift, and lifecycle overclaims.
 
-Designs forms, multi-selects, hierarchical selectors, repeatable sections, bulk changes, steppers, wizards, validation, and offline form behavior.
+#### `capability-registrar`
 
-### `accessibility-review`
+Registers capability IDs, namespaces, permissions, events, dependencies, first-slice depth, and generated registries.
 
-Reviews complete workflows for keyboard, focus, semantics, contrast, reflow, forms, tables, overlays, native mobile, and error prevention.
+#### `review-disposition`
 
-### `vercel-v0-handoff`
+Converts an independent audit into a formal disposition matrix, remediation plan, closure criteria, and follow-up review checkpoint.
 
-Creates a constrained design-system-aware generation brief for v0 and reviews generated code against platform rules. It is manually invoked because generation scope should remain user-controlled.
+### Frontend and Experience Skills
+
+#### `frontend-architecture`
+
+Plans and reviews Next.js, TanStack, Expo, Tailwind, shadcn/ui, state ownership, component boundaries, accessibility, analytics, white label, and offline behavior.
+
+#### `ui-pattern-audit`
+
+Adversarial review of information hierarchy, progressive disclosure, overlays, tabs, drawers, menus, states, accessibility, responsive behavior, and workflow quality.
+
+#### `dashboard-design`
+
+Turns business questions and data shape into governed metrics, responsive visualizations, cross-filters, comparisons, drill-downs, alerts, annotations, and action layers.
+
+#### `form-wizard-design`
+
+Designs forms, multi-selects, hierarchical selectors, repeatable sections, bulk changes, steppers, wizards, validation, and offline behavior.
+
+#### `accessibility-review`
+
+Reviews workflows for keyboard, focus, semantics, contrast, reflow, charts, tables, overlays, native mobile, and error prevention.
+
+#### `vercel-v0-handoff`
+
+Creates a constrained Tailwind/shadcn-aware generation brief for v0 and reviews generated output against platform rules. It is manual-only.
+
+## Tool-Semantics Rule
+
+Claude Code's `allowed-tools` field **pre-approves** listed tools; it does not restrict the remaining tool pool.
+
+Therefore:
+
+- Read-only audit skills use `disallowed-tools` to remove mutation and shell tools while active.
+- Side-effecting skills use `disable-model-invocation: true` and require explicit user invocation.
+- Project-wide deny rules belong in `.claude/settings.json` when a tool must be blocked across all skills and prompts.
+- A skill must never assume `allowed-tools` is an allowlist.
+
+## Forked Context
+
+`context: fork` and an explicit agent are used for read-heavy audits when supported. Skills must still be correct if a client ignores optional fork metadata; safety cannot depend solely on subagent isolation.
 
 ## Skill Rules
 
-1. A skill must identify when it applies.
-2. A skill must cite governing repository documents.
-3. A skill must not duplicate long specifications when it can point to them.
-4. A skill must remain narrow enough to evaluate.
+1. A skill identifies when it applies.
+2. It cites governing repository documents.
+3. It points to long specifications rather than duplicating them unnecessarily.
+4. It remains narrow enough to evaluate.
 5. Side-effecting skills are manual-only.
-6. Tool permissions are minimized.
-7. Forked subagent context is preferred for large audits to avoid polluting the main working context.
-8. Skills must not authorize deployment, secrets access, production mutation, or broad administrator behavior.
-9. Skills must preserve first-slice scope.
-10. Generated output receives normal architecture, security, accessibility, test, and human review.
+6. Tool access is minimized using correct semantics.
+7. Read-heavy audits prefer forked context.
+8. Skills cannot authorize deployment, secrets access, production mutation, or broad administrator behavior.
+9. Skills preserve first-slice scope and founder decisions.
+10. Generated output receives ordinary architecture, security, accessibility, testing, and human review.
+11. Skills do not embed proprietary third-party prompts.
+12. Skills remain portable enough to map to the open Agent Skills standard where practical.
 
 ## Skill Creation Workflow
 
-1. Identify a repeated procedure, checklist, or specialized review.
+1. Identify a repeated procedure or specialized review.
 2. Confirm it is not a stable fact better placed in `CLAUDE.md`.
 3. Identify source documents and authority.
-4. Write a concise skill entry file with a precise description.
+4. Write precise front matter and instructions.
 5. Add supporting files only when they reduce repeated context.
-6. Restrict model invocation for consequential workflows.
-7. Test automatic and manual triggering.
-8. Evaluate false triggering, missed triggering, output quality, and token cost.
-9. Review security implications of any allowed tools or dynamic commands.
-10. Version changes through ordinary pull-request review.
+6. Choose automatic or manual invocation deliberately.
+7. Apply `disallowed-tools` for temporary restriction; do not misuse `allowed-tools`.
+8. Test triggering, false triggering, missed triggering, output quality, safety, and token cost.
+9. Review dynamic commands and tool permissions.
+10. Version changes through normal review.
 
 ## Evaluation
 
-Each skill should have representative prompts covering:
+Each skill requires representative cases covering:
 
 - Correct invocation
 - Non-invocation on unrelated work
-- Correct governing-document retrieval
-- Adherence to architecture and scope
+- Governing-document retrieval
+- Architecture and scope adherence
 - Useful output structure
-- Refusal to invent missing business decisions
+- Refusal to invent business decisions
+- Tool and side-effect safety
 - Security and privacy behavior
 - Accessibility and testing depth where relevant
+- Compatibility when fork metadata is not honored
 
-## Vercel and Anthropic Integration
+## Vercel and Premium UI Integration
 
-Anthropic's current Claude Code documentation describes project skills under `.claude/skills/`, optional frontmatter for invocation and tools, forked context, supporting files, and evaluation. Vercel's v0 and AI SDK are useful implementation accelerators for React and AI interfaces, but remain subordinate to the platform's design system and architecture.
-
-The repository does not copy proprietary Anthropic or Vercel skill content. It creates original project-specific skills informed by public official documentation.
+Vercel v0, Tailwind, shadcn/ui, Magic UI Pro, and shadcn/studio premium assets are implementation accelerators. Skills must apply `09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`; third-party output remains subordinate to platform ownership, accessibility, licensing, performance, and maintenance rules.
 
 ## Source References
 

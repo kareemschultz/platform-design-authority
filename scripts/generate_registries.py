@@ -4,6 +4,7 @@
 The script uses only the Python standard library. It generates:
 - registry/documents.json
 - registry/capabilities.json
+- registry/events.json
 
 Run with --check in CI to fail when committed registries are stale.
 """
@@ -18,9 +19,12 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-NUMBERED_SECTION = re.compile(r"^\d{2}-")
 CAPABILITY = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
+EVENT = re.compile(
+    r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`\s*$"
+)
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
+EVENT_HEADING = re.compile(r"\bevents?\b", re.IGNORECASE)
 
 
 def parse_front_matter(path: Path) -> dict[str, Any] | None:
@@ -50,11 +54,15 @@ def parse_front_matter(path: Path) -> dict[str, Any] | None:
 
 
 def governed_documents() -> list[Path]:
-    files = [ROOT / "PLATFORM_MANIFEST.md"]
-    for directory in sorted(ROOT.iterdir()):
-        if directory.is_dir() and NUMBERED_SECTION.match(directory.name):
-            files.extend(sorted(directory.rglob("*.md")))
-    return [path for path in files if path.exists()]
+    """Return every Markdown file with PDA front matter, regardless of folder."""
+    files: list[Path] = []
+    for path in sorted(ROOT.rglob("*.md")):
+        if any(part.startswith(".") for part in path.relative_to(ROOT).parts):
+            continue
+        metadata = parse_front_matter(path)
+        if metadata and metadata.get("document_id"):
+            files.append(path)
+    return files
 
 
 def build_documents_registry() -> dict[str, Any]:
@@ -83,7 +91,7 @@ def build_documents_registry() -> dict[str, Any]:
         )
 
     records.sort(key=lambda item: item["document_id"])
-    return {"schema_version": "1.0.0", "documents": records}
+    return {"schema_version": "1.1.0", "documents": records}
 
 
 def load_namespaces() -> dict[str, dict[str, Any]]:
@@ -97,10 +105,19 @@ def load_namespaces() -> dict[str, dict[str, Any]]:
     return namespaces
 
 
+def load_first_slice() -> tuple[set[str], set[str]]:
+    path = ROOT / "registry" / "first-slice.json"
+    if not path.exists():
+        return set(), set()
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return set(data.get("capabilities", [])), set(data.get("explicitly_deferred", []))
+
+
 def build_capabilities_registry() -> dict[str, Any]:
     path = ROOT / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md"
     lines = path.read_text(encoding="utf-8").splitlines()
     namespaces = load_namespaces()
+    first_slice, explicitly_deferred = load_first_slice()
     records: list[dict[str, Any]] = []
     seen: set[str] = set()
     current_heading = ""
@@ -134,12 +151,63 @@ def build_capabilities_registry() -> dict[str, Any]:
                 "dependencies": [],
                 "packaging_class": "Unclassified",
                 "offline": "Undeclared",
-                "first_slice": False,
+                "first_slice": capability_id in first_slice,
+                "explicitly_deferred": capability_id in explicitly_deferred,
             }
         )
 
+    unknown = sorted((first_slice | explicitly_deferred) - seen)
+    if unknown:
+        raise ValueError(f"first-slice registry contains unknown capabilities: {', '.join(unknown)}")
+
     records.sort(key=lambda item: item["id"])
-    return {"schema_version": "1.0.0", "capabilities": records}
+    return {"schema_version": "1.1.0", "capabilities": records}
+
+
+def build_events_registry() -> dict[str, Any]:
+    namespaces = load_namespaces()
+    records: list[dict[str, Any]] = []
+    seen: dict[str, str] = {}
+
+    for path in governed_documents():
+        metadata = parse_front_matter(path) or {}
+        current_heading = ""
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            heading = HEADING.match(line)
+            if heading:
+                current_heading = heading.group(2)
+                continue
+            if not EVENT_HEADING.search(current_heading):
+                continue
+            match = EVENT.match(line)
+            if not match:
+                continue
+            event_name = match.group(1)
+            source = f"{path.relative_to(ROOT).as_posix()}:{line_number}"
+            if event_name in seen:
+                raise ValueError(f"duplicate event definition {event_name}: {seen[event_name]} and {source}")
+            seen[event_name] = source
+            namespace, entity, fact, version = event_name.split(".")
+            owner = namespaces.get(namespace)
+            if owner is None:
+                raise ValueError(f"unknown event prefix {namespace!r}: {event_name}")
+            records.append(
+                {
+                    "name": event_name,
+                    "namespace": namespace,
+                    "owner": owner["name"],
+                    "entity": entity,
+                    "fact": fact,
+                    "major_version": int(version[1:]),
+                    "source_path": path.relative_to(ROOT).as_posix(),
+                    "source_heading": current_heading,
+                    "source_line": line_number,
+                    "document_status": metadata.get("status"),
+                }
+            )
+
+    records.sort(key=lambda item: item["name"])
+    return {"schema_version": "1.0.0", "events": records}
 
 
 def render(value: dict[str, Any]) -> str:
@@ -150,12 +218,12 @@ def write_or_check(path: Path, content: str, check: bool) -> bool:
     if check:
         current = path.read_text(encoding="utf-8") if path.exists() else ""
         if current != content:
-            print(f"stale registry: {path.relative_to(ROOT)}", file=sys.stderr)
+            print(f"stale registry: {path.relative_to(ROOT).as_posix()}", file=sys.stderr)
             return False
         return True
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
-    print(f"wrote {path.relative_to(ROOT)}")
+    path.write_text(content, encoding="utf-8", newline="\n")
+    print(f"wrote {path.relative_to(ROOT).as_posix()}")
     return True
 
 
@@ -167,6 +235,7 @@ def main() -> int:
     try:
         documents = render(build_documents_registry())
         capabilities = render(build_capabilities_registry())
+        events = render(build_events_registry())
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"registry generation failed: {exc}", file=sys.stderr)
         return 1
@@ -174,6 +243,7 @@ def main() -> int:
     ok = True
     ok &= write_or_check(ROOT / "registry" / "documents.json", documents, args.check)
     ok &= write_or_check(ROOT / "registry" / "capabilities.json", capabilities, args.check)
+    ok &= write_or_check(ROOT / "registry" / "events.json", events, args.check)
     return 0 if ok else 1
 
 

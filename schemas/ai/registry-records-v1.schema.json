@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/ai/registry-records-v1.schema.json",
+  "title": "AI Registry Records V1",
+  "$defs": {
+    "Semver": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "Identifier": {"type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$"},
+    "ReleaseState": {"type": "string", "enum": ["Draft", "InternalEvaluation", "InternalPreview", "CustomerPreview", "LimitedAvailability", "GeneralAvailability", "Suspended", "Deprecated", "Retired"]},
+    "Model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordType", "id", "version", "provider", "providerModelId", "approvedClassifications", "releaseState", "owner"],
+      "properties": {
+        "recordType": {"const": "Model"},
+        "id": {"$ref": "#/$defs/Identifier"},
+        "version": {"$ref": "#/$defs/Semver"},
+        "provider": {"type": "string"},
+        "providerModelId": {"type": "string"},
+        "region": {"type": ["string", "null"]},
+        "modalities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "contextLimit": {"type": ["integer", "null"], "minimum": 1},
+        "structuredOutput": {"type": "boolean"},
+        "toolUse": {"type": "boolean"},
+        "approvedClassifications": {"type": "array", "items": {"type": "string"}},
+        "retentionTerms": {"type": "string"},
+        "trainingTerms": {"type": "string"},
+        "fallbackModelId": {"type": ["string", "null"]},
+        "evaluationRecordId": {"type": ["string", "null"]},
+        "releaseState": {"$ref": "#/$defs/ReleaseState"},
+        "owner": {"type": "string"}
+      }
+    },
+    "Prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordType", "id", "version", "purpose", "owner", "outputSchema", "releaseState"],
+      "properties": {
+        "recordType": {"const": "Prompt"},
+        "id": {"$ref": "#/$defs/Identifier"},
+        "version": {"$ref": "#/$defs/Semver"},
+        "purpose": {"type": "string"},
+        "owner": {"type": "string"},
+        "instructionReference": {"type": "string"},
+        "variables": {"type": "array", "items": {"type": "string"}},
+        "allowedModelIds": {"type": "array", "items": {"type": "string"}},
+        "allowedToolIds": {"type": "array", "items": {"type": "string"}},
+        "outputSchema": {"type": "object"},
+        "prohibitedUses": {"type": "array", "items": {"type": "string"}},
+        "evaluationRecordId": {"type": ["string", "null"]},
+        "releaseState": {"$ref": "#/$defs/ReleaseState"}
+      }
+    },
+    "Tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordType", "id", "version", "owner", "inputSchema", "outputSchema", "mutationClass", "permissions", "releaseState"],
+      "properties": {
+        "recordType": {"const": "Tool"},
+        "id": {"$ref": "#/$defs/Identifier"},
+        "version": {"$ref": "#/$defs/Semver"},
+        "owner": {"type": "string"},
+        "inputSchema": {"type": "object"},
+        "outputSchema": {"type": "object"},
+        "mutationClass": {"type": "string", "enum": ["ReadOnly", "DraftOnly", "Mutating"]},
+        "permissions": {"type": "array", "items": {"type": "string"}},
+        "entitlements": {"type": "array", "items": {"type": "string"}},
+        "approvalPolicy": {"type": ["string", "null"]},
+        "idempotent": {"type": "boolean"},
+        "compensation": {"type": ["string", "null"]},
+        "recordLimit": {"type": ["integer", "null"], "minimum": 1},
+        "releaseState": {"$ref": "#/$defs/ReleaseState"}
+      }
+    },
+    "Agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordType", "id", "version", "purpose", "owner", "autonomyLevel", "modelIds", "toolIds", "budgets", "releaseState"],
+      "properties": {
+        "recordType": {"const": "Agent"},
+        "id": {"$ref": "#/$defs/Identifier"},
+        "version": {"$ref": "#/$defs/Semver"},
+        "purpose": {"type": "string"},
+        "owner": {"type": "string"},
+        "autonomyLevel": {"type": "integer", "minimum": 1, "maximum": 6},
+        "modelIds": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "promptIds": {"type": "array", "items": {"type": "string"}},
+        "toolIds": {"type": "array", "items": {"type": "string"}},
+        "budgets": {"type": "object"},
+        "loopLimits": {"type": "object"},
+        "evaluationRecordId": {"type": ["string", "null"]},
+        "providerExitPlanId": {"type": ["string", "null"]},
+        "killSwitchId": {"type": "string"},
+        "releaseState": {"$ref": "#/$defs/ReleaseState"}
+      }
+    },
+    "Evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordType", "id", "subjectId", "subjectVersion", "datasetVersion", "thresholds", "results", "decision", "reviewedAt"],
+      "properties": {
+        "recordType": {"const": "Evaluation"},
+        "id": {"$ref": "#/$defs/Identifier"},
+        "subjectId": {"type": "string"},
+        "subjectVersion": {"$ref": "#/$defs/Semver"},
+        "datasetVersion": {"$ref": "#/$defs/Semver"},
+        "graderVersions": {"type": "array", "items": {"type": "string"}},
+        "thresholds": {"type": "object"},
+        "results": {"type": "object"},
+        "failures": {"type": "array", "items": {"type": "object"}},
+        "reviewers": {"type": "array", "items": {"type": "string"}},
+        "decision": {"type": "string", "enum": ["Approved", "ApprovedWithConditions", "Rejected"]},
+        "reviewedAt": {"type": "string", "format": "date-time"},
+        "expiresAt": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "ProviderExitPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordType", "id", "provider", "services", "replacement", "evaluationRecordId", "cutover", "credentialRevocation", "dataDeletion", "owner", "reviewedAt"],
+      "properties": {
+        "recordType": {"const": "ProviderExitPlan"},
+        "id": {"$ref": "#/$defs/Identifier"},
+        "provider": {"type": "string"},
+        "services": {"type": "array", "items": {"type": "string"}},
+        "replacement": {"type": "string"},
+        "evaluationRecordId": {"type": "string"},
+        "cutover": {"type": "string"},
+        "rollback": {"type": ["string", "null"]},
+        "credentialRevocation": {"type": "string"},
+        "dataDeletion": {"type": "string"},
+        "customerCommunication": {"type": ["string", "null"]},
+        "owner": {"type": "string"},
+        "reviewedAt": {"type": "string", "format": "date-time"},
+        "rehearsedAt": {"type": ["string", "null"], "format": "date-time"}
+      }
+    }
+  },
+  "oneOf": [
+    {"$ref": "#/$defs/Model"},
+    {"$ref": "#/$defs/Prompt"},
+    {"$ref": "#/$defs/Tool"},
+    {"$ref": "#/$defs/Agent"},
+    {"$ref": "#/$defs/Evaluation"},
+    {"$ref": "#/$defs/ProviderExitPlan"}
+  ]
+}

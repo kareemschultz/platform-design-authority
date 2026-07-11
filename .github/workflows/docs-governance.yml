@@ -10,7 +10,7 @@ on:
       - research/**
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate-docs:
@@ -39,3 +39,16 @@ jobs:
             registry/capabilities.json
           if-no-files-found: error
           retention-days: 7
+
+      - name: Commit refreshed registries
+        if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
+        run: |
+          if git diff --quiet -- registry/documents.json registry/capabilities.json; then
+            echo "Generated registries are current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add registry/documents.json registry/capabilities.json
+          git commit -m "build: refresh generated documentation registries"
+          git push

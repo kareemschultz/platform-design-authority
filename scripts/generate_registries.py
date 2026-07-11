@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 """Generate deterministic machine-readable documentation registries.
 
-Generates:
-- registry/documents.json
-- registry/capabilities.json
-- registry/events.json
-- registry/permissions.json
-
+Generates documents, capabilities, events, and permissions registries.
 Run with --check in CI to fail when committed registries are stale.
 """
 
@@ -24,6 +19,10 @@ CAPABILITY = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
 EVENT = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`\s*$")
 PERMISSION = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
+CAPABILITY_SOURCES = [
+    ROOT / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md",
+    ROOT / "08-Marketplace" / "MARKETPLACE_ARCHITECTURE.md",
+]
 
 
 def parse_front_matter(path: Path) -> dict[str, Any] | None:
@@ -34,21 +33,19 @@ def parse_front_matter(path: Path) -> dict[str, Any] | None:
         end = lines.index("---", 1)
     except ValueError:
         return None
-
     result: dict[str, Any] = {}
     for raw in lines[1:end]:
         if not raw.strip() or raw.lstrip().startswith("#") or ":" not in raw:
             continue
         key, value = raw.split(":", 1)
-        key = key.strip()
         value = value.strip()
         if value.startswith("[") and value.endswith("]"):
             body = value[1:-1].strip()
-            result[key] = [] if not body else [item.strip() for item in body.split(",")]
+            result[key.strip()] = [] if not body else [item.strip() for item in body.split(",")]
         elif value in {"null", "~"}:
-            result[key] = None
+            result[key.strip()] = None
         else:
-            result[key] = value.strip('"').strip("'")
+            result[key.strip()] = value.strip('"').strip("'")
     return result
 
 
@@ -56,9 +53,7 @@ def governed_documents() -> list[Path]:
     files: list[Path] = []
     for path in sorted(ROOT.rglob("*.md")):
         rel = path.relative_to(ROOT)
-        if any(part.startswith(".") for part in rel.parts):
-            continue
-        if rel.parts and rel.parts[0] == "templates":
+        if any(part.startswith(".") for part in rel.parts) or (rel.parts and rel.parts[0] == "templates"):
             continue
         metadata = parse_front_matter(path)
         if metadata and metadata.get("document_id"):
@@ -104,7 +99,6 @@ def load_first_slice() -> tuple[dict[str, str], set[str]]:
     if not path.exists():
         return {}, set()
     data = json.loads(path.read_text(encoding="utf-8"))
-
     capability_depth: dict[str, str] = {}
     for item in data.get("capabilities", []):
         if isinstance(item, str):
@@ -116,7 +110,6 @@ def load_first_slice() -> tuple[dict[str, str], set[str]]:
             capability_depth[str(item["id"])] = depth
         else:
             raise ValueError("first-slice capabilities must be strings or objects with id")
-
     deferred: set[str] = set()
     for item in data.get("explicitly_deferred", []):
         if isinstance(item, str):
@@ -128,69 +121,78 @@ def load_first_slice() -> tuple[dict[str, str], set[str]]:
     return capability_depth, deferred
 
 
+def is_capability_heading(heading: str) -> bool:
+    normalized = heading.strip().lower()
+    return normalized in {
+        "platform kernel", "shared engine registrations", "ai orchestration", "loyalty",
+        "fiscalization and statutory reporting", "security platform", "developer platform",
+        "commercial control plane", "capability family",
+    } or normalized in {
+        "commerce", "product catalog", "inventory", "warehouse", "procurement", "finance", "crm",
+        "workforce", "payroll", "supply chain and logistics", "manufacturing", "projects",
+        "service and help desk", "assets and maintenance", "fleet", "rental", "marketing",
+        "documents and knowledge", "governance and compliance", "planning and analytics",
+    }
+
+
 def build_capabilities_registry() -> dict[str, Any]:
-    path = ROOT / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md"
-    lines = path.read_text(encoding="utf-8").splitlines()
     namespaces = load_namespaces()
     first_slice_depth, explicitly_deferred = load_first_slice()
     records: list[dict[str, Any]] = []
     seen: set[str] = set()
-    current_heading = ""
 
-    for line_number, line in enumerate(lines, start=1):
-        heading = HEADING.match(line)
-        if heading:
-            current_heading = heading.group(2)
-            continue
-        match = CAPABILITY.match(line)
-        if not match:
-            continue
-        capability_id = match.group(1)
-        if capability_id in seen:
-            raise ValueError(f"duplicate capability: {capability_id}")
-        seen.add(capability_id)
-        prefix = capability_id.split(".", 1)[0]
-        namespace = namespaces.get(prefix)
-        if namespace is None:
-            raise ValueError(f"unknown capability prefix {prefix!r}: {capability_id}")
-        records.append({
-            "id": capability_id,
-            "namespace": prefix,
-            "owner": namespace["name"],
-            "source_path": path.relative_to(ROOT).as_posix(),
-            "source_heading": current_heading,
-            "source_line": line_number,
-            "status": "Draft",
-            "dependencies": [],
-            "packaging_class": "Unclassified",
-            "offline": "Undeclared",
-            "first_slice": capability_id in first_slice_depth,
-            "first_slice_depth": first_slice_depth.get(capability_id),
-            "explicitly_deferred": capability_id in explicitly_deferred,
-        })
+    for path in CAPABILITY_SOURCES:
+        current_heading = ""
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            heading = HEADING.match(line)
+            if heading:
+                current_heading = heading.group(2)
+                continue
+            if not is_capability_heading(current_heading):
+                continue
+            match = CAPABILITY.match(line)
+            if not match:
+                continue
+            capability_id = match.group(1)
+            if capability_id in seen:
+                raise ValueError(f"duplicate canonical capability: {capability_id}")
+            seen.add(capability_id)
+            prefix = capability_id.split(".", 1)[0]
+            namespace = namespaces.get(prefix)
+            if namespace is None:
+                raise ValueError(f"unknown capability prefix {prefix!r}: {capability_id}")
+            records.append({
+                "id": capability_id,
+                "namespace": prefix,
+                "owner": namespace["name"],
+                "source_path": path.relative_to(ROOT).as_posix(),
+                "source_heading": current_heading,
+                "source_line": line_number,
+                "status": "Draft",
+                "dependencies": [],
+                "packaging_class": "Unclassified",
+                "offline": "Undeclared",
+                "first_slice": capability_id in first_slice_depth,
+                "first_slice_depth": first_slice_depth.get(capability_id),
+                "explicitly_deferred": capability_id in explicitly_deferred,
+            })
 
     unknown = sorted((set(first_slice_depth) | explicitly_deferred) - seen)
     if unknown:
         raise ValueError(f"first-slice registry contains unknown capabilities: {', '.join(unknown)}")
-
     records.sort(key=lambda item: item["id"])
-    return {"schema_version": "1.2.0", "capabilities": records}
+    return {"schema_version": "1.2.0", "capability_sources": [p.relative_to(ROOT).as_posix() for p in CAPABILITY_SOURCES], "capabilities": records}
 
 
 def is_canonical_event_heading(heading: str) -> bool:
     normalized = heading.strip().lower()
-    return normalized == "events" or normalized.endswith(" events") or normalized in {
-        "event integration",
-        "required events",
-        "representative events",
-    }
+    return normalized == "events" or normalized.endswith(" events") or normalized in {"event integration", "required events", "representative events"}
 
 
 def build_events_registry() -> dict[str, Any]:
     namespaces = load_namespaces()
     records: list[dict[str, Any]] = []
     seen: dict[str, str] = {}
-
     for path in governed_documents():
         metadata = parse_front_matter(path) or {}
         current_heading = ""
@@ -214,18 +216,11 @@ def build_events_registry() -> dict[str, Any]:
             if owner is None:
                 raise ValueError(f"unknown event prefix {namespace!r}: {event_name}")
             records.append({
-                "name": event_name,
-                "namespace": namespace,
-                "owner": owner["name"],
-                "entity": entity,
-                "fact": fact,
-                "major_version": int(version[1:]),
-                "source_path": path.relative_to(ROOT).as_posix(),
-                "source_heading": current_heading,
-                "source_line": line_number,
-                "document_status": metadata.get("status"),
+                "name": event_name, "namespace": namespace, "owner": owner["name"],
+                "entity": entity, "fact": fact, "major_version": int(version[1:]),
+                "source_path": path.relative_to(ROOT).as_posix(), "source_heading": current_heading,
+                "source_line": line_number, "document_status": metadata.get("status"),
             })
-
     records.sort(key=lambda item: item["name"])
     return {"schema_version": "1.1.0", "events": records}
 
@@ -236,7 +231,6 @@ def build_permissions_registry() -> dict[str, Any]:
     records: list[dict[str, Any]] = []
     seen: set[str] = set()
     current_heading = ""
-
     for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         heading = HEADING.match(line)
         if heading:
@@ -254,17 +248,11 @@ def build_permissions_registry() -> dict[str, Any]:
         if owner is None:
             raise ValueError(f"unknown permission prefix {namespace!r}: {permission_id}")
         records.append({
-            "id": permission_id,
-            "namespace": namespace,
-            "owner": owner["name"],
-            "resource": resource,
-            "action": action,
-            "source_path": path.relative_to(ROOT).as_posix(),
-            "source_heading": current_heading,
-            "source_line": line_number,
-            "status": "Draft",
+            "id": permission_id, "namespace": namespace, "owner": owner["name"],
+            "resource": resource, "action": action,
+            "source_path": path.relative_to(ROOT).as_posix(), "source_heading": current_heading,
+            "source_line": line_number, "status": "Draft",
         })
-
     records.sort(key=lambda item: item["id"])
     return {"schema_version": "1.0.0", "permissions": records}
 
@@ -290,7 +278,6 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-
     try:
         outputs = {
             ROOT / "registry" / "documents.json": render(build_documents_registry()),
@@ -301,7 +288,6 @@ def main() -> int:
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"registry generation failed: {exc}", file=sys.stderr)
         return 1
-
     ok = True
     for path, content in outputs.items():
         ok &= write_or_check(path, content, args.check)

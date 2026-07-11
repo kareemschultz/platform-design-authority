@@ -1,5 +1,5 @@
 ---
-document_id: PDA-DEV-002
+document_id: PDA-DEV-003
 title: Registry and Agent Automation
 version: 0.1.0
 status: Draft

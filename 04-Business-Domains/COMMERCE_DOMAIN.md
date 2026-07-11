@@ -1,11 +1,11 @@
 ---
 document_id: PDA-DOM-001
 title: Commerce Domain
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
-related_adrs: [ADR-0012, ADR-0013, ADR-0015]
+last_reviewed: 2026-07-11
+related_adrs: [ADR-0012, ADR-0013, ADR-0015, ADR-0016]
 ---
 
 # Commerce Domain
@@ -29,7 +29,7 @@ Own the customer-facing sale lifecycle across POS, assisted sales, quotes, order
 
 ## Authoritative Entities
 
-Sale, Quote, Sales Order, Return, Exchange, Register, Shift, Till, Cash Movement, Receipt, Sales Channel, Commerce Transaction, Stored Value Program, Stored Value Instrument, Stored Value Ledger Entry, Cart, Checkout Session, and Recurring Agreement.
+Sale, Quote, Sales Order, Return, Exchange, Register, Shift, Till, Cash Movement, Deposit, Receipt, Sales Channel, Commerce Transaction, Stored Value Program, Stored Value Instrument, Stored Value Ledger Entry, Cart, Checkout Session, and Recurring Agreement.
 
 The Party service owns shared identity. CRM owns customer relationship context. Commerce owns transaction-specific customer snapshots and customer stored-value obligations.
 
@@ -51,6 +51,22 @@ Pricing, Promotions, Tax, Payments, Loyalty, Fiscalization, Documents, Workflow,
 - Documents and Knowledge owns controlled policies, terms, and legal notices.
 - Fiscalization owns statutory packaging, signing, submission, and acknowledgements.
 - Security Risk owns correlated fraud assessments and risk cases.
+
+## Events
+
+- `commerce.sale.completed.v1`
+- `commerce.sale.held.v1`
+- `commerce.return.completed.v1`
+- `commerce.refund.requested.v1`
+- `commerce.exchange.completed.v1`
+- `commerce.register.opened.v1`
+- `commerce.register.closed.v1`
+- `commerce.cash-movement.posted.v1`
+- `commerce.deposit.prepared.v1`
+- `commerce.deposit.reconciled.v1`
+- `commerce.receipt.issued.v1`
+
+These are canonical Commerce facts. First-slice contracts and external webhook subscriptions reference these definitions rather than redefining them.
 
 ## First-Slice Sequence
 

@@ -14,10 +14,17 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-NUMBERED_SECTION = re.compile(r"^\d{2}-")
 ADR_FILE = re.compile(r"^ADR-\d{4}-[A-Z0-9-]+\.md$")
 SPEC_FILE = re.compile(r"^[A-Z0-9_]+(?:-\d{4}-\d{2}-\d{2})?\.md$")
 DOCUMENT_ID = re.compile(r"^(?:PDA-[A-Z]+-\d{3}|ADR-\d{4})$")
+SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
+ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+EVENT = re.compile(
+    r"^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*$"
+)
+EVENT_CANDIDATE = re.compile(r"`([a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*){2,}\.v\d+)`")
+MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+BACKTICK_MD_PATH = re.compile(r"`([^`\n]+\.md)`")
 VALID_STATUSES = {
     "Planned",
     "Draft",
@@ -55,15 +62,35 @@ def parse_front_matter(path: Path) -> dict[str, str]:
     return values
 
 
+def all_markdown_files() -> list[Path]:
+    files: list[Path] = []
+    for path in sorted(ROOT.rglob("*.md")):
+        rel = path.relative_to(ROOT)
+        if any(part.startswith(".") for part in rel.parts):
+            continue
+        files.append(path)
+    return files
+
+
 def governed_markdown_files() -> list[Path]:
-    files: list[Path] = [ROOT / "PLATFORM_MANIFEST.md"]
-    for directory in ROOT.iterdir():
-        if directory.is_dir() and NUMBERED_SECTION.match(directory.name):
-            files.extend(sorted(directory.rglob("*.md")))
-    return [path for path in files if path.exists()]
+    governed: list[Path] = []
+    for path in all_markdown_files():
+        first = path.read_text(encoding="utf-8").splitlines()[:1]
+        if first and first[0].strip() == "---":
+            governed.append(path)
+    return governed
 
 
-def validate_documents() -> list[str]:
+def parse_related_adrs(raw: str) -> list[str]:
+    value = raw.strip()
+    if not value or value == "[]":
+        return []
+    if value.startswith("[") and value.endswith("]"):
+        value = value[1:-1]
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def validate_documents() -> tuple[list[str], dict[str, Path]]:
     errors: list[str] = []
     ids: dict[str, list[Path]] = defaultdict(list)
 
@@ -85,6 +112,14 @@ def validate_documents() -> list[str]:
             if not DOCUMENT_ID.fullmatch(document_id):
                 errors.append(f"{rel}: invalid document_id {document_id!r}")
 
+        version = meta.get("version", "")
+        if version and not SEMVER.fullmatch(version):
+            errors.append(f"{rel}: version must use semantic versioning, got {version!r}")
+
+        review_date = meta.get("last_reviewed", "")
+        if review_date and not ISO_DATE.fullmatch(review_date):
+            errors.append(f"{rel}: last_reviewed must use YYYY-MM-DD, got {review_date!r}")
+
         status = meta.get("status", "")
         if status and status not in VALID_STATUSES:
             errors.append(f"{rel}: unsupported status {status!r}")
@@ -92,55 +127,142 @@ def validate_documents() -> list[str]:
         if path.parent.name == "18-Decisions":
             if not ADR_FILE.fullmatch(path.name):
                 errors.append(f"{rel}: ADR filename does not match required pattern")
-        elif path.name != "README.md" and not SPEC_FILE.fullmatch(path.name):
+            if not meta.get("created"):
+                errors.append(f"{rel}: ADR is missing created date")
+        elif path.name not in {"README.md", "PLATFORM_MANIFEST.md"} and not SPEC_FILE.fullmatch(path.name):
             errors.append(
                 f"{rel}: specification filename must use uppercase snake case; "
-                "a trailing ISO date is allowed only for inherently periodic evidence"
+                "a trailing ISO date is allowed only for periodic evidence"
             )
 
     for document_id, paths in ids.items():
         if len(paths) > 1:
             errors.append(f"duplicate document_id {document_id}: {', '.join(map(str, paths))}")
 
-    return errors
+    return errors, {document_id: paths[0] for document_id, paths in ids.items() if len(paths) == 1}
 
 
-def validate_domain_registry() -> list[str]:
+def load_namespace_registry() -> tuple[list[str], dict[str, dict[str, object]]]:
     errors: list[str] = []
     path = ROOT / "registry" / "domains.json"
     if not path.exists():
-        return ["registry/domains.json: missing"]
+        return ["registry/domains.json: missing"], {}
 
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as exc:
-        return [f"registry/domains.json: {exc}"]
+        return [f"registry/domains.json: {exc}"], {}
 
-    prefixes: dict[str, str] = {}
+    prefixes: dict[str, dict[str, object]] = {}
     for item in data.get("namespaces", []):
         name = item.get("name")
         prefix = item.get("prefix")
-        if not name or not prefix:
-            errors.append("registry/domains.json: namespace missing name or prefix")
+        document = item.get("authoritative_document")
+        if not name or not prefix or not document:
+            errors.append("registry/domains.json: namespace missing name, prefix, or authoritative_document")
             continue
-        if not re.fullmatch(r"[a-z][a-z0-9-]*", prefix):
+        if not re.fullmatch(r"[a-z][a-z0-9-]*", str(prefix)):
             errors.append(f"registry/domains.json: invalid prefix {prefix!r}")
         if prefix in prefixes:
             errors.append(
-                f"registry/domains.json: prefix {prefix!r} used by both {prefixes[prefix]!r} and {name!r}"
+                f"registry/domains.json: prefix {prefix!r} used by both "
+                f"{prefixes[str(prefix)].get('name')!r} and {name!r}"
             )
-        prefixes[prefix] = name
+        prefixes[str(prefix)] = item
+        if not (ROOT / str(document)).exists():
+            errors.append(f"registry/domains.json: authoritative document does not exist: {document}")
 
         for additional in item.get("additional_prefixes", []):
             if additional in prefixes:
                 errors.append(f"registry/domains.json: duplicate additional prefix {additional!r}")
-            prefixes[additional] = name
+            prefixes[str(additional)] = item
 
+    return errors, prefixes
+
+
+def validate_related_adrs(document_ids: dict[str, Path]) -> list[str]:
+    errors: list[str] = []
+    for path in governed_markdown_files():
+        meta = parse_front_matter(path)
+        for adr in parse_related_adrs(meta.get("related_adrs", "")):
+            if adr not in document_ids:
+                errors.append(f"{path.relative_to(ROOT)}: related ADR does not exist: {adr}")
+            elif not adr.startswith("ADR-"):
+                errors.append(f"{path.relative_to(ROOT)}: related_adrs contains non-ADR id: {adr}")
+    return errors
+
+
+def validate_event_identifiers(prefixes: dict[str, dict[str, object]]) -> list[str]:
+    errors: list[str] = []
+    for path in all_markdown_files():
+        text = path.read_text(encoding="utf-8")
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            for match in EVENT_CANDIDATE.finditer(line):
+                event_name = match.group(1)
+                if not EVENT.fullmatch(event_name):
+                    errors.append(
+                        f"{path.relative_to(ROOT)}:{line_number}: invalid event identifier {event_name!r}; "
+                        "expected <namespace>.<entity>.<past-tense-fact>.v<major>"
+                    )
+                    continue
+                prefix = event_name.split(".", 1)[0]
+                if prefix not in prefixes:
+                    errors.append(
+                        f"{path.relative_to(ROOT)}:{line_number}: unregistered event prefix {prefix!r} in {event_name}"
+                    )
+    return errors
+
+
+def normalize_local_target(source: Path, target: str) -> Path | None:
+    target = target.strip()
+    if not target or target.startswith(("http://", "https://", "mailto:", "#")):
+        return None
+    target = target.split("#", 1)[0].split("?", 1)[0]
+    if not target or "<" in target or ">" in target:
+        return None
+    candidate = Path(target)
+    return candidate if candidate.is_absolute() else (source.parent / candidate)
+
+
+def validate_internal_links() -> list[str]:
+    errors: list[str] = []
+    for path in all_markdown_files():
+        text = path.read_text(encoding="utf-8")
+        targets = [match.group(1) for match in MARKDOWN_LINK.finditer(text)]
+        targets += [match.group(1) for match in BACKTICK_MD_PATH.finditer(text)]
+        for target in targets:
+            candidate = normalize_local_target(path, target)
+            if candidate is None:
+                continue
+            # Repository-root paths are common in architectural prose.
+            root_candidate = ROOT / target.split("#", 1)[0]
+            if candidate.exists() or root_candidate.exists():
+                continue
+            errors.append(f"{path.relative_to(ROOT)}: broken internal document reference {target!r}")
+    return sorted(set(errors))
+
+
+def validate_json_files() -> list[str]:
+    errors: list[str] = []
+    for path in sorted((ROOT / "registry").glob("*.json")):
+        try:
+            json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"{path.relative_to(ROOT)}: {exc}")
     return errors
 
 
 def main() -> int:
-    errors = validate_documents() + validate_domain_registry()
+    document_errors, document_ids = validate_documents()
+    namespace_errors, prefixes = load_namespace_registry()
+    errors = (
+        document_errors
+        + namespace_errors
+        + validate_related_adrs(document_ids)
+        + validate_event_identifiers(prefixes)
+        + validate_internal_links()
+        + validate_json_files()
+    )
     if errors:
         print("Documentation governance validation failed:", file=sys.stderr)
         for error in errors:

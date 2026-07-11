@@ -1,7 +1,7 @@
 ---
 document_id: PDA-PLT-027
 title: First Slice Permission Catalog
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -11,13 +11,13 @@ last_reviewed: 2026-07-11
 
 ## Purpose
 
-Define the initial permission vocabulary, scope behavior, segregation of duties, and high-risk controls for the Guyana retail foundation slice.
+Define the canonical first-slice permission vocabulary, scope behavior, segregation of duties, and endpoint coverage for the Guyana retail foundation slice.
 
 ## Permission Pattern
 
 `<namespace>.<resource>.<action>`
 
-Permissions are actor-level authority and remain separate from tenant entitlements.
+Permissions are actor-level authority and remain separate from tenant entitlements. Every permission in this catalog must appear in `registry/permissions.json` after generation.
 
 ## Platform Administration
 
@@ -32,9 +32,16 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 - `platform.device.read`
 - `platform.device.enroll`
 - `platform.device.revoke`
+- `platform.offline-lease.issue`
+- `platform.sync-batch.submit`
+- `platform.sync-batch.read`
 - `platform.audit.read`
+- `platform.import.create`
 - `platform.export.create`
+- `platform.export.read`
 - `platform.support-access.approve`
+- `platform.branding.configure`
+- `platform.jurisdiction-profile.configure`
 
 ## Party and CRM
 
@@ -68,6 +75,7 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 - `inventory.count.approve`
 - `inventory.transfer.create`
 - `inventory.transfer.receive`
+- `inventory.import.create`
 
 ## Commerce and Registers
 
@@ -84,12 +92,18 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 - `commerce.register.close`
 - `commerce.cash-movement.create`
 - `commerce.cash-variance.approve`
+- `commerce.deposit.create`
+- `commerce.deposit.confirm`
+- `commerce.receipt.read`
+- `commerce.receipt.reissue`
+- `commerce.receipt.void`
 
 ## Stored Value
 
 - `commerce.stored-value.read`
 - `commerce.stored-value.issue`
 - `commerce.stored-value.load`
+- `commerce.stored-value.reserve`
 - `commerce.stored-value.redeem`
 - `commerce.stored-value.adjust`
 - `commerce.stored-value.suspend`
@@ -97,18 +111,33 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 
 ## Payments
 
-- `engine.payment.read`
-- `engine.payment.confirm`
-- `engine.payment.refund`
-- `engine.payment.reverse`
-- `engine.payment.reconcile`
+- `engine.payment-intent.create`
+- `engine.payment-intent.read`
+- `engine.payment-intent.confirm`
+- `engine.payment-intent.refund`
+- `engine.payment-intent.reverse`
+- `engine.payment-reconciliation.create`
 - `engine.payment-adapter.configure`
+
+## Finance Handoff
+
+- `finance.posting-batch.read`
+- `finance.bank-reconciliation.create`
+- `finance.cash-management.read`
+
+## Developer Platform
+
+- `developer.webhook.read`
+- `developer.webhook.create`
+- `developer.webhook.update`
+- `developer.webhook.replay`
 
 ## Security and Privacy
 
 - `security.risk-case.read`
 - `security.risk-case.review`
 - `security.protective-action.apply`
+- `security.privacy-request.create`
 - `security.privacy-request.read`
 - `security.privacy-request.verify`
 - `security.privacy-action.approve`
@@ -118,6 +147,12 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 
 Assignments may be scoped by tenant, organization, legal entity, branch, store, location, register, team, or record set. A permission without a valid scope grants nothing.
 
+## Endpoint Coverage
+
+Every endpoint listed in `02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md` must reference one permission in this catalog or explicitly state that an authenticated session or membership is sufficient.
+
+The documentation validator fails when an endpoint references an unknown permission.
+
 ## Segregation of Duties
 
 Examples requiring separation or heightened approval:
@@ -125,6 +160,7 @@ Examples requiring separation or heightened approval:
 - User invitation versus role assignment
 - Stored-value adjustment versus reconciliation
 - Cash count versus variance approval
+- Deposit preparation versus confirmation
 - Inventory adjustment creation versus approval
 - Refund creation versus high-value approval
 - Privacy request handling versus legal-hold approval
@@ -135,8 +171,6 @@ Examples requiring separation or heightened approval:
 High-risk actions may require fresh authentication, manager approval, dual control, reason, threshold, location restriction, device trust, and stronger audit.
 
 ## Role Templates
-
-Initial role templates:
 
 - Cashier
 - Store Associate
@@ -151,9 +185,10 @@ Templates are starting points. Effective authority remains explicit and inspecta
 
 ## Quality Gates
 
-- No permission grants cross-tenant access
-- Entitlement absence still denies capability use
-- UI hiding is not the only enforcement
+- No cross-tenant grant
+- Entitlement absence still denies use
+- UI hiding is not enforcement
 - Jobs, exports, webhooks, offline leases, and AI tools use the same policy
-- Permission changes are audited and immediately revocable
+- Permission changes are audited and revocable
 - Role templates pass segregation-of-duties review
+- API-to-permission coverage is machine-checked

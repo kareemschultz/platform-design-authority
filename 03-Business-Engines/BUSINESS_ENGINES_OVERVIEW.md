@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENG-001
 title: Business Engines Overview
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
@@ -22,13 +22,14 @@ Business engines provide reusable, domain-neutral behavior consumed across multi
 - Pricing
 - Tax
 - Payment
-- Promotion and discount
+- Promotion, discount, and loyalty orchestration
 - Document and template
 - Scheduling and calendar
 - Branding and theme
 - Workspace and navigation
 - Dashboard and widget
 - Reporting and analytics
+- AI orchestration
 
 ## Engine Rules
 
@@ -37,11 +38,22 @@ Business engines provide reusable, domain-neutral behavior consumed across multi
 3. Every engine must be tenant-aware, entitlement-aware, permission-aware, auditable, observable, API-accessible, and testable.
 4. Engines may publish events but must not create hidden cross-domain ownership.
 5. Engine configuration must be versioned, effective-dated where relevant, and rollback-capable.
-6. Extensions may add providers, rules, templates, or adapters only through published contracts.
+6. Extensions may add providers, rules, templates, models, prompts, or adapters only through published contracts.
+7. A referenced engine must have an owning specification and registered capability family before production implementation depends on it.
+
+## Kernel and Engine Boundary
+
+The kernel owns primitives needed by every deployment, such as jobs, event transport, notifications, files, search indexing, tenancy, permissions, entitlements, and audit.
+
+Engines own reusable business orchestration layered on those primitives. Examples:
+
+- The Notification primitive delivers messages; communication workflows and campaigns may orchestrate through domain or engine behavior.
+- The Search primitive indexes and retrieves permission-filtered data; reporting, analytics, forecasting, and AI retrieval add higher-order behavior.
+- The Jobs primitive executes work; Workflow and Automation define governed business execution.
 
 ## Composition
 
-Domains invoke engines through application contracts. Example: Commerce asks Pricing to calculate a sale, Tax to calculate tax, Payments to authorize funds, Documents to render a receipt, and Workflow to manage exceptions.
+Domains invoke engines through application contracts. Example: Commerce asks Pricing to calculate a sale, Tax to calculate tax, Payments to authorize funds, Documents to render a receipt, Workflow to manage exceptions, and AI Orchestration to assist through approved tools.
 
 ## Delivery Principle
 

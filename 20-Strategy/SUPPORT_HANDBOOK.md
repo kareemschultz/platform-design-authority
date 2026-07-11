@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-018
 title: Support Handbook
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -12,6 +12,10 @@ last_reviewed: 2026-07-11
 ## Purpose
 
 Define support intake, severity, diagnostics, access, escalation, customer communication, problem management, and knowledge creation.
+
+## Company-Stage Note
+
+This is a founding-stage operating design. It defines the support capability required before pilot and production; it does not imply a staffed round-the-clock support organization or contracted response commitments. Operational specifications and signed customer terms are authoritative for actual service levels.
 
 ## Intake
 

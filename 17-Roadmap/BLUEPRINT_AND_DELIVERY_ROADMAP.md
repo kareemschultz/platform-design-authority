@@ -1,17 +1,18 @@
 ---
 document_id: PDA-RDM-001
 title: Blueprint and Delivery Roadmap
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
+related_adrs: [ADR-0013, ADR-0014, ADR-0015]
 ---
 
 # Blueprint and Delivery Roadmap
 
 ## Purpose
 
-Sequence blueprint ratification, technical prototypes, implementation-ready specifications, and product delivery so capability breadth does not outrun architecture, usability, security, or customer evidence.
+Sequence blueprint ratification, technical prototypes, implementation-ready specifications, and product delivery so capability breadth does not outrun architecture, usability, security, regulatory readiness, or customer evidence.
 
 ## Current Readiness
 
@@ -19,62 +20,84 @@ The repository is ready for controlled technical prototypes only.
 
 Production implementation is blocked until the governing documents for the selected vertical slice are approved and the audit remediation gates below are satisfied.
 
+The bounded human-readable scope is `17-Roadmap/FIRST_SLICE_MANIFEST.md`; the machine-readable index is `registry/first-slice.json`.
+
 ## Phase 0 — Audit Remediation and Governance
 
-- Resolve stack contradictions
-- Establish AI-agent instructions and registries
-- Decide the Party model
-- Specify extensible metadata and custom fields
-- Register AI orchestration ownership
-- Specify sequence and numbering
-- Define planned repository sections honestly
-- Add documentation validation CI
-- Split ratification into review waves
+Completed or materially addressed:
+
+- Stack contradictions
+- AI-agent instructions and namespace registries
+- Canonical Party model
+- Extensible metadata and custom fields
+- AI orchestration ownership
+- Sequence and numbering
+- Honest repository section indexes
+- Documentation validation CI
+- Ratification waves
+- Stored-value ownership
+- Privacy erasure and append-only reconciliation
+- Initial direct tenant-merchant payment model
+- Event namespaces and registry generation
+
+Still open before broad ratification:
+
+- Founder ratification of platform legal entity and billing currency
+- Authoritative Guyana tax, payment, privacy, and fiscal research
+- Full first-slice specifications and threat models
+- UX, accessibility, deployment, operations, and testing depth
+- Review dispositions for the second Fable audit
 
 Exit criteria:
 
 - No unresolved blocker-level repository contradiction
-- Foundation and kernel review wave prepared
-- Machine-readable document, namespace, and capability registries available
-- A constrained prototype slice selected
+- Foundation and kernel review waves prepared
+- Machine-readable document, namespace, capability, event, and first-slice registries available
+- A constrained prototype slice selected and founder-ratified
 
 ## Phase 1 — Technical Foundation Prototype
 
 Build a non-production vertical slice that proves:
 
-- Better Auth sign-in, sessions, 2FA, and passkeys through the platform adapter
+- Better Auth sign-in, sessions, 2FA, passkeys, and session revocation through the platform adapter
 - Tenant, organization, workspace, Party, permission, and entitlement context
 - Product and catalog read model
 - Inventory ledger and availability
-- One POS or stock transaction
-- Sequence allocation
+- POS cash transaction and one directly contracted payment-adapter seam
+- Commerce-owned stored-value issue and redemption
+- Sequence allocation and offline numbering
 - Audit and transactional outbox
 - Next.js web client
 - Expo offline client with SQLite
-- Synchronization and conflict handling
+- Synchronization, privacy tombstones, and conflict handling
 - OpenTelemetry traces
-- One carefully governed AI assistance workflow
+- Backup restore with deletion-journal reapplication
 
-This phase validates architecture. It does not establish broad product scope.
+AI is optional in this phase. If included, it must be one low-risk, measurable, read-only or draft-assistance workflow and must not become an acceptance dependency.
+
+This phase validates architecture. It does not establish statutory compliance or broad product scope.
 
 ## Phase 2 — First Market Slice Decision
 
-### Provisional Candidate
+### Selected Provisional Candidate
 
-Caribbean small and medium retail operations:
+Guyana-first Caribbean small and medium retail operations:
 
-- POS
-- Product catalog
-- Inventory
-- Purchasing essentials
+- POS and register control
+- Product catalog and search
+- Inventory and stock counts
+- Cash, mixed tender, and deposit reconciliation
+- Returns and refunds
 - Customer and supplier Party roles
-- Tax and receipt rules
-- Basic financial handoff
+- Gift cards and store credit
+- Tax and receipt seams
+- Accountant-ready financial handoff
 - Offline continuity
-- Multi-location support
-- Local payment and fiscal integrations where required
+- Multi-location foundations
+- Direct tenant-provider payment adapters
+- Fiscalization interface where jurisdiction review requires it
 
-This candidate is attractive because it aligns with existing domain knowledge and prior operating experience. It remains provisional until customer interviews, market research, payment-rail analysis, fiscalization research, and implementation-cost estimates are complete.
+The detailed scope is controlled by the First Slice Manifest. The native reference storefront and tenant Recurring Agreements are deferred unless a named pilot and verified collection rail justify them.
 
 ### Decision Criteria
 
@@ -89,6 +112,16 @@ This candidate is attractive because it aligns with existing domain knowledge an
 - Time to measurable value
 - Ability to become a reusable platform proof rather than a one-off product
 
+### Founder Gates
+
+Before this candidate becomes Approved:
+
+- Confirm platform legal entity and contracting structure.
+- Confirm platform billing and settlement currencies.
+- Ratify direct tenant merchant contracts as the initial payment model.
+- Ratify storefront and Recurring Agreement deferral.
+- Approve named pilot-customer criteria and success metrics.
+
 ## Phase 3 — First Production Slice
 
 Before implementation, promote the following from outline to full specification depth:
@@ -100,21 +133,27 @@ Before implementation, promote the following from outline to full specification 
 - Party and relationships
 - Extensible metadata
 - Sequence and numbering
+- Data classification, privacy erasure, and deletion journal
 - Audit, events, jobs, files, search, devices, and offline synchronization
+- Import/export and migration
 - Product Catalog
 - Inventory
-- Commerce and POS
-- Pricing, Tax, Payment, Documents, Workflow, and AI orchestration as required
-- Security, Data, UX, Testing, Deployment, and Operations specifications for the slice
+- Commerce, POS, cash, returns, and stored value
+- Pricing, Tax, Payment, Fiscalization, Documents, Workflow, and Risk as required
+- Security threat model and tenant-isolation tests
+- UX and accessibility specifications
+- Testing, deployment, backup, recovery, observability, and operations
+- Guyana jurisdiction profile with dated authoritative evidence
 
 Exit criteria:
 
 - Approved governing specifications
-- Threat models and privacy review
-- End-to-end test plan
-- Migration and support plan
+- Threat models, data classification, and privacy review
+- End-to-end and cross-tenant test plan
+- Migration, backup, recovery, and support plan
 - Commercial offer and cost model
-- Pilot customers and success metrics
+- Provider and jurisdiction evidence
+- Pilot customers and measurable success criteria
 
 ## Phase 4 — Workforce and Payroll Slice
 
@@ -139,7 +178,8 @@ Candidate ordering is evidence-driven and may include:
 - Procurement and warehouse depth
 - CRM and service
 - Finance depth
-- E-commerce or connector-first storefront
+- External commerce connectors and then the native reference storefront
+- Tenant Recurring Agreements after payment-rail validation
 - Projects and field service
 - Manufacturing
 - Assets, fleet, and rental
@@ -151,24 +191,25 @@ Candidate ordering is evidence-driven and may include:
 3. Architecture and ADRs
 4. Business Engines
 5. Business Domains and Capability Map
-6. Industry Packs
+6. Industry and Jurisdiction Packs
 7. Commercial Architecture
-8. AI, Developer Platform, Marketplace, UX, Data, Security, Deployment, Engineering, Operations, Testing, and Strategy
+8. AI, Developer Platform, Marketplace, UX, Data, Security, Deployment, Engineering, Operations, Testing, Roadmap, and Strategy
 
-The large authoring pull request may remain open as a workspace, but approval must occur through smaller reviewable waves.
+The large authoring pull request may remain open as a workspace, but approval occurs through smaller reviewable waves.
 
 ## Scope Guardrails
 
-- Do not attempt all 400-plus capabilities in the first release.
+- Do not attempt all capabilities in the first release.
 - Do not launch a domain without one complete, measurable workflow.
-- Do not promise a jurisdiction before legal, tax, payment, fiscalization, and support readiness.
+- Do not promise a jurisdiction before legal, tax, payment, fiscalization, privacy, and support readiness.
 - Do not use AI autonomy to compensate for missing deterministic business behavior.
 - Do not require professional services for ordinary customer success.
 - Do not expand an industry pack through code forks.
+- Do not add storefront, recurring commerce, advanced loyalty, or payment-facilitator scope to the first slice without explicit change control.
 
 ## Success Measures
 
-Each delivered workflow must track:
+Each delivered workflow tracks:
 
 - Time to first value
 - Completion time
@@ -178,7 +219,8 @@ Each delivered workflow must track:
 - Mobile and offline success
 - Accessibility outcomes
 - Support burden
-- Reliability and performance
-- AI acceptance and override rate
+- Reliability, recovery, and performance
+- Fraud and privacy exception rate
+- AI acceptance and override rate where AI is present
 - Customer business outcome
 - Competitive benchmark position

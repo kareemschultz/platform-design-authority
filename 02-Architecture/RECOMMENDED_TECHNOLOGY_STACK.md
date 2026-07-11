@@ -1,47 +1,52 @@
 ---
 document_id: PDA-ARC-009
 title: Recommended Technology Stack
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
-related_adrs: [ADR-0004]
+verified_as_of: 2026-07-10
+related_adrs: [ADR-0004, ADR-0005, ADR-0006]
 ---
 
 # Recommended Technology Stack
 
 ## Purpose
 
-Define the initial technology stack for building a modular, multi-tenant, white-label, AI-native Business Operating Platform that can begin as a modular monolith and evolve toward independently deployed services only where justified.
+Define the initial technology direction for a modular, multi-tenant, white-label, AI-native Business Operating Platform that begins as a modular monolith and evolves toward independently deployed services only where evidence justifies the change.
+
+## Authority and Precedence
+
+This document is a stack summary. Where a technology is governed by an ADR, the ADR is authoritative. Later ADRs supersede conflicting recommendations here and this document must be revised promptly.
+
+Current governing decisions:
+
+- ADR-0004: TypeScript, PostgreSQL, modular application stack
+- ADR-0005: Next.js, selective TanStack adoption, Expo client architecture
+- ADR-0006: Better Auth as the authentication and session foundation
 
 ## Stack Principles
 
-- Prefer boring, proven, well-supported technology for business-critical systems.
+- Prefer proven, well-supported technology for business-critical paths.
 - Keep one primary language across web, API, jobs, tooling, and SDKs where practical.
 - Preserve self-hosting and cloud portability.
-- Optimize for AI-assisted development, type safety, testability, and maintainability.
-- Do not couple core business logic to Vercel, a single cloud provider, or a single AI provider.
-- Use managed services initially where they accelerate delivery without blocking future portability.
+- Optimize for AI-assisted development, type safety, testability, observability, and maintainability.
+- Do not couple core business logic to Vercel, a single cloud provider, billing provider, identity provider, or AI provider.
+- Use managed infrastructure where it accelerates delivery without becoming the only deployment path.
+- Keep exact dependency versions in an implementation compatibility record rather than treating this architectural document as a lockfile.
 
 ## Recommended Baseline
 
 ### Primary Language
 
-**TypeScript** across frontend, backend, shared contracts, SDKs, workers, scripts, and most extension tooling.
+Use **TypeScript** across frontend, backend, shared contracts, SDKs, workers, scripts, and most extension tooling.
 
-Why:
-
-- One language reduces context switching and duplicated models.
-- Strong typing helps protect large domain contracts.
-- Excellent support from AI coding tools.
-- Broad ecosystem for web, APIs, workflows, testing, and integrations.
-
-Use Python selectively for data science, model evaluation, optimization, and specialized machine-learning workloads—not as a second general backend stack.
+Use Python selectively for data science, model evaluation, optimization, document intelligence, and specialized machine-learning workloads—not as a second general backend stack.
 
 ### Monorepo
 
-- **pnpm** workspaces
-- **Turborepo** for build orchestration and caching
+- pnpm workspaces
+- Turborepo for build orchestration and caching
 
 Suggested structure:
 
@@ -58,7 +63,9 @@ packages/
   domain-*/
   engine-*/
   platform-*/
-  ui/
+  design-tokens/
+  ui-web/
+  ui-native/
   contracts/
   sdk/
   testing/
@@ -67,63 +74,64 @@ packages/
 
 ### Web Applications
 
-- **Next.js 16 App Router**
-- **React 19**
-- **TypeScript**
-- **Tailwind CSS**
-- **Radix UI primitives** with a private platform design system
-- **TanStack Query** for client-side server-state workflows where needed
-- **React Hook Form** and schema validation for complex forms
+- Next.js App Router on the current approved stable major
+- React on the current approved stable major
+- TypeScript
+- Tailwind CSS
+- Radix UI primitives with a private platform design system
+- TanStack Query for interactive server-state workflows
+- TanStack Table and TanStack Virtual for advanced data experiences
+- One approved web-form standard after the TanStack Form versus React Hook Form evaluation
 
-Use Next.js for the administrative platform, portals, storefront, onboarding, and public pages. Keep domain behavior in backend application services rather than embedding critical rules in server actions.
+Next.js is the default for administration, portals, storefronts, onboarding, and public pages. Authoritative domain behavior remains in backend application services rather than React components, route handlers, or Server Actions.
+
+The form standard is **not yet decided**. `02-Architecture/TANSTACK_DECISION_MATRIX.md` owns the evaluation criteria and result.
 
 ### Backend Application
 
-- **Node.js 24 LTS**
-- **NestJS** using the **Fastify** adapter
+- Node.js on an active approved LTS release
+- NestJS with the Fastify adapter as the preferred production baseline
 - REST-first public APIs with OpenAPI
-- Internal command/query application contracts
+- Internal command and query application contracts
 - Webhooks and versioned events
 
-NestJS provides strong modular organization, dependency injection, guards, interceptors, validation, and testing conventions that suit the modular-monolith architecture. Fastify provides an efficient HTTP runtime.
+NestJS/Fastify must be validated through the first vertical slice. The benchmark may compare plain Fastify or Hono for complexity, performance, testability, agent productivity, and deployment behavior. Changing the selected production framework requires amendment of ADR-0004 rather than an informal scaffold choice.
 
 ### Primary Database
 
-- **PostgreSQL 18**
-
-Use PostgreSQL as the authoritative transactional database because the platform requires relational integrity, strong transactions, flexible indexing, JSON support, row-level security options, partitioning, full-text features, and mature operational tooling.
+Use PostgreSQL on an approved supported major as the authoritative transactional database.
 
 Database rules:
 
 - Domain-owned schemas or clearly enforced table ownership
 - UUID or time-sortable opaque internal identifiers
 - Human-readable business references stored separately
-- Append-oriented ledgers for finance, inventory, payroll, and audit
+- Append-oriented ledgers for finance, inventory, payroll, usage, and audit
 - Transactional outbox for reliable event publication
-- Read replicas and partitioning only when justified by evidence
+- Read replicas, partitioning, and specialized extensions only when justified by evidence
 
 ### Database Access
 
-Recommended:
+Recommended baseline:
 
-- **Kysely** for type-safe SQL and explicit control
-- **node-postgres** as the underlying PostgreSQL driver
-- SQL migration files managed through a controlled migration tool
+- Kysely for type-safe SQL and explicit control
+- node-postgres as the PostgreSQL driver
+- Controlled SQL migrations with rollback and compatibility policy
 
-Do not hide complex accounting, inventory, payroll, or reporting behavior behind an ORM that makes generated queries difficult to inspect. Prisma may still be evaluated for simpler modules, prototypes, or generated tooling, but should not become mandatory across the platform without a benchmark and migration review.
+Drizzle may be evaluated in generated Better-T-Stack prototypes. Prisma may be used in isolated prototypes or simple tooling, but no ORM may become mandatory for complex accounting, inventory, payroll, authorization, or reporting without query and migration evidence.
 
 ### Cache, Coordination, and Short Jobs
 
-- **Redis** for cache, rate limiting, distributed locks where unavoidable, ephemeral sessions, and short-lived coordination
-- **BullMQ** for lightweight background jobs during the earliest implementation phase
+- Redis or a compatible approved implementation for cache, rate limits, ephemeral coordination, and short-lived locks where unavoidable
+- BullMQ for lightweight background jobs during early implementation
 
-Redis must not become an authoritative business-data store.
+Redis is never an authoritative business-data store.
 
 ### Durable Workflows
 
-- **Temporal** for long-running workflows, approvals, retries, timers, compensation, and reliable multi-step orchestration
+Use Temporal when the first workflow requires durable timers, retries, compensation, long-running execution, or reliable multi-step orchestration.
 
-Temporal should be introduced when the first workflows require durable execution rather than recreated as a bespoke workflow runtime. Domain state remains authoritative in PostgreSQL; Temporal owns workflow execution state.
+PostgreSQL domain records remain authoritative for business state. Temporal owns workflow execution state, not domain truth.
 
 ### Events and Messaging
 
@@ -131,13 +139,13 @@ Initial phase:
 
 - PostgreSQL transactional outbox
 - Worker-based event dispatcher
-- In-process contracts where synchronous communication is appropriate
+- In-process contracts for approved synchronous calls
 
-Scale phase:
+Growth phase:
 
-- **NATS JetStream** as the preferred event and messaging backbone
+- NATS JetStream as the preferred event and messaging backbone when extraction, fan-out, replay, or independent scaling requires it
 
-Do not introduce Kafka initially unless event volume, retention, stream processing, or ecosystem requirements clearly justify its operational cost.
+Do not introduce Kafka before measured volume, retention, stream-processing, or ecosystem needs justify its operating cost.
 
 ### Search
 
@@ -147,153 +155,181 @@ Initial phase:
 
 Growth phase:
 
-- **OpenSearch** for global search, faceting, large-scale indexing, audit search, and advanced relevance
+- OpenSearch for global search, faceting, large-scale indexing, audit search, and advanced relevance
 
-Search indexes remain non-authoritative projections.
+Search indexes are non-authoritative projections. Semantic search ownership must be defined jointly by Search and the AI architecture.
 
 ### Object Storage
 
 - S3-compatible object storage
-- AWS S3 for managed cloud deployments
-- MinIO or another compatible implementation for self-hosted environments
+- AWS S3 for the initial managed-cloud path
+- A compatible self-hosted implementation for controlled deployments
 
-All access must use platform authorization and signed, expiring links.
+All object access passes through platform authorization and signed, expiring access.
 
 ### Mobile and Offline
 
-- **React Native with Expo** for native mobile applications
-- **SQLite** for encrypted local operational storage
+- React Native with Expo
+- Expo Router
+- Expo SQLite for local operational data
+- Expo SecureStore or native keychain facilities for secrets and session material
 - A shared TypeScript synchronization SDK
-- Web PWA support for selected browser-based continuity workflows
+- Selective PWA continuity workflows
+- Selective Expo UI adapters for SwiftUI and Jetpack Compose controls
 
-Do not attempt to make every administrative screen offline-capable. Design offline support per capability, beginning with POS, warehouse scanning, field service, attendance, and mobile inventory.
+Offline is declared per capability. Initial candidates include POS, warehouse scanning, mobile inventory, field service, and attendance.
 
-### Identity
+### Identity and Authentication
 
-Build a provider-neutral identity boundary using OpenID Connect, OAuth 2.1, SAML, SCIM, passkeys, MFA, and service identities.
+**Better Auth is the selected authentication, account, and session foundation under ADR-0006.**
 
-Recommended deployment options:
+Use Better Auth for approved combinations of:
 
-- Managed identity provider for the first SaaS release
-- **Keycloak** as the strategic self-hosted option
+- Email/password and passwordless sign-in
+- Sessions and account lifecycle
+- Two-factor authentication
+- Passkeys
+- Social sign-in and account linking
+- Organization-aware authentication context
+- OIDC, OAuth, SAML, SCIM, API keys, device authorization, and OIDC-provider scenarios after validation
 
-The platform authorization and policy engine remains internal and must not be delegated entirely to the identity provider.
+The platform retains ownership of tenant hierarchy, canonical parties, business roles, permissions, scopes, entitlements, segregation of duties, approvals, and risk policy.
+
+Better Auth managed infrastructure is optional. The framework remains self-hosted in the application architecture. Self-service SSO, directory sync, managed audit, security detection, and vendor support may create variable recurring costs and must be represented in commercial cost models rather than assumed free.
+
+Keycloak is not the default strategic identity system. It may be evaluated later as an interoperability, migration, or customer-mandated integration—not as a competing primary identity foundation without a new ADR.
 
 ### Observability
 
-- **OpenTelemetry** for traces, metrics, and logs correlation
-- **Prometheus** for metrics
-- **Grafana** for dashboards
-- **Loki** or compatible log storage
-- **Tempo** or compatible tracing backend
-- **Sentry** for application error monitoring during early phases
+- OpenTelemetry for traces, metrics, and log correlation
+- Prometheus-compatible metrics
+- Grafana dashboards
+- Loki-compatible logs
+- Tempo-compatible tracing
+- Sentry or equivalent application error monitoring during early phases
 
-Use tenant and correlation context while preventing protected data from entering telemetry.
+Telemetry must include tenant and correlation context while excluding protected or secret data.
 
 ### Testing
 
-- **Vitest** for unit and module tests
-- **Playwright** for end-to-end browser tests
-- **Testcontainers** for PostgreSQL, Redis, NATS, and integration dependencies
-- **Pact** or equivalent contract testing where independently deployed consumers appear
-- **k6** for load and performance tests
+- Vitest for unit and module tests
+- Playwright for browser journeys
+- Testcontainers for PostgreSQL, Redis, NATS, and integration dependencies
+- Pact or an equivalent where independently deployed consumers appear
+- k6 for load and performance testing
 - Accessibility automation plus manual assistive-technology review
+- Tenant-isolation, entitlement, permission, and offline-reconciliation test suites
 
 ### API and Schema Tooling
 
 - OpenAPI for public REST contracts
-- JSON Schema or equivalent for events and extension manifests
+- JSON Schema or an approved equivalent for events, registries, and extension manifests
 - Generated TypeScript SDKs
-- Zod or a similar schema library at trusted application boundaries
+- Zod or an approved schema library at trust boundaries
 
-Do not expose GraphQL as the primary public API initially. It may be added later for governed analytical or partner use cases where it produces clear value.
+GraphQL is not the initial primary public API. It may be introduced later for governed analytical or partner scenarios.
 
 ### Infrastructure and Deployment
 
 Local development:
 
 - Docker Compose
-- Seeded local PostgreSQL, Redis, object storage, mail capture, and observability
+- Seeded PostgreSQL, Redis, object storage, mail capture, and observability
 
-Initial SaaS production:
+Initial SaaS:
 
 - Containers on a managed container platform
 - Managed PostgreSQL
-- Managed Redis
+- Managed Redis-compatible service
 - S3-compatible storage
 - CDN and web application firewall
 
 Growth and enterprise:
 
-- Kubernetes where multi-region, self-hosting, workload isolation, and operational scale justify it
-- Helm charts and GitOps deployment
-
-Do not begin with Kubernetes solely for appearance. Preserve container portability from day one and adopt Kubernetes when operational needs are real.
+- Kubernetes only when multi-region, workload isolation, self-hosting, or operating scale justify it
+- Helm and GitOps when Kubernetes is adopted
 
 ### Cloud Strategy
 
-Recommended initial cloud: **AWS**, because the platform will likely need mature relational databases, object storage, networking, queues, observability integrations, regional deployment options, and enterprise procurement support.
+AWS is the preferred initial cloud candidate because of its relational, object-storage, networking, security, regional, and enterprise-procurement capabilities.
 
-Vercel may host Next.js preview and production web surfaces, but the authoritative backend, durable jobs, workflows, databases, and event processing should remain separately deployable. The platform must also support running the Next.js application in containers for self-hosted and controlled-enterprise environments.
+Vercel may host Next.js previews and selected production web surfaces, but backend services, durable jobs, workflows, databases, and events remain separately deployable. The Next.js application must also support container deployment.
 
 ### CI/CD and Repository Controls
 
 - GitHub Actions
-- Changesets or an equivalent package-versioning process
 - Conventional commits
-- Automated formatting, linting, type checking, architecture checks, tests, migration checks, security scanning, SBOM generation, and documentation validation
-- Preview environments for UI and workflow review
-- Signed production artifacts and protected deployment environments
+- Automated format, lint, type, architecture, migration, documentation, security, and test gates
+- Software bill of materials
+- Signed production artifacts
+- Protected deployment environments
+- Preview environments for workflow and UX review
+- Machine-readable document, domain, capability, event, and permission registries
 
 ### Security Tooling
 
-- Dependabot or Renovate
+- Renovate or Dependabot
 - CodeQL
 - Secret scanning
-- Container and dependency vulnerability scanning
-- Software bill of materials
-- Policy-as-code for deployment and infrastructure checks
-- Regular tenant-isolation, authorization, and abuse-case test suites
+- Dependency and container vulnerability scanning
+- SBOM generation
+- Policy-as-code for infrastructure and deployment
+- Continuous tenant-isolation and authorization testing
 
 ### AI Platform
 
 - Provider-neutral AI gateway and model registry
-- Tool contracts implemented through normal application commands
-- Retrieval over permission-filtered platform data
-- Vector storage initially through **pgvector** in PostgreSQL
-- Separate evaluation service and datasets
-- Explicit prompt, model, tool, cost, approval, and provenance records
+- AI orchestration engine using ordinary application commands
+- Tool authorization through normal permissions, entitlements, policy, and approvals
+- Permission-filtered retrieval
+- pgvector in PostgreSQL as the initial vector option
+- Evaluation datasets, scoring, red-team testing, and release gates
+- Explicit prompt, model, tool, cost, approval, provenance, and audit records
 
-Avoid introducing a standalone vector database until scale or retrieval requirements exceed PostgreSQL and pgvector.
+Do not add a separate vector database before measured retrieval or scale requirements justify it.
 
-## Recommended Version Policy
+## Version Policy
 
-- Use active LTS runtimes.
-- Pin major versions and define supported upgrade windows.
-- Review framework upgrades quarterly.
-- Avoid canary or preview features in accounting, inventory, payroll, authorization, offline synchronization, or other critical paths.
-- Record every major stack change through an ADR.
+- Use active supported runtime and framework releases.
+- Maintain exact versions and compatibility status in implementation manifests and lockfiles.
+- Record a `verified_as_of` date for architectural capability claims.
+- Review major framework and runtime support quarterly.
+- Avoid canary, alpha, preview, or release-candidate dependencies in accounting, inventory, payroll, authorization, offline synchronization, or other critical paths unless isolated in Platform Labs.
+- Record major stack changes through ADRs.
 
 ## Explicitly Avoid Initially
 
-- Microservices for every module
+- Microservices for every domain
 - Kafka before demonstrated need
 - Kubernetes before operational justification
 - Multiple general-purpose backend languages
-- Direct database access from Next.js UI code
-- Business logic in React components
-- Vendor-specific serverless functions as the only backend architecture
+- Direct domain-database access from UI applications
+- Business rules in React components or framework route handlers
+- Vendor-specific serverless functions as the only backend path
 - GraphQL as the only public API
 - Event sourcing across every domain
-- A bespoke workflow engine when Temporal can satisfy the requirement
+- A bespoke durable workflow runtime when Temporal satisfies the requirement
 - A separate vector database without measured need
+- Treating Better-T-Stack output as architecture authority
 
 ## Revisit Triggers
 
 Review this stack when:
 
+- A selected component fails its vertical-slice benchmark
 - A component reaches documented performance or scale limits
-- Self-hosted customers require alternative deployment paths
-- A module needs separate fault or security isolation
+- Self-hosted customers require another deployment path
+- A domain needs separate fault, scaling, or security isolation
 - Licensing or provider risk changes materially
-- AI, offline, event, or analytical workloads exceed the chosen foundation
+- AI, offline, event, search, or analytical workloads exceed the chosen foundation
+
+## Official References Verified 2026-07-10
+
+- Better Auth documentation: `https://better-auth.com/docs`
+- Better Auth SSO plugin: `https://better-auth.com/docs/plugins/sso`
+- Better Auth SCIM plugin: `https://better-auth.com/docs/plugins/scim`
+- Better Auth pricing and managed infrastructure: `https://better-auth.com/pricing`
+- Next.js App Router documentation: `https://nextjs.org/docs/app`
+- TanStack documentation: `https://tanstack.com`
+- Expo Router: `https://docs.expo.dev/router/introduction/`
+- Expo UI: `https://docs.expo.dev/versions/latest/sdk/ui/`

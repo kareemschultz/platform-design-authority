@@ -1,28 +1,34 @@
 ---
 document_id: PDA-ENGR-001
 title: Engineering Section Index
-version: 0.1.0
-status: Planned
+version: 0.2.0
+status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 ---
 
 # Engineering
 
-Planned specifications:
+## Current Specifications
 
-- Engineering handbook
-- Repository and monorepo standards
-- Modular-monolith boundary enforcement
-- Coding and review standards
-- Domain, engine, capability, API, event, and migration recipes
-- Money, quantity, time, and identifier standards
-- Better Auth adapter patterns
-- Transactional outbox and idempotency patterns
-- Offline implementation patterns
-- AI coding standards and agent skills
-- Dependency and version governance
-- Performance and accessibility engineering
-- Technical-debt and deprecation policy
+- `ENGINEERING_HANDBOOK.md` — TypeScript, repository boundaries, review, dependencies, migrations, security, release, and definition of done
+- `IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md` — repeatable recipes for domains, engines, capabilities, APIs, events, imports, reports, offline, providers, extensions, and AI
+- `../07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md` — SDK, CLI, and generated-project architecture
+- `../07-Developer-Platform/PROJECT_AGENT_SKILLS.md` — project-local coding and review skills
+- `../02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md` — stack direction
+- `../16-Testing/PLATFORM_TESTING_STRATEGY.md` — platform quality system
 
-Engineering recipes must implement approved specifications rather than silently becoming architecture decisions.
+## Remaining Implementation-Level Depth
+
+- Exact monorepo package map
+- Architecture-test rules
+- TypeScript lint and formatter configuration
+- Money, quantity, time, and identifier libraries
+- Better Auth adapter package recipe
+- Outbox and idempotency reference implementation
+- Offline client reference implementation
+- Dependency-update automation
+- Secure build and artifact-signing pipeline
+- Technical-debt register and deprecation dashboards
+
+Engineering recipes implement approved specifications rather than silently becoming architecture decisions.

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DEV-004
 title: API Versioning and Deprecation
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 related_adrs: [ADR-0016]
 ---
 
@@ -39,7 +39,7 @@ A compatibility-sensitive contract between server and clients that may remain di
 ## Versioning Rules
 
 - Public REST APIs use an explicit major version, normally in the path: `/v1/...`.
-- Event major versions remain in the event name: `commerce.order.created.v1`.
+- Event major versions remain in the event name, for example `commerce.sale.completed.v1`.
 - Webhook payloads identify event and schema versions.
 - SDKs use semantic versioning.
 - Offline protocol messages include protocol and schema versions.
@@ -52,7 +52,7 @@ Examples that may be compatible when documented and tested:
 
 - Add optional response field
 - Add optional request field with a safe default
-- Add enum value only when consumers are required to tolerate unknown values
+- Add enum value only when consumers tolerate unknown values
 - Add endpoint or event type
 - Increase a documented limit without changing semantics
 - Add a nullable relationship
@@ -70,7 +70,7 @@ Examples:
 - Change identifier stability
 - Change authorization or tenant scope
 - Change event ordering or delivery guarantee
-- Change default behavior with consequential effects
+- Change consequential default behavior
 - Reclassify data in a way that changes visibility or retention
 
 Breaking public changes require a new major version or a separately versioned resource.
@@ -90,31 +90,13 @@ Breaking public changes require a new major version or a separately versioned re
 
 ## Support Windows
 
-Every public contract declares:
+Every public contract declares general-availability date, minimum support period, security-fix policy, deprecation notice, sunset date, successor, migration owner, and emergency-retirement conditions.
 
-- General-availability date
-- Minimum support period
-- Security-fix policy
-- Deprecation notice period
-- Sunset date
-- Successor contract
-- Migration owner
-- Emergency-retirement conditions
-
-Exact commercial support windows remain part of the approved product policy. No document should promise a duration that Operations and Engineering cannot support.
+Exact commercial support windows remain part of approved product policy. No document promises a duration Operations and Engineering cannot support.
 
 ## Consumer Inventory
 
-The Developer Platform records:
-
-- Application or integration owner
-- Tenant and environment
-- API keys and scopes
-- SDK and contract versions
-- Recent use
-- Webhook subscriptions
-- Declared support contact
-- Migration state
+The Developer Platform records application owner, tenant, environment, credentials, scopes, SDK and contract versions, recent use, webhook subscriptions, support contact, and migration state.
 
 Usage telemetry is minimized and tenant-safe but sufficient to identify affected consumers.
 
@@ -129,15 +111,7 @@ Usage telemetry is minimized and tenant-safe but sufficient to identify affected
 
 ## Offline Clients
 
-Offline compatibility requires:
-
-- Minimum and maximum supported protocol version
-- Server-side tolerance for delayed clients
-- Migration of local stores
-- Refusal behavior that preserves queued work safely
-- Privacy tombstone compatibility
-- Forced-update policy for security-critical cases
-- Device fleet visibility
+Offline compatibility requires minimum and maximum protocol versions, delayed-client tolerance, local-store migration, safe refusal behavior, privacy tombstone compatibility, forced-update policy for security-critical cases, and device fleet visibility.
 
 A server release cannot silently make an offline client's queued operations uninterpretable.
 
@@ -154,20 +128,11 @@ Database migrations are not public API versions. Domain schema evolution uses ex
 
 ## Emergency Changes
 
-A critical security, privacy, legal, or provider incident may require accelerated disablement. The incident commander records the basis, affected consumers, mitigations, communication, fallback, and restoration or permanent retirement plan.
+A critical security, privacy, legal, or provider incident may require accelerated disablement. Incident command records the basis, affected consumers, mitigations, communication, fallback, and restoration or retirement plan.
 
 ## Documentation and SDKs
 
-Every supported version provides:
-
-- OpenAPI or event schema
-- Changelog
-- Migration guide
-- Examples
-- Generated SDK compatibility
-- Error and rate-limit behavior
-- Security and data-classification notes
-- Deprecation and sunset metadata
+Every supported version provides OpenAPI or event schema, changelog, migration guide, examples, generated SDK compatibility, error and rate-limit behavior, security notes, and deprecation metadata.
 
 ## Quality Gates
 
@@ -182,14 +147,6 @@ Every supported version provides:
 
 ## First-Slice Scope
 
-The first slice establishes:
-
-- REST `/v1` conventions
-- Event v1 registry
-- One generated TypeScript client
-- Webhook schema and signature version
-- Offline protocol version
-- Provider adapter capability version
-- A simulated compatible and breaking migration
+The first slice establishes REST `/v1`, Event v1 registry, one generated TypeScript client, webhook signature version, offline protocol version, provider-adapter capability version, and a simulated compatible and breaking migration.
 
 No first-slice public contract is marked GA until support and deprecation ownership are operational.

@@ -1,10 +1,11 @@
 ---
 document_id: PDA-PLT-026
 title: Collaboration Primitives
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
+related_adrs: [ADR-0014, ADR-0016]
 ---
 
 # Collaboration Primitives
@@ -55,7 +56,7 @@ Visibility scopes include:
 
 ## Lifecycle
 
-Comments are append-oriented. Editing preserves version history. Deletion normally becomes a tombstone with reason, except where privacy or legal policy requires another treatment. Moderation and redaction must preserve audit evidence without exposing removed content to ordinary users.
+Comments are append-oriented. Editing preserves version history. Deletion normally becomes a tombstone with reason, except where privacy or legal policy requires deletion, redaction, restriction, or pseudonymization under ADR-0014. Moderation and privacy transformation preserve audit evidence without exposing removed content to ordinary users.
 
 ## Notifications
 
@@ -63,22 +64,22 @@ Mentions, assignments, replies, follows, and status changes publish notification
 
 ## Offline
 
-Selected mobile workflows may create comments offline with client-generated identifiers, queued attachments, and conflict-safe ordering. Access is revalidated during synchronization.
+Selected mobile workflows may create comments offline with client-generated identifiers, queued attachments, and conflict-safe ordering. Access is revalidated during synchronization. Privacy tombstones must be applied before protected content is presented after reconnection.
 
 ## Search and AI
 
-Collaboration content is indexed only within the record's permission boundary. AI retrieval must preserve participant and record visibility and must distinguish user-authored statements from authoritative business facts.
+Collaboration content is indexed only within the record's permission boundary. AI retrieval preserves participant and record visibility and distinguishes user-authored statements from authoritative business facts.
 
 ## Retention and Privacy
 
-Collaboration content inherits domain retention unless a stricter collaboration policy applies. Privacy requests must account for authorship, other participants' rights, legal holds, and the business need to preserve decision history.
+Collaboration content inherits domain retention unless a stricter collaboration policy applies. Privacy requests account for authorship, other participants' rights, legal holds, and the business need to preserve decision history.
 
 ## Events
 
 - `platform.comment.created.v1`
 - `platform.comment.edited.v1`
 - `platform.mention.created.v1`
-- `platform.record-followed.v1`
+- `platform.record-follow.created.v1`
 - `platform.assignment.created.v1`
 - `platform.thread.resolved.v1`
 

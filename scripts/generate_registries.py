@@ -72,7 +72,7 @@ def build_documents_registry() -> dict[str, Any]:
         records.append(
             {
                 "document_id": document_id,
-                "path": str(path.relative_to(ROOT)),
+                "path": path.relative_to(ROOT).as_posix(),
                 "title": metadata.get("title"),
                 "version": metadata.get("version"),
                 "status": metadata.get("status"),
@@ -127,7 +127,7 @@ def build_capabilities_registry() -> dict[str, Any]:
                 "id": capability_id,
                 "namespace": prefix,
                 "owner": namespace["name"],
-                "source_path": str(path.relative_to(ROOT)),
+                "source_path": path.relative_to(ROOT).as_posix(),
                 "source_heading": current_heading,
                 "source_line": line_number,
                 "status": "Draft",

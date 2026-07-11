@@ -1,81 +1,88 @@
 ---
 document_id: PDA-PLT-003
 title: Identity and Authentication
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
+related_adrs: [ADR-0006, ADR-0007]
 ---
 
 # Identity and Authentication
 
 ## Purpose
 
-Define how people, services, devices, partners, and external systems prove identity and establish trusted sessions across the platform.
+Define how people, services, devices, partners, and external systems prove identity and establish trusted sessions across the platform without confusing authentication accounts with canonical Parties or domain-owned business roles.
 
 ## Identity Types
 
-- Human user
-- Employee self-service user
-- Customer or supplier portal user
-- Partner administrator
-- Platform administrator
+- Human authentication account
 - Service identity
 - Integration identity
 - Device identity
-- Temporary support identity
+- Temporary support or delegated identity
 - AI execution identity
+
+Employee, customer, supplier, contractor, partner, and other business identities are represented by canonical Party plus domain-owned role records. They are not separate authentication identity types merely because they use a portal.
+
+## Ownership Model
+
+Better Auth owns authentication mechanics and session state behind the Platform Identity boundary.
+
+Party owns canonical person and organization identity, names, contact points, addresses, identifiers, relationships, duplicate resolution, and merge.
+
+Domains own role records such as Employment, Customer Relationship Profile, Supplier Commercial Profile, and Partner Account.
+
+`PlatformIdentityLink` connects a Better Auth user to a tenant membership, Party, and optional domain-owned role. It does not transfer ownership of those role records to Identity.
 
 ## Core Capabilities
 
 - Email, username, phone, and federated sign-in
-- Passwordless and passkey-ready authentication
+- Passwordless and passkey authentication
 - Multi-factor authentication
-- SAML and OpenID Connect single sign-on
-- SCIM or equivalent identity provisioning
+- SAML and OpenID Connect SSO
+- SCIM identity provisioning
 - Session and device management
-- Recovery and account-protection workflows
+- Recovery and account protection
 - Service accounts and scoped credentials
 - API keys, OAuth applications, and token rotation
 - Risk-based and step-up authentication
-- Identity linking across organizations where policy permits
+- Governed links from authentication account to Party and domain roles
 
 ## Rules
 
 1. Authentication proves identity; it never grants business authorization by itself.
-2. Credentials must be revocable, rotated, and protected according to risk.
-3. Sensitive actions may require recent or stronger authentication.
-4. Shared user accounts are prohibited except for explicitly governed device or kiosk identities.
-5. Support impersonation must be time-limited, consent-aware where required, prominently visible, and fully audited.
-6. AI agents must use explicit service or delegated identities rather than hidden system privilege.
-7. Authentication behavior must support tenant-specific policy without weakening platform minimums.
+2. A Better Auth user is not the canonical Party, employee, customer, supplier, or partner record.
+3. Credentials are revocable, rotated, and protected according to risk.
+4. Sensitive actions may require recent or stronger authentication.
+5. Shared user accounts are prohibited except for governed device or kiosk identities.
+6. Support impersonation is time-limited, approved, prominently visible, and fully audited.
+7. AI agents use explicit service or delegated identities rather than hidden privilege.
+8. Tenant policy cannot weaken platform minimums.
+9. Authentication lifecycle cannot silently create, merge, suspend, or terminate a domain role.
+10. Party merge and privacy transformation preserve identity links and domain-role references through governed workflows.
 
 ## Session Requirements
 
-Sessions must track:
+Sessions track authentication identity, tenant or organization hint, assurance level, timestamps, device and client context, revocation, step-up state, and original/delegated actor.
 
-- Identity and tenant context
-- Authentication methods and assurance level
-- Issued, last-active, and expiry timestamps
-- Device and client metadata
-- Risk and location signals where lawful
-- Revocation and step-up state
-- Original and delegated actor identities
+Current Party, role, permission, entitlement, and business-policy context is resolved by platform services and is not permanently trusted from the session alone.
 
 ## Recovery
 
-Recovery workflows must defend against account takeover and include appropriate rate limits, notifications, recovery codes, administrator controls, and audit records.
+Recovery workflows defend against account takeover and include rate limits, notifications, recovery codes, administrator controls, factor reset governance, Party/role mismatch detection, and audit.
 
-## Security Events
+## Canonical Events
 
-- Sign-in succeeded or failed
-- MFA enrolled, removed, or challenged
-- Password, passkey, or recovery method changed
-- Session created, revoked, or elevated
-- SSO configuration changed
-- Service credential created or rotated
-- Suspicious or blocked authentication detected
+Detailed event definitions are owned by `BETTER_AUTH_IDENTITY_ARCHITECTURE.md`. This umbrella document does not define a duplicate event family.
 
 ## Availability
 
-Authentication is a critical dependency. The architecture must define graceful behavior for offline POS or edge use, cached device authorization, emergency access, and recovery from identity-provider outages without compromising security.
+Authentication is a critical dependency. Offline POS uses signed, expiring platform authority rather than pretending a cached online session remains current. Identity-provider outage, recovery, and emergency-access behavior must preserve security and tenant isolation.
+
+## Related Specifications
+
+- `01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md`
+- `01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md`
+- `01-Platform/AUTHORIZATION_AND_POLICY.md`
+- `01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md`

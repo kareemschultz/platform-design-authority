@@ -520,8 +520,8 @@
       "document_id": "PDA-DEP-001",
       "path": "12-Deployment/README.md",
       "title": "Deployment Section Index",
-      "version": "0.1.0",
-      "status": "Planned",
+      "version": "0.2.0",
+      "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []

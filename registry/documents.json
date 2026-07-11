@@ -1887,8 +1887,8 @@
       "document_id": "PDA-UX-001",
       "path": "09-UX/README.md",
       "title": "UX and Design System Section Index",
-      "version": "0.1.0",
-      "status": "Planned",
+      "version": "0.2.0",
+      "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []

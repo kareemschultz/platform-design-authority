@@ -34,7 +34,28 @@ jobs:
           python-version: "3.12"
 
       - name: Validate document governance
-        run: python scripts/validate_docs.py
+        id: validate
+        shell: bash
+        run: |
+          set +e
+          python scripts/validate_docs.py > validation-report.txt 2>&1
+          status=$?
+          cat validation-report.txt
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-skills-validation-report
+          path: validation-report.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Fail when validation fails
+        if: steps.validate.outputs.status != '0'
+        run: exit 1
 
       - name: Generate machine-readable registries
         run: python scripts/generate_registries.py

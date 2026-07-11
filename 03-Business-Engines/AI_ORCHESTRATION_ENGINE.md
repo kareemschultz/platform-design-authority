@@ -1,17 +1,18 @@
 ---
 document_id: PDA-ENG-016
 title: AI Orchestration Engine
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
+related_adrs: [ADR-0014, ADR-0016]
 ---
 
 # AI Orchestration Engine
 
 ## Purpose
 
-Define the shared engine that coordinates AI models, tools, retrieval, agents, approvals, evaluations, cost controls, and audit across platform domains without allowing AI to bypass ordinary application boundaries.
+Define the shared engine that coordinates AI models, tools, retrieval, agents, approvals, evaluations, cost controls, privacy, and audit across platform domains without allowing AI to bypass ordinary application boundaries.
 
 ## Architectural Position
 
@@ -29,12 +30,14 @@ Detailed model, agent, memory, evaluation, safety, and developer specifications 
 - Retrieval orchestration
 - Context assembly
 - Permission, entitlement, policy, and approval enforcement
+- Data-classification and purpose enforcement
 - Cost and usage accounting
 - Evaluation and release gates
 - Human-in-the-loop workflows
 - Provenance and audit
 - Redaction and data-boundary enforcement
-- Incident response and model disable controls
+- Retention and privacy-transformation integration
+- Incident response and model-disable controls
 
 ## Non-Responsibilities
 
@@ -45,12 +48,13 @@ The engine does not:
 - Execute unrestricted SQL
 - Call domain repositories directly
 - Treat model output as an authoritative decision without domain validation
-- Replace workflows, approvals, rules, or audit
+- Replace workflows, approvals, rules, risk review, or audit
 - Store unrestricted long-term memory by default
+- Create a hidden cross-tenant Party graph
 
 ## Tool Contract
 
-Every AI tool must declare:
+Every AI tool declares:
 
 - Stable tool identifier
 - Owning platform service, engine, or domain
@@ -61,10 +65,11 @@ Every AI tool must declare:
 - Approval requirements
 - Whether the tool is read-only or mutating
 - Idempotency behavior
-- Data sensitivity and redaction rules
+- Data classification, redaction, and purpose rules
 - Offline availability
 - Cost and rate limits
 - Audit and provenance fields
+- Retention and erasure behavior
 - Failure and compensation behavior
 
 Mutating tools call normal application commands. AI does not bypass validation, workflow, approval, segregation-of-duties, or audit rules.
@@ -106,18 +111,19 @@ Required concerns:
 
 ## Retrieval
 
-Retrieval must be:
+Retrieval is:
 
 - Tenant-scoped
 - Permission-filtered
 - Purpose-aware
 - Entitlement-aware
+- Classification-aware
 - Source-cited where practical
 - Resistant to prompt injection from retrieved content
 - Auditable
 - Limited to approved indexes and projections
 
-Search and retrieval projections remain non-authoritative. A retrieved statement does not replace a current domain read or policy check where correctness matters.
+Search owns indexing and retrieval contracts. AI consumes authorized retrieval results. A retrieved statement does not replace a current domain read or policy check where correctness matters.
 
 ## Memory
 
@@ -143,7 +149,7 @@ The engine supports:
 - Dual control
 - Fully automated actions within approved risk limits
 
-High-impact actions involving money, payroll, employment, tax, legal status, access, customer communication, deletion, or irreversible external effects require explicit policy and usually human confirmation or approval.
+High-impact actions involving money, stored value, payroll, employment, tax, legal status, access, customer communication, privacy, deletion, or irreversible external effects require explicit policy and usually human confirmation or approval.
 
 ## Evaluation
 
@@ -180,7 +186,7 @@ A model or agent may be disabled independently from the rest of the platform.
 
 ## Usage and Cost
 
-AI usage must integrate with the Metering Service and commercial entitlements.
+AI usage integrates with the Metering Service and commercial entitlements.
 
 Track:
 
@@ -210,7 +216,7 @@ Required controls:
 - Audit and anomaly detection
 - Emergency kill switches
 
-## Audit and Provenance
+## Audit, Retention, and Provenance
 
 Capture as policy permits:
 
@@ -223,32 +229,37 @@ Capture as policy permits:
 - Final business command IDs
 - Errors, retries, and fallback path
 - Whether content was AI-generated or AI-modified
+- Data classification and retention class
+
+Raw prompts and responses are stored only when an approved purpose requires them. Deletion-journal actions propagate to prompts, responses, embeddings, memory, feedback, traces, and evaluation datasets under ADR-0014.
 
 ## Events
 
 Representative events:
 
-- `engine.ai.requested.v1`
-- `engine.ai.completed.v1`
-- `engine.ai.failed.v1`
-- `engine.ai.tool-invoked.v1`
-- `engine.ai.approval-requested.v1`
-- `engine.ai.agent-released.v1`
-- `engine.ai.agent-suspended.v1`
-- `engine.ai.evaluation-completed.v1`
-- `engine.ai.budget-threshold-reached.v1`
+- `ai.request.created.v1`
+- `ai.request.completed.v1`
+- `ai.request.failed.v1`
+- `ai.tool-invocation.completed.v1`
+- `ai.approval-request.created.v1`
+- `ai.agent.released.v1`
+- `ai.agent.suspended.v1`
+- `ai.evaluation.completed.v1`
+- `ai.budget-threshold.reached.v1`
 
 ## Initial Capability Family
 
-- `engine.ai-gateway`
-- `engine.ai-model-registry`
-- `engine.ai-tool-registry`
-- `engine.ai-agent-registry`
-- `engine.ai-retrieval`
-- `engine.ai-evaluation`
-- `engine.ai-governance`
-- `engine.ai-usage-metering`
+- `ai.gateway`
+- `ai.model-registry`
+- `ai.tool-registry`
+- `ai.agent-registry`
+- `ai.retrieval`
+- `ai.evaluation`
+- `ai.governance`
+- `ai.usage-metering`
+
+`engine.ai-orchestration` remains the top-level engine registration in the Business Capability Map. Detailed capabilities use the registered `ai` namespace under ADR-0016.
 
 ## Delivery Principle
 
-The first vertical slice should implement only the minimum AI capabilities needed for one measurable workflow. The engine architecture must support growth, but broad autonomous-agent scope is explicitly deferred until permissions, entitlements, audit, evaluation, and incident controls are proven.
+The first vertical slice implements only the minimum AI capabilities needed for one measurable, low-risk workflow. Broad autonomous-agent scope is deferred until permissions, entitlements, tenant isolation, audit, evaluation, privacy, and incident controls are proven.

@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "status": "template",
+  "instructions": "Copy this record into a private or permitted provenance inventory. Do not commit credentials, license keys, private download URLs, invoices, or source whose redistribution is prohibited.",
+  "record": {
+    "id": "ui-source.example",
+    "source_product": "Magic UI Pro or shadcn/studio",
+    "source_item": "Block or component name",
+    "source_version": null,
+    "retrieved_at": null,
+    "license_owner": null,
+    "permitted_entity": null,
+    "permitted_products": [],
+    "redistribution_status": "Verify",
+    "repository_paths": [],
+    "platform_component_name": null,
+    "modifications": [],
+    "dependencies_added": [],
+    "external_network_calls_removed": [],
+    "token_normalization": false,
+    "accessibility_review": null,
+    "responsive_review": null,
+    "reduced_motion_review": null,
+    "performance_review": null,
+    "security_review": null,
+    "dark_mode_review": null,
+    "white_label_review": null,
+    "visual_regression_story": null,
+    "upgrade_policy": "Manual review",
+    "reviewed_by": null,
+    "reviewed_at": null
+  }
+}

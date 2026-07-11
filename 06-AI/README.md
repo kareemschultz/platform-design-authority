@@ -1,7 +1,7 @@
 ---
 document_id: PDA-AI-001
 title: AI Platform Section Index
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -11,26 +11,40 @@ last_reviewed: 2026-07-11
 
 ## Current Specifications
 
-- `../03-Business-Engines/AI_ORCHESTRATION_ENGINE.md` — shared engine ownership and platform boundaries
-- `AI_PLATFORM_ARCHITECTURE.md` — complete AI control-plane architecture
-- `MODEL_PROMPT_TOOL_AND_AGENT_REGISTRIES.md` — model, prompt, tool, and agent lifecycle records
-- `MEMORY_RETRIEVAL_AND_CONTEXT.md` — context assembly, retrieval, memory, provenance, and privacy
-- `EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md` — release evidence, attack testing, incidents, and containment
-- `AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md` — SDK, delegation, coordination, mutation, approvals, and compensation
-- `FIRST_SLICE_AI_BOUNDARY.md` — optional read-only first-slice scope and prohibited actions
+- `../03-Business-Engines/AI_ORCHESTRATION_ENGINE.md`
+- `AI_PLATFORM_ARCHITECTURE.md`
+- `MODEL_PROMPT_TOOL_AND_AGENT_REGISTRIES.md`
+- `AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md`
+- `MEMORY_RETRIEVAL_AND_CONTEXT.md`
+- `EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`
+- `AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md`
+- `FIRST_SLICE_AI_BOUNDARY.md`
 - `../10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md`
 - `../10-Data/DATA_CLASSIFICATION_AND_HANDLING.md`
 - `../11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
 - `../20-Strategy/AI_HANDBOOK.md`
+- `../schemas/ai/registry-records-v1.schema.json`
+
+## Canonical Controls
+
+- Six autonomy levels: Inform, Draft, Recommend, Confirm Single Action, Approved Workflow, and Bounded Automation
+- Permission, entitlement, classification, purpose, budget, approval, and tool enforcement
+- Delegation depth, cycle, repetition, time, action, record, and cost limits
+- Compensation-budget reservation for mutating workflows
+- Provider fallback evaluation and exit rehearsal
+- Tenant-data training prohibited by default
+- Memory approvers, retention, purge SLO, and reconstruction testing
+- Evaluation thresholds, red-team cadence, incident clocks, and kill switches
+- Publisher AI assets use the same governance
 
 ## Remaining Implementation Evidence
 
-- Concrete registry JSON schemas
 - AI SDK package
 - Provider adapters
-- Prompt authoring tools
-- Evaluation fixtures and graders
+- Prompt and registry authoring tools
+- Evaluation datasets and graders
 - Customer-facing administration UX
 - Multi-agent and mutating-agent prototype evidence
+- Provider-exit rehearsal evidence
 
-No production AI implementation may bypass tenant isolation, permissions, entitlements, domain commands, workflows, approvals, data classification, privacy transformations, quotas, audit, evaluation, or incident controls.
+No production AI implementation may bypass ordinary platform authority or domain-owned business commands.

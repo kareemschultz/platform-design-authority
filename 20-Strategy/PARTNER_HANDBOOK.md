@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-020
 title: Partner Handbook
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -13,9 +13,15 @@ last_reviewed: 2026-07-11
 
 Define how referral, reseller, implementation, managed-service, technology, marketplace, franchise, and strategic partners are selected, enabled, governed, supported, and exited.
 
+## Company-Stage and Authority Note
+
+This is a founding-stage operating design and does not imply an active partner program, certified partner network, or existing revenue-sharing capability.
+
+`13-Commercial/PARTNER_RESELLER_AND_MARKETPLACE_MODEL.md` and other approved Commercial specifications are authoritative for partner types, agreements, lifecycle, delegated authority, pricing, settlement, credits, refunds, and termination. This handbook describes operating practice and uses the same lifecycle terms.
+
 ## Lifecycle
 
-Application, due diligence, agreement, training, certification, sandbox, active delivery, quality monitoring, remediation, suspension, termination, and archival.
+Application, Due Diligence, Agreement, Enablement, Certification, Sandbox, Active, Quality Review, Remediation, Suspended, Terminated, and Archived.
 
 ## Partner Authority
 

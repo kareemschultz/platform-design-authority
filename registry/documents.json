@@ -540,10 +540,10 @@
       "document_id": "PDA-DEV-001",
       "path": "07-Developer-Platform/README.md",
       "title": "Developer Platform Section Index",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-10",
+      "last_reviewed": "2026-07-11",
       "related_adrs": []
     },
     {
@@ -577,6 +577,16 @@
       "related_adrs": [
         "ADR-0016"
       ]
+    },
+    {
+      "document_id": "PDA-DEV-005",
+      "path": "07-Developer-Platform/PROJECT_AGENT_SKILLS.md",
+      "title": "Project Agent Skills",
+      "version": "0.1.1",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-11",
+      "related_adrs": []
     },
     {
       "document_id": "PDA-DOM-001",
@@ -1783,7 +1793,7 @@
       "document_id": "PDA-REV-004",
       "path": "reviews/FABLE5_SECOND_AUDIT_DISPOSITION_V1.md",
       "title": "Fable 5 Second Audit Disposition V1",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
@@ -1887,10 +1897,10 @@
       "document_id": "PDA-UX-001",
       "path": "09-UX/README.md",
       "title": "UX and Design System Section Index",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-10",
+      "last_reviewed": "2026-07-11",
       "related_adrs": []
     },
     {
@@ -1901,6 +1911,56 @@
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-UX-011",
+      "path": "09-UX/ADVANCED_INTERFACE_PATTERNS.md",
+      "title": "Advanced Interface Patterns",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-11",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-UX-012",
+      "path": "09-UX/DASHBOARD_AND_DATA_VISUALIZATION.md",
+      "title": "Dashboard and Data Visualization",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-11",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-UX-013",
+      "path": "09-UX/FORMS_SELECTION_AND_MULTISELECT.md",
+      "title": "Forms Selection and Multiselect",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-11",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-UX-014",
+      "path": "09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md",
+      "title": "Progressive Disclosure and Complexity Management",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-11",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-UX-015",
+      "path": "09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md",
+      "title": "Design Tokens and Visual System",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-11",
       "related_adrs": []
     }
   ]

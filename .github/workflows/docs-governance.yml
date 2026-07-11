@@ -26,3 +26,16 @@ jobs:
 
       - name: Validate document governance
         run: python scripts/validate_docs.py
+
+      - name: Generate machine-readable registries
+        run: python scripts/generate_registries.py
+
+      - name: Upload generated registries
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-registries
+          path: |
+            registry/documents.json
+            registry/capabilities.json
+          if-no-files-found: error
+          retention-days: 7

@@ -22,9 +22,11 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - name: Check out pull request revision
+      - name: Check out pull request source branch
         if: github.event_name == 'pull_request'
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -70,8 +72,10 @@ jobs:
           retention-days: 7
 
       - name: Commit refreshed registries
-        if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
+        if: github.actor != 'github-actions[bot]' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
         shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -80,9 +84,8 @@ jobs:
             echo "Registries are already current."
           else
             git commit -m "chore: refresh documentation registries"
-            git push origin HEAD:${{ github.ref_name }}
+            git push origin HEAD:"$TARGET_BRANCH"
           fi
 
       - name: Verify generated output is clean
-        if: github.actor == 'github-actions[bot]' || github.event_name == 'pull_request'
         run: git diff --exit-code -- registry/documents.json registry/capabilities.json registry/events.json

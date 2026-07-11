@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "documents": [
     {
       "document_id": "ADR-0001",
@@ -45,7 +45,7 @@
       "document_id": "ADR-0005",
       "path": "18-Decisions/ADR-0005-NEXTJS-TANSTACK-EXPO-CLIENT-STACK.md",
       "title": "Adopt Next.js TanStack and Expo for Client Applications",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
@@ -105,6 +105,19 @@
       "document_id": "ADR-0011",
       "path": "18-Decisions/ADR-0011-PROVIDER-NEUTRAL-BILLING-AND-REGIONAL-PAYMENT-RAILS.md",
       "title": "Use Provider Neutral Billing and Regional Payment Rails",
+      "version": "0.2.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": [
+        "ADR-0013",
+        "ADR-0015"
+      ]
+    },
+    {
+      "document_id": "ADR-0012",
+      "path": "18-Decisions/ADR-0012-CONNECTOR-FIRST-WITH-A-NATIVE-REFERENCE-STOREFRONT.md",
+      "title": "Use a Connector First Strategy with a Native Reference Storefront",
       "version": "0.1.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
@@ -112,9 +125,39 @@
       "related_adrs": []
     },
     {
-      "document_id": "ADR-0012",
-      "path": "18-Decisions/ADR-0012-CONNECTOR-FIRST-WITH-A-NATIVE-REFERENCE-STOREFRONT.md",
-      "title": "Use a Connector First Strategy with a Native Reference Storefront",
+      "document_id": "ADR-0013",
+      "path": "18-Decisions/ADR-0013-COMMERCE-OWNS-CUSTOMER-STORED-VALUE.md",
+      "title": "Commerce Owns Customer Stored Value",
+      "version": "0.1.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "ADR-0014",
+      "path": "18-Decisions/ADR-0014-PII-ISOLATION-AND-IRREVERSIBLE-PSEUDONYMIZATION.md",
+      "title": "Isolate PII and Use Irreversible Pseudonymization for Valid Erasure",
+      "version": "0.1.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "ADR-0015",
+      "path": "18-Decisions/ADR-0015-DIRECT-TENANT-MERCHANT-CONTRACTS-FIRST.md",
+      "title": "Use Direct Tenant Merchant Contracts for the Initial Payment Model",
+      "version": "0.1.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "ADR-0016",
+      "path": "18-Decisions/ADR-0016-REGISTERED-NAMESPACES-AND-EVENT-CONVENTIONS.md",
+      "title": "Use Registered Namespaces and Uniform Event Conventions",
       "version": "0.1.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
@@ -132,11 +175,21 @@
       "related_adrs": []
     },
     {
+      "document_id": "PDA-AI-010",
+      "path": "06-AI/FIRST_SLICE_AI_BOUNDARY.md",
+      "title": "First Slice AI Boundary",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
       "document_id": "PDA-APP-001",
       "path": "19-Appendices/README.md",
       "title": "Appendices Section Index",
-      "version": "0.1.0",
-      "status": "Planned",
+      "version": "0.2.0",
+      "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []
@@ -207,21 +260,28 @@
       "document_id": "PDA-ARC-005",
       "path": "02-Architecture/EVENT_STANDARDS.md",
       "title": "Event Standards",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0016"
+      ]
     },
     {
       "document_id": "PDA-ARC-006",
       "path": "02-Architecture/DATA_OWNERSHIP_AND_CONSISTENCY.md",
       "title": "Data Ownership and Consistency",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0007",
+        "ADR-0013",
+        "ADR-0014"
+      ]
     },
     {
       "document_id": "PDA-ARC-007",
@@ -284,6 +344,24 @@
       ]
     },
     {
+      "document_id": "PDA-ARC-012",
+      "path": "02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md",
+      "title": "First Slice System Context and Flows",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0006",
+        "ADR-0007",
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0015"
+      ]
+    },
+    {
       "document_id": "PDA-COM-001",
       "path": "13-Commercial/COMMERCIAL_ARCHITECTURE_OVERVIEW.md",
       "title": "Commercial Architecture Overview",
@@ -336,12 +414,14 @@
     {
       "document_id": "PDA-COM-006",
       "path": "13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
-      "title": "Subscription Lifecycle",
-      "version": "0.1.0",
+      "title": "Platform Subscription Lifecycle",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0016"
+      ]
     },
     {
       "document_id": "PDA-COM-007",
@@ -397,20 +477,21 @@
       "document_id": "PDA-COM-012",
       "path": "13-Commercial/BILLING_PROVIDER_AND_REGIONAL_PAYMENT_RAILS.md",
       "title": "Billing Provider and Regional Payment Rails",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": [
-        "ADR-0011"
+        "ADR-0011",
+        "ADR-0015"
       ]
     },
     {
       "document_id": "PDA-DAT-001",
       "path": "10-Data/README.md",
       "title": "Data Platform Section Index",
-      "version": "0.1.0",
-      "status": "Planned",
+      "version": "0.2.0",
+      "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []
@@ -419,6 +500,16 @@
       "document_id": "PDA-DAT-002",
       "path": "10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md",
       "title": "Search Relevance and Semantic Retrieval",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-DAT-010",
+      "path": "10-Data/DATA_CLASSIFICATION_AND_HANDLING.md",
+      "title": "Data Classification and Handling",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
@@ -436,11 +527,21 @@
       "related_adrs": []
     },
     {
+      "document_id": "PDA-DEP-010",
+      "path": "12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md",
+      "title": "Backup Restore and Disaster Recovery",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
       "document_id": "PDA-DEV-001",
       "path": "07-Developer-Platform/README.md",
       "title": "Developer Platform Section Index",
-      "version": "0.1.0",
-      "status": "Planned",
+      "version": "0.2.0",
+      "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []
@@ -466,14 +567,30 @@
       "related_adrs": []
     },
     {
-      "document_id": "PDA-DOM-001",
-      "path": "04-Business-Domains/COMMERCE_DOMAIN.md",
-      "title": "Commerce Domain",
+      "document_id": "PDA-DEV-004",
+      "path": "07-Developer-Platform/API_VERSIONING_AND_DEPRECATION.md",
+      "title": "API Versioning and Deprecation",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0016"
+      ]
+    },
+    {
+      "document_id": "PDA-DOM-001",
+      "path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "title": "Commerce Domain",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": [
+        "ADR-0012",
+        "ADR-0013",
+        "ADR-0015"
+      ]
     },
     {
       "document_id": "PDA-DOM-002",
@@ -509,31 +626,39 @@
       "document_id": "PDA-DOM-005",
       "path": "04-Business-Domains/PROCUREMENT_DOMAIN.md",
       "title": "Procurement Domain",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0007"
+      ]
     },
     {
       "document_id": "PDA-DOM-006",
       "path": "04-Business-Domains/FINANCE_DOMAIN.md",
       "title": "Finance Domain",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0010",
+        "ADR-0013",
+        "ADR-0014"
+      ]
     },
     {
       "document_id": "PDA-DOM-007",
       "path": "04-Business-Domains/CRM_DOMAIN.md",
       "title": "CRM Domain",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0007"
+      ]
     },
     {
       "document_id": "PDA-DOM-008",
@@ -629,7 +754,7 @@
       "document_id": "PDA-DOM-017",
       "path": "04-Business-Domains/MARKETING_DOMAIN.md",
       "title": "Marketing Domain",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
@@ -639,17 +764,19 @@
       "document_id": "PDA-DOM-018",
       "path": "04-Business-Domains/DOCUMENTS_AND_KNOWLEDGE_DOMAIN.md",
       "title": "Documents and Knowledge Domain",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0014"
+      ]
     },
     {
       "document_id": "PDA-DOM-019",
       "path": "04-Business-Domains/GOVERNANCE_AND_COMPLIANCE_DOMAIN.md",
       "title": "Governance and Compliance Domain",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
@@ -669,17 +796,27 @@
       "document_id": "PDA-DOM-021",
       "path": "04-Business-Domains/BUSINESS_CAPABILITY_MAP.md",
       "title": "Business Capability Map",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0007",
+        "ADR-0008",
+        "ADR-0009",
+        "ADR-0010",
+        "ADR-0012",
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0015",
+        "ADR-0016"
+      ]
     },
     {
       "document_id": "PDA-DOM-022",
       "path": "04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md",
       "title": "Domain Dependency Matrix",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
@@ -687,14 +824,18 @@
         "ADR-0003",
         "ADR-0007",
         "ADR-0009",
-        "ADR-0010"
+        "ADR-0010",
+        "ADR-0012",
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0015"
       ]
     },
     {
       "document_id": "PDA-DOM-023",
       "path": "04-Business-Domains/STOREFRONT_AND_DIGITAL_COMMERCE.md",
       "title": "Storefront and Digital Commerce",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
@@ -706,11 +847,25 @@
       "document_id": "PDA-DOM-024",
       "path": "04-Business-Domains/RECURRING_COMMERCE_AND_MEMBERSHIPS.md",
       "title": "Recurring Commerce and Memberships",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": [
+        "ADR-0015"
+      ]
+    },
+    {
+      "document_id": "PDA-DOM-025",
+      "path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
+      "title": "Stored Value and Customer Balances",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0013"
+      ]
     },
     {
       "document_id": "PDA-ENG-001",
@@ -776,21 +931,26 @@
       "document_id": "PDA-ENG-007",
       "path": "03-Business-Engines/TAX_ENGINE.md",
       "title": "Tax Engine",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0010"
+      ]
     },
     {
       "document_id": "PDA-ENG-008",
       "path": "03-Business-Engines/PAYMENT_ENGINE.md",
       "title": "Payment Engine",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0013",
+        "ADR-0015"
+      ]
     },
     {
       "document_id": "PDA-ENG-009",
@@ -866,22 +1026,27 @@
       "document_id": "PDA-ENG-016",
       "path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "title": "AI Orchestration Engine",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0014",
+        "ADR-0016"
+      ]
     },
     {
       "document_id": "PDA-ENG-017",
       "path": "03-Business-Engines/LOYALTY_ENGINE.md",
       "title": "Loyalty Engine",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": [
-        "ADR-0009"
+        "ADR-0009",
+        "ADR-0013",
+        "ADR-0016"
       ]
     },
     {
@@ -1000,11 +1165,13 @@
       "document_id": "PDA-FND-010",
       "path": "00-Foundation/NAMING_STANDARDS.md",
       "title": "Naming Standards",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0016"
+      ]
     },
     {
       "document_id": "PDA-FND-011",
@@ -1040,11 +1207,16 @@
       "document_id": "PDA-FND-014",
       "path": "00-Foundation/GLOSSARY.md",
       "title": "Platform Glossary",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0007",
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0015"
+      ]
     },
     {
       "document_id": "PDA-IND-001",
@@ -1060,11 +1232,17 @@
       "document_id": "PDA-IND-002",
       "path": "05-Industry-Packs/RETAIL_PACK.md",
       "title": "Retail Industry Pack",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0007",
+        "ADR-0010",
+        "ADR-0012",
+        "ADR-0013",
+        "ADR-0015"
+      ]
     },
     {
       "document_id": "PDA-IND-003",
@@ -1130,11 +1308,14 @@
       "document_id": "PDA-IND-009",
       "path": "05-Industry-Packs/HEALTHCARE_OPERATIONS_PACK.md",
       "title": "Healthcare Operations Industry Pack",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0007",
+        "ADR-0014"
+      ]
     },
     {
       "document_id": "PDA-IND-010",
@@ -1207,14 +1388,30 @@
       "related_adrs": []
     },
     {
-      "document_id": "PDA-MAN-001",
-      "path": "PLATFORM_MANIFEST.md",
-      "title": "Platform Manifest",
+      "document_id": "PDA-IND-018",
+      "path": "05-Industry-Packs/GUYANA_RETAIL_JURISDICTION_PROFILE.md",
+      "title": "Guyana Retail Jurisdiction Profile",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []
+    },
+    {
+      "document_id": "PDA-MAN-001",
+      "path": "PLATFORM_MANIFEST.md",
+      "title": "Platform Manifest",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": [
+        "ADR-0001",
+        "ADR-0007",
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0015"
+      ]
     },
     {
       "document_id": "PDA-MKT-001",
@@ -1237,14 +1434,29 @@
       "related_adrs": []
     },
     {
-      "document_id": "PDA-PLT-001",
-      "path": "01-Platform/PLATFORM_KERNEL_OVERVIEW.md",
-      "title": "Platform Kernel Overview",
+      "document_id": "PDA-OPS-010",
+      "path": "15-Operations/OBSERVABILITY_INCIDENT_AND_SUPPORT_OPERATIONS.md",
+      "title": "Observability Incident and Support Operations",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []
+    },
+    {
+      "document_id": "PDA-PLT-001",
+      "path": "01-Platform/PLATFORM_KERNEL_OVERVIEW.md",
+      "title": "Platform Kernel Overview",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": [
+        "ADR-0006",
+        "ADR-0007",
+        "ADR-0008",
+        "ADR-0014"
+      ]
     },
     {
       "document_id": "PDA-PLT-002",
@@ -1300,21 +1512,26 @@
       "document_id": "PDA-PLT-007",
       "path": "01-Platform/AUDIT_AND_ACTIVITY.md",
       "title": "Audit and Activity",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0014"
+      ]
     },
     {
       "document_id": "PDA-PLT-008",
       "path": "01-Platform/EVENT_BACKBONE.md",
       "title": "Event Backbone",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0014",
+        "ADR-0016"
+      ]
     },
     {
       "document_id": "PDA-PLT-009",
@@ -1330,7 +1547,7 @@
       "document_id": "PDA-PLT-010",
       "path": "01-Platform/NOTIFICATIONS_AND_COMMUNICATION.md",
       "title": "Notifications and Communication",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
@@ -1350,7 +1567,7 @@
       "document_id": "PDA-PLT-012",
       "path": "01-Platform/SEARCH_AND_DISCOVERY.md",
       "title": "Search and Discovery",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
@@ -1430,24 +1647,27 @@
       "document_id": "PDA-PLT-020",
       "path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "title": "Better Auth Identity Architecture",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": [
-        "ADR-0006"
+        "ADR-0006",
+        "ADR-0007",
+        "ADR-0016"
       ]
     },
     {
       "document_id": "PDA-PLT-021",
       "path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "title": "Party and Relationship Model",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": [
-        "ADR-0007"
+        "ADR-0007",
+        "ADR-0014"
       ]
     },
     {
@@ -1496,21 +1716,28 @@
       "document_id": "PDA-PLT-026",
       "path": "01-Platform/COLLABORATION_PRIMITIVES.md",
       "title": "Collaboration Primitives",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0014",
+        "ADR-0016"
+      ]
     },
     {
       "document_id": "PDA-RDM-001",
       "path": "17-Roadmap/BLUEPRINT_AND_DELIVERY_ROADMAP.md",
       "title": "Blueprint and Delivery Roadmap",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
-      "related_adrs": []
+      "related_adrs": [
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0015"
+      ]
     },
     {
       "document_id": "PDA-RDM-002",
@@ -1523,11 +1750,51 @@
       "related_adrs": []
     },
     {
+      "document_id": "PDA-RDM-003",
+      "path": "17-Roadmap/FIRST_SLICE_MANIFEST.md",
+      "title": "First Slice Capability Manifest",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-REV-002",
+      "path": "reviews/FABLE5_AUDIT_DISPOSITION_V1.md",
+      "title": "Fable 5 Audit Disposition V1",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-REV-003",
+      "path": "reviews/FABLE5_SECOND_AUDIT_V1.md",
+      "title": "Fable 5 Second Audit V1",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-REV-004",
+      "path": "reviews/FABLE5_SECOND_AUDIT_DISPOSITION_V1.md",
+      "title": "Fable 5 Second Audit Disposition V1",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
       "document_id": "PDA-SEC-001",
       "path": "11-Security/README.md",
       "title": "Security Section Index",
-      "version": "0.1.0",
-      "status": "Planned",
+      "version": "0.2.0",
+      "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []
@@ -1536,16 +1803,40 @@
       "document_id": "PDA-SEC-002",
       "path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "title": "Privacy Rights and Retention",
-      "version": "0.1.0",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": [
+        "ADR-0014"
+      ]
+    },
+    {
+      "document_id": "PDA-SEC-003",
+      "path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
+      "title": "Risk Fraud and Anomaly Management",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []
     },
     {
-      "document_id": "PDA-SEC-003",
-      "path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
-      "title": "Risk Fraud and Anomaly Management",
+      "document_id": "PDA-SEC-010",
+      "path": "11-Security/PII_ERASURE_AND_PSEUDONYMIZATION.md",
+      "title": "PII Erasure and Pseudonymization",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": [
+        "ADR-0014"
+      ]
+    },
+    {
+      "document_id": "PDA-SEC-011",
+      "path": "11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md",
+      "title": "Threat Model and Tenant Isolation Strategy",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
@@ -1563,6 +1854,16 @@
       "related_adrs": []
     },
     {
+      "document_id": "PDA-STR-002",
+      "path": "20-Strategy/FOUNDER_DECISION_REGISTER.md",
+      "title": "Founder Decision Register",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Founder",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
       "document_id": "PDA-TST-001",
       "path": "16-Testing/README.md",
       "title": "Testing Section Index",
@@ -1573,11 +1874,31 @@
       "related_adrs": []
     },
     {
+      "document_id": "PDA-TST-010",
+      "path": "16-Testing/PLATFORM_TESTING_STRATEGY.md",
+      "title": "Platform Testing Strategy",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
       "document_id": "PDA-UX-001",
       "path": "09-UX/README.md",
       "title": "UX and Design System Section Index",
       "version": "0.1.0",
       "status": "Planned",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-10",
+      "related_adrs": []
+    },
+    {
+      "document_id": "PDA-UX-010",
+      "path": "09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md",
+      "title": "First Slice UX and Accessibility",
+      "version": "0.1.0",
+      "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": []

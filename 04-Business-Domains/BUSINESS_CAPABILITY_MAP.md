@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DOM-021
 title: Business Capability Map
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
@@ -37,6 +37,7 @@ Each capability must eventually define:
 
 - `platform.tenancy`
 - `platform.organizations`
+- `platform.party`
 - `platform.identity`
 - `platform.authentication`
 - `platform.authorization`
@@ -44,14 +45,22 @@ Each capability must eventually define:
 - `platform.entitlements`
 - `platform.usage-metering`
 - `platform.configuration`
+- `platform.extensible-metadata`
 - `platform.audit`
 - `platform.events`
+- `platform.webhooks`
 - `platform.jobs`
 - `platform.notifications`
 - `platform.files`
 - `platform.search`
 - `platform.localization`
 - `platform.reference-data`
+- `platform.numbering`
+- `platform.import-export`
+- `platform.data-migration`
+- `platform.quotas`
+- `platform.collaboration`
+- `platform.privacy-rights`
 - `platform.feature-flags`
 - `platform.devices`
 - `platform.offline-sync`
@@ -68,12 +77,15 @@ Each capability must eventually define:
 - `engine.tax`
 - `engine.payments`
 - `engine.promotions`
+- `engine.loyalty`
+- `engine.fiscalization`
 - `engine.documents`
 - `engine.scheduling`
 - `engine.branding`
 - `engine.workspaces`
 - `engine.dashboards`
 - `engine.reporting`
+- `engine.ai-orchestration`
 
 ## Business Domains
 

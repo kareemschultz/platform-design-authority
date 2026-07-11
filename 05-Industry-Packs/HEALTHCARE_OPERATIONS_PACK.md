@@ -1,10 +1,11 @@
 ---
 document_id: PDA-IND-009
 title: Healthcare Operations Industry Pack
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
+related_adrs: [ADR-0007, ADR-0014]
 ---
 
 # Healthcare Operations Industry Pack
@@ -15,11 +16,11 @@ Operational administration for clinics, diagnostic centers, pharmacies, laborato
 
 ## Required Capabilities
 
-- CRM or party records for patients, guarantors, payers, providers, suppliers, and referral sources
+- Party and Relationship records for patients, guarantors, payers, providers, suppliers, and referral sources, with role-specific CRM or operational profiles
 - Scheduling appointments, rooms, equipment, practitioners, reminders, and waitlists
 - Service intake, cases, authorizations, referrals, and operational follow-up
 - Inventory lots, serials, expiry, cold-chain status, quarantine, and recalls
-- Procurement suppliers, contracts, purchasing, receiving, and quality controls
+- Procurement supplier roles, contracts, purchasing, receiving, and quality controls
 - Workforce credentials, shifts, attendance, training, leave, and payroll inputs
 - Assets and Maintenance clinical equipment, calibration, inspections, and downtime
 - Finance billing, receivables, payables, payments, expenses, and cost centers
@@ -34,11 +35,13 @@ Reception, Scheduler, Care Coordinator, Pharmacy or Inventory Officer, Procureme
 
 Registration, appointment, consent, eligibility or authorization, service handoff, stock issue, controlled receipt, expiry monitoring, equipment calibration, incident reporting, billing handoff, and records request.
 
-## Safety and Privacy Rules
+## Party and Privacy Rules
 
-- Health and identity data require strict classification, least privilege, field-level controls, consent, retention, audit, and jurisdiction-specific review.
+- One person or organization may hold multiple roles; patient, worker, provider, supplier, payer, and guarantor profiles must link to canonical Parties rather than create ungoverned duplicates.
+- Health and identity data require Restricted classification, least privilege, field-level controls, consent, retention, audit, and jurisdiction-specific review.
+- Role-scoped erasure, legal retention, and pseudonymization follow ADR-0014.
 - AI must not provide ungoverned diagnosis, treatment, or autonomous clinical decisions.
-- Medication, laboratory, and clinical modules require separate specialist specifications and regulatory validation.
+- Medication, laboratory, clinical, controlled-substance, and electronic-health-record modules require separate specialist specifications and regulatory validation.
 
 ## AI Skills
 

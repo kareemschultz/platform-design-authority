@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-017
 title: Component Catalog and State Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -44,17 +44,50 @@ Define the minimum web and native component families and the states each must su
 - Menu
 - Toast and persistent notice
 
-## Data Display
+## Data Display and Analytics
 
 - Table and virtualized table
 - Record list
-- KPI card
-- Chart container
+- KPI and delta card
+- Sparkline
+- Responsive chart container
+- Chart tooltip and legend
+- Filter and comparison toolbar
+- Brush and range selector
+- Insight and annotation panel
+- Accessible chart summary and data table
 - Empty state
 - Timeline and activity feed
 - Definition list
 - Key-value inspector
 - Tree
+
+Interactive chart components follow `INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md` and must support exact-value inspection, responsive sizing, accessible alternatives, active-filter visibility, drill context, freshness, partial data, and live-update behavior where applicable.
+
+## POS and Retail Components
+
+- Barcode and scanner input field
+- Product lookup and result list
+- Product tile and variant chooser
+- Cart line and cart summary
+- Quantity and unit editor
+- Price override request and approval panel
+- Tender selector
+- Cash denomination and amount-received pad
+- Numeric keypad
+- Split-tender composer
+- Customer-approved payment-request panel
+- Payment uncertainty and reconciliation status
+- Stored-value lookup, balance, reservation, and redemption panel
+- Receipt preview and delivery panel
+- Return-line selector
+- Refund-destination summary
+- Register and shift status
+- Cash drawer, safe-drop, variance, and deposit panel
+- Offline lease, sync queue, and conflict status
+- External scanner and keyboard command handling
+
+Every POS component defines touch, keyboard, scanner, screen-reader, offline, pending, provider-uncertainty, and manager-approval behavior.
 
 ## Workflow
 
@@ -86,6 +119,9 @@ Each applicable component defines:
 - Pending
 - Stale
 - Offline
+- Degraded
+- Provider uncertain
+- Reconciliation required
 - Success
 - Destructive
 - Permission denied
@@ -101,9 +137,11 @@ Every component documents:
 - Screen-reader naming and announcements
 - Controlled state API
 - Responsive transformation
-- Token use
+- Tailwind and semantic-token use
+- shadcn/ui or underlying primitive provenance where applicable
 - Localization
-- Error and pending behavior
+- Error, pending, offline, and uncertainty behavior
+- Performance budget
 - Test identifiers used without coupling to presentation
 
 ## Composition Rules
@@ -114,18 +152,28 @@ Every component documents:
 - Keep one primary action per bounded task.
 - Do not create visually similar components with different semantics.
 - State meaning is stable across white-label themes.
+- Premium blocks are normalized into platform-owned components before production use.
+- Charts never calculate authoritative business metrics in the client.
 
 ## Delivery
 
-Components are implemented in separate web and native packages backed by shared tokens and behavior specifications. Storybook or an equivalent workbench provides examples, accessibility notes, and visual regression.
+Components are implemented in separate web and native packages backed by shared tokens and behavior specifications.
+
+The web foundation uses approved stable Tailwind CSS and source-owned shadcn/ui components. The initial ordinary chart family uses shadcn chart composition with Recharts. Premium Magic UI Pro and shadcn/studio sources may accelerate selected compositions under the premium UI source policy.
+
+Storybook or an equivalent workbench provides examples, accessibility notes, interactive states, responsive viewports, visual regression, and provenance.
 
 ## Quality Gates
 
 - Unit and interaction tests
 - Keyboard and screen-reader tests
 - Responsive examples
+- Touch, scanner, and external-keyboard tests for POS
+- Chart interaction and structured-data alternatives
 - Dark and high-contrast modes
 - Text scaling
+- Reduced motion
 - Visual regression
 - Performance budget
 - White-label theme validation
+- Offline and provider-uncertainty scenarios

@@ -1,35 +1,33 @@
 ---
 document_id: PDA-DEP-001
 title: Deployment Section Index
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 ---
 
 # Deployment
 
 ## Current Specifications
 
+- `DEPLOYMENT_REFERENCE_ARCHITECTURE.md` — SaaS, dedicated, self-hosted, hybrid, edge, trust zones, residency, scaling, Kubernetes, release, and customer responsibilities
 - `BACKUP_RESTORE_AND_DISASTER_RECOVERY.md` — authoritative and rebuildable data, recovery objectives, deletion-journal reapplication, provider reconciliation, and offline resynchronization
-- `../02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md` — containers, managed services, AWS direction, self-hosting, and Kubernetes adoption criteria
-- `../02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md` — first-slice systems, trust boundaries, transaction boundaries, and recovery flows
+- `../02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md` — containers, managed services, AWS direction, self-hosting, and stack choices
+- `../02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md` — systems, trust boundaries, transaction boundaries, and recovery flows
 - `../15-Operations/OBSERVABILITY_INCIDENT_AND_SUPPORT_OPERATIONS.md` — runtime telemetry, incidents, containment, and support operations
+- `../15-Operations/SLO_AND_OPERATIONAL_READINESS.md` — production readiness and service objectives
 
-## Planned Specifications
+## Remaining Implementation-Level Depth
 
-- First-slice SaaS reference deployment
-- Dedicated and self-hosted deployment
-- Environment topology and trust zones
-- Network, certificate, domain, and edge architecture
-- Multi-region and data-residency strategy
-- PostgreSQL, Redis, object storage, Temporal, NATS, and search deployment
-- Edge nodes and offline client fleet management
-- Infrastructure as code and secret bootstrap
-- Release, rollback, migration, and disaster-recovery automation
-- Capacity, cost, and scaling models
-- Customer-managed keys and enterprise isolation
-- Deployment compatibility matrix
-- Provider outage and regional continuity strategy
+- Infrastructure-as-code modules
+- First-slice environment topology
+- Network and certificate diagrams
+- Database, Redis, object-storage, workflow, messaging, and search sizing
+- Multi-region failover implementation
+- Edge service packaging
+- Customer-managed key implementation
+- Deployment compatibility test matrix
+- Cost model with measured workloads
 
-Containers are the standard deployment unit. Kubernetes is adopted only when operating requirements justify it. Every deployment mode must preserve tenant isolation, audit, privacy transformation, backup recovery, provider portability, and version compatibility.
+Containers are the standard deployment unit. Kubernetes is adopted only when operating requirements justify it. Every deployment mode preserves tenant isolation, audit, privacy transformation, backup recovery, provider portability, and version compatibility.

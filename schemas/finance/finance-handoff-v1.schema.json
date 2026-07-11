@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/finance/finance-handoff-v1.schema.json",
+  "title": "Finance Handoff V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "batchId", "tenantId", "legalEntityId", "period", "currency", "ruleVersion", "controlTotals", "lines", "exceptions", "createdAt"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "batchId": {"type": "string"},
+    "tenantId": {"type": "string"},
+    "legalEntityId": {"type": "string"},
+    "period": {
+      "type": "object",
+      "required": ["start", "end", "timezone"],
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"},
+        "timezone": {"type": "string"}
+      }
+    },
+    "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "ruleVersion": {"type": "string"},
+    "sourceEventRange": {
+      "type": "object",
+      "properties": {
+        "firstEventId": {"type": ["string", "null"]},
+        "lastEventId": {"type": ["string", "null"]}
+      }
+    },
+    "controlTotals": {
+      "type": "object",
+      "required": ["grossSalesMinor", "discountsMinor", "taxMinor", "netSalesMinor", "cashMinor", "electronicTenderMinor", "storedValueIssuedMinor", "storedValueRedeemedMinor", "refundsMinor", "feesMinor", "cashVarianceMinor", "depositMinor"],
+      "properties": {
+        "grossSalesMinor": {"type": "integer"},
+        "discountsMinor": {"type": "integer"},
+        "taxMinor": {"type": "integer"},
+        "netSalesMinor": {"type": "integer"},
+        "cashMinor": {"type": "integer"},
+        "electronicTenderMinor": {"type": "integer"},
+        "storedValueIssuedMinor": {"type": "integer"},
+        "storedValueRedeemedMinor": {"type": "integer"},
+        "refundsMinor": {"type": "integer"},
+        "feesMinor": {"type": "integer"},
+        "cashVarianceMinor": {"type": "integer"},
+        "depositMinor": {"type": "integer"}
+      }
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lineId", "sourceType", "sourceId", "accountRole", "direction", "amountMinor"],
+        "properties": {
+          "lineId": {"type": "string"},
+          "sourceType": {"type": "string"},
+          "sourceId": {"type": "string"},
+          "accountRole": {"type": "string"},
+          "configuredAccountCode": {"type": ["string", "null"]},
+          "direction": {"type": "string", "enum": ["Debit", "Credit"]},
+          "amountMinor": {"type": "integer", "minimum": 0},
+          "dimensions": {"type": "object", "additionalProperties": {"type": "string"}},
+          "description": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "severity", "message"],
+        "properties": {
+          "code": {"type": "string"},
+          "severity": {"type": "string", "enum": ["Warning", "Blocking"]},
+          "message": {"type": "string"},
+          "sourceIds": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "createdAt": {"type": "string", "format": "date-time"},
+    "reviewState": {"type": "string", "enum": ["Draft", "ReadyForReview", "Accepted", "Rejected", "CorrectionRequired"]}
+  }
+}

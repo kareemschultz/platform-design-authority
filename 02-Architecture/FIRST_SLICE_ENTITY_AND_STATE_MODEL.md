@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-013
 title: First Slice Entity and State Model
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -43,6 +43,14 @@ States: Pending Enrollment, Active, Offline Lease Valid, Lease Expiring, Revoked
 
 States: Issued, Active, Expired, Revoked, Reconciled.
 
+### Webhook Subscription
+
+Owner: Developer Platform.
+
+States: Draft, Active, Paused, Degraded, Suspended, Revoked, Archived.
+
+A subscription records tenant, application, endpoint, event selection, filters, schema versions, signing-key version, retry policy, rate limits, owner, and support contact.
+
 ## Party and CRM Entities
 
 ### Party
@@ -55,7 +63,7 @@ States: Active, Duplicate Candidate, Merge Pending, Merged, Restricted, Pseudony
 
 States: Prospect, Active Customer, Inactive, Restricted, Closed.
 
-## Catalog Entities
+## Catalog and Pricing Entities
 
 ### Product
 
@@ -68,6 +76,28 @@ States: Draft, Active, Suspended, Discontinued.
 ### Price Definition
 
 States: Draft, Scheduled, Active, Expired, Superseded.
+
+### Tax Snapshot
+
+Owner: Tax Engine for calculation; embedded immutable snapshot belongs to the source transaction after completion.
+
+States: Calculated, Validated, Applied, Superseded by Correction.
+
+Required prototype fields:
+
+- Jurisdiction and rule-set version
+- Registration context
+- Tax code and treatment
+- Taxable base
+- Rate
+- Amount
+- Inclusive or exclusive indicator
+- Rounding rule and result
+- Currency
+- Exemption or zero-rating evidence where applicable
+- Calculation timestamp and provider reference where used
+
+A Tax Snapshot is not proof of filing or fiscal submission.
 
 ## Inventory Entities
 
@@ -84,6 +114,14 @@ States: Pending, Active, Partially Consumed, Consumed, Released, Expired.
 ### Stock Count
 
 States: Draft, In Progress, Submitted, Review Required, Approved, Posted, Cancelled.
+
+### Stock Transfer
+
+Owner: Inventory for stock state; Warehouse may own execution tasks when enabled.
+
+States: Draft, Submitted, Approved, Reserved, Dispatched, In Transit, Partially Received, Received, Exception, Cancelled, Reconciled.
+
+A transfer posts linked Transfer Out and Transfer In ledger facts. Dispatch and receipt remain separate to represent in-transit stock.
 
 ## Commerce Entities
 
@@ -107,6 +145,12 @@ States: Active, Cancelled, Partially Returned, Fully Returned.
 
 States: Draft, Review Required, Approved, Refund Pending, Completed, Rejected, Cancelled.
 
+### Exchange
+
+States: Draft, Review Required, Approved, Payment or Refund Pending, Completed, Reconciliation Required, Cancelled.
+
+An Exchange references returned lines and replacement sale lines. Any price difference, tax effect, payment, refund, inventory movement, and stored-value effect remains explicit.
+
 ### Receipt
 
 States: Pending Number, Issued, Reissued, Voided, Statutory Rejection, Archived.
@@ -116,6 +160,12 @@ States: Pending Number, Issued, Reissued, Voided, Statutory Rejection, Archived.
 Types: Opening Float, Sale Receipt, Change, Paid In, Paid Out, Refund, Safe Drop, Transfer, Deposit Handoff, Variance.
 
 States: Draft, Posted, Reversed, Reconciled.
+
+### Deposit
+
+States: Draft, Preparing, Counted, Approved, Handed Off, In Transit, Submitted to Bank, Confirmed, Variance Review, Reconciled, Cancelled.
+
+A Deposit records legal entity, store, source register shifts and safe drops, currency, expected amount, counted amount, custody transitions, bank reference, variance, and evidence.
 
 ## Payment Entities
 
@@ -145,7 +195,7 @@ States: Active, Captured, Released, Expired, Reconciliation Required.
 
 Facts: Issue, Activate, Load, Reserve, Release, Redeem, Refund, Reverse, Expire, Reinstate, Adjust, Transfer Out, Transfer In.
 
-## Import Entities
+## Import and Export Entities
 
 ### Import Job
 
@@ -154,6 +204,12 @@ States: Uploaded, Scanning, Profiling, Mapping, Dry Run, Awaiting Approval, Appl
 ### Import Row Result
 
 States: Proposed, Valid, Warning, Rejected, Applied, Skipped, Reversed.
+
+### Export Job
+
+States: Requested, Authorizing, Generating, Ready, Downloaded, Expired, Failed, Cancelled.
+
+Exports record scope, purpose, classification, permission, format, expiry, and audit evidence.
 
 ## Privacy Entities
 
@@ -177,14 +233,16 @@ States: Pending, In Progress, Completed, Failed, Exempted, Held.
 8. Human-readable references are separate from primary identifiers.
 9. Cross-domain references use stable identifiers and application contracts.
 10. Archived does not mean deleted.
+11. Deposit custody, Stock Transfer in-transit state, Exchange price difference, and Tax Snapshot evidence cannot be inferred from one generic status.
+12. Webhook Subscription state never changes the authoritative source event.
 
 ## Open Schema Decisions
 
 - Exact PostgreSQL table boundaries
 - Aggregate sizes and transaction boundaries
-- Party/address snapshot representation
+- Party and address snapshot representation
 - Store and legal-entity relationship cardinality
-- Tax and fiscal evidence schema after Guyana verification
+- Production Guyana tax and fiscal evidence after authoritative verification
 - Exact currency minor-unit and rounding library
 
-These require prototype evidence and cannot be ratified solely from prose.
+Prototype schemas may proceed using the provisional tax pack and quality budgets, but production ratification requires evidence.

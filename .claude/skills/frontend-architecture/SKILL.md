@@ -1,19 +1,20 @@
 ---
 name: frontend-architecture
-description: Design or review platform frontend architecture, page composition, component boundaries, state ownership, Next.js, TanStack, Expo, accessibility, and white-label behavior. Use for frontend plans, implementations, refactors, and UI architecture reviews.
-paths:
-  - "apps/**"
-  - "packages/ui-*/**"
-  - "packages/design-tokens/**"
-  - "09-UX/**"
-  - "02-Architecture/**"
+description: Design or review platform frontend architecture, page composition, component boundaries, state ownership, Next.js, TanStack, Expo, Tailwind, shadcn/ui, accessibility, analytics, and white-label behavior. Use for frontend plans and architecture reviews before implementation.
+context: fork
+agent: Explore
+disallowed-tools: Write Edit Bash NotebookEdit
 ---
 
 # Frontend Architecture Skill
 
-## Read First
+## Safety and Scope
 
-Read the relevant governing documents before proposing code:
+This skill is read-only and produces architecture and implementation plans. It does not modify code. Remove the restriction only through a separate explicitly authorized implementation workflow.
+
+Do not use undocumented `paths` metadata. Claude Code discovers project skills from `.claude/skills/` and their descriptions.
+
+## Read First
 
 - `02-Architecture/BETTER_T_STACK_AND_CLIENT_ARCHITECTURE.md`
 - `02-Architecture/TANSTACK_DECISION_MATRIX.md`
@@ -23,20 +24,24 @@ Read the relevant governing documents before proposing code:
 - `09-UX/FORMS_SELECTION_AND_MULTISELECT.md`
 - `09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
 - `09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
+- `09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md`
+- `09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
 - `00-Foundation/UX_PHILOSOPHY.md`
 
 ## Architecture Rules
 
 1. Keep authoritative business rules on the server and behind domain application contracts.
-2. Separate server state, local interaction state, form state, URL state, and offline state.
+2. Separate server, local interaction, form, URL, and offline state.
 3. Use Next.js for the primary web shell and Expo with Expo Router for native applications.
-4. Use TanStack Query for server-state synchronization and TanStack Table/Virtual for appropriate dense data surfaces.
-5. Do not select a form library without the approved evaluation; follow the existing decision matrix.
-6. Use shared semantic design tokens, not duplicated raw styling constants.
-7. Share contracts, value objects, identifiers, and behavior specifications across web and native; do not force identical rendered components.
-8. Every route and component must respect tenant context, permission, entitlement, classification, and connectivity state.
-9. Essential workflows must remain usable without AI.
-10. Provider or framework SDKs must not become the business abstraction.
+4. Use the latest approved stable Tailwind CSS release, pinned and reviewed.
+5. Use owned shadcn/ui source components normalized into platform tokens and contracts.
+6. Use TanStack Query for server state and TanStack Table/Virtual for appropriate dense data surfaces.
+7. Use shadcn chart composition and Recharts for the initial ordinary web chart family.
+8. Do not select a form library without the approved evaluation.
+9. Share semantic tokens, contracts, value objects, and identifiers across web and native; do not force identical rendered components.
+10. Every route and component respects tenant, permission, entitlement, classification, and connectivity state.
+11. Essential workflows remain usable without AI.
+12. Provider, premium-block, or framework source must not become the business abstraction.
 
 ## Page Composition
 
@@ -48,56 +53,44 @@ For each page identify:
 - URL and navigation state
 - Permission and entitlement behavior
 - Loading, empty, stale, offline, pending, error, and success states
+- Interactive analytics and drill behavior where applicable
 - Mobile transformation
 - Accessibility behavior
-- Audit or analytics events
+- Audit and product analytics events
 
 Prefer task workspaces over generic module landing pages.
 
 ## Component Boundaries
 
-Create components around stable interaction contracts, not arbitrary markup fragments.
-
-A reusable component defines:
-
-- Purpose and supported variants
-- Controlled and uncontrolled state behavior
-- Accessibility semantics
-- Keyboard and focus behavior
-- Loading and error states
-- Responsive behavior
-- Token use
-- Test contract
+A reusable component defines purpose, variants, state behavior, accessibility, keyboard and focus behavior, loading and error states, responsive behavior, token use, performance budget, and test contract.
 
 Do not build one universal component with dozens of unrelated flags.
 
 ## State Ownership
 
 - Server state: TanStack Query or framework server mechanisms
-- URL state: filters, tabs, pagination, selected record when shareable
-- Form state: chosen form abstraction
+- URL state: filters, tabs, pagination, selected record, and shareable analytical state
+- Form state: approved form abstraction
 - Local transient state: component or page state
-- Global client state: only for genuinely cross-route client concerns
+- Global client state: only genuinely cross-route concerns
 - Offline state: explicit sync store and protocol
 
 Do not mirror server state into a global client store without a measured reason.
 
 ## Output
 
-When asked for a frontend plan or review, provide:
+Provide:
 
 1. Governing documents and capability identifiers
 2. User task and route structure
 3. Component tree and ownership
 4. State model
 5. API and event dependencies
-6. Accessibility and responsive behavior
-7. Offline and error behavior
-8. Test plan
-9. Risks and unresolved decisions
+6. Tailwind, shadcn/ui, chart, and token approach
+7. Accessibility and responsive behavior
+8. Offline and error behavior
+9. Performance and quality budgets
+10. Test plan
+11. Risks and unresolved decisions
 
-Reject visually attractive proposals that violate domain boundaries, accessibility, progressive disclosure, or first-slice scope.
-
-## Sources
-
-This project skill follows the Agent Skills model documented by Anthropic and uses project-local `.claude/skills/` discovery. It is original project guidance, not a copy of an Anthropic or Vercel proprietary skill.
+Reject attractive proposals that violate domain boundaries, accessibility, progressive disclosure, data integrity, or first-slice scope.

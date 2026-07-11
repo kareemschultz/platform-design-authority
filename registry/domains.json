@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "status": "draft",
   "last_reviewed": "2026-07-10",
   "description": "Canonical prefixes for capability, event, permission, schema, and package identifiers.",
@@ -11,10 +11,47 @@
       "authoritative_document": "01-Platform/PLATFORM_KERNEL_OVERVIEW.md"
     },
     {
-      "kind": "engine",
+      "kind": "engine_registry",
       "name": "Shared Business Engines",
       "prefix": "engine",
-      "authoritative_document": "03-Business-Engines/BUSINESS_ENGINES_OVERVIEW.md"
+      "authoritative_document": "03-Business-Engines/BUSINESS_ENGINES_OVERVIEW.md",
+      "note": "Used for top-level engine capabilities. Detailed engine families may use dedicated registered namespaces."
+    },
+    {
+      "kind": "engine_family",
+      "name": "AI Orchestration",
+      "prefix": "ai",
+      "authoritative_document": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md"
+    },
+    {
+      "kind": "engine_family",
+      "name": "Loyalty",
+      "prefix": "loyalty",
+      "authoritative_document": "03-Business-Engines/LOYALTY_ENGINE.md"
+    },
+    {
+      "kind": "engine_family",
+      "name": "Fiscalization and Statutory Reporting",
+      "prefix": "fiscalization",
+      "authoritative_document": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md"
+    },
+    {
+      "kind": "platform_area",
+      "name": "Security Platform",
+      "prefix": "security",
+      "authoritative_document": "11-Security/README.md"
+    },
+    {
+      "kind": "platform_area",
+      "name": "Developer Platform",
+      "prefix": "developer",
+      "authoritative_document": "07-Developer-Platform/README.md"
+    },
+    {
+      "kind": "control_plane",
+      "name": "Commercial Control Plane",
+      "prefix": "commercial",
+      "authoritative_document": "13-Commercial/COMMERCIAL_ARCHITECTURE_OVERVIEW.md"
     },
     {
       "kind": "domain",
@@ -138,16 +175,16 @@
       "authoritative_document": "04-Business-Domains/PLANNING_AND_ANALYTICS_DOMAIN.md"
     },
     {
-      "kind": "proposed_shared_master_data",
+      "kind": "shared_master_data",
       "name": "Party and Relationships",
       "prefix": "party",
-      "authoritative_document": "18-Decisions/ADR-0007-CANONICAL-PARTY-AND-RELATIONSHIP-MODEL.md",
-      "note": "Proposed. Must not be used as authoritative until ADR-0007 is accepted."
+      "authoritative_document": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
+      "note": "Governed by proposed ADR-0007 until accepted."
     }
   ],
   "rules": {
     "capability": "<prefix>.<capability>",
-    "event": "<prefix>.<entity>.<past-tense-event>.v<major>",
+    "event": "<prefix>.<entity>.<past-tense-fact>.v<major>",
     "permission": "<prefix>.<resource>.<action>",
     "new_prefix_requires_adr": true,
     "plan_names_prohibited": true

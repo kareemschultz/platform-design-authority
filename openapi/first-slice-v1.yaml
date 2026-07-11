@@ -1,0 +1,762 @@
+openapi: 3.1.0
+info:
+  title: Business Operating Platform First Slice API
+  version: 0.1.0
+  description: >-
+    Draft implementation-review contract for the Guyana Retail Foundation Slice.
+    This is not a GA public API and does not assert production provider or jurisdiction certification.
+servers:
+  - url: https://api.example.invalid/v1
+    description: Placeholder only
+security:
+  - sessionCookie: []
+tags:
+  - name: Identity
+  - name: Parties
+  - name: Catalog
+  - name: Inventory
+  - name: Commerce
+  - name: Payment
+  - name: StoredValue
+  - name: Devices
+  - name: Exports
+  - name: Webhooks
+  - name: Privacy
+paths:
+  /me:
+    get:
+      tags: [Identity]
+      operationId: getCurrentIdentity
+      responses:
+        '200':
+          description: Current authenticated identity and active context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentIdentity'
+  /organizations:
+    get:
+      tags: [Identity]
+      operationId: listOrganizations
+      x-permission: platform.organization.read
+      responses:
+        '200':
+          $ref: '#/components/responses/PagedOrganizations'
+  /session/active-context:
+    post:
+      tags: [Identity]
+      operationId: setActiveContext
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveContextRequest'
+      responses:
+        '200':
+          description: Context accepted
+  /parties:
+    get:
+      tags: [Parties]
+      operationId: listParties
+      x-permission: party.record.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: query
+          in: query
+          schema: {type: string, maxLength: 200}
+      responses:
+        '200':
+          description: Authorized Party results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedParties'
+  /parties/persons:
+    post:
+      tags: [Parties]
+      operationId: createPersonParty
+      x-permission: party.record.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePersonParty'
+      responses:
+        '201':
+          description: Party created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Party'
+        default:
+          $ref: '#/components/responses/Error'
+  /products:
+    get:
+      tags: [Catalog]
+      operationId: listProducts
+      x-permission: catalog.product.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - name: query
+          in: query
+          schema: {type: string, maxLength: 200}
+        - name: barcode
+          in: query
+          schema: {type: string, maxLength: 64}
+      responses:
+        '200':
+          description: Product results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedProducts'
+    post:
+      tags: [Catalog]
+      operationId: createProduct
+      x-permission: catalog.product.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProduct'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+  /stock-balances:
+    get:
+      tags: [Inventory]
+      operationId: listStockBalances
+      x-permission: inventory.balance.read
+      parameters:
+        - name: locationId
+          in: query
+          required: true
+          schema: {$ref: '#/components/schemas/Identifier'}
+        - name: productId
+          in: query
+          schema: {$ref: '#/components/schemas/Identifier'}
+      responses:
+        '200':
+          description: Current stock projection
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/StockBalance'}
+  /inventory-adjustments:
+    post:
+      tags: [Inventory]
+      operationId: createInventoryAdjustment
+      x-permission: inventory.adjustment.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateInventoryAdjustment'}
+      responses:
+        '202':
+          description: Adjustment created or awaiting approval
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InventoryAdjustment'}
+  /stock-counts:
+    post:
+      tags: [Inventory]
+      operationId: createStockCount
+      x-permission: inventory.count.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateStockCount'}
+      responses:
+        '201':
+          description: Stock count created
+  /stock-transfers:
+    post:
+      tags: [Inventory]
+      operationId: createStockTransfer
+      x-permission: inventory.transfer.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateStockTransfer'}
+      responses:
+        '201':
+          description: Transfer created
+  /registers/{registerId}/open:
+    post:
+      tags: [Commerce]
+      operationId: openRegister
+      x-permission: commerce.register.open
+      parameters:
+        - $ref: '#/components/parameters/RegisterId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/OpenRegisterRequest'}
+      responses:
+        '200':
+          description: Register opened
+  /registers/{registerId}/close:
+    post:
+      tags: [Commerce]
+      operationId: closeRegister
+      x-permission: commerce.register.close
+      parameters:
+        - $ref: '#/components/parameters/RegisterId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CloseRegisterRequest'}
+      responses:
+        '200':
+          description: Register closed or variance review required
+  /sales:
+    post:
+      tags: [Commerce]
+      operationId: createSale
+      x-permission: commerce.sale.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateSale'}
+      responses:
+        '201':
+          description: Sale draft created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
+  /sales/{saleId}/complete:
+    post:
+      tags: [Commerce]
+      operationId: completeSale
+      x-permission: commerce.sale.complete
+      parameters:
+        - $ref: '#/components/parameters/SaleId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CompleteSaleRequest'}
+      responses:
+        '200':
+          description: Sale completed, pending, or reconciliation required
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
+  /returns:
+    post:
+      tags: [Commerce]
+      operationId: createReturn
+      x-permission: commerce.return.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateReturn'}
+      responses:
+        '201':
+          description: Return created
+  /deposits:
+    post:
+      tags: [Commerce]
+      operationId: createDeposit
+      x-permission: commerce.deposit.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateDeposit'}
+      responses:
+        '201':
+          description: Deposit created
+  /payment-intents:
+    post:
+      tags: [Payment]
+      operationId: createPaymentIntent
+      x-permission: payment.intent.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreatePaymentIntent'}
+      responses:
+        '201':
+          description: Payment intent created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PaymentIntent'}
+  /payment-intents/{paymentIntentId}/confirm:
+    post:
+      tags: [Payment]
+      operationId: confirmPaymentIntent
+      x-permission: payment.intent.confirm
+      parameters:
+        - $ref: '#/components/parameters/PaymentIntentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Current confirmed, pending, failed, or uncertain state
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PaymentIntent'}
+  /stored-value-instruments:
+    post:
+      tags: [StoredValue]
+      operationId: issueStoredValueInstrument
+      x-permission: commerce.stored-value.issue
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/IssueStoredValueInstrument'}
+      responses:
+        '201':
+          description: Instrument issued
+  /stored-value-instruments/{instrumentId}/reserve:
+    post:
+      tags: [StoredValue]
+      operationId: reserveStoredValue
+      x-permission: commerce.stored-value.reserve
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReserveStoredValue'}
+      responses:
+        '201':
+          description: Reservation created
+  /devices/enroll:
+    post:
+      tags: [Devices]
+      operationId: enrollDevice
+      x-permission: platform.device.enroll
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EnrollDevice'}
+      responses:
+        '201':
+          description: Device enrollment created
+  /offline-leases:
+    post:
+      tags: [Devices]
+      operationId: issueOfflineLease
+      x-permission: platform.offline-lease.issue
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Signed offline lease issued
+  /sync/batches:
+    post:
+      tags: [Devices]
+      operationId: submitSyncBatch
+      x-permission: platform.sync-batch.submit
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '../schemas/offline/sync-batch-v1.schema.json'}
+      responses:
+        '202':
+          description: Batch accepted for validation and application
+  /exports/accountant-handoff:
+    post:
+      tags: [Exports]
+      operationId: createAccountantHandoffExport
+      x-permission: platform.export.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/AccountantHandoffRequest'}
+      responses:
+        '202':
+          description: Export job created
+  /webhook-subscriptions:
+    post:
+      tags: [Webhooks]
+      operationId: createWebhookSubscription
+      x-permission: developer.webhook.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateWebhookSubscription'}
+      responses:
+        '201':
+          description: Subscription created
+  /privacy-requests:
+    post:
+      tags: [Privacy]
+      operationId: createPrivacyRequest
+      x-permission: security.privacy-request.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreatePrivacyRequest'}
+      responses:
+        '201':
+          description: Privacy case created
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Host-platform_session
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      schema: {type: string}
+    Limit:
+      name: limit
+      in: query
+      schema: {type: integer, minimum: 1, maximum: 200, default: 50}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: {type: string, minLength: 16, maxLength: 128}
+    RegisterId:
+      name: registerId
+      in: path
+      required: true
+      schema: {$ref: '#/components/schemas/Identifier'}
+    SaleId:
+      name: saleId
+      in: path
+      required: true
+      schema: {$ref: '#/components/schemas/Identifier'}
+    PaymentIntentId:
+      name: paymentIntentId
+      in: path
+      required: true
+      schema: {$ref: '#/components/schemas/Identifier'}
+    InstrumentId:
+      name: instrumentId
+      in: path
+      required: true
+      schema: {$ref: '#/components/schemas/Identifier'}
+  responses:
+    Error:
+      description: Structured error
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/Problem'}
+    PagedOrganizations:
+      description: Organizations
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [items]
+            properties:
+              items:
+                type: array
+                items: {$ref: '#/components/schemas/Organization'}
+              nextCursor: {type: [string, 'null']}
+  schemas:
+    Identifier:
+      type: string
+      pattern: '^[A-Za-z0-9_-]{12,64}$'
+    Money:
+      type: object
+      required: [currency, amountMinor]
+      properties:
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        amountMinor: {type: integer}
+    CurrentIdentity:
+      type: object
+      required: [userId, memberships]
+      properties:
+        userId: {$ref: '#/components/schemas/Identifier'}
+        partyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        memberships:
+          type: array
+          items: {$ref: '#/components/schemas/Identifier'}
+    ActiveContextRequest:
+      type: object
+      required: [organizationId]
+      properties:
+        organizationId: {$ref: '#/components/schemas/Identifier'}
+        locationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    Organization:
+      type: object
+      required: [id, name]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        name: {type: string, maxLength: 200}
+    Party:
+      type: object
+      required: [id, type, displayName, state]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        type: {type: string, enum: [Person, Organization]}
+        displayName: {type: string, maxLength: 300}
+        state: {type: string}
+    CreatePersonParty:
+      type: object
+      required: [displayName]
+      properties:
+        displayName: {type: string, minLength: 1, maxLength: 300}
+        email: {type: string, format: email}
+        phone: {type: string, maxLength: 50}
+    PagedParties:
+      type: object
+      required: [items]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Party'}}
+        nextCursor: {type: [string, 'null']}
+    Product:
+      type: object
+      required: [id, name, state]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        name: {type: string, maxLength: 300}
+        sku: {type: string, maxLength: 100}
+        barcode: {type: string, maxLength: 64}
+        state: {type: string}
+    CreateProduct:
+      type: object
+      required: [name]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 300}
+        sku: {type: string, maxLength: 100}
+        barcode: {type: string, maxLength: 64}
+    PagedProducts:
+      type: object
+      required: [items]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Product'}}
+        nextCursor: {type: [string, 'null']}
+    StockBalance:
+      type: object
+      required: [productId, locationId, unit, onHand, available, asOf]
+      properties:
+        productId: {$ref: '#/components/schemas/Identifier'}
+        locationId: {$ref: '#/components/schemas/Identifier'}
+        unit: {type: string}
+        onHand: {type: number}
+        available: {type: number}
+        asOf: {type: string, format: date-time}
+    CreateInventoryAdjustment:
+      type: object
+      required: [locationId, productId, quantity, unit, reason]
+      properties:
+        locationId: {$ref: '#/components/schemas/Identifier'}
+        productId: {$ref: '#/components/schemas/Identifier'}
+        quantity: {type: number}
+        unit: {type: string}
+        reason: {type: string, maxLength: 500}
+    InventoryAdjustment:
+      allOf:
+        - $ref: '#/components/schemas/CreateInventoryAdjustment'
+        - type: object
+          required: [id, state]
+          properties:
+            id: {$ref: '#/components/schemas/Identifier'}
+            state: {type: string}
+    CreateStockCount:
+      type: object
+      required: [locationId]
+      properties:
+        locationId: {$ref: '#/components/schemas/Identifier'}
+        blind: {type: boolean, default: true}
+    CreateStockTransfer:
+      type: object
+      required: [sourceLocationId, destinationLocationId, lines]
+      properties:
+        sourceLocationId: {$ref: '#/components/schemas/Identifier'}
+        destinationLocationId: {$ref: '#/components/schemas/Identifier'}
+        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/QuantityLine'}}
+    QuantityLine:
+      type: object
+      required: [productId, quantity, unit]
+      properties:
+        productId: {$ref: '#/components/schemas/Identifier'}
+        quantity: {type: number, exclusiveMinimum: 0}
+        unit: {type: string}
+    OpenRegisterRequest:
+      type: object
+      required: [currency, openingFloat]
+      properties:
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        openingFloat: {$ref: '#/components/schemas/Money'}
+    CloseRegisterRequest:
+      type: object
+      required: [countedCash]
+      properties:
+        countedCash: {$ref: '#/components/schemas/Money'}
+        reason: {type: string, maxLength: 500}
+    CreateSale:
+      type: object
+      required: [registerId, currency, lines]
+      properties:
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        customerPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/SaleLineInput'}}
+    SaleLineInput:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: {$ref: '#/components/schemas/Identifier'}
+        quantity: {type: number, exclusiveMinimum: 0}
+    CompleteSaleRequest:
+      type: object
+      required: [tenders]
+      properties:
+        tenders: {type: array, minItems: 1, items: {$ref: '#/components/schemas/TenderReference'}}
+    TenderReference:
+      type: object
+      required: [type, amount]
+      properties:
+        type: {type: string, enum: [Cash, PaymentIntent, StoredValue]}
+        amount: {$ref: '#/components/schemas/Money'}
+        referenceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    Sale:
+      type: object
+      required: [id, state, currency, total]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        state: {type: string}
+        currency: {type: string}
+        total: {$ref: '#/components/schemas/Money'}
+        receiptId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    CreateReturn:
+      type: object
+      required: [saleId, lines, reason]
+      properties:
+        saleId: {$ref: '#/components/schemas/Identifier'}
+        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/QuantityLine'}}
+        reason: {type: string, maxLength: 500}
+    CreateDeposit:
+      type: object
+      required: [currency, sourceShiftIds, countedAmount]
+      properties:
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        sourceShiftIds: {type: array, minItems: 1, items: {$ref: '#/components/schemas/Identifier'}}
+        countedAmount: {$ref: '#/components/schemas/Money'}
+    CreatePaymentIntent:
+      type: object
+      required: [saleId, rail, amount]
+      properties:
+        saleId: {$ref: '#/components/schemas/Identifier'}
+        rail: {type: string, enum: [Card, Bank, Wallet, RequestToPay]}
+        amount: {$ref: '#/components/schemas/Money'}
+        providerAdapterId: {$ref: '#/components/schemas/Identifier'}
+    PaymentIntent:
+      type: object
+      required: [id, state, amount]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        state: {type: string, enum: [Created, CustomerActionRequired, Processing, Authorized, Captured, Failed, Cancelled, Uncertain, ReconciliationRequired, Refunded, PartiallyRefunded, Reversed]}
+        amount: {$ref: '#/components/schemas/Money'}
+        providerReference: {type: [string, 'null']}
+    IssueStoredValueInstrument:
+      type: object
+      required: [programId, currency]
+      properties:
+        programId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        partyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    ReserveStoredValue:
+      type: object
+      required: [amount, sourceSaleId]
+      properties:
+        amount: {$ref: '#/components/schemas/Money'}
+        sourceSaleId: {$ref: '#/components/schemas/Identifier'}
+    EnrollDevice:
+      type: object
+      required: [deviceType, publicKey, locationId]
+      properties:
+        deviceType: {type: string}
+        publicKey: {type: string}
+        locationId: {$ref: '#/components/schemas/Identifier'}
+    AccountantHandoffRequest:
+      type: object
+      required: [legalEntityId, periodStart, periodEnd, currency]
+      properties:
+        legalEntityId: {$ref: '#/components/schemas/Identifier'}
+        periodStart: {type: string, format: date-time}
+        periodEnd: {type: string, format: date-time}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+    CreateWebhookSubscription:
+      type: object
+      required: [endpoint, eventNames]
+      properties:
+        endpoint: {type: string, format: uri, pattern: '^https://'}
+        eventNames: {type: array, minItems: 1, items: {type: string}}
+    CreatePrivacyRequest:
+      type: object
+      required: [requestType, subjectReference, intakeChannel]
+      properties:
+        requestType: {type: string, enum: [Access, Export, Correct, Restrict, Erase, Object]}
+        subjectReference: {type: string}
+        intakeChannel: {type: string, enum: [SelfService, StaffAssisted, AuthorizedAgent]}
+    Problem:
+      type: object
+      required: [type, title, status, code, correlationId]
+      properties:
+        type: {type: string, format: uri-reference}
+        title: {type: string}
+        status: {type: integer}
+        code: {type: string}
+        detail: {type: string}
+        correlationId: {type: string}
+        retryable: {type: boolean}
+        uncertainty: {type: boolean}

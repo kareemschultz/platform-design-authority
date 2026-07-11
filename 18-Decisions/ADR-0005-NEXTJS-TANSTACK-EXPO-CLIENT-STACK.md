@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0005
 title: Adopt Next.js TanStack and Expo for Client Applications
-version: 0.1.0
+version: 0.2.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
@@ -14,7 +14,7 @@ superseded_by: null
 
 ## Context
 
-The platform requires multiple web applications, customer and partner portals, storefronts, native mobile applications, offline operational clients, white-label shells, dense enterprise tables, and reusable client contracts.
+The platform requires multiple web applications, customer and partner portals, a future reference storefront, native mobile applications, offline operational clients, white-label shells, dense enterprise tables, and reusable client contracts.
 
 Better-T-Stack provides a modern TypeScript scaffolding system with selectable web, backend, database, authentication, API, monorepo, and mobile options. The TanStack ecosystem provides mature headless libraries and a newer full-stack framework. Expo provides React Native tooling, file-based routing, updates, native modules, SQLite, and native UI access.
 
@@ -37,7 +37,7 @@ Use Next.js as the stable web framework, TanStack Query, Table, and Virtual as h
 
 ### TanStack Start for all web applications
 
-Provides an integrated TanStack architecture and deployment flexibility, but its current release maturity requires additional validation before becoming the primary framework for business-critical applications.
+Provides an integrated TanStack architecture and deployment flexibility, but its release maturity requires additional validation before becoming the primary framework for business-critical applications.
 
 ### Separate web and native technology ecosystems
 
@@ -49,12 +49,14 @@ Adopt:
 
 - Next.js and React for the primary web platform
 - TanStack Query, Table, and Virtual as standard client libraries
-- TanStack Form after a focused production evaluation
+- A focused production evaluation of TanStack Form and React Hook Form before selecting the default complex-form library
 - TanStack Router only for standalone React applications not using Next.js
 - TanStack Start as a Platform Labs evaluation, not the initial production standard
 - React Native with Expo and Expo Router for native applications
 - Expo UI selectively for native SwiftUI and Jetpack Compose controls
 - Better-T-Stack as an approved scaffolding and experimentation tool, not an architecture authority
+
+No form library is selected by this ADR. One default is chosen only after the same production-grade forms are implemented and measured under the TanStack decision matrix.
 
 Create separate web and native component packages backed by shared design tokens, contracts, value objects, capability identifiers, and synchronization protocols.
 
@@ -68,6 +70,7 @@ Create separate web and native component packages backed by shared design tokens
 - Native access and offline support through Expo
 - Better-T-Stack can accelerate reproducible scaffolding for humans and AI agents
 - TanStack Start remains available as a future alternative without blocking delivery
+- The form choice remains evidence-driven rather than ecosystem-driven
 
 ### Negative
 
@@ -76,6 +79,7 @@ Create separate web and native component packages backed by shared design tokens
 - Expo UI introduces platform-specific APIs and must be adopted selectively
 - Next.js and Expo release cadences require controlled upgrades
 - The backend must remain clearly separated from both client frameworks
+- The form abstraction cannot be finalized before the evaluation
 
 ## Required Controls
 
@@ -86,7 +90,9 @@ Create separate web and native component packages backed by shared design tokens
 - Offline synchronization contract tests
 - Better-T-Stack generated code requires normal architecture and security review
 - TanStack Start requires a successful vertical-slice evaluation before reconsideration
+- Form evaluation must use product, purchase-order, onboarding, policy-builder, branding, and offline mobile scenarios
+- Form choice requires an ADR amendment or a new superseding ADR
 
 ## Validation
 
-Validate the decision through a vertical slice that runs on web and Expo mobile, includes a dense searchable table, a transaction, white-label theming, offline SQLite storage, synchronization, tenant and permission enforcement, observability, and automated tests.
+Validate the client architecture through a vertical slice that runs on web and Expo mobile, includes a dense searchable table, a complex typed form, a transaction, white-label theming, offline SQLite storage, synchronization, tenant and permission enforcement, observability, accessibility, and automated tests.

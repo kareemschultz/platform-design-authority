@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-019
 title: Customer Success Handbook
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -12,6 +12,12 @@ last_reviewed: 2026-07-11
 ## Purpose
 
 Define how customers achieve measurable outcomes after implementation through adoption, health management, optimization, renewal, and expansion.
+
+## Company-Stage Note
+
+This is a founding-stage operating design. It defines the Customer Success capability required as design partners and paid customers are onboarded; it does not imply an existing staffed organization, measured health model, renewal history, or established benchmarks.
+
+Commercial specifications under `13-Commercial/` are authoritative for subscriptions, pricing, renewal, expansion, credits, and partner terms.
 
 ## Lifecycle
 

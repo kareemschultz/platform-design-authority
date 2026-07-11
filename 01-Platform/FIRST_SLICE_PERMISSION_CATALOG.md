@@ -1,10 +1,11 @@
 ---
 document_id: PDA-PLT-027
 title: First Slice Permission Catalog
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
+related_adrs: [ADR-0016, ADR-0017]
 ---
 
 # First Slice Permission Catalog
@@ -17,7 +18,7 @@ Define the canonical first-slice permission vocabulary, scope behavior, segregat
 
 `<namespace>.<resource>.<action>`
 
-Permissions are actor-level authority and remain separate from tenant entitlements. Every permission in this catalog must appear in `registry/permissions.json` after generation.
+Permissions are actor-level authority and remain separate from tenant entitlements. Capability references used by entitlements resolve to canonical IDs in `registry/capabilities.json`. Every permission in this catalog appears in `registry/permissions.json` after generation.
 
 ## Platform Administration
 
@@ -109,15 +110,15 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 - `commerce.stored-value.suspend`
 - `commerce.stored-value.reconcile`
 
-## Payments
+## Payment
 
-- `engine.payment-intent.create`
-- `engine.payment-intent.read`
-- `engine.payment-intent.confirm`
-- `engine.payment-intent.refund`
-- `engine.payment-intent.reverse`
-- `engine.payment-reconciliation.create`
-- `engine.payment-adapter.configure`
+- `payment.intent.create`
+- `payment.intent.read`
+- `payment.intent.confirm`
+- `payment.intent.refund`
+- `payment.intent.reverse`
+- `payment.reconciliation.create`
+- `payment.provider-adapter.configure`
 
 ## Finance Handoff
 
@@ -149,7 +150,7 @@ Assignments may be scoped by tenant, organization, legal entity, branch, store, 
 
 ## Endpoint Coverage
 
-Every endpoint listed in `02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md` must reference one permission in this catalog or explicitly state that an authenticated session or membership is sufficient.
+Every endpoint listed in `02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md` references one permission in this catalog or explicitly states that an authenticated session or membership is sufficient.
 
 The documentation validator fails when an endpoint references an unknown permission.
 
@@ -192,3 +193,4 @@ Templates are starting points. Effective authority remains explicit and inspecta
 - Permission changes are audited and revocable
 - Role templates pass segregation-of-duties review
 - API-to-permission coverage is machine-checked
+- No detailed Payment permission uses the generic `engine` namespace

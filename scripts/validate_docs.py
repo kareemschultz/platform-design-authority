@@ -25,6 +25,7 @@ EVENT = re.compile(
 EVENT_CANDIDATE = re.compile(r"`([a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*){2,}\.v\d+)`")
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 BACKTICK_MD_PATH = re.compile(r"`([^`\n]+\.md)`")
+PLACEHOLDER_PATH = re.compile(r"(?:NNNN|XXXX|YYYY|DESCRIPTIVE|<[^>]+>)")
 VALID_STATUSES = {
     "Planned",
     "Draft",
@@ -73,8 +74,12 @@ def all_markdown_files() -> list[Path]:
 
 
 def governed_markdown_files() -> list[Path]:
+    """Governed records have real front matter; reusable templates do not."""
     governed: list[Path] = []
     for path in all_markdown_files():
+        rel = path.relative_to(ROOT)
+        if rel.parts and rel.parts[0] == "templates":
+            continue
         first = path.read_text(encoding="utf-8").splitlines()[:1]
         if first and first[0].strip() == "---":
             governed.append(path)
@@ -218,7 +223,7 @@ def normalize_local_target(source: Path, target: str) -> Path | None:
     if not target or target.startswith(("http://", "https://", "mailto:", "#")):
         return None
     target = target.split("#", 1)[0].split("?", 1)[0]
-    if not target or "<" in target or ">" in target:
+    if not target or PLACEHOLDER_PATH.search(target):
         return None
     candidate = Path(target)
     return candidate if candidate.is_absolute() else (source.parent / candidate)
@@ -226,7 +231,16 @@ def normalize_local_target(source: Path, target: str) -> Path | None:
 
 def validate_internal_links() -> list[str]:
     errors: list[str] = []
-    for path in all_markdown_files():
+    markdown_files = all_markdown_files()
+    basename_index: dict[str, list[Path]] = defaultdict(list)
+    for item in markdown_files:
+        basename_index[item.name].append(item)
+
+    for path in markdown_files:
+        rel = path.relative_to(ROOT)
+        # Audits and reusable templates may quote historical filenames or desired output names.
+        if rel.parts and rel.parts[0] in {"reviews", "templates"}:
+            continue
         text = path.read_text(encoding="utf-8")
         targets = [match.group(1) for match in MARKDOWN_LINK.finditer(text)]
         targets += [match.group(1) for match in BACKTICK_MD_PATH.finditer(text)]
@@ -234,11 +248,13 @@ def validate_internal_links() -> list[str]:
             candidate = normalize_local_target(path, target)
             if candidate is None:
                 continue
-            # Repository-root paths are common in architectural prose.
-            root_candidate = ROOT / target.split("#", 1)[0]
+            root_target = target.split("#", 1)[0]
+            root_candidate = ROOT / root_target
             if candidate.exists() or root_candidate.exists():
                 continue
-            errors.append(f"{path.relative_to(ROOT)}: broken internal document reference {target!r}")
+            if "/" not in root_target and len(basename_index.get(Path(root_target).name, [])) == 1:
+                continue
+            errors.append(f"{rel}: broken internal document reference {target!r}")
     return sorted(set(errors))
 
 

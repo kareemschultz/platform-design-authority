@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/providers/provider-capability-v1.schema.json",
+  "title": "Provider Capability Declaration V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["providerId", "adapterId", "adapterVersion", "environment", "regions", "capabilities", "evidenceStatus", "reviewedAt"],
+  "properties": {
+    "providerId": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "adapterId": {"type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$"},
+    "adapterVersion": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "environment": {"type": "string", "enum": ["Sandbox", "Pilot", "Production"]},
+    "regions": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "currencies": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z]{3}$"}, "uniqueItems": true},
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status"],
+        "properties": {
+          "status": {"type": "string", "enum": ["Supported", "Unsupported", "Undocumented", "ContractualOnly", "SandboxVerified", "ProductionCertified"]},
+          "limitations": {"type": "array", "items": {"type": "string"}},
+          "source": {"type": ["string", "null"], "format": "uri-reference"},
+          "testedAt": {"type": ["string", "null"], "format": "date-time"}
+        }
+      }
+    },
+    "webhookModel": {"type": ["string", "null"]},
+    "idempotencyModel": {"type": ["string", "null"]},
+    "settlementModel": {"type": ["string", "null"]},
+    "dataClassifications": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "evidenceStatus": {"type": "string", "enum": ["DocumentationOnly", "ContractReviewed", "SandboxTested", "PilotCertified", "ProductionCertified"]},
+    "riskAssessmentPath": {"type": ["string", "null"]},
+    "reviewedAt": {"type": "string", "format": "date-time"},
+    "reviewedBy": {"type": ["string", "null"]},
+    "expiresAt": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

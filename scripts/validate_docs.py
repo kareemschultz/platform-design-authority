@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Platform Design Authority documentation governance rules."""
+"""Validate Platform Design Authority documentation, registries, skills, and contracts."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 ADR_FILE = re.compile(r"^ADR-\d{4}-[A-Z0-9-]+\.md$")
@@ -17,16 +18,16 @@ SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 EVENT = re.compile(r"^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*$")
 EVENT_BULLET = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`\s*$")
-EVENT_CANDIDATE = re.compile(r"`([a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*){2,}\.v\d+)`")
+EVENT_CANDIDATE = re.compile(r"`([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`")
 PERMISSION = re.compile(r"^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$")
 PERMISSION_BULLET = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
-PERMISSION_CANDIDATE = re.compile(r"`([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`")
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
-BACKTICK_MD_PATH = re.compile(r"`([^`\n]+\.md)`")
+BACKTICK_PATH = re.compile(r"`([^`\n]+\.md)`")
 PLACEHOLDER_PATH = re.compile(r"(?:NNNN|XXXX|YYYY|DESCRIPTIVE|<[^>]+>)")
 VALID_STATUSES = {"Planned", "Draft", "Proposed", "In Review", "Approved", "Accepted", "Ratified", "Deprecated", "Superseded", "Archived"}
 REQUIRED_FIELDS = {"document_id", "title", "version", "status", "owner", "last_reviewed"}
+REVIEW_GATED_STATUSES = {"Approved", "Ratified"}
 
 
 def parse_front_matter(path: Path) -> dict[str, str]:
@@ -48,14 +49,15 @@ def parse_front_matter(path: Path) -> dict[str, str]:
     return values
 
 
+def parse_simple_front_matter(path: Path) -> dict[str, str]:
+    try:
+        return parse_front_matter(path)
+    except ValueError:
+        return {}
+
+
 def all_markdown_files() -> list[Path]:
-    files: list[Path] = []
-    for path in sorted(ROOT.rglob("*.md")):
-        rel = path.relative_to(ROOT)
-        if any(part.startswith(".") for part in rel.parts):
-            continue
-        files.append(path)
-    return files
+    return [path for path in sorted(ROOT.rglob("*.md")) if not any(part.startswith(".") for part in path.relative_to(ROOT).parts)]
 
 
 def governed_markdown_files() -> list[Path]:
@@ -70,7 +72,7 @@ def governed_markdown_files() -> list[Path]:
     return governed
 
 
-def parse_related_adrs(raw: str) -> list[str]:
+def parse_list(raw: str) -> list[str]:
     value = raw.strip()
     if not value or value == "[]":
         return []
@@ -106,17 +108,23 @@ def validate_documents() -> tuple[list[str], dict[str, Path]]:
         status = meta.get("status", "")
         if status and status not in VALID_STATUSES:
             errors.append(f"{rel}: unsupported status {status!r}")
+        if status in REVIEW_GATED_STATUSES and not meta.get("review_evidence"):
+            errors.append(f"{rel}: {status} documents require review_evidence")
         if path.parent.name == "18-Decisions":
             if not ADR_FILE.fullmatch(path.name):
                 errors.append(f"{rel}: ADR filename does not match required pattern")
             if not meta.get("created"):
                 errors.append(f"{rel}: ADR is missing created date")
         elif path.name not in {"README.md", "PLATFORM_MANIFEST.md"} and not SPEC_FILE.fullmatch(path.name):
-            errors.append(f"{rel}: specification filename must use uppercase snake case; a trailing ISO date is allowed only for periodic evidence")
+            errors.append(f"{rel}: specification filename must use uppercase snake case; a trailing ISO date is allowed for dated evidence")
     for document_id, paths in ids.items():
         if len(paths) > 1:
             errors.append(f"duplicate document_id {document_id}: {', '.join(map(str, paths))}")
     return errors, {document_id: paths[0] for document_id, paths in ids.items() if len(paths) == 1}
+
+
+def load_json(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def load_namespace_registry() -> tuple[list[str], dict[str, dict[str, object]]]:
@@ -125,7 +133,7 @@ def load_namespace_registry() -> tuple[list[str], dict[str, dict[str, object]]]:
     if not path.exists():
         return ["registry/domains.json: missing"], {}
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = load_json(path)
     except (json.JSONDecodeError, OSError) as exc:
         return [f"registry/domains.json: {exc}"], {}
     prefixes: dict[str, dict[str, object]] = {}
@@ -154,7 +162,7 @@ def validate_related_adrs(document_ids: dict[str, Path]) -> list[str]:
     errors: list[str] = []
     for path in governed_markdown_files():
         meta = parse_front_matter(path)
-        for adr in parse_related_adrs(meta.get("related_adrs", "")):
+        for adr in parse_list(meta.get("related_adrs", "")):
             if adr not in document_ids:
                 errors.append(f"{path.relative_to(ROOT)}: related ADR does not exist: {adr}")
             elif not adr.startswith("ADR-"):
@@ -186,25 +194,24 @@ def collect_canonical_events(prefixes: dict[str, dict[str, object]]) -> tuple[li
             source = f"{path.relative_to(ROOT)}:{line_number}"
             prefix = event_name.split(".", 1)[0]
             if prefix not in prefixes:
-                errors.append(f"{source}: unregistered event prefix {prefix!r} in {event_name}")
+                errors.append(f"{source}: unregistered event prefix {prefix!r}")
             if event_name in definitions:
                 errors.append(f"duplicate canonical event {event_name}: {definitions[event_name]} and {source}")
             definitions[event_name] = source
     return errors, set(definitions)
 
 
-def validate_event_identifiers(prefixes: dict[str, dict[str, object]]) -> list[str]:
+def validate_event_references(prefixes: dict[str, dict[str, object]]) -> list[str]:
     definition_errors, definitions = collect_canonical_events(prefixes)
     errors = list(definition_errors)
-    for path in all_markdown_files():
+    for path in governed_markdown_files():
         rel = path.relative_to(ROOT)
         if rel.parts and rel.parts[0] in {"reviews", "templates"}:
             continue
         for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            for match in EVENT_CANDIDATE.finditer(line):
-                event_name = match.group(1)
+            for event_name in EVENT_CANDIDATE.findall(line):
                 if not EVENT.fullmatch(event_name):
-                    errors.append(f"{rel}:{line_number}: invalid event identifier {event_name!r}; expected <namespace>.<entity>.<past-tense-fact>.v<major>")
+                    errors.append(f"{rel}:{line_number}: invalid event identifier {event_name}")
                     continue
                 prefix = event_name.split(".", 1)[0]
                 if prefix not in prefixes:
@@ -232,19 +239,35 @@ def collect_permissions(prefixes: dict[str, dict[str, object]]) -> tuple[list[st
     return errors, definitions
 
 
-def validate_api_permissions(prefixes: dict[str, dict[str, object]]) -> list[str]:
+def validate_endpoint_permissions(prefixes: dict[str, dict[str, object]]) -> list[str]:
     errors, permissions = collect_permissions(prefixes)
-    path = ROOT / "02-Architecture" / "FIRST_SLICE_API_AND_EVENT_CONTRACTS.md"
-    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-        for match in PERMISSION_CANDIDATE.finditer(line):
-            candidate = match.group(1)
-            if candidate.endswith(tuple(f".v{i}" for i in range(1, 10))):
-                continue
-            if not PERMISSION.fullmatch(candidate):
-                continue
-            if candidate not in permissions:
-                errors.append(f"{path.relative_to(ROOT)}:{line_number}: endpoint references unknown permission {candidate}")
+    path = ROOT / "registry" / "endpoint-permissions.json"
+    try:
+        endpoints = load_json(path).get("endpoints", [])
+    except (OSError, json.JSONDecodeError) as exc:
+        return errors + [f"{path.relative_to(ROOT)}: {exc}"]
+    seen: set[tuple[str, str]] = set()
+    for item in endpoints:
+        method = str(item.get("method", ""))
+        route = str(item.get("path", ""))
+        key = (method, route)
+        if key in seen:
+            errors.append(f"registry/endpoint-permissions.json: duplicate endpoint {method} {route}")
+        seen.add(key)
+        permission = item.get("permission")
+        authorization = item.get("authorization")
+        if bool(permission) == bool(authorization):
+            errors.append(f"registry/endpoint-permissions.json: {method} {route} needs exactly one permission or authorization marker")
+        if permission and permission not in permissions:
+            errors.append(f"registry/endpoint-permissions.json: unknown permission {permission} for {method} {route}")
     return sorted(set(errors))
+
+
+def looks_like_document_reference(target: str) -> bool:
+    if "/" in target or "\\" in target:
+        return True
+    name = Path(target).name
+    return name == "README.md" or bool(SPEC_FILE.fullmatch(name)) or bool(ADR_FILE.fullmatch(name))
 
 
 def normalize_local_target(source: Path, target: str) -> Path | None:
@@ -270,7 +293,7 @@ def validate_internal_links() -> list[str]:
             continue
         text = path.read_text(encoding="utf-8")
         targets = [match.group(1) for match in MARKDOWN_LINK.finditer(text)]
-        targets += [match.group(1) for match in BACKTICK_MD_PATH.finditer(text)]
+        targets += [match.group(1) for match in BACKTICK_PATH.finditer(text) if looks_like_document_reference(match.group(1))]
         for target in targets:
             candidate = normalize_local_target(path, target)
             if candidate is None:
@@ -287,11 +310,56 @@ def validate_internal_links() -> list[str]:
 
 def validate_json_files() -> list[str]:
     errors: list[str] = []
-    for path in sorted((ROOT / "registry").glob("*.json")):
-        try:
-            json.loads(path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError) as exc:
-            errors.append(f"{path.relative_to(ROOT)}: {exc}")
+    for directory in [ROOT / "registry", ROOT / "schemas"]:
+        if not directory.exists():
+            continue
+        for path in sorted(directory.rglob("*.json")):
+            try:
+                load_json(path)
+            except (json.JSONDecodeError, OSError) as exc:
+                errors.append(f"{path.relative_to(ROOT)}: {exc}")
+    return errors
+
+
+def validate_contract_files() -> list[str]:
+    errors: list[str] = []
+    required = [
+        "openapi/first-slice-v1.yaml",
+        "schemas/events/event-envelope-v1.schema.json",
+        "schemas/offline/sync-batch-v1.schema.json",
+        "schemas/providers/provider-capability-v1.schema.json",
+        "schemas/import-export/import-export-v1.schema.json",
+        "schemas/finance/finance-handoff-v1.schema.json",
+        "schemas/webhooks/webhook-envelope-v1.schema.json",
+        "schemas/ai/registry-records-v1.schema.json",
+        "registry/architecture-rules.json",
+        "registry/design-tokens.json",
+        "registry/endpoint-permissions.json",
+    ]
+    for relative in required:
+        if not (ROOT / relative).exists():
+            errors.append(f"missing required contract: {relative}")
+    openapi = ROOT / "openapi" / "first-slice-v1.yaml"
+    if openapi.exists() and "openapi: 3.1.0" not in openapi.read_text(encoding="utf-8"):
+        errors.append("openapi/first-slice-v1.yaml: expected OpenAPI 3.1.0 marker")
+    return errors
+
+
+def validate_skills() -> list[str]:
+    errors: list[str] = []
+    skills_root = ROOT / ".claude" / "skills"
+    if not skills_root.exists():
+        return errors
+    for path in sorted(skills_root.glob("*/SKILL.md")):
+        meta = parse_simple_front_matter(path)
+        if not meta.get("name") or not meta.get("description"):
+            errors.append(f"{path.relative_to(ROOT)}: skill requires name and description")
+        if "allowed-tools" in meta:
+            errors.append(f"{path.relative_to(ROOT)}: allowed-tools pre-approves tools and cannot be used as a restriction")
+        body = path.read_text(encoding="utf-8")
+        read_only = "read-only" in body.lower()
+        if read_only and not meta.get("disallowed-tools"):
+            errors.append(f"{path.relative_to(ROOT)}: read-only skill requires disallowed-tools")
     return errors
 
 
@@ -302,14 +370,16 @@ def main() -> int:
         document_errors
         + namespace_errors
         + validate_related_adrs(document_ids)
-        + validate_event_identifiers(prefixes)
-        + validate_api_permissions(prefixes)
+        + validate_event_references(prefixes)
+        + validate_endpoint_permissions(prefixes)
         + validate_internal_links()
         + validate_json_files()
+        + validate_contract_files()
+        + validate_skills()
     )
     if errors:
         print("Documentation governance validation failed:", file=sys.stderr)
-        for error in errors:
+        for error in sorted(set(errors)):
             print(f"- {error}", file=sys.stderr)
         return 1
     print("Documentation governance validation passed.")

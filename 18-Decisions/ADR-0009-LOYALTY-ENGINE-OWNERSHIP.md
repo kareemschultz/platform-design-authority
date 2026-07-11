@@ -1,22 +1,25 @@
 ---
 document_id: ADR-0009
 title: Assign Loyalty to a Shared Loyalty Engine
-version: 0.1.0
+version: 0.2.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 supersedes: null
 superseded_by: null
+related_adrs: [ADR-0013]
 ---
 
 # ADR-0009 — Assign Loyalty to a Shared Loyalty Engine
 
 ## Context
 
-Loyalty was referenced by the Platform Manifest, Promotion Engine, and Retail industry pack without an authoritative owner or capability family. Loyalty spans Commerce transactions, CRM parties, Marketing communication, promotion application, customer portals, and append-oriented balances.
+Loyalty was referenced by the Platform Manifest, Promotion Engine, and Retail pack without an authoritative owner. Loyalty spans Commerce transactions, CRM parties, Marketing communication, promotion application, customer portals, and append-oriented balances.
 
 Leaving ownership implicit would cause duplicated points balances, inconsistent reversals, and confusion between non-cash loyalty value, promotions, gift cards, and store credit.
+
+ADR-0013 separately assigns all monetary customer stored value, including gift cards, refund credits, and store credit, to Commerce. This ADR applies only to non-cash loyalty points, benefits, tiers, and program rules.
 
 ## Options Considered
 
@@ -26,7 +29,7 @@ Keeps POS integration close, but couples loyalty to selling and makes non-Commer
 
 ### CRM or Marketing owns loyalty
 
-Fits member segmentation and communication, but neither should own transactional balance integrity or redemption reservation.
+Fits segmentation and communication, but neither should own transactional balance integrity or redemption reservation.
 
 ### Promotion Engine owns loyalty
 
@@ -34,7 +37,7 @@ Fits discounts but incorrectly treats a durable member ledger as only a price-ca
 
 ### A shared Loyalty Engine owns program and ledger behavior
 
-Provides one reusable owner while domains remain authoritative for their own transactions and records.
+Provides one reusable owner while domains remain authoritative for their transactions and records.
 
 ## Decision
 
@@ -50,16 +53,18 @@ It owns:
 
 It does not own:
 
-- Customer or party master data
+- Customer or Party master data
 - Sales orders, payments, returns, or marketing campaigns
-- Gift cards or monetary store credit
+- Gift cards, refund credits, prepaid balances, or monetary store credit
 - Generic promotions
+
+Monetary instruments remain governed by ADR-0013 and `STORED_VALUE_AND_CUSTOMER_BALANCES.md`.
 
 ## Consequences
 
 ### Positive
 
-- One ledger and rule owner across industries and channels
+- One non-cash loyalty ledger and rule owner
 - Clean separation from monetary stored value
 - Consistent returns, reversals, expiration, and offline controls
 - Reusable integrations for Commerce, CRM, Marketing, and partners
@@ -68,7 +73,7 @@ It does not own:
 
 - Adds another engine boundary and integration contract
 - Offline redemption requires reservations and bounded leases
-- Accounting and tax treatment still require jurisdiction-specific review
+- Accounting and tax treatment remains jurisdiction-specific
 
 ## Required Controls
 
@@ -77,9 +82,10 @@ It does not own:
 - Explicit rule versions
 - Permissioned adjustments
 - Signed offline allowances
-- Party linkage without duplicating customer master data
+- Party linkage without duplicate customer master data
 - Distinct capability and event namespaces
+- Automated tests proving monetary stored value cannot enter the Loyalty ledger
 
 ## Validation
 
-Validate with a retail vertical slice supporting earn, redemption, return reversal, expiration, tier change, offline POS allowance, and customer-visible history.
+Validate with a later retail slice supporting points earn, redemption, return reversal, expiration, tier change, offline allowance, and customer-visible history while gift cards and store credit remain Commerce-owned.

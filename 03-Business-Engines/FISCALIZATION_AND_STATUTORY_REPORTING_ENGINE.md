@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ENG-018
 title: Fiscalization and Statutory Reporting Engine
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
-related_adrs: [ADR-0010]
+last_reviewed: 2026-07-11
+related_adrs: [ADR-0010, ADR-0016]
 ---
 
 # Fiscalization and Statutory Reporting Engine
@@ -24,6 +24,8 @@ Fiscalization is a shared statutory engine, not an optional POS plugin. It coord
 - Sequence Service owns governed reference allocation.
 - Document Engine owns rendering.
 - Fiscalization owns legal transformation, signing, submission, acknowledgement, certified device integration, and statutory status.
+
+The engine is required as an architectural seam for jurisdictions that mandate fiscalization or electronic reporting. The Guyana-first slice must not claim that Guyana currently mandates real-time fiscalization unless authoritative evidence verifies it. For Guyana, this engine initially provides a future-proofed interface and prototype contingency model; production activation remains jurisdiction-gated.
 
 ## Core Entities
 
@@ -56,21 +58,9 @@ Fiscalization is a shared statutory engine, not an optional POS plugin. It coord
 
 ## Jurisdiction Packs
 
-Each pack declares:
+Each pack declares applicable taxpayers, registrations, schemas, numbering, required fields, signing, submission deadlines, contingency, correction, retention, and certification requirements.
 
-- Applicable taxpayers, entities, locations, and transaction types
-- Registration prerequisites
-- Schemas and protocol versions
-- Numbering authority and uniqueness rules
-- Required tax, party, product, payment, and address fields
-- Signing, certificate, device, and timestamp requirements
-- Submission deadlines
-- Contingency and offline rules
-- Correction and cancellation procedures
-- Retention period and evidence
-- Test and certification requirements
-
-No jurisdiction pack is considered production-ready without legal review and authority-conformance testing.
+No jurisdiction pack is production-ready without legal review and authority-conformance testing.
 
 ## Transaction Flow
 
@@ -79,43 +69,46 @@ No jurisdiction pack is considered production-ready without legal review and aut
 3. The engine validates the jurisdiction schema and prerequisites.
 4. It signs, transmits, or routes to the certified device.
 5. Authority response is persisted with immutable payload hashes.
-6. Commerce or Finance receives the statutory result and exposes it to the user.
-7. Rejections enter an operational queue and follow jurisdiction-specific correction rules.
+6. Commerce or Finance receives the statutory result.
+7. Rejections enter an operational queue.
 
 ## Offline and Contingency
 
-Offline behavior is jurisdiction-specific. The engine may support:
-
-- Pre-authorized number ranges
-- Local signing with protected device keys
-- Certified fiscal hardware
-- Contingency document markers
-- Deferred submission deadlines
-- Restricted transaction values or counts
-- Mandatory reconciliation after reconnection
+Offline behavior is jurisdiction-specific and may support number ranges, local signing, certified hardware, contingency markers, deferred deadlines, limits, and mandatory reconciliation.
 
 The platform must never claim offline fiscal legality without an approved jurisdiction profile.
 
 ## Data Integrity
 
 - Submitted payloads are immutable.
-- Corrections use linked legal documents, not destructive edits.
+- Corrections use linked legal documents.
 - Numbering gaps and voids are explainable.
-- Authority acknowledgements and certificates are retained.
-- Reconciliation compares domain records, statutory records, tax totals, payments, and finance postings.
+- Acknowledgements and certificates are retained.
+- Reconciliation compares domain, statutory, tax, payment, and Finance records.
 
 ## Security
 
-- Hardware-backed or managed signing keys where required
+- Managed or hardware-backed signing keys where required
 - Certificate inventory and expiry alerts
-- Separation of duties for registration and key management
+- Separation of duties
 - Tamper-evident payload and acknowledgement storage
-- Restricted access to taxpayer credentials
-- Full operational and security audit
+- Restricted taxpayer credentials
+- Full audit
+
+## Events
+
+- `fiscalization.document.prepared.v1`
+- `fiscalization.submission.created.v1`
+- `fiscalization.submission.accepted.v1`
+- `fiscalization.submission.rejected.v1`
+- `fiscalization.submission.reconciled.v1`
+- `fiscalization.contingency.started.v1`
+- `fiscalization.contingency.ended.v1`
+- `fiscalization.certificate.rotated.v1`
 
 ## Regulatory Direction
 
-Electronic invoicing and digital transaction reporting continue to expand internationally. The EU's VAT in the Digital Age package, adopted in 2025, introduces progressive e-invoicing and digital reporting changes through 2035. The platform must therefore treat statutory digital reporting as a durable architecture concern rather than a country-specific afterthought.
+Electronic invoicing and digital transaction reporting continue to expand internationally. EU ViDA changes are a durable architecture signal for export markets and future jurisdictions, not evidence of a current Guyana mandate.
 
 ## Initial Scope
 

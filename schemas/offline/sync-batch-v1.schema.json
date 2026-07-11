@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/offline/sync-batch-v1.schema.json",
+  "title": "Offline Sync Batch V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["protocolVersion", "batchId", "tenantId", "deviceId", "leaseId", "createdAt", "operations", "signature"],
+  "properties": {
+    "protocolVersion": {"const": "1.0"},
+    "batchId": {"type": "string", "minLength": 12, "maxLength": 64},
+    "tenantId": {"type": "string", "minLength": 12, "maxLength": 64},
+    "deviceId": {"type": "string", "minLength": 12, "maxLength": 64},
+    "leaseId": {"type": "string", "minLength": 12, "maxLength": 64},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "previousServerWatermark": {"type": ["string", "null"]},
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["operationId", "capabilityId", "commandName", "occurredAt", "idempotencyKey", "payload"],
+        "properties": {
+          "operationId": {"type": "string", "minLength": 12, "maxLength": 64},
+          "capabilityId": {"type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$"},
+          "commandName": {"type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$"},
+          "occurredAt": {"type": "string", "format": "date-time"},
+          "idempotencyKey": {"type": "string", "minLength": 16, "maxLength": 128},
+          "actorId": {"type": "string"},
+          "locationId": {"type": ["string", "null"]},
+          "localSequence": {"type": "integer", "minimum": 1},
+          "payload": {"type": "object"},
+          "payloadHash": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"}
+        }
+      }
+    },
+    "privacyTombstoneWatermark": {"type": ["string", "null"]},
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "keyId", "value"],
+      "properties": {
+        "algorithm": {"type": "string", "enum": ["EdDSA", "ES256"]},
+        "keyId": {"type": "string"},
+        "value": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-SEC-010
 title: PII Erasure and Pseudonymization
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
@@ -139,7 +139,9 @@ A Party is not erased globally merely because one relationship ends. The privacy
 
 The system may remove marketing and prospect attributes while retaining restricted payroll or statutory records. User experiences must stop presenting retained data outside its remaining purpose.
 
-## Events
+## Related Event Family
+
+Canonical privacy event definitions are owned by `PRIVACY_RIGHTS_AND_RETENTION.md`. This technical specification consumes the same event family:
 
 - `security.privacy-request.received.v1`
 - `security.privacy-request.verified.v1`

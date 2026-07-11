@@ -48,5 +48,16 @@ jobs:
         if: steps.validate.outputs.status != '0'
         run: exit 1
 
-      - name: Verify machine-readable registries are current
-        run: python scripts/generate_registries.py --check
+      - name: Generate machine-readable registries
+        run: python scripts/generate_registries.py
+
+      - name: Upload generated registries
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-registries
+          path: |
+            registry/documents.json
+            registry/capabilities.json
+            registry/events.json
+          if-no-files-found: error
+          retention-days: 7

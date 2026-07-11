@@ -1,10 +1,10 @@
 ---
 document_id: PDA-TST-010
 title: Platform Testing Strategy
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 ---
 
 # Platform Testing Strategy
@@ -26,126 +26,98 @@ Define the quality system for a modular, multi-tenant, offline-capable, financia
 
 ## Test Layers
 
-### Unit and Domain Tests
+### Unit and Domain
 
 - Value objects and calculations
 - State transitions and invariants
 - Policy and rule evaluation
-- Rounding, currency, quantity, time, and effective dating
+- Money, currency, quantity, time, and effective dating
 - Serialization and schema validation
 
-### Module and Application Tests
+### Module and Application
 
-- Commands, queries, repositories, and domain events
+- Commands, queries, repositories, and canonical events
 - Permission and entitlement enforcement
 - Idempotency and duplicate handling
 - Outbox behavior
 - Audit evidence
-- Cross-domain contract boundaries
+- Cross-domain contracts
 
-### Integration Tests
+### Integration
 
-Use real PostgreSQL and representative infrastructure through Testcontainers or equivalent for:
+Use real PostgreSQL and representative infrastructure through Testcontainers or equivalent for database constraints, migrations, Redis or Valkey, jobs, events, object storage, search, Better Auth, providers, and webhook verification.
 
-- Database constraints and migrations
-- Redis and job behavior
-- Event delivery
-- Object storage
-- Search projections
-- Better Auth adapter
-- Provider adapters and webhook verification
+### Contract
 
-### Contract Tests
-
-- Public REST and OpenAPI contracts
+- REST and OpenAPI
 - Event schemas and compatibility
 - Webhook signatures and retries
 - SDK generation
-- Provider adapter capability declarations
+- Provider capability declarations
 - Offline synchronization protocol
+- Permission-to-endpoint coverage
 
-### End-to-End Tests
+### End-to-End
 
-- Role-based user workflows
-- White-label branding and custom domains
-- Payments, stored value, inventory, and returns
+- Role-based workflows
+- White-label branding and domains
+- Payment, stored value, cash, inventory, returns, and exchange
 - Import and export
 - Support and delegated administration
 - Browser and native applications
 
-### Security Tests
+### Security
 
-- Cross-tenant read, write, search, export, event, file, and cache denial
-- Authorization bypass and confused-deputy cases
-- Session, recovery, passkey, SSO, and API-key abuse
-- Injection, SSRF, deserialization, and malicious-file cases
-- Rate-limit and credential-stuffing behavior
-- Support impersonation
+- Cross-tenant read, write, search, export, event, file, job, cache, device, and AI denial
+- Authorization bypass and confused deputy
+- Session, recovery, passkey, SSO, SCIM, API-key, and support abuse
+- Injection, SSRF, malicious file, and unsafe extension
+- Rate limits and credential stuffing
 - AI prompt injection and tool escalation
 
-### Offline and Resilience Tests
+### Offline and Resilience
 
 - Network loss at every state transition
-- Duplicate replay
-- Out-of-order synchronization
-- Device lease expiry
-- Privacy tombstone application
-- Offline numbering ranges
-- Stored-value reservations
-- Server restore followed by client resynchronization
+- Duplicate and out-of-order replay
+- Device lease expiry and revocation
+- Privacy tombstones
+- Number ranges
+- Stored-value allowance and reservation
+- Restore followed by client resynchronization
 
-### Performance Tests
+### Performance
 
-- POS transaction latency
-- Product search and scanning
-- Inventory posting throughput
-- Report and export limits
-- Tenant-noisy-neighbor tests
-- Background queue recovery
-- Webhook fan-out
-- Mobile cold start and offline database size
+Use provisional budgets from `17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md` for POS, product search and scanning, inventory posting, chart interaction, reports, exports, tenant isolation, queue recovery, webhooks, mobile startup, and offline database size.
 
-### Accessibility and Experience Tests
+### Accessibility and Experience
 
 - Keyboard and screen-reader workflows
-- Focus, errors, status, and confirmation
-- Touch and mobile ergonomics
-- High contrast and zoom
-- Offline, stale, conflict, and pending-state clarity
-- Workflow completion time and error rate
+- Focus, errors, status, confirmation, charts, and grids
+- Touch, mobile, scanner, and external keyboard
+- High contrast, zoom, text scaling, and reduced motion
+- Offline, stale, conflict, uncertainty, and pending-state clarity
+- Workflow completion, error, and assistance rates
 
 ### AI Evaluation
 
-- Grounded-answer accuracy
+- Grounding and citation
 - Retrieval authorization
-- Tool-selection correctness
-- Refusal and approval behavior
-- Hallucination and unsupported-claim rate
-- Prompt-injection resistance
+- Tool selection
+- Refusal and approval
+- Unsupported claims
+- Prompt injection
 - Cost and latency
-- Regression by model and prompt version
+- Regression by model, prompt, tool, and policy version
 
 ## Mandatory Capability Test Matrix
 
-Every first-slice capability must declare:
+The normative matrix contract is `16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md`; the generated skeleton is `registry/first-slice-tests.json`.
 
-- Happy path
-- Validation failures
-- Authorization failures
-- Entitlement failures
-- Tenant-isolation failures
-- Idempotency and retry
-- Audit evidence
-- Provider or dependency outage
-- Offline behavior or explicit not-supported result
-- Privacy and retention
-- Accessibility
-- Performance budget
-- Recovery and reconciliation
+Every first-slice capability declares all thirteen dimensions: happy path; validation and denial; tenant isolation; permission and entitlement; idempotency; concurrency; events/jobs/projections; audit; privacy; offline; accessibility; performance; and recovery/reconciliation.
 
 ## Financial and Ledger Testing
 
-For Finance, Inventory, Stored Value, Payments, Payroll, and fiscal records:
+For Finance, Inventory, Stored Value, Payment, Payroll, cash, and fiscal records:
 
 - Balance invariants
 - Reversal chains
@@ -154,15 +126,15 @@ For Finance, Inventory, Stored Value, Payments, Payroll, and fiscal records:
 - Period boundaries
 - Concurrent posting
 - Duplicate source events
-- Reconciliation to source and external provider
+- Source and provider reconciliation
 - Restore and replay
 
-Property-based and model-based tests should be used for high-value invariants.
+Use property-based and model-based tests for high-value invariants.
 
 ## Migration Testing
 
 - Forward migration
-- Rollback or compensating migration
+- Rollback or compensation
 - Large representative dataset
 - Tenant-by-tenant validation
 - Extension-field compatibility
@@ -172,46 +144,49 @@ Property-based and model-based tests should be used for high-value invariants.
 
 ## Environments
 
-- Local deterministic environment
-- CI ephemeral integration environment
-- Shared development environment
-- Staging with production-like topology and synthetic data
-- Controlled pilot environment
-- Production
+Use the canonical taxonomy in `12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md`: Local, CI Ephemeral, Integration, Shared Development, Staging, Pilot, Production, Recovery, Dedicated, and Self-Hosted.
 
-Production data must not be copied into lower environments without approved de-identification.
+Testing selects the appropriate subset and does not create a competing environment vocabulary. Production data is not copied downward without approved de-identification.
 
 ## Release Gates
 
 A release candidate requires:
 
-- Governance and registry checks passing
-- Architecture-boundary checks passing
-- Unit, module, integration, and contract suites passing
+- Governance and registry checks
+- Architecture-boundary checks
+- Unit, module, integration, and contract suites
 - No unresolved critical security findings
-- Tenant-isolation suite passing
-- Migration rehearsal passing
-- Accessibility and performance budgets met
-- Recovery procedure verified for consequential changes
-- Required manual approvals recorded
+- Tenant-isolation suite
+- Migration rehearsal
+- Accessibility and performance budgets
+- Recovery verification for consequential changes
+- Required manual approvals
+- Generated capability matrix with no unexplained missing dimensions
 
 ## First-Slice Acceptance Suite
 
-The Caribbean retail slice must prove:
+The Guyana retail foundation slice proves:
 
-- Better Auth login, session revocation, and step-up
+- Better Auth login, session revocation, step-up, and Party/domain-role link
 - Tenant and legal-entity isolation
-- Catalog and product search
-- Register open, cash sale, mixed tender, and close
-- Inventory movement and reconciliation
-- Stored-value issue and redemption
-- Offline sale, numbering, and sync
-- Return and refund policy
-- Audit and support access
-- Search and export permissions
-- Backup restore and privacy reapplication
-- Provider webhook and settlement reconciliation seam
+- Catalog search, barcode scanning, malformed barcode handling, rapid scans, and manual fallback
+- Product import dry run, correction of rejected rows, partial apply, and idempotent rerun
+- Register open, cash sale, mixed tender, safe drop, variance, deposit, and close
+- Payment success, timeout, uncertainty, duplicate callback, and reconciliation
+- Inventory adjustment, count, transfer, and reconciliation
+- Stored-value issue, reservation, redemption, release, reversal, offline allowance, and duplicate protection
+- Disconnect during sale, offline numbering, queue replay, conflict, lease expiry, and sync
+- Receipt-backed return, exchange, refund destination, and provider limitation
+- Staff-assisted and self-service privacy-request intake, verification failure, multi-role erasure, legal hold, target retry, and offline-device tombstone
+- Audit, support access, impersonation, and export authorization
+- Search, chart, dashboard, and record-level permissions
+- Accountant handoff and control-total reconciliation
+- Backup restore, deletion-journal reapplication, projection rebuild, and client resynchronization
+- Provider webhook and settlement seam
+- Cross-tenant denial across all access paths
 
 ## Evidence and Reporting
 
-Test evidence records version, environment, data set, tenant, capability, result, duration, logs, artifacts, reviewer, waived failures, and linked defects. Flaky tests are defects and cannot be normalized into permanent retries.
+Test evidence records source commit, artifact, environment, data fixture, tenant, capability, matrix dimension, result, duration, logs, screenshots or traces, reviewer, waivers, linked defects, and expiry.
+
+Flaky tests are defects and cannot be normalized into permanent retries.

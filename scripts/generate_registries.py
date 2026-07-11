@@ -24,7 +24,12 @@ EVENT = re.compile(
     r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`\s*$"
 )
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
-EVENT_HEADING = re.compile(r"\bevents?\b", re.IGNORECASE)
+CANONICAL_EVENT_HEADINGS = {
+    "events",
+    "event integration",
+    "required events",
+    "representative events",
+}
 
 
 def parse_front_matter(path: Path) -> dict[str, Any] | None:
@@ -54,10 +59,13 @@ def parse_front_matter(path: Path) -> dict[str, Any] | None:
 
 
 def governed_documents() -> list[Path]:
-    """Return every Markdown file with PDA front matter, regardless of folder."""
+    """Return every real governed Markdown record and exclude reusable templates."""
     files: list[Path] = []
     for path in sorted(ROOT.rglob("*.md")):
-        if any(part.startswith(".") for part in path.relative_to(ROOT).parts):
+        rel = path.relative_to(ROOT)
+        if any(part.startswith(".") for part in rel.parts):
+            continue
+        if rel.parts and rel.parts[0] == "templates":
             continue
         metadata = parse_front_matter(path)
         if metadata and metadata.get("document_id"):
@@ -177,7 +185,7 @@ def build_events_registry() -> dict[str, Any]:
             if heading:
                 current_heading = heading.group(2)
                 continue
-            if not EVENT_HEADING.search(current_heading):
+            if current_heading.strip().lower() not in CANONICAL_EVENT_HEADINGS:
                 continue
             match = EVENT.match(line)
             if not match:

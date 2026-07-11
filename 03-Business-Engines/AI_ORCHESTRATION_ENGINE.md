@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENG-016
 title: AI Orchestration Engine
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 related_adrs: [ADR-0014, ADR-0016]
 ---
 
@@ -12,230 +12,94 @@ related_adrs: [ADR-0014, ADR-0016]
 
 ## Purpose
 
-Define the shared engine that coordinates AI models, tools, retrieval, agents, approvals, evaluations, cost controls, privacy, and audit across platform domains without allowing AI to bypass ordinary application boundaries.
+Define the shared engine that coordinates AI models, tools, retrieval, agents, approvals, evaluations, budgets, privacy, provider exit, and audit without bypassing ordinary application boundaries.
 
 ## Architectural Position
 
-The AI Orchestration Engine is a domain-neutral shared engine. It does not own authoritative business records. It invokes approved domain and platform application commands through governed tool contracts.
+The AI Orchestration Engine is domain-neutral and owns no authoritative business records. It invokes approved application commands through governed tools. Detailed controls live in `06-AI/`.
 
-Detailed model, agent, memory, evaluation, safety, and developer specifications belong in `06-AI/`. This document establishes ownership and minimum cross-domain rules now so AI references elsewhere have an architectural home.
-
-## Core Responsibilities
+## Responsibilities
 
 - Provider-neutral model gateway
-- Model and deployment registry
-- Prompt and instruction registry
-- Tool registry
-- Agent registry
-- Retrieval orchestration
-- Context assembly
-- Permission, entitlement, policy, and approval enforcement
-- Data-classification and purpose enforcement
-- Cost and usage accounting
+- Model, prompt, tool, and agent registries
+- Retrieval, context, and memory policy
+- Permission, entitlement, classification, purpose, and approval enforcement
+- Cost, action, record, time, and delegation budgets
 - Evaluation and release gates
-- Human-in-the-loop workflows
+- Human oversight and compensation
 - Provenance and audit
-- Redaction and data-boundary enforcement
-- Retention and privacy-transformation integration
-- Incident response and model-disable controls
+- Privacy transformation
+- Incident and kill-switch controls
+- Evaluated fallback and provider exit
 
 ## Non-Responsibilities
 
-The engine does not:
+The engine does not own domain records, grant access, execute unrestricted SQL or shell, call repositories directly, treat model output as authoritative, replace workflow or risk review, create unrestricted memory, or create cross-tenant identity graphs.
 
-- Own customer, supplier, employee, inventory, finance, or other domain records
-- Grant permissions or entitlements
-- Execute unrestricted SQL
-- Call domain repositories directly
-- Treat model output as an authoritative decision without domain validation
-- Replace workflows, approvals, rules, risk review, or audit
-- Store unrestricted long-term memory by default
-- Create a hidden cross-tenant Party graph
+## Canonical Autonomy Levels
+
+1. Inform
+2. Draft
+3. Recommend
+4. Confirm Single Action
+5. Approved Workflow
+6. Bounded Automation
+
+This ladder is authoritative across AI documents. Levels 4–6 require the controls in `06-AI/AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md`. The first slice remains at Levels 1–2.
 
 ## Tool Contract
 
-Every AI tool declares:
-
-- Stable tool identifier
-- Owning platform service, engine, or domain
-- Input and output schema
-- Required capability entitlement
-- Required permissions and scopes
-- Risk classification
-- Approval requirements
-- Whether the tool is read-only or mutating
-- Idempotency behavior
-- Data classification, redaction, and purpose rules
-- Offline availability
-- Cost and rate limits
-- Audit and provenance fields
-- Retention and erasure behavior
-- Failure and compensation behavior
-
-Mutating tools call normal application commands. AI does not bypass validation, workflow, approval, segregation-of-duties, or audit rules.
+Every tool declares identifier, owner, schemas, entitlement, permissions, scopes, mutation class, risk, approval, idempotency, classification, purpose, offline posture, budget, audit, retention, incident disablement, and compensation.
 
 ## Agent Contract
 
-An agent definition includes:
-
-- Agent identifier and version
-- Purpose and prohibited purposes
-- Model policy
-- Allowed tools
-- Retrieval sources
-- Memory policy
-- Tenant and workspace scope
-- Human approval policy
-- Cost budget
-- Evaluation suite
-- Release status
-- Owner and support contact
-- Incident-disable mechanism
+Every agent declares purpose, owner, autonomy level, exact model/prompt/tool versions, retrieval, memory, scope, approvals, budgets, loop limits, evaluation, release state, support, kill switch, and provider-exit plan.
 
 ## Model Gateway
 
-The gateway normalizes provider interaction while preserving provider-specific capabilities behind adapters.
+The gateway governs selection, evaluated fallback, region, residency, retention, provider training terms, metering, timeout, retry, circuit breaking, structured output, streaming, and outage behavior.
 
-Required concerns:
+A fallback must pass mandatory evaluation before activation.
 
-- Model selection and fallback
-- Regional and data-residency policy
-- Prompt and response logging policy
-- Token or unit metering
-- Timeouts, retries, and circuit breakers
-- Safety filters
-- Structured output validation
-- Streaming
-- Provider outage handling
-- Provider-specific retention and training controls
+## Retrieval and Memory
 
-## Retrieval
+Retrieval is tenant-, permission-, purpose-, entitlement-, classification-, source-, and deletion-state-aware. Search owns indexing and retrieval contracts.
 
-Retrieval is:
+Memory types, approvers, retention classes, purge SLOs, and reconstruction testing are defined in `06-AI/MEMORY_RETRIEVAL_AND_CONTEXT.md`.
 
-- Tenant-scoped
-- Permission-filtered
-- Purpose-aware
-- Entitlement-aware
-- Classification-aware
-- Source-cited where practical
-- Resistant to prompt injection from retrieved content
-- Auditable
-- Limited to approved indexes and projections
+## Budgets and Delegation
 
-Search owns indexing and retrieval contracts. AI consumes authorized retrieval results. A retrieved statement does not replace a current domain read or policy check where correctness matters.
+Budgets separately control provider cost, model units, tool calls, mutations, records, communication, time, delegation depth, and delegated task count.
 
-## Memory
+Mutating multi-step workflows reserve compensation and reconciliation budget before starting. Delegation cycles, authority expansion, and unlimited recursion are prohibited.
 
-Memory types may include:
+## Evaluation and Release
 
-- Ephemeral conversation state
-- User preference memory
-- Workspace context
-- Task state
-- Approved organizational knowledge
-- Agent-specific operational memory
+Evaluation thresholds, dataset sizes, grading methods, red-team cadence, and incident clocks are defined in `06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`.
 
-Every memory type requires retention, scope, sensitivity, deletion, export, and cross-session policy. Personal or business memory is not stored merely because a model generated it.
+Release states:
 
-## Human Oversight
-
-The engine supports:
-
-- Suggest-only actions
-- Draft generation
-- Review and confirm
-- Approval workflows
-- Dual control
-- Fully automated actions within approved risk limits
-
-High-impact actions involving money, stored value, payroll, employment, tax, legal status, access, customer communication, privacy, deletion, or irreversible external effects require explicit policy and usually human confirmation or approval.
-
-## Evaluation
-
-Every production agent and significant prompt or model change requires evaluation appropriate to its risk.
-
-Evaluation may cover:
-
-- Task completion
-- Factuality and grounding
-- Authorization adherence
-- Tenant isolation
-- Tool-selection correctness
-- Hallucination rate
-- Refusal behavior
-- Prompt-injection resistance
-- Sensitive-data leakage
-- Cost and latency
-- Accessibility and language quality
-- Human acceptance rate
-- Regression against prior releases
-
-## Release States
-
-- Research
-- Prototype
+- Draft
+- Internal Evaluation
 - Internal Preview
 - Customer Preview
 - Limited Availability
 - General Availability
 - Suspended
+- Deprecated
 - Retired
-
-A model or agent may be disabled independently from the rest of the platform.
 
 ## Usage and Cost
 
-AI usage integrates with the Metering Service and commercial entitlements.
+Track provider, model, billable units, tool calls, retrieval, storage, tenant, actor, agent, workflow, capability, retries, failures, budgets, reservations, and released compensation budget.
 
-Track:
+## Security and Privacy
 
-- Provider and model
-- Input, output, cached, image, audio, or other billable units
-- Tool executions
-- Retrieval and storage cost
-- Tenant, user, agent, workflow, and capability
-- Included allowance and overage
-- Budget and threshold decisions
-- Failed and retried calls
+Required controls include prompt-injection defenses, exact tool allow-lists, schema validation, output encoding, secret isolation, DLP, tenant and role scoping, provider allow-lists, anomaly detection, kill switches, and ADR-0014 propagation.
 
-## Security
-
-Required controls:
-
-- Prompt-injection defenses
-- Tool allow-lists
-- Schema validation
-- Output encoding
-- Secret isolation
-- Data-loss prevention
-- Tenant and role scoping
-- Rate and budget limits
-- Model and provider allow-lists
-- Sensitive-data minimization
-- Audit and anomaly detection
-- Emergency kill switches
-
-## Audit, Retention, and Provenance
-
-Capture as policy permits:
-
-- Actor and tenant
-- Agent, prompt, model, and tool versions
-- Source references
-- Tool inputs and outputs or protected hashes
-- Approvals and confirmations
-- Cost and latency
-- Final business command IDs
-- Errors, retries, and fallback path
-- Whether content was AI-generated or AI-modified
-- Data classification and retention class
-
-Raw prompts and responses are stored only when an approved purpose requires them. Deletion-journal actions propagate to prompts, responses, embeddings, memory, feedback, traces, and evaluation datasets under ADR-0014.
+Provider training or fine-tuning on tenant data is prohibited by default and requires explicit contractual opt-in and separate governance.
 
 ## Events
-
-Representative events:
 
 - `ai.request.created.v1`
 - `ai.request.completed.v1`
@@ -247,7 +111,7 @@ Representative events:
 - `ai.evaluation.completed.v1`
 - `ai.budget-threshold.reached.v1`
 
-## Initial Capability Family
+## Capability Family
 
 - `ai.gateway`
 - `ai.model-registry`
@@ -258,8 +122,6 @@ Representative events:
 - `ai.governance`
 - `ai.usage-metering`
 
-`engine.ai-orchestration` remains the top-level engine registration in the Business Capability Map. Detailed capabilities use the registered `ai` namespace under ADR-0016.
-
 ## Delivery Principle
 
-The first vertical slice implements only the minimum AI capabilities needed for one measurable, low-risk workflow. Broad autonomous-agent scope is deferred until permissions, entitlements, tenant isolation, audit, evaluation, privacy, and incident controls are proven.
+The first slice uses optional read-only briefing and bounded import mapping. Mutating and autonomous scope remains deferred until all controls are proven.

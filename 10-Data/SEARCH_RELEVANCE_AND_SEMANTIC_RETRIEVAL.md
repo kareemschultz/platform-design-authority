@@ -1,5 +1,5 @@
 ---
-document_id: PDA-DAT-001
+document_id: PDA-DAT-002
 title: Search Relevance and Semantic Retrieval
 version: 0.1.0
 status: Draft

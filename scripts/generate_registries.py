@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Generate deterministic machine-readable documentation registries.
 
-The script uses only the Python standard library. It generates:
+Generates:
 - registry/documents.json
 - registry/capabilities.json
 - registry/events.json
+- registry/permissions.json
 
 Run with --check in CI to fail when committed registries are stale.
 """
@@ -20,16 +21,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPABILITY = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
-EVENT = re.compile(
-    r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`\s*$"
-)
+EVENT = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`\s*$")
+PERMISSION = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
-CANONICAL_EVENT_HEADINGS = {
-    "events",
-    "event integration",
-    "required events",
-    "representative events",
-}
 
 
 def parse_front_matter(path: Path) -> dict[str, Any] | None:
@@ -59,7 +53,6 @@ def parse_front_matter(path: Path) -> dict[str, Any] | None:
 
 
 def governed_documents() -> list[Path]:
-    """Return every real governed Markdown record and exclude reusable templates."""
     files: list[Path] = []
     for path in sorted(ROOT.rglob("*.md")):
         rel = path.relative_to(ROOT)
@@ -76,35 +69,28 @@ def governed_documents() -> list[Path]:
 def build_documents_registry() -> dict[str, Any]:
     records: list[dict[str, Any]] = []
     seen: set[str] = set()
-
     for path in governed_documents():
-        metadata = parse_front_matter(path)
-        if not metadata or not metadata.get("document_id"):
-            continue
+        metadata = parse_front_matter(path) or {}
         document_id = str(metadata["document_id"])
         if document_id in seen:
             raise ValueError(f"duplicate document_id: {document_id}")
         seen.add(document_id)
-        records.append(
-            {
-                "document_id": document_id,
-                "path": path.relative_to(ROOT).as_posix(),
-                "title": metadata.get("title"),
-                "version": metadata.get("version"),
-                "status": metadata.get("status"),
-                "owner": metadata.get("owner"),
-                "last_reviewed": metadata.get("last_reviewed"),
-                "related_adrs": metadata.get("related_adrs", []),
-            }
-        )
-
+        records.append({
+            "document_id": document_id,
+            "path": path.relative_to(ROOT).as_posix(),
+            "title": metadata.get("title"),
+            "version": metadata.get("version"),
+            "status": metadata.get("status"),
+            "owner": metadata.get("owner"),
+            "last_reviewed": metadata.get("last_reviewed"),
+            "related_adrs": metadata.get("related_adrs", []),
+        })
     records.sort(key=lambda item: item["document_id"])
     return {"schema_version": "1.1.0", "documents": records}
 
 
 def load_namespaces() -> dict[str, dict[str, Any]]:
-    path = ROOT / "registry" / "domains.json"
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = json.loads((ROOT / "registry" / "domains.json").read_text(encoding="utf-8"))
     namespaces: dict[str, dict[str, Any]] = {}
     for record in data.get("namespaces", []):
         namespaces[record["prefix"]] = record
@@ -113,19 +99,40 @@ def load_namespaces() -> dict[str, dict[str, Any]]:
     return namespaces
 
 
-def load_first_slice() -> tuple[set[str], set[str]]:
+def load_first_slice() -> tuple[dict[str, str], set[str]]:
     path = ROOT / "registry" / "first-slice.json"
     if not path.exists():
-        return set(), set()
+        return {}, set()
     data = json.loads(path.read_text(encoding="utf-8"))
-    return set(data.get("capabilities", [])), set(data.get("explicitly_deferred", []))
+
+    capability_depth: dict[str, str] = {}
+    for item in data.get("capabilities", []):
+        if isinstance(item, str):
+            capability_depth[item] = "undeclared"
+        elif isinstance(item, dict) and item.get("id"):
+            depth = str(item.get("depth", "undeclared"))
+            if depth not in {"full", "prototype", "seam", "undeclared"}:
+                raise ValueError(f"invalid first-slice depth {depth!r} for {item['id']}")
+            capability_depth[str(item["id"])] = depth
+        else:
+            raise ValueError("first-slice capabilities must be strings or objects with id")
+
+    deferred: set[str] = set()
+    for item in data.get("explicitly_deferred", []):
+        if isinstance(item, str):
+            deferred.add(item)
+        elif isinstance(item, dict) and item.get("id"):
+            deferred.add(str(item["id"]))
+        else:
+            raise ValueError("explicitly_deferred entries must be strings or objects with id")
+    return capability_depth, deferred
 
 
 def build_capabilities_registry() -> dict[str, Any]:
     path = ROOT / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md"
     lines = path.read_text(encoding="utf-8").splitlines()
     namespaces = load_namespaces()
-    first_slice, explicitly_deferred = load_first_slice()
+    first_slice_depth, explicitly_deferred = load_first_slice()
     records: list[dict[str, Any]] = []
     seen: set[str] = set()
     current_heading = ""
@@ -135,7 +142,6 @@ def build_capabilities_registry() -> dict[str, Any]:
         if heading:
             current_heading = heading.group(2)
             continue
-
         match = CAPABILITY.match(line)
         if not match:
             continue
@@ -147,29 +153,37 @@ def build_capabilities_registry() -> dict[str, Any]:
         namespace = namespaces.get(prefix)
         if namespace is None:
             raise ValueError(f"unknown capability prefix {prefix!r}: {capability_id}")
-        records.append(
-            {
-                "id": capability_id,
-                "namespace": prefix,
-                "owner": namespace["name"],
-                "source_path": path.relative_to(ROOT).as_posix(),
-                "source_heading": current_heading,
-                "source_line": line_number,
-                "status": "Draft",
-                "dependencies": [],
-                "packaging_class": "Unclassified",
-                "offline": "Undeclared",
-                "first_slice": capability_id in first_slice,
-                "explicitly_deferred": capability_id in explicitly_deferred,
-            }
-        )
+        records.append({
+            "id": capability_id,
+            "namespace": prefix,
+            "owner": namespace["name"],
+            "source_path": path.relative_to(ROOT).as_posix(),
+            "source_heading": current_heading,
+            "source_line": line_number,
+            "status": "Draft",
+            "dependencies": [],
+            "packaging_class": "Unclassified",
+            "offline": "Undeclared",
+            "first_slice": capability_id in first_slice_depth,
+            "first_slice_depth": first_slice_depth.get(capability_id),
+            "explicitly_deferred": capability_id in explicitly_deferred,
+        })
 
-    unknown = sorted((first_slice | explicitly_deferred) - seen)
+    unknown = sorted((set(first_slice_depth) | explicitly_deferred) - seen)
     if unknown:
         raise ValueError(f"first-slice registry contains unknown capabilities: {', '.join(unknown)}")
 
     records.sort(key=lambda item: item["id"])
-    return {"schema_version": "1.1.0", "capabilities": records}
+    return {"schema_version": "1.2.0", "capabilities": records}
+
+
+def is_canonical_event_heading(heading: str) -> bool:
+    normalized = heading.strip().lower()
+    return normalized == "events" or normalized.endswith(" events") or normalized in {
+        "event integration",
+        "required events",
+        "representative events",
+    }
 
 
 def build_events_registry() -> dict[str, Any]:
@@ -185,7 +199,7 @@ def build_events_registry() -> dict[str, Any]:
             if heading:
                 current_heading = heading.group(2)
                 continue
-            if current_heading.strip().lower() not in CANONICAL_EVENT_HEADINGS:
+            if not is_canonical_event_heading(current_heading):
                 continue
             match = EVENT.match(line)
             if not match:
@@ -199,23 +213,60 @@ def build_events_registry() -> dict[str, Any]:
             owner = namespaces.get(namespace)
             if owner is None:
                 raise ValueError(f"unknown event prefix {namespace!r}: {event_name}")
-            records.append(
-                {
-                    "name": event_name,
-                    "namespace": namespace,
-                    "owner": owner["name"],
-                    "entity": entity,
-                    "fact": fact,
-                    "major_version": int(version[1:]),
-                    "source_path": path.relative_to(ROOT).as_posix(),
-                    "source_heading": current_heading,
-                    "source_line": line_number,
-                    "document_status": metadata.get("status"),
-                }
-            )
+            records.append({
+                "name": event_name,
+                "namespace": namespace,
+                "owner": owner["name"],
+                "entity": entity,
+                "fact": fact,
+                "major_version": int(version[1:]),
+                "source_path": path.relative_to(ROOT).as_posix(),
+                "source_heading": current_heading,
+                "source_line": line_number,
+                "document_status": metadata.get("status"),
+            })
 
     records.sort(key=lambda item: item["name"])
-    return {"schema_version": "1.0.0", "events": records}
+    return {"schema_version": "1.1.0", "events": records}
+
+
+def build_permissions_registry() -> dict[str, Any]:
+    path = ROOT / "01-Platform" / "FIRST_SLICE_PERMISSION_CATALOG.md"
+    namespaces = load_namespaces()
+    records: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    current_heading = ""
+
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        heading = HEADING.match(line)
+        if heading:
+            current_heading = heading.group(2)
+            continue
+        match = PERMISSION.match(line)
+        if not match:
+            continue
+        permission_id = match.group(1)
+        if permission_id in seen:
+            raise ValueError(f"duplicate permission: {permission_id}")
+        seen.add(permission_id)
+        namespace, resource, action = permission_id.split(".")
+        owner = namespaces.get(namespace)
+        if owner is None:
+            raise ValueError(f"unknown permission prefix {namespace!r}: {permission_id}")
+        records.append({
+            "id": permission_id,
+            "namespace": namespace,
+            "owner": owner["name"],
+            "resource": resource,
+            "action": action,
+            "source_path": path.relative_to(ROOT).as_posix(),
+            "source_heading": current_heading,
+            "source_line": line_number,
+            "status": "Draft",
+        })
+
+    records.sort(key=lambda item: item["id"])
+    return {"schema_version": "1.0.0", "permissions": records}
 
 
 def render(value: dict[str, Any]) -> str:
@@ -241,17 +292,19 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        documents = render(build_documents_registry())
-        capabilities = render(build_capabilities_registry())
-        events = render(build_events_registry())
+        outputs = {
+            ROOT / "registry" / "documents.json": render(build_documents_registry()),
+            ROOT / "registry" / "capabilities.json": render(build_capabilities_registry()),
+            ROOT / "registry" / "events.json": render(build_events_registry()),
+            ROOT / "registry" / "permissions.json": render(build_permissions_registry()),
+        }
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"registry generation failed: {exc}", file=sys.stderr)
         return 1
 
     ok = True
-    ok &= write_or_check(ROOT / "registry" / "documents.json", documents, args.check)
-    ok &= write_or_check(ROOT / "registry" / "capabilities.json", capabilities, args.check)
-    ok &= write_or_check(ROOT / "registry" / "events.json", events, args.check)
+    for path, content in outputs.items():
+        ok &= write_or_check(path, content, args.check)
     return 0 if ok else 1
 
 

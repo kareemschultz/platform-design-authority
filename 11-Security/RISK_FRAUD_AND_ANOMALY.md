@@ -1,10 +1,11 @@
 ---
 document_id: PDA-SEC-003
 title: Risk Fraud and Anomaly Management
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
+related_adrs: [ADR-0014]
 ---
 
 # Risk, Fraud, and Anomaly Management
@@ -17,7 +18,7 @@ Define a governed Security service for detecting, assessing, explaining, reviewi
 
 Risk management consumes authorized signals and recommends or enforces policy through approved domain contracts. It does not silently rewrite source transactions or become the authoritative owner of payments, orders, stock, payroll, identity, stored value, or audit records.
 
-This service owns transactional and security risk decisions. Governance and Compliance owns enterprise risk registers, control assessments, audit findings, and compliance evidence. A transactional risk case may link to a Governance incident or control failure without merging the two ownership models.
+This service owns transactional and security risk decisions. Governance and Compliance owns enterprise risk registers, control assessments, audit findings, and compliance evidence.
 
 ## Capability Family
 
@@ -32,17 +33,7 @@ This service owns transactional and security risk decisions. Governance and Comp
 
 ## Core Ownership
 
-The Security platform owns:
-
-- Signal normalization
-- Risk policies and versions
-- Risk assessments and explanations
-- Risk cases and review workflow
-- Velocity, reputation, and anomaly features
-- Cross-domain risk correlation within authorized scope
-- Protective-action recommendations
-- Model and rule performance monitoring
-- Appeal and false-positive remediation evidence
+The Security platform owns signal normalization, policies, assessments, explanations, cases, velocity and anomaly features, authorized correlation, protective recommendations, performance monitoring, appeal, and false-positive remediation.
 
 Domains own the final business action unless a pre-approved security policy permits an immediate, reversible protective block.
 
@@ -61,89 +52,87 @@ Domains own the final business action unless a pre-approved security policy perm
 
 - Trial abuse and fake accounts
 - Card testing
-- Laundering or prohibited transaction patterns
+- Laundering or prohibited patterns
 - Sanctions or restricted-party evasion
 - Abuse of marketplace, payout, or communication services
 - Deliberate misuse of AI or automation
 
-Platform-operator investigation of tenant behavior requires separate authority, restricted access, legal basis, and audit. It must not become invisible support impersonation.
+Platform investigation requires separate authority, restricted access, legal basis, and audit.
 
 ## Signal Categories
 
-- Authentication failures, new devices, impossible travel, and recovery activity
-- API keys, service identities, rate-limit events, and unusual integration behavior
-- Payment authorization, refunds, chargebacks, and account changes
-- Order velocity, unusual discounts, returns, gift cards, store credit, and loyalty redemption
-- Inventory adjustments, shrinkage, voids, and unusual transfers
-- Payroll account changes, off-cycle payments, and unusual overrides
+- Authentication failures, new devices, impossible travel, and recovery
+- API keys, service identities, rate-limit and integration anomalies
+- Payment authorization, refunds, disputes, and account changes
+- Order velocity, discounts, returns, gift cards, store credit, and loyalty
+- Inventory adjustments, shrinkage, voids, and transfers
+- Payroll account changes and unusual overrides
 - Privileged administration, impersonation, exports, and bulk changes
 - AI tool calls, automation loops, and unusual cost or data access
 
 ## Risk Assessment Output
 
 - Risk score or band
-- Decision: allow, challenge, hold, review, limit, block, or monitor
+- Allow, challenge, hold, review, limit, block, or monitor
 - Policy and model versions
 - Contributing signals and explanation
-- Expiry and reassessment conditions
+- Expiry and reassessment
 - Recommended business action
 - Case and evidence references
-- Appeal eligibility and review deadline
+- Appeal eligibility and deadline
 
 ## Risk Case Model
 
-A Risk Case contains:
+A Risk Case contains tenant and operator scope, subject references, category, severity, assessment, signals, owner, state, service target, evidence, actions, communication, appeal, override, remediation, and closure reason.
 
-- Tenant and operator scope
-- Subject, Party, device, transaction, or application references
-- Risk category and severity
-- Assessment and contributing signals
-- Assigned queue and owner
-- State: Open, Triage, Investigating, Awaiting Information, Actioned, Appealed, Resolved, or Reopened
-- Service-level target
-- Evidence and notes
-- Protective actions
-- Customer or subject communication where permitted
-- Appeal, override, and remediation history
-- Closure reason and false-positive classification
+States: Open, Triage, Investigating, Awaiting Information, Actioned, Appealed, Resolved, and Reopened.
 
 ## Human Review and Appeal
 
-High-impact holds and blocks require clear queues, evidence, service levels, escalation, and override authority. Reviewers must see enough explanation to act without exposing protected model internals or unnecessary personal data.
-
-Where policy or law permits, affected users or tenants receive a review or appeal route. A successful appeal reverses protective action through ordinary domain commands and records the reason; it does not erase the original assessment.
+High-impact holds and blocks require queues, evidence, service levels, escalation, and override authority. Successful appeal reverses protective action through ordinary domain commands and records the reason.
 
 ## Rules, Models, and Inline Limits
 
-- Domains and engines may enforce local hard limits required for correctness, such as one-time token use or maximum offline redemption.
-- The Risk service owns cross-transaction velocity, reputation, correlation, and anomaly policy.
+- Domains may enforce local hard limits required for correctness.
+- Risk owns cross-transaction velocity, reputation, correlation, and anomaly policy.
 - Begin with deterministic rules and velocity controls.
-- Add statistical and machine-learning models only with labeled data, evaluation, drift monitoring, fairness review, and rollback.
+- Add models only with labeled data, evaluation, drift, fairness, and rollback.
 - Separate detection confidence from business impact.
 - Record false positives and false negatives.
-- Never use protected characteristics unlawfully or infer sensitive traits without an approved basis.
+- Do not infer sensitive traits without an approved basis.
 
 ## Cross-Tenant Correlation
 
-Canonical Party identity is tenant-scoped unless an explicit platform-level legal basis and governance process permits otherwise. Cross-tenant correlation may use de-identified, aggregated, provider-supplied, or platform-abuse signals, but must not create a hidden global Party graph.
+Canonical Party identity is tenant-scoped. Cross-tenant correlation may use de-identified, aggregated, provider-supplied, or platform-abuse signals but cannot create a hidden global Party graph.
 
-Any cross-tenant reputation feature requires a separate privacy, legal, security, and fairness review.
+Any cross-tenant reputation feature requires separate privacy, legal, security, and fairness review.
 
 ## Domain Enforcement
 
-Examples:
+Better Auth may request step-up or revoke sessions. Commerce may hold fulfillment. Payment may challenge or block capture. Stored Value may reserve or suspend. Inventory may require dual approval. Payroll may freeze a payment-detail change. AI may reduce scope or require approval.
 
-- Better Auth may request step-up authentication or revoke sessions.
-- Commerce may hold fulfillment or require manager approval.
-- Payments may require provider challenge or block capture.
-- Stored Value may reserve or suspend an instrument.
-- Inventory may require dual approval for unusual adjustments.
-- Payroll may freeze a bank-account change pending verification.
-- AI Orchestration may reduce tool scope or require human approval.
+## Signal Retention Policy
 
-## Privacy and Retention
+Provisional retention classes, subject to jurisdiction, contract, legal hold, and professional review:
 
-Risk signals are classified and retained according to fraud, security, legal, and privacy policy. Access is restricted. Subject-access and deletion requests account for legal exemptions, investigation integrity, other parties' rights, and ADR-0014.
+| Class | Examples | Default retention |
+|---|---|---:|
+| R0 transient | In-memory rate windows and unsuccessful low-risk checks | 24 hours or less |
+| R1 operational | Ordinary velocity features and low-risk assessments | 90 days |
+| R2 security | Authentication abuse, privileged anomalies, account takeover evidence | 1 year |
+| R3 financial/fraud case | Payment, refund, stored-value, inventory, payroll, or marketplace investigation evidence | 7 years after closure |
+| R4 legal hold | Evidence subject to litigation, regulator, or investigation hold | Until released plus ordinary class period |
+| R5 model evaluation | De-identified labeled examples and performance evidence | 12 months then review |
+
+Rules:
+
+1. Raw signals are minimized; derived features are preferred when sufficient.
+2. Secret data and raw credentials are prohibited.
+3. A case may preserve linked evidence longer than the ordinary signal window only with an explicit basis.
+4. Privacy requests account for legal exemptions and investigation integrity under ADR-0014.
+5. Expired signals are deleted or irreversibly pseudonymized from stores, features, search, analytics, AI memory, and backups according to policy.
+6. Cross-tenant features use shorter retention unless separate approval establishes a need.
+7. Retention configuration is effective-dated and auditable.
 
 ## Events
 
@@ -158,10 +147,10 @@ Risk signals are classified and retained according to fraud, security, legal, an
 ## Initial Scope
 
 - Authentication and account-takeover signals
-- Refund, discount, return, loyalty, and stored-value velocity rules
+- Refund, discount, return, loyalty, and stored-value velocity
 - Privileged export and impersonation alerts
 - Payroll payment-detail change controls
 - AI budget and loop anomalies
-- Review queue, appeal, override, and audit
+- Review queue, appeal, override, audit, and retention enforcement
 
-Advanced fraud models, consortium data, and cross-tenant identity correlation are deferred and require separate approval.
+Advanced models, consortium data, and cross-tenant identity correlation are deferred.

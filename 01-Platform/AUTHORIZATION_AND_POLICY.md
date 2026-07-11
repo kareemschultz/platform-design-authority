@@ -1,10 +1,11 @@
 ---
 document_id: PDA-PLT-004
 title: Authorization and Policy
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
+related_adrs: [ADR-0016]
 ---
 
 # Authorization and Policy
@@ -15,53 +16,43 @@ Define how the platform determines whether a person, service, device, extension,
 
 ## Authorization Model
 
-The platform combines:
-
-- Role-based access control for reusable job responsibilities
-- Attribute-based policies for context-sensitive rules
-- Resource scopes such as tenant, organization, legal entity, branch, location, department, team, or record owner
-- Entitlement checks for purchased capabilities
-- Approval and segregation-of-duties policies
-- Data-classification and field-level restrictions
-- Time, device, network, risk, and workflow-state conditions where justified
+The platform combines role-based access control, attribute-based policy, resource scopes, entitlement checks, approvals, segregation of duties, data-classification restrictions, and contextual conditions such as time, device, risk, and workflow state.
 
 ## Decision Inputs
 
-An authorization decision may evaluate:
-
-- Actor identity and type
-- Tenant and organization context
-- Effective roles and permissions
-- Capability entitlement and current limits
-- Resource ownership and classification
-- Branch, location, department, and legal-entity scope
-- Action risk and required assurance level
-- Workflow and approval state
-- Delegation, impersonation, or service-account context
-- Device, session, and environmental risk
+An authorization decision may evaluate actor identity and type, tenant and organization, roles and permissions, canonical capability entitlement from `registry/capabilities.json`, limits, resource ownership, classification, scope, risk, assurance, workflow, delegation, device, and session context.
 
 ## Rules
 
 1. Deny by default.
-2. Every protected action must use a named canonical permission.
-3. UI visibility is advisory; server-side enforcement is authoritative.
-4. Authorization logic must be centralized through shared policy contracts rather than copied into modules.
-5. Sensitive field access must be independently controllable from record access where required.
+2. Every protected action uses a named canonical permission.
+3. UI visibility is advisory; server enforcement is authoritative.
+4. Shared policy contracts centralize authorization logic.
+5. Sensitive field access can be controlled independently from record access.
 6. Privilege escalation, permission changes, impersonation, and break-glass use require enhanced audit.
-7. Separation of duties must support policies such as creator cannot approve, payroll preparer cannot finalize, and refund initiator cannot settle above thresholds.
-8. Policy decisions should be explainable to authorized administrators without exposing sensitive security internals.
+7. Segregation of duties supports creator-versus-approver and initiator-versus-settler rules.
+8. Decisions are explainable to authorized administrators without exposing sensitive security internals.
+9. A permission does not create an entitlement, and an entitlement does not grant an actor permission.
+10. Current policy is re-evaluated for consequential operations rather than trusted permanently from a token or UI state.
 
 ## Permission Naming
 
-Use `<domain>.<resource>.<action>`.
+Use exactly:
+
+`<namespace>.<resource>.<action>`
+
+A resource may use hyphens when a precise compound noun is required. Do not add a fourth dot-separated segment.
 
 Examples:
 
 - `commerce.order.create`
 - `inventory.adjustment.approve`
 - `finance.journal.post`
-- `workforce.employee.compensation.read`
+- `workforce.compensation.read`
 - `payroll.pay-run.finalize`
+- `payment.intent.refund`
+
+Every implementation permission must resolve through the governed permission registry appropriate to its delivery scope.
 
 ## Policy Outcomes
 
@@ -75,15 +66,16 @@ Examples:
 
 ## Delegation
 
-Delegated access must specify delegator, delegate, scope, permissions, start, expiry, reason, revocation, and whether further delegation is permitted.
+Delegated access specifies delegator, delegate, scope, permissions, start, expiry, reason, revocation, and whether further delegation is permitted.
 
 ## Testing Requirements
 
+- Permission-registry validation
 - Permission matrix tests
 - Cross-tenant denial tests
 - Scope-boundary tests
 - Field-level access tests
 - Entitlement interaction tests
-- Approval and separation-of-duties tests
+- Approval and segregation-of-duties tests
 - Impersonation and delegation tests
 - AI and automation tool-authorization tests

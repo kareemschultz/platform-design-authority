@@ -1,10 +1,11 @@
 ---
 document_id: PDA-DOM-021
 title: Business Capability Map
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
+related_adrs: [ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0012, ADR-0013, ADR-0014, ADR-0015, ADR-0016]
 ---
 
 # Business Capability Map
@@ -18,7 +19,7 @@ This document is the master index of business and platform capabilities. It defi
 Each capability must eventually define:
 
 - Canonical identifier
-- Owning domain or engine
+- Owning domain, platform area, or engine
 - Purpose and users
 - Maturity level
 - Entitlement and packaging model
@@ -28,7 +29,7 @@ Each capability must eventually define:
 - Data ownership
 - UX, mobile, and offline behavior
 - Reports, automation, and AI support
-- Security, audit, and compliance requirements
+- Security, audit, privacy, and compliance requirements
 - Testing and operational readiness
 
 ## Platform Capabilities
@@ -48,7 +49,6 @@ Each capability must eventually define:
 - `platform.extensible-metadata`
 - `platform.audit`
 - `platform.events`
-- `platform.webhooks`
 - `platform.jobs`
 - `platform.notifications`
 - `platform.files`
@@ -61,13 +61,15 @@ Each capability must eventually define:
 - `platform.quotas`
 - `platform.collaboration`
 - `platform.privacy-rights`
+- `platform.privacy-erasure`
+- `platform.data-classification`
 - `platform.feature-flags`
 - `platform.devices`
 - `platform.offline-sync`
 - `platform.secrets`
 - `platform.administration`
 
-### Shared Engines
+### Shared Engine Registrations
 
 - `engine.workflow`
 - `engine.approvals`
@@ -87,6 +89,77 @@ Each capability must eventually define:
 - `engine.reporting`
 - `engine.ai-orchestration`
 
+### AI Orchestration
+
+- `ai.gateway`
+- `ai.model-registry`
+- `ai.tool-registry`
+- `ai.agent-registry`
+- `ai.retrieval`
+- `ai.evaluation`
+- `ai.governance`
+- `ai.usage-metering`
+
+### Loyalty
+
+- `loyalty.programs`
+- `loyalty.memberships`
+- `loyalty.accounts`
+- `loyalty.ledger`
+- `loyalty.earning`
+- `loyalty.redemption`
+- `loyalty.tiers`
+- `loyalty.expiration`
+
+### Fiscalization and Statutory Reporting
+
+- `fiscalization.jurisdiction-profiles`
+- `fiscalization.registrations`
+- `fiscalization.documents`
+- `fiscalization.signing`
+- `fiscalization.submissions`
+- `fiscalization.acknowledgements`
+- `fiscalization.contingency`
+- `fiscalization.reconciliation`
+
+### Security Platform
+
+- `security.tenant-isolation`
+- `security.threat-modeling`
+- `security.data-classification`
+- `security.privacy-requests`
+- `security.privacy-erasure`
+- `security.risk-signals`
+- `security.risk-policies`
+- `security.risk-assessments`
+- `security.risk-cases`
+- `security.velocity-controls`
+- `security.protective-actions`
+- `security.risk-appeals`
+- `security.model-monitoring`
+
+### Developer Platform
+
+- `developer.applications`
+- `developer.api-keys`
+- `developer.webhooks`
+- `developer.event-delivery`
+- `developer.sdks`
+- `developer.sandboxes`
+- `developer.compatibility`
+- `developer.registry-automation`
+
+### Commercial Control Plane
+
+- `commercial.catalog`
+- `commercial.contracts`
+- `commercial.platform-subscriptions`
+- `commercial.billing`
+- `commercial.usage-rating`
+- `commercial.trials`
+- `commercial.partner-settlement`
+- `commercial.customer-portal`
+
 ## Business Domains
 
 ### Commerce
@@ -103,15 +176,21 @@ Each capability must eventually define:
 - `commerce.refunds`
 - `commerce.receipts`
 - `commerce.gift-receipts`
+- `commerce.stored-value`
+- `commerce.stored-value-ledger`
 - `commerce.store-credit`
 - `commerce.gift-cards`
 - `commerce.layaway`
 - `commerce.deposits`
 - `commerce.ecommerce`
 - `commerce.checkout`
+- `commerce.storefront`
+- `commerce.storefront-connectors`
 - `commerce.omnichannel-orders`
 - `commerce.channel-management`
 - `commerce.customer-account-sales`
+- `commerce.recurring-agreements`
+- `commerce.memberships`
 - `commerce.offline-sales`
 - `commerce.self-checkout`
 - `commerce.assisted-selling`
@@ -506,4 +585,4 @@ Each capability must eventually define:
 
 ## Governance
 
-This map is intentionally broad and remains a living index. New capabilities require ownership, canonical naming, dependency review, and packaging classification before implementation.
+This map is intentionally broad and remains a living index. A new capability requires registered ownership, canonical naming, dependency review, lifecycle status, packaging classification, offline declaration, privacy and security review, and first-slice disposition before implementation.

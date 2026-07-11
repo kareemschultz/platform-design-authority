@@ -1,10 +1,11 @@
 ---
 document_id: PDA-DOM-003
 title: Inventory Domain
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
+related_adrs: [ADR-0016]
 ---
 
 # Inventory Domain
@@ -39,3 +40,16 @@ Stock Ledger Entry, Stock Balance Projection, Reservation, Transfer, Count, Lot,
 ## Boundaries
 
 Warehouse owns execution tasks and bin operations. Procurement owns purchase commitments. Commerce owns sales demand. Manufacturing owns production consumption and output. Finance owns financial valuation and ledger posting.
+
+## Events
+
+- `inventory.stock.adjusted.v1`
+- `inventory.stock-count.posted.v1`
+- `inventory.stock-transfer.created.v1`
+- `inventory.stock-transfer.dispatched.v1`
+- `inventory.stock-transfer.received.v1`
+- `inventory.reservation.created.v1`
+- `inventory.reservation.released.v1`
+- `inventory.stock-movement.reversed.v1`
+
+Each event preserves tenant, location, item, unit, quantity, source, correlation, causation, and authoritative ledger references.

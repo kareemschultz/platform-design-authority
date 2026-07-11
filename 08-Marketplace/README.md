@@ -1,7 +1,7 @@
 ---
 document_id: PDA-MKT-001
 title: Marketplace Section Index
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -11,22 +11,33 @@ last_reviewed: 2026-07-11
 
 ## Current Specifications
 
-- `MARKETPLACE_ARCHITECTURE.md` — publisher lifecycle, review, discovery, installation, permissions, billing, settlement, support, suspension, and removal
-- `../07-Developer-Platform/EXTENSION_PLUGIN_AND_SANDBOX_ARCHITECTURE.md` — extension manifests, execution models, permissions, sandboxing, compatibility, and uninstall
-- `../13-Commercial/PARTNER_RESELLER_AND_MARKETPLACE_MODEL.md` — partner and marketplace commercial models
-- `../13-Commercial/BILLING_ARCHITECTURE.md` — billing-provider and internal commercial boundaries
-- `../20-Strategy/ECOSYSTEM_ACADEMY_AND_CERTIFICATION.md` — publisher and partner enablement
+- `MARKETPLACE_ARCHITECTURE.md`
+- `PUBLISHER_REVIEW_AND_EXTENSION_LIFECYCLE.md`
+- `MARKETPLACE_COMMERCIAL_PHASING.md`
+- `../07-Developer-Platform/EXTENSION_PLUGIN_AND_SANDBOX_ARCHITECTURE.md`
+- `../18-Decisions/ADR-0019-PHASED-EXTENSION-EXECUTION-MODEL.md`
+- `../13-Commercial/PARTNER_RESELLER_AND_MARKETPLACE_MODEL.md`
+- `../13-Commercial/BILLING_ARCHITECTURE.md`
+- `../20-Strategy/ECOSYSTEM_ACADEMY_AND_CERTIFICATION.md`
+- `../06-AI/AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md`
 
-## Remaining Implementation-Level Depth
+## Commercial Phase
 
-- Publisher application workflow
-- Listing and manifest schemas
-- Automated package scanning pipeline
+The initial marketplace is private or free-listings-first. Direct publisher billing may be supported under separate contracts. Platform-billed listings, connected accounts, and publisher payout remain disabled until FDR-002, FDR-003, FDR-008, legal and tax review, payout-provider validation, and a new ADR are complete.
+
+## Capability Governance
+
+Marketplace has a registered namespace, canonical capabilities, lifecycle events, permission and extension boundaries, and AI-pack linkage. Marketplace approval cannot bypass Developer Platform, Security, AI, Commercial, Finance, or domain authority.
+
+## Remaining Implementation Evidence
+
+- Listing and manifest JSON schemas
+- Automated package scanning and signing pipeline
 - Review checklist and certification fixtures
-- Installation and upgrade APIs
-- Marketplace search and recommendation ranking
-- Rating and dispute moderation procedures
-- Settlement-provider selection
+- Installation, update, suspension, and uninstall APIs
+- Marketplace search and recommendation ranking implementation
+- Rating and moderation procedures
 - Publisher dashboard and customer administration UX
+- Paid-phase settlement provider and legal evidence
 
-Marketplace content must use published contracts and may not create hidden database access, broaden permissions silently, bypass tenant policy, or weaken uninstall and data-portability rights.
+Marketplace content may not create hidden database access, broaden permissions silently, bypass tenant policy, or weaken uninstall and portability rights.

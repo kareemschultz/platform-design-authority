@@ -1,49 +1,66 @@
 ---
 document_id: PDA-DOM-001
 title: Commerce Domain
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
+related_adrs: [ADR-0012, ADR-0013, ADR-0015]
 ---
 
 # Commerce Domain
 
 ## Purpose
 
-Own the customer-facing sale lifecycle across POS, assisted sales, e-commerce, quotes, orders, returns, exchanges, receipts, and channel coordination.
+Own the customer-facing sale lifecycle across POS, assisted sales, quotes, orders, returns, exchanges, receipts, customer stored value, channel coordination, storefront checkout, and tenant-facing recurring agreements.
 
 ## Core Capabilities
 
 - Point of sale and register operations
 - Quotes, sales orders, backorders, and fulfillment requests
-- E-commerce checkout and storefront order capture
 - Returns, exchanges, cancellations, and refunds
-- Receipts, gift receipts, layaway, deposits, and store credit
-- Cash drawer, shifts, till counts, and end-of-day close
-- Sales channels, order sources, and omnichannel customer experience
-- Order status, holds, notes, attachments, and audit history
+- Receipts, gift receipts, layaway, and deposits
+- Cash drawer, shifts, till counts, safe drops, deposits, and end-of-day close
+- Customer stored value, gift cards, refund credits, and store credit
+- Sales channels, order sources, and omnichannel coordination
+- Storefront cart, checkout, and order capture through headless contracts
+- Recurring Agreements and memberships sold by tenants to their customers
+- Order status, holds, collaboration, attachments, and audit history
 
 ## Authoritative Entities
 
-Sale, Quote, Sales Order, Return, Exchange, Register, Shift, Till, Receipt, Sales Channel, and Commerce Transaction.
+Sale, Quote, Sales Order, Return, Exchange, Register, Shift, Till, Cash Movement, Receipt, Sales Channel, Commerce Transaction, Stored Value Program, Stored Value Instrument, Stored Value Ledger Entry, Cart, Checkout Session, and Recurring Agreement.
 
-## Shared Engines Used
+The Party service owns shared identity. CRM owns customer relationship context. Commerce owns transaction-specific customer snapshots and customer stored-value obligations.
 
-Pricing, Promotions, Tax, Payments, Documents, Workflow, Approvals, Notifications, Reporting, and AI.
+## Shared Engines and Services Used
+
+Pricing, Promotions, Tax, Payments, Loyalty, Fiscalization, Documents, Workflow, Approvals, Notifications, Collaboration, Reporting, Risk, and AI Orchestration.
 
 ## Domain Boundaries
 
-- Product Catalog owns product definitions.
-- Inventory owns stock quantities and movements.
+- Product Catalog owns product definitions and channel-publication facts.
+- Inventory owns stock quantities, reservations, and movements.
 - Warehouse owns fulfillment execution.
-- Finance owns accounting entries and receivables.
-- CRM owns customer relationship data.
+- Finance owns accounting entries, receivables, and stored-value accounting interpretation.
+- Party owns canonical people, organizations, addresses, and shared contact points.
+- CRM owns customer/prospect relationship profiles and sales pipeline.
+- Payment Engine owns tender orchestration and provider state, not stored-value balances.
+- Loyalty owns non-cash points and benefits.
+- Marketing owns landing pages, campaign content, and merchandising copy.
+- Documents and Knowledge owns controlled policies, terms, and legal notices.
+- Fiscalization owns statutory packaging, signing, submission, and acknowledgements.
+- Security Risk owns correlated fraud assessments and risk cases.
 
-## Initial Maturity Roadmap
+## First-Slice Sequence
 
-1. POS sale, payment, receipt, shift open and close
-2. Quotes, orders, returns, exchanges, and customer accounts
-3. E-commerce and omnichannel order capture
-4. Advanced promotions, loyalty, layaway, and distributed fulfillment
-5. AI-assisted selling, fraud detection, and predictive recommendations
+1. POS sale, cash and direct-provider tender seams, receipt, register open and close
+2. Catalog and inventory integration, returns, refunds, stored value, and offline continuity
+3. Cash deposit and accountant handoff, risk controls, privacy, backup, and recovery
+4. Quotes, orders, customer accounts, broader channel ingestion, and fulfillment seams
+5. Connector-first external commerce integration
+6. Bounded native reference storefront
+7. Tenant Recurring Agreements when a named pilot and verified collection rail justify them
+8. Advanced promotions, loyalty, distributed fulfillment, and AI-assisted selling
+
+The first Guyana retail pilot does not require a production storefront or recurring collection.

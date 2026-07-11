@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ARC-005
 title: Event Standards
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 related_adrs: [ADR-0016]
 ---
 
@@ -20,12 +20,11 @@ Every event uses exactly:
 
 `<namespace>.<entity>.<past-tense-fact>.v<major>`
 
-Examples:
+Canonical examples already defined by owning specifications:
 
-- `commerce.order.created.v1`
+- `commerce.sale.completed.v1`
 - `inventory.stock.adjusted.v1`
-- `workforce.employee.hired.v1`
-- `payroll.pay-run.posted.v1`
+- `workforce.employment.activated.v1`
 - `platform.session.revoked.v1`
 - `party.duplicate.detected.v1`
 - `security.risk-assessment.created.v1`
@@ -34,6 +33,7 @@ Examples:
 - `commercial.subscription.activated.v1`
 - `ai.tool-invocation.completed.v1`
 - `fiscalization.submission.accepted.v1`
+- `marketplace.listing.published.v1`
 
 ## Namespace Rules
 
@@ -52,7 +52,7 @@ Examples:
 - The fact is past tense and describes something that completed.
 - Do not collapse entity and fact into one segment.
 - Do not publish commands or future intentions as completed facts.
-- A request may be an event only when the request itself has been durably recorded, for example `security.risk-review.requested.v1`.
+- A request may be an event only when the request itself has been durably recorded and canonically defined by its owner.
 - Avoid generic facts such as `updated` when a more meaningful fact exists.
 - Event names do not encode tenant, plan, provider, region, or implementation technology.
 
@@ -83,6 +83,7 @@ Every event contains:
 8. Failed consumers do not block the producer's authoritative transaction.
 9. Internal events and externally delivered webhooks are distinct contracts even when a webhook is derived from an event.
 10. A cached event or replay never grants current authorization.
+11. Every event reference in governed documentation must resolve to one canonical definition in an owning specification.
 
 ## Schema Evolution
 
@@ -101,20 +102,14 @@ External webhook delivery is owned by the Developer Platform. Internal event tra
 
 ## Event Registry
 
-`registry/events.json` is generated from governed documents. It records:
+`registry/events.json` is generated from governed documents. It records event name, source path and line, producer namespace, entity, fact, document status, and duplicate detection.
 
-- Event name
-- Source path and line
-- Producer namespace
-- Entity and fact
-- Document status
-- Duplicate detection
-
-The registry is an index; the authoritative semantics remain in the source specification.
+The registry is an index; authoritative semantics remain in the owning source specification.
 
 ## Quality Gates
 
 - Naming and namespace validation
+- Canonical-definition coverage for every event reference
 - Duplicate event detection
 - Schema validation
 - Producer contract tests

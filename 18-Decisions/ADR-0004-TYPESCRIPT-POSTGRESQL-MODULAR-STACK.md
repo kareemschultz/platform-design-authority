@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0004
 title: Adopt a TypeScript and PostgreSQL Platform Stack
-version: 0.1.0
+version: 0.2.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
@@ -33,43 +33,62 @@ The stack must support fast initial delivery without locking the platform into a
 
 ### TypeScript throughout, PostgreSQL as the system of record
 
-Next.js and React for web, NestJS and Node.js for backend services, PostgreSQL for transactional data, and selective supporting infrastructure.
+Next.js and React for web, a Node.js backend application framework, PostgreSQL for transactional data, and selective supporting infrastructure.
 
 ### Separate frontend and enterprise backend languages
 
-TypeScript frontend with Java, Kotlin, C#, or Go backend. Strong backend alternatives, but creates additional model duplication, staffing complexity, and AI-agent context switching during the first phase.
+TypeScript frontend with Java, Kotlin, C#, Go, or another backend runtime. These are strong alternatives, but they create additional model duplication, staffing complexity, and AI-agent context switching during the first phase.
 
 ### Serverless-first full-stack framework
 
-Use Next.js server functions and hosted database services as the entire backend. Fast for prototypes, but poorly aligned with durable workflows, self-hosting, long jobs, edge operations, and a large domain model.
+Use framework-hosted functions and managed database services as the entire backend. Fast for prototypes, but poorly aligned with durable workflows, self-hosting, long jobs, edge operations, and a large domain model.
 
 ## Decision
 
 Adopt TypeScript as the primary platform language and PostgreSQL as the authoritative transactional database.
 
-The initial implementation stack will use:
+The preferred initial implementation stack is:
 
 - Next.js and React for web applications
-- NestJS with Fastify on Node.js LTS for backend application services
+- NestJS with the Fastify adapter on an active Node.js LTS release for backend application services
 - PostgreSQL with explicit type-safe SQL access
-- Redis for cache and short-lived coordination
+- Redis-compatible infrastructure for cache and short-lived coordination
 - A transactional outbox for event reliability
 - Temporal for durable workflows when the first qualifying workflows are implemented
 - S3-compatible object storage
-- React Native and SQLite for native offline-capable clients
+- React Native, Expo, and SQLite for native offline-capable clients
 - OpenTelemetry-based observability
 - Containers as the standard deployment unit
 
 Managed cloud services may accelerate the SaaS launch, but every critical component must have a portable or self-hostable path.
+
+### Conditional Backend Ratification
+
+NestJS with Fastify is the preferred production baseline, but this portion of the decision remains conditional until the first vertical-slice benchmark is complete.
+
+The benchmark must compare the preferred baseline with a simpler Fastify or Hono application shell where useful and measure:
+
+- Domain-boundary enforcement
+- Testability
+- Startup and request performance
+- Dependency and abstraction overhead
+- OpenAPI and validation ergonomics
+- Worker and job integration
+- Observability
+- Container and self-hosted deployment
+- AI-agent code quality and consistency
+- Long-term maintainability
+
+Scaffolding convenience does not override architecture. If the evidence rejects NestJS, this ADR must be amended before another production framework is adopted.
 
 ## Consequences
 
 ### Positive
 
 - Shared types and tooling across most of the platform
-- Strong alignment with Vercel v0, Codex, Claude Code, and modern AI coding workflows
+- Strong alignment with modern AI coding workflows
 - Relational integrity for accounting, payroll, inventory, and business records
-- Lower initial operational complexity
+- Lower initial language and operating complexity
 - Clear path from modular monolith to extracted services
 - Good web, mobile, API, and extension ecosystems
 
@@ -77,8 +96,9 @@ Managed cloud services may accelerate the SaaS launch, but every critical compon
 
 - CPU-intensive optimization and data-science workloads may require Python or another specialized runtime
 - TypeScript discipline and architecture tests are required to avoid weak domain models
-- NestJS and Next.js upgrades require active dependency governance
+- Framework and runtime upgrades require active dependency governance
 - PostgreSQL scaling and tenant partitioning must be planned carefully
+- The preferred backend framework remains subject to benchmark evidence before ratification
 
 ## Required Controls
 
@@ -90,7 +110,16 @@ Managed cloud services may accelerate the SaaS launch, but every critical compon
 - Containerized self-hosting path
 - Performance benchmarks before introducing additional infrastructure
 - ADR review before adopting a second general backend language or replacing PostgreSQL
+- ADR amendment before replacing the preferred production backend framework
 
 ## Validation
 
-The decision is validated when the initial vertical slice can run locally and in a cloud environment with the same core containers, supports tenant isolation, publishes reliable events, executes background work, provides generated API contracts, and demonstrates a recoverable offline workflow.
+The decision is validated when the initial vertical slice:
+
+- Runs locally and in a cloud environment with the same core containers
+- Enforces tenant isolation
+- Publishes reliable events through the outbox
+- Executes background work
+- Provides generated API contracts
+- Demonstrates a recoverable offline workflow
+- Produces benchmark evidence for the backend framework decision

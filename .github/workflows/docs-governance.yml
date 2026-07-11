@@ -48,7 +48,7 @@ jobs:
           (github.event_name == 'push' ||
           (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
         run: |
-          if git diff --quiet -- registry/documents.json registry/capabilities.json; then
+          if [ -z "$(git status --porcelain -- registry/documents.json registry/capabilities.json)" ]; then
             echo "Generated registries are current."
             exit 0
           fi

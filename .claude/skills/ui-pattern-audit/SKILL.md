@@ -1,6 +1,6 @@
 ---
 name: ui-pattern-audit
-description: Audit a screen, flow, component, or pull request for information hierarchy, progressive disclosure, tabs, modals, drawers, menus, states, accessibility, responsiveness, consistency, and workflow quality.
+description: Audit information architecture, interaction-pattern selection, progressive disclosure, workflow states, responsiveness, consistency, and task efficiency. Use accessibility-review instead when WCAG conformance or assistive-technology behavior is the primary question.
 context: fork
 agent: Explore
 disallowed-tools: Write Edit Bash NotebookEdit
@@ -11,6 +11,12 @@ disallowed-tools: Write Edit Bash NotebookEdit
 ## Safety
 
 This is a read-only audit skill. `disallowed-tools` removes mutation and shell tools while the skill is active. Do not use `allowed-tools` as a restriction mechanism; it only pre-approves listed tools.
+
+## Skill Boundary
+
+Use this skill when the main question is whether the chosen interface patterns, hierarchy, disclosure, states, and workflow composition are appropriate.
+
+Use `accessibility-review` when the main question is WCAG conformance, keyboard behavior, screen-reader semantics, contrast, zoom, touch-target compliance, or assistive technology. A UI-pattern audit may identify accessibility risks but should delegate a formal conformance review.
 
 ## Inputs
 
@@ -52,9 +58,9 @@ Identify the screen, flow, component, or diff being reviewed. Read:
 
 Check loading, empty, no results, partial, stale, offline, pending, uncertain provider result, permission denial, entitlement absence, validation error, recoverable failure, and success.
 
-### Accessibility
+### Accessibility Risk Scan
 
-Check keyboard, focus, screen-reader semantics, labels, status announcements, contrast, reflow, touch targets, reduced motion, and non-color state cues.
+Identify obvious keyboard, focus, naming, status, contrast, reflow, touch-target, motion, and non-color risks. Route formal conformance findings to `accessibility-review`.
 
 ### Visual System
 
@@ -70,10 +76,10 @@ Return:
 
 1. Executive verdict
 2. User task and risk level
-3. Findings by severity: Critical, High, Medium, Low
+3. Findings by severity
 4. Pattern substitutions with reasons
 5. Missing states
-6. Accessibility findings
+6. Accessibility risks requiring formal review
 7. Mobile/offline findings
 8. Recommended component and token changes
 9. Acceptance tests

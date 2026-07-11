@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-017
 title: Implementation Handbook
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -13,9 +13,15 @@ last_reviewed: 2026-07-11
 
 Define how customers move from discovery to a stable, supportable production deployment without uncontrolled customization.
 
+## Company-Stage Note
+
+This is a founding-stage operating design. It defines the implementation discipline required for design partners and future customers; it does not imply that repeatable implementation tooling, certified consultants, provider integrations, or jurisdiction packs have already been proven.
+
+Approved architecture, Commercial specifications, jurisdiction evidence, and customer contracts take precedence over this handbook.
+
 ## Lifecycle
 
-Discovery, Business DNA assessment, scope, solution design, contract, configuration, migration, integration, validation, training, rehearsal, cutover, stabilization, acceptance, and transition to Customer Success and Support.
+Discovery, Business DNA assessment, Scope, Solution Design, Contract, Configuration, Migration, Integration, Validation, Training, Rehearsal, Cutover, Stabilization, Acceptance, and Transition.
 
 ## Scope
 

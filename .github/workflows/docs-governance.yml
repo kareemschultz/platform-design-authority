@@ -10,13 +10,20 @@ on:
       - research/**
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate-docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out evaluated revision
+      - name: Check out source branch
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Check out pull request revision
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -49,27 +56,9 @@ jobs:
         run: exit 1
 
       - name: Generate machine-readable registries
-        id: generate
-        shell: bash
-        run: |
-          set +e
-          python scripts/generate_registries.py > registry-generation-report.txt 2>&1
-          status=$?
-          cat registry-generation-report.txt
-          echo "status=$status" >> "$GITHUB_OUTPUT"
-          exit 0
-
-      - name: Upload registry generation diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: registry-generation-report
-          path: registry-generation-report.txt
-          if-no-files-found: error
-          retention-days: 7
+        run: python scripts/generate_registries.py
 
       - name: Upload generated registries
-        if: steps.generate.outputs.status == '0'
         uses: actions/upload-artifact@v4
         with:
           name: generated-registries
@@ -80,6 +69,20 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Fail when registry generation fails
-        if: steps.generate.outputs.status != '0'
-        run: exit 1
+      - name: Commit refreshed registries
+        if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add registry/documents.json registry/capabilities.json registry/events.json
+          if git diff --cached --quiet; then
+            echo "Registries are already current."
+          else
+            git commit -m "chore: refresh documentation registries"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+
+      - name: Verify generated output is clean
+        if: github.actor == 'github-actions[bot]' || github.event_name == 'pull_request'
+        run: git diff --exit-code -- registry/documents.json registry/capabilities.json registry/events.json

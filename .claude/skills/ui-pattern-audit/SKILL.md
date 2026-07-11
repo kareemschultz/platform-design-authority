@@ -2,10 +2,15 @@
 name: ui-pattern-audit
 description: Audit a screen, flow, component, or pull request for information hierarchy, progressive disclosure, tabs, modals, drawers, menus, states, accessibility, responsiveness, consistency, and workflow quality.
 context: fork
-allowed-tools: Read Grep Glob
+agent: Explore
+disallowed-tools: Write Edit Bash NotebookEdit
 ---
 
 # UI Pattern Audit Skill
+
+## Safety
+
+This is a read-only audit skill. `disallowed-tools` removes mutation and shell tools while the skill is active. Do not use `allowed-tools` as a restriction mechanism; it only pre-approves listed tools.
 
 ## Inputs
 
@@ -15,6 +20,7 @@ Identify the screen, flow, component, or diff being reviewed. Read:
 - `09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
 - `09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
 - `09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
+- `09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md` when charts or analytics are involved
 - `00-Foundation/UX_PHILOSOPHY.md`
 
 ## Audit Dimensions

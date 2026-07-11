@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft",
+  "source_document": "14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
+  "package_families": [
+    {"id":"applications","globs":["apps/*"],"may_depend_on":["foundation","contracts","platform-clients","ui-web","ui-native","design-tokens","tooling"]},
+    {"id":"foundation","globs":["packages/foundation/*"],"may_depend_on":[]},
+    {"id":"platform","globs":["packages/platform/*"],"may_depend_on":["foundation","contracts","tooling"]},
+    {"id":"engines","globs":["packages/engines/*"],"may_depend_on":["foundation","contracts","platform","tooling"]},
+    {"id":"domains","globs":["packages/domains/*"],"may_depend_on":["foundation","contracts","platform","engines","tooling"]},
+    {"id":"contracts","globs":["packages/contracts/*"],"may_depend_on":["foundation"]},
+    {"id":"ui-web","globs":["packages/ui-web/*"],"may_depend_on":["foundation","contracts","design-tokens"]},
+    {"id":"ui-native","globs":["packages/ui-native/*"],"may_depend_on":["foundation","contracts","design-tokens"]},
+    {"id":"design-tokens","globs":["packages/design-tokens/*"],"may_depend_on":[]},
+    {"id":"integrations","globs":["packages/integrations/*"],"may_depend_on":["foundation","contracts","platform"]},
+    {"id":"tooling","globs":["packages/tooling/*"],"may_depend_on":["foundation"]}
+  ],
+  "forbidden_patterns": [
+    {"id":"cross-domain-repository","description":"A domain cannot import another domain repository or persistence package.","pattern":"packages/domains/* -> packages/domains/*/(repository|persistence|migrations)"},
+    {"id":"database-outside-persistence","description":"Database clients are limited to approved persistence packages.","pattern":"**/!(persistence)/** -> database-client"},
+    {"id":"provider-type-leak","description":"Provider SDK types cannot appear in domain contracts.","pattern":"packages/contracts/** -> provider-sdk"},
+    {"id":"business-rule-in-ui","description":"UI packages cannot own authoritative business rules or persistence.","pattern":"packages/ui-*/** -> (database|domain-repository)"},
+    {"id":"plan-name-authorization","description":"Commercial plan names cannot appear in authorization logic.","pattern":"authorization -> commercial-plan-name"},
+    {"id":"feature-flag-entitlement","description":"Feature flags cannot create entitlement access.","pattern":"entitlement -> feature-flag-key"}
+  ],
+  "requirements": {
+    "single_table_owner": true,
+    "single_migration_owner": true,
+    "circular_dependencies": "prohibited_without_exception",
+    "exceptions_require_expiry": true,
+    "composition_roots": ["apps/*/composition", "packages/tooling/composition/*"]
+  }
+}

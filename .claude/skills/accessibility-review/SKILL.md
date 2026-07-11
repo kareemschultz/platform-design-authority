@@ -1,11 +1,16 @@
 ---
 name: accessibility-review
-description: Review frontend code, components, screens, and workflows for WCAG 2.2 AA goals, keyboard and focus behavior, screen-reader semantics, forms, tables, dialogs, mobile, motion, contrast, and error prevention.
+description: Review frontend code, components, screens, charts, dashboards, and workflows for WCAG 2.2 AA goals, keyboard and focus behavior, screen-reader semantics, forms, tables, dialogs, mobile, motion, contrast, and error prevention.
 context: fork
-allowed-tools: Read Grep Glob
+agent: Explore
+disallowed-tools: Write Edit Bash NotebookEdit
 ---
 
 # Accessibility Review Skill
+
+## Safety
+
+This is a read-only audit skill. Mutation and shell tools are removed while active.
 
 ## Read First
 
@@ -13,7 +18,9 @@ allowed-tools: Read Grep Glob
 - `09-UX/ADVANCED_INTERFACE_PATTERNS.md`
 - `09-UX/FORMS_SELECTION_AND_MULTISELECT.md`
 - `09-UX/DASHBOARD_AND_DATA_VISUALIZATION.md`
+- `09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md`
 - `09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
+- `09-UX/ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`
 
 ## Review Scope
 
@@ -24,7 +31,7 @@ Audit complete workflows, not only isolated markup.
 - All functions are keyboard accessible.
 - Focus order follows task order.
 - Focus is visible and unobscured.
-- Dialogs, menus, tabs, comboboxes, and drawers follow appropriate interaction patterns.
+- Dialogs, menus, tabs, comboboxes, drawers, charts, and grids follow appropriate interaction patterns.
 - Focus returns sensibly after overlays close.
 - Live refresh does not steal or lose focus.
 
@@ -36,6 +43,7 @@ Audit complete workflows, not only isolated markup.
 - Tables have correct headers.
 - Form groups use fieldset and legend where appropriate.
 - Status, errors, pending, offline, and completion are announced.
+- Charts provide titles, summaries, exact-value access, and a structured-data alternative where needed.
 
 ### Visual and Responsive
 
@@ -45,6 +53,7 @@ Audit complete workflows, not only isolated markup.
 - Touch targets meet the approved minimum.
 - Reduced motion is respected.
 - Dense screens remain usable at high zoom.
+- Responsive chart transformations preserve meaning and exact-value access.
 
 ### Forms and Error Prevention
 

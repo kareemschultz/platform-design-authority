@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "status": "draft",
   "last_reviewed": "2026-07-11",
   "description": "Canonical prefixes for capability, event, permission, schema, and package identifiers.",
@@ -7,6 +7,7 @@
     {"kind":"platform","name":"Platform Kernel","prefix":"platform","authoritative_document":"01-Platform/PLATFORM_KERNEL_OVERVIEW.md"},
     {"kind":"engine_registry","name":"Shared Business Engines","prefix":"engine","authoritative_document":"03-Business-Engines/BUSINESS_ENGINES_OVERVIEW.md","note":"Used for top-level engine capabilities. Detailed engine families may use dedicated registered namespaces."},
     {"kind":"engine_family","name":"AI Orchestration","prefix":"ai","authoritative_document":"03-Business-Engines/AI_ORCHESTRATION_ENGINE.md"},
+    {"kind":"engine_family","name":"Payment Orchestration","prefix":"payment","authoritative_document":"03-Business-Engines/PAYMENT_ENGINE.md"},
     {"kind":"engine_family","name":"Loyalty","prefix":"loyalty","authoritative_document":"03-Business-Engines/LOYALTY_ENGINE.md"},
     {"kind":"engine_family","name":"Fiscalization and Statutory Reporting","prefix":"fiscalization","authoritative_document":"03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md"},
     {"kind":"platform_area","name":"Security Platform","prefix":"security","authoritative_document":"11-Security/README.md"},

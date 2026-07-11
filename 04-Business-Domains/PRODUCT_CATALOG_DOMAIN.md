@@ -1,10 +1,11 @@
 ---
 document_id: PDA-DOM-002
 title: Product Catalog Domain
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
+related_adrs: [ADR-0016]
 ---
 
 # Product Catalog Domain
@@ -40,3 +41,15 @@ Inventory owns stock. Pricing owns price calculation. Procurement owns supplier 
 - Localized content
 - Channel publication history
 - Permissioned cost and supplier data
+
+## Events
+
+- `catalog.product.created.v1`
+- `catalog.product.changed.v1`
+- `catalog.product.activated.v1`
+- `catalog.product.discontinued.v1`
+- `catalog.variant.created.v1`
+- `catalog.identifier.assigned.v1`
+- `catalog.publication.changed.v1`
+
+Catalog events publish stable identifiers and changed facts without copying unrestricted source records.

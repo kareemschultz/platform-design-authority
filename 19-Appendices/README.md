@@ -1,10 +1,10 @@
 ---
 document_id: PDA-APP-001
 title: Appendices Section Index
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-11
 ---
 
 # Appendices
@@ -13,25 +13,24 @@ last_reviewed: 2026-07-10
 
 - `BETTER_AUTH_VERIFICATION-2026-07-10.md`
 - `REGIONAL_PAYMENTS_PRIVACY_AND_FISCALIZATION_VERIFICATION-2026-07-10.md`
+- `DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md`
 
-Machine-readable indexes are maintained separately under `../registry/`.
+Machine-readable indexes are maintained under `../registry/`.
 
-## Planned Appendices
+## Evidence Still Required
 
-- Standards and protocol references
-- Technology compatibility records
-- Provider capability matrices
-- Research evidence and dated source reviews
-- Example contracts, schemas, and event envelopes
-- Reference workflows and data examples
-- Jurisdiction matrices and approval evidence
-- Competitor and benchmark evidence
-- Acronyms and expanded glossary materials
+- Current technology compatibility records
+- Provider capability and certification matrices
+- Guyana legal, tax, accounting, privacy, payment, and regulatory reviews
+- Completed competitor scorecards
+- Usability and accessibility evidence
+- Security and penetration-test evidence
+- Prototype reports
+- Recovery and operational exercise reports
 - Review coverage manifests
-- Legal, tax, accounting, security, and regulatory review references where disclosure is appropriate
 
 ## Rules
 
-Appendices support authoritative documents but do not silently override the Constitution, ADRs, approved specifications, or founder decisions.
+Appendices support authoritative documents but do not override the Constitution, ADRs, approved specifications, or founder decisions.
 
-Dated evidence records must distinguish verified fact, source limitation, inference, recommendation, and unresolved question. A vendor or regulator website being unavailable is recorded as a research limitation, never treated as evidence that a requirement does not exist.
+Dated evidence must distinguish verified fact, source limitation, inference, recommendation, and unresolved question. An unavailable source is a research limitation, not evidence that a requirement is absent.

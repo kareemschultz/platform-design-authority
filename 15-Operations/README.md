@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-001
 title: Operations Section Index
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -11,25 +11,26 @@ last_reviewed: 2026-07-11
 
 ## Current Specifications
 
-- `OBSERVABILITY_INCIDENT_AND_SUPPORT_OPERATIONS.md` — telemetry, alerts, incidents, containment, communication, support access, runbooks, and operational evidence
-- `SLO_AND_OPERATIONAL_READINESS.md` — service-level indicators, error budgets, readiness reviews, launch gates, and ownership
-- `../12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md` — backup, restore, privacy reapplication, and disaster recovery
-- `../12-Deployment/DEPLOYMENT_REFERENCE_ARCHITECTURE.md` — deployment modes and operating boundaries
-- `../01-Platform/PLATFORM_ADMINISTRATION_AND_DIAGNOSTICS.md` — platform administration and diagnostics
-- `../11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md` — containment and abuse scenarios
-- `../20-Strategy/SUPPORT_HANDBOOK.md` — support intake, severity, access, escalation, and knowledge
+- `OBSERVABILITY_INCIDENT_AND_SUPPORT_OPERATIONS.md`
+- `SLO_AND_OPERATIONAL_READINESS.md`
+- `PROBLEM_CHANGE_RELEASE_AND_DATA_REPAIR_OPERATIONS.md`
+- `SECURITY_OPERATIONS_AND_FORENSICS.md`
+- `../12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`
+- `../12-Deployment/DEPLOYMENT_REFERENCE_ARCHITECTURE.md`
+- `../01-Platform/PLATFORM_ADMINISTRATION_AND_DIAGNOSTICS.md`
+- `../11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
+- `../20-Strategy/SUPPORT_HANDBOOK.md`
 
-## Remaining Implementation-Level Depth
+## Remaining Implementation Evidence
 
 - Service catalog and on-call rotation
-- Concrete SLO values from prototypes
-- Runbook repository and automation
-- Status-page implementation
+- Concrete SLO values
+- Runbook automation
+- Status page
 - Capacity and cost dashboards
 - Data-repair utilities
 - Self-hosted support matrix
-- Security-operations procedures
-- Change-management tooling
+- Security-operations exercises
 - Tenant migration and exit runbooks
 
-Every production capability requires an owner, telemetry, SLO, failure modes, runbook, support path, privacy and security controls, reconciliation behavior, and recovery evidence.
+Every production capability requires an owner, telemetry, SLO, failure modes, runbook, support path, reconciliation, and recovery evidence.

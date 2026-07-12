@@ -311,7 +311,7 @@ Every projection and telemetry path inherits or raises classification; it cannot
 
 ## First-Slice Diagram Deliverables
 
-Before implementation review, add detailed sequence and data-flow diagrams for:
+Before implementation review, maintain detailed sequence diagrams for the following flows. Separate data-flow diagrams are deferred until deployable trust-boundary topology exists; every sequence still identifies classification and trust-boundary crossings:
 
 - Better Auth login and tenant selection
 - Cash and electronic sale

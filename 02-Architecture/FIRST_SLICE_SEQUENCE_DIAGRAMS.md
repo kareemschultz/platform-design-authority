@@ -11,7 +11,7 @@ last_reviewed: 2026-07-11
 
 ## Purpose
 
-Provide implementation-review sequence diagrams for the ten load-bearing flows named by `FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md`.
+Provide implementation-review sequence diagrams for the eleven load-bearing flows named by `FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md`.
 
 Every diagram highlights trusted context, authorization, authoritative owner, event publication, audit, provider uncertainty, and recovery behavior.
 
@@ -280,6 +280,33 @@ sequenceDiagram
     Recovery->>Tests: Run tenant-isolation, ledger, privacy, acceptance tests
     Tests-->>IncidentCommander: Pass/fail + reconciliation evidence
     IncidentCommander->>Recovery: Approve traffic only after pass
+```
+
+## 11. Support Impersonation Approval and Expiry
+
+```mermaid
+sequenceDiagram
+    actor Agent as Support Agent
+    actor Approver
+    actor TenantAdmin as Tenant Administrator
+    participant Support
+    participant Policy
+    participant Session
+    participant Audit
+    Agent->>Support: Request tenant-scoped elevation with reason and ticket
+    Support->>Policy: Verify ordinary support permission and tenant policy
+    Policy-->>Support: Approval required; no elevated session
+    Support->>Approver: Request bounded scope and expiry
+    Approver-->>Support: Approve or reject
+    Support->>Audit: Record requester, approver, tenant, reason, scope, expiry
+    Support-->>TenantAdmin: Publish tenant-visible access notice
+    Support->>Session: Mint time-boxed tenant-bound session
+    Agent->>Support: Perform permitted action
+    Support->>Policy: Re-evaluate scope, permission, entitlement, expiry
+    Support->>Audit: Record action and outcome
+    Session->>Session: Auto-expire or revoke
+    Session->>Audit: Record termination
+    Session-->>TenantAdmin: Publish completion and audit reference
 ```
 
 ## Review Checklist

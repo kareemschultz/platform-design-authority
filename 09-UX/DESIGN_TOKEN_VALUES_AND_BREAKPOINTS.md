@@ -74,7 +74,7 @@ The shadcn `default` radius input maps into this governed scale. Generated compo
 |---|---:|
 | `radius.none` | 0 px |
 | `radius.sm` | 4 px |
-| `radius.medium` | 8 px |
+| `radius.md` | 8 px |
 | `radius.lg` | 12 px |
 | `radius.xl` | 16 px |
 | `radius.full` | 9999 px |
@@ -109,7 +109,7 @@ The web shell begins with Tailwind-compatible viewport breakpoints:
 | Token | Minimum width |
 |---|---:|
 | `screen.sm` | 640 px |
-| `screen.medium` | 768 px |
+| `screen.md` | 768 px |
 | `screen.lg` | 1024 px |
 | `screen.xl` | 1280 px |
 | `screen.2xl` | 1536 px |
@@ -212,7 +212,9 @@ Dark mode is a semantic token mapping. It must:
 
 The first chart palette defines eight categorical roles plus sequential and diverging scales. Every chart also uses labels, patterns, shapes, or direct annotation so color is not the only carrier of meaning.
 
-The exact hexadecimal values are maintained in `registry/design-tokens.json` and must pass contrast and color-vision review against their intended background.
+The provisional exact values are maintained under `color.chart.*` in `registry/design-tokens.json`. Categorical roles are ordered rather than semantic status colors. Sequential and diverging scales are evaluation starting points. Every use must pass contrast, adjacent-series, dark-mode, monochrome, and common color-vision-deficiency review; labels or patterns remain mandatory.
+
+Registry-backed groups are `space`, `radius`, `motion`, `screen`, `size`, and `color`. Typography, elevation, and z-index remain governed prose until a cross-platform machine representation is approved.
 
 ## Governance
 

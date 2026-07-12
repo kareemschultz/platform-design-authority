@@ -154,3 +154,7 @@ Sources:
 - License inventory and self-hosted font asset processing.
 
 Recheck when shadcn changes preset schema or style output, Base UI/shadcn publishes a material component change, a chosen font or icon package changes licensing/maturity, the implementation lock changes, or prototype evidence fails a gate.
+
+## 2026-07-12 Repository-Correction Note
+
+The earlier observation that the governed eight-role chart palette already existed in `registry/design-tokens.json` was inaccurate at the audited checkpoint. FA4-001 remediation now adds provisional `color.chart.*` roles and explicit contrast and color-vision review requirements. This note corrects repository state without rewriting the original evidence.

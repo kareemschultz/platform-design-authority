@@ -122,6 +122,8 @@ The export is permissioned, encrypted in transit and at rest, time-limited, audi
 
 ## Acceptance and Feedback
 
+The accept, reject, and correction workflow below is design intent only. It has no first-slice mutation endpoint or permission until OpenAPI, the permission catalog, and the endpoint manifest add them together.
+
 An accounting reviewer may:
 
 - Accept the batch
@@ -136,8 +138,6 @@ The reviewer cannot edit a posted Commerce, Inventory, Cash, Payment, or Stored 
 ## API Contracts
 
 - `GET /v1/finance-handoff/posting-batches`
-- `GET /v1/finance-handoff/posting-batches/{batchId}`
-- `POST /v1/finance-handoff/posting-batches/{batchId}/review`
 - `POST /v1/exports/accountant-handoff`
 - `GET /v1/exports/{exportId}`
 - `POST /v1/deposit-reconciliations`

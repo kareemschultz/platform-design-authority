@@ -1,0 +1,366 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft",
+  "source_document": "09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md",
+  "tokens": {
+    "space": {
+      "0": {
+        "$type": "dimension",
+        "$value": "0px"
+      },
+      "1": {
+        "$type": "dimension",
+        "$value": "4px"
+      },
+      "2": {
+        "$type": "dimension",
+        "$value": "8px"
+      },
+      "3": {
+        "$type": "dimension",
+        "$value": "12px"
+      },
+      "4": {
+        "$type": "dimension",
+        "$value": "16px"
+      },
+      "6": {
+        "$type": "dimension",
+        "$value": "24px"
+      },
+      "8": {
+        "$type": "dimension",
+        "$value": "32px"
+      },
+      "12": {
+        "$type": "dimension",
+        "$value": "48px"
+      },
+      "16": {
+        "$type": "dimension",
+        "$value": "64px"
+      },
+      "0_5": {
+        "$type": "dimension",
+        "$value": "2px"
+      }
+    },
+    "radius": {
+      "none": {
+        "$type": "dimension",
+        "$value": "0px"
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "4px"
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "8px"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "12px"
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "16px"
+      },
+      "full": {
+        "$type": "dimension",
+        "$value": "9999px"
+      }
+    },
+    "motion": {
+      "instant": {
+        "$type": "duration",
+        "$value": "0ms"
+      },
+      "fast": {
+        "$type": "duration",
+        "$value": "100ms"
+      },
+      "normal": {
+        "$type": "duration",
+        "$value": "180ms"
+      },
+      "slow": {
+        "$type": "duration",
+        "$value": "280ms"
+      },
+      "deliberate": {
+        "$type": "duration",
+        "$value": "400ms"
+      }
+    },
+    "screen": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "640px"
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "768px"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "1024px"
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "1280px"
+      },
+      "2xl": {
+        "$type": "dimension",
+        "$value": "1536px"
+      }
+    },
+    "size": {
+      "target-min": {
+        "$type": "dimension",
+        "$value": "24px"
+      },
+      "target-preferred": {
+        "$type": "dimension",
+        "$value": "40px"
+      },
+      "target-pos": {
+        "$type": "dimension",
+        "$value": "48px"
+      },
+      "input-comfortable": {
+        "$type": "dimension",
+        "$value": "40px"
+      },
+      "input-compact": {
+        "$type": "dimension",
+        "$value": "32px"
+      },
+      "row-comfortable": {
+        "$type": "dimension",
+        "$value": "44px"
+      },
+      "row-compact": {
+        "$type": "dimension",
+        "$value": "34px"
+      }
+    },
+    "color": {
+      "light": {
+        "surface-canvas": {
+          "$type": "color",
+          "$value": "#F8FAFC"
+        },
+        "surface-default": {
+          "$type": "color",
+          "$value": "#FFFFFF"
+        },
+        "surface-raised": {
+          "$type": "color",
+          "$value": "#FFFFFF"
+        },
+        "surface-subtle": {
+          "$type": "color",
+          "$value": "#F1F5F9"
+        },
+        "text-primary": {
+          "$type": "color",
+          "$value": "#0F172A"
+        },
+        "text-secondary": {
+          "$type": "color",
+          "$value": "#334155"
+        },
+        "text-muted": {
+          "$type": "color",
+          "$value": "#64748B"
+        },
+        "text-inverse": {
+          "$type": "color",
+          "$value": "#FFFFFF"
+        },
+        "border-default": {
+          "$type": "color",
+          "$value": "#CBD5E1"
+        },
+        "border-strong": {
+          "$type": "color",
+          "$value": "#94A3B8"
+        },
+        "action-primary": {
+          "$type": "color",
+          "$value": "#1D4ED8"
+        },
+        "action-primary-hover": {
+          "$type": "color",
+          "$value": "#1E40AF"
+        },
+        "focus-ring": {
+          "$type": "color",
+          "$value": "#2563EB"
+        },
+        "status-info": {
+          "$type": "color",
+          "$value": "#0369A1"
+        },
+        "status-success": {
+          "$type": "color",
+          "$value": "#047857"
+        },
+        "status-warning": {
+          "$type": "color",
+          "$value": "#A16207"
+        },
+        "status-critical": {
+          "$type": "color",
+          "$value": "#B91C1C"
+        },
+        "status-pending": {
+          "$type": "color",
+          "$value": "#7C3AED"
+        },
+        "status-offline": {
+          "$type": "color",
+          "$value": "#475569"
+        }
+      },
+      "dark": {
+        "surface-canvas": {
+          "$type": "color",
+          "$value": "#020617"
+        },
+        "surface-default": {
+          "$type": "color",
+          "$value": "#0F172A"
+        },
+        "surface-raised": {
+          "$type": "color",
+          "$value": "#1E293B"
+        },
+        "surface-subtle": {
+          "$type": "color",
+          "$value": "#172033"
+        },
+        "text-primary": {
+          "$type": "color",
+          "$value": "#F8FAFC"
+        },
+        "text-secondary": {
+          "$type": "color",
+          "$value": "#CBD5E1"
+        },
+        "text-muted": {
+          "$type": "color",
+          "$value": "#94A3B8"
+        },
+        "text-inverse": {
+          "$type": "color",
+          "$value": "#020617"
+        },
+        "border-default": {
+          "$type": "color",
+          "$value": "#334155"
+        },
+        "border-strong": {
+          "$type": "color",
+          "$value": "#64748B"
+        },
+        "action-primary": {
+          "$type": "color",
+          "$value": "#60A5FA"
+        },
+        "action-primary-hover": {
+          "$type": "color",
+          "$value": "#93C5FD"
+        },
+        "focus-ring": {
+          "$type": "color",
+          "$value": "#60A5FA"
+        },
+        "status-info": {
+          "$type": "color",
+          "$value": "#38BDF8"
+        },
+        "status-success": {
+          "$type": "color",
+          "$value": "#34D399"
+        },
+        "status-warning": {
+          "$type": "color",
+          "$value": "#FBBF24"
+        },
+        "status-critical": {
+          "$type": "color",
+          "$value": "#F87171"
+        },
+        "status-pending": {
+          "$type": "color",
+          "$value": "#C4B5FD"
+        },
+        "status-offline": {
+          "$type": "color",
+          "$value": "#94A3B8"
+        }
+      },
+      "chart": {
+        "$description": "Provisional roles; labels or patterns mandatory; validate contrast and color-vision differentiation.",
+        "categorical-1": {
+          "$type": "color",
+          "$value": "#2563EB"
+        },
+        "categorical-2": {
+          "$type": "color",
+          "$value": "#D97706"
+        },
+        "categorical-3": {
+          "$type": "color",
+          "$value": "#059669"
+        },
+        "categorical-4": {
+          "$type": "color",
+          "$value": "#7C3AED"
+        },
+        "categorical-5": {
+          "$type": "color",
+          "$value": "#DC2626"
+        },
+        "categorical-6": {
+          "$type": "color",
+          "$value": "#0891B2"
+        },
+        "categorical-7": {
+          "$type": "color",
+          "$value": "#C026D3"
+        },
+        "categorical-8": {
+          "$type": "color",
+          "$value": "#4D7C0F"
+        },
+        "sequential-low": {
+          "$type": "color",
+          "$value": "#DBEAFE"
+        },
+        "sequential-mid": {
+          "$type": "color",
+          "$value": "#60A5FA"
+        },
+        "sequential-high": {
+          "$type": "color",
+          "$value": "#1E3A8A"
+        },
+        "diverging-negative": {
+          "$type": "color",
+          "$value": "#B91C1C"
+        },
+        "diverging-neutral": {
+          "$type": "color",
+          "$value": "#CBD5E1"
+        },
+        "diverging-positive": {
+          "$type": "color",
+          "$value": "#047857"
+        }
+      }
+    }
+  }
+}

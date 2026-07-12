@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/security.privacy-case.closed.v1.schema.json",
+  "title": "security.privacy-case.closed.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "security.privacy-case.closed.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["privacyCaseId", "requestType", "outcome", "targetSummary", "completedAt"],
+          "properties": {
+            "privacyCaseId": {"type": "string"},
+            "requestType": {"type": "string", "enum": ["Access", "Export", "Correct", "Restrict", "Erase", "Object"]},
+            "outcome": {"type": "string", "enum": ["Completed", "PartiallyCompleted", "Denied", "Cancelled"]},
+            "targetSummary": {
+              "type": "object",
+              "required": ["completed", "failed", "held", "exempted"],
+              "properties": {
+                "completed": {"type": "integer", "minimum": 0},
+                "failed": {"type": "integer", "minimum": 0},
+                "held": {"type": "integer", "minimum": 0},
+                "exempted": {"type": "integer", "minimum": 0}
+              }
+            },
+            "deletionJournalWatermark": {"type": ["string", "null"]},
+            "completedAt": {"type": "string", "format": "date-time"},
+            "residualRetentionBasis": {"type": ["string", "null"]}
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,258 @@
+---
+document_id: PDA-UX-012
+title: Dashboard and Data Visualization
+version: 0.1.0
+status: Draft
+owner: Platform Design Authority
+last_reviewed: 2026-07-11
+---
+
+# Dashboard and Data Visualization
+
+## Purpose
+
+Define how operational dashboards, KPI surfaces, charts, tables, alerts, and drill-downs translate business questions and data shape into fast, trustworthy decisions.
+
+## Core Rule: Data Drives Shape
+
+Do not design a card or chart first and force data into it. Start with:
+
+1. The user decision
+2. The metric or record grain
+3. Comparison or trend needed
+4. Time horizon
+5. Required precision
+6. Action triggered by the result
+7. Data freshness and confidence
+
+Then select the smallest visual form that communicates the answer accurately.
+
+## Information Weight
+
+Assign each dashboard element a weight:
+
+- Critical: immediate operational risk or required action
+- Primary: daily decision metric
+- Secondary: diagnostic or comparative context
+- Tertiary: low-frequency detail
+
+Critical and primary content receives the most prominent position and clearest action path. Tertiary content belongs in drill-downs, inspectors, tooltips, or secondary views.
+
+## Four-Part Dashboard Structure
+
+### Navigation and Context
+
+The user must always know:
+
+- Tenant and organization
+- Location, store, legal entity, or team
+- Time range
+- Currency and unit
+- Data freshness
+- Workspace or role
+
+### Overview and KPIs
+
+The first viewport should answer “What needs attention?” within seconds.
+
+KPI cards require:
+
+- Clear metric name
+- Current value
+- Comparison basis
+- Direction and meaning
+- Time window
+- Currency or unit
+- Freshness
+- Click-through to evidence
+
+Avoid decorative cards that repeat the same number in multiple forms.
+
+### Main Analysis Area
+
+Use charts, tables, and distributions for the primary business questions.
+
+### Action Layer
+
+Alerts, approvals, drill-down drawers, filters, explanations, and workflow entry points connect insight to action.
+
+A dashboard without a meaningful action or decision is often a report, not an operational dashboard.
+
+## Visualization Selection
+
+| Question | Preferred form |
+|---|---|
+| What is the current value? | KPI or compact metric |
+| How is it changing over time? | Line or area chart |
+| Which categories differ? | Sorted bar chart |
+| What is the distribution? | Histogram, box plot, or bands |
+| What contributes to a total? | Stacked bar; pie only for very few stable parts |
+| Where are exceptions? | Ranked table, heat map, or alert list |
+| What is the process status? | Funnel, stage counts, or status table |
+| What is the relationship? | Scatter plot with careful explanation |
+| What is the exact record detail? | Table or record list |
+| What requires action now? | Queue with severity, age, owner, and action |
+
+## Chart Rules
+
+- Prefer position and length over angle and area for comparison.
+- Start quantitative axes at zero when truncation would mislead.
+- Use consistent time direction and interval.
+- Do not use 3D charts.
+- Limit simultaneous series and provide direct labels where practical.
+- Use color for meaning, not decoration.
+- Preserve meaning without color through labels, shape, or pattern.
+- Explain missing, delayed, partial, estimated, and reconciled data.
+- Show target, threshold, or prior period only when it supports a decision.
+- Avoid dual axes unless the relationship is essential and clearly explained.
+
+## Tables
+
+Use tables for precision, comparison across attributes, sorting, filtering, and action.
+
+Required features depend on task, not component availability:
+
+- Stable row identity
+- Column meaning and units
+- Sorting and filtering
+- Saved views
+- Column visibility
+- Responsive alternative
+- Bulk-selection semantics
+- Pagination or virtualization
+- Export permissions
+- Loading, stale, and partial states
+- Accessible headers and focus
+
+Do not place every record attribute in the default table. Use a focused column set and an inspector or detail page.
+
+## Filters
+
+Filters should answer common questions quickly.
+
+- Promote common filters.
+- Put rare filters in an advanced panel.
+- Show active filters as removable tokens or a clear summary.
+- Preserve and share saved views where useful.
+- Distinguish current-page filters from query-wide filters.
+- Explain timezone, currency, and legal-entity scope.
+- Provide reset and sensible defaults.
+
+## Drill-Down
+
+Every aggregate should link to the records or calculation behind it when permissions allow.
+
+Drill-down preserves:
+
+- Time range
+- Filters
+- Scope
+- Metric definition
+- Currency and units
+- Sort
+- Source dashboard
+
+Do not navigate users to an unrelated generic list and make them reconstruct the dashboard query.
+
+## Metric Governance
+
+Each metric defines:
+
+- Canonical name and identifier
+- Business definition
+- Formula
+- Grain
+- Source owner
+- Time semantics
+- Currency and unit
+- Inclusion and exclusion rules
+- Freshness
+- Certification state
+- Responsible owner
+
+A visually polished dashboard cannot compensate for ambiguous metric definitions.
+
+## Alerts and Exceptions
+
+Operational alerts show:
+
+- Severity
+- What happened
+- Business impact
+- Affected scope
+- Age and freshness
+- Owner or queue
+- Recommended next action
+- Evidence and source
+- Resolution state
+
+Avoid turning every unusual value into an alert. Use thresholds, persistence, correlation, and user role to control noise.
+
+## Progressive Disclosure
+
+Default dashboards should be sparse enough to scan. Use:
+
+- Overview KPIs
+- One or two primary charts
+- Prioritized exception queue
+- Expandable explanations
+- Drill-down drawers
+- Secondary tabs
+- Saved views
+
+Do not hide legal, financial, or data-quality caveats inside tooltips alone.
+
+## Accessibility
+
+- Provide text summaries for charts.
+- Ensure keyboard access to legends, data points, and actions.
+- Offer accessible tables or downloadable data where appropriate.
+- Do not encode meaning by color alone.
+- Support zoom, reflow, and high contrast.
+- Announce filter and refresh results.
+- Preserve focus during live updates.
+
+## Mobile
+
+Mobile dashboards prioritize status and action over chart density.
+
+- Show critical KPIs and alerts first.
+- Use concise charts with drill-down.
+- Replace wide tables with task-focused lists.
+- Keep filters accessible but collapsed.
+- Preserve offline and freshness status.
+
+## Performance
+
+- Load the first meaningful view quickly.
+- Defer low-priority panels.
+- Cache safely by tenant and scope.
+- Virtualize large record sets.
+- Avoid dashboards that trigger uncontrolled fan-out queries.
+- Show partial results only when clearly labeled.
+
+## Anti-Patterns
+
+- KPI card wall with no hierarchy
+- Decorative gradients and shadows competing with data
+- Chart type chosen for novelty
+- Pie charts with many categories
+- Traffic-light colors without labels
+- “Real-time” claims without freshness evidence
+- Mixed currencies or units in one visual without explicit conversion
+- Percent changes without denominator or base period
+- Hidden filters
+- Dashboards that reproduce entire reports in tiny panels
+
+## Dashboard Review
+
+A dashboard passes review when a representative user can answer:
+
+1. What needs attention?
+2. What changed?
+3. Why did it change?
+4. What records support the conclusion?
+5. What can I do next?
+6. How current and trustworthy is the data?
+
+within the expected task time and without training on the charting library.

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/payment.intent.uncertain.v1.schema.json",
+  "title": "payment.intent.uncertain.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "payment.intent.uncertain.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["paymentIntentId", "saleId", "providerAdapterId", "currency", "amountMinor", "uncertaintyReason", "reconciliationRequired"],
+          "properties": {
+            "paymentIntentId": {"type": "string"},
+            "saleId": {"type": "string"},
+            "providerAdapterId": {"type": "string"},
+            "providerReference": {"type": ["string", "null"]},
+            "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+            "amountMinor": {"type": "integer", "minimum": 0},
+            "uncertaintyReason": {"type": "string", "enum": ["Timeout", "ConnectionLost", "ConflictingCallback", "ProviderUnavailable", "Unknown"]},
+            "lastProviderEvidenceAt": {"type": ["string", "null"], "format": "date-time"},
+            "reconciliationRequired": {"const": true},
+            "safeUserInstruction": {"type": "string"}
+          }
+        }
+      }
+    }
+  ]
+}

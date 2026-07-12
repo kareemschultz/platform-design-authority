@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/event-envelope-v1.schema.json",
+  "title": "Canonical Event Envelope V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "occurredAt", "publishedAt", "tenantId", "producerNamespace", "schemaVersion", "classification", "data"],
+  "properties": {
+    "id": {"type": "string", "minLength": 12, "maxLength": 64},
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.v[1-9][0-9]*$"},
+    "occurredAt": {"type": "string", "format": "date-time"},
+    "publishedAt": {"type": "string", "format": "date-time"},
+    "tenantId": {"type": "string"},
+    "organizationId": {"type": ["string", "null"]},
+    "legalEntityId": {"type": ["string", "null"]},
+    "locationId": {"type": ["string", "null"]},
+    "producerNamespace": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "capabilityId": {"type": ["string", "null"], "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$"},
+    "actorId": {"type": ["string", "null"]},
+    "sourceChannel": {"type": ["string", "null"]},
+    "correlationId": {"type": ["string", "null"]},
+    "causationId": {"type": ["string", "null"]},
+    "idempotencyKey": {"type": ["string", "null"]},
+    "traceId": {"type": ["string", "null"]},
+    "aggregateId": {"type": ["string", "null"]},
+    "schemaVersion": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "classification": {"type": "string"},
+    "purpose": {"type": ["string", "null"]},
+    "data": {"type": "object"}
+  }
+}

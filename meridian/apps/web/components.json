@@ -1,0 +1,37 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-rhea",
+  "rsc": true,
+  "tsx": true,
+  "rtl": true,
+  "pointer": true,
+  "theme": "blue",
+  "chartColor": "blue",
+  "font": "inter",
+  "fontHeading": "geist",
+  "radius": "default",
+  "tailwind": {
+    "config": "",
+    "css": "../../packages/ui/src/styles/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@/components",
+    "utils": "@meridian/ui/lib/utils",
+    "ui": "@meridian/ui/components",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "menuColor": "default",
+  "menuAccent": "subtle",
+  "provenance": {
+    "lifecycle": "controlled prototype",
+    "shadcnCli": "4.13.0",
+    "base": "Base UI",
+    "decision": "PDA-UX-028 and ADR-0022"
+  },
+  "registries": {}
+}

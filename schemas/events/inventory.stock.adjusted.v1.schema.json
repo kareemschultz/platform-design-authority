@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/inventory.stock.adjusted.v1.schema.json",
+  "title": "inventory.stock.adjusted.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "inventory.stock.adjusted.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["adjustmentId", "ledgerEntryId", "productId", "locationId", "quantity", "unit", "reason"],
+          "properties": {
+            "adjustmentId": {"type": "string"},
+            "ledgerEntryId": {"type": "string"},
+            "productId": {"type": "string"},
+            "locationId": {"type": "string"},
+            "lotId": {"type": ["string", "null"]},
+            "serialId": {"type": ["string", "null"]},
+            "quantity": {"type": "number"},
+            "unit": {"type": "string"},
+            "reason": {"type": "string"},
+            "approvalId": {"type": ["string", "null"]},
+            "sourceOperationId": {"type": ["string", "null"]}
+          }
+        }
+      }
+    }
+  ]
+}

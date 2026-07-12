@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "status": "draft",
-  "source_document": "14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
+  "source_document": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
   "package_families": [
     {"id":"applications","globs":["apps/*"],"may_depend_on":["foundation","contracts","platform-clients","ui-web","ui-native","design-tokens","tooling"]},
     {"id":"platform-clients","globs":["packages/platform-clients/*"],"may_depend_on":["foundation","contracts"]},

@@ -1,0 +1,130 @@
+---
+title: Troubleshooting
+description: Diagnose the Meridian controlled prototype safely
+---
+
+# Troubleshoot the local prototype
+
+Use these checks only with a local environment containing synthetic data. Do not paste secrets, cookies, database contents, private audit evidence, or customer data into issues or AI tools.
+
+## Start with a clean diagnostic snapshot
+
+```bash
+bun --version
+node --version
+docker version
+docker compose version
+git status --short
+```
+
+Expected runtime baselines are Bun 1.3.14, Node 24 for the fallback check, and PostgreSQL 18.4. Record the exact command, exit code, affected application, and sanitized error message.
+
+## Frozen installation fails
+
+Run:
+
+```bash
+bun install --frozen-lockfile
+```
+
+If Bun says the lockfile would change:
+
+1. confirm the expected Bun version;
+2. inspect `package.json` and `bun.lock` changes;
+3. do not delete or regenerate the lockfile merely to make CI pass;
+4. treat an intentional dependency update as a governed technology change.
+
+## Server environment validation fails
+
+Confirm all required variables exist and contain no empty values:
+
+```text
+BETTER_AUTH_SECRET
+BETTER_AUTH_TRUSTED_ORIGINS
+BETTER_AUTH_URL
+CORS_ORIGIN
+DATABASE_URL
+```
+
+`BETTER_AUTH_SECRET` needs at least 32 characters. Origins must be exact origins such as `http://localhost:3001`, without a path, query, fragment, or trailing slash.
+
+## PostgreSQL does not become healthy
+
+```bash
+docker compose ps
+docker compose logs postgres
+docker compose exec -T postgres pg_isready -U postgres
+```
+
+Check that `POSTGRES_PASSWORD` is set and matches `DATABASE_URL`. Do not publish the database port as a workaround. If the local volume is disposable and incompatible, follow the reset procedure in [Administration](/docs/administration).
+
+## Authentication fails
+
+- Confirm PostgreSQL is healthy and the auth schema was applied.
+- Confirm browser and server origins match the configured exact origins.
+- Confirm the email is valid and the password has at least eight characters.
+- Clear only the local prototype site's cookies when testing a suspected stale session.
+- Inspect sanitized server output; never publish cookie or credential values.
+
+Account recovery, email verification, MFA, native secure exchange, and production abuse controls are not implemented.
+
+## API status is disconnected
+
+```bash
+curl --fail http://localhost:3000/
+```
+
+If the root succeeds but the web page is disconnected, verify `NEXT_PUBLIC_SERVER_URL=http://localhost:3000`, restart the web build after changing a public environment variable, and confirm CORS uses `http://localhost:3001`.
+
+## Dashboard redirects to sign-in
+
+The dashboard requires a current Better Auth session. Sign in again using a synthetic account. If the session endpoint fails, diagnose the server, database, trusted origins, and cookie environment rather than bypassing the route guard.
+
+## Formatting fails only on Windows
+
+The repository uses LF-formatted source. Configure Git consistently and run:
+
+```bash
+bun run check
+```
+
+Do not commit a repository-wide line-ending rewrite as an incidental fix.
+
+## Fumadocs build reports a path-length error on Windows
+
+Turbopack may exceed the Windows filesystem path limit when the checkout is deeply nested. Move or clone the repository to a shorter path and rerun:
+
+```bash
+bun run --filter docs build
+```
+
+The Linux CI build remains authoritative for the evaluated revision.
+
+## Ports are already in use
+
+The default ports are API 3000, web 3001, and docs 4000. Identify and stop the exact obsolete local process. Do not terminate unrelated processes or change public URLs without also updating trusted-origin and CORS configuration.
+
+## Node fallback fails
+
+Build first, then run:
+
+```bash
+bun run build
+node apps/server/dist/node.mjs
+```
+
+Probe `http://localhost:3000/`. Runtime-specific code must remain isolated; do not remove the fallback check to hide a compatibility regression.
+
+## Escalation record
+
+Include:
+
+- evaluated commit SHA;
+- operating system and architecture;
+- Bun, Node, Docker, and PostgreSQL versions;
+- sanitized reproduction steps;
+- expected and actual behavior;
+- whether the failure reproduces from a fresh disposable environment;
+- relevant test or CI link.
+
+Classify missing implementation separately from a defect. Retail, tenant, permission, entitlement, offline-sync, payment, reporting, and other first-slice workflows are not present in this scaffold.

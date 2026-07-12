@@ -6,12 +6,12 @@ This repository is the architectural source of truth for the modular, white-labe
 
 When documents conflict, report the conflict and use this order:
 
-1. `00-Foundation/CONSTITUTION.md`
+1. `docs/blueprint/00-Foundation/CONSTITUTION.md`
 2. Ratified or Accepted ADRs
 3. Approved specifications with review evidence
 4. Proposed ADRs
 5. Draft specifications
-6. `20-Strategy/FOUNDER_DECISION_REGISTER.md` for unresolved business authority
+6. `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md` for unresolved business authority
 7. Templates, evidence, reviews, examples, and generated artifacts
 
 Generated registries are indexes and contracts derived from authoritative sources; they do not outrank those sources.
@@ -47,17 +47,17 @@ Before inventing an identifier or boundary, consult:
 - `registry/first-slice-tests.json`
 - `registry/endpoint-permissions.json`
 - `registry/architecture-rules.json`
-- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for technology, version, compatibility, and workaround claims
-- `14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md` before creating or handing off parallel work
-- `07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` for user, developer, release, or in-app help changes
-- `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
-- `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
-- `09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before creating, applying, changing, or recommending a shadcn preset, style, base/theme/chart color, font, icon library, radius, menu treatment, RTL, or density default
-- `02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` before changing runtime, HTTP shell, transport, or Node fallback policy
-- `02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md` before selecting or changing durable/background workflow infrastructure
-- `02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before changing the documentation platform or content-delivery architecture
-- `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
-- `20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for technology, version, compatibility, and workaround claims
+- `docs/blueprint/14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md` before creating or handing off parallel work
+- `docs/blueprint/07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` for user, developer, release, or in-app help changes
+- `docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
+- `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
+- `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before creating, applying, changing, or recommending a shadcn preset, style, base/theme/chart color, font, icon library, radius, menu treatment, RTL, or density default
+- `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` before changing runtime, HTTP shell, transport, or Node fallback policy
+- `docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md` before selecting or changing durable/background workflow infrastructure
+- `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before changing the documentation platform or content-delivery architecture
+- `docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
+- `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
 
 Do not edit generated registries manually. Update sources and run:
 
@@ -70,7 +70,7 @@ python scripts/generate_registries.py --check
 ## 5. Architectural Rules
 
 - Preserve ADR-0002 and ADR-0003 modular-monolith and data ownership boundaries.
-- Follow `14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md` and `registry/architecture-rules.json`.
+- Follow `docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md` and `registry/architecture-rules.json`.
 - A domain owns its authoritative data and behavior.
 - Do not import another domain's repositories, migrations, or tables.
 - Use explicit application contracts, the transactional outbox, and canonical events.

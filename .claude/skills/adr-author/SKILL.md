@@ -11,9 +11,9 @@ Author an ADR for `$ARGUMENTS` only when the decision changes durable architectu
 
 ## Read First
 
-- `00-Foundation/CONSTITUTION.md`
-- `00-Foundation/DECISION_FRAMEWORK.md`
-- `templates/ADR_TEMPLATE.md`
+- `docs/blueprint/00-Foundation/CONSTITUTION.md`
+- `docs/blueprint/00-Foundation/DECISION_FRAMEWORK.md`
+- `docs/templates/ADR_TEMPLATE.md`
 - Existing ADRs with related scope
 - Affected specifications, capability map, dependency matrix, founder decisions, and audit findings
 

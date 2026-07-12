@@ -3,7 +3,7 @@
   "documents": [
     {
       "document_id": "ADR-0001",
-      "path": "18-Decisions/ADR-0001-UNIFIED-MODULAR-PLATFORM.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0001-UNIFIED-MODULAR-PLATFORM.md",
       "title": "Adopt a Unified Modular Business Operating Platform",
       "version": "0.1.0",
       "status": "Proposed",
@@ -14,7 +14,7 @@
     },
     {
       "document_id": "ADR-0002",
-      "path": "18-Decisions/ADR-0002-MODULAR-MONOLITH-FIRST.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0002-MODULAR-MONOLITH-FIRST.md",
       "title": "Adopt a Modular Monolith First",
       "version": "0.1.0",
       "status": "Proposed",
@@ -25,7 +25,7 @@
     },
     {
       "document_id": "ADR-0003",
-      "path": "18-Decisions/ADR-0003-DOMAIN-OWNED-DATA-AND-CONTRACTS.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0003-DOMAIN-OWNED-DATA-AND-CONTRACTS.md",
       "title": "Adopt Domain-Owned Data and Published Contracts",
       "version": "0.1.0",
       "status": "Proposed",
@@ -36,7 +36,7 @@
     },
     {
       "document_id": "ADR-0004",
-      "path": "18-Decisions/ADR-0004-TYPESCRIPT-POSTGRESQL-MODULAR-STACK.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0004-TYPESCRIPT-POSTGRESQL-MODULAR-STACK.md",
       "title": "Adopt a TypeScript and PostgreSQL Platform Stack",
       "version": "0.5.0",
       "status": "Proposed",
@@ -51,7 +51,7 @@
     },
     {
       "document_id": "ADR-0005",
-      "path": "18-Decisions/ADR-0005-NEXTJS-TANSTACK-EXPO-CLIENT-STACK.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0005-NEXTJS-TANSTACK-EXPO-CLIENT-STACK.md",
       "title": "Adopt Next.js TanStack and Expo for Client Applications",
       "version": "0.3.0",
       "status": "Proposed",
@@ -65,7 +65,7 @@
     },
     {
       "document_id": "ADR-0006",
-      "path": "18-Decisions/ADR-0006-BETTER-AUTH-AS-AUTHENTICATION-FOUNDATION.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0006-BETTER-AUTH-AS-AUTHENTICATION-FOUNDATION.md",
       "title": "Adopt Better Auth as the Authentication and Session Foundation",
       "version": "0.2.0",
       "status": "Proposed",
@@ -79,7 +79,7 @@
     },
     {
       "document_id": "ADR-0007",
-      "path": "18-Decisions/ADR-0007-CANONICAL-PARTY-AND-RELATIONSHIP-MODEL.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0007-CANONICAL-PARTY-AND-RELATIONSHIP-MODEL.md",
       "title": "Adopt a Canonical Party and Relationship Model",
       "version": "0.1.0",
       "status": "Proposed",
@@ -90,7 +90,7 @@
     },
     {
       "document_id": "ADR-0008",
-      "path": "18-Decisions/ADR-0008-HYBRID-EXTENSIBLE-METADATA-STORAGE.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0008-HYBRID-EXTENSIBLE-METADATA-STORAGE.md",
       "title": "Adopt Hybrid Storage for Extensible Metadata and Custom Fields",
       "version": "0.1.0",
       "status": "Proposed",
@@ -101,7 +101,7 @@
     },
     {
       "document_id": "ADR-0009",
-      "path": "18-Decisions/ADR-0009-LOYALTY-ENGINE-OWNERSHIP.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0009-LOYALTY-ENGINE-OWNERSHIP.md",
       "title": "Assign Loyalty to a Shared Loyalty Engine",
       "version": "0.2.0",
       "status": "Proposed",
@@ -114,7 +114,7 @@
     },
     {
       "document_id": "ADR-0010",
-      "path": "18-Decisions/ADR-0010-FISCALIZATION-AS-A-SHARED-ENGINE.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0010-FISCALIZATION-AS-A-SHARED-ENGINE.md",
       "title": "Treat Fiscalization as a Shared Statutory Engine",
       "version": "0.1.0",
       "status": "Proposed",
@@ -125,7 +125,7 @@
     },
     {
       "document_id": "ADR-0011",
-      "path": "18-Decisions/ADR-0011-PROVIDER-NEUTRAL-BILLING-AND-REGIONAL-PAYMENT-RAILS.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0011-PROVIDER-NEUTRAL-BILLING-AND-REGIONAL-PAYMENT-RAILS.md",
       "title": "Use Provider Neutral Billing and Regional Payment Rails",
       "version": "0.2.0",
       "status": "Proposed",
@@ -139,7 +139,7 @@
     },
     {
       "document_id": "ADR-0012",
-      "path": "18-Decisions/ADR-0012-CONNECTOR-FIRST-WITH-A-NATIVE-REFERENCE-STOREFRONT.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0012-CONNECTOR-FIRST-WITH-A-NATIVE-REFERENCE-STOREFRONT.md",
       "title": "Use a Connector First Strategy with a Native Reference Storefront",
       "version": "0.1.0",
       "status": "Proposed",
@@ -150,7 +150,7 @@
     },
     {
       "document_id": "ADR-0013",
-      "path": "18-Decisions/ADR-0013-COMMERCE-OWNS-CUSTOMER-STORED-VALUE.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0013-COMMERCE-OWNS-CUSTOMER-STORED-VALUE.md",
       "title": "Commerce Owns Customer Stored Value",
       "version": "0.1.0",
       "status": "Proposed",
@@ -161,7 +161,7 @@
     },
     {
       "document_id": "ADR-0014",
-      "path": "18-Decisions/ADR-0014-PII-ISOLATION-AND-IRREVERSIBLE-PSEUDONYMIZATION.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0014-PII-ISOLATION-AND-IRREVERSIBLE-PSEUDONYMIZATION.md",
       "title": "Isolate PII and Use Irreversible Pseudonymization for Valid Erasure",
       "version": "0.1.0",
       "status": "Proposed",
@@ -172,7 +172,7 @@
     },
     {
       "document_id": "ADR-0015",
-      "path": "18-Decisions/ADR-0015-DIRECT-TENANT-MERCHANT-CONTRACTS-FIRST.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0015-DIRECT-TENANT-MERCHANT-CONTRACTS-FIRST.md",
       "title": "Use Direct Tenant Merchant Contracts for the Initial Payment Model",
       "version": "0.1.0",
       "status": "Proposed",
@@ -183,7 +183,7 @@
     },
     {
       "document_id": "ADR-0016",
-      "path": "18-Decisions/ADR-0016-REGISTERED-NAMESPACES-AND-EVENT-CONVENTIONS.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0016-REGISTERED-NAMESPACES-AND-EVENT-CONVENTIONS.md",
       "title": "Use Registered Namespaces and Uniform Event Conventions",
       "version": "0.2.0",
       "status": "Proposed",
@@ -194,7 +194,7 @@
     },
     {
       "document_id": "ADR-0017",
-      "path": "18-Decisions/ADR-0017-REGISTER-PAYMENT-NAMESPACE.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0017-REGISTER-PAYMENT-NAMESPACE.md",
       "title": "Register Dedicated Payment Namespace",
       "version": "0.1.0",
       "status": "Proposed",
@@ -209,7 +209,7 @@
     },
     {
       "document_id": "ADR-0018",
-      "path": "18-Decisions/ADR-0018-USE-OPENTOFU-FOR-INFRASTRUCTURE-AS-CODE.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0018-USE-OPENTOFU-FOR-INFRASTRUCTURE-AS-CODE.md",
       "title": "Use OpenTofu for Infrastructure as Code",
       "version": "0.2.0",
       "status": "Proposed",
@@ -223,7 +223,7 @@
     },
     {
       "document_id": "ADR-0019",
-      "path": "18-Decisions/ADR-0019-PHASED-EXTENSION-EXECUTION-MODEL.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0019-PHASED-EXTENSION-EXECUTION-MODEL.md",
       "title": "Use a Phased Extension Execution Model",
       "version": "0.1.0",
       "status": "Proposed",
@@ -236,7 +236,7 @@
     },
     {
       "document_id": "ADR-0020",
-      "path": "18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md",
       "title": "Prefer Bun Hono and oRPC for Backend Prototypes with a Node Fallback",
       "version": "0.1.0",
       "status": "Proposed",
@@ -253,22 +253,23 @@
     },
     {
       "document_id": "ADR-0021",
-      "path": "18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md",
       "title": "Use a Repository-Owned Fumadocs Documentation Portal",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
       "related_adrs": [
         "ADR-0005",
         "ADR-0016",
-        "ADR-0022"
+        "ADR-0022",
+        "ADR-0025"
       ],
       "review_evidence": null
     },
     {
       "document_id": "ADR-0022",
-      "path": "18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md",
       "title": "Prefer Base UI-Backed shadcn Primitives for New Web Components",
       "version": "0.2.0",
       "status": "Proposed",
@@ -282,7 +283,7 @@
     },
     {
       "document_id": "ADR-0023",
-      "path": "18-Decisions/ADR-0023-EVALUATE-PG-DURABLE-FOR-DATABASE-LOCAL-WORKFLOWS.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0023-EVALUATE-PG-DURABLE-FOR-DATABASE-LOCAL-WORKFLOWS.md",
       "title": "Evaluate pg_durable for Database-Local Workflows Without Replacing Temporal",
       "version": "0.2.0",
       "status": "Proposed",
@@ -298,7 +299,7 @@
     },
     {
       "document_id": "ADR-0024",
-      "path": "18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md",
+      "path": "docs/blueprint/18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md",
       "title": "Adopt PostgreSQL 18 with a Minimal Extension Policy",
       "version": "0.1.0",
       "status": "Proposed",
@@ -312,8 +313,23 @@
       "review_evidence": null
     },
     {
+      "document_id": "ADR-0025",
+      "path": "docs/blueprint/18-Decisions/ADR-0025-NORMALIZE-MONOREPO-AND-DOCUMENTATION-LAYOUT.md",
+      "title": "Normalize the Monorepo and Documentation Layout",
+      "version": "0.1.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0016",
+        "ADR-0020",
+        "ADR-0021"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-AI-001",
-      "path": "06-AI/README.md",
+      "path": "docs/blueprint/06-AI/README.md",
       "title": "AI Platform Section Index",
       "version": "0.5.0",
       "status": "Draft",
@@ -324,7 +340,7 @@
     },
     {
       "document_id": "PDA-AI-010",
-      "path": "06-AI/FIRST_SLICE_AI_BOUNDARY.md",
+      "path": "docs/blueprint/06-AI/FIRST_SLICE_AI_BOUNDARY.md",
       "title": "First Slice AI Boundary",
       "version": "0.1.0",
       "status": "Draft",
@@ -335,7 +351,7 @@
     },
     {
       "document_id": "PDA-AI-011",
-      "path": "06-AI/AI_PLATFORM_ARCHITECTURE.md",
+      "path": "docs/blueprint/06-AI/AI_PLATFORM_ARCHITECTURE.md",
       "title": "AI Platform Architecture",
       "version": "0.2.0",
       "status": "Draft",
@@ -348,7 +364,7 @@
     },
     {
       "document_id": "PDA-AI-012",
-      "path": "06-AI/MODEL_PROMPT_TOOL_AND_AGENT_REGISTRIES.md",
+      "path": "docs/blueprint/06-AI/MODEL_PROMPT_TOOL_AND_AGENT_REGISTRIES.md",
       "title": "Model Prompt Tool and Agent Registries",
       "version": "0.1.0",
       "status": "Draft",
@@ -359,7 +375,7 @@
     },
     {
       "document_id": "PDA-AI-013",
-      "path": "06-AI/MEMORY_RETRIEVAL_AND_CONTEXT.md",
+      "path": "docs/blueprint/06-AI/MEMORY_RETRIEVAL_AND_CONTEXT.md",
       "title": "AI Memory Retrieval and Context",
       "version": "0.2.0",
       "status": "Draft",
@@ -370,7 +386,7 @@
     },
     {
       "document_id": "PDA-AI-014",
-      "path": "06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md",
+      "path": "docs/blueprint/06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md",
       "title": "AI Evaluation Red Team and Incident Response",
       "version": "0.2.0",
       "status": "Draft",
@@ -381,7 +397,7 @@
     },
     {
       "document_id": "PDA-AI-015",
-      "path": "06-AI/AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md",
+      "path": "docs/blueprint/06-AI/AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md",
       "title": "AI SDK Multi Agent and Mutating Agent Controls",
       "version": "0.2.0",
       "status": "Draft",
@@ -392,7 +408,7 @@
     },
     {
       "document_id": "PDA-AI-016",
-      "path": "06-AI/AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md",
+      "path": "docs/blueprint/06-AI/AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md",
       "title": "AI Registry Schemas and Provider Exit",
       "version": "0.1.0",
       "status": "Draft",
@@ -403,7 +419,7 @@
     },
     {
       "document_id": "PDA-APP-001",
-      "path": "19-Appendices/README.md",
+      "path": "docs/blueprint/19-Appendices/README.md",
       "title": "Appendices Section Index",
       "version": "0.9.0",
       "status": "Draft",
@@ -414,7 +430,7 @@
     },
     {
       "document_id": "PDA-APP-002",
-      "path": "19-Appendices/BETTER_AUTH_VERIFICATION-2026-07-10.md",
+      "path": "docs/blueprint/19-Appendices/BETTER_AUTH_VERIFICATION-2026-07-10.md",
       "title": "Better Auth Capability and Commercial Verification",
       "version": "0.1.0",
       "status": "Draft",
@@ -425,7 +441,7 @@
     },
     {
       "document_id": "PDA-APP-003",
-      "path": "19-Appendices/REGIONAL_PAYMENTS_PRIVACY_AND_FISCALIZATION_VERIFICATION-2026-07-10.md",
+      "path": "docs/blueprint/19-Appendices/REGIONAL_PAYMENTS_PRIVACY_AND_FISCALIZATION_VERIFICATION-2026-07-10.md",
       "title": "Regional Payments Privacy and Fiscalization Verification",
       "version": "0.1.0",
       "status": "Draft",
@@ -436,7 +452,7 @@
     },
     {
       "document_id": "PDA-APP-010",
-      "path": "19-Appendices/DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md",
+      "path": "docs/blueprint/19-Appendices/DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md",
       "title": "Documentation Completeness Matrix 2026-07-11",
       "version": "0.2.1",
       "status": "Draft",
@@ -447,7 +463,7 @@
     },
     {
       "document_id": "PDA-APP-011",
-      "path": "19-Appendices/STACK_AND_VENDOR_VERIFICATION-2026-07-11.md",
+      "path": "docs/blueprint/19-Appendices/STACK_AND_VENDOR_VERIFICATION-2026-07-11.md",
       "title": "Stack and Vendor Verification 2026-07-11",
       "version": "0.1.0",
       "status": "Draft",
@@ -458,7 +474,7 @@
     },
     {
       "document_id": "PDA-APP-012",
-      "path": "19-Appendices/GUYANA_REGULATORY_VERIFICATION-2026-07-11.md",
+      "path": "docs/blueprint/19-Appendices/GUYANA_REGULATORY_VERIFICATION-2026-07-11.md",
       "title": "Guyana Regulatory Verification 2026-07-11",
       "version": "0.1.0",
       "status": "Draft",
@@ -469,7 +485,7 @@
     },
     {
       "document_id": "PDA-APP-013",
-      "path": "19-Appendices/BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md",
+      "path": "docs/blueprint/19-Appendices/BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md",
       "title": "Bun Hono oRPC and Better-T Verification 2026-07-12",
       "version": "0.1.0",
       "status": "Draft",
@@ -480,7 +496,7 @@
     },
     {
       "document_id": "PDA-APP-014",
-      "path": "19-Appendices/DOCUMENTATION_TANSTACK_AND_BASE_UI_VERIFICATION-2026-07-12.md",
+      "path": "docs/blueprint/19-Appendices/DOCUMENTATION_TANSTACK_AND_BASE_UI_VERIFICATION-2026-07-12.md",
       "title": "Documentation TanStack and Base UI Verification 2026-07-12",
       "version": "0.1.0",
       "status": "Draft",
@@ -491,7 +507,7 @@
     },
     {
       "document_id": "PDA-APP-015",
-      "path": "19-Appendices/PG_DURABLE_VERIFICATION-2026-07-12.md",
+      "path": "docs/blueprint/19-Appendices/PG_DURABLE_VERIFICATION-2026-07-12.md",
       "title": "pg_durable Verification 2026-07-12",
       "version": "0.1.0",
       "status": "Draft",
@@ -502,7 +518,7 @@
     },
     {
       "document_id": "PDA-APP-016",
-      "path": "19-Appendices/POSTGRESQL_18_AND_EXTENSION_VERIFICATION-2026-07-12.md",
+      "path": "docs/blueprint/19-Appendices/POSTGRESQL_18_AND_EXTENSION_VERIFICATION-2026-07-12.md",
       "title": "PostgreSQL 18 and Extension Verification 2026-07-12",
       "version": "0.1.0",
       "status": "Draft",
@@ -513,7 +529,7 @@
     },
     {
       "document_id": "PDA-APP-017",
-      "path": "19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md",
+      "path": "docs/blueprint/19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md",
       "title": "Better Auth Complete Documentation and Plugin Verification - 2026-07-12",
       "version": "0.1.0",
       "status": "Draft",
@@ -530,7 +546,7 @@
     },
     {
       "document_id": "PDA-APP-018",
-      "path": "19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md",
+      "path": "docs/blueprint/19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md",
       "title": "shadcn Configuration Verification - 2026-07-12",
       "version": "0.1.0",
       "status": "Draft",
@@ -544,7 +560,7 @@
     },
     {
       "document_id": "PDA-APP-019",
-      "path": "19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md",
+      "path": "docs/blueprint/19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md",
       "title": "OpenTofu Verification 2026-07-12",
       "version": "0.1.0",
       "status": "Draft",
@@ -557,7 +573,7 @@
     },
     {
       "document_id": "PDA-ARC-001",
-      "path": "02-Architecture/SYSTEM_CONTEXT.md",
+      "path": "docs/blueprint/02-Architecture/SYSTEM_CONTEXT.md",
       "title": "System Context",
       "version": "0.1.0",
       "status": "Draft",
@@ -568,7 +584,7 @@
     },
     {
       "document_id": "PDA-ARC-002",
-      "path": "02-Architecture/MODULAR_MONOLITH_ARCHITECTURE.md",
+      "path": "docs/blueprint/02-Architecture/MODULAR_MONOLITH_ARCHITECTURE.md",
       "title": "Modular Monolith Architecture",
       "version": "0.1.0",
       "status": "Draft",
@@ -581,7 +597,7 @@
     },
     {
       "document_id": "PDA-ARC-003",
-      "path": "02-Architecture/DOMAIN_COMMUNICATION.md",
+      "path": "docs/blueprint/02-Architecture/DOMAIN_COMMUNICATION.md",
       "title": "Domain Communication",
       "version": "0.1.0",
       "status": "Draft",
@@ -592,7 +608,7 @@
     },
     {
       "document_id": "PDA-ARC-004",
-      "path": "02-Architecture/API_STANDARDS.md",
+      "path": "docs/blueprint/02-Architecture/API_STANDARDS.md",
       "title": "API Standards",
       "version": "0.1.0",
       "status": "Draft",
@@ -603,7 +619,7 @@
     },
     {
       "document_id": "PDA-ARC-005",
-      "path": "02-Architecture/EVENT_STANDARDS.md",
+      "path": "docs/blueprint/02-Architecture/EVENT_STANDARDS.md",
       "title": "Event Standards",
       "version": "0.3.0",
       "status": "Draft",
@@ -616,7 +632,7 @@
     },
     {
       "document_id": "PDA-ARC-006",
-      "path": "02-Architecture/DATA_OWNERSHIP_AND_CONSISTENCY.md",
+      "path": "docs/blueprint/02-Architecture/DATA_OWNERSHIP_AND_CONSISTENCY.md",
       "title": "Data Ownership and Consistency",
       "version": "0.2.0",
       "status": "Draft",
@@ -632,7 +648,7 @@
     },
     {
       "document_id": "PDA-ARC-007",
-      "path": "02-Architecture/INTEGRATION_ARCHITECTURE.md",
+      "path": "docs/blueprint/02-Architecture/INTEGRATION_ARCHITECTURE.md",
       "title": "Integration Architecture",
       "version": "0.1.0",
       "status": "Draft",
@@ -643,7 +659,7 @@
     },
     {
       "document_id": "PDA-ARC-008",
-      "path": "02-Architecture/QUALITY_ATTRIBUTES.md",
+      "path": "docs/blueprint/02-Architecture/QUALITY_ATTRIBUTES.md",
       "title": "Quality Attributes",
       "version": "0.1.0",
       "status": "Draft",
@@ -654,7 +670,7 @@
     },
     {
       "document_id": "PDA-ARC-009",
-      "path": "02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md",
+      "path": "docs/blueprint/02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md",
       "title": "Recommended Technology Stack",
       "version": "0.6.0",
       "status": "Draft",
@@ -674,7 +690,7 @@
     },
     {
       "document_id": "PDA-ARC-010",
-      "path": "02-Architecture/BETTER_T_STACK_AND_CLIENT_ARCHITECTURE.md",
+      "path": "docs/blueprint/02-Architecture/BETTER_T_STACK_AND_CLIENT_ARCHITECTURE.md",
       "title": "Better-T-Stack and Client Architecture",
       "version": "0.6.0",
       "status": "Draft",
@@ -690,7 +706,7 @@
     },
     {
       "document_id": "PDA-ARC-011",
-      "path": "02-Architecture/TANSTACK_DECISION_MATRIX.md",
+      "path": "docs/blueprint/02-Architecture/TANSTACK_DECISION_MATRIX.md",
       "title": "TanStack Decision Matrix",
       "version": "0.2.0",
       "status": "Draft",
@@ -703,7 +719,7 @@
     },
     {
       "document_id": "PDA-ARC-012",
-      "path": "02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md",
+      "path": "docs/blueprint/02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md",
       "title": "First Slice System Context and Flows",
       "version": "0.1.0",
       "status": "Draft",
@@ -722,7 +738,7 @@
     },
     {
       "document_id": "PDA-ARC-013",
-      "path": "02-Architecture/FIRST_SLICE_ENTITY_AND_STATE_MODEL.md",
+      "path": "docs/blueprint/02-Architecture/FIRST_SLICE_ENTITY_AND_STATE_MODEL.md",
       "title": "First Slice Entity and State Model",
       "version": "0.2.0",
       "status": "Draft",
@@ -733,7 +749,7 @@
     },
     {
       "document_id": "PDA-ARC-014",
-      "path": "02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md",
+      "path": "docs/blueprint/02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md",
       "title": "First Slice API and Event Contracts",
       "version": "0.3.1",
       "status": "Draft",
@@ -747,7 +763,7 @@
     },
     {
       "document_id": "PDA-ARC-015",
-      "path": "02-Architecture/FIRST_SLICE_SEQUENCE_DIAGRAMS.md",
+      "path": "docs/blueprint/02-Architecture/FIRST_SLICE_SEQUENCE_DIAGRAMS.md",
       "title": "First Slice Sequence Diagrams",
       "version": "0.1.0",
       "status": "Draft",
@@ -758,7 +774,7 @@
     },
     {
       "document_id": "PDA-ARC-016",
-      "path": "02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md",
+      "path": "docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md",
       "title": "Bun Hono and oRPC Decision Matrix",
       "version": "0.1.0",
       "status": "Draft",
@@ -774,7 +790,7 @@
     },
     {
       "document_id": "PDA-ARC-017",
-      "path": "02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md",
+      "path": "docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md",
       "title": "Documentation Platform Decision Matrix",
       "version": "0.1.0",
       "status": "Draft",
@@ -789,7 +805,7 @@
     },
     {
       "document_id": "PDA-ARC-018",
-      "path": "02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md",
+      "path": "docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md",
       "title": "Workflow Runtime Decision Matrix",
       "version": "0.2.0",
       "status": "Draft",
@@ -805,7 +821,7 @@
     },
     {
       "document_id": "PDA-ARC-019",
-      "path": "02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md",
+      "path": "docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md",
       "title": "PostgreSQL 18 Extension Decision Matrix",
       "version": "0.1.0",
       "status": "Draft",
@@ -821,7 +837,7 @@
     },
     {
       "document_id": "PDA-ARC-020",
-      "path": "02-Architecture/README.md",
+      "path": "docs/blueprint/02-Architecture/README.md",
       "title": "Architecture Section Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -832,7 +848,7 @@
     },
     {
       "document_id": "PDA-COM-001",
-      "path": "13-Commercial/COMMERCIAL_ARCHITECTURE_OVERVIEW.md",
+      "path": "docs/blueprint/13-Commercial/COMMERCIAL_ARCHITECTURE_OVERVIEW.md",
       "title": "Commercial Architecture Overview",
       "version": "0.1.0",
       "status": "Draft",
@@ -843,7 +859,7 @@
     },
     {
       "document_id": "PDA-COM-002",
-      "path": "13-Commercial/PACKAGING_AND_PLATFORM_EDITIONS.md",
+      "path": "docs/blueprint/13-Commercial/PACKAGING_AND_PLATFORM_EDITIONS.md",
       "title": "Packaging and Platform Editions",
       "version": "0.1.0",
       "status": "Draft",
@@ -854,7 +870,7 @@
     },
     {
       "document_id": "PDA-COM-003",
-      "path": "13-Commercial/CAPABILITY_ENTITLEMENTS_AND_LIMITS.md",
+      "path": "docs/blueprint/13-Commercial/CAPABILITY_ENTITLEMENTS_AND_LIMITS.md",
       "title": "Capability Entitlements and Limits",
       "version": "0.1.0",
       "status": "Draft",
@@ -865,7 +881,7 @@
     },
     {
       "document_id": "PDA-COM-004",
-      "path": "13-Commercial/USAGE_METERING_AND_OVERAGES.md",
+      "path": "docs/blueprint/13-Commercial/USAGE_METERING_AND_OVERAGES.md",
       "title": "Usage Metering and Overages",
       "version": "0.1.0",
       "status": "Draft",
@@ -876,7 +892,7 @@
     },
     {
       "document_id": "PDA-COM-005",
-      "path": "13-Commercial/BILLING_ARCHITECTURE.md",
+      "path": "docs/blueprint/13-Commercial/BILLING_ARCHITECTURE.md",
       "title": "Billing Architecture",
       "version": "0.2.0",
       "status": "Draft",
@@ -889,7 +905,7 @@
     },
     {
       "document_id": "PDA-COM-006",
-      "path": "13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
+      "path": "docs/blueprint/13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
       "title": "Platform Subscription Lifecycle",
       "version": "0.2.0",
       "status": "Draft",
@@ -902,7 +918,7 @@
     },
     {
       "document_id": "PDA-COM-007",
-      "path": "13-Commercial/TRIALS_UPGRADES_AND_DOWNGRADES.md",
+      "path": "docs/blueprint/13-Commercial/TRIALS_UPGRADES_AND_DOWNGRADES.md",
       "title": "Trials Upgrades and Downgrades",
       "version": "0.1.0",
       "status": "Draft",
@@ -913,7 +929,7 @@
     },
     {
       "document_id": "PDA-COM-008",
-      "path": "13-Commercial/WHITE_LABEL_COMMERCIAL_TIERS.md",
+      "path": "docs/blueprint/13-Commercial/WHITE_LABEL_COMMERCIAL_TIERS.md",
       "title": "White Label Commercial Tiers",
       "version": "0.1.0",
       "status": "Draft",
@@ -924,7 +940,7 @@
     },
     {
       "document_id": "PDA-COM-009",
-      "path": "13-Commercial/PARTNER_RESELLER_AND_MARKETPLACE_MODEL.md",
+      "path": "docs/blueprint/13-Commercial/PARTNER_RESELLER_AND_MARKETPLACE_MODEL.md",
       "title": "Partner Reseller and Marketplace Model",
       "version": "0.1.0",
       "status": "Draft",
@@ -935,7 +951,7 @@
     },
     {
       "document_id": "PDA-COM-010",
-      "path": "13-Commercial/CUSTOMER_BILLING_PORTAL_AND_SELF_SERVICE.md",
+      "path": "docs/blueprint/13-Commercial/CUSTOMER_BILLING_PORTAL_AND_SELF_SERVICE.md",
       "title": "Customer Billing Portal and Self Service",
       "version": "0.1.0",
       "status": "Draft",
@@ -946,7 +962,7 @@
     },
     {
       "document_id": "PDA-COM-011",
-      "path": "13-Commercial/SUPPORT_IMPLEMENTATION_AND_CUSTOMER_SUCCESS.md",
+      "path": "docs/blueprint/13-Commercial/SUPPORT_IMPLEMENTATION_AND_CUSTOMER_SUCCESS.md",
       "title": "Support Implementation and Customer Success",
       "version": "0.1.0",
       "status": "Draft",
@@ -957,7 +973,7 @@
     },
     {
       "document_id": "PDA-COM-012",
-      "path": "13-Commercial/BILLING_PROVIDER_AND_REGIONAL_PAYMENT_RAILS.md",
+      "path": "docs/blueprint/13-Commercial/BILLING_PROVIDER_AND_REGIONAL_PAYMENT_RAILS.md",
       "title": "Billing Provider and Regional Payment Rails",
       "version": "0.2.0",
       "status": "Draft",
@@ -971,7 +987,7 @@
     },
     {
       "document_id": "PDA-COM-013",
-      "path": "13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md",
+      "path": "docs/blueprint/13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md",
       "title": "Cash Collection and Disbursement Boundaries",
       "version": "0.1.1",
       "status": "Draft",
@@ -985,7 +1001,7 @@
     },
     {
       "document_id": "PDA-COM-014",
-      "path": "13-Commercial/README.md",
+      "path": "docs/blueprint/13-Commercial/README.md",
       "title": "Commercial Section Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -996,7 +1012,7 @@
     },
     {
       "document_id": "PDA-DAT-001",
-      "path": "10-Data/README.md",
+      "path": "docs/blueprint/10-Data/README.md",
       "title": "Data Platform Section Index",
       "version": "0.4.0",
       "status": "Draft",
@@ -1007,7 +1023,7 @@
     },
     {
       "document_id": "PDA-DAT-002",
-      "path": "10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md",
+      "path": "docs/blueprint/10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md",
       "title": "Search Relevance and Semantic Retrieval",
       "version": "0.2.0",
       "status": "Draft",
@@ -1020,7 +1036,7 @@
     },
     {
       "document_id": "PDA-DAT-010",
-      "path": "10-Data/DATA_CLASSIFICATION_AND_HANDLING.md",
+      "path": "docs/blueprint/10-Data/DATA_CLASSIFICATION_AND_HANDLING.md",
       "title": "Data Classification and Handling",
       "version": "0.1.0",
       "status": "Draft",
@@ -1031,7 +1047,7 @@
     },
     {
       "document_id": "PDA-DAT-011",
-      "path": "10-Data/DATA_PLATFORM_ARCHITECTURE.md",
+      "path": "docs/blueprint/10-Data/DATA_PLATFORM_ARCHITECTURE.md",
       "title": "Data Platform Architecture",
       "version": "0.1.0",
       "status": "Draft",
@@ -1042,7 +1058,7 @@
     },
     {
       "document_id": "PDA-DAT-012",
-      "path": "10-Data/DATA_CONTRACTS_LINEAGE_AND_SCHEMA_REGISTRY.md",
+      "path": "docs/blueprint/10-Data/DATA_CONTRACTS_LINEAGE_AND_SCHEMA_REGISTRY.md",
       "title": "Data Contracts Lineage and Schema Registry",
       "version": "0.1.0",
       "status": "Draft",
@@ -1053,7 +1069,7 @@
     },
     {
       "document_id": "PDA-DAT-013",
-      "path": "10-Data/MASTER_REFERENCE_AND_DATA_QUALITY_GOVERNANCE.md",
+      "path": "docs/blueprint/10-Data/MASTER_REFERENCE_AND_DATA_QUALITY_GOVERNANCE.md",
       "title": "Master Reference and Data Quality Governance",
       "version": "0.1.0",
       "status": "Draft",
@@ -1064,7 +1080,7 @@
     },
     {
       "document_id": "PDA-DAT-014",
-      "path": "10-Data/ANALYTICS_SEMANTIC_LAYER_AND_METRIC_GOVERNANCE.md",
+      "path": "docs/blueprint/10-Data/ANALYTICS_SEMANTIC_LAYER_AND_METRIC_GOVERNANCE.md",
       "title": "Analytics Semantic Layer and Metric Governance",
       "version": "0.1.0",
       "status": "Draft",
@@ -1075,7 +1091,7 @@
     },
     {
       "document_id": "PDA-DAT-015",
-      "path": "10-Data/DATA_RETENTION_ARCHIVAL_AND_PORTABILITY.md",
+      "path": "docs/blueprint/10-Data/DATA_RETENTION_ARCHIVAL_AND_PORTABILITY.md",
       "title": "Data Retention Archival and Portability",
       "version": "0.1.0",
       "status": "Draft",
@@ -1086,7 +1102,7 @@
     },
     {
       "document_id": "PDA-DAT-016",
-      "path": "10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md",
+      "path": "docs/blueprint/10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md",
       "title": "Search and Command Ranking Policy",
       "version": "0.1.0",
       "status": "Draft",
@@ -1097,7 +1113,7 @@
     },
     {
       "document_id": "PDA-DEC-001",
-      "path": "18-Decisions/README.md",
+      "path": "docs/blueprint/18-Decisions/README.md",
       "title": "Architecture Decision Record Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -1108,7 +1124,7 @@
     },
     {
       "document_id": "PDA-DEP-001",
-      "path": "12-Deployment/README.md",
+      "path": "docs/blueprint/12-Deployment/README.md",
       "title": "Deployment Section Index",
       "version": "0.5.0",
       "status": "Draft",
@@ -1119,7 +1135,7 @@
     },
     {
       "document_id": "PDA-DEP-010",
-      "path": "12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md",
+      "path": "docs/blueprint/12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md",
       "title": "Backup Restore and Disaster Recovery",
       "version": "0.1.0",
       "status": "Draft",
@@ -1130,7 +1146,7 @@
     },
     {
       "document_id": "PDA-DEP-011",
-      "path": "12-Deployment/DEPLOYMENT_REFERENCE_ARCHITECTURE.md",
+      "path": "docs/blueprint/12-Deployment/DEPLOYMENT_REFERENCE_ARCHITECTURE.md",
       "title": "Deployment Reference Architecture",
       "version": "0.1.0",
       "status": "Draft",
@@ -1141,7 +1157,7 @@
     },
     {
       "document_id": "PDA-DEP-012",
-      "path": "12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md",
+      "path": "docs/blueprint/12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md",
       "title": "Infrastructure as Code and Environment Topology",
       "version": "0.4.0",
       "status": "Draft",
@@ -1156,7 +1172,7 @@
     },
     {
       "document_id": "PDA-DEP-013",
-      "path": "12-Deployment/CAPACITY_COST_AND_MULTI_REGION_STRATEGY.md",
+      "path": "docs/blueprint/12-Deployment/CAPACITY_COST_AND_MULTI_REGION_STRATEGY.md",
       "title": "Capacity Cost and Multi Region Strategy",
       "version": "0.2.0",
       "status": "Draft",
@@ -1167,7 +1183,7 @@
     },
     {
       "document_id": "PDA-DEP-014",
-      "path": "12-Deployment/SELF_HOSTED_COMPATIBILITY_MATRIX.md",
+      "path": "docs/blueprint/12-Deployment/SELF_HOSTED_COMPATIBILITY_MATRIX.md",
       "title": "Self Hosted Compatibility Matrix",
       "version": "0.2.0",
       "status": "Draft",
@@ -1178,7 +1194,7 @@
     },
     {
       "document_id": "PDA-DEP-015",
-      "path": "12-Deployment/INFRASTRUCTURE_COST_WORKSHEET.md",
+      "path": "docs/blueprint/12-Deployment/INFRASTRUCTURE_COST_WORKSHEET.md",
       "title": "Infrastructure Cost Worksheet",
       "version": "0.1.0",
       "status": "Draft",
@@ -1189,7 +1205,7 @@
     },
     {
       "document_id": "PDA-DEV-001",
-      "path": "07-Developer-Platform/README.md",
+      "path": "docs/blueprint/07-Developer-Platform/README.md",
       "title": "Developer Platform Section Index",
       "version": "0.8.0",
       "status": "Draft",
@@ -1200,7 +1216,7 @@
     },
     {
       "document_id": "PDA-DEV-002",
-      "path": "07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
+      "path": "docs/blueprint/07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
       "title": "Webhooks and Event Delivery",
       "version": "0.2.0",
       "status": "Draft",
@@ -1213,7 +1229,7 @@
     },
     {
       "document_id": "PDA-DEV-003",
-      "path": "07-Developer-Platform/REGISTRY_AND_AGENT_AUTOMATION.md",
+      "path": "docs/blueprint/07-Developer-Platform/REGISTRY_AND_AGENT_AUTOMATION.md",
       "title": "Registry and Agent Automation",
       "version": "0.1.0",
       "status": "Draft",
@@ -1224,7 +1240,7 @@
     },
     {
       "document_id": "PDA-DEV-004",
-      "path": "07-Developer-Platform/API_VERSIONING_AND_DEPRECATION.md",
+      "path": "docs/blueprint/07-Developer-Platform/API_VERSIONING_AND_DEPRECATION.md",
       "title": "API Versioning and Deprecation",
       "version": "0.2.0",
       "status": "Draft",
@@ -1237,7 +1253,7 @@
     },
     {
       "document_id": "PDA-DEV-005",
-      "path": "07-Developer-Platform/PROJECT_AGENT_SKILLS.md",
+      "path": "docs/blueprint/07-Developer-Platform/PROJECT_AGENT_SKILLS.md",
       "title": "Project Agent Skills",
       "version": "0.3.0",
       "status": "Draft",
@@ -1248,7 +1264,7 @@
     },
     {
       "document_id": "PDA-DEV-006",
-      "path": "07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md",
+      "path": "docs/blueprint/07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md",
       "title": "SDK CLI and Scaffolding",
       "version": "0.1.0",
       "status": "Draft",
@@ -1259,7 +1275,7 @@
     },
     {
       "document_id": "PDA-DEV-007",
-      "path": "07-Developer-Platform/EXTENSION_PLUGIN_AND_SANDBOX_ARCHITECTURE.md",
+      "path": "docs/blueprint/07-Developer-Platform/EXTENSION_PLUGIN_AND_SANDBOX_ARCHITECTURE.md",
       "title": "Extension Plugin and Sandbox Architecture",
       "version": "0.2.0",
       "status": "Draft",
@@ -1272,7 +1288,7 @@
     },
     {
       "document_id": "PDA-DEV-008",
-      "path": "07-Developer-Platform/PUBLIC_API_AND_APPLICATION_REGISTRATION.md",
+      "path": "docs/blueprint/07-Developer-Platform/PUBLIC_API_AND_APPLICATION_REGISTRATION.md",
       "title": "Public API and Application Registration",
       "version": "0.1.0",
       "status": "Draft",
@@ -1283,7 +1299,7 @@
     },
     {
       "document_id": "PDA-DEV-009",
-      "path": "07-Developer-Platform/REFERENCE_INTEGRATIONS_AND_PROVIDER_SIMULATORS.md",
+      "path": "docs/blueprint/07-Developer-Platform/REFERENCE_INTEGRATIONS_AND_PROVIDER_SIMULATORS.md",
       "title": "Reference Integrations and Provider Simulators",
       "version": "0.1.0",
       "status": "Draft",
@@ -1294,7 +1310,7 @@
     },
     {
       "document_id": "PDA-DEV-010",
-      "path": "07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md",
+      "path": "docs/blueprint/07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md",
       "title": "Product Documentation and Knowledge Architecture",
       "version": "0.1.0",
       "status": "Draft",
@@ -1309,7 +1325,7 @@
     },
     {
       "document_id": "PDA-DOM-001",
-      "path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/COMMERCE_DOMAIN.md",
       "title": "Commerce Domain",
       "version": "0.3.0",
       "status": "Draft",
@@ -1325,7 +1341,7 @@
     },
     {
       "document_id": "PDA-DOM-002",
-      "path": "04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "title": "Product Catalog Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1338,7 +1354,7 @@
     },
     {
       "document_id": "PDA-DOM-003",
-      "path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "title": "Inventory Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1351,7 +1367,7 @@
     },
     {
       "document_id": "PDA-DOM-004",
-      "path": "04-Business-Domains/WAREHOUSE_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/WAREHOUSE_DOMAIN.md",
       "title": "Warehouse Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1362,7 +1378,7 @@
     },
     {
       "document_id": "PDA-DOM-005",
-      "path": "04-Business-Domains/PROCUREMENT_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/PROCUREMENT_DOMAIN.md",
       "title": "Procurement Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1375,7 +1391,7 @@
     },
     {
       "document_id": "PDA-DOM-006",
-      "path": "04-Business-Domains/FINANCE_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/FINANCE_DOMAIN.md",
       "title": "Finance Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1390,7 +1406,7 @@
     },
     {
       "document_id": "PDA-DOM-007",
-      "path": "04-Business-Domains/CRM_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/CRM_DOMAIN.md",
       "title": "CRM Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1403,7 +1419,7 @@
     },
     {
       "document_id": "PDA-DOM-008",
-      "path": "04-Business-Domains/WORKFORCE_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/WORKFORCE_DOMAIN.md",
       "title": "Workforce Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1417,7 +1433,7 @@
     },
     {
       "document_id": "PDA-DOM-009",
-      "path": "04-Business-Domains/PAYROLL_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/PAYROLL_DOMAIN.md",
       "title": "Payroll Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1428,7 +1444,7 @@
     },
     {
       "document_id": "PDA-DOM-010",
-      "path": "04-Business-Domains/SUPPLY_CHAIN_AND_LOGISTICS_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/SUPPLY_CHAIN_AND_LOGISTICS_DOMAIN.md",
       "title": "Supply Chain and Logistics Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1439,7 +1455,7 @@
     },
     {
       "document_id": "PDA-DOM-011",
-      "path": "04-Business-Domains/MANUFACTURING_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/MANUFACTURING_DOMAIN.md",
       "title": "Manufacturing Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1450,7 +1466,7 @@
     },
     {
       "document_id": "PDA-DOM-012",
-      "path": "04-Business-Domains/PROJECTS_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/PROJECTS_DOMAIN.md",
       "title": "Projects Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1461,7 +1477,7 @@
     },
     {
       "document_id": "PDA-DOM-013",
-      "path": "04-Business-Domains/SERVICE_AND_HELP_DESK_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/SERVICE_AND_HELP_DESK_DOMAIN.md",
       "title": "Service and Help Desk Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1472,7 +1488,7 @@
     },
     {
       "document_id": "PDA-DOM-014",
-      "path": "04-Business-Domains/ASSETS_AND_MAINTENANCE_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/ASSETS_AND_MAINTENANCE_DOMAIN.md",
       "title": "Assets and Maintenance Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1483,7 +1499,7 @@
     },
     {
       "document_id": "PDA-DOM-015",
-      "path": "04-Business-Domains/FLEET_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/FLEET_DOMAIN.md",
       "title": "Fleet Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1494,7 +1510,7 @@
     },
     {
       "document_id": "PDA-DOM-016",
-      "path": "04-Business-Domains/RENTAL_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/RENTAL_DOMAIN.md",
       "title": "Rental Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1505,7 +1521,7 @@
     },
     {
       "document_id": "PDA-DOM-017",
-      "path": "04-Business-Domains/MARKETING_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/MARKETING_DOMAIN.md",
       "title": "Marketing Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1516,7 +1532,7 @@
     },
     {
       "document_id": "PDA-DOM-018",
-      "path": "04-Business-Domains/DOCUMENTS_AND_KNOWLEDGE_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/DOCUMENTS_AND_KNOWLEDGE_DOMAIN.md",
       "title": "Documents and Knowledge Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1529,7 +1545,7 @@
     },
     {
       "document_id": "PDA-DOM-019",
-      "path": "04-Business-Domains/GOVERNANCE_AND_COMPLIANCE_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/GOVERNANCE_AND_COMPLIANCE_DOMAIN.md",
       "title": "Governance and Compliance Domain",
       "version": "0.2.0",
       "status": "Draft",
@@ -1540,7 +1556,7 @@
     },
     {
       "document_id": "PDA-DOM-020",
-      "path": "04-Business-Domains/PLANNING_AND_ANALYTICS_DOMAIN.md",
+      "path": "docs/blueprint/04-Business-Domains/PLANNING_AND_ANALYTICS_DOMAIN.md",
       "title": "Planning and Analytics Domain",
       "version": "0.1.0",
       "status": "Draft",
@@ -1551,7 +1567,7 @@
     },
     {
       "document_id": "PDA-DOM-021",
-      "path": "04-Business-Domains/BUSINESS_CAPABILITY_MAP.md",
+      "path": "docs/blueprint/04-Business-Domains/BUSINESS_CAPABILITY_MAP.md",
       "title": "Business Capability Map",
       "version": "0.3.0",
       "status": "Draft",
@@ -1572,7 +1588,7 @@
     },
     {
       "document_id": "PDA-DOM-022",
-      "path": "04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md",
+      "path": "docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md",
       "title": "Domain Dependency Matrix",
       "version": "0.3.0",
       "status": "Draft",
@@ -1592,7 +1608,7 @@
     },
     {
       "document_id": "PDA-DOM-023",
-      "path": "04-Business-Domains/STOREFRONT_AND_DIGITAL_COMMERCE.md",
+      "path": "docs/blueprint/04-Business-Domains/STOREFRONT_AND_DIGITAL_COMMERCE.md",
       "title": "Storefront and Digital Commerce",
       "version": "0.2.0",
       "status": "Draft",
@@ -1605,7 +1621,7 @@
     },
     {
       "document_id": "PDA-DOM-024",
-      "path": "04-Business-Domains/RECURRING_COMMERCE_AND_MEMBERSHIPS.md",
+      "path": "docs/blueprint/04-Business-Domains/RECURRING_COMMERCE_AND_MEMBERSHIPS.md",
       "title": "Recurring Commerce and Memberships",
       "version": "0.2.0",
       "status": "Draft",
@@ -1618,7 +1634,7 @@
     },
     {
       "document_id": "PDA-DOM-025",
-      "path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
+      "path": "docs/blueprint/04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
       "title": "Stored Value and Customer Balances",
       "version": "0.2.0",
       "status": "Draft",
@@ -1633,7 +1649,7 @@
     },
     {
       "document_id": "PDA-DOM-026",
-      "path": "04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md",
+      "path": "docs/blueprint/04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md",
       "title": "First Slice Finance Handoff Contract",
       "version": "0.1.0",
       "status": "Draft",
@@ -1647,7 +1663,7 @@
     },
     {
       "document_id": "PDA-DOM-027",
-      "path": "04-Business-Domains/README.md",
+      "path": "docs/blueprint/04-Business-Domains/README.md",
       "title": "Business Domains Section Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -1658,7 +1674,7 @@
     },
     {
       "document_id": "PDA-DOM-090",
-      "path": "04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md",
+      "path": "docs/blueprint/04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md",
       "title": "Capability Map Amendment 2026-07-11",
       "version": "0.2.1",
       "status": "Draft",
@@ -1673,7 +1689,7 @@
     },
     {
       "document_id": "PDA-ENG-001",
-      "path": "03-Business-Engines/BUSINESS_ENGINES_OVERVIEW.md",
+      "path": "docs/blueprint/03-Business-Engines/BUSINESS_ENGINES_OVERVIEW.md",
       "title": "Business Engines Overview",
       "version": "0.3.0",
       "status": "Draft",
@@ -1684,7 +1700,7 @@
     },
     {
       "document_id": "PDA-ENG-002",
-      "path": "03-Business-Engines/WORKFLOW_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/WORKFLOW_ENGINE.md",
       "title": "Workflow Engine",
       "version": "0.2.0",
       "status": "Draft",
@@ -1697,7 +1713,7 @@
     },
     {
       "document_id": "PDA-ENG-003",
-      "path": "03-Business-Engines/APPROVAL_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/APPROVAL_ENGINE.md",
       "title": "Approval Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1708,7 +1724,7 @@
     },
     {
       "document_id": "PDA-ENG-004",
-      "path": "03-Business-Engines/RULES_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/RULES_ENGINE.md",
       "title": "Rules Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1719,7 +1735,7 @@
     },
     {
       "document_id": "PDA-ENG-005",
-      "path": "03-Business-Engines/AUTOMATION_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/AUTOMATION_ENGINE.md",
       "title": "Automation Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1730,7 +1746,7 @@
     },
     {
       "document_id": "PDA-ENG-006",
-      "path": "03-Business-Engines/PRICING_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/PRICING_ENGINE.md",
       "title": "Pricing Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1741,7 +1757,7 @@
     },
     {
       "document_id": "PDA-ENG-007",
-      "path": "03-Business-Engines/TAX_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/TAX_ENGINE.md",
       "title": "Tax Engine",
       "version": "0.2.0",
       "status": "Draft",
@@ -1754,7 +1770,7 @@
     },
     {
       "document_id": "PDA-ENG-008",
-      "path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/PAYMENT_ENGINE.md",
       "title": "Payment Engine",
       "version": "0.3.0",
       "status": "Draft",
@@ -1769,7 +1785,7 @@
     },
     {
       "document_id": "PDA-ENG-009",
-      "path": "03-Business-Engines/PROMOTION_AND_DISCOUNT_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/PROMOTION_AND_DISCOUNT_ENGINE.md",
       "title": "Promotion and Discount Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1780,7 +1796,7 @@
     },
     {
       "document_id": "PDA-ENG-010",
-      "path": "03-Business-Engines/DOCUMENT_AND_TEMPLATE_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/DOCUMENT_AND_TEMPLATE_ENGINE.md",
       "title": "Document and Template Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1791,7 +1807,7 @@
     },
     {
       "document_id": "PDA-ENG-011",
-      "path": "03-Business-Engines/SCHEDULING_AND_CALENDAR_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/SCHEDULING_AND_CALENDAR_ENGINE.md",
       "title": "Scheduling and Calendar Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1802,7 +1818,7 @@
     },
     {
       "document_id": "PDA-ENG-012",
-      "path": "03-Business-Engines/BRANDING_AND_THEME_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/BRANDING_AND_THEME_ENGINE.md",
       "title": "Branding and Theme Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1813,7 +1829,7 @@
     },
     {
       "document_id": "PDA-ENG-013",
-      "path": "03-Business-Engines/WORKSPACE_AND_NAVIGATION_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/WORKSPACE_AND_NAVIGATION_ENGINE.md",
       "title": "Workspace and Navigation Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1824,7 +1840,7 @@
     },
     {
       "document_id": "PDA-ENG-014",
-      "path": "03-Business-Engines/DASHBOARD_AND_WIDGET_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/DASHBOARD_AND_WIDGET_ENGINE.md",
       "title": "Dashboard and Widget Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1835,7 +1851,7 @@
     },
     {
       "document_id": "PDA-ENG-015",
-      "path": "03-Business-Engines/REPORTING_AND_ANALYTICS_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/REPORTING_AND_ANALYTICS_ENGINE.md",
       "title": "Reporting and Analytics Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1846,7 +1862,7 @@
     },
     {
       "document_id": "PDA-ENG-016",
-      "path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "title": "AI Orchestration Engine",
       "version": "0.3.0",
       "status": "Draft",
@@ -1860,7 +1876,7 @@
     },
     {
       "document_id": "PDA-ENG-017",
-      "path": "03-Business-Engines/LOYALTY_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/LOYALTY_ENGINE.md",
       "title": "Loyalty Engine",
       "version": "0.2.0",
       "status": "Draft",
@@ -1875,7 +1891,7 @@
     },
     {
       "document_id": "PDA-ENG-018",
-      "path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
       "title": "Fiscalization and Statutory Reporting Engine",
       "version": "0.2.0",
       "status": "Draft",
@@ -1889,7 +1905,7 @@
     },
     {
       "document_id": "PDA-ENG-019",
-      "path": "03-Business-Engines/BUSINESS_DNA_ENGINE.md",
+      "path": "docs/blueprint/03-Business-Engines/BUSINESS_DNA_ENGINE.md",
       "title": "Business DNA Engine",
       "version": "0.1.0",
       "status": "Draft",
@@ -1902,7 +1918,7 @@
     },
     {
       "document_id": "PDA-ENG-020",
-      "path": "03-Business-Engines/README.md",
+      "path": "docs/blueprint/03-Business-Engines/README.md",
       "title": "Business Engines Section Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -1913,7 +1929,7 @@
     },
     {
       "document_id": "PDA-ENGR-001",
-      "path": "14-Engineering/README.md",
+      "path": "docs/blueprint/14-Engineering/README.md",
       "title": "Engineering Section Index",
       "version": "0.5.0",
       "status": "Draft",
@@ -1924,7 +1940,7 @@
     },
     {
       "document_id": "PDA-ENGR-010",
-      "path": "14-Engineering/ENGINEERING_HANDBOOK.md",
+      "path": "docs/blueprint/14-Engineering/ENGINEERING_HANDBOOK.md",
       "title": "Engineering Handbook",
       "version": "0.1.0",
       "status": "Draft",
@@ -1935,7 +1951,7 @@
     },
     {
       "document_id": "PDA-ENGR-011",
-      "path": "14-Engineering/IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md",
+      "path": "docs/blueprint/14-Engineering/IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md",
       "title": "Implementation Recipes and Scaffolding",
       "version": "0.2.0",
       "status": "Draft",
@@ -1946,7 +1962,7 @@
     },
     {
       "document_id": "PDA-ENGR-012",
-      "path": "14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
+      "path": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
       "version": "0.2.0",
       "status": "Draft",
@@ -1961,9 +1977,9 @@
     },
     {
       "document_id": "PDA-ENGR-013",
-      "path": "14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
+      "path": "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "status": "Draft",
       "owner": "Platform Engineering",
       "last_reviewed": "2026-07-12",
@@ -1976,13 +1992,14 @@
         "ADR-0021",
         "ADR-0022",
         "ADR-0023",
-        "ADR-0024"
+        "ADR-0024",
+        "ADR-0025"
       ],
       "review_evidence": null
     },
     {
       "document_id": "PDA-ENGR-014",
-      "path": "14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md",
+      "path": "docs/blueprint/14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md",
       "title": "Worktree Change and Release Coordination",
       "version": "0.1.0",
       "status": "Draft",
@@ -1993,7 +2010,7 @@
     },
     {
       "document_id": "PDA-ENGR-015",
-      "path": "14-Engineering/ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md",
+      "path": "docs/blueprint/14-Engineering/ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md",
       "title": "Advanced Frontend Technique Catalog",
       "version": "0.1.0",
       "status": "Draft",
@@ -2007,7 +2024,7 @@
     },
     {
       "document_id": "PDA-FND-001",
-      "path": "00-Foundation/PLATFORM_CANON.md",
+      "path": "docs/blueprint/00-Foundation/PLATFORM_CANON.md",
       "title": "Platform Canon",
       "version": "0.1.0",
       "status": "Draft",
@@ -2018,7 +2035,7 @@
     },
     {
       "document_id": "PDA-FND-002",
-      "path": "00-Foundation/CONSTITUTION.md",
+      "path": "docs/blueprint/00-Foundation/CONSTITUTION.md",
       "title": "Platform Constitution",
       "version": "0.1.0",
       "status": "Draft",
@@ -2029,7 +2046,7 @@
     },
     {
       "document_id": "PDA-FND-003",
-      "path": "00-Foundation/GUIDING_PRINCIPLES.md",
+      "path": "docs/blueprint/00-Foundation/GUIDING_PRINCIPLES.md",
       "title": "Guiding Principles",
       "version": "0.1.0",
       "status": "Draft",
@@ -2040,7 +2057,7 @@
     },
     {
       "document_id": "PDA-FND-004",
-      "path": "00-Foundation/DECISION_FRAMEWORK.md",
+      "path": "docs/blueprint/00-Foundation/DECISION_FRAMEWORK.md",
       "title": "Decision Framework",
       "version": "0.1.0",
       "status": "Draft",
@@ -2051,7 +2068,7 @@
     },
     {
       "document_id": "PDA-FND-005",
-      "path": "00-Foundation/PLATFORM_VALUES.md",
+      "path": "docs/blueprint/00-Foundation/PLATFORM_VALUES.md",
       "title": "Platform Values",
       "version": "0.1.0",
       "status": "Draft",
@@ -2062,7 +2079,7 @@
     },
     {
       "document_id": "PDA-FND-006",
-      "path": "00-Foundation/PRODUCT_PHILOSOPHY.md",
+      "path": "docs/blueprint/00-Foundation/PRODUCT_PHILOSOPHY.md",
       "title": "Product Philosophy",
       "version": "0.1.0",
       "status": "Draft",
@@ -2073,7 +2090,7 @@
     },
     {
       "document_id": "PDA-FND-007",
-      "path": "00-Foundation/UX_PHILOSOPHY.md",
+      "path": "docs/blueprint/00-Foundation/UX_PHILOSOPHY.md",
       "title": "UX Philosophy",
       "version": "0.1.0",
       "status": "Draft",
@@ -2084,7 +2101,7 @@
     },
     {
       "document_id": "PDA-FND-008",
-      "path": "00-Foundation/ENGINEERING_PHILOSOPHY.md",
+      "path": "docs/blueprint/00-Foundation/ENGINEERING_PHILOSOPHY.md",
       "title": "Engineering Philosophy",
       "version": "0.1.0",
       "status": "Draft",
@@ -2095,7 +2112,7 @@
     },
     {
       "document_id": "PDA-FND-009",
-      "path": "00-Foundation/ARCHITECTURE_PRINCIPLES.md",
+      "path": "docs/blueprint/00-Foundation/ARCHITECTURE_PRINCIPLES.md",
       "title": "Architecture Principles",
       "version": "0.1.0",
       "status": "Draft",
@@ -2106,7 +2123,7 @@
     },
     {
       "document_id": "PDA-FND-010",
-      "path": "00-Foundation/NAMING_STANDARDS.md",
+      "path": "docs/blueprint/00-Foundation/NAMING_STANDARDS.md",
       "title": "Naming Standards",
       "version": "0.2.0",
       "status": "Draft",
@@ -2119,7 +2136,7 @@
     },
     {
       "document_id": "PDA-FND-011",
-      "path": "00-Foundation/DOCUMENT_GOVERNANCE.md",
+      "path": "docs/blueprint/00-Foundation/DOCUMENT_GOVERNANCE.md",
       "title": "Document Governance",
       "version": "0.1.0",
       "status": "Draft",
@@ -2130,7 +2147,7 @@
     },
     {
       "document_id": "PDA-FND-012",
-      "path": "00-Foundation/AI_PHILOSOPHY.md",
+      "path": "docs/blueprint/00-Foundation/AI_PHILOSOPHY.md",
       "title": "AI Philosophy",
       "version": "0.1.0",
       "status": "Draft",
@@ -2141,7 +2158,7 @@
     },
     {
       "document_id": "PDA-FND-013",
-      "path": "00-Foundation/SECURITY_PHILOSOPHY.md",
+      "path": "docs/blueprint/00-Foundation/SECURITY_PHILOSOPHY.md",
       "title": "Security Philosophy",
       "version": "0.1.0",
       "status": "Draft",
@@ -2152,7 +2169,7 @@
     },
     {
       "document_id": "PDA-FND-014",
-      "path": "00-Foundation/GLOSSARY.md",
+      "path": "docs/blueprint/00-Foundation/GLOSSARY.md",
       "title": "Platform Glossary",
       "version": "0.2.0",
       "status": "Draft",
@@ -2168,7 +2185,7 @@
     },
     {
       "document_id": "PDA-FND-015",
-      "path": "00-Foundation/README.md",
+      "path": "docs/blueprint/00-Foundation/README.md",
       "title": "Foundation Section Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -2179,7 +2196,7 @@
     },
     {
       "document_id": "PDA-IND-001",
-      "path": "05-Industry-Packs/INDUSTRY_PACKS_OVERVIEW.md",
+      "path": "docs/blueprint/05-Industry-Packs/INDUSTRY_PACKS_OVERVIEW.md",
       "title": "Industry Packs Overview",
       "version": "0.1.0",
       "status": "Draft",
@@ -2190,7 +2207,7 @@
     },
     {
       "document_id": "PDA-IND-002",
-      "path": "05-Industry-Packs/RETAIL_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/RETAIL_PACK.md",
       "title": "Retail Industry Pack",
       "version": "0.2.0",
       "status": "Draft",
@@ -2207,7 +2224,7 @@
     },
     {
       "document_id": "PDA-IND-003",
-      "path": "05-Industry-Packs/WHOLESALE_AND_DISTRIBUTION_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/WHOLESALE_AND_DISTRIBUTION_PACK.md",
       "title": "Wholesale and Distribution Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2218,7 +2235,7 @@
     },
     {
       "document_id": "PDA-IND-004",
-      "path": "05-Industry-Packs/RESTAURANT_AND_FOOD_SERVICE_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/RESTAURANT_AND_FOOD_SERVICE_PACK.md",
       "title": "Restaurant and Food Service Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2229,7 +2246,7 @@
     },
     {
       "document_id": "PDA-IND-005",
-      "path": "05-Industry-Packs/MANUFACTURING_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/MANUFACTURING_PACK.md",
       "title": "Manufacturing Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2240,7 +2257,7 @@
     },
     {
       "document_id": "PDA-IND-006",
-      "path": "05-Industry-Packs/CONSTRUCTION_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/CONSTRUCTION_PACK.md",
       "title": "Construction Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2251,7 +2268,7 @@
     },
     {
       "document_id": "PDA-IND-007",
-      "path": "05-Industry-Packs/FIELD_SERVICE_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/FIELD_SERVICE_PACK.md",
       "title": "Field Service Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2262,7 +2279,7 @@
     },
     {
       "document_id": "PDA-IND-008",
-      "path": "05-Industry-Packs/HOSPITALITY_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/HOSPITALITY_PACK.md",
       "title": "Hospitality Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2273,7 +2290,7 @@
     },
     {
       "document_id": "PDA-IND-009",
-      "path": "05-Industry-Packs/HEALTHCARE_OPERATIONS_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/HEALTHCARE_OPERATIONS_PACK.md",
       "title": "Healthcare Operations Industry Pack",
       "version": "0.2.0",
       "status": "Draft",
@@ -2287,7 +2304,7 @@
     },
     {
       "document_id": "PDA-IND-010",
-      "path": "05-Industry-Packs/AUTOMOTIVE_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/AUTOMOTIVE_PACK.md",
       "title": "Automotive Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2298,7 +2315,7 @@
     },
     {
       "document_id": "PDA-IND-011",
-      "path": "05-Industry-Packs/EDUCATION_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/EDUCATION_PACK.md",
       "title": "Education Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2309,7 +2326,7 @@
     },
     {
       "document_id": "PDA-IND-012",
-      "path": "05-Industry-Packs/NONPROFIT_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/NONPROFIT_PACK.md",
       "title": "Nonprofit Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2320,7 +2337,7 @@
     },
     {
       "document_id": "PDA-IND-013",
-      "path": "05-Industry-Packs/AGRICULTURE_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/AGRICULTURE_PACK.md",
       "title": "Agriculture Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2331,7 +2348,7 @@
     },
     {
       "document_id": "PDA-IND-014",
-      "path": "05-Industry-Packs/GOVERNMENT_AND_PUBLIC_ADMINISTRATION_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/GOVERNMENT_AND_PUBLIC_ADMINISTRATION_PACK.md",
       "title": "Government and Public Administration Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2342,7 +2359,7 @@
     },
     {
       "document_id": "PDA-IND-015",
-      "path": "05-Industry-Packs/SALON_AND_PERSONAL_SERVICES_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/SALON_AND_PERSONAL_SERVICES_PACK.md",
       "title": "Salon and Personal Services Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2353,7 +2370,7 @@
     },
     {
       "document_id": "PDA-IND-016",
-      "path": "05-Industry-Packs/PROFESSIONAL_SERVICES_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/PROFESSIONAL_SERVICES_PACK.md",
       "title": "Professional Services Industry Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2364,7 +2381,7 @@
     },
     {
       "document_id": "PDA-IND-018",
-      "path": "05-Industry-Packs/GUYANA_RETAIL_JURISDICTION_PROFILE.md",
+      "path": "docs/blueprint/05-Industry-Packs/GUYANA_RETAIL_JURISDICTION_PROFILE.md",
       "title": "Guyana Retail Jurisdiction Profile",
       "version": "0.1.0",
       "status": "Draft",
@@ -2375,7 +2392,7 @@
     },
     {
       "document_id": "PDA-IND-019",
-      "path": "05-Industry-Packs/README.md",
+      "path": "docs/blueprint/05-Industry-Packs/README.md",
       "title": "Industry Packs Section Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -2386,7 +2403,7 @@
     },
     {
       "document_id": "PDA-IND-090",
-      "path": "05-Industry-Packs/GUYANA_RETAIL_PROTOTYPE_TAX_PACK.md",
+      "path": "docs/blueprint/05-Industry-Packs/GUYANA_RETAIL_PROTOTYPE_TAX_PACK.md",
       "title": "Guyana Retail Prototype Tax Pack",
       "version": "0.1.0",
       "status": "Draft",
@@ -2397,7 +2414,7 @@
     },
     {
       "document_id": "PDA-MAN-001",
-      "path": "PLATFORM_MANIFEST.md",
+      "path": "docs/blueprint/PLATFORM_MANIFEST.md",
       "title": "Platform Manifest",
       "version": "0.3.0",
       "status": "Draft",
@@ -2418,7 +2435,7 @@
     },
     {
       "document_id": "PDA-MKT-001",
-      "path": "08-Marketplace/README.md",
+      "path": "docs/blueprint/08-Marketplace/README.md",
       "title": "Marketplace Section Index",
       "version": "0.3.0",
       "status": "Draft",
@@ -2429,7 +2446,7 @@
     },
     {
       "document_id": "PDA-MKT-010",
-      "path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "path": "docs/blueprint/08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
       "title": "Marketplace Architecture",
       "version": "0.2.0",
       "status": "Draft",
@@ -2442,7 +2459,7 @@
     },
     {
       "document_id": "PDA-MKT-011",
-      "path": "08-Marketplace/PUBLISHER_REVIEW_AND_EXTENSION_LIFECYCLE.md",
+      "path": "docs/blueprint/08-Marketplace/PUBLISHER_REVIEW_AND_EXTENSION_LIFECYCLE.md",
       "title": "Publisher Review and Extension Lifecycle",
       "version": "0.1.0",
       "status": "Draft",
@@ -2453,7 +2470,7 @@
     },
     {
       "document_id": "PDA-MKT-012",
-      "path": "08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md",
+      "path": "docs/blueprint/08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md",
       "title": "Marketplace Commercial Phasing",
       "version": "0.1.0",
       "status": "Draft",
@@ -2467,7 +2484,7 @@
     },
     {
       "document_id": "PDA-OPS-001",
-      "path": "15-Operations/README.md",
+      "path": "docs/blueprint/15-Operations/README.md",
       "title": "Operations Section Index",
       "version": "0.5.0",
       "status": "Draft",
@@ -2478,7 +2495,7 @@
     },
     {
       "document_id": "PDA-OPS-010",
-      "path": "15-Operations/OBSERVABILITY_INCIDENT_AND_SUPPORT_OPERATIONS.md",
+      "path": "docs/blueprint/15-Operations/OBSERVABILITY_INCIDENT_AND_SUPPORT_OPERATIONS.md",
       "title": "Observability Incident and Support Operations",
       "version": "0.1.0",
       "status": "Draft",
@@ -2489,7 +2506,7 @@
     },
     {
       "document_id": "PDA-OPS-011",
-      "path": "15-Operations/SLO_AND_OPERATIONAL_READINESS.md",
+      "path": "docs/blueprint/15-Operations/SLO_AND_OPERATIONAL_READINESS.md",
       "title": "SLO and Operational Readiness",
       "version": "0.1.0",
       "status": "Draft",
@@ -2500,7 +2517,7 @@
     },
     {
       "document_id": "PDA-OPS-012",
-      "path": "15-Operations/PROBLEM_CHANGE_RELEASE_AND_DATA_REPAIR_OPERATIONS.md",
+      "path": "docs/blueprint/15-Operations/PROBLEM_CHANGE_RELEASE_AND_DATA_REPAIR_OPERATIONS.md",
       "title": "Problem Change Release and Data Repair Operations",
       "version": "0.2.0",
       "status": "Draft",
@@ -2511,7 +2528,7 @@
     },
     {
       "document_id": "PDA-OPS-013",
-      "path": "15-Operations/SECURITY_OPERATIONS_AND_FORENSICS.md",
+      "path": "docs/blueprint/15-Operations/SECURITY_OPERATIONS_AND_FORENSICS.md",
       "title": "Security Operations and Forensics",
       "version": "0.2.0",
       "status": "Draft",
@@ -2522,7 +2539,7 @@
     },
     {
       "document_id": "PDA-OPS-014",
-      "path": "15-Operations/OPERATIONAL_EXERCISE_TEMPLATES.md",
+      "path": "docs/blueprint/15-Operations/OPERATIONAL_EXERCISE_TEMPLATES.md",
       "title": "Operational Exercise Templates",
       "version": "0.1.0",
       "status": "Draft",
@@ -2533,7 +2550,7 @@
     },
     {
       "document_id": "PDA-OPS-015",
-      "path": "15-Operations/SERVICE_CATALOG_AND_RUNBOOK_INDEX.md",
+      "path": "docs/blueprint/15-Operations/SERVICE_CATALOG_AND_RUNBOOK_INDEX.md",
       "title": "Service Catalog and Runbook Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -2544,7 +2561,7 @@
     },
     {
       "document_id": "PDA-OPS-016",
-      "path": "15-Operations/STATUS_PAGE_AND_CUSTOMER_COMMUNICATION.md",
+      "path": "docs/blueprint/15-Operations/STATUS_PAGE_AND_CUSTOMER_COMMUNICATION.md",
       "title": "Status Page and Customer Communication",
       "version": "0.1.0",
       "status": "Draft",
@@ -2555,7 +2572,7 @@
     },
     {
       "document_id": "PDA-OPS-017",
-      "path": "15-Operations/TENANT_MIGRATION_EXIT_AND_DATA_REPAIR.md",
+      "path": "docs/blueprint/15-Operations/TENANT_MIGRATION_EXIT_AND_DATA_REPAIR.md",
       "title": "Tenant Migration Exit and Data Repair",
       "version": "0.1.0",
       "status": "Draft",
@@ -2566,7 +2583,7 @@
     },
     {
       "document_id": "PDA-PLT-001",
-      "path": "01-Platform/PLATFORM_KERNEL_OVERVIEW.md",
+      "path": "docs/blueprint/01-Platform/PLATFORM_KERNEL_OVERVIEW.md",
       "title": "Platform Kernel Overview",
       "version": "0.2.0",
       "status": "Draft",
@@ -2582,7 +2599,7 @@
     },
     {
       "document_id": "PDA-PLT-002",
-      "path": "01-Platform/TENANCY_AND_ORGANIZATIONS.md",
+      "path": "docs/blueprint/01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "title": "Tenancy and Organization Model",
       "version": "0.1.0",
       "status": "Draft",
@@ -2593,7 +2610,7 @@
     },
     {
       "document_id": "PDA-PLT-003",
-      "path": "01-Platform/IDENTITY_AND_AUTHENTICATION.md",
+      "path": "docs/blueprint/01-Platform/IDENTITY_AND_AUTHENTICATION.md",
       "title": "Identity and Authentication",
       "version": "0.3.0",
       "status": "Draft",
@@ -2607,7 +2624,7 @@
     },
     {
       "document_id": "PDA-PLT-004",
-      "path": "01-Platform/AUTHORIZATION_AND_POLICY.md",
+      "path": "docs/blueprint/01-Platform/AUTHORIZATION_AND_POLICY.md",
       "title": "Authorization and Policy",
       "version": "0.2.0",
       "status": "Draft",
@@ -2620,7 +2637,7 @@
     },
     {
       "document_id": "PDA-PLT-005",
-      "path": "01-Platform/ENTITLEMENTS_AND_LICENSING.md",
+      "path": "docs/blueprint/01-Platform/ENTITLEMENTS_AND_LICENSING.md",
       "title": "Entitlements and Licensing",
       "version": "0.2.0",
       "status": "Draft",
@@ -2631,7 +2648,7 @@
     },
     {
       "document_id": "PDA-PLT-006",
-      "path": "01-Platform/CONFIGURATION_AND_SETTINGS.md",
+      "path": "docs/blueprint/01-Platform/CONFIGURATION_AND_SETTINGS.md",
       "title": "Configuration and Settings",
       "version": "0.1.0",
       "status": "Draft",
@@ -2642,7 +2659,7 @@
     },
     {
       "document_id": "PDA-PLT-007",
-      "path": "01-Platform/AUDIT_AND_ACTIVITY.md",
+      "path": "docs/blueprint/01-Platform/AUDIT_AND_ACTIVITY.md",
       "title": "Audit and Activity",
       "version": "0.2.0",
       "status": "Draft",
@@ -2655,7 +2672,7 @@
     },
     {
       "document_id": "PDA-PLT-008",
-      "path": "01-Platform/EVENT_BACKBONE.md",
+      "path": "docs/blueprint/01-Platform/EVENT_BACKBONE.md",
       "title": "Event Backbone",
       "version": "0.2.0",
       "status": "Draft",
@@ -2669,7 +2686,7 @@
     },
     {
       "document_id": "PDA-PLT-009",
-      "path": "01-Platform/JOBS_AND_SCHEDULING.md",
+      "path": "docs/blueprint/01-Platform/JOBS_AND_SCHEDULING.md",
       "title": "Jobs and Scheduling",
       "version": "0.2.0",
       "status": "Draft",
@@ -2682,7 +2699,7 @@
     },
     {
       "document_id": "PDA-PLT-010",
-      "path": "01-Platform/NOTIFICATIONS_AND_COMMUNICATION.md",
+      "path": "docs/blueprint/01-Platform/NOTIFICATIONS_AND_COMMUNICATION.md",
       "title": "Notifications and Communication",
       "version": "0.2.0",
       "status": "Draft",
@@ -2693,7 +2710,7 @@
     },
     {
       "document_id": "PDA-PLT-011",
-      "path": "01-Platform/FILES_AND_DOCUMENT_PRIMITIVES.md",
+      "path": "docs/blueprint/01-Platform/FILES_AND_DOCUMENT_PRIMITIVES.md",
       "title": "Files and Document Primitives",
       "version": "0.1.0",
       "status": "Draft",
@@ -2704,7 +2721,7 @@
     },
     {
       "document_id": "PDA-PLT-012",
-      "path": "01-Platform/SEARCH_AND_DISCOVERY.md",
+      "path": "docs/blueprint/01-Platform/SEARCH_AND_DISCOVERY.md",
       "title": "Search and Discovery",
       "version": "0.2.0",
       "status": "Draft",
@@ -2715,7 +2732,7 @@
     },
     {
       "document_id": "PDA-PLT-013",
-      "path": "01-Platform/LOCALIZATION_AND_REGIONALIZATION.md",
+      "path": "docs/blueprint/01-Platform/LOCALIZATION_AND_REGIONALIZATION.md",
       "title": "Localization and Regionalization",
       "version": "0.1.0",
       "status": "Draft",
@@ -2726,7 +2743,7 @@
     },
     {
       "document_id": "PDA-PLT-014",
-      "path": "01-Platform/CURRENCIES_UNITS_AND_REFERENCE_DATA.md",
+      "path": "docs/blueprint/01-Platform/CURRENCIES_UNITS_AND_REFERENCE_DATA.md",
       "title": "Currencies Units and Reference Data",
       "version": "0.1.0",
       "status": "Draft",
@@ -2737,7 +2754,7 @@
     },
     {
       "document_id": "PDA-PLT-015",
-      "path": "01-Platform/FEATURE_FLAGS_AND_RELEASE_CONTROLS.md",
+      "path": "docs/blueprint/01-Platform/FEATURE_FLAGS_AND_RELEASE_CONTROLS.md",
       "title": "Feature Flags and Release Controls",
       "version": "0.1.0",
       "status": "Draft",
@@ -2748,7 +2765,7 @@
     },
     {
       "document_id": "PDA-PLT-016",
-      "path": "01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md",
+      "path": "docs/blueprint/01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md",
       "title": "Device and Edge Management",
       "version": "0.1.0",
       "status": "Draft",
@@ -2759,7 +2776,7 @@
     },
     {
       "document_id": "PDA-PLT-017",
-      "path": "01-Platform/OFFLINE_SYNCHRONIZATION.md",
+      "path": "docs/blueprint/01-Platform/OFFLINE_SYNCHRONIZATION.md",
       "title": "Offline Synchronization",
       "version": "0.1.0",
       "status": "Draft",
@@ -2770,7 +2787,7 @@
     },
     {
       "document_id": "PDA-PLT-018",
-      "path": "01-Platform/SECRETS_KEYS_AND_CREDENTIALS.md",
+      "path": "docs/blueprint/01-Platform/SECRETS_KEYS_AND_CREDENTIALS.md",
       "title": "Secrets Keys and Credentials",
       "version": "0.1.0",
       "status": "Draft",
@@ -2781,7 +2798,7 @@
     },
     {
       "document_id": "PDA-PLT-019",
-      "path": "01-Platform/PLATFORM_ADMINISTRATION_AND_DIAGNOSTICS.md",
+      "path": "docs/blueprint/01-Platform/PLATFORM_ADMINISTRATION_AND_DIAGNOSTICS.md",
       "title": "Platform Administration and Diagnostics",
       "version": "0.1.0",
       "status": "Draft",
@@ -2792,7 +2809,7 @@
     },
     {
       "document_id": "PDA-PLT-020",
-      "path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
+      "path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "title": "Better Auth Identity Architecture",
       "version": "0.4.0",
       "status": "Draft",
@@ -2807,7 +2824,7 @@
     },
     {
       "document_id": "PDA-PLT-021",
-      "path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
+      "path": "docs/blueprint/01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "title": "Party and Relationship Model",
       "version": "0.2.0",
       "status": "Draft",
@@ -2821,7 +2838,7 @@
     },
     {
       "document_id": "PDA-PLT-022",
-      "path": "01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
+      "path": "docs/blueprint/01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
       "title": "Extensible Metadata and Custom Fields",
       "version": "0.1.0",
       "status": "Draft",
@@ -2834,7 +2851,7 @@
     },
     {
       "document_id": "PDA-PLT-023",
-      "path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
+      "path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "title": "Sequence and Numbering Service",
       "version": "0.1.0",
       "status": "Draft",
@@ -2845,7 +2862,7 @@
     },
     {
       "document_id": "PDA-PLT-024",
-      "path": "01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
+      "path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
       "title": "Import Export and Data Migration",
       "version": "0.1.0",
       "status": "Draft",
@@ -2856,7 +2873,7 @@
     },
     {
       "document_id": "PDA-PLT-025",
-      "path": "01-Platform/RATE_LIMITS_QUOTAS_AND_ABUSE_CONTROLS.md",
+      "path": "docs/blueprint/01-Platform/RATE_LIMITS_QUOTAS_AND_ABUSE_CONTROLS.md",
       "title": "Rate Limits Quotas and Abuse Controls",
       "version": "0.2.0",
       "status": "Draft",
@@ -2867,7 +2884,7 @@
     },
     {
       "document_id": "PDA-PLT-026",
-      "path": "01-Platform/COLLABORATION_PRIMITIVES.md",
+      "path": "docs/blueprint/01-Platform/COLLABORATION_PRIMITIVES.md",
       "title": "Collaboration Primitives",
       "version": "0.2.0",
       "status": "Draft",
@@ -2881,7 +2898,7 @@
     },
     {
       "document_id": "PDA-PLT-027",
-      "path": "01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
+      "path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "title": "First Slice Permission Catalog",
       "version": "0.3.0",
       "status": "Draft",
@@ -2895,7 +2912,7 @@
     },
     {
       "document_id": "PDA-PLT-028",
-      "path": "01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md",
+      "path": "docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md",
       "title": "Better Auth Plugin and Feature Decision Matrix",
       "version": "0.1.0",
       "status": "Draft",
@@ -2911,7 +2928,7 @@
     },
     {
       "document_id": "PDA-PLT-029",
-      "path": "01-Platform/README.md",
+      "path": "docs/blueprint/01-Platform/README.md",
       "title": "Platform Section Index",
       "version": "0.1.0",
       "status": "Draft",
@@ -2922,7 +2939,7 @@
     },
     {
       "document_id": "PDA-RDM-001",
-      "path": "17-Roadmap/BLUEPRINT_AND_DELIVERY_ROADMAP.md",
+      "path": "docs/blueprint/17-Roadmap/BLUEPRINT_AND_DELIVERY_ROADMAP.md",
       "title": "Blueprint and Delivery Roadmap",
       "version": "0.2.0",
       "status": "Draft",
@@ -2937,7 +2954,7 @@
     },
     {
       "document_id": "PDA-RDM-002",
-      "path": "17-Roadmap/RATIFICATION_WAVES.md",
+      "path": "docs/blueprint/17-Roadmap/RATIFICATION_WAVES.md",
       "title": "Blueprint Ratification Waves",
       "version": "0.1.0",
       "status": "Draft",
@@ -2948,7 +2965,7 @@
     },
     {
       "document_id": "PDA-RDM-003",
-      "path": "17-Roadmap/FIRST_SLICE_MANIFEST.md",
+      "path": "docs/blueprint/17-Roadmap/FIRST_SLICE_MANIFEST.md",
       "title": "First Slice Capability Manifest",
       "version": "0.1.0",
       "status": "Draft",
@@ -2959,7 +2976,7 @@
     },
     {
       "document_id": "PDA-RDM-004",
-      "path": "17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md",
+      "path": "docs/blueprint/17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md",
       "title": "Technical Prototype Plan",
       "version": "0.2.0",
       "status": "Draft",
@@ -2970,7 +2987,7 @@
     },
     {
       "document_id": "PDA-RDM-005",
-      "path": "17-Roadmap/README.md",
+      "path": "docs/blueprint/17-Roadmap/README.md",
       "title": "Roadmap Section Index",
       "version": "0.2.0",
       "status": "Draft",
@@ -2981,7 +2998,7 @@
     },
     {
       "document_id": "PDA-RDM-006",
-      "path": "17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md",
+      "path": "docs/blueprint/17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md",
       "title": "First Slice Provisional Quality Budgets",
       "version": "0.1.0",
       "status": "Draft",
@@ -2992,7 +3009,7 @@
     },
     {
       "document_id": "PDA-REV-002",
-      "path": "reviews/FABLE5_AUDIT_DISPOSITION_V1.md",
+      "path": "docs/reviews/FABLE5_AUDIT_DISPOSITION_V1.md",
       "title": "Fable 5 Audit Disposition V1",
       "version": "0.2.0",
       "status": "Draft",
@@ -3003,7 +3020,7 @@
     },
     {
       "document_id": "PDA-REV-003",
-      "path": "reviews/FABLE5_SECOND_AUDIT_V1.md",
+      "path": "docs/reviews/FABLE5_SECOND_AUDIT_V1.md",
       "title": "Fable 5 Second Audit V1",
       "version": "0.1.0",
       "status": "Draft",
@@ -3014,7 +3031,7 @@
     },
     {
       "document_id": "PDA-REV-004",
-      "path": "reviews/FABLE5_SECOND_AUDIT_DISPOSITION_V1.md",
+      "path": "docs/reviews/FABLE5_SECOND_AUDIT_DISPOSITION_V1.md",
       "title": "Fable 5 Second Audit Disposition V1",
       "version": "0.2.0",
       "status": "Draft",
@@ -3025,51 +3042,51 @@
     },
     {
       "document_id": "PDA-REV-005",
-      "path": "reviews/FABLE5_THIRD_AUDIT_REGISTRATION.md",
+      "path": "docs/reviews/FABLE5_THIRD_AUDIT_REGISTRATION.md",
       "title": "Fable 5 Third Audit Registration",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [],
-      "review_evidence": "reviews/FABLE5_THIRD_AUDIT_V1.md"
+      "review_evidence": "docs/reviews/FABLE5_THIRD_AUDIT_V1.md"
     },
     {
       "document_id": "PDA-REV-006",
-      "path": "reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md",
+      "path": "docs/reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md",
       "title": "Fable 5 Third Audit Disposition V1",
       "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [],
-      "review_evidence": "reviews/FABLE5_THIRD_AUDIT_V1.md"
+      "review_evidence": "docs/reviews/FABLE5_THIRD_AUDIT_V1.md"
     },
     {
       "document_id": "PDA-REV-007",
-      "path": "reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md",
+      "path": "docs/reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md",
       "title": "Fable 5 Fourth Audit Registration",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
       "related_adrs": [],
-      "review_evidence": "reviews/FABLE5_FOURTH_AUDIT_V1.md"
+      "review_evidence": "docs/reviews/FABLE5_FOURTH_AUDIT_V1.md"
     },
     {
       "document_id": "PDA-REV-008",
-      "path": "reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md",
+      "path": "docs/reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md",
       "title": "Fable 5 Fourth Audit Disposition V1",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
       "related_adrs": [],
-      "review_evidence": "reviews/FABLE5_FOURTH_AUDIT_V1.md"
+      "review_evidence": "docs/reviews/FABLE5_FOURTH_AUDIT_V1.md"
     },
     {
       "document_id": "PDA-SEC-001",
-      "path": "11-Security/README.md",
+      "path": "docs/blueprint/11-Security/README.md",
       "title": "Security Section Index",
       "version": "0.4.0",
       "status": "Draft",
@@ -3080,7 +3097,7 @@
     },
     {
       "document_id": "PDA-SEC-002",
-      "path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
+      "path": "docs/blueprint/11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "title": "Privacy Rights and Retention",
       "version": "0.2.0",
       "status": "Draft",
@@ -3093,7 +3110,7 @@
     },
     {
       "document_id": "PDA-SEC-003",
-      "path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
+      "path": "docs/blueprint/11-Security/RISK_FRAUD_AND_ANOMALY.md",
       "title": "Risk Fraud and Anomaly Management",
       "version": "0.3.0",
       "status": "Draft",
@@ -3106,7 +3123,7 @@
     },
     {
       "document_id": "PDA-SEC-010",
-      "path": "11-Security/PII_ERASURE_AND_PSEUDONYMIZATION.md",
+      "path": "docs/blueprint/11-Security/PII_ERASURE_AND_PSEUDONYMIZATION.md",
       "title": "PII Erasure and Pseudonymization",
       "version": "0.2.0",
       "status": "Draft",
@@ -3119,7 +3136,7 @@
     },
     {
       "document_id": "PDA-SEC-011",
-      "path": "11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md",
+      "path": "docs/blueprint/11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md",
       "title": "Threat Model and Tenant Isolation Strategy",
       "version": "0.2.0",
       "status": "Draft",
@@ -3130,7 +3147,7 @@
     },
     {
       "document_id": "PDA-SEC-012",
-      "path": "11-Security/SECURITY_ARCHITECTURE_AND_CONTROL_FRAMEWORK.md",
+      "path": "docs/blueprint/11-Security/SECURITY_ARCHITECTURE_AND_CONTROL_FRAMEWORK.md",
       "title": "Security Architecture and Control Framework",
       "version": "0.1.0",
       "status": "Draft",
@@ -3141,7 +3158,7 @@
     },
     {
       "document_id": "PDA-SEC-013",
-      "path": "11-Security/CRYPTOGRAPHY_KEY_AND_SECRET_LIFECYCLE.md",
+      "path": "docs/blueprint/11-Security/CRYPTOGRAPHY_KEY_AND_SECRET_LIFECYCLE.md",
       "title": "Cryptography Key and Secret Lifecycle",
       "version": "0.1.0",
       "status": "Draft",
@@ -3152,7 +3169,7 @@
     },
     {
       "document_id": "PDA-SEC-014",
-      "path": "11-Security/SECURE_SOFTWARE_SUPPLY_CHAIN_AND_VULNERABILITY_MANAGEMENT.md",
+      "path": "docs/blueprint/11-Security/SECURE_SOFTWARE_SUPPLY_CHAIN_AND_VULNERABILITY_MANAGEMENT.md",
       "title": "Secure Software Supply Chain and Vulnerability Management",
       "version": "0.1.0",
       "status": "Draft",
@@ -3163,7 +3180,7 @@
     },
     {
       "document_id": "PDA-SEC-015",
-      "path": "11-Security/API_WEBHOOK_EXTENSION_AND_DEVICE_SECURITY.md",
+      "path": "docs/blueprint/11-Security/API_WEBHOOK_EXTENSION_AND_DEVICE_SECURITY.md",
       "title": "API Webhook Extension and Device Security",
       "version": "0.1.0",
       "status": "Draft",
@@ -3174,7 +3191,7 @@
     },
     {
       "document_id": "PDA-SEC-016",
-      "path": "11-Security/PROVIDER_RISK_ASSESSMENT_TEMPLATE.md",
+      "path": "docs/blueprint/11-Security/PROVIDER_RISK_ASSESSMENT_TEMPLATE.md",
       "title": "Provider Risk Assessment Template",
       "version": "0.1.0",
       "status": "Draft",
@@ -3185,7 +3202,7 @@
     },
     {
       "document_id": "PDA-SEC-017",
-      "path": "11-Security/SECURITY_CONTROL_EVIDENCE_AND_LEGAL_HOLD_MATRIX.md",
+      "path": "docs/blueprint/11-Security/SECURITY_CONTROL_EVIDENCE_AND_LEGAL_HOLD_MATRIX.md",
       "title": "Security Control Evidence and Legal Hold Matrix",
       "version": "0.1.0",
       "status": "Draft",
@@ -3196,7 +3213,7 @@
     },
     {
       "document_id": "PDA-STR-001",
-      "path": "20-Strategy/README.md",
+      "path": "docs/blueprint/20-Strategy/README.md",
       "title": "Strategy Section Index",
       "version": "0.5.0",
       "status": "Draft",
@@ -3207,7 +3224,7 @@
     },
     {
       "document_id": "PDA-STR-002",
-      "path": "20-Strategy/FOUNDER_DECISION_REGISTER.md",
+      "path": "docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md",
       "title": "Founder Decision Register",
       "version": "0.3.0",
       "status": "Draft",
@@ -3218,7 +3235,7 @@
     },
     {
       "document_id": "PDA-STR-010",
-      "path": "20-Strategy/COMPETITIVE_INTELLIGENCE_AND_BENCHMARKING.md",
+      "path": "docs/blueprint/20-Strategy/COMPETITIVE_INTELLIGENCE_AND_BENCHMARKING.md",
       "title": "Competitive Intelligence and Benchmarking",
       "version": "0.1.0",
       "status": "Draft",
@@ -3229,7 +3246,7 @@
     },
     {
       "document_id": "PDA-STR-011",
-      "path": "20-Strategy/PLATFORM_EXPERIENCE_INDEX.md",
+      "path": "docs/blueprint/20-Strategy/PLATFORM_EXPERIENCE_INDEX.md",
       "title": "Platform Experience Index",
       "version": "0.2.0",
       "status": "Draft",
@@ -3240,7 +3257,7 @@
     },
     {
       "document_id": "PDA-STR-012",
-      "path": "20-Strategy/BUSINESS_DNA_ENGINE.md",
+      "path": "docs/blueprint/20-Strategy/BUSINESS_DNA_ENGINE.md",
       "title": "Business DNA Strategy Rationale",
       "version": "0.2.0",
       "status": "Draft",
@@ -3251,7 +3268,7 @@
     },
     {
       "document_id": "PDA-STR-013",
-      "path": "20-Strategy/COMPANY_HANDBOOKS.md",
+      "path": "docs/blueprint/20-Strategy/COMPANY_HANDBOOKS.md",
       "title": "Company Handbooks",
       "version": "0.1.0",
       "status": "Draft",
@@ -3262,7 +3279,7 @@
     },
     {
       "document_id": "PDA-STR-014",
-      "path": "20-Strategy/PRODUCT_HANDBOOK.md",
+      "path": "docs/blueprint/20-Strategy/PRODUCT_HANDBOOK.md",
       "title": "Product Handbook",
       "version": "0.1.0",
       "status": "Draft",
@@ -3273,7 +3290,7 @@
     },
     {
       "document_id": "PDA-STR-015",
-      "path": "20-Strategy/DESIGN_HANDBOOK.md",
+      "path": "docs/blueprint/20-Strategy/DESIGN_HANDBOOK.md",
       "title": "Design Handbook",
       "version": "0.1.0",
       "status": "Draft",
@@ -3284,7 +3301,7 @@
     },
     {
       "document_id": "PDA-STR-016",
-      "path": "20-Strategy/AI_HANDBOOK.md",
+      "path": "docs/blueprint/20-Strategy/AI_HANDBOOK.md",
       "title": "AI Handbook",
       "version": "0.2.0",
       "status": "Draft",
@@ -3295,7 +3312,7 @@
     },
     {
       "document_id": "PDA-STR-017",
-      "path": "20-Strategy/IMPLEMENTATION_HANDBOOK.md",
+      "path": "docs/blueprint/20-Strategy/IMPLEMENTATION_HANDBOOK.md",
       "title": "Implementation Handbook",
       "version": "0.2.0",
       "status": "Draft",
@@ -3306,7 +3323,7 @@
     },
     {
       "document_id": "PDA-STR-018",
-      "path": "20-Strategy/SUPPORT_HANDBOOK.md",
+      "path": "docs/blueprint/20-Strategy/SUPPORT_HANDBOOK.md",
       "title": "Support Handbook",
       "version": "0.2.0",
       "status": "Draft",
@@ -3317,7 +3334,7 @@
     },
     {
       "document_id": "PDA-STR-019",
-      "path": "20-Strategy/CUSTOMER_SUCCESS_HANDBOOK.md",
+      "path": "docs/blueprint/20-Strategy/CUSTOMER_SUCCESS_HANDBOOK.md",
       "title": "Customer Success Handbook",
       "version": "0.2.0",
       "status": "Draft",
@@ -3328,7 +3345,7 @@
     },
     {
       "document_id": "PDA-STR-020",
-      "path": "20-Strategy/PARTNER_HANDBOOK.md",
+      "path": "docs/blueprint/20-Strategy/PARTNER_HANDBOOK.md",
       "title": "Partner Handbook",
       "version": "0.2.0",
       "status": "Draft",
@@ -3339,7 +3356,7 @@
     },
     {
       "document_id": "PDA-STR-021",
-      "path": "20-Strategy/SALES_HANDBOOK.md",
+      "path": "docs/blueprint/20-Strategy/SALES_HANDBOOK.md",
       "title": "Sales Handbook",
       "version": "0.2.0",
       "status": "Draft",
@@ -3350,7 +3367,7 @@
     },
     {
       "document_id": "PDA-STR-022",
-      "path": "20-Strategy/COMPANY_AND_PLATFORM_STRATEGY.md",
+      "path": "docs/blueprint/20-Strategy/COMPANY_AND_PLATFORM_STRATEGY.md",
       "title": "Company and Platform Strategy",
       "version": "0.1.0",
       "status": "Draft",
@@ -3361,7 +3378,7 @@
     },
     {
       "document_id": "PDA-STR-023",
-      "path": "20-Strategy/GEOGRAPHIC_AND_JURISDICTION_EXPANSION.md",
+      "path": "docs/blueprint/20-Strategy/GEOGRAPHIC_AND_JURISDICTION_EXPANSION.md",
       "title": "Geographic and Jurisdiction Expansion",
       "version": "0.1.0",
       "status": "Draft",
@@ -3372,7 +3389,7 @@
     },
     {
       "document_id": "PDA-STR-024",
-      "path": "20-Strategy/BUILD_BUY_PARTNER_AND_INTEGRATE.md",
+      "path": "docs/blueprint/20-Strategy/BUILD_BUY_PARTNER_AND_INTEGRATE.md",
       "title": "Build Buy Partner and Integrate",
       "version": "0.1.0",
       "status": "Draft",
@@ -3383,7 +3400,7 @@
     },
     {
       "document_id": "PDA-STR-025",
-      "path": "20-Strategy/ECOSYSTEM_ACADEMY_AND_CERTIFICATION.md",
+      "path": "docs/blueprint/20-Strategy/ECOSYSTEM_ACADEMY_AND_CERTIFICATION.md",
       "title": "Ecosystem Academy and Certification",
       "version": "0.1.0",
       "status": "Draft",
@@ -3394,7 +3411,7 @@
     },
     {
       "document_id": "PDA-STR-026",
-      "path": "20-Strategy/COMPETITOR_BENCHMARK_SCORECARD.md",
+      "path": "docs/blueprint/20-Strategy/COMPETITOR_BENCHMARK_SCORECARD.md",
       "title": "Competitor Benchmark Scorecard",
       "version": "0.1.0",
       "status": "Draft",
@@ -3405,7 +3422,7 @@
     },
     {
       "document_id": "PDA-STR-027",
-      "path": "20-Strategy/MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md",
+      "path": "docs/blueprint/20-Strategy/MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md",
       "title": "Market Segmentation and Beachhead Evidence",
       "version": "0.2.0",
       "status": "Draft",
@@ -3416,7 +3433,7 @@
     },
     {
       "document_id": "PDA-STR-028",
-      "path": "20-Strategy/STRATEGIC_RISKS_ASSUMPTIONS_AND_MILESTONES.md",
+      "path": "docs/blueprint/20-Strategy/STRATEGIC_RISKS_ASSUMPTIONS_AND_MILESTONES.md",
       "title": "Strategic Risks Assumptions and Milestones",
       "version": "0.1.0",
       "status": "Draft",
@@ -3427,7 +3444,7 @@
     },
     {
       "document_id": "PDA-STR-029",
-      "path": "20-Strategy/INTELLECTUAL_PROPERTY_LICENSING_AND_REPOSITORY_POLICY.md",
+      "path": "docs/blueprint/20-Strategy/INTELLECTUAL_PROPERTY_LICENSING_AND_REPOSITORY_POLICY.md",
       "title": "Intellectual Property Licensing and Repository Policy",
       "version": "0.1.0",
       "status": "Draft",
@@ -3438,7 +3455,7 @@
     },
     {
       "document_id": "PDA-TST-001",
-      "path": "16-Testing/README.md",
+      "path": "docs/blueprint/16-Testing/README.md",
       "title": "Testing Section Index",
       "version": "0.5.0",
       "status": "Draft",
@@ -3449,7 +3466,7 @@
     },
     {
       "document_id": "PDA-TST-010",
-      "path": "16-Testing/PLATFORM_TESTING_STRATEGY.md",
+      "path": "docs/blueprint/16-Testing/PLATFORM_TESTING_STRATEGY.md",
       "title": "Platform Testing Strategy",
       "version": "0.2.0",
       "status": "Draft",
@@ -3460,7 +3477,7 @@
     },
     {
       "document_id": "PDA-TST-011",
-      "path": "16-Testing/SPECIALIST_TESTING_STANDARDS.md",
+      "path": "docs/blueprint/16-Testing/SPECIALIST_TESTING_STANDARDS.md",
       "title": "Specialist Testing Standards",
       "version": "0.1.0",
       "status": "Draft",
@@ -3471,7 +3488,7 @@
     },
     {
       "document_id": "PDA-TST-012",
-      "path": "16-Testing/TEST_DATA_ENVIRONMENTS_AND_RELEASE_EVIDENCE.md",
+      "path": "docs/blueprint/16-Testing/TEST_DATA_ENVIRONMENTS_AND_RELEASE_EVIDENCE.md",
       "title": "Test Data Environments and Release Evidence",
       "version": "0.1.0",
       "status": "Draft",
@@ -3482,7 +3499,7 @@
     },
     {
       "document_id": "PDA-TST-013",
-      "path": "16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
+      "path": "docs/blueprint/16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
       "title": "First Slice Capability Test Matrix",
       "version": "0.1.0",
       "status": "Draft",
@@ -3493,7 +3510,7 @@
     },
     {
       "document_id": "PDA-UX-001",
-      "path": "09-UX/README.md",
+      "path": "docs/blueprint/09-UX/README.md",
       "title": "UX and Design System Section Index",
       "version": "0.7.0",
       "status": "Draft",
@@ -3504,7 +3521,7 @@
     },
     {
       "document_id": "PDA-UX-010",
-      "path": "09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md",
+      "path": "docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md",
       "title": "First Slice UX and Accessibility",
       "version": "0.1.0",
       "status": "Draft",
@@ -3515,7 +3532,7 @@
     },
     {
       "document_id": "PDA-UX-011",
-      "path": "09-UX/ADVANCED_INTERFACE_PATTERNS.md",
+      "path": "docs/blueprint/09-UX/ADVANCED_INTERFACE_PATTERNS.md",
       "title": "Advanced Interface Patterns",
       "version": "0.1.0",
       "status": "Draft",
@@ -3526,7 +3543,7 @@
     },
     {
       "document_id": "PDA-UX-012",
-      "path": "09-UX/DASHBOARD_AND_DATA_VISUALIZATION.md",
+      "path": "docs/blueprint/09-UX/DASHBOARD_AND_DATA_VISUALIZATION.md",
       "title": "Dashboard and Data Visualization",
       "version": "0.1.0",
       "status": "Draft",
@@ -3537,7 +3554,7 @@
     },
     {
       "document_id": "PDA-UX-013",
-      "path": "09-UX/FORMS_SELECTION_AND_MULTISELECT.md",
+      "path": "docs/blueprint/09-UX/FORMS_SELECTION_AND_MULTISELECT.md",
       "title": "Forms Selection and Multiselect",
       "version": "0.1.0",
       "status": "Draft",
@@ -3548,7 +3565,7 @@
     },
     {
       "document_id": "PDA-UX-014",
-      "path": "09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md",
+      "path": "docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md",
       "title": "Progressive Disclosure and Complexity Management",
       "version": "0.1.0",
       "status": "Draft",
@@ -3559,7 +3576,7 @@
     },
     {
       "document_id": "PDA-UX-015",
-      "path": "09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md",
+      "path": "docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md",
       "title": "Design Tokens and Visual System",
       "version": "0.2.0",
       "status": "Draft",
@@ -3570,7 +3587,7 @@
     },
     {
       "document_id": "PDA-UX-016",
-      "path": "09-UX/DESIGN_SYSTEM_OPERATIONS.md",
+      "path": "docs/blueprint/09-UX/DESIGN_SYSTEM_OPERATIONS.md",
       "title": "Design System Operations",
       "version": "0.2.0",
       "status": "Draft",
@@ -3581,7 +3598,7 @@
     },
     {
       "document_id": "PDA-UX-017",
-      "path": "09-UX/COMPONENT_CATALOG_AND_STATE_MATRIX.md",
+      "path": "docs/blueprint/09-UX/COMPONENT_CATALOG_AND_STATE_MATRIX.md",
       "title": "Component Catalog and State Matrix",
       "version": "0.2.0",
       "status": "Draft",
@@ -3592,7 +3609,7 @@
     },
     {
       "document_id": "PDA-UX-018",
-      "path": "09-UX/CONTENT_DESIGN_LOCALIZATION_AND_MOTION.md",
+      "path": "docs/blueprint/09-UX/CONTENT_DESIGN_LOCALIZATION_AND_MOTION.md",
       "title": "Content Design Localization and Motion",
       "version": "0.1.0",
       "status": "Draft",
@@ -3603,7 +3620,7 @@
     },
     {
       "document_id": "PDA-UX-019",
-      "path": "09-UX/ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md",
+      "path": "docs/blueprint/09-UX/ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md",
       "title": "Enterprise Table and Data Grid Standard",
       "version": "0.2.0",
       "status": "Draft",
@@ -3614,7 +3631,7 @@
     },
     {
       "document_id": "PDA-UX-020",
-      "path": "09-UX/NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md",
+      "path": "docs/blueprint/09-UX/NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md",
       "title": "Navigation Command Palette and Global Search",
       "version": "0.1.0",
       "status": "Draft",
@@ -3625,7 +3642,7 @@
     },
     {
       "document_id": "PDA-UX-021",
-      "path": "09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md",
+      "path": "docs/blueprint/09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md",
       "title": "Interactive Analytics and Visualization",
       "version": "0.1.0",
       "status": "Draft",
@@ -3636,7 +3653,7 @@
     },
     {
       "document_id": "PDA-UX-022",
-      "path": "09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md",
+      "path": "docs/blueprint/09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md",
       "title": "Tailwind shadcn and Premium UI Source Policy",
       "version": "0.3.0",
       "status": "Draft",
@@ -3650,7 +3667,7 @@
     },
     {
       "document_id": "PDA-UX-023",
-      "path": "09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md",
+      "path": "docs/blueprint/09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md",
       "title": "Design Token Values and Breakpoints",
       "version": "0.2.0",
       "status": "Draft",
@@ -3661,7 +3678,7 @@
     },
     {
       "document_id": "PDA-UX-024",
-      "path": "09-UX/MARKETING_WEBSITE_ARCHITECTURE.md",
+      "path": "docs/blueprint/09-UX/MARKETING_WEBSITE_ARCHITECTURE.md",
       "title": "Marketing Website Architecture",
       "version": "0.1.0",
       "status": "Draft",
@@ -3672,7 +3689,7 @@
     },
     {
       "document_id": "PDA-UX-025",
-      "path": "09-UX/STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md",
+      "path": "docs/blueprint/09-UX/STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md",
       "title": "Storybook and Visual Regression Standard",
       "version": "0.1.0",
       "status": "Draft",
@@ -3683,7 +3700,7 @@
     },
     {
       "document_id": "PDA-UX-026",
-      "path": "09-UX/ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md",
+      "path": "docs/blueprint/09-UX/ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md",
       "title": "Iconography Terminology and Product Content",
       "version": "0.2.0",
       "status": "Draft",
@@ -3694,7 +3711,7 @@
     },
     {
       "document_id": "PDA-UX-027",
-      "path": "09-UX/FIRST_SLICE_TENDER_SCOPE_CLARIFICATION.md",
+      "path": "docs/blueprint/09-UX/FIRST_SLICE_TENDER_SCOPE_CLARIFICATION.md",
       "title": "First Slice Tender Scope Clarification",
       "version": "0.1.0",
       "status": "Draft",
@@ -3708,7 +3725,7 @@
     },
     {
       "document_id": "PDA-UX-028",
-      "path": "09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md",
+      "path": "docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md",
       "title": "shadcn Configuration Decision Matrix",
       "version": "0.1.0",
       "status": "Draft",

@@ -15,9 +15,9 @@ Register `$ARGUMENTS` only after confirming its authoritative owner and avoiding
 - `registry/capabilities.json`
 - `registry/first-slice.json`
 - `registry/permissions.json` when present
-- `04-Business-Domains/BUSINESS_CAPABILITY_MAP.md`
+- `docs/blueprint/04-Business-Domains/BUSINESS_CAPABILITY_MAP.md`
 - Relevant engine, domain, marketplace, commercial, security, and developer specifications
-- `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
+- `docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - ADR-0016
 
 ## Process

@@ -3,19 +3,29 @@ name: Meridian Prototype
 on:
   pull_request:
     paths:
-      - "meridian/**"
+      - "apps/**"
+      - "packages/**"
+      - "ops/**"
+      - ".dockerignore"
+      - "biome.json"
+      - "bts.jsonc"
+      - "bun.lock"
+      - "docker-compose.yml"
+      - "package.json"
+      - "tsconfig.json"
+      - "turbo.json"
       - ".github/workflows/meridian-prototype.yml"
       - "CLAUDE.md"
-      - "00-Foundation/**"
-      - "01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md"
-      - "02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md"
-      - "09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md"
-      - "14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md"
-      - "18-Decisions/ADR-0006-BETTER-AUTH-AS-AUTHENTICATION-FOUNDATION.md"
-      - "18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md"
-      - "18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md"
-      - "18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md"
-      - "18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md"
+      - "docs/blueprint/00-Foundation/**"
+      - "docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md"
+      - "docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md"
+      - "docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md"
+      - "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md"
+      - "docs/blueprint/18-Decisions/ADR-0006-BETTER-AUTH-AS-AUTHENTICATION-FOUNDATION.md"
+      - "docs/blueprint/18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md"
+      - "docs/blueprint/18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md"
+      - "docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md"
+      - "docs/blueprint/18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md"
       - "registry/**"
       - "scripts/**"
   workflow_dispatch:
@@ -30,9 +40,6 @@ permissions:
 jobs:
   meridian:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: meridian
     env:
       # Fixed non-secret test fixtures; never reused outside this isolated CI job.
       BETTER_AUTH_SECRET: "ci-only-32-character-secret-value"
@@ -90,7 +97,6 @@ jobs:
           exit 1
 
       - name: Generated registry freshness
-        working-directory: .
         run: python scripts/generate_registries.py --check
 
       - name: Secret and prohibited surface scan
@@ -99,11 +105,14 @@ jobs:
           set -euo pipefail
           if grep -RInE "(sk-[A-Za-z0-9]|OPENAI_API_KEY|OPENROUTER_API_KEY|POSTGRES_PASSWORD:-password|@ai-sdk|openrouter|devtools|/ai|/todos)" \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.turbo \
-            --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock .; then
+            --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock \
+            apps packages ops package.json biome.json turbo.json docker-compose.yml; then
             echo "Prohibited secret or generated example surface found" >&2
             exit 1
           fi
-          if git grep -n "@latest" -- "*.json" "*.jsonc" "*.yml" "*.yaml" ":!bts.jsonc"; then
+          if grep -RIn "@latest" --include='*.json' --include='*.jsonc' --include='*.yml' --include='*.yaml' \
+            --exclude=bts.jsonc --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.turbo \
+            apps packages package.json biome.json turbo.json docker-compose.yml; then
             echo "Unpinned @latest selector found in active configuration" >&2
             exit 1
           fi

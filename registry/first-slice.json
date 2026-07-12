@@ -1,7 +1,7 @@
 {
   "schema_version": "2.1.0",
   "status": "draft",
-  "source_document": "17-Roadmap/FIRST_SLICE_MANIFEST.md",
+  "source_document": "docs/blueprint/17-Roadmap/FIRST_SLICE_MANIFEST.md",
   "name": "Guyana Retail Foundation Slice",
   "capabilities": [
     {"id":"platform.tenancy","depth":"full"},

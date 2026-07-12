@@ -14,12 +14,12 @@ This is a read-only design and review skill. Mutation and shell tools are remove
 
 ## Governing Documents
 
-- `09-UX/FORMS_SELECTION_AND_MULTISELECT.md`
-- `09-UX/ADVANCED_INTERFACE_PATTERNS.md`
-- `09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
-- `09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
-- `09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
-- `02-Architecture/TANSTACK_DECISION_MATRIX.md`
+- `docs/blueprint/09-UX/FORMS_SELECTION_AND_MULTISELECT.md`
+- `docs/blueprint/09-UX/ADVANCED_INTERFACE_PATTERNS.md`
+- `docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
+- `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
+- `docs/blueprint/09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
+- `docs/blueprint/02-Architecture/TANSTACK_DECISION_MATRIX.md`
 
 ## Choose the Form Shape
 

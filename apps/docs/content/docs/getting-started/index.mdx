@@ -1,0 +1,125 @@
+---
+title: Getting Started
+description: Run and verify the Meridian controlled prototype locally
+---
+
+# Run the controlled prototype
+
+This guide is for developers and reviewers evaluating the Meridian scaffold. It covers the implemented authentication, API health, protected dashboard, PostgreSQL, and documentation surfaces. It does not describe the unimplemented first-slice retail workflows.
+
+## Before you begin
+
+You need:
+
+- Git;
+- Bun 1.3.14;
+- Node.js 24 for the fallback-runtime check;
+- Docker with Compose;
+- a local clone of this repository.
+
+Run commands from the repository root. Do not reuse the example credentials outside a disposable local environment.
+
+## Install dependencies
+
+```bash
+bun install --frozen-lockfile
+```
+
+The frozen lockfile is mandatory. If installation reports a lockfile change, stop and review the dependency update instead of accepting it implicitly.
+
+## Start the containerized prototype
+
+Generate unique local secrets in the shell that will run Compose:
+
+```bash
+export POSTGRES_PASSWORD='replace-local-password'
+export BETTER_AUTH_SECRET='replace-with-at-least-32-random-characters'
+```
+
+The values above are example markers, not usable secrets. Start the stack and initialize its authentication schema:
+
+```bash
+bun run docker:up
+docker compose exec server bun run --cwd /app/packages/db db:migrate
+```
+
+The server container can reach the private Compose database and applies the committed authentication migration. Do not use Drizzle `push` against the baseline database: extension-owned `pg_stat_statements` views are outside the application schema.
+
+The local surfaces are:
+
+| Surface | Address | Expected result |
+|---|---|---|
+| API | `http://localhost:3000` | `OK` |
+| Web | `http://localhost:3001` | API status and navigation |
+| Documentation | `http://localhost:4000/docs` when started with `bun run --filter docs dev` | This portal |
+
+## Optional source development
+
+The bundled Compose database is deliberately not published to the host. To run `bun run dev`, provide a separate PostgreSQL 18 database reachable from the host and create `apps/server/.env`:
+
+```dotenv
+BETTER_AUTH_SECRET=replace-with-at-least-32-random-characters
+BETTER_AUTH_TRUSTED_ORIGINS=http://localhost:3000,http://localhost:3001
+BETTER_AUTH_URL=http://localhost:3000
+CORS_ORIGIN=http://localhost:3001
+DATABASE_URL=postgresql://postgres:replace-host-database-password@localhost:5432/meridian
+```
+
+Create `apps/web/.env`:
+
+```dotenv
+NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+```
+
+These files are ignored by Git. Initialize that host-reachable disposable database and start the source applications:
+
+```bash
+bun run db:migrate
+bun run dev
+```
+
+## Verify the implemented flow
+
+1. Open the web application.
+2. Confirm **API Status** reports **Connected**.
+3. Open **Sign In** and select the account-creation form.
+4. Enter a synthetic name, email address, and a password of at least eight characters.
+5. Confirm the browser opens `/dashboard`.
+6. Confirm the dashboard returns the protected API message.
+7. Sign out from the account menu and confirm the browser returns home.
+
+There are no tenant, business-role, entitlement, or domain-workflow permissions in this scaffold yet. A Better Auth account is not a Party or business role.
+
+## Stop and clean up
+
+Stop source processes with `Ctrl+C`. Stop the containerized stack with:
+
+```bash
+bun run docker:down
+```
+
+To remove the disposable database volume as well:
+
+```bash
+docker compose down -v --remove-orphans
+```
+
+Removing the volume deletes local prototype data.
+
+## If something fails
+
+- **API disconnected:** verify the server is running on port 3000 and `NEXT_PUBLIC_SERVER_URL` is correct.
+- **Database connection refused:** start PostgreSQL and ensure `DATABASE_URL` uses the same password as `POSTGRES_PASSWORD`.
+- **Trusted-origin error:** use exact origins without paths or trailing slashes.
+- **Authentication secret error:** generate a value with at least 32 characters.
+- **Windows build path error:** use a shorter checkout path; Turbopack can exceed the Windows path-length limit in deeply nested directories.
+
+See [Troubleshooting](/docs/troubleshooting) for diagnostic commands and safe recovery.
+
+## Governing scope
+
+- ADR-0006: Better Auth authentication foundation
+- ADR-0020: Bun, Hono, and oRPC controlled prototype
+- ADR-0021: repository-owned documentation portal
+- ADR-0024: PostgreSQL 18 minimal-extension policy
+- PDA-ENGR-013: pinned technology evidence and lessons

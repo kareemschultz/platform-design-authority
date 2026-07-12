@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -18,9 +19,9 @@ HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 IGNORED_TREE_PARTS = {"node_modules", ".next", ".turbo", ".source", "dist"}
 
 CAPABILITY_SOURCES = [
-    ROOT / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md",
-    ROOT / "04-Business-Domains" / "CAPABILITY_MAP_AMENDMENT-2026-07-11.md",
-    ROOT / "08-Marketplace" / "MARKETPLACE_ARCHITECTURE.md",
+    ROOT / "docs" / "blueprint" / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md",
+    ROOT / "docs" / "blueprint" / "04-Business-Domains" / "CAPABILITY_MAP_AMENDMENT-2026-07-11.md",
+    ROOT / "docs" / "blueprint" / "08-Marketplace" / "MARKETPLACE_ARCHITECTURE.md",
 ]
 
 TEST_DIMENSIONS = [
@@ -71,16 +72,24 @@ def parse_front_matter(path: Path) -> dict[str, Any] | None:
 
 def governed_documents() -> list[Path]:
     files: list[Path] = []
-    for path in sorted(ROOT.rglob("*.md")):
-        rel = path.relative_to(ROOT)
-        if any(part.startswith(".") or part in IGNORED_TREE_PARTS for part in rel.parts):
-            continue
-        if rel.parts and rel.parts[0] == "templates":
-            continue
-        metadata = parse_front_matter(path)
-        if metadata and metadata.get("document_id"):
-            files.append(path)
-    return files
+    for directory, subdirectories, filenames in os.walk(ROOT):
+        subdirectories[:] = [
+            name
+            for name in subdirectories
+            if not name.startswith(".") and name not in IGNORED_TREE_PARTS
+        ]
+        base = Path(directory)
+        for filename in filenames:
+            if not filename.endswith(".md"):
+                continue
+            path = base / filename
+            rel = path.relative_to(ROOT)
+            if rel.parts[:2] == ("docs", "templates"):
+                continue
+            metadata = parse_front_matter(path)
+            if metadata and metadata.get("document_id"):
+                files.append(path)
+    return sorted(files)
 
 
 def build_documents_registry() -> dict[str, Any]:
@@ -277,7 +286,7 @@ def build_events_registry() -> dict[str, Any]:
 
 
 def build_permissions_registry() -> dict[str, Any]:
-    path = ROOT / "01-Platform" / "FIRST_SLICE_PERMISSION_CATALOG.md"
+    path = ROOT / "docs" / "blueprint" / "01-Platform" / "FIRST_SLICE_PERMISSION_CATALOG.md"
     namespaces = load_namespaces()
     endpoints = load_json(ROOT / "registry" / "endpoint-permissions.json").get("endpoints", [])
     endpoint_counts: dict[str, int] = {}
@@ -363,7 +372,7 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
     records.sort(key=lambda item: item["capability_id"])
     return {
         "schema_version": "1.0.0",
-        "source_document": "16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
+        "source_document": "docs/blueprint/16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
         "source_registry": "registry/first-slice.json",
         "dimensions": TEST_DIMENSIONS,
         "tests": records,

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "status": "draft",
-  "source_document": "02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md",
+  "source_document": "docs/blueprint/02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md",
   "openapi": "openapi/first-slice-v1.yaml",
   "endpoints": [
     {"method":"GET","path":"/v1/me","authorization":"authenticated_session"},

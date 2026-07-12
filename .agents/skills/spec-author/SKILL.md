@@ -12,9 +12,9 @@ Create or revise `$ARGUMENTS` only after identifying its authoritative owner and
 ## Read First
 
 - `AGENTS.md`
-- `00-Foundation/CONSTITUTION.md`
-- `00-Foundation/NAMING_STANDARDS.md`
-- `00-Foundation/GLOSSARY.md`
+- `docs/blueprint/00-Foundation/CONSTITUTION.md`
+- `docs/blueprint/00-Foundation/NAMING_STANDARDS.md`
+- `docs/blueprint/00-Foundation/GLOSSARY.md`
 - `registry/domains.json`
 - `registry/documents.json`
 - `registry/capabilities.json`

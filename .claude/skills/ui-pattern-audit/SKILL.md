@@ -22,12 +22,12 @@ Use `accessibility-review` when the main question is WCAG conformance, keyboard 
 
 Identify the screen, flow, component, or diff being reviewed. Read:
 
-- `09-UX/ADVANCED_INTERFACE_PATTERNS.md`
-- `09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
-- `09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
-- `09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
-- `09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md` when charts or analytics are involved
-- `00-Foundation/UX_PHILOSOPHY.md`
+- `docs/blueprint/09-UX/ADVANCED_INTERFACE_PATTERNS.md`
+- `docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
+- `docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
+- `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
+- `docs/blueprint/09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md` when charts or analytics are involved
+- `docs/blueprint/00-Foundation/UX_PHILOSOPHY.md`
 
 ## Audit Dimensions
 

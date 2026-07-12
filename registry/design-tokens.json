@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "status": "draft",
-  "source_document": "09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md",
+  "source_document": "docs/blueprint/09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md",
   "tokens": {
     "space": {
       "0": {

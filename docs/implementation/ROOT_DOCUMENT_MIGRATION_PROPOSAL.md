@@ -1,113 +1,96 @@
-# Root Document Migration Proposal
+# Repository Layout Migration Record
 
-Status: Proposal for integrated review; no migration is executed by PR #2.
-Owner: Platform Design Authority with Developer Platform and Documentation owners.
-Lifecycle: controlled prototype planning evidence only.
+Status: Executed on the ADR-0025 migration branch; merge and post-merge validation remain the completion gate.
 
-The Meridian Fumadocs prototype must not mass-move or duplicate the architecture repository. Root architecture/governance documents remain authoritative according to the root contributor contract, Constitution and each document's lifecycle metadata. Product documentation is a separate information class.
+Owner: Platform Design Authority with Developer Platform and Operations.
 
-## Current inventory and authority
+## Purpose
 
-| Source | Current role | Proposed product-doc treatment |
-|---|---|---|
-| `00-Foundation/CONSTITUTION.md` | Highest repository authority | Never copied into product docs; cite internally where required |
-| `01-Platform/` through `20-Strategy/` | Governed architecture, specifications, evidence and strategy | Retain in place; publish only purpose-written product guidance derived through review |
-| `18-Decisions/` ADR records | ADR authority according to lifecycle | Retain history and paths; product docs may link to ratified decisions but must not paraphrase them as a second authority |
-| `openapi/` and `schemas/` | Canonical machine contracts | Generate labelled API/reference pages; generated output is never edited as authority |
-| `registry/*.json` | Generated indexes/contracts | Keep generated from authoritative sources; do not copy into prose or edit manually |
-| `reviews/FABLE*` | Independent audit evidence | Never modified, moved or republished by the scaffold remediation |
-| `07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` | Product-document strategy | Governs information classes, ownership and publication process |
-| `meridian/apps/fumadocs/content/docs/` | Prototype product-doc source | Only reviewed user/admin/developer prose; no placeholder or architecture copies |
+Record the migration from a root-level architecture tree plus nested `meridian/` scaffold to one conventional monorepo root with repository prose organized beneath `docs/`.
 
-## Desired final layout
+## Pre-migration layout
 
 ```text
 /
-├── 00-Foundation/ ... 20-Strategy/   # architecture/governance authority, unchanged
-├── openapi/ and schemas/             # canonical contracts, unchanged
-├── registry/                         # generated authority indexes, unchanged
+├── 00-Foundation/ ... 20-Strategy/
+├── docs/implementation/
+├── reviews/
+├── templates/
 └── meridian/
-    └── apps/fumadocs/content/docs/
-        ├── getting-started/
-        ├── user-guides/
-        ├── administration/
-        ├── developer/
-        ├── api/                       # generated, source-labelled reference only
-        ├── troubleshooting/
-        ├── migrations/
-        └── release-notes/
+    ├── apps/
+    ├── packages/
+    ├── ops/
+    └── package.json
 ```
 
-This proposal does **not** approve that final taxonomy for production publication. Audience classification, stable document identifiers and public/private visibility remain review decisions.
+The old shape was valid for blueprint-only development but created two operational roots after the scaffold arrived.
 
-## Link and script impact inventory
+## Canonical layout
 
-A later restructuring PR must inventory before moving anything:
+```text
+/
+├── apps/
+│   ├── docs/
+│   ├── native/
+│   ├── server/
+│   └── web/
+├── packages/
+├── ops/
+├── docs/
+│   ├── blueprint/
+│   │   ├── 00-Foundation/
+│   │   └── ... 20-Strategy/
+│   ├── implementation/
+│   ├── reviews/
+│   └── templates/
+├── openapi/
+├── schemas/
+├── registry/
+├── scripts/
+└── package.json
+```
 
-1. Relative Markdown links within all root documents and ADR references.
-2. Front matter fields including `related_adrs`, document IDs and lifecycle metadata.
-3. Root `README.md`, `AGENTS.md`, `CLAUDE.md`, issue templates, PR templates and CODEOWNERS path rules.
-4. `scripts/generate_registries.py`, `scripts/validate_docs.py` and their test fixtures.
-5. `.github/workflows/docs-governance.yml` and `meridian-prototype.yml` path filters.
-6. Fumadocs source configuration, navigation, search, sitemap, llms routes and OpenAPI generation inputs.
-7. External GitHub permalinks, issue/PR citations and downstream agent instructions.
-8. Registry records and any consumers that expect current directory-prefixed paths.
+## Authority and content boundaries
 
-## Registry and workflow effects
+- `docs/blueprint/` contains governed architecture and keeps all document IDs and lifecycle metadata.
+- `apps/docs/content/docs/` contains product-facing prose compiled by Fumadocs; it does not duplicate the blueprint.
+- `docs/reviews/` preserves immutable audit contents. Registrations and dispositions use current paths; audit text remains historically unchanged.
+- `docs/implementation/` contains non-authoritative scaffold and migration evidence.
+- `openapi/`, `schemas/`, and `registry/` remain machine-consumed contracts and indexes at root.
+- Root `AGENTS.md` and `CLAUDE.md` remain contributor authority for the entire monorepo.
 
-- Generated registry paths must change only through authoritative source/path updates followed by `python scripts/generate_registries.py`; generated JSON is never hand-edited.
-- Governance validation must pass both before and after any move.
-- Workflow path filters must be updated in the same migration commit so moved documents remain governed.
-- Fumadocs CI must distinguish authored product content from generated API/reference output and verify generated-source freshness.
-- Preview builds must never publish internal evidence, Fable material, secrets, tenant data or unapproved Draft/Proposed claims.
+## Execution sequence
 
-## Fumadocs content mapping
+1. Captured pre-move `main` SHA `215885b3cf1607d693ec799194d3723d37fe4553`.
+2. Moved 485 tracked files in a move-only commit with zero content changes.
+3. Removed the obsolete ignored wrapper after verifying it contained only `node_modules` and `.turbo`.
+4. Updated active paths in governed sources, dispositions, app guidance, scripts, schemas, curated registries, workflows, and agent instructions.
+5. Excluded immutable audit evidence from content substitution.
+6. Added ADR-0025 and updated ADR-0021.
+7. Regenerated derived registries from moved authoritative sources.
 
-- User/admin/developer guides are authored as new product-facing pages after the represented behaviour is approved and tested.
-- API reference is generated from canonical OpenAPI files and displays the source file, source revision and generation date.
-- Architecture background remains in this repository and is linked only for authorised internal audiences.
-- Release notes and migration guides derive from reviewed changesets, migrations and PR evidence.
-- Placeholder/demo pages remain outside production navigation and publication.
-
-## History-preserving move strategy
-
-If an Accepted ADR or explicit approved migration plan later authorises a root reorganisation:
-
-1. Create a dedicated issue, branch, worktree and PR with exclusive ownership.
-2. Capture the pre-move commit SHA and generated-registry snapshot.
-3. Produce a machine-readable old-path to new-path manifest.
-4. Use `git mv` in a move-only commit with no prose changes so Git history is reviewable.
-5. Update links, scripts, registry sources and workflow filters in a separate commit.
-6. Regenerate registries from authoritative sources in a third commit.
-7. Add redirects or stable-link mappings where external consumers require them.
-8. Review the complete diff for accidental content rewrites and visibility changes.
-
-## Validation plan
-
-The migration PR must run and record:
+## Required validation
 
 ```bash
 python scripts/generate_registries.py
 python scripts/validate_docs.py
 python scripts/generate_registries.py --check
 git diff --check
+bun install --frozen-lockfile
+bun run check
+bun run check-types
+bun run test
+bun run build
 ```
 
-It must also run broken-link checks, Fumadocs production build under Bun and approved Node LTS, OpenAPI freshness/semantic checks, navigation/search checks, public-content classification review, accessibility checks and workflow path-filter tests.
+The migration also requires Drizzle migration freshness, PostgreSQL 18.4 smoke testing, Compose validation, Docker image builds, live stack health, synthetic authentication, Fumadocs navigation/build validation, and stale-path scans.
 
-## Rollback plan
+## Rollback
 
-- Before merge: revert the move/update commits in reverse order or abandon the dedicated branch; no production path changes occur.
-- After merge but before publication: revert the migration PR as one unit and regenerate registries from restored sources.
-- After publication: restore old paths or redirects first, verify external links and search, then revert source moves. Never leave registry/workflow references pointing at absent paths.
-- Rollback evidence must include restored governance checks, docs build and link validation.
+- Before merge: abandon the dedicated branch.
+- After merge: revert the migration PR as one unit, regenerate registries from restored paths, and rerun both workflows.
+- Do not partially restore old paths or leave compatibility copies that create two authorities.
 
-## Open decisions and blockers
+## Historical links
 
-- Public, partner, customer and internal visibility classifications.
-- Stable documentation identifiers for contextual help.
-- Canonical OpenAPI files mature enough for product publication.
-- Redirect/permalink retention period and ownership.
-- Accepted ADR or explicit approval governing the final restructuring.
-
-Until those decisions are recorded, root governed documentation remains in place and Fumadocs publishes only bounded prototype product content.
+External links to old paths may require GitHub commit permalinks. The repository does not keep duplicate source files solely as redirects. Historical audit evidence continues to describe the layout evaluated at its issue date.

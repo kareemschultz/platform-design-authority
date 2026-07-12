@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0022
 title: Prefer Base UI-Backed shadcn Primitives for New Web Components
-version: 0.1.0
+version: 0.2.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
@@ -54,6 +54,7 @@ Prefer Base UI-backed shadcn source for new platform web components and the docu
 ## Required Controls
 
 - Pin the primitive choice in registry/configuration rather than accepting future CLI defaults silently.
+- Apply the provisional Base UI/Rhea bootstrap through `PDA-UX-028`; preserve human-readable inputs and a decoded preset generated with the pinned CLI.
 - Record source version and provenance for every imported component.
 - Normalize tokens, state APIs, portal stacking, responsive behavior, and error/loading/denied/offline states.
 - Test keyboard, focus, screen readers, zoom, contrast, touch, RTL, reduced motion, iOS viewport behavior, and form submission.
@@ -66,7 +67,9 @@ Prototype Dialog, Menu, Popover, Select, Combobox, Field, Tabs, Toast, Drawer, a
 ## References
 
 - `09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
+- `09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md`
 - `19-Appendices/DOCUMENTATION_TANSTACK_AND_BASE_UI_VERIFICATION-2026-07-12.md`
+- `19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`
 
 ## Review Record
 
@@ -81,3 +84,4 @@ Prototype Dialog, Menu, Popover, Select, Combobox, Field, Tabs, Toast, Drawer, a
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial proposal |
+| 0.2.0 | 2026-07-12 | Platform Design Authority | Link governed shadcn bootstrap configuration and reproducibility controls |

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.1.1
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Design Token Values and Breakpoints
@@ -42,6 +42,16 @@ Application code consumes generated semantic CSS variables and native token modu
 
 ## Typography
 
+Provisional families:
+
+| Role | Family | Fallback |
+|---|---|---|
+| Body, label, input, table, menu | Inter Variable | Approved locale-specific Noto family, then system sans-serif |
+| Display and headings | Geist Sans | Inter Variable, approved locale-specific Noto family, then system sans-serif |
+| Code and identifiers | Geist Mono | Approved locale-specific mono, then system monospace |
+
+Use tabular numerals for comparative operational and financial columns. Font assets are self-hosted/subset where licensing permits and must not block text rendering. Inter-only is the approved performance/localization fallback.
+
 | Role | Size | Line height | Weight |
 |---|---:|---:|---:|
 | Display | 32 px | 40 px | 700 |
@@ -57,6 +67,8 @@ Application code consumes generated semantic CSS variables and native token modu
 Text must scale with user and browser settings. Fixed values are defaults, not caps.
 
 ## Radius
+
+The shadcn `default` radius input maps into this governed scale. Generated component radius values do not become a parallel token system.
 
 | Token | Value |
 |---|---:|

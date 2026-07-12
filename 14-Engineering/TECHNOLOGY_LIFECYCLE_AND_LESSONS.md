@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENG-020
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-12
@@ -50,6 +50,9 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | Fumadocs Core/UI | 16.11.3 | Preferred docs prototype | Package family versions differ and must be tested together | Bun/Node build, OpenAPI, search, accessibility, static/container preview | Nextra or Starlight | Before docs scaffold/upgrade |
 | Fumadocs MDX/OpenAPI | 15.1.0 / 11.1.1 | Preferred content/API tooling | Executable MDX and API proxy require security controls | Restricted components, canonical contract freshness, proxy deny-by-default | Plain MDX plus generated static reference | Before docs scaffold/upgrade |
 | Base UI | 1.6.0 | Preferred new web primitive | API differs from Radix; source ownership retains test burden | Component/accessibility matrix and incremental migration | Radix for proven existing components | Every primitive upgrade |
+| shadcn CLI/presets | 4.13.0 | Selected source/scaffold tooling | Preset apply can rewrite components, theme, fonts, colors, and icons; style output evolves | Pinned decode/dry-run/diff, monorepo config parity, source provenance, visual/accessibility suite | Owned components; Nova style; prior reviewed CLI | Every CLI/style/preset change |
+| Lucide React / React Native | 1.24.0 | Selected initial icon source | Dynamic all-icon imports increase bundles; concept mapping and native parity remain project work | Direct-import bundle, missing-icon, a11y, RTL, native-rendering, license tests | Owned SVG or reviewed alternate for missing concept | Every icon package upgrade |
+| Geist package | 1.7.2 | Selected heading/limited mono prototype | Second family adds loading, glyph, layout, and localization cost | Self-host/subset, layout shift, glyph/fallback, license, Inter-only comparison | Inter Variable for headings | Every font asset/package change |
 | TanStack Start | Release Candidate observed | Platform Labs | Not stable v1; RSC is separately experimental | Same vertical slice on Next and Start; Bun/Node/container/auth/trace evidence | Next.js | Stable v1 and each prototype |
 | Nextra | 4.6.1 | Documentation fallback | Weaker verified first-party OpenAPI path | Docs build/search/i18n/API comparison | Fumadocs | If Fumadocs gates fail |
 | Astro Starlight | 0.41.3 | Static docs fallback | Introduces Astro | Static build, integration and authoring comparison | Fumadocs/Nextra | If independent static portal required |
@@ -68,6 +71,9 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | Better Auth | `https://better-auth.com/docs`; `https://better-auth.com/docs/reference/security`; `https://better-auth.com/docs/concepts/session-management`; `https://better-auth.com/docs/plugins`; `https://github.com/better-auth/better-auth/releases/tag/v1.6.23` | 2026-07-12 |
 | Fumadocs | `https://www.fumadocs.dev/docs`; `https://www.fumadocs.dev/docs/integrations/openapi`; `https://www.fumadocs.dev/docs/ui/component-library` | 2026-07-12 |
 | Base UI and shadcn/ui | `https://base-ui.com/react/overview/releases`; `https://ui.shadcn.com/docs/changelog/2026-07-base-ui-default` | 2026-07-12 |
+| shadcn presets and configuration | `https://ui.shadcn.com/docs/changelog/2025-12-shadcn-create`; `https://ui.shadcn.com/docs/cli`; `https://ui.shadcn.com/docs/registry/api-reference`; `https://ui.shadcn.com/docs/monorepo`; `https://ui.shadcn.com/docs/rtl` | 2026-07-12 |
+| Lucide | `https://lucide.dev/guide/react`; `https://lucide.dev/guide/packages/lucide-react-native`; npm registry metadata for `lucide-react` and `lucide-react-native` | 2026-07-12 |
+| Inter and Geist | `https://rsms.me/inter/`; `https://vercel.com/font`; npm registry metadata for `geist` | 2026-07-12 |
 | TanStack Start | `https://tanstack.com/start/latest/docs/framework/react/overview`; `https://tanstack.com/start/latest/docs/framework/react/guide/server-components` | 2026-07-12 |
 | Documentation alternatives | `https://nextra.site/docs`; `https://docusaurus.io/docs/versioning`; `https://astro.build/themes/details/starlight/` | 2026-07-12 |
 | Changesets | `https://github.com/changesets/changesets`; `https://github.com/changesets/action` | 2026-07-12 |
@@ -99,6 +105,9 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 | TECH-LESSON-016 | 2026-07-12 | Active | Cookie session caching reduces reads but delays remote revocation until cache expiry unless current database state is forced | Default cache off; set an approved staleness bound and bypass cache for sensitive operations before enabling | Revocation and load tests pending | Platform Identity | Session architecture changes |
 | TECH-LESSON-017 | 2026-07-12 | Active | Better Auth v1.6 `disableOriginCheck` also disables CSRF protection, while proxy and wildcard-origin options can broaden trust unexpectedly | Prohibit both security-disable flags in production; use exact origins, host-only cookies, and explicit trusted proxy/IP configuration | Security configuration tests pending | Security Engineering | Security semantics or deployment topology changes |
 | TECH-LESSON-018 | 2026-07-12 | Active | Official documentation labels Agent Auth unstable and OIDC Provider active-development, while OAuth 2.1 Provider exposes a large authorization-server surface | Agent Auth/OIDC Provider remain Labs; OAuth provider deferred behind a Developer Platform ADR and real relying-party need | Isolated evaluation only | Developer Platform | Stable maturity and approved use case |
+| TECH-LESSON-019 | 2026-07-12 | Active | A shadcn preset changes component geometry and source, not only colors; full apply can reinstall owned components | Preserve human-readable inputs and decoded pinned code; dry-run/diff; never auto-apply over production source | `PDA-UX-028`; prototype pending | Frontend Platform | Every preset/CLI change |
+| TECH-LESSON-020 | 2026-07-12 | Active | Rhea offers the best default density balance but is newer than Nova, while compact geometry can still violate touch targets | Prototype Rhea with owned compact/comfortable/48 px POS variants; keep Nova fallback | Comparative visual/accessibility evidence pending | Design System | Rhea gates pass or fail |
+| TECH-LESSON-021 | 2026-07-12 | Active | Geist headings plus Inter body improve hierarchy but add a second-family performance and fallback obligation | Self-host/subset and compare against Inter-only; fall back without API change | Font performance/localization tests pending | Design System | Font budget or locale failure |
 
 ## Entry Templates
 

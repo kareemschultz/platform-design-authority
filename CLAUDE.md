@@ -52,6 +52,7 @@ Before inventing an identifier or boundary, consult:
 - `07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` for user, developer, release, or in-app help changes
 - `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
 - `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
+- `09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before creating, applying, changing, or recommending a shadcn preset, style, base/theme/chart color, font, icon library, radius, menu treatment, RTL, or density default
 - `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `20-Strategy/FOUNDER_DECISION_REGISTER.md`
 
@@ -115,6 +116,7 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 
 - Web styling uses the latest approved stable Tailwind CSS release.
 - shadcn/ui components are copied and normalized into platform-owned source.
+- New authenticated web scaffolds use the governed Base UI/Rhea/Neutral/Blue/Geist-Inter/Lucide/default-radius bootstrap, then normalize it into semantic tokens and accessible compact, comfortable, and touch variants. A preset is not design-system authority.
 - Ordinary charts use shadcn chart composition and Recharts.
 - Specialized visualization libraries require a justified requirement and review.
 - Magic UI Pro and shadcn/studio premium assets follow the premium source policy and provenance template.

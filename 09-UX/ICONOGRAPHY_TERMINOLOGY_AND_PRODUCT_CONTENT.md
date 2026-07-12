@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-026
 title: Iconography Terminology and Product Content
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Iconography, Terminology, and Product Content
@@ -15,7 +15,9 @@ Define icons, labels, action language, status wording, errors, instructions, con
 
 ## Icon Source
 
-The initial icon source must be open, consistently styled, tree-shakeable, and compatible with web and native implementation. Exact library selection is an implementation decision recorded with license and bundle evidence.
+Lucide is the selected initial icon source for web and native, using direct named imports from `lucide-react` and `lucide-react-native`. It is open, consistently styled, typed, tree-shakeable on the React path, available for React Native through native SVG components, aligned with shadcn defaults, and ISC licensed.
+
+The selection remains subject to exact-version, bundle, accessibility, missing-concept, cultural-metaphor, RTL, and native rendering evidence. Do not import the complete icon namespace or use a dynamic all-icons component in production bundles.
 
 Premium icons may be used only when the license permits the intended products and redistribution.
 
@@ -28,6 +30,8 @@ Premium icons may be used only when the license permits the intended products an
 - Avoid culturally ambiguous metaphors when a label is clearer.
 - Destructive actions use explicit text and confirmation, not a trash icon alone.
 - Financial success icons appear only after authoritative completion.
+- Brand and provider logos are governed assets, not substitutions from Lucide.
+- The canonical concept-to-icon mapping lives in the design-system package so web and native do not choose unrelated metaphors.
 
 ## Sizes
 

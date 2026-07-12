@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-010
 title: Better-T-Stack and Client Architecture
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -31,6 +31,7 @@ Use:
 - Tailwind CSS
 - Base UI-backed source-owned shadcn/ui primitives for new components under ADR-0022; Radix remains an approved legacy/fallback primitive
 - A private platform design system and design-token package
+- The governed Base UI/Rhea/Neutral/Blue/Geist-Inter/Lucide/default-radius bootstrap from `09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md`
 - TanStack Query
 - TanStack Table
 - TanStack Virtual
@@ -140,6 +141,7 @@ Better-T-Stack must not:
 - Become the source of truth for dependency versions
 - Replace repository templates, ADRs, threat models, or quality gates
 - Cause generated demo patterns to enter critical financial, inventory, payroll, authorization, identity, or offline code without review
+- Treat a shadcn preset, screenshots, generated raw colors, or component density as the platform design-system authority
 
 ## Initial Scaffold Recommendation
 

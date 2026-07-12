@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-001
 title: UX and Design System Section Index
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # UX and Design System
@@ -28,6 +28,7 @@ last_reviewed: 2026-07-11
 - `NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`
 - `STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md`
 - `TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
+- `SHADCN_CONFIGURATION_DECISION_MATRIX.md`
 - `MARKETING_WEBSITE_ARCHITECTURE.md`
 - `../10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`
 - `../20-Strategy/DESIGN_HANDBOOK.md`
@@ -52,7 +53,7 @@ Project-local skills cover frontend architecture, UI-pattern audit, dashboard de
 
 - Web and native component packages
 - Storybook implementation and baselines
-- Final icon-library selection
+- Exact icon-package lock and bundle/native-parity evidence for the provisional Lucide selection
 - Automated token generation and contrast reports
 - POS, kiosk, scanner, and device implementation examples
 - Accessibility conformance reports

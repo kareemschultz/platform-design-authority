@@ -264,7 +264,7 @@
       "document_id": "ADR-0022",
       "path": "18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md",
       "title": "Prefer Base UI-Backed shadcn Primitives for New Web Components",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -399,7 +399,7 @@
       "document_id": "PDA-APP-001",
       "path": "19-Appendices/README.md",
       "title": "Appendices Section Index",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -519,6 +519,20 @@
         "ADR-0016",
         "ADR-0019",
         "ADR-0020"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-APP-018",
+      "path": "19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md",
+      "title": "shadcn Configuration Verification - 2026-07-12",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
       ],
       "review_evidence": null
     },
@@ -643,7 +657,7 @@
       "document_id": "PDA-ARC-010",
       "path": "02-Architecture/BETTER_T_STACK_AND_CLIENT_ARCHITECTURE.md",
       "title": "Better-T-Stack and Client Architecture",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -1827,7 +1841,7 @@
       "document_id": "PDA-ENG-020",
       "path": "14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "status": "Draft",
       "owner": "Platform Engineering",
       "last_reviewed": "2026-07-12",
@@ -3350,10 +3364,10 @@
       "document_id": "PDA-UX-001",
       "path": "09-UX/README.md",
       "title": "UX and Design System Section Index",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3416,10 +3430,10 @@
       "document_id": "PDA-UX-015",
       "path": "09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md",
       "title": "Design Tokens and Visual System",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3493,7 +3507,7 @@
       "document_id": "PDA-UX-022",
       "path": "09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md",
       "title": "Tailwind shadcn and Premium UI Source Policy",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -3507,10 +3521,10 @@
       "document_id": "PDA-UX-023",
       "path": "09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md",
       "title": "Design Token Values and Breakpoints",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3540,10 +3554,10 @@
       "document_id": "PDA-UX-026",
       "path": "09-UX/ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md",
       "title": "Iconography Terminology and Product Content",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3558,6 +3572,20 @@
       "related_adrs": [
         "ADR-0015",
         "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-UX-028",
+      "path": "09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md",
+      "title": "shadcn Configuration Decision Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
       ],
       "review_evidence": null
     }

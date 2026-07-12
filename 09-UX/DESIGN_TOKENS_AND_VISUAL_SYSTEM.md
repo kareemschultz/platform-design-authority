@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-015
 title: Design Tokens and Visual System
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Design Tokens and Visual System
@@ -85,6 +85,8 @@ Requirements:
 - Uppercase is limited and never used for long text.
 - Brand fonts require performance, character-set, fallback, and accessibility review.
 
+The provisional web composition uses Geist Sans for headings and Inter Variable for body/UI text, with Geist Mono limited to identifiers and technical content. Inter-only is the fallback if the second family fails performance, glyph, localization, or layout-stability gates. Locale-specific approved fallbacks such as Noto fill unsupported scripts. See `SHADCN_CONFIGURATION_DECISION_MATRIX.md`.
+
 ## Color
 
 Color has semantic roles, not arbitrary ownership by components.
@@ -158,6 +160,8 @@ Brand configuration may not:
 Support comfortable and compact density where the component and device allow it. Density changes spacing and control size within accessible minimums; it does not remove labels, evidence, or states.
 
 POS and touch workflows may use larger targets while accounting and inventory tables use compact density.
+
+The selected Rhea shadcn style is only the generated component geometry baseline. It does not redefine the token scale or reduce minimum targets. Owned compact, comfortable, and touch/POS variants remain authoritative.
 
 ## Token Governance
 

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.2.0",
   "events": [
     {
       "name": "ai.agent.released.v1",
@@ -10,8 +10,9 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 245,
-      "document_status": "Draft"
+      "source_line": 109,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "ai.agent.suspended.v1",
@@ -22,8 +23,9 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 246,
-      "document_status": "Draft"
+      "source_line": 110,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "ai.approval-request.created.v1",
@@ -34,8 +36,9 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 244,
-      "document_status": "Draft"
+      "source_line": 108,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "ai.budget-threshold.reached.v1",
@@ -46,8 +49,9 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 248,
-      "document_status": "Draft"
+      "source_line": 112,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "ai.evaluation.completed.v1",
@@ -58,8 +62,9 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 247,
-      "document_status": "Draft"
+      "source_line": 111,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "ai.request.completed.v1",
@@ -70,8 +75,9 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 241,
-      "document_status": "Draft"
+      "source_line": 105,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "ai.request.created.v1",
@@ -82,8 +88,9 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 240,
-      "document_status": "Draft"
+      "source_line": 104,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "ai.request.failed.v1",
@@ -94,8 +101,9 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 242,
-      "document_status": "Draft"
+      "source_line": 106,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "ai.tool-invocation.completed.v1",
@@ -106,8 +114,243 @@
       "major_version": 1,
       "source_path": "03-Business-Engines/AI_ORCHESTRATION_ENGINE.md",
       "source_heading": "Events",
-      "source_line": 243,
-      "document_status": "Draft"
+      "source_line": 107,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "catalog.identifier.assigned.v1",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "entity": "identifier",
+      "fact": "assigned",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 52,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "catalog.product.activated.v1",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "entity": "product",
+      "fact": "activated",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 49,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "catalog.product.changed.v1",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "entity": "product",
+      "fact": "changed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 48,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "catalog.product.created.v1",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "entity": "product",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 47,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "catalog.product.discontinued.v1",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "entity": "product",
+      "fact": "discontinued",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 50,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "catalog.publication.changed.v1",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "entity": "publication",
+      "fact": "changed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 53,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "catalog.variant.created.v1",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "entity": "variant",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 51,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.cash-movement.posted.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "cash-movement",
+      "fact": "posted",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 64,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.deposit.prepared.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "deposit",
+      "fact": "prepared",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 65,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.deposit.reconciled.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "deposit",
+      "fact": "reconciled",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 66,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.exchange.completed.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "exchange",
+      "fact": "completed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 61,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.receipt.issued.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "receipt",
+      "fact": "issued",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 67,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.refund.requested.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "refund",
+      "fact": "requested",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 60,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.register.closed.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "register",
+      "fact": "closed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 63,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.register.opened.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "register",
+      "fact": "opened",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 62,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.return.completed.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "return",
+      "fact": "completed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 59,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.sale.completed.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "sale",
+      "fact": "completed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 57,
+      "document_status": "Draft",
+      "schema_path": "schemas/events/commerce.sale.completed.v1.schema.json"
+    },
+    {
+      "name": "commerce.sale.held.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "sale",
+      "fact": "held",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/COMMERCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 58,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commerce.stored-value-balance.expired.v1",
@@ -118,8 +361,9 @@
       "major_version": 1,
       "source_path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
       "source_heading": "Events",
-      "source_line": 176,
-      "document_status": "Draft"
+      "source_line": 105,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commerce.stored-value-entry.reversed.v1",
@@ -130,8 +374,22 @@
       "major_version": 1,
       "source_path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
       "source_heading": "Events",
-      "source_line": 175,
-      "document_status": "Draft"
+      "source_line": 104,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commerce.stored-value-instrument.issued.v1",
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "entity": "stored-value-instrument",
+      "fact": "issued",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
+      "source_heading": "Events",
+      "source_line": 100,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commerce.stored-value-instrument.suspended.v1",
@@ -142,20 +400,9 @@
       "major_version": 1,
       "source_path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
       "source_heading": "Events",
-      "source_line": 177,
-      "document_status": "Draft"
-    },
-    {
-      "name": "commerce.stored-value-issued.created.v1",
-      "namespace": "commerce",
-      "owner": "Commerce",
-      "entity": "stored-value-issued",
-      "fact": "created",
-      "major_version": 1,
-      "source_path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
-      "source_heading": "Events",
-      "source_line": 171,
-      "document_status": "Draft"
+      "source_line": 106,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commerce.stored-value-load.posted.v1",
@@ -166,8 +413,9 @@
       "major_version": 1,
       "source_path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
       "source_heading": "Events",
-      "source_line": 172,
-      "document_status": "Draft"
+      "source_line": 101,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commerce.stored-value-redemption.captured.v1",
@@ -178,8 +426,9 @@
       "major_version": 1,
       "source_path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
       "source_heading": "Events",
-      "source_line": 174,
-      "document_status": "Draft"
+      "source_line": 103,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commerce.stored-value-redemption.reserved.v1",
@@ -190,8 +439,22 @@
       "major_version": 1,
       "source_path": "04-Business-Domains/STORED_VALUE_AND_CUSTOMER_BALANCES.md",
       "source_heading": "Events",
-      "source_line": 173,
-      "document_status": "Draft"
+      "source_line": 102,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "commercial.partner-settlement.created.v1",
+      "namespace": "commercial",
+      "owner": "Commercial Control Plane",
+      "entity": "partner-settlement",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md",
+      "source_heading": "Events",
+      "source_line": 86,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commercial.subscription.activated.v1",
@@ -203,7 +466,8 @@
       "source_path": "13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
       "source_heading": "Events",
       "source_line": 58,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commercial.subscription.cancelled.v1",
@@ -215,7 +479,8 @@
       "source_path": "13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
       "source_heading": "Events",
       "source_line": 62,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commercial.subscription.change-scheduled.v1",
@@ -227,7 +492,8 @@
       "source_path": "13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
       "source_heading": "Events",
       "source_line": 59,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commercial.subscription.grace-started.v1",
@@ -239,7 +505,8 @@
       "source_path": "13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
       "source_heading": "Events",
       "source_line": 60,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commercial.subscription.reactivated.v1",
@@ -251,7 +518,8 @@
       "source_path": "13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
       "source_heading": "Events",
       "source_line": 63,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "commercial.subscription.suspended.v1",
@@ -263,7 +531,411 @@
       "source_path": "13-Commercial/SUBSCRIPTION_LIFECYCLE.md",
       "source_heading": "Events",
       "source_line": 61,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "developer.webhook-delivery.dead-lettered.v1",
+      "namespace": "developer",
+      "owner": "Developer Platform",
+      "entity": "webhook-delivery",
+      "fact": "dead-lettered",
+      "major_version": 1,
+      "source_path": "07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
+      "source_heading": "Events",
+      "source_line": 89,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "developer.webhook-delivery.failed.v1",
+      "namespace": "developer",
+      "owner": "Developer Platform",
+      "entity": "webhook-delivery",
+      "fact": "failed",
+      "major_version": 1,
+      "source_path": "07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
+      "source_heading": "Events",
+      "source_line": 88,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "developer.webhook-delivery.succeeded.v1",
+      "namespace": "developer",
+      "owner": "Developer Platform",
+      "entity": "webhook-delivery",
+      "fact": "succeeded",
+      "major_version": 1,
+      "source_path": "07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
+      "source_heading": "Events",
+      "source_line": 87,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "developer.webhook-replay.requested.v1",
+      "namespace": "developer",
+      "owner": "Developer Platform",
+      "entity": "webhook-replay",
+      "fact": "requested",
+      "major_version": 1,
+      "source_path": "07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
+      "source_heading": "Events",
+      "source_line": 90,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "developer.webhook-subscription.changed.v1",
+      "namespace": "developer",
+      "owner": "Developer Platform",
+      "entity": "webhook-subscription",
+      "fact": "changed",
+      "major_version": 1,
+      "source_path": "07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
+      "source_heading": "Events",
+      "source_line": 85,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "developer.webhook-subscription.created.v1",
+      "namespace": "developer",
+      "owner": "Developer Platform",
+      "entity": "webhook-subscription",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
+      "source_heading": "Events",
+      "source_line": 84,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "developer.webhook-subscription.suspended.v1",
+      "namespace": "developer",
+      "owner": "Developer Platform",
+      "entity": "webhook-subscription",
+      "fact": "suspended",
+      "major_version": 1,
+      "source_path": "07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md",
+      "source_heading": "Events",
+      "source_line": 86,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "finance.disbursement.approved.v1",
+      "namespace": "finance",
+      "owner": "Finance",
+      "entity": "disbursement",
+      "fact": "approved",
+      "major_version": 1,
+      "source_path": "13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md",
+      "source_heading": "Events",
+      "source_line": 84,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "finance.disbursement.reconciled.v1",
+      "namespace": "finance",
+      "owner": "Finance",
+      "entity": "disbursement",
+      "fact": "reconciled",
+      "major_version": 1,
+      "source_path": "13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md",
+      "source_heading": "Events",
+      "source_line": 85,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "finance.posting-batch.accepted.v1",
+      "namespace": "finance",
+      "owner": "Finance",
+      "entity": "posting-batch",
+      "fact": "accepted",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md",
+      "source_heading": "Events",
+      "source_line": 150,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "finance.posting-batch.created.v1",
+      "namespace": "finance",
+      "owner": "Finance",
+      "entity": "posting-batch",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md",
+      "source_heading": "Events",
+      "source_line": 149,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "finance.posting-batch.rejected.v1",
+      "namespace": "finance",
+      "owner": "Finance",
+      "entity": "posting-batch",
+      "fact": "rejected",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md",
+      "source_heading": "Events",
+      "source_line": 151,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "finance.receivable-payment.applied.v1",
+      "namespace": "finance",
+      "owner": "Finance",
+      "entity": "receivable-payment",
+      "fact": "applied",
+      "major_version": 1,
+      "source_path": "13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md",
+      "source_heading": "Events",
+      "source_line": 83,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "finance.reconciliation.completed.v1",
+      "namespace": "finance",
+      "owner": "Finance",
+      "entity": "reconciliation",
+      "fact": "completed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md",
+      "source_heading": "Events",
+      "source_line": 152,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "finance.reconciliation.exception-detected.v1",
+      "namespace": "finance",
+      "owner": "Finance",
+      "entity": "reconciliation",
+      "fact": "exception-detected",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md",
+      "source_heading": "Events",
+      "source_line": 153,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "fiscalization.certificate.rotated.v1",
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "entity": "certificate",
+      "fact": "rotated",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 107,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "fiscalization.contingency.ended.v1",
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "entity": "contingency",
+      "fact": "ended",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 106,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "fiscalization.contingency.started.v1",
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "entity": "contingency",
+      "fact": "started",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 105,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "fiscalization.document.prepared.v1",
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "entity": "document",
+      "fact": "prepared",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 100,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "fiscalization.submission.accepted.v1",
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "entity": "submission",
+      "fact": "accepted",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 102,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "fiscalization.submission.created.v1",
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "entity": "submission",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 101,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "fiscalization.submission.reconciled.v1",
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "entity": "submission",
+      "fact": "reconciled",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 104,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "fiscalization.submission.rejected.v1",
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "entity": "submission",
+      "fact": "rejected",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 103,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "inventory.reservation.created.v1",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "entity": "reservation",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 51,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "inventory.reservation.released.v1",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "entity": "reservation",
+      "fact": "released",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 52,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "inventory.stock-count.posted.v1",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "entity": "stock-count",
+      "fact": "posted",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 47,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "inventory.stock-movement.reversed.v1",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "entity": "stock-movement",
+      "fact": "reversed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 53,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "inventory.stock-transfer.created.v1",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "entity": "stock-transfer",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 48,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "inventory.stock-transfer.dispatched.v1",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "entity": "stock-transfer",
+      "fact": "dispatched",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 49,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "inventory.stock-transfer.received.v1",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "entity": "stock-transfer",
+      "fact": "received",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 50,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "inventory.stock.adjusted.v1",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "entity": "stock",
+      "fact": "adjusted",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/INVENTORY_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 46,
+      "document_status": "Draft",
+      "schema_path": "schemas/events/inventory.stock.adjusted.v1.schema.json"
     },
     {
       "name": "loyalty.ledger-entry.reversed.v1",
@@ -275,7 +947,8 @@
       "source_path": "03-Business-Engines/LOYALTY_ENGINE.md",
       "source_heading": "Events",
       "source_line": 110,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "loyalty.membership.created.v1",
@@ -287,7 +960,8 @@
       "source_path": "03-Business-Engines/LOYALTY_ENGINE.md",
       "source_heading": "Events",
       "source_line": 107,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "loyalty.points-balance.expired.v1",
@@ -299,7 +973,8 @@
       "source_path": "03-Business-Engines/LOYALTY_ENGINE.md",
       "source_heading": "Events",
       "source_line": 111,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "loyalty.points-earned.posted.v1",
@@ -311,7 +986,8 @@
       "source_path": "03-Business-Engines/LOYALTY_ENGINE.md",
       "source_heading": "Events",
       "source_line": 108,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "loyalty.points-redemption.posted.v1",
@@ -323,7 +999,8 @@
       "source_path": "03-Business-Engines/LOYALTY_ENGINE.md",
       "source_heading": "Events",
       "source_line": 109,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "loyalty.tier.changed.v1",
@@ -335,7 +1012,112 @@
       "source_path": "03-Business-Engines/LOYALTY_ENGINE.md",
       "source_heading": "Events",
       "source_line": 112,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "marketplace.installation.created.v1",
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "entity": "installation",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "source_heading": "Events",
+      "source_line": 91,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "marketplace.installation.removed.v1",
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "entity": "installation",
+      "fact": "removed",
+      "major_version": 1,
+      "source_path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "source_heading": "Events",
+      "source_line": 92,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "marketplace.listing.published.v1",
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "entity": "listing",
+      "fact": "published",
+      "major_version": 1,
+      "source_path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "source_heading": "Events",
+      "source_line": 90,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "marketplace.listing.submitted.v1",
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "entity": "listing",
+      "fact": "submitted",
+      "major_version": 1,
+      "source_path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "source_heading": "Events",
+      "source_line": 89,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "marketplace.listing.suspended.v1",
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "entity": "listing",
+      "fact": "suspended",
+      "major_version": 1,
+      "source_path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "source_heading": "Events",
+      "source_line": 94,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "marketplace.publisher.approved.v1",
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "entity": "publisher",
+      "fact": "approved",
+      "major_version": 1,
+      "source_path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "source_heading": "Events",
+      "source_line": 88,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "marketplace.security-advisory.published.v1",
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "entity": "security-advisory",
+      "fact": "published",
+      "major_version": 1,
+      "source_path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "source_heading": "Events",
+      "source_line": 93,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "marketplace.settlement.created.v1",
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "entity": "settlement",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "08-Marketplace/MARKETPLACE_ARCHITECTURE.md",
+      "source_heading": "Events",
+      "source_line": 95,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.address.changed.v1",
@@ -347,7 +1129,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 213,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.contact-point.verified.v1",
@@ -359,7 +1142,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 212,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.duplicate.detected.v1",
@@ -371,7 +1155,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 216,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.identity-link.created.v1",
@@ -383,7 +1168,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 218,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.organization.created.v1",
@@ -395,7 +1181,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 211,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.person.created.v1",
@@ -407,7 +1194,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 210,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.privacy-state.changed.v1",
@@ -419,7 +1207,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 219,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.record.merged.v1",
@@ -431,7 +1220,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 217,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.relationship.created.v1",
@@ -443,7 +1233,8 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 214,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "party.relationship.ended.v1",
@@ -455,7 +1246,151 @@
       "source_path": "01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md",
       "source_heading": "Events",
       "source_line": 215,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.intent.authorized.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "intent",
+      "fact": "authorized",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 103,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.intent.captured.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "intent",
+      "fact": "captured",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 104,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.intent.created.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "intent",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 101,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.intent.customer-action-required.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "intent",
+      "fact": "customer-action-required",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 102,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.intent.failed.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "intent",
+      "fact": "failed",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 105,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.intent.uncertain.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "intent",
+      "fact": "uncertain",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 106,
+      "document_status": "Draft",
+      "schema_path": "schemas/events/payment.intent.uncertain.v1.schema.json"
+    },
+    {
+      "name": "payment.reconciliation.exception-detected.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "reconciliation",
+      "fact": "exception-detected",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 111,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.refund.completed.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "refund",
+      "fact": "completed",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 107,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.reversal.completed.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "reversal",
+      "fact": "completed",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 108,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.settlement.received.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "settlement",
+      "fact": "received",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 109,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "payment.settlement.reconciled.v1",
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "entity": "settlement",
+      "fact": "reconciled",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/PAYMENT_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 110,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.account-recovery.completed.v1",
@@ -466,8 +1401,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 340,
-      "document_status": "Draft"
+      "source_line": 209,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.api-key.created.v1",
@@ -478,8 +1414,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 341,
-      "document_status": "Draft"
+      "source_line": 210,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.assignment.created.v1",
@@ -491,7 +1428,8 @@
       "source_path": "01-Platform/COLLABORATION_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 83,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.authentication-factor.enrolled.v1",
@@ -502,8 +1440,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 336,
-      "document_status": "Draft"
+      "source_line": 205,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.authentication-factor.removed.v1",
@@ -514,8 +1453,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 337,
-      "document_status": "Draft"
+      "source_line": 206,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.branch.created.v1",
@@ -527,7 +1467,8 @@
       "source_path": "01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "source_heading": "Events",
       "source_line": 122,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.branding.changed.v1",
@@ -539,7 +1480,99 @@
       "source_path": "01-Platform/CONFIGURATION_AND_SETTINGS.md",
       "source_heading": "Events",
       "source_line": 74,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "platform.business-dna-profile.created.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "business-dna-profile",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/BUSINESS_DNA_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 140,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "platform.business-dna-profile.reviewed.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "business-dna-profile",
+      "fact": "reviewed",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/BUSINESS_DNA_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 141,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "platform.business-dna-profile.stale-detected.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "business-dna-profile",
+      "fact": "stale-detected",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/BUSINESS_DNA_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 142,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "platform.business-dna-recommendation.accepted.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "business-dna-recommendation",
+      "fact": "accepted",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/BUSINESS_DNA_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 144,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "platform.business-dna-recommendation.applied.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "business-dna-recommendation",
+      "fact": "applied",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/BUSINESS_DNA_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 146,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "platform.business-dna-recommendation.created.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "business-dna-recommendation",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/BUSINESS_DNA_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 143,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "platform.business-dna-recommendation.rejected.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "business-dna-recommendation",
+      "fact": "rejected",
+      "major_version": 1,
+      "source_path": "03-Business-Engines/BUSINESS_DNA_ENGINE.md",
+      "source_heading": "Events",
+      "source_line": 145,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.comment.created.v1",
@@ -551,7 +1584,8 @@
       "source_path": "01-Platform/COLLABORATION_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 79,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.comment.edited.v1",
@@ -563,7 +1597,8 @@
       "source_path": "01-Platform/COLLABORATION_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 80,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.communication-preference.changed.v1",
@@ -575,7 +1610,8 @@
       "source_path": "01-Platform/NOTIFICATIONS_AND_COMMUNICATION.md",
       "source_heading": "Events",
       "source_line": 87,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.configuration.changed.v1",
@@ -587,7 +1623,8 @@
       "source_path": "01-Platform/CONFIGURATION_AND_SETTINGS.md",
       "source_heading": "Events",
       "source_line": 71,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.configuration.rollback-completed.v1",
@@ -599,7 +1636,8 @@
       "source_path": "01-Platform/CONFIGURATION_AND_SETTINGS.md",
       "source_heading": "Events",
       "source_line": 72,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.device.configuration-changed.v1",
@@ -611,7 +1649,8 @@
       "source_path": "01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md",
       "source_heading": "Events",
       "source_line": 65,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.device.enrolled.v1",
@@ -623,7 +1662,8 @@
       "source_path": "01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md",
       "source_heading": "Events",
       "source_line": 64,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.device.quarantined.v1",
@@ -635,7 +1675,8 @@
       "source_path": "01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md",
       "source_heading": "Events",
       "source_line": 66,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.device.revoked.v1",
@@ -647,7 +1688,8 @@
       "source_path": "01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md",
       "source_heading": "Events",
       "source_line": 67,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.document.extraction-completed.v1",
@@ -659,7 +1701,8 @@
       "source_path": "01-Platform/FILES_AND_DOCUMENT_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 62,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.document.generated.v1",
@@ -671,7 +1714,8 @@
       "source_path": "01-Platform/FILES_AND_DOCUMENT_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 61,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.edge-node.sync-failed.v1",
@@ -683,7 +1727,8 @@
       "source_path": "01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md",
       "source_heading": "Events",
       "source_line": 68,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.entitlement.activated.v1",
@@ -694,8 +1739,9 @@
       "major_version": 1,
       "source_path": "01-Platform/ENTITLEMENTS_AND_LICENSING.md",
       "source_heading": "Events",
-      "source_line": 97,
-      "document_status": "Draft"
+      "source_line": 83,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.entitlement.changed.v1",
@@ -706,8 +1752,9 @@
       "major_version": 1,
       "source_path": "01-Platform/ENTITLEMENTS_AND_LICENSING.md",
       "source_heading": "Events",
-      "source_line": 98,
-      "document_status": "Draft"
+      "source_line": 84,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.entitlement.expired.v1",
@@ -718,8 +1765,9 @@
       "major_version": 1,
       "source_path": "01-Platform/ENTITLEMENTS_AND_LICENSING.md",
       "source_heading": "Events",
-      "source_line": 99,
-      "document_status": "Draft"
+      "source_line": 85,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.file.deleted.v1",
@@ -731,7 +1779,8 @@
       "source_path": "01-Platform/FILES_AND_DOCUMENT_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 60,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.file.quarantined.v1",
@@ -743,7 +1792,8 @@
       "source_path": "01-Platform/FILES_AND_DOCUMENT_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 59,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.file.uploaded.v1",
@@ -755,7 +1805,8 @@
       "source_path": "01-Platform/FILES_AND_DOCUMENT_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 58,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.legal-entity.created.v1",
@@ -767,7 +1818,8 @@
       "source_path": "01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "source_heading": "Events",
       "source_line": 121,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.location.created.v1",
@@ -779,7 +1831,8 @@
       "source_path": "01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "source_heading": "Events",
       "source_line": 123,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.mention.created.v1",
@@ -791,7 +1844,8 @@
       "source_path": "01-Platform/COLLABORATION_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 81,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.metadata.field-activated.v1",
@@ -803,7 +1857,8 @@
       "source_path": "01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
       "source_heading": "Events",
       "source_line": 265,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.metadata.field-changed.v1",
@@ -815,7 +1870,8 @@
       "source_path": "01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
       "source_heading": "Events",
       "source_line": 266,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.metadata.field-created.v1",
@@ -827,7 +1883,8 @@
       "source_path": "01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
       "source_heading": "Events",
       "source_line": 264,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.metadata.field-deprecated.v1",
@@ -839,7 +1896,8 @@
       "source_path": "01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
       "source_heading": "Events",
       "source_line": 267,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.metadata.field-migration-completed.v1",
@@ -851,7 +1909,8 @@
       "source_path": "01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
       "source_heading": "Events",
       "source_line": 269,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.metadata.field-migration-started.v1",
@@ -863,7 +1922,8 @@
       "source_path": "01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
       "source_heading": "Events",
       "source_line": 268,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.metadata.projection-reconciled.v1",
@@ -875,7 +1935,8 @@
       "source_path": "01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md",
       "source_heading": "Events",
       "source_line": 270,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.notification.delivered.v1",
@@ -887,7 +1948,8 @@
       "source_path": "01-Platform/NOTIFICATIONS_AND_COMMUNICATION.md",
       "source_heading": "Events",
       "source_line": 85,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.notification.failed.v1",
@@ -899,7 +1961,8 @@
       "source_path": "01-Platform/NOTIFICATIONS_AND_COMMUNICATION.md",
       "source_heading": "Events",
       "source_line": 86,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.notification.requested.v1",
@@ -911,7 +1974,8 @@
       "source_path": "01-Platform/NOTIFICATIONS_AND_COMMUNICATION.md",
       "source_heading": "Events",
       "source_line": 84,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.organization.created.v1",
@@ -923,7 +1987,8 @@
       "source_path": "01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "source_heading": "Events",
       "source_line": 120,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.partner.delegation-granted.v1",
@@ -935,7 +2000,8 @@
       "source_path": "01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "source_heading": "Events",
       "source_line": 124,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.passkey.registered.v1",
@@ -946,8 +2012,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 338,
-      "document_status": "Draft"
+      "source_line": 207,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.record-follow.created.v1",
@@ -959,7 +2026,8 @@
       "source_path": "01-Platform/COLLABORATION_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 82,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sequence.definition-changed.v1",
@@ -971,7 +2039,8 @@
       "source_path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
       "source_line": 158,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sequence.definition-created.v1",
@@ -983,7 +2052,8 @@
       "source_path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
       "source_line": 157,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sequence.number-issued.v1",
@@ -995,7 +2065,8 @@
       "source_path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
       "source_line": 159,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sequence.number-voided.v1",
@@ -1007,7 +2078,8 @@
       "source_path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
       "source_line": 162,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sequence.range-leased.v1",
@@ -1019,7 +2091,8 @@
       "source_path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
       "source_line": 160,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sequence.range-reconciled.v1",
@@ -1031,7 +2104,8 @@
       "source_path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
       "source_line": 163,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sequence.range-revoked.v1",
@@ -1043,7 +2117,8 @@
       "source_path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
       "source_line": 161,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sequence.rollover-completed.v1",
@@ -1055,7 +2130,8 @@
       "source_path": "01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
       "source_line": 164,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.session.created.v1",
@@ -1066,8 +2142,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 334,
-      "document_status": "Draft"
+      "source_line": 203,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.session.revoked.v1",
@@ -1078,8 +2155,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 335,
-      "document_status": "Draft"
+      "source_line": 204,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.sso-session.created.v1",
@@ -1090,20 +2168,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 339,
-      "document_status": "Draft"
-    },
-    {
-      "name": "platform.subscription.grace-started.v1",
-      "namespace": "platform",
-      "owner": "Platform Kernel",
-      "entity": "subscription",
-      "fact": "grace-started",
-      "major_version": 1,
-      "source_path": "01-Platform/ENTITLEMENTS_AND_LICENSING.md",
-      "source_heading": "Events",
-      "source_line": 102,
-      "document_status": "Draft"
+      "source_line": 208,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.tenant.created.v1",
@@ -1115,7 +2182,8 @@
       "source_path": "01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "source_heading": "Events",
       "source_line": 118,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.tenant.suspended.v1",
@@ -1127,7 +2195,8 @@
       "source_path": "01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "source_heading": "Events",
       "source_line": 119,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.terminology.changed.v1",
@@ -1139,7 +2208,8 @@
       "source_path": "01-Platform/CONFIGURATION_AND_SETTINGS.md",
       "source_heading": "Events",
       "source_line": 73,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.thread.resolved.v1",
@@ -1151,7 +2221,8 @@
       "source_path": "01-Platform/COLLABORATION_PRIMITIVES.md",
       "source_heading": "Events",
       "source_line": 84,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.usage.limit-approaching.v1",
@@ -1162,8 +2233,9 @@
       "major_version": 1,
       "source_path": "01-Platform/ENTITLEMENTS_AND_LICENSING.md",
       "source_heading": "Events",
-      "source_line": 100,
-      "document_status": "Draft"
+      "source_line": 86,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.usage.limit-reached.v1",
@@ -1174,8 +2246,9 @@
       "major_version": 1,
       "source_path": "01-Platform/ENTITLEMENTS_AND_LICENSING.md",
       "source_heading": "Events",
-      "source_line": 101,
-      "document_status": "Draft"
+      "source_line": 87,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.user.registered.v1",
@@ -1186,8 +2259,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 333,
-      "document_status": "Draft"
+      "source_line": 202,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "platform.user.suspended.v1",
@@ -1198,8 +2272,9 @@
       "major_version": 1,
       "source_path": "01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 342,
-      "document_status": "Draft"
+      "source_line": 211,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.privacy-action.requested.v1",
@@ -1211,7 +2286,8 @@
       "source_path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "source_heading": "Events",
       "source_line": 157,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.privacy-case.closed.v1",
@@ -1223,7 +2299,8 @@
       "source_path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "source_heading": "Events",
       "source_line": 162,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": "schemas/events/security.privacy-case.closed.v1.schema.json"
     },
     {
       "name": "security.privacy-hold.applied.v1",
@@ -1235,7 +2312,8 @@
       "source_path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "source_heading": "Events",
       "source_line": 160,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.privacy-hold.released.v1",
@@ -1247,7 +2325,8 @@
       "source_path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "source_heading": "Events",
       "source_line": 161,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.privacy-request.received.v1",
@@ -1259,7 +2338,8 @@
       "source_path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "source_heading": "Events",
       "source_line": 155,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.privacy-request.verified.v1",
@@ -1271,7 +2351,8 @@
       "source_path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "source_heading": "Events",
       "source_line": 156,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.privacy-target.completed.v1",
@@ -1283,7 +2364,8 @@
       "source_path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "source_heading": "Events",
       "source_line": 158,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.privacy-target.failed.v1",
@@ -1295,7 +2377,8 @@
       "source_path": "11-Security/PRIVACY_RIGHTS_AND_RETENTION.md",
       "source_heading": "Events",
       "source_line": 159,
-      "document_status": "Draft"
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.protective-action.applied.v1",
@@ -1306,8 +2389,9 @@
       "major_version": 1,
       "source_path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
       "source_heading": "Events",
-      "source_line": 153,
-      "document_status": "Draft"
+      "source_line": 142,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.protective-action.reversed.v1",
@@ -1318,8 +2402,9 @@
       "major_version": 1,
       "source_path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
       "source_heading": "Events",
-      "source_line": 154,
-      "document_status": "Draft"
+      "source_line": 143,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.risk-appeal.received.v1",
@@ -1330,8 +2415,9 @@
       "major_version": 1,
       "source_path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
       "source_heading": "Events",
-      "source_line": 156,
-      "document_status": "Draft"
+      "source_line": 145,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.risk-assessment.created.v1",
@@ -1342,8 +2428,9 @@
       "major_version": 1,
       "source_path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
       "source_heading": "Events",
-      "source_line": 150,
-      "document_status": "Draft"
+      "source_line": 139,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.risk-case.closed.v1",
@@ -1354,8 +2441,9 @@
       "major_version": 1,
       "source_path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
       "source_heading": "Events",
-      "source_line": 155,
-      "document_status": "Draft"
+      "source_line": 144,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.risk-decision.changed.v1",
@@ -1366,8 +2454,9 @@
       "major_version": 1,
       "source_path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
       "source_heading": "Events",
-      "source_line": 151,
-      "document_status": "Draft"
+      "source_line": 140,
+      "document_status": "Draft",
+      "schema_path": null
     },
     {
       "name": "security.risk-review.required.v1",
@@ -1378,8 +2467,100 @@
       "major_version": 1,
       "source_path": "11-Security/RISK_FRAUD_AND_ANOMALY.md",
       "source_heading": "Events",
-      "source_line": 152,
-      "document_status": "Draft"
+      "source_line": 141,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "workforce.assignment.changed.v1",
+      "namespace": "workforce",
+      "owner": "Workforce",
+      "entity": "assignment",
+      "fact": "changed",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/WORKFORCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 74,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "workforce.employment.activated.v1",
+      "namespace": "workforce",
+      "owner": "Workforce",
+      "entity": "employment",
+      "fact": "activated",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/WORKFORCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 72,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "workforce.employment.created.v1",
+      "namespace": "workforce",
+      "owner": "Workforce",
+      "entity": "employment",
+      "fact": "created",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/WORKFORCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 71,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "workforce.employment.ended.v1",
+      "namespace": "workforce",
+      "owner": "Workforce",
+      "entity": "employment",
+      "fact": "ended",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/WORKFORCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 73,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "workforce.leave-request.approved.v1",
+      "namespace": "workforce",
+      "owner": "Workforce",
+      "entity": "leave-request",
+      "fact": "approved",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/WORKFORCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 76,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "workforce.leave-request.submitted.v1",
+      "namespace": "workforce",
+      "owner": "Workforce",
+      "entity": "leave-request",
+      "fact": "submitted",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/WORKFORCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 75,
+      "document_status": "Draft",
+      "schema_path": null
+    },
+    {
+      "name": "workforce.time-record.posted.v1",
+      "namespace": "workforce",
+      "owner": "Workforce",
+      "entity": "time-record",
+      "fact": "posted",
+      "major_version": 1,
+      "source_path": "04-Business-Domains/WORKFORCE_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 77,
+      "document_status": "Draft",
+      "schema_path": null
     }
   ]
 }

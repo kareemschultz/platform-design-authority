@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-001
 title: Strategy Section Index
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -35,26 +35,37 @@ last_reviewed: 2026-07-11
 - `../14-Engineering/ENGINEERING_HANDBOOK.md`
 - `../17-Roadmap/FIRST_SLICE_MANIFEST.md`
 - `../17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md`
-- `../13-Commercial/`
+- `../08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md`
+- `../13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md`
 - `../05-Industry-Packs/GUYANA_RETAIL_JURISDICTION_PROFILE.md`
+
+## Company-Stage Discipline
+
+The handbooks define the operating model the company must establish; they do not claim staffed departments, certifications, benchmarks, customers, partner networks, or mature processes already exist.
+
+Commercial specifications are authoritative over handbook summaries for editions, billing, entitlements, partners, marketplace, services, support terms, credits, refunds, settlement, and contractual money flows.
 
 ## Remaining Evidence and Decisions
 
 - Market interviews and willingness-to-pay evidence
+- Named design partners and pilot commitments
 - Completed competitor benchmarks
 - Platform Experience Index baseline studies
 - Business DNA prototype results
-- Legal entity, tax, and banking advice
-- Repository and licensing decisions
-- Long-term financial model
+- Legal entity, tax, banking, privacy, payment, and regulatory advice
+- Repository visibility and licensing decision
+- Long-term financial and financing model
 - Founder ratification of current gates
 
 ## Current Founder Gates
 
-1. Ratify direct tenant merchant contracts as the initial payment model.
-2. Decide the platform operating legal entity and contracting structure.
-3. Decide initial platform billing and settlement currencies.
-4. Ratify exclusion of a production storefront and tenant Recurring Agreements from the first pilot.
-5. Decide repository visibility, documentation license, and disclosure policy.
+1. Ratify direct tenant-provider merchant contracts.
+2. Decide the platform legal entity and contracting structure.
+3. Decide platform billing and settlement currencies.
+4. Ratify first-slice inclusion and deferrals.
+5. Decide repository visibility and documentation license.
+6. Decide terminal and provider coverage.
+7. Decide whether and when a paid marketplace phase may begin.
+8. Verify premium UI license scope for the owning entity and products.
 
-Strategy guides prioritization but does not bypass architecture, security, evidence, legal and tax review, lifecycle governance, or customer validation.
+Strategy guides prioritization but does not bypass architecture, security, evidence, qualified advice, lifecycle governance, or customer validation.

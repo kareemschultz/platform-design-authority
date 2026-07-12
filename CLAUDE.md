@@ -51,6 +51,7 @@ Before inventing an identifier or boundary, consult:
 - `14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md` before creating or handing off parallel work
 - `07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` for user, developer, release, or in-app help changes
 - `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
+- `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
 - `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `20-Strategy/FOUNDER_DECISION_REGISTER.md`
 
@@ -72,6 +73,7 @@ python scripts/generate_registries.py --check
 - Enforce tenant scope across data, cache, search, jobs, events, files, exports, webhooks, offline, extensions, and AI.
 - Evaluate entitlements and permissions separately. Feature flags are neither.
 - Better Auth owns authentication and sessions, not Party, business roles, permissions, entitlements, or tenant hierarchy.
+- Better Auth plugins are deny-by-default. Organization/Admin roles, payment/subscription plugins, Agent Auth, MCP, managed audit, and scaffold defaults do not transfer canonical platform ownership.
 - Party owns canonical real-world identity; domains own role records.
 - Corrections to financial, inventory, payroll, stored-value, cash, and audit facts use reversal or compensation.
 - Privacy follows ADR-0014 and the deletion journal.

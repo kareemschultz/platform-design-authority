@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-020
 title: Better Auth Identity Architecture
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 related_adrs: [ADR-0006, ADR-0007, ADR-0016]
 ---
 
@@ -47,6 +47,8 @@ CRM, Procurement, Workforce, Partners, and other domains own customer, supplier,
 
 Better Auth's organization plugin may support authentication-oriented membership and active-organization context, but it must not become the sole source of truth for the full business hierarchy.
 
+`BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` is the mandatory deny-by-default register for Better Auth core options and plugins. Scaffold defaults, documentation availability, or a package installation do not authorize a plugin.
+
 ## Accounts and Credentials
 
 Supported foundations may include email and password, username, phone where justified, email OTP, magic links, social providers, account linking, email verification, password reset, and recovery.
@@ -60,6 +62,8 @@ Required behavior includes database-backed sessions, expiration and refresh, rev
 A session may reference user identity, assurance level, active tenant or organization hint, session and device identifiers, authentication methods, expiry, and delegation context.
 
 Current permissions, entitlements, scopes, and business policy are resolved by platform services rather than trusted permanently from a session or token claim.
+
+Cookie session caching and secondary storage are disabled until maximum revocation staleness, tenant isolation, outage behavior, cache invalidation, and sensitive-operation database revalidation are approved and tested. A cached authentication session never makes cached business authority current.
 
 ## Two-Factor Authentication
 
@@ -121,6 +125,8 @@ The platform administration layer remains the user-facing control plane. Adminis
 
 Identity administration must not silently alter Party or domain-owned role records.
 
+The Better Auth Admin plugin's `admin` role and built-in access-control model are internal mechanics only. They do not satisfy platform permission checks. User deletion, password/email changes, role changes, bans, session revocation, and impersonation are exposed only through platform commands with tenant scope, recent authentication, reason, approval where required, visible delegated context, and audit.
+
 ## API Keys and Machine Authentication
 
 API keys may support approved customer, integration, developer, and extension scenarios.
@@ -138,6 +144,8 @@ JWTs are short-lived, audience- and issuer-bound, minimally scoped, and never tr
 ## OIDC Provider
 
 Exposing the platform as an OIDC provider requires governed client registration, redirect validation, consent, scopes, signing-key rotation, discovery, JWKS, token revocation, tenant-aware claims, and external security review.
+
+The documented OIDC Provider plugin is active-development and Labs-only as of the evidence date. The broader OAuth 2.1 Provider remains deferred until a Developer Platform ADR and real relying-party requirement define the authorization-server and resource-server boundaries.
 
 ## Device Authorization
 
@@ -196,6 +204,18 @@ A Better Auth user is not an employee, customer, supplier, partner, or canonical
 - Recovery-code and factor-reset governance
 - Provider and dependency monitoring
 - Version pinning and upgrade testing
+- Explicit production base URL, exact HTTPS trusted origins, secure host-only cookies by default, and trusted proxy/IP headers
+- Production prohibition on `disableCSRFCheck` and `disableOriginCheck`
+- Plugin-by-plugin schema, endpoint, secret, hook, package, and data-flow review
+- No credential, cookie, token, OTP, recovery code, factor secret, or excessive provider claim in logs or events
+
+Better Auth built-in rate limiting is defense in depth; platform edge and application abuse controls remain required. Broad wildcard origins, dynamic origin lookup, cross-subdomain cookies, cross-site cookies, and forwarded host/protocol derivation require dedicated threat modeling.
+
+## Runtime and Client Integration
+
+Hono mounts the owned Better Auth handler for `GET` and `POST`; narrowly scoped credentialed CORS is registered before routes. Bun compatibility is proven on the exact implementation lock across cryptography, cookies, WebAuthn, OAuth, email, database adapters, migrations, proxy behavior, telemetry, and shutdown. Node LTS remains the supported fallback under ADR-0020.
+
+Next.js and Expo integrations are adapters only. Expo requires secure storage, deep-link and custom-scheme allowlists, app/universal links, cookie exchange, recovery, device-loss, and revocation evidence. Neither framework integration performs business authorization.
 
 ## Event Integration
 
@@ -228,7 +248,10 @@ Lifecycle hooks publish through the transactional outbox or another reliable bou
 - Migration and rollback
 - Tenant isolation and authorization separation
 - Proof that identity lifecycle cannot silently mutate domain role records
+- CSRF, trusted-origin, proxy-header, cookie, account-linking, recovery, enumeration, replay, and open-redirect testing
+- Schema and endpoint diff for the exact selected plugin composition
+- Bun and Node critical compatibility suites for the Better Auth boundary
 
 ## Source References
 
-Dated verification and official URLs are maintained in the Better Auth evidence appendices under `19-Appendices/`.
+Dated verification and official URLs are maintained in `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`. Plugin decisions are governed by `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`.

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-003
 title: Identity and Authentication
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 related_adrs: [ADR-0006, ADR-0007]
 ---
 
@@ -61,6 +61,9 @@ Domains own role records such as Employment, Customer Relationship Profile, Supp
 8. Tenant policy cannot weaken platform minimums.
 9. Authentication lifecycle cannot silently create, merge, suspend, or terminate a domain role.
 10. Party merge and privacy transformation preserve identity links and domain-role references through governed workflows.
+11. Better Auth plugins are deny-by-default and require an entry in `BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`; catalog or scaffold availability is not approval.
+12. Better Auth Organization and Admin roles never replace platform permissions, entitlements, tenant scope, segregation of duties, or approvals.
+13. Payment, subscription, referral, managed-audit, agent, and MCP plugins do not transfer ownership from their canonical platform areas.
 
 ## Session Requirements
 
@@ -86,3 +89,5 @@ Authentication is a critical dependency. Offline POS uses signed, expiring platf
 - `01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md`
 - `01-Platform/AUTHORIZATION_AND_POLICY.md`
 - `01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md`
+- `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`
+- `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`

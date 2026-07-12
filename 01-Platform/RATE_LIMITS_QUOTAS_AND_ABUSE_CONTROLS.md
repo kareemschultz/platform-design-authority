@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-025
 title: Rate Limits Quotas and Abuse Controls
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
 ---
 
 # Rate Limits, Quotas, and Abuse Controls
@@ -60,6 +60,9 @@ Policies may scope by:
 6. Use queues and backpressure for deferrable workloads.
 7. Require approval for manual overrides and record expiry.
 8. Prevent one tenant's workload from exhausting shared capacity.
+9. Treat Better Auth route limits and optional managed abuse detection as defense in depth; platform edge and application controls remain required.
+10. Accept client IP only through an explicitly trusted proxy chain or protected header; never rate-limit on a spoofable forwarded value.
+11. CAPTCHA or breached-password services require accessibility, privacy, provider-outage, evasion, latency, regional, and fallback review before enablement.
 
 ## Customer Experience
 

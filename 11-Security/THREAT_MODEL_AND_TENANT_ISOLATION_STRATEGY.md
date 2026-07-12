@@ -1,10 +1,10 @@
 ---
 document_id: PDA-SEC-011
 title: Threat Model and Tenant Isolation Strategy
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
 ---
 
 # Threat Model and Tenant Isolation Strategy
@@ -68,6 +68,17 @@ Required context includes:
 - Delegation or impersonation context
 - Entitlements and policy version
 - Correlation and request identifiers
+
+## Better Auth Boundary Controls
+
+- Better Auth establishes authentication identity and session state; Platform Identity resolves tenant membership, Party links, delegated context, current permissions, entitlements, and policy.
+- Better Auth Organization and Admin roles are never accepted as business authorization. Powerful plugin operations are wrapped by platform commands and canonical permissions.
+- Production keeps CSRF and origin checks enabled, uses exact HTTPS trusted origins, prefers host-only `SameSite=Lax` cookies, and explicitly configures trusted proxy and client-IP headers.
+- Cross-domain cookies, wildcard/dynamic origins, forwarded host/protocol derivation, and native custom schemes require topology-specific threat models and negative tests.
+- Database-backed sessions are the baseline. Cookie cache is disabled until revocation staleness is accepted; sensitive operations force current session plus platform-authority evaluation.
+- Every plugin or upgrade receives a schema, endpoint, secret, hook, data-flow, package, tenant-isolation, rollback, and audit review under `PDA-PLT-028`.
+- Authentication logs and events exclude credentials, cookies, tokens, OTPs, recovery codes, factor secrets, API-key secrets, and excessive provider claims.
+- Payment/subscription, referral, Agent Auth, MCP, and managed-audit plugins cannot silently create a new trust boundary or transfer canonical ownership.
 
 ## Isolation Layers
 

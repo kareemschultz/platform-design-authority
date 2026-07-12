@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-011
 title: Implementation Recipes and Scaffolding
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Implementation Recipes and Scaffolding
@@ -28,6 +28,7 @@ Define repeatable implementation recipes that turn approved blueprint decisions 
 - New permission and entitlement
 - New offline-capable workflow
 - New provider adapter
+- New Better Auth core option or plugin
 - New extension or marketplace application
 - New AI tool or agent
 - New industry or jurisdiction pack
@@ -72,6 +73,16 @@ Every recipe identifies:
 - Reconcile provider and internal records
 - Define outage, migration, and exit
 - Avoid provider identifiers as primary business identities
+
+## Example: Better Auth Core Option or Plugin
+
+1. Verify the current stable release, official option/plugin page, package, maturity, changelog, and advisories.
+2. Confirm the decision in `PDA-PLT-028`; if absent or different, update the matrix, ADR-0006, identity specification, dated evidence, and lifecycle ledger before code.
+3. Inventory schema, migrations, routes, methods, cookies, secrets, hooks, claims, external processors, managed-service costs, and data flows.
+4. Prove the option does not own Party, tenancy, business roles/permissions, entitlements, approvals, payment, subscriptions, domain roles, or AI authority.
+5. Pin the exact core and plugin packages, generate schema to a review branch, and diff endpoints and migrations.
+6. Add tenant-isolation, denial, CSRF/origin, proxy, cookie, linking, recovery, revocation, replay, enumeration, audit, rollback, and runtime compatibility tests as applicable.
+7. Update the technology lessons ledger with any breaking change, workaround, failure, or reusable result.
 
 ## Guardrails
 

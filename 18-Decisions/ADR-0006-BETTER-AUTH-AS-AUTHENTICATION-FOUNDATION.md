@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0006
 title: Adopt Better Auth as the Authentication and Session Foundation
-version: 0.1.0
+version: 0.2.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
 ---
@@ -52,6 +52,10 @@ Maximum control but unacceptable security, maintenance, and time cost.
 
 Adopt Better Auth as the default authentication, session, account, and authentication-protocol foundation.
 
+The first-slice plugin baseline is deliberately small: database-backed sessions, email/password and account lifecycle, Two-Factor Authentication, Passkey, constrained Admin operations, constrained Organization context, and test-only Test Utils. Last Login Method and i18n may be included in the controlled prototype behind platform adapters. SSO, SCIM, API Key, and Device Authorization are seams or later prototypes, not production promises.
+
+All other core options, official plugins, managed-infrastructure plugins, partner plugins, and community plugins are deny-by-default under `PDA-PLT-028`. A plugin appearing in official documentation or scaffold output is not approval to enable it.
+
 Use Better Auth for:
 
 - Primary sign-in and registration
@@ -60,9 +64,9 @@ Use Better Auth for:
 - Passkeys
 - Social sign-in and account linking
 - Organization-oriented authentication context where useful
-- Enterprise SSO and SCIM after licensing and operational review
+- Enterprise SSO and SCIM after protocol, security, commercial, and operational review
 - API keys and selected token flows
-- Device authorization and OIDC-provider capabilities where approved
+- Device authorization and authorization-server capabilities where approved
 
 Do not use Better Auth as the sole source of truth for:
 
@@ -75,6 +79,8 @@ Do not use Better Auth as the sole source of truth for:
 - High-impact business approval policy
 
 These remain owned by platform services.
+
+Better Auth payment/subscription plugins do not own Platform Subscription, tenant customer Recurring Agreements, payment orchestration, stored value, or entitlements. Agent Auth and MCP integrations do not bypass canonical application commands, permissions, entitlements, approvals, tenant scope, or AI governance.
 
 ## Consequences
 
@@ -90,7 +96,7 @@ These remain owned by platform services.
 ### Negative
 
 - Better Auth becomes a critical security dependency requiring careful upgrades and review
-- Some enterprise capabilities may have licensing or product-tier implications
+- Optional managed infrastructure and third-party plugins may have pricing, processing, retention, residency, and product-tier implications
 - Platform and Better Auth organization models must be mapped without duplicate ownership
 - Expo and custom-domain behavior require dedicated validation
 - The team remains responsible for operating the identity data and security configuration
@@ -106,6 +112,10 @@ These remain owned by platform services.
 - Test horizontal scaling, session revocation, cookie policy, and mobile storage
 - Maintain an emergency migration and export path
 - Review Better Auth enterprise licensing before promising self-service SSO or SCIM commercially
+- Keep production CSRF and origin checks enabled; explicitly configure trusted origins, secure cookies, and trusted proxy/IP headers
+- Review schema, endpoint, secret, hook, data-flow, and package changes for every enabled plugin and upgrade
+- Keep session caching disabled until revocation-staleness and sensitive-operation revalidation have passed policy review
+- Apply `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling any plugin
 
 ## Validation
 
@@ -123,3 +133,5 @@ The decision is validated when a production-like vertical slice demonstrates:
 - SCIM provisioning proof of concept
 - Scoped API key and device authorization flow
 - Complete audit and security-event coverage
+
+The dated release, documentation, security, adapter, plugin, and pricing evidence is `PDA-APP-017`. Lifecycle approval remains Proposed until the validation evidence above exists.

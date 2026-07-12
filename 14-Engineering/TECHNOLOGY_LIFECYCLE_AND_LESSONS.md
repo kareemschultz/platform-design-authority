@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENG-020
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-12
@@ -41,6 +41,7 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | oRPC | 1.14.8 | Preferred stable transport | OpenAPI generator beta; Hono body caveat | Canonical parity, responses, bodies/files/streams/errors | Plain OpenAPI layer; Node | Before lockfile/major |
 | oRPC | 2.0.0-beta.16 observed | Labs only | Pre-release | No critical-path use | Stable 1.x | Stable 2.0 |
 | Better-T-Stack | 3.36.3 | Scaffold only | `latest` changes and addon constraints | Pinned dry-run and generated review | Manual assembly | Every scaffold |
+| Better Auth | 1.6.23 | Selected authentication/session foundation | Plugin catalog mixes auth, authorization helpers, developer protocols, payments, tracking, and managed services; some plugins are unstable | Exact composition schema/endpoint diff, Bun/Node/Hono/Next/Expo/Drizzle/PG18 compatibility, security and tenant-isolation suite | Pinned prior reviewed version; Node LTS boundary; emergency identity export/migration | Every release, advisory, or plugin change |
 | PostgreSQL | 18.4 current patch observed | Selected major; authoritative database | Patch evolves; extension/provider compatibility and AIO behavior require exact evidence | Restore, PITR, failover, migrations, decimals, isolation, performance, upgrades | Another supported PG18 deployment | Every PostgreSQL patch and environment lock |
 | pg_stat_statements | PostgreSQL 18 supplied | Required baseline extension/preload | Shared memory, restart, query-text privacy, overhead | Privileges, overhead, retention/reset, dashboards, failover/restore | Provider query insights/logs with reduced portability | Every PostgreSQL patch |
 | pg_trgm | PostgreSQL 18 supplied | Conditional approved search extension | Index write/storage cost and collation/search behavior | Relevance, GIN/GiST, size, write, locale and fallback tests | Core full-text/prefix search or external projection | Before first trigram index and PG patch |
@@ -64,6 +65,7 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | Hono | `https://hono.dev/`; `https://github.com/honojs/hono/releases/tag/v4.12.29` | 2026-07-12 |
 | oRPC | `https://orpc.dev/docs/getting-started`; `https://orpc.dev/docs/adapters/hono`; `https://orpc.dev/docs/openapi/openapi-to-contract`; `https://github.com/middleapi/orpc/releases/tag/v1.14.8` | 2026-07-12 |
 | Better-T-Stack | `https://www.better-t-stack.dev/new`; `https://better-t-stack.dev/docs`; `https://github.com/AmanVarshney01/create-better-t-stack/releases/tag/v3.36.3` | 2026-07-12 |
+| Better Auth | `https://better-auth.com/docs`; `https://better-auth.com/docs/reference/security`; `https://better-auth.com/docs/concepts/session-management`; `https://better-auth.com/docs/plugins`; `https://github.com/better-auth/better-auth/releases/tag/v1.6.23` | 2026-07-12 |
 | Fumadocs | `https://www.fumadocs.dev/docs`; `https://www.fumadocs.dev/docs/integrations/openapi`; `https://www.fumadocs.dev/docs/ui/component-library` | 2026-07-12 |
 | Base UI and shadcn/ui | `https://base-ui.com/react/overview/releases`; `https://ui.shadcn.com/docs/changelog/2026-07-base-ui-default` | 2026-07-12 |
 | TanStack Start | `https://tanstack.com/start/latest/docs/framework/react/overview`; `https://tanstack.com/start/latest/docs/framework/react/guide/server-components` | 2026-07-12 |
@@ -93,6 +95,10 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 | TECH-LESSON-012 | 2026-07-12 | Active | Video summary named a nonexistent `df.weight` scheduler | Use official `df.wait_for_schedule()` and verify video claims against primary docs | Primary-source verification recorded | Data Platform | API changes |
 | TECH-LESSON-013 | 2026-07-12 | Active | PostgreSQL 18 natively supplies UUIDv7, so UUID helper extensions add no baseline value | Use core `uuidv7()` where approved; omit `uuid-ossp` and UUID-only `pgcrypto` use | ADR-0024 tests pending | Data Platform | PostgreSQL UUID policy changes |
 | TECH-LESSON-014 | 2026-07-12 | Active | Every preload/background-worker extension expands startup, failure, upgrade, restore, and provider constraints | Preload only `pg_stat_statements`; isolate conditional/Labs extensions | Extension matrix and recovery tests pending | Data Platform | Accepted extension admission |
+| TECH-LESSON-015 | 2026-07-12 | Active | An authentication plugin catalog combines useful authentication mechanics with roles, billing, tracking, AI, and other ownership-changing conveniences | Deny plugins by default; require `PDA-PLT-028`, an owner, schema/endpoint diff, threat model, exact pin, and rollback | Better Auth matrix; implementation tests pending | Platform Identity | Every plugin request or release |
+| TECH-LESSON-016 | 2026-07-12 | Active | Cookie session caching reduces reads but delays remote revocation until cache expiry unless current database state is forced | Default cache off; set an approved staleness bound and bypass cache for sensitive operations before enabling | Revocation and load tests pending | Platform Identity | Session architecture changes |
+| TECH-LESSON-017 | 2026-07-12 | Active | Better Auth v1.6 `disableOriginCheck` also disables CSRF protection, while proxy and wildcard-origin options can broaden trust unexpectedly | Prohibit both security-disable flags in production; use exact origins, host-only cookies, and explicit trusted proxy/IP configuration | Security configuration tests pending | Security Engineering | Security semantics or deployment topology changes |
+| TECH-LESSON-018 | 2026-07-12 | Active | Official documentation labels Agent Auth unstable and OIDC Provider active-development, while OAuth 2.1 Provider exposes a large authorization-server surface | Agent Auth/OIDC Provider remain Labs; OAuth provider deferred behind a Developer Platform ADR and real relying-party need | Isolated evaluation only | Developer Platform | Stable maturity and approved use case |
 
 ## Entry Templates
 

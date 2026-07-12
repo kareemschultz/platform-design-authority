@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-010
 title: Better-T-Stack and Client Architecture
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -109,6 +109,8 @@ Business components such as Money, Quantity, Product Picker, Party Picker, Appro
 
 Better Auth is selected under ADR-0006 for authentication, accounts, sessions, 2FA, passkeys, and approved protocol plugins.
 
+The generated Better Auth option selects the framework, not every plugin or generated authorization model. Keep only the composition permitted by `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`; record exact core and separate plugin versions; review generated schema, endpoints, secrets, hooks, cookies, origins, proxy trust, and migrations; and run the Bun/Node/Hono/Next/Expo compatibility suite.
+
 Better-T-Stack may scaffold Better Auth integration, but generated code must still use the platform identity adapter and must not make Better Auth the owner of:
 
 - Tenant hierarchy
@@ -117,6 +119,7 @@ Better-T-Stack may scaffold Better Auth integration, but generated code must sti
 - Entitlements
 - Segregation of duties
 - Workforce, customer, or supplier records
+- Payment, subscription, referral, managed-audit, or AI capability authority
 
 ## Better-T-Stack Usage
 

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-009
 title: Recommended Technology Stack
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -206,6 +206,10 @@ Use Better Auth for approved combinations of:
 - Organization-aware authentication context
 - OIDC, OAuth, SAML, SCIM, API keys, device authorization, and OIDC-provider scenarios after validation
 
+The first-slice composition is intentionally minimal and deny-by-default. Use `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before adding any official, managed-infrastructure, partner, or community plugin. Payment/subscription plugins do not own platform or tenant business billing; Agent Auth and MCP do not own platform AI authority; Better Auth Organization/Admin roles do not own business authorization.
+
+Better Auth v1.6.23 was the current stable release observed on 2026-07-12. Exact core and separate plugin package versions are pinned together and tested across Bun, Node fallback, Hono, Next.js, Expo, Drizzle, and PostgreSQL 18. The official Hono integration proves a Web `Request`/`Response` mounting shape, not complete Bun runtime compatibility.
+
 The platform retains ownership of tenant hierarchy, canonical parties, business roles, permissions, scopes, entitlements, segregation of duties, approvals, and risk policy.
 
 Better Auth managed infrastructure is optional. The framework remains self-hosted in the application architecture. Self-service SSO, directory sync, managed audit, security detection, and vendor support may create variable recurring costs and must be represented in commercial cost models rather than assumed free.
@@ -352,6 +356,8 @@ Review this stack when:
 - Better Auth SSO plugin: `https://better-auth.com/docs/plugins/sso`
 - Better Auth SCIM plugin: `https://better-auth.com/docs/plugins/scim`
 - Better Auth pricing and managed infrastructure: `https://better-auth.com/pricing`
+- Better Auth complete verification: `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`
+- Better Auth plugin matrix: `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`
 - Next.js App Router documentation: `https://nextjs.org/docs/app`
 - TanStack documentation: `https://tanstack.com`
 - Expo Router: `https://docs.expo.dev/router/introduction/`

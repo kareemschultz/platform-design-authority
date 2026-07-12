@@ -109,7 +109,7 @@ jobs:
           set -euo pipefail
           if grep -RInE "(sk-[A-Za-z0-9]|OPENAI_API_KEY|OPENROUTER_API_KEY|POSTGRES_PASSWORD:-password|@ai-sdk|openrouter|devtools|/ai|/todos)" \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.turbo \
-            --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock \
+            --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock --exclude='*.tsbuildinfo' \
             apps packages ops package.json biome.json turbo.json docker-compose.yml; then
             echo "Prohibited secret or generated example surface found" >&2
             exit 1

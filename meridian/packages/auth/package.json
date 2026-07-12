@@ -1,0 +1,25 @@
+{
+  "name": "@meridian/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@better-auth/expo": "catalog:",
+    "@meridian/db": "workspace:*",
+    "@meridian/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@meridian/config": "workspace:*",
+    "typescript": "^6"
+  }
+}

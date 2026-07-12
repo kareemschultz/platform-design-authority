@@ -1,7 +1,7 @@
 ---
 document_id: PDA-COM-013
 title: Cash Collection and Disbursement Boundaries
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -80,13 +80,12 @@ Examples include partner commission and future marketplace publisher payout.
 
 ## Events
 
-- `commerce.deposit.prepared.v1`
-- `commerce.deposit.reconciled.v1`
 - `finance.receivable-payment.applied.v1`
 - `finance.disbursement.approved.v1`
 - `finance.disbursement.reconciled.v1`
-- `payment.settlement.reconciled.v1`
 - `commercial.partner-settlement.created.v1`
+
+Commerce deposit events are defined by the Commerce Domain. Payment settlement events are defined by the Payment Engine. This document references those owning contracts without redefining them.
 
 ## Quality Gates
 

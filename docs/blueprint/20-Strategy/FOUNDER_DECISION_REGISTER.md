@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Founder Decision Register
@@ -144,11 +144,3 @@ A decision closes only when:
 5. The decision is represented in implementation and customer claims.
 
 Architecture documents reference this register rather than inventing business facts.
-
-## FDR-010 - Platform SaaS Cash Receivables Policy
-
-**Status:** Open.
-
-Define whether and how the platform company may accept cash or agent-collected Platform Subscription receivables, including authority, custody, receipt, deposit, fraud, reversal, reconciliation, accounting, insurance, jurisdiction, and segregation of duties. Until ratified, this collection is disabled.
-
-**Ratification required before:** any Platform Subscription invoice is collected in cash or by an agent.

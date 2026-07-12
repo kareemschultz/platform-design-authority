@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-013
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-12
@@ -38,7 +38,7 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 |---|---|---|---|---|---|---|
 | Bun | 1.3.14 | Preferred prototype runtime/package manager | Named Node APIs and diagnostics remain partial/missing | Dual runtime, addons, telemetry, crypto/TLS, signals, diagnostics, containers | Active Node LTS or Node worker | Every prototype and upgrade |
 | Hono | 4.12.29 | Preferred thin shell | Platform supplies application structure; middleware order matters | Boundaries, authorization order, request context, errors, shutdown | Hono on Node; NestJS/Fastify | Before lockfile |
-| oRPC | 1.14.8 | Preferred stable transport | OpenAPI generator beta; Hono body caveat | Canonical parity, responses, bodies/files/streams/errors | Plain OpenAPI layer; Node | Before lockfile/major |
+| oRPC package family | 1.14.7 | Preferred stable transport package set | The upstream project has a general `v1.14.8` release tag, but the five scoped npm packages used by this repository currently publish `1.14.7`; OpenAPI generator beta and Hono body caveat remain | Canonical parity, responses, bodies/files/streams/errors; verify all scoped package versions together | Plain OpenAPI layer; Node | Before lockfile/major and every upstream release |
 | oRPC | 2.0.0-beta.16 observed | Labs only | Pre-release | No critical-path use | Stable 1.x | Stable 2.0 |
 | Better-T-Stack | 3.36.3 | Scaffold only | `latest` changes and addon constraints | Pinned dry-run and generated review | Manual assembly | Every scaffold |
 | Better Auth | 1.6.23 | Selected authentication/session foundation | Plugin catalog mixes auth, authorization helpers, developer protocols, payments, tracking, and managed services; some plugins are unstable | Exact composition schema/endpoint diff, Bun/Node/Hono/Next/Expo/Drizzle/PG18 compatibility, security and tenant-isolation suite | Pinned prior reviewed version; Node LTS boundary; emergency identity export/migration | Every release, advisory, or plugin change |
@@ -67,7 +67,7 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 |---|---|---|
 | Bun | `https://bun.sh/`; `https://bun.sh/docs/runtime/nodejs-compat`; `https://bun.sh/docs/runtime/node-api`; `https://bun.sh/docs/pm/isolated-installs`; `https://github.com/oven-sh/bun/releases/tag/bun-v1.3.14`; `https://github.com/oven-sh/bun/issues/23524` | 2026-07-12 |
 | Hono | `https://hono.dev/`; `https://github.com/honojs/hono/releases/tag/v4.12.29` | 2026-07-12 |
-| oRPC | `https://orpc.dev/docs/getting-started`; `https://orpc.dev/docs/adapters/hono`; `https://orpc.dev/docs/openapi/openapi-to-contract`; `https://github.com/middleapi/orpc/releases/tag/v1.14.8` | 2026-07-12 |
+| oRPC | `https://orpc.dev/docs/getting-started`; `https://orpc.dev/docs/adapters/hono`; `https://orpc.dev/docs/openapi/openapi-to-contract`; `https://github.com/middleapi/orpc/releases/tag/v1.14.8`; npm registry metadata for `@orpc/server`, `@orpc/client`, `@orpc/openapi`, `@orpc/zod`, and `@orpc/tanstack-query` | 2026-07-12 |
 | Better-T-Stack | `https://www.better-t-stack.dev/new`; `https://better-t-stack.dev/docs`; `https://github.com/AmanVarshney01/create-better-t-stack/releases/tag/v3.36.3` | 2026-07-12 |
 | Better Auth | `https://better-auth.com/docs`; `https://better-auth.com/docs/reference/security`; `https://better-auth.com/docs/concepts/session-management`; `https://better-auth.com/docs/plugins`; `https://github.com/better-auth/better-auth/releases/tag/v1.6.23` | 2026-07-12 |
 | Fumadocs | `https://www.fumadocs.dev/docs`; `https://www.fumadocs.dev/docs/integrations/openapi`; `https://www.fumadocs.dev/docs/ui/component-library` | 2026-07-12 |
@@ -114,6 +114,7 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 | TECH-LESSON-023 | 2026-07-12 | Active | Infrastructure compatibility includes the OpenTofu CLI, providers, modules, state backend, and policy tooling, not only the CLI version | Pin and test the whole IaC lock set; record drift and recovery evidence | ADR-0018; disposable-environment tests pending | Platform Engineering | Every infrastructure lock change |
 | TECH-LESSON-024 | 2026-07-12 | Active | Better Auth documents MCP succession toward OAuth Provider | Keep MCP deferred; authentication grants no tool authority | Fourth-audit disposition | Developer Platform | Better Auth plugin or maturity change |
 | TECH-LESSON-025 | 2026-07-12 | Active | With Bun 1.3.14 isolated workspaces on Windows, Next/Turbopack could not resolve a dependency that `mdast-util-from-markdown` and `micromark-util-decode-string` both declare, although Bun installed and linked it inside the virtual store; Bun's narrow `hoistPattern` did not resolve this Turbopack traversal | Keep isolated linking and explicitly pin `micromark-util-decode-numeric-character-reference@2.0.2` as a root build-tool dependency; do not globally switch to hoisted linking | Clean install, frozen install, and full docs build; official Bun isolated-linker docs and issue 23524 | Developer Platform | Remove only after a clean isolated install and full build pass without the root pin on a reviewed Bun/Fumadocs upgrade |
+| TECH-LESSON-026 | 2026-07-12 | Active | An upstream repository release tag does not prove that every separately published package in a coordinated family has the same version | Select and record the exact jointly available package set from registry metadata; keep the general release tag as contextual evidence only | `bun pm view` for the five scoped oRPC packages returned `1.14.7`; frozen install and implementation conflict record | Platform Engineering | Recheck all scoped packages together on every oRPC release |
 
 ## Entry Templates
 

@@ -24,7 +24,7 @@ Reviewed deviations from generated output:
 
 - Removed generated AI and Todo examples from the governed first-slice prototype.
 - Removed the Better-T-Stack `skills` addon payload, including its AI SDK skill and nested third-party instruction trees, so root and nested repository governance remain the only agent authority.
-- Pinned Bun 1.3.14, Hono 4.12.29, shadcn 4.13.0, and Lucide 1.24.0. oRPC exact 1.14.8 is blocked because the scoped packages used here are not published at that version; this prototype pins 1.14.7 and records the conflict in `docs/implementation/IMPLEMENTATION_CONFLICTS.md`.
+- Pinned Bun 1.3.14, Hono 4.12.29, shadcn 4.13.0, and Lucide 1.24.0. The upstream oRPC project has a general `v1.14.8` tag, while the five scoped packages used here publish a coherent stable `1.14.7` set; this prototype correctly pins `1.14.7` and records the distinction in `docs/implementation/IMPLEMENTATION_CONFLICTS.md`.
 - Reconciled shadcn metadata to the Base UI/Rhea, Neutral/Blue, Geist/Inter, Lucide, default-radius bootstrap selected in PDA-UX-028.
 - Hardened Better Auth cookie and trusted-origin configuration for prototype review.
 

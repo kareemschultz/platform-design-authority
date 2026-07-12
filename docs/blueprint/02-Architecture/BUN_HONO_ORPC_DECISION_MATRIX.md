@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-016
 title: Bun Hono and oRPC Decision Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -40,7 +40,7 @@ Node + Hono + oRPC has the highest pre-prototype risk-adjusted score. Bun remain
 |---|---|---|---|---|---|
 | Bun 1.3.14 | Preferred runtime/package manager | Integrated fast TypeScript toolchain | Partial Node APIs and operational differences | Pin; dual-runtime critical suites; adapters; drills | Active Node LTS |
 | Hono 4.12.29 | Preferred thin shell | Web Standards and multi-runtime | Less built-in application structure | Composition root, middleware and architecture tests | Hono on Node; NestJS/Fastify if Hono fails |
-| oRPC 1.14.8 | Preferred stable transport | Typed inputs, outputs, errors, OpenAPI | Contract duplication and body-order caveat | Semantic parity, response validation, integration tests | Plain OpenAPI handlers/clients |
+| oRPC 1.14.7 scoped package set | Preferred stable transport | Typed inputs, outputs, errors, OpenAPI | The upstream general release tag may differ from separately published package versions; contract duplication and body-order caveat | Verify all five scoped packages together; semantic parity, response validation, integration tests | Plain OpenAPI handlers/clients |
 | oRPC 2 beta | Labs only | Emerging features | Breaking pre-release changes | Isolation only | Stable 1.x |
 | Better-T-Stack 3.36.3 | Scaffold only | Reproducible compatible composition | `latest` drift and generated defaults | Pin, dry-run, diff and governance review | Manual assembly |
 | Drizzle | Scaffold/evaluate | TypeScript ergonomics | Complex ledger SQL and ownership | SQL/migration evidence; compare Kysely/SQL | Kysely or explicit SQL |

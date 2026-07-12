@@ -1,6 +1,6 @@
 # Meridian Implementation Conflicts
 
-## oRPC 1.14.8 Package Availability
+## oRPC Release Tag and Package-Family Availability
 
 Plan requirement: pin Bun 1.3.14, Hono 4.12.29, oRPC 1.14.8, and Lucide 1.24.0.
 
@@ -16,7 +16,9 @@ bun pm view @orpc/tanstack-query versions --json
 
 The highest published stable 1.x version available for these packages was `1.14.7`; `1.14.8` was not published for the packages used by this scaffold. The next visible line was `2.0.0-beta.*`, which ADR-0020 and PDA-ENGR-013 keep out of the critical prototype path.
 
-Disposition: the prototype pins the available stable `1.14.7` package set and does not claim to satisfy the exact `1.14.8` requirement. Updating to `1.14.8` remains blocked until the package set is published or the authority is corrected.
+Reverified after repository normalization on 2026-07-12: each of the five scoped package `version` queries still returned `1.14.7`. The upstream repository's general `v1.14.8` tag is retained as contextual release evidence, not as proof that the separately published package family exists at that number.
+
+Disposition: the prototype pins the coherent stable `1.14.7` package set. The architecture authority now distinguishes the upstream/general release tag from package-family availability. No upgrade to `1.14.8` is expected unless all scoped packages publish a reviewed coherent set; any later version change follows the normal technology-evidence and compatibility gates.
 
 ## Better-T-Stack dry-run output rewrites the package selector
 

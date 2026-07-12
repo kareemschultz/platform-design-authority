@@ -33,7 +33,7 @@ Every first-slice capability declares all thirteen dimensions:
 12. Performance and capacity
 13. Recovery, replay, and reconciliation
 
-A dimension may be `required`, `not-applicable`, or `deferred-by-depth`. `not-applicable` requires a reason. `seam` capabilities still require contract, failure, and integration tests.
+The generated registry currently supports only `required`. For a seam, `required` means contract, failure, and integration evidence at seam depth rather than full UI or load proof. Future overrides require an approved source, reason, owner, and generator support.
 
 ## Machine-Readable Shape
 

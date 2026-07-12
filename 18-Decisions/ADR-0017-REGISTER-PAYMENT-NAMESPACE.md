@@ -70,3 +70,11 @@ Commerce owns sales, returns, cash, and customer stored value. Finance owns acco
 ## Validation
 
 The decision is validated when all detailed Payment identifiers use `payment.*`, generated registries resolve them to the Payment Engine, and no governed permission uses `engine.payment*`.
+
+## Review Record
+
+Fourth-audit remediation confirms this Proposed ADR remains subordinate to ratified authority.
+
+## Change Log
+
+- 2026-07-12: Added review/change-log structure; no lifecycle promotion.

@@ -134,7 +134,7 @@ Drizzle may be evaluated in generated Better-T-Stack prototypes. Prisma may be u
 ### Cache, Coordination, and Short Jobs
 
 - Redis or a compatible approved implementation for cache, rate limits, ephemeral coordination, and short-lived locks where unavoidable
-- BullMQ for lightweight background jobs during early implementation
+- A lifecycle-registered queue adapter for lightweight background jobs; no queue product is selected until compatibility evidence exists
 
 Redis is never an authoritative business-data store.
 
@@ -308,7 +308,7 @@ Vercel may host Next.js previews and selected production web surfaces, but backe
 - AI orchestration engine using ordinary application commands
 - Tool authorization through normal permissions, entitlements, policy, and approvals
 - Permission-filtered retrieval
-- pgvector in PostgreSQL as the initial vector option
+- pgvector in PostgreSQL as a candidate admitted only for an isolated prototype under ADR-0024
 - Evaluation datasets, scoring, red-team testing, and release gates
 - Explicit prompt, model, tool, cost, approval, provenance, and audit records
 
@@ -362,3 +362,5 @@ Review this stack when:
 - TanStack documentation: `https://tanstack.com`
 - Expo Router: `https://docs.expo.dev/router/introduction/`
 - Expo UI: `https://docs.expo.dev/versions/latest/sdk/ui/`
+
+OpenTofu 1.12.3 is proposed under ADR-0018 and dated evidence; it is not production-ratified.

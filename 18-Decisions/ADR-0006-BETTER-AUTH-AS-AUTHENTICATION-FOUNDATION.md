@@ -8,6 +8,7 @@ created: 2026-07-10
 last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
+related_adrs: [ADR-0004, ADR-0020]
 ---
 
 # ADR-0006 — Adopt Better Auth as the Authentication and Session Foundation
@@ -135,3 +136,7 @@ The decision is validated when a production-like vertical slice demonstrates:
 - Complete audit and security-event coverage
 
 The dated release, documentation, security, adapter, plugin, and pricing evidence is `PDA-APP-017`. Lifecycle approval remains Proposed until the validation evidence above exists.
+
+## Amendment Record
+
+- 2026-07-12: Recorded ADR-0020 prototype-runtime amendment without lifecycle promotion.

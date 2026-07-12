@@ -5,7 +5,7 @@ version: 0.1.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
-related_adrs: [ADR-0002, ADR-0003]
+related_adrs: [ADR-0002, ADR-0003, ADR-0020]
 ---
 
 # Architecture Dependency Rules
@@ -79,6 +79,9 @@ Provider adapters depend on stable platform-facing adapter interfaces. Provider 
 - Feature-flag keys inside entitlement policy
 - AI prompt or tool packages importing repositories directly
 - Self-hosted or cloud-specific infrastructure code from domain packages
+- Bun globals in runtime-neutral core packages
+- Hono context or oRPC transport objects outside adapters
+- Database adapters in runtime-neutral core packages
 
 ## Persistence Rules
 
@@ -118,6 +121,8 @@ The implementation must include tests that:
 - Fail application packages that contain migrations
 - Detect circular dependencies
 - Verify each table and migration has one owner
+- Fail Bun-global imports outside adapters
+- Fail Hono/oRPC transport and database-adapter leakage into runtime-neutral core
 
 ## Temporary Exceptions
 
@@ -147,3 +152,7 @@ A machine-readable ruleset should eventually define package globs, allowed depen
 - New package families require architecture review
 - Extraction to services preserves the same ownership contracts
 - Generated scaffolds comply by default
+
+## Contract Granularity
+
+Machine rules express family and prohibited-pattern gates; this document remains normative for module, contract, table, and migration ownership.

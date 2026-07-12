@@ -126,3 +126,7 @@ The decision is validated when the initial vertical slice:
 - Provides generated API contracts
 - Demonstrates a recoverable offline workflow
 - Produces benchmark evidence for the backend framework decision
+
+## Amendment Record
+
+- 2026-07-12: Recorded ADR-0020 prototype-runtime amendment without lifecycle promotion.

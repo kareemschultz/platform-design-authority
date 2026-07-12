@@ -99,3 +99,7 @@ Create separate web and native component packages backed by shared design tokens
 ## Validation
 
 Validate the client architecture through a vertical slice that runs on web and Expo mobile, includes a dense searchable table, a complex typed form, a transaction, white-label theming, offline SQLite storage, synchronization, tenant and permission enforcement, observability, accessibility, and automated tests.
+
+## Amendment Record
+
+- 2026-07-12: Recorded ADR-0020 prototype-runtime amendment without lifecycle promotion.

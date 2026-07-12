@@ -71,7 +71,10 @@
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
-      "related_adrs": [],
+      "related_adrs": [
+        "ADR-0004",
+        "ADR-0020"
+      ],
       "review_evidence": null
     },
     {
@@ -533,6 +536,19 @@
       "related_adrs": [
         "ADR-0005",
         "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-APP-019",
+      "path": "19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md",
+      "title": "OpenTofu Verification - 2026-07-12",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0018"
       ],
       "review_evidence": null
     },
@@ -1925,7 +1941,8 @@
       "last_reviewed": "2026-07-11",
       "related_adrs": [
         "ADR-0002",
-        "ADR-0003"
+        "ADR-0003",
+        "ADR-0020"
       ],
       "review_evidence": null
     },

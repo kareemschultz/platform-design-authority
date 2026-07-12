@@ -97,3 +97,11 @@ Publisher AI skills, tools, prompts, and agents additionally enter the governed 
 ## Validation
 
 Before Class 3 adoption, prototype at least two runtime candidates and test tenant escape, CPU exhaustion, memory exhaustion, network denial, secret denial, cancellation, package tampering, logging, and emergency suspension.
+
+## Review Record
+
+Fourth-audit remediation confirms this Proposed ADR remains subordinate to ratified authority.
+
+## Change Log
+
+- 2026-07-12: Added review/change-log structure; no lifecycle promotion.

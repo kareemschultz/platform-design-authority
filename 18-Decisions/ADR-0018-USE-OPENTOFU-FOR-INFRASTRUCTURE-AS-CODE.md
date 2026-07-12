@@ -99,3 +99,17 @@ Terraform-compatible providers and modules may be used only after license, maint
 ## Validation
 
 Validate through a disposable first-slice environment, isolated recovery environment, plan/apply/destroy tests, drift simulation, state recovery, provider upgrade, and one reference self-hosted installation.
+
+## Evidence and Cross-Links
+
+- `19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md`
+- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
+- `02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md`
+
+## Review Record
+
+Fourth-audit remediation confirms this Proposed ADR remains subordinate to ratified authority.
+
+## Change Log
+
+- 2026-07-12: Added review/change-log structure; no lifecycle promotion.

@@ -104,6 +104,8 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 
 `engine.<name>` registers a shared engine. Dedicated detailed families include `ai.*`, `payment.*`, `loyalty.*`, and `fiscalization.*`.
 
+"Meridian" is the internal engineering codename only (ADR-0026): it names the workspace, `@meridian/*` packages, services, and CI — never canonical identifiers, tenant-visible strings, receipts, or public API surfaces. The `@meridian/*` scope is provisional until npm/trademark checks are recorded; the commercial product name is a separate founder decision.
+
 ## 7. Money, Time, Quantity, and Identity
 
 - Authoritative money uses explicit currency and approved decimal/integer semantics, never binary floating point.
@@ -164,7 +166,35 @@ Draft implementation contracts are under `openapi/` and `schemas/`.
 - Import/export and Finance handoff preserve manifests, hashes, reconciliation, and classification.
 - AI records follow the governed AI schema.
 
-## 11. Change Process
+## 11. Development Practice
+
+Everyday commands (Bun + Turborepo):
+
+```bash
+bun install                 # workspace install
+bun run dev                 # all dev servers (or dev:web / dev:server / dev:native)
+bun run check-types         # TypeScript across every workspace
+bun run test                # bun:test suites
+bun run check               # ultracite (Biome) lint + format check; `bun run fix` applies
+bun run db:start            # local PostgreSQL 18 via Docker
+bun run db:migrate          # apply committed Drizzle migrations
+```
+
+Every change must leave ALL gates green before a PR: `check-types`, `test`, `check`, `python scripts/validate_docs.py`, and `python scripts/generate_registries.py --check`. CI additionally runs the live Docker stack, migration freshness, and API/web health probes — do not merge on a red or skipped gate.
+
+Code conventions:
+
+- TypeScript strict everywhere; every workspace carries a working `check-types` script.
+- Core packages stay runtime-neutral per ADR-0020 and `ARCHITECTURE_DEPENDENCY_RULES.md`: no Bun globals, `bun:*` imports, Hono context types, oRPC transport objects, or database adapters in domain, application, contract, or authorization code.
+- All external input is validated with zod v4 schemas at the boundary; oRPC procedures declare typed errors.
+- Environment access goes only through `@meridian/env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed.
+- Database changes go through Drizzle schema + `db:generate`; committed migrations are never hand-edited (CI enforces migration freshness).
+- Tests are colocated `*.test.ts` using `bun:test` and assert real behavior — no placeholder assertions.
+- No `console.log` in committed code; use the structured logger. No commented-out code blocks.
+- Line endings are LF, enforced by `.gitattributes` — Windows contributors should not fight the formatter.
+- New UI follows the governed shadcn bootstrap (§8) and semantic tokens; raw palette values in real components are lint-visible defects.
+
+## 12. Change Process
 
 Before editing:
 
@@ -182,13 +212,13 @@ After editing:
 5. Update dispositions.
 6. Do not claim readiness beyond evidence.
 
-## 12. ADR Triggers
+## 13. ADR Triggers
 
 Create or amend an ADR for ownership, boundaries, stack, persistence, offline semantics, public contracts, extension execution, deployment, security, privacy, payments, settlement, commercial runtime, or platform-wide lifecycle changes.
 
 Business facts architecture cannot infer belong in the Founder Decision Register.
 
-## 13. Prohibited Behavior
+## 14. Prohibited Behavior
 
 - Silent contradiction resolution
 - Cross-domain persistence shortcuts
@@ -203,9 +233,9 @@ Business facts architecture cannot infer belong in the Founder Decision Register
 - Treating AI, search, cache, analytics, or offline projections as current authority
 - Editing independent audit evidence instead of writing a disposition
 
-## 14. Current Readiness
+## 15. Current Readiness
 
-The repository targets one constrained vertical-slice implementation after named blockers. Technical Prototypes 1–3 may begin after the final remediation verification.
+The repository targets one constrained vertical-slice implementation after named blockers. Technical Prototypes 1–3 are cleared to proceed per the fourth audit (reviews family FA4) and its disposition; the monorepo scaffold under apps/ and packages/ is that prototype surface.
 
 Pilot and production remain blocked on founder decisions, customer evidence, qualified Guyana review, provider certification, implementation tests, penetration testing, accessibility evidence, and operational exercises.
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@meridian/ui/components/button";
 import { Input } from "@meridian/ui/components/input";
 import { Label } from "@meridian/ui/components/label";
@@ -73,6 +75,13 @@ export default function SignUpForm({
 							<div className="space-y-2">
 								<Label htmlFor={field.name}>Name</Label>
 								<Input
+									aria-describedby={
+										field.state.meta.errors.length > 0
+											? `${field.name}-error`
+											: undefined
+									}
+									aria-invalid={field.state.meta.errors.length > 0}
+									autoComplete="name"
 									id={field.name}
 									name={field.name}
 									onBlur={field.handleBlur}
@@ -80,7 +89,12 @@ export default function SignUpForm({
 									value={field.state.value}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
+									<p
+										className="text-destructive text-sm"
+										id={`${field.name}-error`}
+										key={error?.message}
+										role="alert"
+									>
 										{error?.message}
 									</p>
 								))}
@@ -95,6 +109,13 @@ export default function SignUpForm({
 							<div className="space-y-2">
 								<Label htmlFor={field.name}>Email</Label>
 								<Input
+									aria-describedby={
+										field.state.meta.errors.length > 0
+											? `${field.name}-error`
+											: undefined
+									}
+									aria-invalid={field.state.meta.errors.length > 0}
+									autoComplete="email"
 									id={field.name}
 									name={field.name}
 									onBlur={field.handleBlur}
@@ -103,7 +124,12 @@ export default function SignUpForm({
 									value={field.state.value}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
+									<p
+										className="text-destructive text-sm"
+										id={`${field.name}-error`}
+										key={error?.message}
+										role="alert"
+									>
 										{error?.message}
 									</p>
 								))}
@@ -118,6 +144,13 @@ export default function SignUpForm({
 							<div className="space-y-2">
 								<Label htmlFor={field.name}>Password</Label>
 								<Input
+									aria-describedby={
+										field.state.meta.errors.length > 0
+											? `${field.name}-error`
+											: undefined
+									}
+									aria-invalid={field.state.meta.errors.length > 0}
+									autoComplete="new-password"
 									id={field.name}
 									name={field.name}
 									onBlur={field.handleBlur}
@@ -126,7 +159,12 @@ export default function SignUpForm({
 									value={field.state.value}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
+									<p
+										className="text-destructive text-sm"
+										id={`${field.name}-error`}
+										key={error?.message}
+										role="alert"
+									>
 										{error?.message}
 									</p>
 								))}
@@ -154,11 +192,7 @@ export default function SignUpForm({
 			</form>
 
 			<div className="mt-4 text-center">
-				<Button
-					className="text-indigo-600 hover:text-indigo-800"
-					onClick={onSwitchToSignIn}
-					variant="link"
-				>
+				<Button onClick={onSwitchToSignIn} variant="link">
 					Already have an account? Sign In
 				</Button>
 			</div>

@@ -98,6 +98,29 @@ package.json             Bun/Turborepo workspace root
 - `docs/reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
 - `CLAUDE.md`
 
+## Prototype Development
+
+Prerequisites: Bun 1.3.14 (pinned by `packageManager`), Docker with Compose for the disposable PostgreSQL prototype, Python 3 for the governance scripts, and Node.js 24 only for the server fallback-runtime check.
+
+```bash
+bun install --frozen-lockfile   # install workspace dependencies
+bun run dev                     # run the Turbo dev graph
+bun run dev:web                 # Next.js web prototype on port 3001
+bun run dev:server              # Hono/oRPC server on port 3000
+bun run dev:native              # Expo prototype
+bun run --filter docs dev       # Fumadocs portal on port 4000
+bun run build                   # build all workspaces
+bun run check-types             # typecheck all workspaces
+bun run check                   # ultracite/Biome lint and format check
+bun run fix                     # apply safe lint/format fixes
+bun run test                    # run workspace tests
+bun run db:start                # start the disposable PostgreSQL container
+bun run db:migrate              # apply reviewed Drizzle migrations
+bun run docker:up               # build and start the full Compose stack
+```
+
+Environment variables are validated by `packages/env`; see `apps/docs/content/docs/getting-started/index.mdx` for the local `.env` shapes. "Meridian" is an internal codename and must not appear in tenant-visible product strings (ADR-0026).
+
 ## UI Foundation
 
 The initial web foundation is the latest approved stable Tailwind CSS release, source-owned shadcn/ui components, and Recharts through shadcn chart composition for ordinary operational visualization.

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@meridian/ui/components/button";
 import { Input } from "@meridian/ui/components/input";
 import { Label } from "@meridian/ui/components/label";
@@ -70,6 +72,13 @@ export default function SignInForm({
 							<div className="space-y-2">
 								<Label htmlFor={field.name}>Email</Label>
 								<Input
+									aria-describedby={
+										field.state.meta.errors.length > 0
+											? `${field.name}-error`
+											: undefined
+									}
+									aria-invalid={field.state.meta.errors.length > 0}
+									autoComplete="email"
 									id={field.name}
 									name={field.name}
 									onBlur={field.handleBlur}
@@ -78,7 +87,12 @@ export default function SignInForm({
 									value={field.state.value}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
+									<p
+										className="text-destructive text-sm"
+										id={`${field.name}-error`}
+										key={error?.message}
+										role="alert"
+									>
 										{error?.message}
 									</p>
 								))}
@@ -93,6 +107,13 @@ export default function SignInForm({
 							<div className="space-y-2">
 								<Label htmlFor={field.name}>Password</Label>
 								<Input
+									aria-describedby={
+										field.state.meta.errors.length > 0
+											? `${field.name}-error`
+											: undefined
+									}
+									aria-invalid={field.state.meta.errors.length > 0}
+									autoComplete="current-password"
 									id={field.name}
 									name={field.name}
 									onBlur={field.handleBlur}
@@ -101,7 +122,12 @@ export default function SignInForm({
 									value={field.state.value}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
+									<p
+										className="text-destructive text-sm"
+										id={`${field.name}-error`}
+										key={error?.message}
+										role="alert"
+									>
 										{error?.message}
 									</p>
 								))}
@@ -129,11 +155,7 @@ export default function SignInForm({
 			</form>
 
 			<div className="mt-4 text-center">
-				<Button
-					className="text-indigo-600 hover:text-indigo-800"
-					onClick={onSwitchToSignUp}
-					variant="link"
-				>
+				<Button onClick={onSwitchToSignUp} variant="link">
 					Need an account? Sign Up
 				</Button>
 			</div>

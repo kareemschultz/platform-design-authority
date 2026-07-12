@@ -94,11 +94,11 @@ Review generated code before keeping it. Cover loading, empty, error, denied, of
 
 Update product documentation in the same change when behavior, configuration, API, permissions, migrations, operations, or troubleshooting changes. Product prose describes released or explicitly labelled prototype behavior only. Architecture decisions stay in governed root documents.
 
-Run:
+Run from the repository root:
 
 ```bash
-python ../scripts/validate_docs.py
-python ../scripts/generate_registries.py --check
+python scripts/validate_docs.py
+python scripts/generate_registries.py --check
 bun run --filter docs types:check
 bun run --filter docs build
 ```

@@ -16,3 +16,15 @@ export const NAV_THEME = {
 		text: "hsl(222.2 84% 4.9%)",
 	},
 };
+
+// Status roles from registry/design-tokens.json (color.*.status-*).
+export const STATUS_COLORS = {
+	dark: {
+		critical: "#F87171",
+		success: "#34D399",
+	},
+	light: {
+		critical: "#B91C1C",
+		success: "#047857",
+	},
+};

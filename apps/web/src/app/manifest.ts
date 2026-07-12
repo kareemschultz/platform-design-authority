@@ -17,8 +17,10 @@ export default function manifest(): MetadataRoute.Manifest {
 				type: "image/png",
 			},
 		],
-		name: "meridian",
-		short_name: "meridian",
+		// Internal codename (ADR-0026): replace with tenant branding before any
+		// tenant-visible release.
+		name: "Meridian Prototype (Internal)",
+		short_name: "Meridian",
 		start_url: "/",
 		theme_color: "#000000",
 	};

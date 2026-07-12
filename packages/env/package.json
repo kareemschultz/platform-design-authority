@@ -8,6 +8,10 @@
     "./web": "./src/web.ts",
     "./native": "./src/native.ts"
   },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "bun test src/*.test.ts"
+  },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.11",
     "@t3-oss/env-nextjs": "^0.13.11",

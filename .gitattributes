@@ -1,0 +1,32 @@
+# Normalize all text files to LF in the index and in working-tree checkouts.
+# This prevents phantom formatter (ultracite/biome) diagnostics on Windows
+# checkouts where core.autocrlf=true would smudge files to CRLF.
+* text=auto eol=lf
+
+# Lockfile is text (JSONC); keep it LF like everything else.
+bun.lock text eol=lf
+
+# Binary files — never normalize.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.icns binary
+*.bmp binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.jar binary
+*.mp3 binary
+*.mp4 binary
+*.webm binary
+*.wasm binary

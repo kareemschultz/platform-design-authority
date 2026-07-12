@@ -6,13 +6,15 @@ import { Container } from "@/components/container";
 import { SignIn } from "@/components/sign-in";
 import { SignUp } from "@/components/sign-up";
 import { authClient } from "@/lib/auth-client";
-import { NAV_THEME } from "@/lib/constants";
+import { NAV_THEME, STATUS_COLORS } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
 import { orpc, queryClient } from "@/utils/orpc";
 
 export default function Home() {
 	const { colorScheme } = useColorScheme();
 	const theme = colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light;
+	const statusColors =
+		colorScheme === "dark" ? STATUS_COLORS.dark : STATUS_COLORS.light;
 	const healthCheck = useQuery(orpc.healthCheck.queryOptions());
 	const privateData = useQuery(orpc.privateData.queryOptions());
 	const isConnected = healthCheck?.data === "OK";
@@ -35,7 +37,7 @@ export default function Home() {
 								textAlign: "center",
 							}}
 						>
-							BETTER T STACK
+							Controlled Prototype
 						</ExpoUIText>
 					</Host>
 
@@ -99,7 +101,11 @@ export default function Home() {
 							<View
 								style={[
 									styles.statusIndicator,
-									{ backgroundColor: isConnected ? "#10b981" : "#ef4444" },
+									{
+										backgroundColor: isConnected
+											? statusColors.success
+											: statusColors.critical,
+									},
 								]}
 							/>
 							<View style={styles.statusContent}>
@@ -182,9 +188,6 @@ const styles = StyleSheet.create({
 		paddingBottom: 32,
 		paddingHorizontal: 20,
 		paddingTop: 28,
-	},
-	paymentActions: {
-		marginTop: 12,
 	},
 	privateDataCard: {
 		borderRadius: 16,

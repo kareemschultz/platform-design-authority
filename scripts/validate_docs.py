@@ -29,6 +29,7 @@ OPENAPI_AUTHORIZATION = re.compile(r"^      x-authorization:\s*(\S+)\s*$")
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 BACKTICK_PATH = re.compile(r"`([^`\n]+\.md)`")
+MARKDOWN_ENDPOINT = re.compile(r"`(GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD|TRACE) (/v1/[^`\\s]+)`")
 PLACEHOLDER_PATH = re.compile(r"(?:NNNN|XXXX|YYYY|DESCRIPTIVE|<[^>]+>)")
 VALID_STATUSES = {"Planned", "Draft", "Proposed", "In Review", "Approved", "Accepted", "Ratified", "Deprecated", "Superseded", "Archived"}
 REQUIRED_FIELDS = {"document_id", "title", "version", "status", "owner", "last_reviewed"}
@@ -452,6 +453,71 @@ def validate_skills() -> list[str]:
     return errors
 
 
+def validate_markdown_endpoint_parity() -> list[str]:
+    _, operations = collect_openapi_operations(ROOT / "openapi" / "first-slice-v1.yaml")
+    errors: list[str] = []
+    for path in governed_markdown_files():
+        if "FIRST_SLICE" not in path.name:
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            for method, route in MARKDOWN_ENDPOINT.findall(line):
+                if (method, normalize_endpoint_path(route)) not in operations:
+                    errors.append(f"{path.relative_to(ROOT)}:{number}: endpoint absent from OpenAPI: {method} {route}")
+    return errors
+
+def validate_machine_semantics() -> list[str]:
+    errors: list[str] = []
+    rules = load_json(ROOT / "registry" / "architecture-rules.json")
+    families = {str(item.get("id")) for item in rules.get("package_families", [])}
+    for item in rules.get("package_families", []):
+        for target in item.get("may_depend_on", []):
+            if target not in families:
+                errors.append(f"registry/architecture-rules.json: unknown family {target}")
+    tokens = load_json(ROOT / "registry" / "design-tokens.json").get("tokens", {})
+    if len([key for key in tokens.get("color", {}).get("chart", {}) if key.startswith("categorical-")]) != 8:
+        errors.append("registry/design-tokens.json: chart palette requires eight categorical roles")
+    return errors
+
+def validate_schema_structure() -> list[str]:
+    errors: list[str] = []
+    for path in sorted((ROOT / "schemas").rglob("*.json")):
+        schema = load_json(path)
+        def walk(node: Any, location: str = "#") -> None:
+            if isinstance(node, dict):
+                required, properties = node.get("required", []), node.get("properties", {})
+                if isinstance(required, list) and isinstance(properties, dict):
+                    for name in required:
+                        if name not in properties:
+                            errors.append(f"{path.relative_to(ROOT)}:{location}: undefined required property {name}")
+                ref = node.get("$ref")
+                if isinstance(ref, str) and ref.startswith("#/"):
+                    target: Any = schema
+                    try:
+                        for part in ref[2:].split("/"):
+                            target = target[part.replace("~1", "/").replace("~0", "~")]
+                    except (KeyError, TypeError):
+                        errors.append(f"{path.relative_to(ROOT)}:{location}: unresolved local $ref {ref}")
+                for key, value in node.items():
+                    walk(value, f"{location}/{key}")
+            elif isinstance(node, list):
+                for index, value in enumerate(node):
+                    walk(value, f"{location}/{index}")
+        walk(schema)
+    return errors
+
+def validate_governance_exemptions() -> list[str]:
+    errors: list[str] = []
+    exemptions = {str(item.get("path")) for item in load_json(ROOT / "registry" / "governance-exemptions.json").get("exemptions", []) if item.get("rule") == "document_front_matter"}
+    for path in all_markdown_files():
+        rel = path.relative_to(ROOT).as_posix()
+        if rel.startswith("templates/"):
+            continue
+        first = path.read_text(encoding="utf-8").splitlines()[:1]
+        if not (first and first[0].strip() == "---") and rel not in exemptions:
+            errors.append(f"{rel}: missing front matter and governance exemption")
+    return errors
+
+
 def main() -> int:
     document_errors, document_ids = validate_documents()
     namespace_errors, prefixes = load_namespace_registry()
@@ -462,8 +528,12 @@ def main() -> int:
         + validate_event_references(prefixes)
         + validate_endpoint_permissions(prefixes)
         + validate_openapi_endpoint_parity()
+        + validate_markdown_endpoint_parity()
         + validate_internal_links()
         + validate_json_files()
+        + validate_machine_semantics()
+        + validate_schema_structure()
+        + validate_governance_exemptions()
         + validate_contract_files()
         + validate_skills()
     )

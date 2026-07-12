@@ -59,3 +59,7 @@ The beachhead moves from provisional to approved only after named pilot candidat
 ## Quality Measures
 
 Interview coverage, evidence confidence, pilot conversion, time to value, implementation variance, retention, support burden, and expansion potential.
+
+## Current Evidence Status
+
+Every advantage and criterion in this Draft is a hypothesis, not demonstrated market fact. As of 2026-07-12 the repository records zero completed customer interviews. Promotion requires `BEACHHEAD_EVIDENCE_LOG.md`, named pilots, quantified pain, willingness-to-pay, implementation/support evidence, and founder approval.

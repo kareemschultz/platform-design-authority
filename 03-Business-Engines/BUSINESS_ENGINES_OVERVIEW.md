@@ -32,6 +32,7 @@ Business engines provide reusable, domain-neutral behavior consumed across multi
 - Dashboard and widget
 - Reporting and analytics
 - AI orchestration
+- Business DNA
 
 ## Engine Rules
 

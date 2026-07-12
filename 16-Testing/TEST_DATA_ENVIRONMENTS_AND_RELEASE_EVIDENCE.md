@@ -19,13 +19,14 @@ Prefer synthetic datasets representing realistic tenants, currencies, products, 
 
 ## Environments
 
-- Local deterministic
-- CI ephemeral
+- Local
+- CI Ephemeral
 - Integration
-- Shared development
+- Shared Development
 - Staging
 - Pilot
-- Recovery exercise
+- Recovery Exercise
+- Production
 
 Every environment declares provider simulators, external dependencies, data policy, access, reset, and observability.
 

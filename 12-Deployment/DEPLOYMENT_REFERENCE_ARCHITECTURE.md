@@ -51,7 +51,7 @@ Cloud control plane with approved local services or offline clients for stores, 
 
 ## Environment Model
 
-Local, CI ephemeral, development, staging, pilot, and production. Production data is not copied downward without approved de-identification.
+The exact canonical environment names are Local, CI Ephemeral, Integration, Shared Development, Staging, Pilot, Recovery Exercise, and Production, as governed by `16-Testing/TEST_DATA_ENVIRONMENTS_AND_RELEASE_EVIDENCE.md`. Production data is not copied downward without approved de-identification.
 
 ## Network and Trust Zones
 

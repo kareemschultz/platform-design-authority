@@ -55,3 +55,7 @@ Application, due diligence, agreement, enablement, certification, active, monito
 ## Customer Transfer
 
 Support controlled transfer between direct and partner management or between partners, preserving identity, entitlements, billing history, data, custom domains, extensions, and audit evidence.
+
+## Paid-Marketplace Phase Gate
+
+Publisher settlement, tax onboarding, and payout are Phase 3-only design intent gated by `08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md` and FDR-008. No current phase authorizes custody or merchant-of-record behavior.

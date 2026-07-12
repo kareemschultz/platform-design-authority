@@ -3127,11 +3127,11 @@
     {
       "document_id": "PDA-STR-012",
       "path": "20-Strategy/BUSINESS_DNA_ENGINE.md",
-      "title": "Business DNA Engine",
-      "version": "0.1.0",
-      "status": "Draft",
+      "title": "Business DNA Strategy Rationale",
+      "version": "0.2.0",
+      "status": "Superseded",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },

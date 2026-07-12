@@ -1,87 +1,23 @@
 ---
 document_id: PDA-STR-012
-title: Business DNA Engine
-version: 0.1.0
-status: Draft
+title: Business DNA Strategy Rationale
+version: 0.2.0
+status: Superseded
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
+superseded_by: 03-Business-Engines/BUSINESS_DNA_ENGINE.md
 ---
 
-# Business DNA Engine
+# Business DNA Strategy Rationale
 
-## Purpose
+## Authority
 
-Define the governed model that captures how an organization operates and uses that profile to recommend workspaces, capabilities, settings, workflows, reports, controls, and implementation paths.
+This duplicate engine specification is superseded by PDA-ENG-019 in `03-Business-Engines/BUSINESS_DNA_ENGINE.md`, the sole architecture authority for Business DNA dimensions, records, rules, contracts, and ownership.
 
-## Business DNA Dimensions
+## Preserved Strategy Intent
 
-- Industry and subindustry
-- Business model
-- Revenue and payment models
-- Organization size and growth stage
-- Countries, jurisdictions, currencies, and languages
-- Legal entities, locations, stores, warehouses, and channels
-- Customer and supplier structure
-- Inventory, lot, serial, expiry, and warehouse complexity
-- Manufacturing, projects, service, rental, fleet, and asset needs
-- Workforce, payroll, scheduling, and compliance
-- Digital maturity
-- Offline and device requirements
-- Automation and AI maturity
-- Risk and control profile
-- Integration landscape
+Use progressive discovery, explainable recommendations, visible confidence, customer correction, and implementation planning. Business DNA never grants permissions, buys entitlements, changes legal configuration, or replaces canonical domain data.
 
-## Architecture
+## Change Log
 
-Business DNA is versioned configuration and evidence, not an unrestricted AI profile. It combines:
-
-- Explicit answers
-- Imported organizational facts
-- Observed platform configuration
-- Approved recommendations
-- Industry and jurisdiction pack defaults
-
-## Outputs
-
-- Recommended edition and capability set
-- Role workspaces and navigation
-- Onboarding path
-- Configuration defaults
-- Required controls and approvals
-- Suggested reports and dashboards
-- Integration and migration plan
-- AI and automation maturity recommendations
-- Readiness gaps and implementation effort
-
-## Rules
-
-1. Recommendations never grant permissions or purchase capabilities automatically without approval.
-2. Source and confidence are visible.
-3. Customers can edit, reject, or reset recommendations.
-4. Sensitive attributes are minimized and classified.
-5. No hidden cross-tenant profiling.
-6. Jurisdiction rules override generic recommendations.
-7. Business DNA does not replace canonical domain data.
-8. Changes are versioned and explainable.
-
-## Onboarding
-
-Use progressive discovery rather than a massive questionnaire. Begin with high-value questions, infer only low-risk defaults, and request detail when a capability or legal requirement depends on it.
-
-## Maturity
-
-- Manual guided questionnaire
-- Rules-based recommendations
-- Evidence-assisted configuration
-- AI-assisted explanation and gap analysis
-- Continuous approved optimization
-
-## Quality Gates
-
-- Recommendation accuracy
-- Customer acceptance and correction rate
-- Time to first value
-- Privacy and fairness review
-- Industry and jurisdiction validation
-- Explanation quality
-- Rollback and reset
+- 2026-07-12: Superseded duplicate architecture and retained strategy rationale.

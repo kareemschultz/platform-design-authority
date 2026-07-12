@@ -53,6 +53,9 @@ Before inventing an identifier or boundary, consult:
 - `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
 - `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
 - `09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before creating, applying, changing, or recommending a shadcn preset, style, base/theme/chart color, font, icon library, radius, menu treatment, RTL, or density default
+- `02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` before changing the prototype runtime, HTTP shell, or typed transport
+- `02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md` before selecting a workflow or durable-jobs runtime
+- `02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before restructuring a documentation portal
 - `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `20-Strategy/FOUNDER_DECISION_REGISTER.md`
 

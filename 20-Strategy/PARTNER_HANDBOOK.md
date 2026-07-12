@@ -21,7 +21,7 @@ This is a founding-stage operating design and does not imply an active partner p
 
 ## Lifecycle
 
-Application, Due Diligence, Agreement, Enablement, Certification, Sandbox, Active, Quality Review, Remediation, Suspended, Terminated, and Archived.
+Application, Due Diligence, Agreement, Enablement, Certification, Active, Monitored, Suspended, Terminated, and Archived. Sandbox, quality review, and remediation are activities within those states.
 
 ## Partner Authority
 

@@ -2,6 +2,15 @@
   "schema_version": "1.0.0",
   "status": "draft",
   "description": "Governed metadata overlay for capability packaging, offline posture, and dependencies. Explicit capability overrides take precedence over namespace defaults.",
+  "test_dimension_defaults": {
+    "full": {},
+    "prototype": {},
+    "seam": {
+      "offline_and_degraded": {"status":"deferred-by-depth","reason":"The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth."},
+      "accessibility_and_responsive": {"status":"not-applicable","reason":"A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations."},
+      "performance_and_capacity": {"status":"deferred-by-depth","reason":"The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."}
+    }
+  },
   "namespace_defaults": {
     "platform": {"packaging_class":"CorePlatform","offline":"VariesByCapability"},
     "engine": {"packaging_class":"SharedEngine","offline":"OnlineOrSeam"},

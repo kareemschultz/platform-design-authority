@@ -15,6 +15,8 @@ Define the mandatory test declarations for every capability listed in `registry/
 
 The generated matrix is `registry/first-slice-tests.json`.
 
+Depth-default overrides are governed in `registry/capability-metadata.json`. The generator consumes those reviewed profiles; it does not infer that every dimension is required at every depth.
+
 ## Required Dimensions
 
 Every first-slice capability declares all thirteen dimensions:
@@ -43,6 +45,7 @@ Each generated record includes:
 - First-slice depth: `full`, `prototype`, or `seam`
 - Owning namespace
 - Thirteen test dimensions
+- Reasons for every `not-applicable` dimension and explanatory reasons for depth deferrals
 - Required golden scenarios
 - Evidence status
 - Responsible owner

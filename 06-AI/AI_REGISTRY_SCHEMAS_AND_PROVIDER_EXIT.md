@@ -15,6 +15,8 @@ Define the minimum machine-readable records for models, prompts, tools, agents, 
 
 Canonical JSON Schemas are maintained under `schemas/ai/`.
 
+This specification defines the semantic obligations; `schemas/ai/registry-records-v1.schema.json` is the executable record shape. A mismatch is a governance failure and neither artifact silently overrides the other. Release-state values use the spaced labels shown below.
+
 ## Model Record
 
 Required fields:

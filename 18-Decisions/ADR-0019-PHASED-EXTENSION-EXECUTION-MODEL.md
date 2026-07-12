@@ -97,3 +97,12 @@ Publisher AI skills, tools, prompts, and agents additionally enter the governed 
 ## Validation
 
 Before Class 3 adoption, prototype at least two runtime candidates and test tenant escape, CPU exhaustion, memory exhaustion, network denial, secret denial, cancellation, package tampering, logging, and emergency suspension.
+
+## Review Record
+
+- Classes 0–2 are architecture definitions only; no marketplace runtime is production-approved.
+- Class 3 remains blocked on comparative runtime, isolation, security, operational, legal, and support evidence.
+
+## Change Log
+
+- 2026-07-11 — v0.1.0 established the phased extension execution classes and prohibited arbitrary third-party code in the core application process.

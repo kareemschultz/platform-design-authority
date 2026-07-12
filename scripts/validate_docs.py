@@ -10,6 +10,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from jsonschema import validators
+
 ROOT = Path(__file__).resolve().parents[1]
 ADR_FILE = re.compile(r"^ADR-\d{4}-[A-Z0-9-]+\.md$")
 SPEC_FILE = re.compile(r"^[A-Z0-9_]+(?:-\d{4}-\d{2}-\d{2})?\.md$")
@@ -26,6 +28,8 @@ OPENAPI_METHOD = re.compile(r"^    (get|post|put|patch|delete|options|head|trace
 OPENAPI_OPERATION_ID = re.compile(r"^      operationId:\s*(\S+)\s*$")
 OPENAPI_PERMISSION = re.compile(r"^      x-permission:\s*(\S+)\s*$")
 OPENAPI_AUTHORIZATION = re.compile(r"^      x-authorization:\s*(\S+)\s*$")
+MARKDOWN_ENDPOINT = re.compile(r"`(GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD|TRACE)\s+(/v1/[^`\s]+)`")
+TOKEN_REFERENCE = re.compile(r"`((?:space|radius|motion|screen|size|color)(?:\.[a-z0-9_*.-]+)+)`")
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 BACKTICK_PATH = re.compile(r"`([^`\n]+\.md)`")
@@ -33,6 +37,7 @@ PLACEHOLDER_PATH = re.compile(r"(?:NNNN|XXXX|YYYY|DESCRIPTIVE|<[^>]+>)")
 VALID_STATUSES = {"Planned", "Draft", "Proposed", "In Review", "Approved", "Accepted", "Ratified", "Deprecated", "Superseded", "Archived"}
 REQUIRED_FIELDS = {"document_id", "title", "version", "status", "owner", "last_reviewed"}
 REVIEW_GATED_STATUSES = {"Approved", "Ratified"}
+IGNORED_TREE_PARTS = {"node_modules", ".next", ".turbo", ".source", "dist"}
 
 
 def parse_front_matter(path: Path) -> dict[str, str]:
@@ -62,7 +67,14 @@ def parse_simple_front_matter(path: Path) -> dict[str, str]:
 
 
 def all_markdown_files() -> list[Path]:
-    return [path for path in sorted(ROOT.rglob("*.md")) if not any(part.startswith(".") for part in path.relative_to(ROOT).parts)]
+    return [
+        path
+        for path in sorted(ROOT.rglob("*.md"))
+        if not any(
+            part.startswith(".") or part in IGNORED_TREE_PARTS
+            for part in path.relative_to(ROOT).parts
+        )
+    ]
 
 
 def governed_markdown_files() -> list[Path]:
@@ -115,7 +127,7 @@ def validate_documents() -> tuple[list[str], dict[str, Path]]:
             errors.append(f"{rel}: unsupported status {status!r}")
         if status in REVIEW_GATED_STATUSES and not meta.get("review_evidence"):
             errors.append(f"{rel}: {status} documents require review_evidence")
-        if path.parent.name == "18-Decisions":
+        if path.parent.name == "18-Decisions" and path.name != "README.md":
             if not ADR_FILE.fullmatch(path.name):
                 errors.append(f"{rel}: ADR filename does not match required pattern")
             if not meta.get("created"):
@@ -352,6 +364,25 @@ def validate_openapi_endpoint_parity() -> list[str]:
     return sorted(set(errors))
 
 
+def validate_markdown_endpoint_declarations() -> list[str]:
+    """Require every endpoint declared in governed Markdown to exist in OpenAPI."""
+    openapi_path = ROOT / "openapi" / "first-slice-v1.yaml"
+    if not openapi_path.exists():
+        return []
+    extraction_errors, operations = collect_openapi_operations(openapi_path)
+    errors = list(extraction_errors)
+    for path in governed_markdown_files():
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            for method, route in MARKDOWN_ENDPOINT.findall(line):
+                key = (method, normalize_endpoint_path(route))
+                if key not in operations:
+                    errors.append(
+                        f"{path.relative_to(ROOT)}:{line_number}: governed Markdown endpoint "
+                        f"{method} {route} is absent from openapi/first-slice-v1.yaml"
+                    )
+    return sorted(set(errors))
+
+
 def looks_like_document_reference(target: str) -> bool:
     if "/" in target or "\\" in target:
         return True
@@ -410,6 +441,89 @@ def validate_json_files() -> list[str]:
     return errors
 
 
+def validate_json_schemas() -> list[str]:
+    errors: list[str] = []
+    for path in sorted((ROOT / "schemas").rglob("*.schema.json")):
+        try:
+            schema = load_json(path)
+            validators.validator_for(schema).check_schema(schema)
+        except Exception as exc:  # jsonschema exposes validator-specific subclasses
+            errors.append(f"{path.relative_to(ROOT)}: invalid JSON Schema: {exc}")
+    return errors
+
+
+def validate_architecture_rules() -> list[str]:
+    path = ROOT / "registry" / "architecture-rules.json"
+    if not path.exists():
+        return []
+    data = load_json(path)
+    families = data.get("package_families", [])
+    ids = [str(item.get("id", "")) for item in families]
+    errors: list[str] = []
+    if len(ids) != len(set(ids)):
+        errors.append("registry/architecture-rules.json: duplicate package family id")
+    known = set(ids)
+    for item in families:
+        family = str(item.get("id", ""))
+        for dependency in item.get("may_depend_on", []):
+            if dependency not in known:
+                errors.append(
+                    f"registry/architecture-rules.json: family {family!r} references unknown family {dependency!r}"
+                )
+    for family in data.get("requirements", {}).get("runtime_neutral_families", []):
+        if family not in known:
+            errors.append(f"registry/architecture-rules.json: unknown runtime-neutral family {family!r}")
+    return errors
+
+
+def validate_design_token_references() -> list[str]:
+    registry_path = ROOT / "registry" / "design-tokens.json"
+    source_path = ROOT / "09-UX" / "DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md"
+    if not registry_path.exists() or not source_path.exists():
+        return []
+    tokens = load_json(registry_path).get("tokens", {})
+    errors: list[str] = []
+    for line_number, line in enumerate(source_path.read_text(encoding="utf-8").splitlines(), start=1):
+        for reference in TOKEN_REFERENCE.findall(line):
+            current: Any = tokens
+            resolved = True
+            for segment in reference.split("."):
+                if segment == "*":
+                    break
+                if not isinstance(current, dict) or segment not in current:
+                    resolved = False
+                    break
+                current = current[segment]
+            if not resolved:
+                errors.append(f"{source_path.relative_to(ROOT)}:{line_number}: token {reference!r} is absent from registry/design-tokens.json")
+    return sorted(set(errors))
+
+
+def validate_governance_exemptions() -> list[str]:
+    path = ROOT / "registry" / "governance-exemptions.json"
+    if not path.exists():
+        return ["missing required contract: registry/governance-exemptions.json"]
+    exemptions = load_json(path).get("exemptions", [])
+    exempt_paths = {
+        str(item.get("path"))
+        for item in exemptions
+        if item.get("rule") == "document_front_matter"
+    }
+    scoped = [ROOT / "README.md", ROOT / "CLAUDE.md", ROOT / "AGENTS.md"]
+    scoped.extend(sorted((ROOT / "reviews").glob("*.md")))
+    errors: list[str] = []
+    for document in scoped:
+        if not document.exists():
+            continue
+        first = document.read_text(encoding="utf-8").splitlines()[:1]
+        if first and first[0].strip() == "---":
+            continue
+        rel = document.relative_to(ROOT).as_posix()
+        if rel not in exempt_paths:
+            errors.append(f"{rel}: missing document_front_matter governance exemption")
+    return errors
+
+
 def validate_contract_files() -> list[str]:
     errors: list[str] = []
     required = [
@@ -436,19 +550,19 @@ def validate_contract_files() -> list[str]:
 
 def validate_skills() -> list[str]:
     errors: list[str] = []
-    skills_root = ROOT / ".claude" / "skills"
-    if not skills_root.exists():
-        return errors
-    for path in sorted(skills_root.glob("*/SKILL.md")):
-        meta = parse_simple_front_matter(path)
-        if not meta.get("name") or not meta.get("description"):
-            errors.append(f"{path.relative_to(ROOT)}: skill requires name and description")
-        if "allowed-tools" in meta:
-            errors.append(f"{path.relative_to(ROOT)}: allowed-tools pre-approves tools and cannot be used as a restriction")
-        body = path.read_text(encoding="utf-8")
-        read_only = "read-only" in body.lower()
-        if read_only and not meta.get("disallowed-tools"):
-            errors.append(f"{path.relative_to(ROOT)}: read-only skill requires disallowed-tools")
+    for skills_root in (ROOT / ".claude" / "skills", ROOT / ".agents" / "skills"):
+        if not skills_root.exists():
+            continue
+        for path in sorted(skills_root.glob("*/SKILL.md")):
+            meta = parse_simple_front_matter(path)
+            if not meta.get("name") or not meta.get("description"):
+                errors.append(f"{path.relative_to(ROOT)}: skill requires name and description")
+            if "allowed-tools" in meta:
+                errors.append(f"{path.relative_to(ROOT)}: allowed-tools pre-approves tools and cannot be used as a restriction")
+            body = path.read_text(encoding="utf-8")
+            read_only = "read-only" in body.lower()
+            if read_only and not meta.get("disallowed-tools"):
+                errors.append(f"{path.relative_to(ROOT)}: read-only skill requires disallowed-tools")
     return errors
 
 
@@ -462,8 +576,13 @@ def main() -> int:
         + validate_event_references(prefixes)
         + validate_endpoint_permissions(prefixes)
         + validate_openapi_endpoint_parity()
+        + validate_markdown_endpoint_declarations()
         + validate_internal_links()
         + validate_json_files()
+        + validate_json_schemas()
+        + validate_architecture_rules()
+        + validate_design_token_references()
+        + validate_governance_exemptions()
         + validate_contract_files()
         + validate_skills()
     )

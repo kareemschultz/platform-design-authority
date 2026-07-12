@@ -54,8 +54,12 @@ registry/               Machine-readable governance and delivery artifacts
 scripts/                Deterministic validation and registry generation
 reviews/                Independent audits, registrations, and dispositions
 templates/              Standard authoring templates
+.agents/skills/          Agent Skills-compatible project workflows
 .claude/skills/         Project-local agent skills
+docs/                    Implementation documentation and documentation-plane guide
+meridian/                Governed Better-T-Stack technical-prototype monorepo
 .github/workflows/      Read-only documentation governance CI
+AGENTS.md                Agent-neutral contributor operating contract
 CLAUDE.md               AI-agent operating contract
 ```
 
@@ -127,11 +131,11 @@ Approved or Ratified status requires review evidence. Production implementation 
 
 The repository is in **complete blueprint remediation and constrained technical-prototype readiness**.
 
-Three independent Fable 5 audits have been completed. The third-audit remediation adds first-slice events, API and permission contracts, delivery depth, numeric quality budgets, schemas, Marketplace governance, AI controls, UX implementation standards, deployment and operations depth, and formal audit disposition.
+Four independent Fable 5 audits have been completed. The fourth audit is registered by `reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md` and fully dispositioned by `reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md`. Its remediation closes registry/prose drift, runtime portability propagation, AI schema mismatch, test-depth semantics, documentation governance gaps, and prior closure overclaims without altering the independent evidence.
 
 The intended readiness decision remains: **one constrained vertical-slice implementation after named blockers; Technical Prototypes 1–3 may start after final verification**. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
 
-Pilot and production readiness still require founder decisions, qualified Guyana review, provider certification, customer evidence, executable tests, accessibility and security evidence, and operational exercises.
+Pilot and production readiness still require FDR-001 through FDR-010, qualified Guyana review, provider certification, customer evidence, executable tests, accessibility and security evidence, and operational exercises.
 
 ## Working Agreement
 

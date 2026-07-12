@@ -69,7 +69,7 @@ The platform supports:
 - Cash collection by authorized agents or resellers where contractually permitted
 - Suspense and variance workflows
 
-Cash collected for the platform's own SaaS invoices requires a separate receivables and agent-collection policy and must not be confused with tenant customer payments.
+Cash collection for the platform's own SaaS invoices is disabled pending FDR-010. Any future approved receivables and agent-collection policy must not be confused with tenant customer payments.
 
 ## Provider Capability Contract
 

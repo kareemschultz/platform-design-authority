@@ -1,10 +1,10 @@
 # Meridian Prototype Contributor Instructions
 
-This directory is controlled prototype evidence inside the Platform Design Authority repository. The root `../CLAUDE.md` is the governing instruction contract and outranks this file. Follow its authority order, lifecycle, security, privacy, domain-boundary, registry, and validation rules before applying local tooling guidance.
+This directory is controlled prototype evidence inside the Platform Design Authority repository. Root `../AGENTS.md` is the agent-neutral governing contract; `../CLAUDE.md` carries the same authority for Claude-compatible tooling. Both outrank this file. Follow their authority order, lifecycle, security, privacy, domain-boundary, registry, and validation rules before applying local tooling guidance.
 
 Lifecycle honesty is required: Meridian is a controlled prototype only. Draft and Proposed authorities may guide this source, but this source does not promote any document, runtime, scaffold, component, database, or authentication configuration to production approval.
 
-Do not manually edit generated registries or independent review evidence such as `reviews/FABLE*`. Do not use scaffold defaults as platform authority where they conflict with `../CLAUDE.md`, the Constitution, ADRs, or decision matrices.
+Do not manually edit generated registries or independent review evidence such as `reviews/FABLE*`. Do not use scaffold defaults as platform authority where they conflict with `../AGENTS.md`, `../CLAUDE.md`, the Constitution, ADRs, or decision matrices.
 
 # Ultracite Code Standards
 

@@ -1,19 +1,23 @@
 ---
 document_id: PDA-STR-012
-title: Business DNA Engine
-version: 0.1.0
+title: Business DNA Strategy Rationale
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
 ---
 
-# Business DNA Engine
+# Business DNA Strategy Rationale
 
 ## Purpose
 
-Define the governed model that captures how an organization operates and uses that profile to recommend workspaces, capabilities, settings, workflows, reports, controls, and implementation paths.
+Explain the strategic reason for a governed Business DNA capability. The sole architectural and data-model authority is `03-Business-Engines/BUSINESS_DNA_ENGINE.md` (`PDA-ENG-019`). This strategy document cannot add dimensions, entities, ownership, lifecycle, or implementation rules independently.
 
-## Business DNA Dimensions
+## Authority Boundary
+
+If this rationale differs from PDA-ENG-019, PDA-ENG-019 governs. Changes to the profile schema or recommendation behavior must be made in that engine specification and propagated here only as non-normative context.
+
+## Non-Normative Strategy Questions
 
 - Industry and subindustry
 - Business model
@@ -31,9 +35,9 @@ Define the governed model that captures how an organization operates and uses th
 - Risk and control profile
 - Integration landscape
 
-## Architecture
+## Strategy Constraints
 
-Business DNA is versioned configuration and evidence, not an unrestricted AI profile. It combines:
+PDA-ENG-019 defines Business DNA as versioned configuration and evidence, not an unrestricted AI profile. Strategically, it may draw on:
 
 - Explicit answers
 - Imported organizational facts

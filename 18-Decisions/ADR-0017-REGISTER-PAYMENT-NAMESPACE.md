@@ -70,3 +70,12 @@ Commerce owns sales, returns, cash, and customer stored value. Finance owns acco
 ## Validation
 
 The decision is validated when all detailed Payment identifiers use `payment.*`, generated registries resolve them to the Payment Engine, and no governed permission uses `engine.payment*`.
+
+## Review Record
+
+- Namespace, capability, event, permission, and endpoint propagation is checked by the registry generator and documentation validator.
+- The decision remains Proposed pending implementation evidence and formal review.
+
+## Change Log
+
+- 2026-07-11 — v0.1.0 established `payment.*` as the detailed Payment family while retaining `engine.payments` as the shared-engine registration.

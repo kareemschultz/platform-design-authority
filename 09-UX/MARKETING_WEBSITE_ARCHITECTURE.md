@@ -9,6 +9,12 @@ last_reviewed: 2026-07-11
 
 # Marketing Website Architecture
 
+## Ownership and Scope Boundary
+
+This document governs the platform company's public marketing website, not a tenant's Marketing business domain, campaigns, customer records, consent, or communications. “Owner” here means the accountable company team for a public-site surface; it does not transfer authoritative tenant Marketing Domain data or behavior.
+
+This surface is outside the first-slice implementation registry. Levels L3–L5 remain roadmap concepts and cannot expand `registry/first-slice.json` without the normal scope-change process.
+
 ## Purpose
 
 Define the public marketing website, product storytelling, documentation entry points, demonstrations, content governance, performance, analytics, accessibility, SEO, and use of licensed premium UI sources.

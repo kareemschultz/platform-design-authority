@@ -17,12 +17,48 @@
       "review_date": "2026-10-11"
     },
     {
+      "path": "AGENTS.md",
+      "rule": "document_front_matter",
+      "reason": "Cross-agent repository contract requires the conventional root filename and parser-safe Markdown; authority is derived from governed sources.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
       "path": "reviews/FABLE5_THIRD_AUDIT_V1.md",
       "rule": "document_front_matter",
       "reason": "Immutable independent evidence file registered through PDA-REV-005 rather than edited after delivery.",
       "owner": "Platform Design Authority",
       "review_date": "2027-07-11",
       "registration_document": "reviews/FABLE5_THIRD_AUDIT_REGISTRATION.md"
+    },
+    {
+      "path": "reviews/FABLE5_FOURTH_AUDIT_V1.md",
+      "rule": "document_front_matter",
+      "reason": "Immutable independent evidence file registered through PDA-REV-007 rather than edited after delivery.",
+      "owner": "Platform Design Authority",
+      "review_date": "2027-07-12",
+      "registration_document": "reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md"
+    },
+    {
+      "path": "reviews/FABLE5_MASTER_REPOSITORY_AUDIT_PROMPT.md",
+      "rule": "document_front_matter",
+      "reason": "Historical independent-audit prompt retained as evidence, not an authoritative specification.",
+      "owner": "Platform Design Authority",
+      "review_date": "2027-07-12"
+    },
+    {
+      "path": "reviews/FABLE5_REVIEW_BRIEF_V1.md",
+      "rule": "document_front_matter",
+      "reason": "Historical review brief retained as evidence, not an authoritative specification.",
+      "owner": "Platform Design Authority",
+      "review_date": "2027-07-12"
+    },
+    {
+      "path": "reviews/FABLE5_THIRD_AUDIT_PROMPT.md",
+      "rule": "document_front_matter",
+      "reason": "Historical independent-audit prompt retained as evidence, not an authoritative specification.",
+      "owner": "Platform Design Authority",
+      "review_date": "2027-07-12"
     }
   ]
 }

@@ -9,6 +9,8 @@ last_reviewed: 2026-07-11
 
 # Status Page and Customer Communication
 
+The public status page is an operational communication surface outside the first-slice implementation registry. Its later maturity levels do not expand `registry/first-slice.json` or prove production operations.
+
 ## Purpose
 
 Define public and tenant-specific service-status communication for incidents, maintenance, degraded performance, provider outages, recovery, and post-incident reports.

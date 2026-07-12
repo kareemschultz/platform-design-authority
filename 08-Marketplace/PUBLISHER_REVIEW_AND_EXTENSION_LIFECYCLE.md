@@ -15,7 +15,7 @@ Define the operational review and lifecycle of marketplace publishers, listings,
 
 ## Publisher Review
 
-Verify legal identity, ownership, support contact, tax and payout data, security history, privacy terms, sanctions and fraud checks where applicable, and agreement acceptance.
+Verify legal identity, ownership, support contact, security history, privacy terms, sanctions and fraud checks where applicable, and agreement acceptance. Tax and payout data collection is Phase 3 only and remains disabled until `08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md`, FDR-008, legal/tax review, and provider gates are complete.
 
 ## Listing Submission
 

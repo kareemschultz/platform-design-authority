@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Founder
 last_reviewed: 2026-07-11
@@ -122,6 +122,16 @@ Direction:
 - Private credentials, license keys, and prohibited redistributable bundles remain outside the public repository.
 
 Before implementation, confirm the purchasing person or entity, permitted products, seats, redistribution, and renewal terms.
+
+## FDR-010 — Platform SaaS Cash Receivables and Agent Collection
+
+**Status:** Open — cash collection for Platform Subscription invoices is disabled until decided.
+
+Decide whether the platform operating entity will ever accept physical cash for its own SaaS invoices and, if so, define the legal entity, authorized collector or agent model, receipt and numbering controls, segregation of duties, custody and deposit deadlines, insurance, fraud and variance handling, accounting application, tax treatment, reconciliation, reversals, customer disputes, audit retention, and jurisdiction limits.
+
+Until ratified, tenants may not treat platform staff, partners, resellers, or implementation personnel as authorized cash collectors for Platform Subscription invoices. This decision is separate from tenant customer cash handled by Commerce.
+
+**Ratification required before:** publishing a cash-payment option, appointing a collector, accepting physical funds, or implementing agent receivables.
 
 ## Governance
 

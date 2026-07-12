@@ -4,6 +4,7 @@
   "source_document": "14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
   "package_families": [
     {"id":"applications","globs":["apps/*"],"may_depend_on":["foundation","contracts","platform-clients","ui-web","ui-native","design-tokens","tooling"]},
+    {"id":"platform-clients","globs":["packages/platform-clients/*"],"may_depend_on":["foundation","contracts"]},
     {"id":"foundation","globs":["packages/foundation/*"],"may_depend_on":[]},
     {"id":"platform","globs":["packages/platform/*"],"may_depend_on":["foundation","contracts","tooling"]},
     {"id":"engines","globs":["packages/engines/*"],"may_depend_on":["foundation","contracts","platform","tooling"]},
@@ -21,13 +22,22 @@
     {"id":"provider-type-leak","description":"Provider SDK types cannot appear in domain contracts.","pattern":"packages/contracts/** -> provider-sdk"},
     {"id":"business-rule-in-ui","description":"UI packages cannot own authoritative business rules or persistence.","pattern":"packages/ui-*/** -> (database|domain-repository)"},
     {"id":"plan-name-authorization","description":"Commercial plan names cannot appear in authorization logic.","pattern":"authorization -> commercial-plan-name"},
-    {"id":"feature-flag-entitlement","description":"Feature flags cannot create entitlement access.","pattern":"entitlement -> feature-flag-key"}
+    {"id":"feature-flag-entitlement","description":"Feature flags cannot create entitlement access.","pattern":"entitlement -> feature-flag-key"},
+    {"id":"better-auth-table-leak","description":"Business domains cannot import Better Auth tables or persistence models.","pattern":"packages/domains/** -> better-auth/(tables|schema|persistence)"},
+    {"id":"ai-repository-import","description":"AI prompt and tool packages cannot import repositories directly.","pattern":"packages/ai/** -> **/(repository|persistence)"},
+    {"id":"domain-cloud-infrastructure","description":"Domain packages cannot import self-hosted or cloud-specific infrastructure code.","pattern":"packages/domains/** -> (cloud-provider|self-hosted-infrastructure)"},
+    {"id":"bun-runtime-leak","description":"Runtime-neutral core packages cannot import Bun globals or Bun-only APIs.","pattern":"packages/(foundation|contracts|platform|engines|domains)/** -> bun-runtime"},
+    {"id":"hono-context-leak","description":"Hono request and context objects remain in application transport adapters.","pattern":"packages/**/!(transport|composition)/** -> hono-context"},
+    {"id":"orpc-transport-leak","description":"oRPC transport objects remain in application transport adapters or generated-client boundaries.","pattern":"packages/**/!(transport|generated-client)/** -> orpc-transport"},
+    {"id":"database-adapter-contract-leak","description":"Contracts and authorization policies cannot import database adapters.","pattern":"packages/**/(contracts|authorization)/** -> database-adapter"}
   ],
   "requirements": {
     "single_table_owner": true,
     "single_migration_owner": true,
     "circular_dependencies": "prohibited_without_exception",
     "exceptions_require_expiry": true,
-    "composition_roots": ["apps/*/composition", "packages/tooling/composition/*"]
+    "composition_roots": ["apps/*/composition", "packages/tooling/composition/*"],
+    "family_grants_are_contract_only": true,
+    "runtime_neutral_families": ["foundation", "contracts", "platform", "engines", "domains"]
   }
 }

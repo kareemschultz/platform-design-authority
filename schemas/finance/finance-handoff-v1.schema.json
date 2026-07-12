@@ -30,7 +30,7 @@
     },
     "controlTotals": {
       "type": "object",
-      "required": ["grossSalesMinor", "discountsMinor", "taxMinor", "netSalesMinor", "cashMinor", "electronicTenderMinor", "storedValueIssuedMinor", "storedValueRedeemedMinor", "refundsMinor", "feesMinor", "cashVarianceMinor", "depositMinor"],
+      "required": ["grossSalesMinor", "discountsMinor", "taxMinor", "netSalesMinor", "cashMinor", "electronicTenderMinor", "storedValueIssuedMinor", "storedValueRedeemedMinor", "refundsMinor", "feesMinor", "cashVarianceMinor", "depositMinor", "inventoryQuantityTotals", "inventoryValuationMinor"],
       "properties": {
         "grossSalesMinor": {"type": "integer"},
         "discountsMinor": {"type": "integer"},
@@ -43,7 +43,20 @@
         "refundsMinor": {"type": "integer"},
         "feesMinor": {"type": "integer"},
         "cashVarianceMinor": {"type": "integer"},
-        "depositMinor": {"type": "integer"}
+        "depositMinor": {"type": "integer"},
+        "inventoryQuantityTotals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unit", "quantity"],
+            "properties": {
+              "unit": {"type": "string", "minLength": 1},
+              "quantity": {"type": "string", "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"}
+            }
+          }
+        },
+        "inventoryValuationMinor": {"type": "integer"}
       }
     },
     "lines": {

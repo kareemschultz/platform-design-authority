@@ -20,7 +20,7 @@
   "reviewedSourceLifecycle": "controlled prototype only; scaffold output is reviewed source, not production authority",
   "reviewedDeviations": [
     "Removed generated AI and Todo examples from governed first-slice prototype.",
-    "Pinned runtime and scaffold versions from PDA-ENG-020.",
+    "Pinned runtime and scaffold versions from PDA-ENGR-013.",
     "Reconciled shadcn metadata to PDA-UX-028 Base UI/Rhea inputs.",
     "Hardened Better Auth cookie and trusted-origin configuration for prototype review."
   ],

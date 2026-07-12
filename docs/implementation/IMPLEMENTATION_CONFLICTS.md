@@ -14,7 +14,7 @@ bun pm view @orpc/zod versions --json
 bun pm view @orpc/tanstack-query versions --json
 ```
 
-The highest published stable 1.x version available for these packages was `1.14.7`; `1.14.8` was not published for the packages used by this scaffold. The next visible line was `2.0.0-beta.*`, which ADR-0020 and PDA-ENG-020 keep out of the critical prototype path.
+The highest published stable 1.x version available for these packages was `1.14.7`; `1.14.8` was not published for the packages used by this scaffold. The next visible line was `2.0.0-beta.*`, which ADR-0020 and PDA-ENGR-013 keep out of the critical prototype path.
 
 Disposition: the prototype pins the available stable `1.14.7` package set and does not claim to satisfy the exact `1.14.8` requirement. Updating to `1.14.8` remains blocked until the package set is published or the authority is corrected.
 

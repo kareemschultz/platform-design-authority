@@ -126,3 +126,7 @@ The decision is validated when the initial vertical slice:
 - Provides generated API contracts
 - Demonstrates a recoverable offline workflow
 - Produces benchmark evidence for the backend framework decision
+
+## Change Log
+
+- 2026-07-12 — v0.5.0 incorporated ADR-0020 runtime portability, ADR-0023 workflow evaluation, and ADR-0024 PostgreSQL 18 extension controls.

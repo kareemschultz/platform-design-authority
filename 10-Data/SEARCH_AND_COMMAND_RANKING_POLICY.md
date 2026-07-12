@@ -13,6 +13,8 @@ last_reviewed: 2026-07-11
 
 Define ranking, filtering, typo tolerance, recency, personalization, command ordering, leakage prevention, explainability, and evaluation for global search and command-palette results.
 
+This document owns result ordering and command-palette evaluation. `10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md` owns retrieval/index architecture and uses precision/recall for candidate-set quality; this policy uses top-k and mean reciprocal rank for ordering quality. Both apply after authorization. UI behavior is governed by `09-UX/NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`, and the platform primitive by `01-Platform/SEARCH_AND_DISCOVERY.md`.
+
 ## Security Before Ranking
 
 Authorization, tenant, organization, legal entity, location, field masking, classification, entitlement, legal hold, and privacy state are applied before a result enters the candidate set.

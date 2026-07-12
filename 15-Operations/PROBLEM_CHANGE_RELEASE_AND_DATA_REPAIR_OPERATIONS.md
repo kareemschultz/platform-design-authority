@@ -99,6 +99,8 @@ A release advances only when the prior stage meets declared health and business-
 
 ## Data Repair
 
+This section is the canonical repair-record definition for ordinary operations, migrations, exits, recovery, and incident follow-up. Other documents may add context-specific fields but cannot omit these controls.
+
 Data repair is exceptional and uses approved tools or scripts with:
 
 - Named owner and independent reviewer

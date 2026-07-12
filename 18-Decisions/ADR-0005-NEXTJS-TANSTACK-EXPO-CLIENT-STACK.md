@@ -99,3 +99,7 @@ Create separate web and native component packages backed by shared design tokens
 ## Validation
 
 Validate the client architecture through a vertical slice that runs on web and Expo mobile, includes a dense searchable table, a complex typed form, a transaction, white-label theming, offline SQLite storage, synchronization, tenant and permission enforcement, observability, accessibility, and automated tests.
+
+## Change Log
+
+- 2026-07-12 — v0.3.0 incorporated ADR-0021 documentation delivery and ADR-0022 Base UI-backed shadcn configuration decisions.

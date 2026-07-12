@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-027
 title: Market Segmentation and Beachhead Evidence
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -12,6 +12,8 @@ last_reviewed: 2026-07-11
 ## Purpose
 
 Define how the company selects target segments and validates the Guyana-first retail beachhead with customer, workflow, commercial, and operational evidence.
+
+**Evidence status:** hypothesis only. As of 2026-07-12 the repository records zero completed customer interviews, zero workflow observations, zero willingness-to-pay confirmations, and no committed design partner. The criteria below describe what must be proven; they do not assert that the Guyana retail beachhead has those advantages today.
 
 ## Segment Dimensions
 
@@ -31,9 +33,9 @@ Define how the company selects target segments and validates the Guyana-first re
 
 Every segment hypothesis records problem, persona, current workaround, frequency, severity, economic impact, alternatives, switching cost, buying process, willingness to pay, and confidence.
 
-## Beachhead Criteria
+## Beachhead Hypothesis Criteria
 
-A strong beachhead has:
+A candidate beachhead must demonstrate:
 
 - Painful repeated workflows
 - Accessible customers
@@ -59,3 +61,9 @@ The beachhead moves from provisional to approved only after named pilot candidat
 ## Quality Measures
 
 Interview coverage, evidence confidence, pilot conversion, time to value, implementation variance, retention, support burden, and expansion potential.
+
+## Evidence Log
+
+| Date | Evidence type | Participants | Result | Confidence | Decision impact |
+|---|---|---:|---|---|---|
+| 2026-07-12 | Repository baseline | 0 | No customer or design-partner evidence recorded | None | Keep FDR-004 open and all beachhead advantages provisional |

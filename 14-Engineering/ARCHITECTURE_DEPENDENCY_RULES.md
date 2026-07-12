@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
-related_adrs: [ADR-0002, ADR-0003]
+related_adrs: [ADR-0002, ADR-0003, ADR-0020]
 ---
 
 # Architecture Dependency Rules
@@ -60,6 +60,8 @@ May depend on Foundation, approved Platform contracts, Shared Engine contracts, 
 
 Contain versioned commands, queries, events, DTOs, schemas, and capability identifiers. Contracts may depend only on Foundation and schema libraries approved for boundary use.
 
+Family-level entries in `registry/architecture-rules.json` are a conservative graph envelope, not permission to import implementations. A reference to Platform, Shared Engine, or another Domain means its published contract package only unless a narrower adapter family is explicitly registered.
+
 ### UI Packages
 
 May depend on design tokens, UI utilities, generated client contracts, and application-facing types. They may not contain authoritative business rules or server persistence.
@@ -79,6 +81,10 @@ Provider adapters depend on stable platform-facing adapter interfaces. Provider 
 - Feature-flag keys inside entitlement policy
 - AI prompt or tool packages importing repositories directly
 - Self-hosted or cloud-specific infrastructure code from domain packages
+- Bun globals or Bun-only APIs from Foundation, Contracts, Platform application logic, Shared Engine logic, or Domain logic
+- Hono request/context objects outside application transport adapters and composition roots
+- oRPC transport objects outside application transport adapters and generated-client boundaries
+- Database adapters from domain/application contracts or authorization-policy packages
 
 ## Persistence Rules
 
@@ -118,6 +124,8 @@ The implementation must include tests that:
 - Fail application packages that contain migrations
 - Detect circular dependencies
 - Verify each table and migration has one owner
+- Fail Bun-, Hono-, oRPC-, or database-adapter leakage into runtime-neutral packages
+- Build and run the critical server suite on Bun and the approved Node LTS fallback from the same commit
 
 ## Temporary Exceptions
 

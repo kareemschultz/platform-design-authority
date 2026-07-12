@@ -51,7 +51,7 @@ Better Auth's organization plugin may support authentication-oriented membership
 
 ## Accounts and Credentials
 
-Supported foundations may include email and password, username, phone where justified, email OTP, magic links, social providers, account linking, email verification, password reset, and recovery.
+The controlled baseline is email/password plus the explicitly selected methods in `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`. Phone authentication and magic links are deferred by default because of SIM-swap, recovery, and email-channel takeover risks; they require a new matrix disposition and threat-model evidence before enablement. Other methods remain deny-by-default unless that matrix admits them.
 
 Platform policy determines which methods are enabled by tenant, user type, risk, region, and application.
 

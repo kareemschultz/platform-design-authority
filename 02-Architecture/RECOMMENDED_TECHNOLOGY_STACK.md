@@ -134,7 +134,7 @@ Drizzle may be evaluated in generated Better-T-Stack prototypes. Prisma may be u
 ### Cache, Coordination, and Short Jobs
 
 - Redis or a compatible approved implementation for cache, rate limits, ephemeral coordination, and short-lived locks where unavoidable
-- BullMQ for lightweight background jobs during early implementation
+- A governed application worker or queue adapter for lightweight background jobs during early implementation; a concrete library requires lifecycle-ledger admission and Bun/Node compatibility evidence
 
 Redis is never an authoritative business-data store.
 
@@ -248,6 +248,8 @@ GraphQL is not the initial primary public API. It may be introduced later for go
 
 ### Infrastructure and Deployment
 
+OpenTofu 1.12.x is the selected infrastructure-as-code engine under ADR-0018. Exact CLI, provider, and module versions are pinned in implementation repositories and reverified through `19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md` and the technology lifecycle ledger.
+
 Local development:
 
 - Docker Compose
@@ -308,7 +310,7 @@ Vercel may host Next.js previews and selected production web surfaces, but backe
 - AI orchestration engine using ordinary application commands
 - Tool authorization through normal permissions, entitlements, policy, and approvals
 - Permission-filtered retrieval
-- pgvector in PostgreSQL as the initial vector option
+- pgvector as an isolated candidate admitted only after ADR-0024's measured semantic-search trigger; it is not a baseline PostgreSQL extension
 - Evaluation datasets, scoring, red-team testing, and release gates
 - Explicit prompt, model, tool, cost, approval, provenance, and audit records
 

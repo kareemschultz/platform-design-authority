@@ -110,3 +110,4 @@ Prohibited until a later accepted ADR:
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial evaluation proposal |
+| 0.2.0 | 2026-07-12 | Platform Design Authority | Added explicit prohibitions, evidence gates, and operational review details while retaining Labs-only status |

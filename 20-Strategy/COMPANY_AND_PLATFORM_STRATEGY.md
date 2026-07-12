@@ -19,7 +19,7 @@ Small and mid-sized organizations are forced to choose between fragmented specia
 
 ## Initial Beachhead
 
-Guyana-first SMB retail provides direct customer access, cash and offline requirements, regional payment constraints, and a reusable platform proof across identity, catalog, inventory, commerce, stored value, finance handoff, and operations.
+Guyana-first SMB retail is the provisional beachhead hypothesis. The expected access, cash/offline needs, regional-payment constraints, and reusable platform proof remain unvalidated until the evidence gate in `20-Strategy/MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md` and FDR-004 are satisfied.
 
 ## Expansion Logic
 
@@ -33,7 +33,9 @@ Expand through reusable adjacent workflows rather than unrelated feature accumul
 6. Industry-specific operations
 7. Marketplace and partner ecosystem
 
-## Differentiation
+## Differentiation Hypotheses
+
+The following are product hypotheses to measure against current alternatives; they are not established market advantages:
 
 - Fast, role-based user experience
 - One governed capability model

@@ -167,3 +167,7 @@ Sources:
 - Accessibility and usability evidence for enrollment, challenge, recovery, passkeys, device approval, and impersonation UX.
 
 Recheck when Better Auth publishes a new stable release, a selected plugin changes package or maturity, an advisory affects authentication, the implementation lock changes, a new authentication method/provider is requested, or any managed service is proposed.
+
+## 2026-07-12 Refresh Note
+
+The Better Auth MCP plugin documentation indicates planned deprecation in favor of the OAuth Provider plugin, and v1.7.0-rc.1 was observed as a prerelease. Neither changes the selected stable v1.6.23 evidence or authorizes an upgrade. The plugin matrix records the successor direction; implementation must reverify the current stable release and migration guidance at lock time.

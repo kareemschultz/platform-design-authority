@@ -9,6 +9,8 @@ last_reviewed: 2026-07-11
 
 # Navigation, Command Palette, and Global Search
 
+This document owns interaction behavior. Search/index architecture is governed by `10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md`, and result/command ordering by `10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`.
+
 ## Purpose
 
 Define how users move across workspaces, records, actions, recent items, saved views, and search without exposing the platform's full complexity.

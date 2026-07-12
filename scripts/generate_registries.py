@@ -15,6 +15,7 @@ CAPABILITY = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
 EVENT = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`\s*$")
 PERMISSION = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
+IGNORED_TREE_PARTS = {"node_modules", ".next", ".turbo", ".source", "dist"}
 
 CAPABILITY_SOURCES = [
     ROOT / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md",
@@ -72,7 +73,7 @@ def governed_documents() -> list[Path]:
     files: list[Path] = []
     for path in sorted(ROOT.rglob("*.md")):
         rel = path.relative_to(ROOT)
-        if any(part.startswith(".") for part in rel.parts):
+        if any(part.startswith(".") or part in IGNORED_TREE_PARTS for part in rel.parts):
             continue
         if rel.parts and rel.parts[0] == "templates":
             continue
@@ -328,16 +329,33 @@ def build_permissions_registry() -> dict[str, Any]:
 
 def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, Any]:
     first_slice = [item for item in capabilities["capabilities"] if item.get("first_slice")]
+    metadata = load_json(ROOT / "registry" / "capability-metadata.json")
+    depth_defaults = metadata.get("test_dimension_defaults", {})
+    allowed_statuses = {"required", "not-applicable", "deferred-by-depth"}
     records: list[dict[str, Any]] = []
     for item in first_slice:
         depth = item["first_slice_depth"]
         dimensions = {dimension: "required" for dimension in TEST_DIMENSIONS}
+        dimension_reasons: dict[str, str] = {}
+        for dimension, override in depth_defaults.get(depth, {}).items():
+            if dimension not in dimensions:
+                raise ValueError(f"unknown test dimension override {dimension!r} for depth {depth!r}")
+            status = str(override.get("status", ""))
+            reason = str(override.get("reason", "")).strip()
+            if status not in allowed_statuses:
+                raise ValueError(f"invalid test dimension status {status!r} for {depth}.{dimension}")
+            if status == "not-applicable" and not reason:
+                raise ValueError(f"not-applicable test dimension requires a reason: {depth}.{dimension}")
+            dimensions[dimension] = status
+            if reason:
+                dimension_reasons[dimension] = reason
         records.append({
             "capability_id": item["id"],
             "owner": item["owner"],
             "depth": depth,
             "fixture": "Demerara Retail Test Group",
             "dimensions": dimensions,
+            "dimension_reasons": dimension_reasons,
             "evidence_status": "Planned",
             "evidence_paths": [],
             "blocking_defects": [],

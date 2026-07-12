@@ -9,6 +9,8 @@ last_reviewed: 2026-07-11
 
 # Interactive Analytics and Visualization
 
+Interactive analytics levels L3–L5 are outside the first-slice implementation registry. They remain governed design targets and cannot expand `registry/first-slice.json` without an explicit scope change.
+
 ## Purpose
 
 Define responsive, accessible, interactive charts, graphs, analytical canvases, insight panels, drill paths, comparison tools, and visualization-to-action workflows across operational dashboards, reports, mobile experiences, and executive workspaces.

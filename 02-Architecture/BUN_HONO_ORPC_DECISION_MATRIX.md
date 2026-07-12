@@ -30,7 +30,7 @@ Scores use 1 (poor) through 5 (strong). Totals are directional analysis, not ben
 | Runtime portability and rollback | 10 | 4 | 5 | 4 |
 | Performance and resource potential | 5 | 5 | 4 | 3 |
 | Scaffolding fit | 5 | 5 | 4 | 2 |
-| **Weighted total / 500** | **100** | **405** | **450** | **405** |
+| **Weighted total / 500** | **100** | **400** | **435** | **395** |
 
 Node + Hono + oRPC has the highest pre-prototype risk-adjusted score. Bun remains the first experiment because it best matches preference and scaffolding, while the same Hono/oRPC shell can fall back to Node if boundaries remain portable.
 

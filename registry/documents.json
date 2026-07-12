@@ -71,7 +71,10 @@
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
-      "related_adrs": [],
+      "related_adrs": [
+        "ADR-0004",
+        "ADR-0020"
+      ],
       "review_evidence": null
     },
     {
@@ -208,11 +211,14 @@
       "document_id": "ADR-0018",
       "path": "18-Decisions/ADR-0018-USE-OPENTOFU-FOR-INFRASTRUCTURE-AS-CODE.md",
       "title": "Use OpenTofu for Infrastructure as Code",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
-      "related_adrs": [],
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0004",
+        "ADR-0020"
+      ],
       "review_evidence": null
     },
     {
@@ -537,6 +543,19 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-APP-019",
+      "path": "19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md",
+      "title": "OpenTofu Verification 2026-07-12",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Engineering",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0018"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-ARC-001",
       "path": "02-Architecture/SYSTEM_CONTEXT.md",
       "title": "System Context",
@@ -801,6 +820,17 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-ARC-020",
+      "path": "02-Architecture/README.md",
+      "title": "Architecture Section Index",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-COM-001",
       "path": "13-Commercial/COMMERCIAL_ARCHITECTURE_OVERVIEW.md",
       "title": "Commercial Architecture Overview",
@@ -954,6 +984,17 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-COM-014",
+      "path": "13-Commercial/README.md",
+      "title": "Commercial Section Index",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-DAT-001",
       "path": "10-Data/README.md",
       "title": "Data Platform Section Index",
@@ -1051,6 +1092,17 @@
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-DEC-001",
+      "path": "18-Decisions/README.md",
+      "title": "Architecture Decision Record Index",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -1594,6 +1646,17 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-DOM-027",
+      "path": "04-Business-Domains/README.md",
+      "title": "Business Domains Section Index",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-DOM-090",
       "path": "04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md",
       "title": "Capability Map Amendment 2026-07-11",
@@ -1839,47 +1902,13 @@
     },
     {
       "document_id": "PDA-ENG-020",
-      "path": "14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
-      "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.5.0",
-      "status": "Draft",
-      "owner": "Platform Engineering",
-      "last_reviewed": "2026-07-12",
-      "related_adrs": [
-        "ADR-0004",
-        "ADR-0005",
-        "ADR-0006",
-        "ADR-0020",
-        "ADR-0021",
-        "ADR-0022",
-        "ADR-0023",
-        "ADR-0024"
-      ],
-      "review_evidence": null
-    },
-    {
-      "document_id": "PDA-ENG-021",
-      "path": "14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md",
-      "title": "Worktree Change and Release Coordination",
+      "path": "03-Business-Engines/README.md",
+      "title": "Business Engines Section Index",
       "version": "0.1.0",
       "status": "Draft",
-      "owner": "Platform Engineering",
+      "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
       "related_adrs": [],
-      "review_evidence": null
-    },
-    {
-      "document_id": "PDA-ENG-022",
-      "path": "14-Engineering/ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md",
-      "title": "Advanced Frontend Technique Catalog",
-      "version": "0.1.0",
-      "status": "Draft",
-      "owner": "Frontend Platform",
-      "last_reviewed": "2026-07-12",
-      "related_adrs": [
-        "ADR-0005",
-        "ADR-0022"
-      ],
       "review_evidence": null
     },
     {
@@ -1919,13 +1948,60 @@
       "document_id": "PDA-ENGR-012",
       "path": "14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [
         "ADR-0002",
-        "ADR-0003"
+        "ADR-0003",
+        "ADR-0020"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-ENGR-013",
+      "path": "14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
+      "title": "Technology Lifecycle Compatibility and Lessons Ledger",
+      "version": "0.5.0",
+      "status": "Draft",
+      "owner": "Platform Engineering",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0004",
+        "ADR-0005",
+        "ADR-0006",
+        "ADR-0018",
+        "ADR-0020",
+        "ADR-0021",
+        "ADR-0022",
+        "ADR-0023",
+        "ADR-0024"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-ENGR-014",
+      "path": "14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md",
+      "title": "Worktree Change and Release Coordination",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Engineering",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-ENGR-015",
+      "path": "14-Engineering/ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md",
+      "title": "Advanced Frontend Technique Catalog",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Frontend Platform",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
       ],
       "review_evidence": null
     },
@@ -2088,6 +2164,17 @@
         "ADR-0014",
         "ADR-0015"
       ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-FND-015",
+      "path": "00-Foundation/README.md",
+      "title": "Foundation Section Index",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
       "review_evidence": null
     },
     {
@@ -2283,6 +2370,17 @@
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-IND-019",
+      "path": "05-Industry-Packs/README.md",
+      "title": "Industry Packs Section Index",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -2812,6 +2910,17 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-PLT-029",
+      "path": "01-Platform/README.md",
+      "title": "Platform Section Index",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-RDM-001",
       "path": "17-Roadmap/BLUEPRINT_AND_DELIVERY_ROADMAP.md",
       "title": "Blueprint and Delivery Roadmap",
@@ -2935,6 +3044,28 @@
       "last_reviewed": "2026-07-11",
       "related_adrs": [],
       "review_evidence": "reviews/FABLE5_THIRD_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-007",
+      "path": "reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md",
+      "title": "Fable 5 Fourth Audit Registration",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": "reviews/FABLE5_FOURTH_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-008",
+      "path": "reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md",
+      "title": "Fable 5 Fourth Audit Disposition V1",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": "reviews/FABLE5_FOURTH_AUDIT_V1.md"
     },
     {
       "document_id": "PDA-SEC-001",
@@ -3078,7 +3209,7 @@
       "document_id": "PDA-STR-002",
       "path": "20-Strategy/FOUNDER_DECISION_REGISTER.md",
       "title": "Founder Decision Register",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Founder",
       "last_reviewed": "2026-07-11",
@@ -3110,8 +3241,8 @@
     {
       "document_id": "PDA-STR-012",
       "path": "20-Strategy/BUSINESS_DNA_ENGINE.md",
-      "title": "Business DNA Engine",
-      "version": "0.1.0",
+      "title": "Business DNA Strategy Rationale",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
@@ -3276,7 +3407,7 @@
       "document_id": "PDA-STR-027",
       "path": "20-Strategy/MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md",
       "title": "Market Segmentation and Beachhead Evidence",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",

@@ -9,6 +9,8 @@ last_reviewed: 2026-07-10
 
 # First Slice Capability Manifest
 
+The governed Finance export and accountant-handoff seam is defined by `04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md` and `schemas/finance/finance-handoff-v1.schema.json`.
+
 ## Purpose
 
 Define the bounded capability set for the first controlled Guyana retail vertical slice. This document prevents the phrase “first slice” from expanding informally and provides the human-readable source for `registry/first-slice.json`.

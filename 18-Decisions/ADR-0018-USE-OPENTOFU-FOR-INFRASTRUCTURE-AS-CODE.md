@@ -1,13 +1,14 @@
 ---
 document_id: ADR-0018
 title: Use OpenTofu for Infrastructure as Code
-version: 0.1.0
+version: 0.2.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-11
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
+related_adrs: [ADR-0004, ADR-0020]
 ---
 
 # ADR-0018 — Use OpenTofu for Infrastructure as Code
@@ -99,3 +100,13 @@ Terraform-compatible providers and modules may be used only after license, maint
 ## Validation
 
 Validate through a disposable first-slice environment, isolated recovery environment, plan/apply/destroy tests, drift simulation, state recovery, provider upgrade, and one reference self-hosted installation.
+
+## Review Record
+
+- Current implementation evidence: not yet available; the decision remains Proposed.
+- Dated external evidence: `19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md`.
+- Lifecycle record: `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`.
+
+## Change Log
+
+- 2026-07-12 — v0.2.0 added dated version evidence, lifecycle-ledger propagation, and related ADR links without changing the selected engine.

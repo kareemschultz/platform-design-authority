@@ -9,6 +9,8 @@ last_reviewed: 2026-07-10
 
 # Search and Discovery
 
+Retrieval/index authority is `10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md`; result and command ordering is governed by `10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`; interaction behavior is governed by `09-UX/NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`.
+
 ## Purpose
 
 Define the kernel search primitive for global and domain search, command discovery, saved views, indexing, permission filtering, navigation, and search administration.

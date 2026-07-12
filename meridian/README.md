@@ -1,6 +1,6 @@
 # meridian
 
-This directory is controlled prototype evidence for PR #2. It was initially generated with Better-T-Stack 3.36.3 and then reviewed against root `../CLAUDE.md`, PDA-FND-002, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0024, PDA-PLT-028, PDA-UX-028, PDA-ARC-019, and PDA-ENG-020.
+This directory is controlled prototype evidence for PR #2. It was initially generated with Better-T-Stack 3.36.3 and then reviewed against root `../AGENTS.md`, `../CLAUDE.md`, PDA-FND-002, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0024, PDA-PLT-028, PDA-UX-028, PDA-ARC-019, and PDA-ENGR-013.
 
 This is not production approval for the runtime, scaffold, UI system, database image, auth configuration, documentation portal, or native auth exchange.
 
@@ -24,7 +24,7 @@ Reviewed deviations from generated output:
 
 - Removed generated AI and Todo examples from the governed first-slice prototype.
 - Removed the Better-T-Stack `skills` addon payload, including its AI SDK skill and nested third-party instruction trees, so root and nested repository governance remain the only agent authority.
-- Pinned Bun 1.3.14, Hono 4.12.29, shadcn 4.13.0, and Lucide 1.24.0. oRPC exact 1.14.8 is blocked because the scoped packages used here are not published at that version; this prototype pins 1.14.7 and records the conflict in `docs/IMPLEMENTATION_CONFLICTS.md`.
+- Pinned Bun 1.3.14, Hono 4.12.29, shadcn 4.13.0, and Lucide 1.24.0. oRPC exact 1.14.8 is blocked because the scoped packages used here are not published at that version; this prototype pins 1.14.7 and records the conflict in `../docs/implementation/IMPLEMENTATION_CONFLICTS.md`.
 - Reconciled shadcn metadata to the Base UI/Rhea, Neutral/Blue, Geist/Inter, Lucide, default-radius bootstrap selected in PDA-UX-028.
 - Hardened Better Auth cookie and trusted-origin configuration for prototype review.
 

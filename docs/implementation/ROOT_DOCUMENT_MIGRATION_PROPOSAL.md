@@ -46,7 +46,7 @@ A later restructuring PR must inventory before moving anything:
 
 1. Relative Markdown links within all root documents and ADR references.
 2. Front matter fields including `related_adrs`, document IDs and lifecycle metadata.
-3. Root `README.md`, `CLAUDE.md`, issue templates, PR templates and CODEOWNERS path rules.
+3. Root `README.md`, `AGENTS.md`, `CLAUDE.md`, issue templates, PR templates and CODEOWNERS path rules.
 4. `scripts/generate_registries.py`, `scripts/validate_docs.py` and their test fixtures.
 5. `.github/workflows/docs-governance.yml` and `meridian-prototype.yml` path filters.
 6. Fumadocs source configuration, navigation, search, sitemap, llms routes and OpenAPI generation inputs.

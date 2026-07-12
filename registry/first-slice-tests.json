@@ -38,6 +38,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -62,6 +63,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -86,6 +88,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -110,6 +113,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -134,6 +138,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -158,6 +163,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -182,6 +188,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -206,6 +213,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -230,6 +238,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -254,6 +263,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -278,6 +288,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -302,6 +313,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -326,6 +338,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -350,6 +363,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -374,6 +388,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -398,6 +413,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -422,6 +438,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -446,6 +463,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -470,6 +488,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -494,6 +513,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -518,6 +538,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -542,6 +563,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -566,6 +588,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -590,6 +613,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -614,6 +638,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -638,6 +663,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -662,6 +688,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -686,6 +713,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -710,6 +738,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -734,6 +763,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -758,6 +788,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -777,10 +808,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -806,6 +842,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -830,6 +867,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -854,6 +892,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -873,10 +912,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -902,6 +946,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -926,6 +971,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -950,6 +996,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -974,6 +1021,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -993,10 +1041,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1017,10 +1070,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1041,10 +1099,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1065,10 +1128,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1089,10 +1157,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1113,10 +1186,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1137,10 +1215,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1166,6 +1249,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1190,6 +1274,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1214,6 +1299,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1238,6 +1324,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1262,6 +1349,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1286,6 +1374,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1310,6 +1399,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1334,6 +1424,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1358,6 +1449,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1382,6 +1474,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1406,6 +1499,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1430,6 +1524,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1449,10 +1544,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1473,10 +1573,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1502,6 +1607,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1526,6 +1632,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1550,6 +1657,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1569,10 +1677,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1598,6 +1711,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1622,6 +1736,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1646,6 +1761,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1670,6 +1786,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1694,6 +1811,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1718,6 +1836,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1742,6 +1861,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1766,6 +1886,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1790,6 +1911,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1814,6 +1936,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1833,10 +1956,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -1862,6 +1990,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1886,6 +2015,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1910,6 +2040,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1934,6 +2065,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1958,6 +2090,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -1977,10 +2110,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -2006,6 +2144,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2030,6 +2169,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2054,6 +2194,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2078,6 +2219,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2102,6 +2244,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2126,6 +2269,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2150,6 +2294,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2174,6 +2319,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2198,6 +2344,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2222,6 +2369,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2246,6 +2394,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2270,6 +2419,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2294,6 +2444,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2313,10 +2464,15 @@
         "events_jobs_and_projections": "required",
         "audit_and_observability": "required",
         "privacy_and_classification": "required",
-        "offline_and_degraded": "required",
-        "accessibility_and_responsive": "required",
-        "performance_and_capacity": "required",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
         "recovery_replay_and_reconciliation": "required"
+      },
+      "dimension_reasons": {
+        "offline_and_degraded": "The seam must define degraded behavior, but executable offline behavior belongs to a deeper implementation depth.",
+        "accessibility_and_responsive": "A contract seam has no rendered user interface; consuming interfaces retain their own accessibility obligations.",
+        "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
       "evidence_paths": [],
@@ -2342,6 +2498,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2366,6 +2523,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2390,6 +2548,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2414,6 +2573,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2438,6 +2598,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2462,6 +2623,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []
@@ -2486,6 +2648,7 @@
         "performance_and_capacity": "required",
         "recovery_replay_and_reconciliation": "required"
       },
+      "dimension_reasons": {},
       "evidence_status": "Planned",
       "evidence_paths": [],
       "blocking_defects": []

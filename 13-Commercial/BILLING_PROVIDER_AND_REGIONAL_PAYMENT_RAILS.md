@@ -70,7 +70,7 @@ Cash is not a provider fallback. It has its own lifecycle and evidence:
 - Bank deposit confirmation
 - Finance reconciliation
 
-Cash collected from tenants for the platform's own SaaS invoices requires a separate approved receivables and agent-collection process. It must not be mixed with tenant customer cash.
+Cash collection for the platform's own SaaS invoices is disabled pending FDR-010. Any future approved receivables and agent-collection process must remain separate from tenant customer cash.
 
 ## Provider-Neutral Strategy
 

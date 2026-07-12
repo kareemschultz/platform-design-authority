@@ -1,45 +1,33 @@
-# fumadocs
+# Meridian Documentation Portal
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+This Fumadocs application is the controlled prototype selected by ADR-0021. It is a delivery surface, not an architecture authority.
 
-Run development server:
+## Content Boundaries
+
+- Authored product content: `content/docs/`
+- Architecture authority: repository root `00-Foundation/` through `20-Strategy/`
+- Canonical API contracts: root `openapi/` and `schemas/`
+- Implementation notes: root `docs/implementation/`
+- Generated API/reference pages must identify their source revision and must never become a second editable contract.
+
+Only released or explicitly identified prototype behavior may be described as available. Draft/Proposed architecture, independent reviews, threat models, secrets, customer data, and private provider evidence are not public product content.
+
+## Local Verification
+
+From `meridian/`:
 
 ```bash
-npm run dev
-# or
-pnpm dev
-# or
-yarn dev
+bun install --frozen-lockfile
+bun run --filter fumadocs typecheck
+bun run --filter fumadocs build
 ```
 
-Open http://localhost:3000 with your browser to see the result.
+The root Meridian CI runs the authoritative frozen-install and build gates. The application must also remain buildable through the approved Node fallback.
 
-## Explore
+## Authoring Requirements
 
-In the project, you can see:
+Every procedural page identifies audience, prerequisites, permission, outcome, offline/degraded behavior, validation errors, correction or reversal path, related capability/contract, and applicable product version. Use synthetic examples only. Product/domain owners review behavioral accuracy; Developer Platform owns publication; UX and Accessibility review information design.
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](https://fumadocs.dev/docs/headless/source-api) provides the interface to access your content.
-- `lib/layout.shared.tsx`: Shared options for layouts, optional but preferred to keep.
+## Publication Status
 
-| Route                     | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| `app/(home)`              | The route group for your landing page and other pages. |
-| `app/docs`                | The documentation layout and pages.                    |
-| `app/api/search/route.ts` | The Route Handler for search.                          |
-
-### Fumadocs MDX
-
-A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
-
-Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
-
-## Learn More
-
-To learn more about Next.js and Fumadocs, take a look at the following
-resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Fumadocs](https://fumadocs.dev) - learn about Fumadocs
+Prototype only. Search is local, AI chat is disabled, and no interactive API proxy or unapproved production documentation is published.

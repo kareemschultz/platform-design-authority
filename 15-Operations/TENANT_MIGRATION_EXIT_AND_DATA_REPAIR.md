@@ -52,23 +52,14 @@ Include documented open formats for authoritative records, files, configuration,
 
 ## Data Repair Template
 
-A repair record includes:
+The canonical repair record and mandatory independent-review controls are defined by `15-Operations/PROBLEM_CHANGE_RELEASE_AND_DATA_REPAIR_OPERATIONS.md`. Migration or exit repairs use that record without weakening it and add:
 
-- Incident or defect reference
-- Exact tenant, entity, record, and period scope
-- Invariant violated
-- Root cause
-- Proposed command, migration, or script
-- Dry-run output
-- Before and expected after values
-- Backup or recovery point
-- Idempotency
-- Permission and approval
-- Audit and correlation
-- Reconciliation
-- Rollback or compensation
-- Customer communication
-- Post-repair tests
+- Migration/export/import manifest and hashes
+- Source and target schema versions
+- Transfer and transformation provenance
+- Tenant acceptance or exit authority
+- Importability and portability evidence
+- Credential, integration, and residual-data disposition
 
 Direct SQL is not the default repair interface. When emergency direct access is unavoidable, the action is captured, reviewed, reproduced safely, and removed from ordinary operator practice.
 

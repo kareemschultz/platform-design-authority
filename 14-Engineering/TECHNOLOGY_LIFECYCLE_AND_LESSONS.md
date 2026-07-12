@@ -1,12 +1,12 @@
 ---
-document_id: PDA-ENG-020
+document_id: PDA-ENGR-013
 title: Technology Lifecycle Compatibility and Lessons Ledger
 version: 0.5.0
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-12
 verified_as_of: 2026-07-12
-related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024]
+related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0018, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024]
 ---
 
 # Technology Lifecycle, Compatibility, and Lessons Ledger
@@ -58,6 +58,7 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | Astro Starlight | 0.41.3 | Static docs fallback | Introduces Astro | Static build, integration and authoring comparison | Fumadocs/Nextra | If independent static portal required |
 | Docusaurus | 3.10.2 | Multi-version docs fallback | Version copies and second framework increase maintenance | Multi-supported-release need and build budget | Fumadocs current docs + migrations | When multiple release lines coexist |
 | Changesets CLI | 2.31.0 | Proposed implementation release metadata | Requires PR/release discipline; not user docs or architecture authority | Release PR, package dependency, changelog, rollback tests | Manual reviewed release process | Before implementation repository release setup |
+| OpenTofu | 1.12.3 | Selected infrastructure-as-code engine | CLI, providers, modules, state backends, and Terraform-compatibility claims require independent pinning and review | Plan/apply/destroy, drift, state recovery, provider upgrade, policy and self-hosted installation tests | Reviewed Terraform-compatible workflow or provider-native templates after ADR amendment | Every CLI/provider/module lock |
 | pg_durable | 0.2.3 | Platform Labs only | Pre-1.0, evaluation images, preload/extension, AMD64, database failure-domain coupling | Isolation, HA/PITR, load, upgrade, security, compensation/versioning comparison | Application worker, pg_cron, Temporal | Each release and prototype |
 
 ## Verified Sources
@@ -77,6 +78,7 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | TanStack Start | `https://tanstack.com/start/latest/docs/framework/react/overview`; `https://tanstack.com/start/latest/docs/framework/react/guide/server-components` | 2026-07-12 |
 | Documentation alternatives | `https://nextra.site/docs`; `https://docusaurus.io/docs/versioning`; `https://astro.build/themes/details/starlight/` | 2026-07-12 |
 | Changesets | `https://github.com/changesets/changesets`; `https://github.com/changesets/action` | 2026-07-12 |
+| OpenTofu | `https://opentofu.org/docs/`; `https://github.com/opentofu/opentofu/releases/tag/v1.12.3`; `https://registry.opentofu.org/` | 2026-07-12 |
 | pg_durable | `https://microsoft.github.io/pg_durable/`; `https://github.com/microsoft/pg_durable/releases/tag/v0.2.3`; `https://github.com/microsoft/pg_durable/blob/main/USER_GUIDE.md` | 2026-07-12 |
 | PostgreSQL 18 | `https://www.postgresql.org/docs/18/`; `https://www.postgresql.org/docs/18/release-18-4.html`; `https://www.postgresql.org/docs/18/functions-uuid.html` | 2026-07-12 |
 | PostgreSQL supplied extensions | `https://www.postgresql.org/docs/18/pgstatstatements.html`; `https://www.postgresql.org/docs/18/pgtrgm.html`; `https://www.postgresql.org/docs/18/pgcrypto.html` | 2026-07-12 |
@@ -108,6 +110,8 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 | TECH-LESSON-019 | 2026-07-12 | Active | A shadcn preset changes component geometry and source, not only colors; full apply can reinstall owned components | Preserve human-readable inputs and decoded pinned code; dry-run/diff; never auto-apply over production source | `PDA-UX-028`; prototype pending | Frontend Platform | Every preset/CLI change |
 | TECH-LESSON-020 | 2026-07-12 | Active | Rhea offers the best default density balance but is newer than Nova, while compact geometry can still violate touch targets | Prototype Rhea with owned compact/comfortable/48 px POS variants; keep Nova fallback | Comparative visual/accessibility evidence pending | Design System | Rhea gates pass or fail |
 | TECH-LESSON-021 | 2026-07-12 | Active | Geist headings plus Inter body improve hierarchy but add a second-family performance and fallback obligation | Self-host/subset and compare against Inter-only; fall back without API change | Font performance/localization tests pending | Design System | Font budget or locale failure |
+| TECH-LESSON-022 | 2026-07-12 | Active | Bun `node:cluster` handle passing and multi-process HTTP load balancing are Linux-only | Keep application packages runtime-neutral; prove Bun and Node container behavior on every supported target | ADR-0020 dual-runtime CI; prototype evidence pending | Platform Engineering | Each Bun/Node runtime lock |
+| TECH-LESSON-023 | 2026-07-12 | Active | Infrastructure compatibility includes the OpenTofu CLI, providers, modules, state backend, and policy tooling, not only the CLI version | Pin and test the whole IaC lock set; record drift and recovery evidence | ADR-0018; disposable-environment tests pending | Platform Engineering | Every infrastructure lock change |
 
 ## Entry Templates
 

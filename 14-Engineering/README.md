@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-001
 title: Engineering Section Index
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -11,24 +11,35 @@ last_reviewed: 2026-07-11
 
 ## Current Specifications
 
-- `ENGINEERING_HANDBOOK.md` — TypeScript, repository boundaries, review, dependencies, migrations, security, release, and definition of done
-- `IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md` — repeatable recipes for domains, engines, capabilities, APIs, events, imports, reports, offline, providers, extensions, and AI
-- `../07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md` — SDK, CLI, and generated-project architecture
-- `../07-Developer-Platform/PROJECT_AGENT_SKILLS.md` — project-local coding and review skills
-- `../02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md` — stack direction
-- `../16-Testing/PLATFORM_TESTING_STRATEGY.md` — platform quality system
+- `ENGINEERING_HANDBOOK.md`
+- `IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md`
+- `ARCHITECTURE_DEPENDENCY_RULES.md`
+- `../registry/architecture-rules.json`
+- `../07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md`
+- `../07-Developer-Platform/PROJECT_AGENT_SKILLS.md`
+- `../02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md`
+- `../16-Testing/PLATFORM_TESTING_STRATEGY.md`
+- `../openapi/first-slice-v1.yaml`
+- `../schemas/`
 
-## Remaining Implementation-Level Depth
+## Current Direction
 
-- Exact monorepo package map
-- Architecture-test rules
-- TypeScript lint and formatter configuration
+The implementation begins as a TypeScript modular monolith with domain-owned persistence, explicit contracts, outbox events, architecture tests, OpenTofu infrastructure, Tailwind and shadcn/ui web foundations, Expo native clients, and generated registries and schemas.
+
+The machine-readable dependency rules define package families, allowed dependency direction, prohibited imports, single table and migration ownership, cycle policy, and expiring exceptions.
+
+## Remaining Implementation Evidence
+
+- Exact monorepo package map and packages
+- Executable architecture-test toolchain
+- TypeScript lint, formatting, and build configuration
 - Money, quantity, time, and identifier libraries
-- Better Auth adapter package recipe
-- Outbox and idempotency reference implementation
-- Offline client reference implementation
+- Better Auth adapter
+- Outbox, idempotency, and event schema reference implementation
+- Offline client and sync server
+- Generated SDK and CLI
 - Dependency-update automation
-- Secure build and artifact-signing pipeline
-- Technical-debt register and deprecation dashboards
+- Signed build and release pipeline
+- Technical-debt and deprecation dashboards
 
 Engineering recipes implement approved specifications rather than silently becoming architecture decisions.

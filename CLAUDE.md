@@ -1,58 +1,56 @@
 # Platform Design Authority — AI Contributor Instructions
 
-This repository is the architectural source of truth for the modular, white-label, AI-native Business Operating Platform.
-
-These instructions apply to Claude Code, Codex, and every AI or automated contributor operating in this repository.
+This repository is the architectural source of truth for the modular, white-label, AI-native Business Operating Platform. These instructions apply to every AI or automated contributor.
 
 ## 1. Authority Order
 
-When documents conflict, use this order and report the conflict explicitly:
+When documents conflict, report the conflict and use this order:
 
 1. `00-Foundation/CONSTITUTION.md`
-2. Ratified or Accepted ADRs in `18-Decisions/`
-3. Approved specifications
+2. Ratified or Accepted ADRs
+3. Approved specifications with review evidence
 4. Proposed ADRs
 5. Draft specifications
-6. Founder decision register for unresolved business-authority questions
-7. Templates, examples, research notes, reviews, and generated artifacts
+6. `20-Strategy/FOUNDER_DECISION_REGISTER.md` for unresolved business authority
+7. Templates, evidence, reviews, examples, and generated artifacts
 
-Never silently choose between conflicting documents. Name the conflict, cite both paths and headings, and request or create a formal disposition.
+Generated registries are indexes and contracts derived from authoritative sources; they do not outrank those sources.
 
-Generated registries are indexes, not higher authority than their source Markdown.
+## 2. Lifecycle
 
-## 2. Lifecycle Rule
+Only Approved, Accepted, or Ratified material may direct production implementation. Draft and Proposed material may guide controlled prototypes that name the exact documents and decisions being tested.
 
-Only Approved, Accepted, or Ratified documents may direct production implementation.
+Approved or Ratified documents require `review_evidence`. Do not promote status because a document is long, implemented, or generated.
 
-Draft and Proposed documents are exploration and design input. They may guide controlled prototypes only when the prototype identifies the exact documents and ADRs it tests.
+## 3. Required References
 
-Do not change a document status without the required review record and founder or designated authority approval.
+Plans, pull requests, specifications, and architectural recommendations cite:
 
-## 3. Required Citations in Work
+- Document IDs and ADRs
+- Canonical capability IDs
+- Event and permission IDs
+- Owning domains, engines, platform areas, and contracts
+- First-slice depth or deferral
+- Founder, legal, regulatory, provider, commercial, and evidence dependencies
 
-Every implementation plan, pull request, generated specification, or architectural recommendation must cite:
-
-- Relevant `document_id` values
-- Relevant ADR numbers
-- Capability identifiers
-- Event and permission identifiers where applicable
-- Affected domains, platform services, security areas, or engines
-- First-slice inclusion or deferral
-- Unresolved founder, legal, regulatory, commercial, or provider assumptions
-
-## 4. Mandatory Repository Lookups
+## 4. Mandatory Lookups
 
 Before inventing an identifier or boundary, consult:
 
 - `registry/domains.json`
 - `registry/documents.json`
 - `registry/capabilities.json`
+- `registry/capability-metadata.json`
 - `registry/events.json`
+- `registry/permissions.json`
 - `registry/first-slice.json`
+- `registry/first-slice-tests.json`
+- `registry/endpoint-permissions.json`
+- `registry/architecture-rules.json`
 - `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `20-Strategy/FOUNDER_DECISION_REGISTER.md`
 
-Do not edit generated registries by hand. Update the authoritative document and run:
+Do not edit generated registries manually. Update sources and run:
 
 ```bash
 python scripts/generate_registries.py
@@ -60,133 +58,146 @@ python scripts/validate_docs.py
 python scripts/generate_registries.py --check
 ```
 
-## 5. Core Architectural Rules
+## 5. Architectural Rules
 
-- Preserve the modular-monolith boundaries in ADR-0002 and ADR-0003.
+- Preserve ADR-0002 and ADR-0003 modular-monolith and data ownership boundaries.
+- Follow `14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md` and `registry/architecture-rules.json`.
 - A domain owns its authoritative data and behavior.
-- Do not import another domain's repositories or mutate another domain's tables.
-- Use explicit application contracts and versioned events.
-- Use a transactional outbox for reliable business events.
-- Enforce tenant scope on every data, cache, search, job, event, export, offline, and AI path.
-- Check entitlements and permissions separately.
-- Feature flags are not permissions or entitlements.
-- Configuration is not authorization.
-- Better Auth owns authentication and sessions, not business authorization, entitlements, tenant hierarchy, Party, or domain-role records.
-- Party owns canonical shared real-world identity; domains own customer, supplier, employment, and other role-specific records.
-- Financial, inventory, payroll, stored-value, and audit corrections use reversal or compensating records rather than destructive economic mutation.
-- Privacy transformation follows ADR-0014: isolate PII, preserve lawful business facts, and propagate through the deletion journal.
-- Commerce owns customer stored value under ADR-0013. Payment orchestrates tender; Finance accounts and reconciles; Loyalty owns non-cash value.
-- Initial tenant payments use direct tenant-provider contracts under ADR-0015. Do not introduce custody, pooling, sub-merchants, payment-facilitator, aggregator, or merchant-of-record behavior.
-- Offline behavior is declared per capability and defines leases, idempotency, conflicts, numbering, privacy tombstones, and reconciliation.
-- External webhooks belong to the Developer Platform, not Notifications or the internal Event Backbone.
-- AI tools invoke normal application commands and remain permission-, entitlement-, classification-, policy-, approval-, privacy-, quota-, and audit-aware.
-- Essential first-slice workflows remain deterministic and usable with AI disabled.
+- Do not import another domain's repositories, migrations, or tables.
+- Use explicit application contracts, the transactional outbox, and canonical events.
+- Enforce tenant scope across data, cache, search, jobs, events, files, exports, webhooks, offline, extensions, and AI.
+- Evaluate entitlements and permissions separately. Feature flags are neither.
+- Better Auth owns authentication and sessions, not Party, business roles, permissions, entitlements, or tenant hierarchy.
+- Party owns canonical real-world identity; domains own role records.
+- Corrections to financial, inventory, payroll, stored-value, cash, and audit facts use reversal or compensation.
+- Privacy follows ADR-0014 and the deletion journal.
+- Commerce owns customer stored value. Payment orchestrates provider rails. Finance accounts and reconciles. Loyalty owns only non-cash value.
+- Initial tenant payments use direct tenant-provider contracts. Do not introduce custody, pooling, sub-merchants, payment facilitation, aggregation, or merchant-of-record behavior.
+- Detailed Payment identifiers use `payment.*` under ADR-0017.
+- Offline behavior declares leases, limits, idempotency, numbering, conflicts, tombstones, and reconciliation.
+- External webhooks belong to the Developer Platform.
+- Extension execution follows ADR-0019. Arbitrary third-party code is prohibited inside the core application process.
+- Marketplace paid billing and publisher payout remain disabled until founder and external gates are complete.
+- AI tools use normal application commands and all ordinary authority controls.
+- Essential first-slice workflows remain deterministic with AI disabled.
 
-## 6. Naming Rules
-
-Use the canonical mappings in `registry/domains.json` and ADR-0016.
-
-Patterns:
+## 6. Naming
 
 - Capability: `<namespace>.<capability>`
 - Event: `<namespace>.<entity>.<past-tense-fact>.v<major>`
 - Permission: `<namespace>.<resource>.<action>`
-- ADR: `ADR-NNNN-DESCRIPTIVE-TITLE.md`
-- Specifications: uppercase snake case
+- ADR filename: `ADR-NNNN-DESCRIPTIVE-TITLE.md`
+- Specification filename: uppercase snake case, with dated evidence suffix where appropriate
 
-Do not invent a prefix. Do not use plan names in capability or authorization identifiers. Do not use provider names in business identifiers.
+Do not invent prefixes, use plan names as capability IDs, or use provider names in business contracts.
 
-Use `Platform Subscription` for the platform's SaaS contract and `Recurring Agreement` for a tenant's recurring customer contract. Do not use the bare term `Subscription` when the layer is ambiguous.
+Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreement` for a tenant's customer contract.
 
-`engine.<engine-name>` registers a shared engine. Detailed capabilities for registered engine families use their dedicated namespaces, such as `ai.*`, `loyalty.*`, and `fiscalization.*`.
+`engine.<name>` registers a shared engine. Dedicated detailed families include `ai.*`, `payment.*`, `loyalty.*`, and `fiscalization.*`.
 
-## 7. Money, Quantity, Time, and Identity
+## 7. Money, Time, Quantity, and Identity
 
-- Store monetary values with explicit currency and approved integer-decimal semantics; never use binary floating point for authoritative amounts.
-- Define rounding policy at the correct business boundary.
-- GYD is a first-class operational currency. USD and other currencies require explicit policy; never infer currency from symbol alone.
-- Preserve unit of measure and conversion provenance.
-- Store timestamps with explicit timezone semantics and preserve the business-local date when legally relevant.
-- Use opaque globally unique internal identifiers and separate human-readable references.
-- A Better Auth user is not an employee, customer, supplier, or canonical Party.
-- A stored-value instrument is not a payment credential, loyalty account, bank deposit, or receivable.
+- Authoritative money uses explicit currency and approved decimal/integer semantics, never binary floating point.
+- Preserve units and conversion provenance.
+- Preserve timezone and legally relevant local dates.
+- Use opaque internal identifiers separately from human references.
+- GYD is first-class; USD and other currencies require explicit policy.
+- A Better Auth user is not a Party or domain role.
+- Stored value is not a payment credential, loyalty account, bank deposit, or receivable.
 
-## 8. Current First-Slice Scope
+## 8. UI and Experience
 
-The current bounded scope is `17-Roadmap/FIRST_SLICE_MANIFEST.md` and `registry/first-slice.json`.
+- Web styling uses the latest approved stable Tailwind CSS release.
+- shadcn/ui components are copied and normalized into platform-owned source.
+- Ordinary charts use shadcn chart composition and Recharts.
+- Specialized visualization libraries require a justified requirement and review.
+- Magic UI Pro and shadcn/studio premium assets follow the premium source policy and provenance template.
+- Never commit premium credentials, license keys, private download URLs, or prohibited redistributable source.
+- Every component and workflow covers canonical states, accessibility, responsive behavior, offline behavior, performance, and white label.
+- `ui-pattern-audit` reviews pattern selection; `accessibility-review` performs formal accessibility review.
 
-Included areas center on:
+## 9. First-Slice Scope
 
-- Better Auth, tenancy, Party, permissions, entitlements, audit, privacy, devices, and offline sync
-- POS, register, cash, returns, stored value, catalog, inventory, and financial handoff
-- Guyana-first currency, payment, tax, and fiscalization seams
-- Backup, restore, testing, UX, accessibility, operations, and tenant isolation
+The bounded scope is defined by `FIRST_SLICE_MANIFEST.md`, `registry/first-slice.json`, the OpenAPI contract, schemas, and test matrix.
 
-Explicitly deferred by default:
+Included depth is explicitly `full`, `prototype`, or `seam`.
 
-- Production native storefront
-- Tenant Recurring Agreements
-- Payment-facilitator or platform-custody model
+Core areas:
+
+- Identity, tenancy, Party, permissions, entitlements, devices, audit, privacy, and offline sync
+- Catalog, barcode, Inventory ledger, POS, registers, cash, deposits, returns, receipts, and stored value
+- Payment, tax, fiscalization, reporting, Finance, webhook, and provider seams according to declared depth
+- Backup, recovery, accessibility, testing, operations, and tenant isolation
+
+Deferred:
+
+- Production storefront and tenant recurring commerce
+- Advanced loyalty
+- Full General Ledger and financial statements
+- Customer-account tender
+- Production fiscal submission
+- Self-checkout
+- Unverified terminal coverage
+- Payment facilitation or custody
 - Broad autonomous AI
-- Full delivery of every business domain
+- Arbitrary marketplace code execution
 
-Do not add deferred scope without updating the First Slice Manifest, registry, dependencies, estimates, and founder decision record.
+Do not expand scope without updating all source and machine-readable artifacts plus founder decisions.
 
-## 9. Change Discipline
+## 10. Contract Discipline
+
+Draft implementation contracts are under `openapi/` and `schemas/`.
+
+- OpenAPI operations declare permissions or explicit authenticated context.
+- Event references resolve to one canonical owning definition.
+- Provider capability is never inferred from another provider.
+- Offline messages are signed, versioned, idempotent, and bounded.
+- Import/export and Finance handoff preserve manifests, hashes, reconciliation, and classification.
+- AI records follow the governed AI schema.
+
+## 11. Change Process
 
 Before editing:
 
-1. Read the governing Foundation, ADR, domain, engine, platform, security, roadmap, and founder-decision documents.
-2. Search for the concept across the repository.
-3. Identify the authoritative owner.
-4. Check whether a new ADR or founder decision is required.
-5. Check downstream effects on Party, permissions, entitlements, events, APIs, offline behavior, audit, privacy, reporting, AI tools, recovery, operations, and commercial packaging.
-6. Check first-slice inclusion or deferral.
+1. Read governing documents and search the concept repository-wide.
+2. Identify owner and authority.
+3. Determine ADR or founder-decision needs.
+4. Check downstream impact across contracts, UI, security, privacy, offline, operations, testing, Commercial, and first-slice scope.
 
 After editing:
 
-1. Update every affected authoritative document, not only the new file.
-2. Update cross-references and source registries through the generator.
-3. Record contradictions, open assumptions, and deferred decisions.
-4. Run governance and registry checks.
-5. Add or update review dispositions.
-6. Do not claim implementation readiness unless lifecycle gates are satisfied.
+1. Propagate every affected source.
+2. Update machine-readable sources and regenerate outputs.
+3. Record assumptions, evidence gaps, and deferrals.
+4. Run governance checks.
+5. Update dispositions.
+6. Do not claim readiness beyond evidence.
 
-## 10. Decision Classes Requiring an ADR
+## 12. ADR Triggers
 
-Create or amend an ADR for changes involving:
+Create or amend an ADR for ownership, boundaries, stack, persistence, offline semantics, public contracts, extension execution, deployment, security, privacy, payments, settlement, commercial runtime, or platform-wide lifecycle changes.
 
-- Domain, engine, platform-area, or data ownership
-- Authoritative record or ledger ownership
-- Authentication, authorization, tenancy, Party, or entitlement architecture
-- Cross-domain contracts
-- Technology stack or deployment architecture
-- Persistence strategy for platform-wide primitives
-- Offline synchronization semantics
-- Public API, event namespace, or compatibility policy
-- Security, privacy, payment-operating, or compliance posture
-- Commercial behavior that changes runtime access, custody, settlement, or data retention
+Business facts architecture cannot infer belong in the Founder Decision Register.
 
-Business facts that architecture cannot infer belong in `20-Strategy/FOUNDER_DECISION_REGISTER.md`.
+## 13. Prohibited Behavior
 
-## 11. Prohibited Agent Behavior
+- Silent contradiction resolution
+- Cross-domain persistence shortcuts
+- Business rules in UI, provider adapters, or prompts
+- Provider SDKs as platform abstractions
+- Unscoped administrator, support, extension, or AI authority
+- Secret or protected-data exposure
+- False lifecycle promotion
+- Scope expansion for feature count
+- Assumed provider capabilities
+- Unsupported legal, tax, privacy, fiscal, security, accessibility, or regulatory claims
+- Treating AI, search, cache, analytics, or offline projections as current authority
+- Editing independent audit evidence instead of writing a disposition
 
-- Do not resolve contradictions silently.
-- Do not create cross-domain database shortcuts.
-- Do not copy domain rules into UI code, route handlers, provider adapters, or AI prompts.
-- Do not make provider SDKs the platform abstraction.
-- Do not generate unscoped administrator or support access.
-- Do not expose secrets, credentials, tokens, or protected personal data.
-- Do not mark a document Approved merely because code was generated from it.
-- Do not expand scope merely to increase feature count.
-- Do not assume a payment rail supports recurring debit, refunds, disputes, or settlement features unless verified.
-- Do not claim a statutory, tax, fiscal, privacy, or regulatory behavior is production-ready from an unverified Draft jurisdiction profile.
-- Do not treat AI output, search results, cache entries, or offline projections as current authorization or authoritative business state.
+## 14. Current Readiness
 
-## 12. Current Readiness
+The repository targets one constrained vertical-slice implementation after named blockers. Technical Prototypes 1–3 may begin after the final remediation verification.
 
-The repository is suitable for controlled technical prototypes, not broad production implementation.
+Pilot and production remain blocked on founder decisions, customer evidence, qualified Guyana review, provider certification, implementation tests, penetration testing, accessibility evidence, and operational exercises.
 
-The active audit reports and dispositions are under `reviews/`. The second-audit remediation closes major ownership and propagation gaps, but founder decisions, Guyana authoritative evidence, detailed first-slice schemas, threat-model artifacts, and formal review waves remain required before implementation readiness changes.
-
-When uncertain, stop and report the missing decision rather than inventing one.
+When uncertain, stop and record the missing decision or evidence rather than inventing it.

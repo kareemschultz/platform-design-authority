@@ -1,0 +1,7 @@
+# 05-Industry-Packs Index
+
+Navigation only; authority follows `CLAUDE.md` and document front matter.
+
+- [INDUSTRY PACKS OVERVIEW](INDUSTRY_PACKS_OVERVIEW.md)
+- [RETAIL PACK](RETAIL_PACK.md)
+- [GUYANA RETAIL JURISDICTION PROFILE](GUYANA_RETAIL_JURISDICTION_PROFILE.md)

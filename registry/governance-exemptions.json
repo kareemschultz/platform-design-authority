@@ -3,6 +3,62 @@
   "status": "draft",
   "exemptions": [
     {
+      "path": "00-Foundation/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "01-Platform/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "02-Architecture/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "03-Business-Engines/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "04-Business-Domains/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "05-Industry-Packs/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "13-Commercial/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "18-Decisions/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
       "path": "20-Strategy/BEACHHEAD_EVIDENCE_LOG.md",
       "rule": "document_front_matter",
       "reason": "Conventional contributor, prototype, or evidence-log file.",

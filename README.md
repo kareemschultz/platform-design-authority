@@ -127,7 +127,7 @@ Approved or Ratified status requires review evidence. Production implementation 
 
 The repository is in **complete blueprint remediation and constrained technical-prototype readiness**.
 
-Three independent Fable 5 audits have been completed. The third-audit remediation adds first-slice events, API and permission contracts, delivery depth, numeric quality budgets, schemas, Marketplace governance, AI controls, UX implementation standards, deployment and operations depth, and formal audit disposition.
+Four independent Fable 5 audits have been completed. The third-audit remediation adds first-slice events, API and permission contracts, delivery depth, numeric quality budgets, schemas, Marketplace governance, AI controls, UX implementation standards, deployment and operations depth, and formal audit disposition.
 
 The intended readiness decision remains: **one constrained vertical-slice implementation after named blockers; Technical Prototypes 1–3 may start after final verification**. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
 
@@ -141,3 +141,9 @@ Pilot and production readiness still require founder decisions, qualified Guyana
 
 Platform Founder: Kareem Schultz  
 Repository: `kareemschultz/platform-design-authority`
+
+Fourth-audit evidence and response:
+
+- `reviews/FABLE5_FOURTH_AUDIT_V1.md`
+- `reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md`
+- `reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md`

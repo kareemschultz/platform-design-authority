@@ -1,0 +1,7 @@
+# 02-Architecture Index
+
+Navigation only; authority follows `CLAUDE.md` and document front matter.
+
+- [SYSTEM CONTEXT](SYSTEM_CONTEXT.md)
+- [FIRST SLICE SYSTEM CONTEXT AND FLOWS](FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md)
+- [BUN HONO ORPC DECISION MATRIX](BUN_HONO_ORPC_DECISION_MATRIX.md)

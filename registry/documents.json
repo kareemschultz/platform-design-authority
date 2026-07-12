@@ -2954,6 +2954,28 @@
       "review_evidence": "reviews/FABLE5_THIRD_AUDIT_V1.md"
     },
     {
+      "document_id": "PDA-REV-007",
+      "path": "reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md",
+      "title": "Fable 5 Fourth Audit Registration",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": "reviews/FABLE5_FOURTH_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-008",
+      "path": "reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md",
+      "title": "Fable 5 Fourth Audit Disposition V1",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": "reviews/FABLE5_FOURTH_AUDIT_V1.md"
+    },
+    {
       "document_id": "PDA-SEC-001",
       "path": "11-Security/README.md",
       "title": "Security Section Index",

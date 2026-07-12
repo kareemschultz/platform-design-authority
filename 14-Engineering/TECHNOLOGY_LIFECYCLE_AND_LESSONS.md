@@ -134,3 +134,14 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 - Review at prototype start/closure, before scaffolds and majors, monthly during active implementation, quarterly otherwise, and immediately after material advisories, license changes, regressions, support changes, or incidents.
 
 Material updates increment this document's version and dates. A no-change review belongs in its review issue; avoid meaningless file churn.
+
+## Fourth-Audit Ledger Additions
+
+| Technology | Verified stable | Status | Constraint | Required proof | Fallback | Recheck |
+|---|---|---|---|---|---|---|
+| OpenTofu | 1.12.3 | Proposed under ADR-0018 | State/provider operations unproven | Pin, lock, drift, rollback, secrets, modules | Compatible reviewed alternative | Before prototype |
+
+| Lesson ID | Date | Status | Observation | Response | Evidence | Owner | Recheck |
+|---|---|---|---|---|---|---|---|
+| TECH-LESSON-021 | 2026-07-12 | Active | Bun node:cluster HTTP balancing is Linux-only | Retain Node-worker/external-queue fallback | Fourth audit | Platform Engineering | Runtime change |
+| TECH-LESSON-022 | 2026-07-12 | Active | Better Auth documents MCP succession toward OAuth Provider | Keep MCP deferred; authentication grants no tool authority | Fourth audit | Developer Platform | Plugin change |

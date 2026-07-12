@@ -5,7 +5,7 @@ version: 0.1.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
-verified_as_of: 2026-07-10
+verified_as_of: 2026-07-12
 ---
 
 # Better Auth Capability and Commercial Verification

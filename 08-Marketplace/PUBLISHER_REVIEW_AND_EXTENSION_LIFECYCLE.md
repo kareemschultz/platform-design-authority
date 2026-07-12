@@ -70,3 +70,7 @@ Publishers may appeal review or enforcement decisions with evidence. Appeals do 
 - Upgrade and uninstall rehearsal
 - Incident contact test
 - Customer communication plan
+
+## Paid-Marketplace Phase Gate
+
+Tax and payout data are inactive in Phases 0-2 and apply only after Phase 3 and FDR-008 approval.

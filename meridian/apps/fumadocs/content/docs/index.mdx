@@ -23,3 +23,7 @@ Documentation changes require owner review, documentation-impact disposition, an
 ## Build And Deploy
 
 The Fumadocs app must build under the pinned dependency set and stay portable to a self-hosted container. Search is local-only in this prototype; AI chat and interactive API proxy behavior are not enabled.
+
+## Plane Separation
+
+Product/user documentation is separated from architecture governance. Root `00-Foundation` through `20-Strategy`, ADRs, registries, schemas, OpenAPI, and Fable evidence stay in place and are never copied here as a second authority.

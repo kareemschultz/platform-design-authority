@@ -106,3 +106,7 @@ Only verified installations may rate. Reviews are moderated for abuse without su
 - Installation and uninstall rehearsal
 - Incident and support runbook
 - Commercial and settlement reconciliation
+
+## Paid-Marketplace Phase Gate
+
+Tax onboarding, settlement, payout, reserves, and paid billing are Phase 3 only, disabled until `MARKETPLACE_COMMERCIAL_PHASING.md`, FDR-008, and legal/provider/custody/refund/reconciliation gates pass.

@@ -3,11 +3,74 @@
   "status": "draft",
   "exemptions": [
     {
-      "path": "README.md",
+      "path": "00-Foundation/README.md",
       "rule": "document_front_matter",
-      "reason": "GitHub repository landing page; governed content is limited to navigation and summary and must link authoritative documents.",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
-      "review_date": "2026-10-11"
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "01-Platform/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "02-Architecture/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "03-Business-Engines/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "04-Business-Domains/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "05-Industry-Packs/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "13-Commercial/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "18-Decisions/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation file; authority derives from linked documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "20-Strategy/BEACHHEAD_EVIDENCE_LOG.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor, prototype, or evidence-log file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "AGENTS.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor, prototype, or evidence-log file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
     },
     {
       "path": "CLAUDE.md",
@@ -15,6 +78,83 @@
       "reason": "Tool-discovery contract requires conventional root filename and minimal parser-safe content; authority is derived from linked governed documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-11"
+    },
+    {
+      "path": "meridian/AGENTS.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor, prototype, or evidence-log file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "meridian/apps/fumadocs/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor, prototype, or evidence-log file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "meridian/docs/IMPLEMENTATION_CONFLICTS.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor, prototype, or evidence-log file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "meridian/docs/ROOT_DOCUMENT_MIGRATION_PROPOSAL.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor, prototype, or evidence-log file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "meridian/ops/postgres/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor, prototype, or evidence-log file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "meridian/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor, prototype, or evidence-log file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "README.md",
+      "rule": "document_front_matter",
+      "reason": "GitHub repository landing page; governed content is limited to navigation and summary and must link authoritative documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-11"
+    },
+    {
+      "path": "reviews/FABLE5_FOURTH_AUDIT_V1.md",
+      "rule": "document_front_matter",
+      "reason": "Immutable audit/prompt evidence registered separately.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "reviews/FABLE5_MASTER_REPOSITORY_AUDIT_PROMPT.md",
+      "rule": "document_front_matter",
+      "reason": "Immutable audit/prompt evidence registered separately.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "reviews/FABLE5_REVIEW_BRIEF_V1.md",
+      "rule": "document_front_matter",
+      "reason": "Immutable audit/prompt evidence registered separately.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
+    },
+    {
+      "path": "reviews/FABLE5_THIRD_AUDIT_PROMPT.md",
+      "rule": "document_front_matter",
+      "reason": "Immutable audit/prompt evidence registered separately.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-12"
     },
     {
       "path": "AGENTS.md",

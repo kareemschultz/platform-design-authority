@@ -194,3 +194,7 @@ Templates are starting points. Effective authority remains explicit and inspecta
 - Role templates pass segregation-of-duties review
 - API-to-permission coverage is machine-checked
 - No detailed Payment permission uses the generic `engine` namespace
+
+## Fiscalization Permission Exemption
+
+The first slice includes only a fiscalization seam and no statutory-submission operation, so no fiscalization mutation permission is registered. Adding one requires a permission, OpenAPI operation, endpoint manifest, jurisdiction evidence, and ADR-0010 controls together.

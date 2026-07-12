@@ -255,3 +255,7 @@ Lifecycle hooks publish through the transactional outbox or another reliable bou
 ## Source References
 
 Dated verification and official URLs are maintained in `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`. Plugin decisions are governed by `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`.
+
+## Deny-by-Default Sign-In Clarification
+
+Email/password is the minimal first-slice method. Magic links and phone authentication are deferred by `BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`; neither is supported until takeover, SIM-swap, recovery, rate-limit, privacy, and evidence gates pass.

@@ -48,6 +48,8 @@ Before inventing an identifier or boundary, consult:
 - `registry/endpoint-permissions.json`
 - `registry/architecture-rules.json`
 - `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for technology, version, compatibility, and workaround claims
+- `14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md` before creating or handing off parallel work
+- `07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` for user, developer, release, or in-app help changes
 - `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `20-Strategy/FOUNDER_DECISION_REGISTER.md`
 
@@ -165,6 +167,7 @@ Before editing:
 3. Determine ADR or founder-decision needs.
 4. Check downstream impact across contracts, UI, security, privacy, offline, operations, testing, Commercial, and first-slice scope.
 5. For technology or version claims, invoke `technology-evidence-maintainer`, verify current primary sources, and consult the living technology ledger. Never rely solely on model memory.
+6. Claim one issue, branch, worktree, and pull request per independently mergeable change; record overlap and dependencies before parallel work.
 
 After editing:
 
@@ -175,6 +178,7 @@ After editing:
 5. Update dispositions.
 6. Do not claim readiness beyond evidence.
 7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
+8. Record documentation and release-note impact for user-visible, API, configuration, migration, permission, workflow, or troubleshooting changes.
 
 ## 12. ADR Triggers
 

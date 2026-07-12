@@ -1,10 +1,11 @@
 ---
 document_id: PDA-ARC-011
 title: TanStack Decision Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
+verified_as_of: 2026-07-12
 related_adrs: [ADR-0005]
 ---
 
@@ -23,7 +24,7 @@ Define which TanStack projects should be adopted, evaluated, deferred, or avoide
 | TanStack Virtual | Adopt | Large lists, tables, product catalogs, ledgers, and queues |
 | TanStack Form | Controlled adoption after vertical-slice validation | Complex typed forms and validation orchestration |
 | TanStack Router | Adopt only for standalone React applications not using Next.js routing | Embedded tools, isolated apps, future shells |
-| TanStack Start | Platform Labs evaluation; not first-release default | Potential future full-stack React framework |
+| TanStack Start | Release Candidate; Platform Labs evaluation, not first-release default | Potential future full-stack React framework |
 | TanStack Store | Selective evaluation | Fine-grained local client state where React state is insufficient |
 | TanStack DB | Research and prototype only | Reactive client data and local-first possibilities |
 | TanStack Pacer | Evaluate when rate, debounce, throttle, or queue behavior becomes repetitive | Client interaction pacing |
@@ -165,6 +166,8 @@ The platform should define canonical destination identifiers and navigation meta
 
 Evaluate in Platform Labs but do not make it the first-release production standard.
 
+Official documentation identified TanStack Start as Release Candidate on 2026-07-12. Its React Server Components implementation is separately experimental and expected to remain so into early v1. Conventional Start and experimental RSC receive separate evidence tracks.
+
 ### Evaluation Scope
 
 Build the same small administrative application in Next.js and TanStack Start and compare:
@@ -178,10 +181,15 @@ Build the same small administrative application in Next.js and TanStack Start an
 - Bundle size and performance
 - Developer and AI-agent productivity
 - Long-term release maturity
+- Conventional SSR/server functions without RSC
+- Experimental `renderServerComponent` and one Composite Component only after the conventional path passes
+- Canonical Hono/oRPC boundary preservation; no direct domain persistence from Start server functions or RSC
 
 ### Adoption Trigger
 
-Reconsider when TanStack Start reaches a stable maturity level acceptable for business-critical software and demonstrates material advantages over Next.js for this platform.
+Reconsider the conventional framework after stable v1 and successful vertical-slice evidence. Reconsider RSC only after its experimental label is removed and its Flight serialization, caching, streaming, security, accessibility, observability, and upgrade behavior pass the technique catalog gates.
+
+Detailed technique dispositions live in `14-Engineering/ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md`.
 
 ## TanStack Store
 

@@ -1,10 +1,11 @@
 ---
 document_id: PDA-PLT-009
 title: Jobs and Scheduling
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
+related_adrs: [ADR-0023]
 ---
 
 # Jobs and Scheduling
@@ -80,6 +81,13 @@ Authorized users need job search, progress, retries, cancellation, failure detai
 - Outbox and inbox patterns
 - Backpressure and circuit breaking
 - Compensation for multi-step work
+
+## Runtime Routing
+
+- Use an application worker for bounded background work and ordinary provider adapters.
+- Use the Workflow Engine plus the selected general-purpose durable runtime for long-lived, cross-domain, provider-facing, human-task, or compensation-sensitive processes.
+- Evaluate `pg_durable` only for bounded database-local Labs work under ADR-0023.
+- Runtime choice does not relax required job metadata, authorization revalidation, tenant isolation, idempotency, compensation, or audit.
 
 ## Testing
 

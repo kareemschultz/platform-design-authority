@@ -1,11 +1,11 @@
 ---
 document_id: PDA-DEP-012
 title: Infrastructure as Code and Environment Topology
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
-related_adrs: [ADR-0018]
+related_adrs: [ADR-0018, ADR-0023]
 ---
 
 # Infrastructure as Code and Environment Topology
@@ -62,7 +62,7 @@ Required tooling:
 | Object storage | Files, receipts, exports, backups | Required | Required | S3-compatible reference |
 | Search | Search projections and rebuild | Prototype | Optional | Supported variants |
 | Messaging | NATS or selected event transport | Prototype | Optional | Supported variants |
-| Durable workflow | Temporal or selected workflow runtime | Later/prototype | Optional | Supported variants |
+| Durable workflow | Temporal or selected workflow runtime; isolated pg_durable Labs variant only | Later/prototype | Optional | Supported variants subject to extension/preload support |
 | Observability | Logs, metrics, traces, alerts | Required | Required | Export-compatible reference |
 | Secrets and keys | Provider secrets, signing, encryption | Required | Required | Customer KMS or vault |
 | Backup and recovery | Backup schedules, replication, restore | Required | Required | Customer responsibility split |

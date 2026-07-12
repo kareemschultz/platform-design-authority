@@ -1,14 +1,14 @@
 ---
 document_id: ADR-0004
 title: Adopt a TypeScript and PostgreSQL Platform Stack
-version: 0.3.0
+version: 0.4.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
 last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
-related_adrs: [ADR-0020]
+related_adrs: [ADR-0020, ADR-0023]
 ---
 
 # ADR-0004 — Adopt a TypeScript and PostgreSQL Platform Stack
@@ -56,6 +56,7 @@ The preferred initial implementation stack is:
 - Redis-compatible infrastructure for cache and short-lived coordination
 - A transactional outbox for event reliability
 - Temporal for durable workflows when the first qualifying workflows are implemented
+- A Labs-only `pg_durable` comparison for bounded database-local workflows under ADR-0023; it does not replace Temporal or the outbox
 - S3-compatible object storage
 - React Native, Expo, and SQLite for native offline-capable clients
 - OpenTelemetry-based observability

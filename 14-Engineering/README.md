@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-001
 title: Engineering Section Index
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -12,6 +12,8 @@ last_reviewed: 2026-07-12
 ## Current Specifications
 
 - `TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
+- `WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md`
+- `ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md`
 - `ENGINEERING_HANDBOOK.md`
 - `IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md`
 - `ARCHITECTURE_DEPENDENCY_RULES.md`
@@ -42,5 +44,6 @@ The machine-readable dependency rules define package families, allowed dependenc
 - Dependency-update automation
 - Signed build and release pipeline
 - Technical-debt and deprecation dashboards
+- GitHub Project, worktree, Changesets, documentation-impact, and release automation trial
 
 Engineering recipes implement approved specifications rather than silently becoming architecture decisions.

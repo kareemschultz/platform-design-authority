@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DEV-001
 title: Developer Platform Section Index
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -19,6 +19,9 @@ last_reviewed: 2026-07-12
 - `EXTENSION_PLUGIN_AND_SANDBOX_ARCHITECTURE.md`
 - `REFERENCE_INTEGRATIONS_AND_PROVIDER_SIMULATORS.md`
 - `PROJECT_AGENT_SKILLS.md`
+- `PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md`
+- `../02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md`
+- `../18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md`
 - `../18-Decisions/ADR-0019-PHASED-EXTENSION-EXECUTION-MODEL.md`
 - `../openapi/first-slice-v1.yaml`
 - `../schemas/providers/provider-capability-v1.schema.json`
@@ -59,5 +62,6 @@ ADR-0019 permits declarative extensions and externally hosted applications first
 - Execution-sandbox prototypes
 - Marketplace submission integration
 - Skill evaluation fixtures and trigger regression tests
+- Fumadocs portal, canonical OpenAPI generation, contextual-help map, search, and documentation CI prototype
 
 The Event Backbone owns internal transport. The Developer Platform owns external applications, credentials, SDKs, webhooks, extensions, simulators, developer sandboxes, and application-facing compatibility.

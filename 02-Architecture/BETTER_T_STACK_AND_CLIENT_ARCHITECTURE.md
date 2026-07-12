@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-010
 title: Better-T-Stack and Client Architecture
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -29,7 +29,7 @@ Use:
 - Next.js App Router on the current approved stable major
 - TypeScript
 - Tailwind CSS
-- Radix UI primitives
+- Base UI-backed source-owned shadcn/ui primitives for new components under ADR-0022; Radix remains an approved legacy/fallback primitive
 - A private platform design system and design-token package
 - TanStack Query
 - TanStack Table
@@ -43,9 +43,11 @@ Do not place authoritative business logic in Next.js route handlers, Server Acti
 
 ### TanStack Start
 
-TanStack Start is strategically interesting and should be evaluated in Platform Labs, especially for highly interactive internal applications and future deployment targets. It is not the primary web framework for the first production release while its release maturity remains below the approved production baseline.
+TanStack Start is strategically interesting and was Release Candidate as of 2026-07-12. Evaluate its conventional SSR/server-function path in Platform Labs. Its React Server Components and Composite Components remain experimental and receive a separate Labs-only track.
 
 TanStack Start and Next.js are alternatives at the full-stack framework and routing layer. They should not be mixed inside the same application shell without a specific approved reason.
+
+TanStack Start examples do not authorize direct domain repository or database access from server functions or Server Components. They call the same governed Hono/oRPC application contracts as other clients.
 
 ### TanStack Libraries
 

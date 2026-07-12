@@ -1,13 +1,14 @@
 ---
 document_id: ADR-0005
 title: Adopt Next.js TanStack and Expo for Client Applications
-version: 0.2.0
+version: 0.3.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
+related_adrs: [ADR-0021, ADR-0022]
 ---
 
 # ADR-0005 — Adopt Next.js, TanStack, and Expo for Client Applications
@@ -51,7 +52,8 @@ Adopt:
 - TanStack Query, Table, and Virtual as standard client libraries
 - A focused production evaluation of TanStack Form and React Hook Form before selecting the default complex-form library
 - TanStack Router only for standalone React applications not using Next.js
-- TanStack Start as a Platform Labs evaluation, not the initial production standard
+- TanStack Start Release Candidate as a Platform Labs evaluation, not the initial production standard; its experimental RSC path is evaluated separately
+- Base UI-backed source-owned shadcn components as the preferred new web primitive path under ADR-0022
 - React Native with Expo and Expo Router for native applications
 - Expo UI selectively for native SwiftUI and Jetpack Compose controls
 - Better-T-Stack as an approved scaffolding and experimentation tool, not an architecture authority
@@ -90,6 +92,7 @@ Create separate web and native component packages backed by shared design tokens
 - Offline synchronization contract tests
 - Better-T-Stack generated code requires normal architecture and security review
 - TanStack Start requires a successful vertical-slice evaluation before reconsideration
+- Experimental TanStack Start RSC and Composite Components require separate maturity, serialization, caching, streaming, security, accessibility, observability, and upgrade evidence
 - Form evaluation must use product, purchase-order, onboarding, policy-builder, branding, and offline mobile scenarios
 - Form choice requires an ADR amendment or a new superseding ADR
 

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-001
 title: Appendices Section Index
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -17,6 +17,8 @@ last_reviewed: 2026-07-12
 - `GUYANA_REGULATORY_VERIFICATION-2026-07-11.md`
 - `DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md`
 - `BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md`
+- `DOCUMENTATION_TANSTACK_AND_BASE_UI_VERIFICATION-2026-07-12.md`
+- `PG_DURABLE_VERIFICATION-2026-07-12.md`
 
 ## Machine-Readable Evidence and Contracts
 

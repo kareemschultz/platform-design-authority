@@ -1,10 +1,12 @@
 ---
 document_id: PDA-UX-022
 title: Tailwind shadcn and Premium UI Source Policy
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
+verified_as_of: 2026-07-12
+related_adrs: [ADR-0005, ADR-0022]
 ---
 
 # Tailwind, shadcn/ui, and Premium UI Source Policy
@@ -19,7 +21,7 @@ The primary web UI foundation is:
 
 - Latest approved stable Tailwind CSS release, pinned and tested through the dependency-governance process
 - shadcn/ui source-owned components and registries
-- Radix UI or Base UI primitives where selected by the adopted shadcn component
+- Base UI-backed shadcn primitives as the default for new components; Radix remains supported for existing proven components and explicit fallbacks
 - Recharts for the initial operational chart family through the shadcn chart composition layer
 - Platform-owned semantic design tokens, component contracts, accessibility behavior, and tests
 
@@ -41,6 +43,17 @@ This is a source-ownership model. Components are copied into and maintained by t
 - Adopted primitive libraries and their official packages
 - Recharts official packages and documentation
 - Other libraries accepted through dependency and license review
+
+## Base UI and Radix Policy
+
+Base UI 1.6.0 was stable and shadcn/ui made it the default for new projects as of 2026-07-12. New platform components therefore prefer the Base UI-backed shadcn source path. This is not an instruction to rewrite working Radix components.
+
+- Pin `registry:base` or the equivalent primitive selection in automated scaffolds.
+- Use `@base-ui/react` directly only for a justified primitive gap.
+- Do not mix Base UI and Radix within one owned component.
+- Treat composition API differences such as Base UI `render` and Radix `asChild` as behavioral migrations, not mechanical renames.
+- `@fumadocs/base-ui` belongs to the documentation portal and must not become the product business-component package.
+- Uber Base Web (`baseui`) is a separate styled/Styletron system and is not approved for the platform foundation.
 
 ### Licensed Premium Sources
 

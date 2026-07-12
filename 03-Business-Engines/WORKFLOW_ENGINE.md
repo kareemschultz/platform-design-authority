@@ -1,10 +1,11 @@
 ---
 document_id: PDA-ENG-002
 title: Workflow Engine
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
+related_adrs: [ADR-0023]
 ---
 
 # Workflow Engine
@@ -33,6 +34,8 @@ Provide a reusable engine for long-running, multi-step business processes involv
 5. Failures, retries, timeouts, cancellation, and compensation must be defined.
 6. Workflow state does not replace authoritative domain state.
 7. Domain actions occur through published commands, never direct data mutation.
+8. Workflow runtime selection is an infrastructure concern; SQL, Temporal, or application-worker execution cannot bypass these engine rules.
+9. `pg_durable` is Labs-only for bounded database-local work and cannot implement cross-domain or consequential business workflows until separately accepted.
 
 ## States
 

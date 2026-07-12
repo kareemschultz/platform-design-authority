@@ -1,12 +1,12 @@
 ---
 document_id: PDA-ARC-009
 title: Recommended Technology Stack
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
 verified_as_of: 2026-07-12
-related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020]
+related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0023]
 ---
 
 # Recommended Technology Stack
@@ -79,7 +79,7 @@ packages/
 - React on the current approved stable major
 - TypeScript
 - Tailwind CSS
-- Radix UI primitives with a private platform design system
+- Base UI-backed source-owned shadcn/ui primitives for new components, with Radix supported for proven existing components
 - TanStack Query for interactive server-state workflows
 - TanStack Table and TanStack Virtual for advanced data experiences
 - One approved web-form standard after the TanStack Form versus React Hook Form evaluation
@@ -134,6 +134,8 @@ Redis is never an authoritative business-data store.
 Use Temporal when the first workflow requires durable timers, retries, compensation, long-running execution, or reliable multi-step orchestration.
 
 PostgreSQL domain records remain authoritative for business state. Temporal owns workflow execution state, not domain truth.
+
+Evaluate `pg_durable` 0.2.x only in Platform Labs for bounded database-local maintenance, ETL, and projection workflows under ADR-0023. It does not replace Temporal, application workers, or the transactional outbox and may not directly mutate cross-domain state.
 
 ### Events and Messaging
 
@@ -267,6 +269,15 @@ Vercel may host Next.js previews and selected production web surfaces, but backe
 - Protected deployment environments
 - Preview environments for workflow and UX review
 - Machine-readable document, domain, capability, event, and permission registries
+- GitHub Issues/Projects as live work authority, one branch/worktree/PR per independently mergeable issue, and Changesets for implementation-monorepo release metadata
+
+### Documentation Platform
+
+- Fumadocs as the preferred repository-owned documentation portal prototype
+- Local Markdown/MDX for product, administrator, developer, troubleshooting, and release content
+- Canonical OpenAPI-generated API reference
+- Self-hosted Orama search initially
+- Stable documentation IDs for contextual in-app help
 
 ### Security Tooling
 

@@ -139,3 +139,7 @@ Validate:
 - Post-change validation
 - Customer/support communication
 - Problem-action tracking
+
+## Migration and Exit Cross-Reference
+
+Tenant migration/exit repairs also follow `TENANT_MIGRATION_EXIT_AND_DATA_REPAIR.md`; portability supplements but does not replace this canonical repair record.

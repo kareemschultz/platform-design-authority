@@ -83,3 +83,7 @@ Direct SQL is not the default repair interface. When emergency direct access is 
 - Restore point
 - Repair simulation
 - No orphaned provider or marketplace access
+
+## Canonical Repair Control Record
+
+`PROBLEM_CHANGE_RELEASE_AND_DATA_REPAIR_OPERATIONS.md` owns repair authorization, independent review, execution, evidence, rollback, and closure. This document adds portability only.

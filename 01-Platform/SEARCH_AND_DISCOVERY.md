@@ -95,3 +95,7 @@ Authorized administrators need:
 - Relevance benchmarks
 - Accessibility and keyboard-navigation tests
 - Large-tenant and noisy-neighbor performance tests
+
+## Ranking Policy Reference
+
+Ranking changes and fixtures defer to `10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`; this creates no second authority.

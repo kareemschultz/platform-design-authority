@@ -122,3 +122,7 @@ Every public claim has an owner and evidence source. Legal, pricing, certificati
 - Premium-source provenance
 - Cross-browser and responsive tests
 - Synthetic-data verification
+
+## Ownership and First-Slice Boundary
+
+This governs the platform company's corporate site, not a tenant Marketing Domain, campaigns, audiences, or customer data. It is outside the first retail slice and adds no capability.

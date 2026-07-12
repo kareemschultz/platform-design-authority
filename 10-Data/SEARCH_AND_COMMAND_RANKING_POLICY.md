@@ -136,3 +136,7 @@ Authorized administrators may inspect why a result family ranked highly using sa
 - Accessibility and keyboard tests
 - Offline and stale-index behavior
 - Performance budget
+
+## Ranking-Authority Boundary
+
+This document owns ranking objectives, fixtures, and approval. Retrieval documents own indexing, authorization filtering, and candidates. Precision/recall measure coverage; MRR/top-k measure ordering over the same fixtures.

@@ -54,3 +54,7 @@ Finance may initiate a statutory workflow but does not duplicate Fiscalization's
 ## Shared Engines Used
 
 Tax, Payments, Fiscalization, Workflow, Approvals, Documents, Rules, Reporting, Scheduling, and AI.
+
+## First-Slice Handoff
+
+The governed seam is `FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`; it is not a full General Ledger.

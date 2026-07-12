@@ -89,3 +89,7 @@ For material incidents, publish an appropriate report with timeline, impact, roo
 - Tenant-targeting tests
 - Status updates included in incident exercises
 - Resolution requires reconciliation evidence
+
+## First-Slice Boundary
+
+The first slice requires a status-communication seam and plan, not a production public status-page product. This adds no capability.

@@ -146,3 +146,7 @@ Adding a capability to the first slice requires:
 - Founder approval when the addition changes commercial, regulatory, or launch scope
 
 The machine-readable registry is an index. This document remains the human-readable source of intent.
+
+## Finance Handoff Contract
+
+Scenario and acceptance detail is governed by `../04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`.

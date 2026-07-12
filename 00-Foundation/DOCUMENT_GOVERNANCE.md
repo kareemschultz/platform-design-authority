@@ -155,3 +155,7 @@ Blueprint pull requests should include:
 - Documents are never deleted solely to hide prior decisions
 - Sensitive customer data, secrets, credentials, or private keys must never be committed
 - Generated copies may exist, but Markdown source remains authoritative unless explicitly changed
+
+## Document-ID Allocation Clarification
+
+Historical `PDA-ENG-001` through `PDA-ENG-019` identify Business Engine specifications. `PDA-ENG-020` through `PDA-ENG-022` are reserved historical Engineering records. New Engineering documents use `PDA-ENGR-*`; new Business Engine documents use the next unused `PDA-ENG-*`.

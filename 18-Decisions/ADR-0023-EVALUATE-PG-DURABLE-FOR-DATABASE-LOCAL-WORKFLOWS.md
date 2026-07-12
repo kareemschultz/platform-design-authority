@@ -110,3 +110,5 @@ Prohibited until a later accepted ADR:
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial evaluation proposal |
+
+- 2026-07-12: Version 0.2.0 clarified evaluate-only admission, PostgreSQL extension policy, and ADR-0024 interaction; no production approval.

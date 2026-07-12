@@ -101,3 +101,7 @@ Domain deletion, anonymization, retention, and legal-hold events propagate to le
 - One semantic document-retrieval prototype using pgvector
 - Hybrid relevance evaluation dataset
 - Citation-preserving AI retrieval
+
+## Ranking Policy Reference
+
+Ranking changes and fixtures defer to `SEARCH_AND_COMMAND_RANKING_POLICY.md`; this creates no second authority.

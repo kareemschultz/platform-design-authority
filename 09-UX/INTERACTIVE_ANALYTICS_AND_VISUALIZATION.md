@@ -318,3 +318,7 @@ A user should be able to answer:
 6. What uncertainty or missing data exists?
 7. What action can be taken next?
 8. Can the same task be completed with keyboard, touch, and assistive technology?
+
+## First-Slice Boundary
+
+Interactive analytics L3-L5 are outside the first retail slice. Bounded reporting adds no capability here.

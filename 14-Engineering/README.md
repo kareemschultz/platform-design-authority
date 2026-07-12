@@ -1,16 +1,17 @@
 ---
 document_id: PDA-ENGR-001
 title: Engineering Section Index
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Engineering
 
 ## Current Specifications
 
+- `TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
 - `ENGINEERING_HANDBOOK.md`
 - `IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md`
 - `ARCHITECTURE_DEPENDENCY_RULES.md`

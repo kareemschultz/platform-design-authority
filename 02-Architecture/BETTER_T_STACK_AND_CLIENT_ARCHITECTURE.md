@@ -1,11 +1,12 @@
 ---
 document_id: PDA-ARC-010
 title: Better-T-Stack and Client Architecture
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
-related_adrs: [ADR-0004, ADR-0005, ADR-0006]
+last_reviewed: 2026-07-12
+verified_as_of: 2026-07-12
+related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020]
 ---
 
 # Better-T-Stack and Client Architecture
@@ -137,28 +138,37 @@ Better-T-Stack must not:
 
 ## Initial Scaffold Recommendation
 
-Use Better-T-Stack for an initial experimental scaffold with approximately this shape:
+Use the following pinned, dry-run-first scaffold for the controlled prototype:
 
-```text
-Frontend: Next.js
-Native: Expo with Expo Router
-Runtime: active Node.js LTS
-Backend: Fastify-compatible application shell
-Database: PostgreSQL
-Database access: evaluate generated Drizzle scaffold, then apply the approved Kysely or explicit SQL standard
-Authentication: Better Auth behind the platform identity adapter
-Monorepo: Turborepo with pnpm
-API: REST and OpenAPI as the authoritative public contract
-Internal RPC: prototype only unless separately approved
-Add-ons: approved formatter, linter, Git hooks, documentation tooling, and agent skills
+```powershell
+bun create better-t-stack@3.36.3 platform-prototype `
+  --frontend next native-bare `
+  --backend hono `
+  --runtime bun `
+  --api orpc `
+  --auth better-auth `
+  --payments none `
+  --database postgres `
+  --orm drizzle `
+  --db-setup docker `
+  --package-manager bun `
+  --git `
+  --web-deploy docker `
+  --server-deploy docker `
+  --install `
+  --addons pwa turborepo ultracite `
+  --examples none `
+  --disable-analytics `
+  --directory-conflict error `
+  --dry-run `
+  --verbose
 ```
 
-Because Better-T-Stack may generate Fastify but not the selected NestJS structure directly, two controlled paths exist:
+Better-T-Stack 3.36.3 dry-run validation passed for this command on 2026-07-12. Remove `--dry-run` only in a disposable prototype workspace after rechecking the pinned release. Do not use `@latest` in the evidence record.
 
-1. Generate client and workspace shells, then add the preferred NestJS/Fastify backend manually.
-2. Use a plain Fastify or Hono comparison prototype as part of ADR-0004's conditional validation.
+Do not include Tauri in this scaffold: Next + Tauri static export was rejected by the CLI with Docker web deployment. Do not select both Biome and Ultracite. Add Better-T MCP and skills only after generation so they can be reviewed against existing repository governance.
 
-The scaffold cannot decide the production framework. ADR-0004 remains authoritative and must be amended if benchmark evidence changes the decision.
+ADR-0020 makes Bun/Hono/oRPC the preferred prototype, with Node/Hono/oRPC as the low-change runtime fallback and NestJS/Fastify as the structured framework alternative. The scaffold still cannot decide production ratification.
 
 ## Shared-Code Rules
 
@@ -196,5 +206,6 @@ Before ratifying the client and application stack, build one end-to-end vertical
 - Audit and OpenTelemetry traces
 - Playwright and native integration tests
 - Backend framework benchmark evidence required by ADR-0004
+- Bun/Node compatibility, canonical OpenAPI parity, operational diagnostics, and rollback evidence required by ADR-0020
 
 Measure development speed, accessibility, bundle size, runtime performance, offline reliability, self-hosting, dependency maturity, security, and AI-agent code quality.

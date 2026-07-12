@@ -1,13 +1,14 @@
 ---
 document_id: ADR-0004
 title: Adopt a TypeScript and PostgreSQL Platform Stack
-version: 0.2.0
+version: 0.3.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
+related_adrs: [ADR-0020]
 ---
 
 # ADR-0004 — Adopt a TypeScript and PostgreSQL Platform Stack
@@ -50,7 +51,7 @@ Adopt TypeScript as the primary platform language and PostgreSQL as the authorit
 The preferred initial implementation stack is:
 
 - Next.js and React for web applications
-- NestJS with the Fastify adapter on an active Node.js LTS release for backend application services
+- Bun, Hono, and oRPC as the preferred controlled-prototype backend under ADR-0020, with an active Node.js LTS fallback
 - PostgreSQL with explicit type-safe SQL access
 - Redis-compatible infrastructure for cache and short-lived coordination
 - A transactional outbox for event reliability
@@ -64,9 +65,9 @@ Managed cloud services may accelerate the SaaS launch, but every critical compon
 
 ### Conditional Backend Ratification
 
-NestJS with Fastify is the preferred production baseline, but this portion of the decision remains conditional until the first vertical-slice benchmark is complete.
+The production backend remains conditional until the first vertical-slice benchmark is complete. ADR-0020 places Bun, Hono, and oRPC first in Technical Prototypes 1–3 while retaining Node with Hono/oRPC and NestJS/Fastify as comparison and fallback paths.
 
-The benchmark must compare the preferred baseline with a simpler Fastify or Hono application shell where useful and measure:
+The benchmark must compare Bun/Hono/oRPC with the Node fallback and NestJS/Fastify where useful and measure:
 
 - Domain-boundary enforcement
 - Testability
@@ -79,7 +80,7 @@ The benchmark must compare the preferred baseline with a simpler Fastify or Hono
 - AI-agent code quality and consistency
 - Long-term maintainability
 
-Scaffolding convenience does not override architecture. If the evidence rejects NestJS, this ADR must be amended before another production framework is adopted.
+Scaffolding convenience does not override architecture. Production adoption of Bun/Hono/oRPC, Node/Hono/oRPC, or NestJS/Fastify requires the recorded benchmark and an acceptance or amendment of this ADR.
 
 ## Consequences
 

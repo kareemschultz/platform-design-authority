@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technology Evidence Maintainer"
+  short_description: "Verify stack versions, compatibility, and lessons"
+  default_prompt: "Verify current primary sources and update the governed technology evidence before changing stack claims."

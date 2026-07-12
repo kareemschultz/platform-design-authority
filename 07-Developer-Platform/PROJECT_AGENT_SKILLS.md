@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DEV-005
 title: Project Agent Skills
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Project Agent Skills
@@ -42,6 +42,10 @@ Registers capability IDs, namespaces, permissions, events, dependencies, first-s
 #### `review-disposition`
 
 Converts an independent audit into a formal disposition matrix, remediation plan, closure criteria, and follow-up review checkpoint.
+
+#### `technology-evidence-maintainer`
+
+Verifies current primary sources, versions, compatibility combinations, breaking changes, workarounds, alternatives, fallbacks, and reusable lessons before agents change or document the technology stack.
 
 ### Frontend and Experience Skills
 
@@ -98,6 +102,7 @@ Therefore:
 10. Generated output receives ordinary architecture, security, accessibility, testing, and human review.
 11. Skills do not embed proprietary third-party prompts.
 12. Skills remain portable enough to map to the open Agent Skills standard where practical.
+13. Technology claims use the living technology ledger and current primary sources; model memory is never sufficient evidence.
 
 ## Skill Creation Workflow
 

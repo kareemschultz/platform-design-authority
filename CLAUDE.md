@@ -47,6 +47,7 @@ Before inventing an identifier or boundary, consult:
 - `registry/first-slice-tests.json`
 - `registry/endpoint-permissions.json`
 - `registry/architecture-rules.json`
+- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for technology, version, compatibility, and workaround claims
 - `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `20-Strategy/FOUNDER_DECISION_REGISTER.md`
 
@@ -163,6 +164,7 @@ Before editing:
 2. Identify owner and authority.
 3. Determine ADR or founder-decision needs.
 4. Check downstream impact across contracts, UI, security, privacy, offline, operations, testing, Commercial, and first-slice scope.
+5. For technology or version claims, invoke `technology-evidence-maintainer`, verify current primary sources, and consult the living technology ledger. Never rely solely on model memory.
 
 After editing:
 
@@ -172,6 +174,7 @@ After editing:
 4. Run governance checks.
 5. Update dispositions.
 6. Do not claim readiness beyond evidence.
+7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
 
 ## 12. ADR Triggers
 

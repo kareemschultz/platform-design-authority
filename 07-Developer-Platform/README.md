@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DEV-001
 title: Developer Platform Section Index
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Developer Platform
@@ -34,6 +34,7 @@ last_reviewed: 2026-07-11
 - `consistency-auditor`
 - `capability-registrar`
 - `review-disposition`
+- `technology-evidence-maintainer`
 
 ### Frontend and Experience
 

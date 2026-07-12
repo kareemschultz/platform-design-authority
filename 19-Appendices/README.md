@@ -1,10 +1,10 @@
 ---
 document_id: PDA-APP-001
 title: Appendices Section Index
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Appendices
@@ -16,6 +16,7 @@ last_reviewed: 2026-07-11
 - `STACK_AND_VENDOR_VERIFICATION-2026-07-11.md`
 - `GUYANA_REGULATORY_VERIFICATION-2026-07-11.md`
 - `DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md`
+- `BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md`
 
 ## Machine-Readable Evidence and Contracts
 
@@ -31,7 +32,7 @@ last_reviewed: 2026-07-11
 
 ## Evidence Still Required
 
-- Exact implementation-version compatibility records
+- Exact implementation lockfiles, container digests, and completed compatibility test reports
 - Provider capability and certification matrices
 - Qualified Guyana legal, tax, accounting, privacy, payment, banking, and regulatory opinions
 - Completed customer and competitor studies

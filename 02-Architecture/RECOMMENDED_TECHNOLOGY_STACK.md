@@ -1,12 +1,12 @@
 ---
 document_id: PDA-ARC-009
 title: Recommended Technology Stack
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
-verified_as_of: 2026-07-10
-related_adrs: [ADR-0004, ADR-0005, ADR-0006]
+last_reviewed: 2026-07-12
+verified_as_of: 2026-07-12
+related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020]
 ---
 
 # Recommended Technology Stack
@@ -24,6 +24,7 @@ Current governing decisions:
 - ADR-0004: TypeScript, PostgreSQL, modular application stack
 - ADR-0005: Next.js, selective TanStack adoption, Expo client architecture
 - ADR-0006: Better Auth as the authentication and session foundation
+- ADR-0020: Bun, Hono, and oRPC preferred for controlled prototypes with a Node fallback
 
 ## Stack Principles
 
@@ -45,7 +46,7 @@ Use Python selectively for data science, model evaluation, optimization, documen
 
 ### Monorepo
 
-- pnpm workspaces
+- Bun workspaces and package manager for the preferred prototype; Node-compatible manifests remain required
 - Turborepo for build orchestration and caching
 
 Suggested structure:
@@ -89,13 +90,14 @@ The form standard is **not yet decided**. `02-Architecture/TANSTACK_DECISION_MAT
 
 ### Backend Application
 
-- Node.js on an active approved LTS release
-- NestJS with the Fastify adapter as the preferred production baseline
+- Bun on the exact approved prototype release, with active Node.js LTS as the supported fallback
+- Hono as the thin HTTP shell
+- oRPC for typed transport and OpenAPI-compatible handling
 - REST-first public APIs with OpenAPI
 - Internal command and query application contracts
 - Webhooks and versioned events
 
-NestJS/Fastify must be validated through the first vertical slice. The benchmark may compare plain Fastify or Hono for complexity, performance, testability, agent productivity, and deployment behavior. Changing the selected production framework requires amendment of ADR-0004 rather than an informal scaffold choice.
+Bun/Hono/oRPC is the preferred Technical Prototypes 1–3 path under ADR-0020, not a production ratification. Critical packages remain runtime-neutral, critical suites run on Bun and Node where portable, and the Node image stays buildable. NestJS/Fastify remains a structured alternative if Hono fails architecture or operability gates. `02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` owns the comparison.
 
 ### Primary Database
 
@@ -212,7 +214,7 @@ Telemetry must include tenant and correlation context while excluding protected 
 
 ### Testing
 
-- Vitest for unit and module tests
+- Bun test for Bun-specific and fast unit coverage, plus portable contract/domain suites that also run on the approved Node test path
 - Playwright for browser journeys
 - Testcontainers for PostgreSQL, Redis, NATS, and integration dependencies
 - Pact or an equivalent where independently deployed consumers appear
@@ -296,6 +298,7 @@ Do not add a separate vector database before measured retrieval or scale require
 - Review major framework and runtime support quarterly.
 - Avoid canary, alpha, preview, or release-candidate dependencies in accounting, inventory, payroll, authorization, offline synchronization, or other critical paths unless isolated in Platform Labs.
 - Record major stack changes through ADRs.
+- Update `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for every material version, compatibility, workaround, breaking-change, or fallback finding.
 
 ## Explicitly Avoid Initially
 

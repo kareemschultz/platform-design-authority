@@ -38,11 +38,13 @@
       "document_id": "ADR-0004",
       "path": "18-Decisions/ADR-0004-TYPESCRIPT-POSTGRESQL-MODULAR-STACK.md",
       "title": "Adopt a TypeScript and PostgreSQL Platform Stack",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-10",
-      "related_adrs": [],
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0020"
+      ],
       "review_evidence": null
     },
     {
@@ -222,6 +224,23 @@
       "review_evidence": null
     },
     {
+      "document_id": "ADR-0020",
+      "path": "18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md",
+      "title": "Prefer Bun Hono and oRPC for Backend Prototypes with a Node Fallback",
+      "version": "0.1.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0004",
+        "ADR-0005",
+        "ADR-0006"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-AI-001",
       "path": "06-AI/README.md",
       "title": "AI Platform Section Index",
@@ -315,10 +334,10 @@
       "document_id": "PDA-APP-001",
       "path": "19-Appendices/README.md",
       "title": "Appendices Section Index",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -374,6 +393,17 @@
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-APP-013",
+      "path": "19-Appendices/BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md",
+      "title": "Bun Hono oRPC and Better-T Verification 2026-07-12",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -478,14 +508,15 @@
       "document_id": "PDA-ARC-009",
       "path": "02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md",
       "title": "Recommended Technology Stack",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-10",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [
         "ADR-0004",
         "ADR-0005",
-        "ADR-0006"
+        "ADR-0006",
+        "ADR-0020"
       ],
       "review_evidence": null
     },
@@ -493,14 +524,15 @@
       "document_id": "PDA-ARC-010",
       "path": "02-Architecture/BETTER_T_STACK_AND_CLIENT_ARCHITECTURE.md",
       "title": "Better-T-Stack and Client Architecture",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-10",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [
         "ADR-0004",
         "ADR-0005",
-        "ADR-0006"
+        "ADR-0006",
+        "ADR-0020"
       ],
       "review_evidence": null
     },
@@ -570,6 +602,22 @@
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-ARC-016",
+      "path": "02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md",
+      "title": "Bun Hono and oRPC Decision Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0004",
+        "ADR-0020"
+      ],
       "review_evidence": null
     },
     {
@@ -907,10 +955,10 @@
       "document_id": "PDA-DEV-001",
       "path": "07-Developer-Platform/README.md",
       "title": "Developer Platform Section Index",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -955,10 +1003,10 @@
       "document_id": "PDA-DEV-005",
       "path": "07-Developer-Platform/PROJECT_AGENT_SKILLS.md",
       "title": "Project Agent Skills",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -1589,13 +1637,29 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-ENG-020",
+      "path": "14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
+      "title": "Technology Lifecycle Compatibility and Lessons Ledger",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Engineering",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0004",
+        "ADR-0005",
+        "ADR-0006",
+        "ADR-0020"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-ENGR-001",
       "path": "14-Engineering/README.md",
       "title": "Engineering Section Index",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -2540,10 +2604,10 @@
       "document_id": "PDA-RDM-004",
       "path": "17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md",
       "title": "Technical Prototype Plan",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },

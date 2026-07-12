@@ -69,6 +69,9 @@ CLAUDE.md               AI-agent operating contract
 - `04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md`
 - `17-Roadmap/FIRST_SLICE_MANIFEST.md`
 - `17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`
+- `18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md`
+- `02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md`
+- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
 - `20-Strategy/FOUNDER_DECISION_REGISTER.md`
 - `19-Appendices/DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md`
 - `reviews/FABLE5_THIRD_AUDIT_V1.md`
@@ -114,7 +117,7 @@ The repository is in **complete blueprint remediation and constrained technical-
 
 Three independent Fable 5 audits have been completed. The third-audit remediation adds first-slice events, API and permission contracts, delivery depth, numeric quality budgets, schemas, Marketplace governance, AI controls, UX implementation standards, deployment and operations depth, and formal audit disposition.
 
-The intended readiness decision remains: **one constrained vertical-slice implementation after named blockers; Technical Prototypes 1–3 may start after final verification**.
+The intended readiness decision remains: **one constrained vertical-slice implementation after named blockers; Technical Prototypes 1–3 may start after final verification**. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
 
 Pilot and production readiness still require founder decisions, qualified Guyana review, provider certification, customer evidence, executable tests, accessibility and security evidence, and operational exercises.
 

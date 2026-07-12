@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-004
 title: Technical Prototype Plan
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Technical Prototype Plan
@@ -12,6 +12,10 @@ last_reviewed: 2026-07-11
 ## Purpose
 
 Define the sequence, evidence, exit criteria, and non-goals for controlled prototypes before first-slice implementation.
+
+## Cross-Cutting Runtime and Contract Track
+
+Technical Prototypes 1–3 use the Proposed ADR-0020 Bun/Hono/oRPC path. Each records exact stack and image versions, runs portable critical suites on Bun and Node, checks the oRPC/OpenAPI surface against `openapi/first-slice-v1.yaml`, and exercises telemetry, health, graceful shutdown, failure handling, and rollback. A successful scaffold is not an exit criterion.
 
 ## Prototype 1 — Identity and Tenant Context
 
@@ -43,7 +47,7 @@ Prove point-in-time restore, deletion-journal reapplication, outbox recovery, se
 
 ## Evidence
 
-Each prototype records source commit, architecture assumptions, test results, performance, cost, security findings, UX findings, unresolved decisions, and recommendation.
+Each prototype records source commit, exact dependency and container versions, official-source verification date, architecture assumptions, Bun and Node compatibility results, test results, performance, cost, security findings, UX findings, unresolved decisions, workarounds, rollback time, and recommendation. Findings update `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`.
 
 ## Non-Goals
 

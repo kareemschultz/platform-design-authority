@@ -10,71 +10,43 @@ on:
       - research/**
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   validate-docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source branch
-        if: github.event_name == 'push'
+      - name: Check out evaluated revision
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - name: Check out pull request source branch
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Generate machine-readable registries
-        id: generate
+      - name: Validate documentation and contracts
+        id: validate
         shell: bash
         run: |
           set +e
-          python scripts/generate_registries.py > generation-report.txt 2>&1
+          python scripts/validate_docs.py > validation-report.txt 2>&1
           status=$?
-          cat generation-report.txt
+          cat validation-report.txt
           echo "status=$status" >> "$GITHUB_OUTPUT"
           exit 0
 
-      - name: Upload generation diagnostics
+      - name: Upload validation diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: documentation-generation-report
-          path: generation-report.txt
+          name: documentation-validation-report
+          path: validation-report.txt
           if-no-files-found: error
           retention-days: 7
 
-      - name: Fail when registry generation fails
-        if: steps.generate.outputs.status != '0'
+      - name: Fail when validation fails
+        if: steps.validate.outputs.status != '0'
         run: exit 1
 
-      - name: Validate documentation and contracts
-        run: python scripts/validate_docs.py
-
-      - name: Commit refreshed registries
-        if: github.actor != 'github-actions[bot]' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
-        shell: bash
-        env:
-          TARGET_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add registry/documents.json registry/capabilities.json registry/events.json registry/permissions.json registry/first-slice-tests.json
-          if git diff --cached --quiet; then
-            echo "Registries are already current."
-          else
-            git commit -m "chore: refresh final remediation registries"
-            git push origin HEAD:"$TARGET_BRANCH"
-          fi
-
-      - name: Verify generated output is clean
-        run: git diff --exit-code -- registry/documents.json registry/capabilities.json registry/events.json registry/permissions.json registry/first-slice-tests.json
+      - name: Verify generated registries are current
+        run: python scripts/generate_registries.py --check

@@ -62,6 +62,11 @@ jobs:
       - name: Typecheck
         run: bun run check-types
 
+      - name: Migration freshness
+        run: |
+          bun run db:generate
+          git diff --exit-code -- packages/db/src/migrations
+
       - name: Tests
         run: bun run test
 
@@ -132,3 +137,27 @@ jobs:
 
       - name: Docker image build validation
         run: docker compose build web server
+
+      - name: Docker stack runtime validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'docker compose down -v --remove-orphans' EXIT
+          docker compose up -d postgres server web
+          for attempt in {1..30}; do
+            if docker compose ps --format json | grep -q '"Health":"unhealthy"'; then
+              docker compose logs
+              exit 1
+            fi
+            server_health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$(docker compose ps -q server)")
+            web_health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$(docker compose ps -q web)")
+            if [ "$server_health" = healthy ] && [ "$web_health" = healthy ]; then
+              break
+            fi
+            sleep 1
+          done
+          [ "$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q server)")" = healthy ]
+          [ "$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q web)")" = healthy ]
+          docker compose exec -T server bun run --cwd /app/packages/db db:migrate
+          curl --fail --silent --show-error http://127.0.0.1:3000/ | grep -qx OK
+          curl --fail --silent --show-error http://127.0.0.1:3001/ >/dev/null

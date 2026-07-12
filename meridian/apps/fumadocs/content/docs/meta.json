@@ -1,0 +1,14 @@
+{
+  "title": "Meridian Documentation",
+  "pages": [
+    "index",
+    "getting-started",
+    "user-guides",
+    "administration",
+    "api",
+    "developer",
+    "migrations",
+    "troubleshooting",
+    "release-notes"
+  ]
+}

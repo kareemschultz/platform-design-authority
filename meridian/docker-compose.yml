@@ -47,6 +47,9 @@ services:
       - path: apps/server/.env
         required: false
     environment:
+      # This Compose file is a loopback-only development prototype. Production
+      # rejects HTTP trusted origins and requires an HTTPS deployment contract.
+      NODE_ENV: development
       CORS_ORIGIN: http://localhost:3001
       BETTER_AUTH_URL: http://localhost:3000
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET to at least 32 characters for local Compose}

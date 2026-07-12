@@ -1,10 +1,46 @@
 ---
-title: Release Notes
-description: Controlled-prototype information architecture
+title: Prototype Release Notes
+description: Verified contents and limitations of the initial Meridian scaffold
 ---
 
-# Release Notes
+# Meridian controlled prototype — 2026-07-12
 
-Approved changes only; ADRs remain authority.
+This is an implementation-evidence checkpoint, not a customer release or production-readiness declaration.
 
-Bounded taxonomy placeholder under ADR-0021; not production publication approval.
+## Included
+
+- Better-T-Stack-derived Bun monorepo with governed deviations recorded in `meridian/README.md`.
+- Next.js web application with API connectivity status, email/password sign-up and sign-in, protected dashboard, theme selection, and sign-out.
+- Hono server with public health, Better Auth routing, oRPC transport, OpenAPI handler, and Node fallback entry.
+- Better Auth backed by Drizzle and PostgreSQL for authentication and sessions only.
+- Expo native scaffold with production native-auth exchange deferred.
+- Shared platform-owned shadcn-derived UI source using the governed Base UI/Rhea configuration.
+- Fumadocs portal with local search, LLM-readable routes, and repository-owned content.
+- PostgreSQL 18.4 Compose baseline with `pg_stat_statements` as the only preloaded optional extension.
+- Frozen install, formatting, typecheck, six tests, production builds, Node health, registry freshness, prohibited-surface scan, dependency audit, PostgreSQL smoke test, and Docker image checks in CI.
+
+## Documentation closeout
+
+- Replaced taxonomy-only pages with evidence-bounded getting-started, user, administration, API, developer, migration, troubleshooting, and release documentation.
+- Corrected moved implementation-document governance paths.
+- Added validation that rejects missing or duplicate governance-exemption targets.
+- Updated documentation source links to the merged `main` branch.
+
+## Deliberately not included
+
+- tenant, organization, Party, business role, permission, entitlement, or feature-policy implementation;
+- retail, register, catalog, inventory, payment, stored-value, tax, fiscalization, Finance, offline-sync, or reporting workflows;
+- production native authentication exchange;
+- production secrets, deployment, backup/restore, observability, incident response, security, privacy, accessibility, or provider certification evidence;
+- AI chat, interactive API proxy, payment facilitation, custody, marketplace code execution, or production business automation.
+
+## Compatibility notes
+
+- Bun is the preferred prototype runtime; the Hono server retains a Node 24 fallback.
+- oRPC remains pinned to the verified published package set recorded in the implementation conflict log.
+- Deep Windows checkout paths can exceed Turbopack's path limit during the Fumadocs build; use a shorter local path or the Linux CI result.
+- PostgreSQL extensions remain governed by ADR-0024 and are absent unless specifically allowed.
+
+## Upgrade and support status
+
+No compatibility or support window is promised for this prototype checkpoint. Dependency changes require current technology evidence, a reviewed diff, frozen-lock validation, runtime/build tests, and updated lessons. Customer-facing release notes begin only after an approved product release exists.

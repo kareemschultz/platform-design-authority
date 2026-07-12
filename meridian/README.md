@@ -61,9 +61,9 @@ First, install the dependencies:
 bun install --frozen-lockfile
 ```
 
-## Database Setup
+## Containerized Prototype Setup
 
-This prototype uses local-only PostgreSQL 18.4 with Drizzle ORM for the auth schema.
+This prototype uses loopback-only web and server ports plus a private PostgreSQL 18.4 Compose service. Drizzle owns the Better Auth migration; it does not own extension objects.
 
 1. Set required local environment variables:
 
@@ -72,27 +72,22 @@ export POSTGRES_PASSWORD="$(openssl rand -hex 24)"
 export BETTER_AUTH_SECRET="$(openssl rand -hex 32)"
 ```
 
-2. Start the local database:
+2. Build and start the complete local stack:
 
 ```bash
-bun run db:start
+bun run docker:up
 ```
 
-3. Apply the schema to your local database:
+3. Apply the committed authentication migration from inside the server container:
 
 ```bash
-bun run db:push
-```
-
-Then, run the development server:
-
-```bash
-bun run dev
+docker compose exec server bun run --cwd /app/packages/db db:migrate
 ```
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-Use the Expo Go app to run the mobile application.
 The API is running at [http://localhost:3000](http://localhost:3000).
+
+The bundled PostgreSQL service is deliberately not published to the host. Direct `bun run dev` server development requires a separately configured host-reachable PostgreSQL 18 database. Do not use `db:push` against the baseline database because Drizzle schema introspection may attempt to alter extension-owned `pg_stat_statements` views.
 
 ## UI Customization
 
@@ -164,7 +159,7 @@ meridian/
 - `bun run check-types`: Check TypeScript types across all apps
 - `bun run test`: Run local Bun tests
 - `bun run dev:native`: Start the React Native/Expo development server
-- `bun run db:push`: Push schema changes to database
+- `bun run db:push`: Experimental disposable-database synchronization; prohibited against the bundled extension-bearing baseline
 - `bun run db:generate`: Generate database client/types
 - `bun run db:migrate`: Run database migrations
 - `bun run db:studio`: Open database studio UI

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-013
 title: Bun Hono oRPC and Better-T Verification 2026-07-12
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -20,10 +20,11 @@ Record primary-source research and reproducible CLI observations supporting ADR-
 |---|---:|---|
 | Bun | 1.3.14 | Official homepage and GitHub release |
 | Hono | 4.12.29 | Official release published 2026-07-10 |
-| oRPC | 1.14.8 | Official release published 2026-07-12 |
+| oRPC general project release | 1.14.8 | Official repository release tag published 2026-07-12; not a package-family availability claim |
+| oRPC scoped npm package set | 1.14.7 | Registry metadata for `@orpc/server`, `@orpc/client`, `@orpc/openapi`, `@orpc/zod`, and `@orpc/tanstack-query` |
 | Better-T-Stack | 3.36.3 | Official release published 2026-07-08 |
 
-oRPC 2 beta tags were visible but are not stable-version evidence.
+The upstream/general oRPC `v1.14.8` release number differs from the separately published package family used by this repository. Registry checks on 2026-07-12 returned `1.14.7` for all five scoped packages, so `1.14.7` is the selected coherent implementation set. oRPC 2 beta tags were visible but are not stable-version evidence.
 
 ## Findings
 

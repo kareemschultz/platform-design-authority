@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-001
 title: Blueprint and Delivery Roadmap
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
 related_adrs: [ADR-0013, ADR-0014, ADR-0015]
 ---
 
@@ -46,7 +46,6 @@ Still open before broad ratification:
 - Authoritative Guyana tax, payment, privacy, and fiscal research
 - Full first-slice specifications and threat models
 - UX, accessibility, deployment, operations, and testing depth
-- Review dispositions for the second Fable audit
 
 Exit criteria:
 

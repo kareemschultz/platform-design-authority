@@ -7,7 +7,7 @@ import json
 import os
 import re
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +31,7 @@ OPENAPI_PERMISSION = re.compile(r"^      x-permission:\s*(\S+)\s*$")
 OPENAPI_AUTHORIZATION = re.compile(r"^      x-authorization:\s*(\S+)\s*$")
 MARKDOWN_ENDPOINT = re.compile(r"`(GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD|TRACE)\s+(/v1/[^`\s]+)`")
 TOKEN_REFERENCE = re.compile(r"`((?:space|radius|motion|screen|size|color)(?:\.[a-z0-9_*.-]+)+)`")
+FOUNDER_DECISION_HEADING = re.compile(r"^## (FDR-\d{3})\b")
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 BACKTICK_PATH = re.compile(r"`([^`\n]+\.md)`")
@@ -561,6 +562,24 @@ def validate_contract_files() -> list[str]:
     return errors
 
 
+def validate_founder_decision_register() -> list[str]:
+    path = ROOT / "docs" / "blueprint" / "20-Strategy" / "FOUNDER_DECISION_REGISTER.md"
+    if not path.exists():
+        return ["missing required founder decision register"]
+    identifiers: list[str] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        match = FOUNDER_DECISION_HEADING.match(line)
+        if match:
+            identifiers.append(match.group(1))
+    duplicates = sorted(
+        identifier for identifier, count in Counter(identifiers).items() if count > 1
+    )
+    return [
+        f"{path.relative_to(ROOT).as_posix()}: duplicate founder decision id {identifier}"
+        for identifier in duplicates
+    ]
+
+
 def validate_repository_layout() -> list[str]:
     """Keep the executable monorepo and governed documentation planes canonical."""
     errors: list[str] = []
@@ -641,6 +660,7 @@ def main() -> int:
         + validate_design_token_references()
         + validate_governance_exemptions()
         + validate_contract_files()
+        + validate_founder_decision_register()
         + validate_repository_layout()
         + validate_skills()
     )

@@ -1,0 +1,48 @@
+// Better-T-Stack
+//
+// Website: https://www.better-t-stack.dev/
+// Stack Builder: https://www.better-t-stack.dev/new
+// Analytics: https://www.better-t-stack.dev/analytics
+// Showcase: https://www.better-t-stack.dev/showcase
+// Sponsor: https://github.com/sponsors/AmanVarshney01
+//
+// Add new addons with: bun create better-t-stack add
+// This file is safe to delete
+
+{
+  "$schema": "https://r2.better-t-stack.dev/schema.json",
+  "version": "3.36.3",
+  "createdAt": "2026-07-12T12:56:12.322Z",
+  "originalGeneratedCommand": "bun create better-t-stack@3.36.3 meridian --frontend next native-bare --backend hono --runtime bun --database postgres --orm drizzle --api orpc --auth better-auth --payments none --addons biome fumadocs pwa skills turborepo ultracite --examples ai todo --db-setup docker --web-deploy docker --server-deploy docker --git --package-manager bun --install",
+  "reproducibleCommand": "bun create better-t-stack@3.36.3 meridian --frontend next native-bare --backend hono --runtime bun --api orpc --auth better-auth --payments none --database postgres --orm drizzle --db-setup docker --package-manager bun --git --web-deploy docker --server-deploy docker --install --addons pwa turborepo ultracite --examples none --disable-analytics --directory-conflict error --dry-run --verbose",
+  "initialGeneratedSha": "75e793fdcb2c79066bcb2bfc744971d608e56a00",
+  "generationDate": "2026-07-12",
+  "reviewedSourceLifecycle": "controlled prototype only; scaffold output is reviewed source, not production authority",
+  "reviewedDeviations": [
+    "Removed generated AI and Todo examples from governed first-slice prototype.",
+    "Pinned runtime and scaffold versions from PDA-ENG-020.",
+    "Reconciled shadcn metadata to PDA-UX-028 Base UI/Rhea inputs.",
+    "Hardened Better Auth cookie and trusted-origin configuration for prototype review."
+  ],
+  "limitations": [
+    "Native auth exchange remains deferred pending Expo secure-storage, deep-link, recovery, and revocation evidence.",
+    "Accessibility, white-label, tenant-isolation, PostgreSQL restore, and production runtime evidence are not claimed by this scaffold.",
+    "The dry-run command records scaffold provenance; this working tree contains reviewed remediation edits after generation."
+  ],
+  "database": "postgres",
+  "orm": "drizzle",
+  "backend": "hono",
+  "runtime": "bun",
+  "frontend": ["next", "native-bare"],
+  "addons": ["pwa", "turborepo", "ultracite"],
+  "separatelyReviewedPrototypeApps": ["fumadocs"],
+  "removedGeneratedAddons": ["biome", "skills"],
+  "examples": [],
+  "auth": "better-auth",
+  "payments": "none",
+  "packageManager": "bun",
+  "dbSetup": "docker",
+  "api": "orpc",
+  "webDeploy": "docker",
+  "serverDeploy": "docker",
+}

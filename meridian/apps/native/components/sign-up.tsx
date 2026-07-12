@@ -1,0 +1,273 @@
+import { useForm } from "@tanstack/react-form";
+import { useState } from "react";
+import {
+	ActivityIndicator,
+	StyleSheet,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View,
+} from "react-native";
+import z from "zod";
+
+import { authClient } from "@/lib/auth-client";
+import { NAV_THEME } from "@/lib/constants";
+import { useColorScheme } from "@/lib/use-color-scheme";
+import { queryClient } from "@/utils/orpc";
+
+const signUpSchema = z.object({
+	email: z
+		.string()
+		.trim()
+		.min(1, "Email is required")
+		.email("Enter a valid email address"),
+	name: z
+		.string()
+		.trim()
+		.min(1, "Name is required")
+		.min(2, "Name must be at least 2 characters"),
+	password: z
+		.string()
+		.min(1, "Password is required")
+		.min(8, "Use at least 8 characters"),
+});
+
+function getErrorMessage(error: unknown): string | null {
+	if (!error) {
+		return null;
+	}
+
+	if (typeof error === "string") {
+		return error;
+	}
+
+	if (Array.isArray(error)) {
+		for (const issue of error) {
+			const message = getErrorMessage(issue);
+			if (message) {
+				return message;
+			}
+		}
+		return null;
+	}
+
+	if (typeof error === "object" && error !== null) {
+		const maybeError = error as { message?: unknown };
+		if (typeof maybeError.message === "string") {
+			return maybeError.message;
+		}
+	}
+
+	return null;
+}
+
+function SignUp() {
+	const { colorScheme } = useColorScheme();
+	const theme = colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light;
+	const [error, setError] = useState<string | null>(null);
+
+	const form = useForm({
+		defaultValues: {
+			email: "",
+			name: "",
+			password: "",
+		},
+		onSubmit: async ({ value, formApi }) => {
+			await authClient.signUp.email(
+				{
+					email: value.email.trim(),
+					name: value.name.trim(),
+					password: value.password,
+				},
+				{
+					onError(error) {
+						setError(error.error?.message || "Failed to sign up");
+					},
+					onSuccess() {
+						setError(null);
+						formApi.reset();
+						queryClient.refetchQueries();
+					},
+				}
+			);
+		},
+		validators: {
+			onSubmit: signUpSchema,
+		},
+	});
+
+	return (
+		<View
+			style={[
+				styles.card,
+				{ backgroundColor: theme.card, borderColor: theme.border },
+			]}
+		>
+			<Text style={[styles.title, { color: theme.text }]}>Create Account</Text>
+
+			<form.Subscribe
+				selector={(state) => ({
+					isSubmitting: state.isSubmitting,
+					validationError: getErrorMessage(state.errorMap.onSubmit),
+				})}
+			>
+				{({ isSubmitting, validationError }) => {
+					const formError = error ?? validationError;
+
+					return (
+						<>
+							{formError ? (
+								<View
+									style={[
+										styles.errorContainer,
+										{ backgroundColor: theme.notification + "20" },
+									]}
+								>
+									<Text
+										style={[styles.errorText, { color: theme.notification }]}
+									>
+										{formError}
+									</Text>
+								</View>
+							) : null}
+
+							<form.Field name="name">
+								{(field) => (
+									<TextInput
+										onBlur={field.handleBlur}
+										onChangeText={(value) => {
+											field.handleChange(value);
+											if (error) {
+												setError(null);
+											}
+										}}
+										placeholder="Name"
+										placeholderTextColor={theme.text}
+										style={[
+											styles.input,
+											{
+												backgroundColor: theme.background,
+												borderColor: theme.border,
+												color: theme.text,
+											},
+										]}
+										value={field.state.value}
+									/>
+								)}
+							</form.Field>
+
+							<form.Field name="email">
+								{(field) => (
+									<TextInput
+										autoCapitalize="none"
+										keyboardType="email-address"
+										onBlur={field.handleBlur}
+										onChangeText={(value) => {
+											field.handleChange(value);
+											if (error) {
+												setError(null);
+											}
+										}}
+										placeholder="Email"
+										placeholderTextColor={theme.text}
+										style={[
+											styles.input,
+											{
+												backgroundColor: theme.background,
+												borderColor: theme.border,
+												color: theme.text,
+											},
+										]}
+										value={field.state.value}
+									/>
+								)}
+							</form.Field>
+
+							<form.Field name="password">
+								{(field) => (
+									<TextInput
+										onBlur={field.handleBlur}
+										onChangeText={(value) => {
+											field.handleChange(value);
+											if (error) {
+												setError(null);
+											}
+										}}
+										onSubmitEditing={form.handleSubmit}
+										placeholder="Password"
+										placeholderTextColor={theme.text}
+										secureTextEntry
+										style={[
+											styles.input,
+											{
+												backgroundColor: theme.background,
+												borderColor: theme.border,
+												color: theme.text,
+											},
+										]}
+										value={field.state.value}
+									/>
+								)}
+							</form.Field>
+
+							<TouchableOpacity
+								disabled={isSubmitting}
+								onPress={form.handleSubmit}
+								style={[
+									styles.button,
+									{
+										backgroundColor: theme.primary,
+										opacity: isSubmitting ? 0.5 : 1,
+									},
+								]}
+							>
+								{isSubmitting ? (
+									<ActivityIndicator color="#ffffff" size="small" />
+								) : (
+									<Text style={styles.buttonText}>Sign Up</Text>
+								)}
+							</TouchableOpacity>
+						</>
+					);
+				}}
+			</form.Subscribe>
+		</View>
+	);
+}
+
+const styles = StyleSheet.create({
+	button: {
+		alignItems: "center",
+		justifyContent: "center",
+		padding: 12,
+	},
+	buttonText: {
+		color: "#ffffff",
+		fontSize: 16,
+	},
+	card: {
+		borderWidth: 1,
+		marginTop: 16,
+		padding: 16,
+	},
+	errorContainer: {
+		marginBottom: 12,
+		padding: 8,
+	},
+	errorText: {
+		fontSize: 14,
+	},
+	input: {
+		borderWidth: 1,
+		fontSize: 16,
+		marginBottom: 12,
+		padding: 12,
+	},
+	title: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 12,
+	},
+});
+
+export { SignUp };

@@ -6,13 +6,40 @@
     "ImportManifest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "importId", "tenantId", "capabilityId", "sourceFiles", "mode", "createdAt"],
+      "required": [
+        "schemaVersion",
+        "importId",
+        "tenantId",
+        "capabilityId",
+        "sourceFiles",
+        "mode",
+        "createdAt"
+      ],
       "properties": {
         "schemaVersion": {"const": "1.0.0"},
         "importId": {"type": "string"},
         "tenantId": {"type": "string"},
-        "capabilityId": {"type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$"},
-        "sourceFiles": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "sha256"], "properties": {"name": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"}, "contentType": {"type": "string"}}}},
+        "capabilityId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$"
+        },
+        "sourceFiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "sha256"],
+            "properties": {
+              "name": {"type": "string"},
+              "sha256": {
+                "type": "string",
+                "pattern": "^[A-Fa-f0-9]{64}$"
+              },
+              "contentType": {"type": ["string", "null"]}
+            }
+          }
+        },
         "mode": {"type": "string", "enum": ["DryRun", "Apply"]},
         "mappingVersion": {"type": ["string", "null"]},
         "createdAt": {"type": "string", "format": "date-time"}
@@ -25,25 +52,85 @@
       "properties": {
         "rowNumber": {"type": "integer", "minimum": 1},
         "sourceKey": {"type": ["string", "null"]},
-        "state": {"type": "string", "enum": ["Proposed", "Valid", "Warning", "Rejected", "Applied", "Skipped", "Reversed"]},
+        "state": {
+          "type": "string",
+          "enum": [
+            "Proposed",
+            "Valid",
+            "Warning",
+            "Rejected",
+            "Applied",
+            "Skipped",
+            "Reversed"
+          ]
+        },
         "targetId": {"type": ["string", "null"]},
-        "messages": {"type": "array", "items": {"type": "object", "required": ["code", "message"], "properties": {"code": {"type": "string"}, "field": {"type": ["string", "null"]}, "message": {"type": "string"}, "severity": {"type": "string", "enum": ["Info", "Warning", "Error"]}}}
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "message"],
+            "properties": {
+              "code": {"type": "string"},
+              "field": {"type": ["string", "null"]},
+              "message": {"type": "string"},
+              "severity": {
+                "type": "string",
+                "enum": ["Info", "Warning", "Error"]
+              }
+            }
+          }
+        }
       }
     },
     "ExportManifest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schemaVersion", "exportId", "tenantId", "scope", "classification", "createdAt", "expiresAt", "files"],
+      "required": [
+        "schemaVersion",
+        "exportId",
+        "tenantId",
+        "scope",
+        "classification",
+        "createdAt",
+        "expiresAt",
+        "files"
+      ],
       "properties": {
         "schemaVersion": {"const": "1.0.0"},
         "exportId": {"type": "string"},
         "tenantId": {"type": "string"},
-        "scope": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"}
+        },
         "classification": {"type": "string"},
         "purpose": {"type": ["string", "null"]},
         "createdAt": {"type": "string", "format": "date-time"},
         "expiresAt": {"type": "string", "format": "date-time"},
-        "files": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "format", "sha256"], "properties": {"name": {"type": "string"}, "format": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"}, "recordCount": {"type": ["integer", "null"], "minimum": 0}}}
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "format", "sha256"],
+            "properties": {
+              "name": {"type": "string"},
+              "format": {"type": "string"},
+              "sha256": {
+                "type": "string",
+                "pattern": "^[A-Fa-f0-9]{64}$"
+              },
+              "recordCount": {
+                "type": ["integer", "null"],
+                "minimum": 0
+              }
+            }
+          }
+        }
       }
     }
   },

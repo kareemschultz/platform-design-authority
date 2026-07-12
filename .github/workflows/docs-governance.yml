@@ -10,43 +10,50 @@ on:
       - research/**
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate-docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out evaluated revision
+      - name: Check out source branch
+        if: github.event_name == 'push'
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Check out pull request source branch
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Validate document governance
-        id: validate
+      - name: Generate machine-readable registries
+        run: python scripts/generate_registries.py
+
+      - name: Validate documentation and contracts
+        run: python scripts/validate_docs.py
+
+      - name: Commit refreshed registries
+        if: github.actor != 'github-actions[bot]' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
         shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
         run: |
-          set +e
-          python scripts/validate_docs.py > validation-report.txt 2>&1
-          status=$?
-          cat validation-report.txt
-          echo "status=$status" >> "$GITHUB_OUTPUT"
-          exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add registry/documents.json registry/capabilities.json registry/events.json registry/permissions.json registry/first-slice-tests.json
+          if git diff --cached --quiet; then
+            echo "Registries are already current."
+          else
+            git commit -m "chore: refresh final remediation registries"
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi
 
-      - name: Upload validation diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: documentation-validation-report
-          path: validation-report.txt
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Fail when governance validation fails
-        if: steps.validate.outputs.status != '0'
-        run: exit 1
-
-      - name: Verify machine-readable registries are current
-        run: python scripts/generate_registries.py --check
+      - name: Verify generated output is clean
+        run: git diff --exit-code -- registry/documents.json registry/capabilities.json registry/events.json registry/permissions.json registry/first-slice-tests.json

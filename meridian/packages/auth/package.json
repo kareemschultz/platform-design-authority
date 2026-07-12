@@ -9,7 +9,9 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "test": "bun test src/*.test.ts"
+  },
   "dependencies": {
     "@better-auth/expo": "catalog:",
     "@meridian/db": "workspace:*",

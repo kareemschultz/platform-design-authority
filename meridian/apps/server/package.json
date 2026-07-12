@@ -7,11 +7,11 @@
     "check-types": "tsc -b",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "bun run --hot src/index.ts",
-    "start": "bun run dist/index.mjs"
+    "start": "bun run dist/index.mjs",
+    "start:node": "node dist/node.mjs"
   },
   "dependencies": {
-    "@ai-sdk/devtools": "^1.0.1",
-    "@ai-sdk/google": "^4.0.7",
+    "@hono/node-server": "2.0.8",
     "@meridian/api": "workspace:*",
     "@meridian/auth": "workspace:*",
     "@meridian/db": "workspace:*",
@@ -19,7 +19,6 @@
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
-    "ai": "catalog:",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "hono": "catalog:",

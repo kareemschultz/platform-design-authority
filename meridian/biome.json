@@ -8,7 +8,6 @@
   "files": {
     "ignoreUnknown": false,
     "includes": [
-      "**",
       "!**/.next",
       "!**/dist",
       "!**/.turbo",
@@ -23,6 +22,8 @@
       "!**/.expo",
       "!**/.wrangler",
       "!**/.alchemy",
+      "!apps/native",
+      "!apps/web/public/favicon",
       "!**/.svelte-kit",
       "!**/wrangler.jsonc",
       "!**/.source",
@@ -44,6 +45,9 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "performance": {
+        "noJsxPropsBind": "off"
+      },
       "correctness": {
         "useExhaustiveDependencies": "info"
       },
@@ -80,5 +84,9 @@
       "tailwindDirectives": true
     }
   },
-  "extends": ["ultracite/biome/core", "ultracite/biome/react", "ultracite/biome/next"]
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/next"
+  ]
 }

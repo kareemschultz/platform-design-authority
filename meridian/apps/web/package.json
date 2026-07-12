@@ -8,7 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@ai-sdk/react": "catalog:",
     "@meridian/api": "workspace:*",
     "@meridian/env": "workspace:*",
     "@meridian/ui": "workspace:*",
@@ -18,7 +17,6 @@
     "@swc/helpers": "^0.5.23",
     "@tanstack/react-form": "catalog:",
     "@tanstack/react-query": "catalog:",
-    "ai": "catalog:",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
@@ -28,13 +26,11 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "sonner": "catalog:",
-    "streamdown": "^2.5.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@meridian/config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
-    "@tanstack/react-query-devtools": "^5.101.2",
     "@types/node": "^20",
     "@types/react": "^19.2.17",
     "@types/react-dom": "catalog:",

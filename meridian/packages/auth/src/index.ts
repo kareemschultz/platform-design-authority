@@ -1,34 +1,42 @@
 import { expo } from "@better-auth/expo";
 import { createDb } from "@meridian/db";
+// biome-ignore lint/performance/noNamespaceImport: Better Auth's Drizzle adapter expects a schema object namespace.
 import * as schema from "@meridian/db/schema/auth";
 import { env } from "@meridian/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
+import { getTrustedOrigins } from "./security";
+
 export function createAuth() {
-  const db = createDb();
+	const db = createDb();
 
-  return betterAuth({
-    database: drizzleAdapter(db, {
-      provider: "pg",
+	return betterAuth({
+		advanced: {
+			defaultCookieAttributes: {
+				httpOnly: true,
+				sameSite: "lax",
+				secure: true,
+			},
+		},
+		baseURL: env.BETTER_AUTH_URL,
+		database: drizzleAdapter(db, {
+			provider: "pg",
 
-      schema: schema,
-    }),
-    trustedOrigins: [env.CORS_ORIGIN, "meridian://", "exp://", "http://localhost:8081"],
-    emailAndPassword: {
-      enabled: true,
-    },
-    secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
-    advanced: {
-      defaultCookieAttributes: {
-        sameSite: "none",
-        secure: true,
-        httpOnly: true,
-      },
-    },
-    plugins: [expo()],
-  });
+			schema,
+		}),
+		emailAndPassword: {
+			enabled: true,
+		},
+		plugins: [expo()],
+		secret: env.BETTER_AUTH_SECRET,
+		trustedOrigins: getTrustedOrigins({
+			authUrl: env.BETTER_AUTH_URL,
+			configuredOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS,
+			corsOrigin: env.CORS_ORIGIN,
+			nodeEnv: env.NODE_ENV,
+		}),
+	});
 }
 
 export const auth = createAuth();

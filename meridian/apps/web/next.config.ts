@@ -2,10 +2,10 @@ import "@meridian/env/web";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typedRoutes: true,
-  reactCompiler: true,
-  output: "standalone",
-  transpilePackages: ["shiki"],
+	output: "standalone",
+	reactCompiler: true,
+	transpilePackages: ["shiki"],
+	typedRoutes: true,
 };
 
 export default nextConfig;

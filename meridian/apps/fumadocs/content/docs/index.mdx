@@ -1,13 +1,25 @@
 ---
-title: Hello World
-description: Your first document
+title: Meridian Documentation Prototype
+description: Controlled prototype documentation process
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+Meridian docs are controlled prototype evidence for ADR-0021. They do not replace the Platform Design Authority repository, root `../CLAUDE.md`, the Constitution, accepted ADRs, specifications, registries, or canonical OpenAPI contracts.
 
-## What is Next?
+## Information Classes
 
-<Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
-</Cards>
+Product documentation explains released product behavior for users, administrators, developers, and operators. Architecture authority remains in governed root documents and generated registries. Generated API pages must come from canonical OpenAPI sources rather than hand-edited pages.
+
+## Authoring Process
+
+1. Cite the governing document ID, ADR, capability, permission, event, or contract behind any product behavior.
+2. Keep protected security findings, tenant data, secrets, provider credentials, and private review evidence out of public docs.
+3. Use approved MDX components only.
+4. Run docs typecheck and build before claiming evidence.
+
+## Review And Versioning
+
+Documentation changes require owner review, documentation-impact disposition, and release/version notes when user-visible behavior, APIs, configuration, migrations, permissions, operations, or troubleshooting change.
+
+## Build And Deploy
+
+The Fumadocs app must build under the pinned dependency set and stay portable to a self-hosted container. Search is local-only in this prototype; AI chat and interactive API proxy behavior are not enabled.

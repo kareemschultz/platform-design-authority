@@ -1,7 +1,10 @@
 name: meridian
 
+# Local controlled-prototype stack only. It is not a production deployment
+# contract and intentionally keeps PostgreSQL off the host network.
 services:
   web:
+    image: meridian-web:prototype-2026-07-12
     build:
       context: .
       dockerfile: apps/web/Dockerfile
@@ -9,7 +12,7 @@ services:
         NEXT_PUBLIC_SERVER_URL: http://localhost:3000
     init: true
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     env_file:
       - path: apps/web/.env
         required: false
@@ -33,18 +36,22 @@ services:
     restart: unless-stopped
 
   server:
+    image: meridian-server:prototype-2026-07-12
     build:
       context: .
       dockerfile: apps/server/Dockerfile
     init: true
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     env_file:
       - path: apps/server/.env
         required: false
     environment:
       CORS_ORIGIN: http://localhost:3001
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/meridian
+      BETTER_AUTH_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET to at least 32 characters for local Compose}
+      BETTER_AUTH_TRUSTED_ORIGINS: http://localhost:3000,http://localhost:3001
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for local Compose}@postgres:5432/meridian
     healthcheck:
       test:
         [
@@ -63,16 +70,16 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:18
-    container_name: meridian-postgres
+    image: postgres:18.4@sha256:22c89fe0d0f507606260237fd55e51f6137f58b2d5bcf6152242b96d9fe8f9a4
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
     environment:
       POSTGRES_DB: meridian
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for local Compose}
     volumes:
       - meridian_postgres_data:/var/lib/postgresql
+      - ./ops/postgres/001-approved-extensions.sql:/docker-entrypoint-initdb.d/001-approved-extensions.sql:ro
+      - ./ops/postgres:/ops/postgres:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s

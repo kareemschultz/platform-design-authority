@@ -1,6 +1,39 @@
 # meridian
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Hono, ORPC, and more.
+This directory is controlled prototype evidence for PR #2. It was initially generated with Better-T-Stack 3.36.3 and then reviewed against root `../CLAUDE.md`, PDA-FND-002, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0024, PDA-PLT-028, PDA-UX-028, PDA-ARC-019, and PDA-ENG-020.
+
+This is not production approval for the runtime, scaffold, UI system, database image, auth configuration, documentation portal, or native auth exchange.
+
+## Provenance
+
+- Initial generated SHA: `75e793fdcb2c79066bcb2bfc744971d608e56a00`
+- Generation date: 2026-07-12
+- Original generated selection, reconstructed from `bts.jsonc` and retained only as provenance (it includes rejected addons/examples and is **not** the governed reproduction command):
+
+```bash
+bun create better-t-stack@3.36.3 meridian --frontend next native-bare --backend hono --runtime bun --database postgres --orm drizzle --api orpc --auth better-auth --payments none --addons biome fumadocs pwa skills turborepo ultracite --examples ai todo --db-setup docker --web-deploy docker --server-deploy docker --git --package-manager bun --install
+```
+
+- Governed reproducible command verified on 2026-07-12. It excludes Biome as a separately selected addon, generated skills, Fumadocs, AI and Todo; Fumadocs remains a separately reviewed ADR-0021 controlled prototype:
+
+```bash
+bun create better-t-stack@3.36.3 meridian --frontend next native-bare --backend hono --runtime bun --api orpc --auth better-auth --payments none --database postgres --orm drizzle --db-setup docker --package-manager bun --git --web-deploy docker --server-deploy docker --install --addons pwa turborepo ultracite --examples none --disable-analytics --directory-conflict error --dry-run --verbose
+```
+
+Reviewed deviations from generated output:
+
+- Removed generated AI and Todo examples from the governed first-slice prototype.
+- Removed the Better-T-Stack `skills` addon payload, including its AI SDK skill and nested third-party instruction trees, so root and nested repository governance remain the only agent authority.
+- Pinned Bun 1.3.14, Hono 4.12.29, shadcn 4.13.0, and Lucide 1.24.0. oRPC exact 1.14.8 is blocked because the scoped packages used here are not published at that version; this prototype pins 1.14.7 and records the conflict in `docs/IMPLEMENTATION_CONFLICTS.md`.
+- Reconciled shadcn metadata to the Base UI/Rhea, Neutral/Blue, Geist/Inter, Lucide, default-radius bootstrap selected in PDA-UX-028.
+- Hardened Better Auth cookie and trusted-origin configuration for prototype review.
+
+Known limitations:
+
+- Native auth exchange is deferred pending Expo secure-storage, deep-link, app-link, recovery, lost-device, and revocation evidence.
+- Node fallback uses the separate `server` package `start:node` entry backed by the Hono Node adapter.
+- Accessibility, white-label, tenant-isolation, PostgreSQL restore, and production runtime evidence are not claimed.
+- PWA support is continuity only and does not replace governed offline sync.
 
 ## Features
 
@@ -12,12 +45,12 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **Shared UI package** - shadcn/ui primitives live in `packages/ui`
 - **Hono** - Lightweight, performant server framework
 - **oRPC** - End-to-end type-safe APIs with OpenAPI integration
-- **Bun** - Runtime environment
+- **Bun** - Primary prototype runtime with Node fallback checks
 - **Drizzle** - TypeScript-first ORM
 - **PostgreSQL** - Database engine
 - **Authentication** - Better-Auth
-- **Biome** - Linting and formatting
-- **PWA** - Progressive Web App support
+- **Ultracite** - The single governed lint/format authority, using its pinned Biome engine
+- **PWA** - Progressive Web App continuity seam
 - **Turborepo** - Optimized monorepo build system
 
 ## Getting Started
@@ -25,17 +58,27 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 First, install the dependencies:
 
 ```bash
-bun install
+bun install --frozen-lockfile
 ```
 
 ## Database Setup
 
-This project uses PostgreSQL with Drizzle ORM.
+This prototype uses local-only PostgreSQL 18.4 with Drizzle ORM for the auth schema.
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+1. Set required local environment variables:
 
-3. Apply the schema to your database:
+```bash
+export POSTGRES_PASSWORD="$(openssl rand -hex 24)"
+export BETTER_AUTH_SECRET="$(openssl rand -hex 32)"
+```
+
+2. Start the local database:
+
+```bash
+bun run db:start
+```
+
+3. Apply the schema to your local database:
 
 ```bash
 bun run db:push
@@ -64,7 +107,7 @@ React web apps in this stack share shadcn/ui primitives through `packages/ui`.
 Run this from the project root to add more primitives to the shared UI package:
 
 ```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
+bunx shadcn@4.13.0 add accordion dialog popover sheet table -c packages/ui
 ```
 
 Import shared components like this:
@@ -75,26 +118,27 @@ import { Button } from "@meridian/ui/components/button";
 
 ### Add app-specific blocks
 
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
+If you want to add app-specific blocks instead of shared primitives, run the pinned shadcn CLI from `apps/web` and review the diff before keeping generated source.
 
 ## Deployment
 
 ### Docker Compose
 
-- Target: web + server
+- Target: local controlled prototype web + server + PostgreSQL
 - Config: `docker-compose.yml` (app Dockerfiles live in `apps/*/Dockerfile`)
 - Build images: bun run docker:build
 - Start: bun run docker:up
 - Logs: bun run docker:logs
 - Stop: bun run docker:down
 
-Environment variables are read from each app's `.env` file (baked into web builds for public variables) and overridden in `docker-compose.yml` for container networking.
+`POSTGRES_PASSWORD` and `BETTER_AUTH_SECRET` are required. PostgreSQL is not published to the host. Backup, restore, and migration notes are in `ops/postgres/README.md`.
 
 For more details, see the guide on [Deploying with Docker Compose](https://www.better-t-stack.dev/docs/guides/docker).
 
 ## Git Hooks and Formatting
 
 - Run checks: `bun run check`
+- Run tests: `bun run test`
 
 ## Project Structure
 
@@ -118,12 +162,13 @@ meridian/
 - `bun run dev:web`: Start only the web application
 - `bun run dev:server`: Start only the server
 - `bun run check-types`: Check TypeScript types across all apps
+- `bun run test`: Run local Bun tests
 - `bun run dev:native`: Start the React Native/Expo development server
 - `bun run db:push`: Push schema changes to database
 - `bun run db:generate`: Generate database client/types
 - `bun run db:migrate`: Run database migrations
 - `bun run db:studio`: Open database studio UI
-- `bun run check`: Run Biome formatting and linting
+- `bun run check`: Run the pinned Ultracite formatting and linting authority
 - `cd apps/web && bun run generate-pwa-assets`: Generate PWA assets
 - `bun run docker:build`: Build the Docker Compose images
 - `bun run docker:up`: Build and start the Docker Compose stack

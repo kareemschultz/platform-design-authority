@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-010
 title: Documentation Completeness Matrix 2026-07-11
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -47,7 +47,7 @@ Provide a dated, honest inventory of blueprint coverage, implementation contract
 - Finance handoff schema
 - Webhook envelope schema
 - AI registry record schema
-- Endpoint-permission manifest
+- Endpoint-permission manifest with OpenAPI coverage and authority parity validation
 - Capability metadata
 - First-slice test matrix
 - Design tokens

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-006
 title: Fable 5 Third Audit Disposition V1
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -34,8 +34,8 @@ Most High and Medium findings are closed. Findings based on customer evidence, f
 | ID | Disposition | Remediation evidence | Remaining closure condition |
 |---|---|---|---|
 | TA-001 | Closed | Commerce, Catalog, Inventory, Developer Webhooks, Fiscalization, Payment, Finance, Marketplace, AI, and Business DNA now define canonical events; first-slice contract references owners; validator rejects orphan references; generator records schemas | Final registry generation and green CI |
-| TA-002 | Closed architecturally; Founder decision | `registry/first-slice.json` v2.1 uses `full`, `prototype`, and `seam`; full deferrals include General Ledger, reporting, storefront, recurring commerce, fiscal submission, customer-account tender, terminal and dispute scope | FDR-004 ratification |
-| TA-003 | Closed architecturally | Expanded API families; `openapi/first-slice-v1.yaml`; import/export, offline, provider, Finance, webhook and event schemas | OpenAPI lint and generated SDK during implementation |
+| TA-002 | Closed architecturally; Founder decision | `registry/first-slice.json` v2.1 uses `full`, `prototype`, and `seam` as target delivery depths rather than current implementation claims; full deferrals include General Ledger, reporting, storefront, recurring commerce, fiscal submission, customer-account tender, terminal and dispute scope | FDR-004 ratification |
+| TA-003 | Closed architecturally | Expanded API families; `openapi/first-slice-v1.yaml` represents all endpoint-manifest operations; CI enforces OpenAPI-to-manifest permission and authorization parity; import/export, offline, provider, Finance, webhook and event schemas | Complete request and response schemas for seam operations, run full OpenAPI semantic lint, and compile the generated SDK during implementation review |
 | TA-004 | Closed | Permission catalog expanded; Payment namespace normalized; `registry/endpoint-permissions.json`; generator creates `permissions.json`; validator checks endpoint permissions | Final generation and CI |
 | TA-005 | Closed architecturally | `FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md` supplies numeric workflow, latency, capacity, SLO, RPO, RTO, freshness, security and offline targets | Replace provisional values with measured prototype and pilot evidence |
 
@@ -115,6 +115,7 @@ Most High and Medium findings are closed. Findings based on customer evidence, f
 - Canonical event envelope and representative event schemas
 - Offline sync, provider, import/export, Finance, webhook and AI schemas
 - Endpoint-permission manifest
+- OpenAPI endpoint-permission parity validation
 - Capability metadata overlay
 - Architecture rules
 - Design tokens

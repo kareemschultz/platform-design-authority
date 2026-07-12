@@ -1,10 +1,12 @@
 openapi: 3.1.0
 info:
   title: Business Operating Platform First Slice API
-  version: 0.1.0
+  version: 0.2.0
   description: >-
     Draft implementation-review contract for the Guyana Retail Foundation Slice.
     This is not a GA public API and does not assert production provider or jurisdiction certification.
+    Operations without detailed payload schemas are route and authority seams; their request and response
+    schemas require completion before implementation review and generated SDK acceptance.
 servers:
   - url: https://api.example.invalid/v1
     description: Placeholder only
@@ -27,6 +29,7 @@ paths:
     get:
       tags: [Identity]
       operationId: getCurrentIdentity
+      x-authorization: authenticated_session
       responses:
         '200':
           description: Current authenticated identity and active context
@@ -46,6 +49,7 @@ paths:
     post:
       tags: [Identity]
       operationId: setActiveContext
+      x-authorization: authenticated_membership
       requestBody:
         required: true
         content:
@@ -436,6 +440,13 @@ paths:
       responses:
         '201':
           description: Subscription created
+    get:
+      tags: [Webhooks]
+      operationId: getWebhookSubscriptions
+      x-permission: developer.webhook.read
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
   /privacy-requests:
     post:
       tags: [Privacy]
@@ -451,6 +462,562 @@ paths:
       responses:
         '201':
           description: Privacy case created
+  /entitlements:
+    get:
+      tags: [Identity]
+      operationId: getEntitlements
+      x-permission: platform.entitlement.read
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /users:
+    get:
+      tags: [Identity]
+      operationId: getUsers
+      x-permission: platform.user.read
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /users/invitations:
+    post:
+      tags: [Identity]
+      operationId: postUsersInvitations
+      x-permission: platform.user.invite
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /users/{userId}/suspend:
+    post:
+      tags: [Identity]
+      operationId: postUsersByUserIdSuspend
+      x-permission: platform.user.suspend
+      parameters:
+        - {name: userId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /roles:
+    get:
+      tags: [Identity]
+      operationId: getRoles
+      x-permission: platform.role.read
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /role-assignments:
+    post:
+      tags: [Identity]
+      operationId: postRoleAssignments
+      x-permission: platform.role.assign
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /audit-records:
+    get:
+      tags: [Identity]
+      operationId: getAuditRecords
+      x-permission: platform.audit.read
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /parties/organizations:
+    post:
+      tags: [Parties]
+      operationId: postPartiesOrganizations
+      x-permission: party.record.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /parties/{partyId}:
+    patch:
+      tags: [Parties]
+      operationId: patchPartiesByPartyId
+      x-permission: party.record.update
+      parameters:
+        - {name: partyId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /customers:
+    get:
+      tags: [Parties]
+      operationId: getCustomers
+      x-permission: crm.customer.read
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+    post:
+      tags: [Parties]
+      operationId: postCustomers
+      x-permission: crm.customer.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /customers/{customerId}:
+    patch:
+      tags: [Parties]
+      operationId: patchCustomersByCustomerId
+      x-permission: crm.customer.update
+      parameters:
+        - {name: customerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /products/{productId}:
+    get:
+      tags: [Catalog]
+      operationId: getProductsByProductId
+      x-permission: catalog.product.read
+      parameters:
+        - {name: productId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+    patch:
+      tags: [Catalog]
+      operationId: patchProductsByProductId
+      x-permission: catalog.product.update
+      parameters:
+        - {name: productId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /product-imports:
+    post:
+      tags: [Catalog]
+      operationId: postProductImports
+      x-permission: catalog.import.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /product-imports/{importId}/approve:
+    post:
+      tags: [Catalog]
+      operationId: postProductImportsByImportIdApprove
+      x-permission: catalog.import.approve
+      parameters:
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /customer-imports:
+    post:
+      tags: [Identity]
+      operationId: postCustomerImports
+      x-permission: platform.import.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /opening-stock-imports:
+    post:
+      tags: [Inventory]
+      operationId: postOpeningStockImports
+      x-permission: inventory.import.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /inventory-adjustments/{id}/approve:
+    post:
+      tags: [Inventory]
+      operationId: postInventoryAdjustmentsByIdApprove
+      x-permission: inventory.adjustment.approve
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stock-counts/{id}/submit:
+    post:
+      tags: [Inventory]
+      operationId: postStockCountsByIdSubmit
+      x-permission: inventory.count.submit
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stock-counts/{id}/approve:
+    post:
+      tags: [Inventory]
+      operationId: postStockCountsByIdApprove
+      x-permission: inventory.count.approve
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stock-transfers/{id}/receive:
+    post:
+      tags: [Inventory]
+      operationId: postStockTransfersByIdReceive
+      x-permission: inventory.transfer.receive
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /sales/{saleId}/hold:
+    post:
+      tags: [Commerce]
+      operationId: postSalesBySaleIdHold
+      x-permission: commerce.sale.hold
+      parameters:
+        - {name: saleId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /returns/{returnId}/approve:
+    post:
+      tags: [Commerce]
+      operationId: postReturnsByReturnIdApprove
+      x-permission: commerce.return.approve
+      parameters:
+        - {name: returnId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /refunds:
+    post:
+      tags: [Commerce]
+      operationId: postRefunds
+      x-permission: commerce.refund.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /refunds/{refundId}/approve:
+    post:
+      tags: [Commerce]
+      operationId: postRefundsByRefundIdApprove
+      x-permission: commerce.refund.approve
+      parameters:
+        - {name: refundId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /registers/{registerId}/cash-movements:
+    post:
+      tags: [Commerce]
+      operationId: postRegistersByRegisterIdCashMovements
+      x-permission: commerce.cash-movement.create
+      parameters:
+        - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /registers/{registerId}/safe-drops:
+    post:
+      tags: [Commerce]
+      operationId: postRegistersByRegisterIdSafeDrops
+      x-permission: commerce.cash-movement.create
+      parameters:
+        - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /deposits/{depositId}/confirm:
+    post:
+      tags: [Commerce]
+      operationId: postDepositsByDepositIdConfirm
+      x-permission: commerce.deposit.confirm
+      parameters:
+        - {name: depositId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /cash-variances/{varianceId}/approve:
+    post:
+      tags: [Commerce]
+      operationId: postCashVariancesByVarianceIdApprove
+      x-permission: commerce.cash-variance.approve
+      parameters:
+        - {name: varianceId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /receipts/{receiptId}:
+    get:
+      tags: [Commerce]
+      operationId: getReceiptsByReceiptId
+      x-permission: commerce.receipt.read
+      parameters:
+        - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /receipts/{receiptId}/reissue:
+    post:
+      tags: [Commerce]
+      operationId: postReceiptsByReceiptIdReissue
+      x-permission: commerce.receipt.reissue
+      parameters:
+        - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /receipts/{receiptId}/void:
+    post:
+      tags: [Commerce]
+      operationId: postReceiptsByReceiptIdVoid
+      x-permission: commerce.receipt.void
+      parameters:
+        - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /payment-intents/{id}:
+    get:
+      tags: [Payment]
+      operationId: getPaymentIntentsById
+      x-permission: payment.intent.read
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /payment-intents/{id}/refund:
+    post:
+      tags: [Payment]
+      operationId: postPaymentIntentsByIdRefund
+      x-permission: payment.intent.refund
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /payment-intents/{id}/reverse:
+    post:
+      tags: [Payment]
+      operationId: postPaymentIntentsByIdReverse
+      x-permission: payment.intent.reverse
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /payment-reconciliations:
+    post:
+      tags: [Payment]
+      operationId: postPaymentReconciliations
+      x-permission: payment.reconciliation.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stored-value-instruments/{id}:
+    get:
+      tags: [Commerce]
+      operationId: getStoredValueInstrumentsById
+      x-permission: commerce.stored-value.read
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stored-value-instruments/{id}/load:
+    post:
+      tags: [Commerce]
+      operationId: postStoredValueInstrumentsByIdLoad
+      x-permission: commerce.stored-value.load
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stored-value-reservations/{id}/capture:
+    post:
+      tags: [Commerce]
+      operationId: postStoredValueReservationsByIdCapture
+      x-permission: commerce.stored-value.redeem
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stored-value-reservations/{id}/release:
+    post:
+      tags: [Commerce]
+      operationId: postStoredValueReservationsByIdRelease
+      x-permission: commerce.stored-value.reserve
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stored-value-instruments/{id}/adjust:
+    post:
+      tags: [Commerce]
+      operationId: postStoredValueInstrumentsByIdAdjust
+      x-permission: commerce.stored-value.adjust
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stored-value-instruments/{id}/suspend:
+    post:
+      tags: [Commerce]
+      operationId: postStoredValueInstrumentsByIdSuspend
+      x-permission: commerce.stored-value.suspend
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /stored-value-reconciliations:
+    post:
+      tags: [Commerce]
+      operationId: postStoredValueReconciliations
+      x-permission: commerce.stored-value.reconcile
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /devices/{deviceId}/revoke:
+    post:
+      tags: [Identity]
+      operationId: postDevicesByDeviceIdRevoke
+      x-permission: platform.device.revoke
+      parameters:
+        - {name: deviceId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /sync/status/{batchId}:
+    get:
+      tags: [Identity]
+      operationId: getSyncStatusByBatchId
+      x-permission: platform.sync-batch.read
+      parameters:
+        - {name: batchId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /exports/{exportId}:
+    get:
+      tags: [Identity]
+      operationId: getExportsByExportId
+      x-permission: platform.export.read
+      parameters:
+        - {name: exportId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /deposit-reconciliations:
+    post:
+      tags: [Exports]
+      operationId: postDepositReconciliations
+      x-permission: finance.bank-reconciliation.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /finance-handoff/posting-batches:
+    get:
+      tags: [Exports]
+      operationId: getFinanceHandoffPostingBatches
+      x-permission: finance.posting-batch.read
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /webhook-subscriptions/{id}:
+    patch:
+      tags: [Webhooks]
+      operationId: patchWebhookSubscriptionsById
+      x-permission: developer.webhook.update
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /webhook-deliveries/{id}/replay:
+    post:
+      tags: [Webhooks]
+      operationId: postWebhookDeliveriesByIdReplay
+      x-permission: developer.webhook.replay
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /privacy-requests/{id}:
+    get:
+      tags: [Privacy]
+      operationId: getPrivacyRequestsById
+      x-permission: security.privacy-request.read
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /privacy-requests/{id}/verify:
+    post:
+      tags: [Privacy]
+      operationId: postPrivacyRequestsByIdVerify
+      x-permission: security.privacy-request.verify
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
+  /privacy-actions/{id}/approve:
+    post:
+      tags: [Privacy]
+      operationId: postPrivacyActionsByIdApprove
+      x-permission: security.privacy-action.approve
+      parameters:
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Contract response; the owning specification defines state and error semantics
 components:
   securitySchemes:
     sessionCookie:

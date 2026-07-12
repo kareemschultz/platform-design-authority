@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-014
 title: First Slice API and Event Contracts
-version: 0.3.0
+version: 0.3.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -223,7 +223,8 @@ Additive changes are preferred. Breaking changes require a new major version. Of
 
 ## Quality Gates
 
-- OpenAPI artifact and validation before implementation review
+- OpenAPI coverage parity with the endpoint-permission manifest in repository CI
+- Full OpenAPI semantic lint before implementation review
 - Generated SDK compilation
 - Endpoint-to-permission coverage check
 - Contract tests

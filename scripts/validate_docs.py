@@ -21,6 +21,11 @@ EVENT_BULLET = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-
 EVENT_CANDIDATE = re.compile(r"`([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*)`")
 PERMISSION = re.compile(r"^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$")
 PERMISSION_BULLET = re.compile(r"^- `([a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*)`\s*$")
+OPENAPI_PATH = re.compile(r"^  (/[^:]+):\s*$")
+OPENAPI_METHOD = re.compile(r"^    (get|post|put|patch|delete|options|head|trace):\s*$")
+OPENAPI_OPERATION_ID = re.compile(r"^      operationId:\s*(\S+)\s*$")
+OPENAPI_PERMISSION = re.compile(r"^      x-permission:\s*(\S+)\s*$")
+OPENAPI_AUTHORIZATION = re.compile(r"^      x-authorization:\s*(\S+)\s*$")
 HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 BACKTICK_PATH = re.compile(r"`([^`\n]+\.md)`")
@@ -263,6 +268,90 @@ def validate_endpoint_permissions(prefixes: dict[str, dict[str, object]]) -> lis
     return sorted(set(errors))
 
 
+def normalize_endpoint_path(route: str) -> str:
+    """Normalize base-version and placeholder names for contract parity checks."""
+    if route.startswith("/v1/"):
+        route = route[3:]
+    return re.sub(r"\{[^{}]+\}", "{}", route)
+
+
+def collect_openapi_operations(path: Path) -> tuple[list[str], dict[tuple[str, str], dict[str, str]]]:
+    """Extract the controlled OpenAPI path surface without adding a YAML dependency to CI."""
+    errors: list[str] = []
+    operations: dict[tuple[str, str], dict[str, str]] = {}
+    current_path: str | None = None
+    current_key: tuple[str, str] | None = None
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        path_match = OPENAPI_PATH.match(line)
+        if path_match:
+            current_path = path_match.group(1)
+            current_key = None
+            continue
+        method_match = OPENAPI_METHOD.match(line)
+        if method_match and current_path:
+            current_key = (method_match.group(1).upper(), normalize_endpoint_path(current_path))
+            if current_key in operations:
+                errors.append(f"{path.relative_to(ROOT)}:{line_number}: duplicate OpenAPI operation {current_key[0]} {current_path}")
+            operations[current_key] = {"source_line": str(line_number)}
+            continue
+        if current_key is None:
+            continue
+        for field, pattern in (
+            ("operation_id", OPENAPI_OPERATION_ID),
+            ("permission", OPENAPI_PERMISSION),
+            ("authorization", OPENAPI_AUTHORIZATION),
+        ):
+            match = pattern.match(line)
+            if match:
+                operations[current_key][field] = match.group(1)
+                break
+    operation_ids: dict[str, tuple[str, str]] = {}
+    for key, operation in operations.items():
+        operation_id = operation.get("operation_id")
+        if not operation_id:
+            errors.append(f"{path.relative_to(ROOT)}:{operation['source_line']}: {key[0]} {key[1]} has no operationId")
+        elif operation_id in operation_ids:
+            errors.append(f"{path.relative_to(ROOT)}: duplicate operationId {operation_id}")
+        else:
+            operation_ids[operation_id] = key
+        if bool(operation.get("permission")) == bool(operation.get("authorization")):
+            errors.append(f"{path.relative_to(ROOT)}:{operation['source_line']}: {key[0]} {key[1]} needs exactly one x-permission or x-authorization")
+    return errors, operations
+
+
+def validate_openapi_endpoint_parity() -> list[str]:
+    errors: list[str] = []
+    openapi_path = ROOT / "openapi" / "first-slice-v1.yaml"
+    manifest_path = ROOT / "registry" / "endpoint-permissions.json"
+    if not openapi_path.exists() or not manifest_path.exists():
+        return errors
+    extraction_errors, operations = collect_openapi_operations(openapi_path)
+    errors.extend(extraction_errors)
+    manifest = load_json(manifest_path).get("endpoints", [])
+    expected: dict[tuple[str, str], dict[str, str]] = {}
+    for item in manifest:
+        key = (str(item.get("method", "")).upper(), normalize_endpoint_path(str(item.get("path", ""))))
+        if key in expected:
+            errors.append(f"registry/endpoint-permissions.json: duplicate normalized endpoint {key[0]} {key[1]}")
+        expected[key] = {
+            field: str(item[field])
+            for field in ("permission", "authorization")
+            if item.get(field)
+        }
+    for key in sorted(set(expected) - set(operations)):
+        errors.append(f"openapi/first-slice-v1.yaml: missing endpoint from manifest: {key[0]} {key[1]}")
+    for key in sorted(set(operations) - set(expected)):
+        errors.append(f"openapi/first-slice-v1.yaml: endpoint absent from manifest: {key[0]} {key[1]}")
+    for key in sorted(set(expected) & set(operations)):
+        for field in ("permission", "authorization"):
+            if expected[key].get(field) != operations[key].get(field):
+                errors.append(
+                    f"openapi/first-slice-v1.yaml: {key[0]} {key[1]} {field} "
+                    f"{operations[key].get(field)!r} does not match manifest {expected[key].get(field)!r}"
+                )
+    return sorted(set(errors))
+
+
 def looks_like_document_reference(target: str) -> bool:
     if "/" in target or "\\" in target:
         return True
@@ -372,6 +461,7 @@ def main() -> int:
         + validate_related_adrs(document_ids)
         + validate_event_references(prefixes)
         + validate_endpoint_permissions(prefixes)
+        + validate_openapi_endpoint_parity()
         + validate_internal_links()
         + validate_json_files()
         + validate_contract_files()

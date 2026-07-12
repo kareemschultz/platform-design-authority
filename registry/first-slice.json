@@ -133,8 +133,8 @@
     {"id":"payment.terminals","reason":"In-person terminal provider selection is open."}
   ],
   "depth_definitions": {
-    "full":"Implemented and accepted as part of the first-slice outcome.",
-    "prototype":"Implemented only to prove the architecture and selected workflow.",
-    "seam":"Contract and test double only; production capability is not promised."
+    "full":"Target delivery depth requiring implementation and acceptance as part of the first-slice outcome.",
+    "prototype":"Target delivery depth requiring implementation only to prove the architecture and selected workflow.",
+    "seam":"Target delivery depth requiring a contract and test double only; production capability is not promised."
   }
 }

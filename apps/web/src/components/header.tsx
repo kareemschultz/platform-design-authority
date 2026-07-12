@@ -11,9 +11,9 @@ export default function Header() {
 	] as const;
 
 	return (
-		<div>
+		<header className="border-b">
 			<div className="flex flex-row items-center justify-between px-2 py-1">
-				<nav className="flex gap-4 text-lg">
+				<nav aria-label="Primary" className="flex gap-4 text-lg">
 					{links.map(({ to, label }) => (
 						<Link href={to} key={to}>
 							{label}
@@ -25,7 +25,6 @@ export default function Header() {
 					<UserMenu />
 				</div>
 			</div>
-			<hr />
-		</div>
+		</header>
 	);
 }

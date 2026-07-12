@@ -71,10 +71,18 @@ export const env = createEnv({
 		BETTER_AUTH_TRUSTED_ORIGINS: exactOrigins,
 		BETTER_AUTH_URL: z.url(),
 		CORS_ORIGIN: exactOrigin,
-		DATABASE_URL: z.string().min(1),
+		DATABASE_URL: z
+			.string()
+			.min(1)
+			.refine(
+				(value) =>
+					value.startsWith("postgres://") || value.startsWith("postgresql://"),
+				{ message: "DATABASE_URL must be a PostgreSQL connection string" }
+			),
 		NODE_ENV: z
 			.enum(["development", "production", "test"])
 			.default("development"),
+		PORT: z.coerce.number().int().min(1).max(65_535).optional(),
 	},
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 });

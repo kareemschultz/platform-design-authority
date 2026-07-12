@@ -11,7 +11,9 @@ import { authClient } from "@/lib/auth-client";
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
 		onError: (error) => {
-			console.log(error);
+			// Prototype-only diagnostics; replace with governed error reporting
+			// before any tenant-visible release.
+			console.warn("Query error:", error);
 		},
 	}),
 });

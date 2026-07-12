@@ -3,22 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 
 import { orpc } from "@/utils/orpc";
 
-const TITLE_TEXT = `
- ██████╗ ███████╗████████╗████████╗███████╗██████╗
- ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
- ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
- ██╔══██╗██╔══╝     ██║      ██║   ██╔══╝  ██╔══██╗
- ██████╔╝███████╗   ██║      ██║   ███████╗██║  ██║
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝
-
- ████████╗    ███████╗████████╗ █████╗  ██████╗██╗  ██╗
- ╚══██╔══╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-    ██║       ███████╗   ██║   ███████║██║     █████╔╝
-    ██║       ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
-    ██║       ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
-    ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
- `;
-
 function getStatusText(isLoading: boolean, isConnected: boolean): string {
 	if (isLoading) {
 		return "Checking...";
@@ -28,22 +12,34 @@ function getStatusText(isLoading: boolean, isConnected: boolean): string {
 
 export default function Home() {
 	const healthCheck = useQuery(orpc.healthCheck.queryOptions());
-	const statusText = getStatusText(
-		healthCheck.isLoading,
-		Boolean(healthCheck.data)
-	);
+	const isConnected = Boolean(healthCheck.data);
+	const statusText = getStatusText(healthCheck.isLoading, isConnected);
 
 	return (
-		<div className="container mx-auto max-w-3xl px-4 py-2">
-			<pre className="overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
-			<div className="grid gap-6">
-				<section className="rounded-lg border p-4">
-					<h2 className="mb-2 font-medium">API Status</h2>
+		<div className="container mx-auto max-w-3xl px-4 py-8">
+			<h1 className="font-heading font-semibold text-2xl">
+				Controlled Prototype
+			</h1>
+			<p className="mt-1 text-muted-foreground text-sm">
+				Internal scaffold surface. No tenant, business-role, or domain-workflow
+				behavior is implemented here.
+			</p>
+			<div className="mt-6 grid gap-6">
+				<section
+					aria-labelledby="api-status-heading"
+					className="rounded-lg border p-4"
+				>
+					<h2 className="mb-2 font-medium" id="api-status-heading">
+						API Status
+					</h2>
 					<div className="flex items-center gap-2">
 						<div
-							className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
+							aria-hidden="true"
+							className={`h-2 w-2 rounded-full ${isConnected ? "bg-status-success" : "bg-status-critical"}`}
 						/>
-						<span className="text-muted-foreground text-sm">{statusText}</span>
+						<span className="text-muted-foreground text-sm" role="status">
+							{statusText}
+						</span>
 					</div>
 				</section>
 			</div>

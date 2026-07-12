@@ -10,10 +10,10 @@
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "test": "bun test src/*.test.ts"
   },
   "dependencies": {
-    "@better-auth/expo": "catalog:",
     "@meridian/db": "workspace:*",
     "@meridian/env": "workspace:*",
     "better-auth": "catalog:",

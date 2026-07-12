@@ -10,6 +10,7 @@ on:
       - "packages/**"
       - "ops/**"
       - ".dockerignore"
+      - ".gitattributes"
       - "biome.json"
       - "bts.jsonc"
       - "bun.lock"

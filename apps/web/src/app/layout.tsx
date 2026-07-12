@@ -21,8 +21,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-	description: "meridian",
-	title: "meridian",
+	// "Meridian" is the internal codename (ADR-0026). This scaffold title is
+	// internal-only and must be replaced by tenant branding before any
+	// tenant-visible release.
+	description: "Internal controlled prototype. Not a tenant-facing surface.",
+	title: {
+		default: "Meridian Prototype (Internal)",
+		template: "%s | Meridian Prototype",
+	},
 };
 
 export default function RootLayout({
@@ -36,9 +42,15 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
 			>
 				<Providers>
+					<a
+						className="sr-only z-50 rounded-md bg-background px-3 py-2 text-foreground ring-1 ring-ring focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
+						href="#main-content"
+					>
+						Skip to main content
+					</a>
 					<div className="grid h-svh grid-rows-[auto_1fr]">
 						<Header />
-						{children}
+						<main id="main-content">{children}</main>
 					</div>
 				</Providers>
 			</body>

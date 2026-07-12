@@ -46,6 +46,13 @@
 	--text-default: var(--foreground);
 	--text-muted: var(--muted-foreground);
 	--focus-ring: var(--ring);
+	/* Status roles from registry/design-tokens.json (color.light.status-*) */
+	--status-info: #0369a1;
+	--status-success: #047857;
+	--status-warning: #a16207;
+	--status-critical: #b91c1c;
+	--status-pending: #7c3aed;
+	--status-offline: #475569;
 	--density-compact-control: 2rem;
 	--density-comfortable-control: 2.5rem;
 	--density-touch-control: 3rem;
@@ -90,6 +97,13 @@
 	--text-default: var(--foreground);
 	--text-muted: var(--muted-foreground);
 	--focus-ring: var(--ring);
+	/* Status roles from registry/design-tokens.json (color.dark.status-*) */
+	--status-info: #38bdf8;
+	--status-success: #34d399;
+	--status-warning: #fbbf24;
+	--status-critical: #f87171;
+	--status-pending: #c4b5fd;
+	--status-offline: #94a3b8;
 }
 
 @theme inline {
@@ -105,6 +119,12 @@
 	--color-text-default: var(--text-default);
 	--color-text-muted: var(--text-muted);
 	--color-focus-ring: var(--focus-ring);
+	--color-status-info: var(--status-info);
+	--color-status-success: var(--status-success);
+	--color-status-warning: var(--status-warning);
+	--color-status-critical: var(--status-critical);
+	--color-status-pending: var(--status-pending);
+	--color-status-offline: var(--status-offline);
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

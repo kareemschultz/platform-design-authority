@@ -13,4 +13,6 @@ ENV SKIP_ENV_VALIDATION=
 EXPOSE 3000
 
 WORKDIR /app/apps/server
+# Drop root: the runtime only needs read access to the built output.
+USER node
 CMD ["bun", "dist/index.mjs"]

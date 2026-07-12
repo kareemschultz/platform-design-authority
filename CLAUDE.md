@@ -50,6 +50,7 @@ Before inventing an identifier or boundary, consult:
 - `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for technology, version, compatibility, and workaround claims
 - `14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md` before creating or handing off parallel work
 - `07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` for user, developer, release, or in-app help changes
+- `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
 - `04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `20-Strategy/FOUNDER_DECISION_REGISTER.md`
 

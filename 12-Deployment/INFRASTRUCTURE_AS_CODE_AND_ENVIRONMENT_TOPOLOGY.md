@@ -1,11 +1,11 @@
 ---
 document_id: PDA-DEP-012
 title: Infrastructure as Code and Environment Topology
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
-related_adrs: [ADR-0018, ADR-0023]
+related_adrs: [ADR-0018, ADR-0023, ADR-0024]
 ---
 
 # Infrastructure as Code and Environment Topology
@@ -57,7 +57,7 @@ Required tooling:
 | Identity and access | Workload roles and least privilege | Required | Required | Customer-adapted |
 | Network and DNS | Trust zones, ingress, egress, certificates | Required | Required | Reference implementation |
 | Application runtime | Containers, scaling, deployment, health | Required | Required | Supported variants |
-| PostgreSQL | Authoritative storage, backup, PITR | Required | Required | Supported variants |
+| PostgreSQL 18 | Authoritative storage, backup, PITR, minimal extension allowlist | Required | Required | Supported PG18 variants |
 | Redis or Valkey | Cache, rate, and bounded queue use | As required | As required | Supported variants |
 | Object storage | Files, receipts, exports, backups | Required | Required | S3-compatible reference |
 | Search | Search projections and rebuild | Prototype | Optional | Supported variants |
@@ -93,6 +93,7 @@ State contains sensitive metadata and receives Restricted handling, encryption, 
 8. Production and pilot data never enter lower environments without approved de-identification.
 9. Provider sandbox and production credentials are isolated.
 10. Environment naming appears in telemetry and deployment evidence.
+11. PostgreSQL images and providers reproduce ADR-0024's minimal extension baseline; Labs-only extensions use separate images/databases and state.
 
 ## Bootstrap and Dual Control
 

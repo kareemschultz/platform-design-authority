@@ -1,12 +1,12 @@
 ---
 document_id: PDA-ARC-018
 title: Workflow Runtime Decision Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
 verified_as_of: 2026-07-12
-related_adrs: [ADR-0003, ADR-0004, ADR-0023]
+related_adrs: [ADR-0003, ADR-0004, ADR-0023, ADR-0024]
 ---
 
 # Workflow Runtime Decision Matrix
@@ -66,7 +66,7 @@ Use ordinary application jobs for bounded short work, retain Temporal as the pre
 
 ## Prototype Exit Criteria
 
-- PG17 and PG18 pinned evaluation builds with HTTP disabled
+- A PostgreSQL 18 pinned evaluation build with HTTP disabled
 - Tenant/shared-role isolation and RLS tests
 - Crash, restart, failover, PITR, duplicate, cancellation, timeout, and stuck-instance tests
 - Connection, CPU, memory, WAL, table-growth, backup, and restore measurements

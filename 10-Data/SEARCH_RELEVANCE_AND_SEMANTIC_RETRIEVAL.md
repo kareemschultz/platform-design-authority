@@ -1,10 +1,11 @@
 ---
 document_id: PDA-DAT-002
 title: Search Relevance and Semantic Retrieval
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-12
+related_adrs: [ADR-0024]
 ---
 
 # Search Relevance and Semantic Retrieval
@@ -66,7 +67,7 @@ Measure precision, recall, ranking quality, success rate, reformulation, time to
 
 ## Semantic Retrieval
 
-- Begin with PostgreSQL full-text search and bounded pgvector prototypes.
+- Begin with PostgreSQL 18 core full-text search and evidence-triggered `pg_trgm`; keep pgvector in an isolated named prototype until admitted under ADR-0024.
 - Use approved embedding models through the AI gateway.
 - Record model, dimensions, normalization, source text version, and generation date.
 - Re-embed when source content, permissions, model, or chunking changes materially.

@@ -1,12 +1,12 @@
 ---
 document_id: PDA-ENG-020
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-12
 verified_as_of: 2026-07-12
-related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0023]
+related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024]
 ---
 
 # Technology Lifecycle, Compatibility, and Lessons Ledger
@@ -41,7 +41,9 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | oRPC | 1.14.8 | Preferred stable transport | OpenAPI generator beta; Hono body caveat | Canonical parity, responses, bodies/files/streams/errors | Plain OpenAPI layer; Node | Before lockfile/major |
 | oRPC | 2.0.0-beta.16 observed | Labs only | Pre-release | No critical-path use | Stable 1.x | Stable 2.0 |
 | Better-T-Stack | 3.36.3 | Scaffold only | `latest` changes and addon constraints | Pinned dry-run and generated review | Manual assembly | Every scaffold |
-| PostgreSQL | Select supported major in implementation | Authoritative database | Major/extensions unselected | Restore, migrations, decimals, isolation, performance | Supported PostgreSQL deployment | Prototype environment |
+| PostgreSQL | 18.4 current patch observed | Selected major; authoritative database | Patch evolves; extension/provider compatibility and AIO behavior require exact evidence | Restore, PITR, failover, migrations, decimals, isolation, performance, upgrades | Another supported PG18 deployment | Every PostgreSQL patch and environment lock |
+| pg_stat_statements | PostgreSQL 18 supplied | Required baseline extension/preload | Shared memory, restart, query-text privacy, overhead | Privileges, overhead, retention/reset, dashboards, failover/restore | Provider query insights/logs with reduced portability | Every PostgreSQL patch |
+| pg_trgm | PostgreSQL 18 supplied | Conditional approved search extension | Index write/storage cost and collation/search behavior | Relevance, GIN/GiST, size, write, locale and fallback tests | Core full-text/prefix search or external projection | Before first trigram index and PG patch |
 | Drizzle | Verify at implementation lock | Scaffold/evaluate | Complex ledger suitability unproven | Query, migration, ownership, transaction, decimal tests | Kysely or explicit SQL | Persistence work |
 | Node.js | Record active approved LTS | Runtime fallback | Exact line must match ecosystem support | Same critical suite and container build | Requires ADR to replace | Fallback build |
 | Fumadocs Core/UI | 16.11.3 | Preferred docs prototype | Package family versions differ and must be tested together | Bun/Node build, OpenAPI, search, accessibility, static/container preview | Nextra or Starlight | Before docs scaffold/upgrade |
@@ -68,6 +70,8 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | Documentation alternatives | `https://nextra.site/docs`; `https://docusaurus.io/docs/versioning`; `https://astro.build/themes/details/starlight/` | 2026-07-12 |
 | Changesets | `https://github.com/changesets/changesets`; `https://github.com/changesets/action` | 2026-07-12 |
 | pg_durable | `https://microsoft.github.io/pg_durable/`; `https://github.com/microsoft/pg_durable/releases/tag/v0.2.3`; `https://github.com/microsoft/pg_durable/blob/main/USER_GUIDE.md` | 2026-07-12 |
+| PostgreSQL 18 | `https://www.postgresql.org/docs/18/`; `https://www.postgresql.org/docs/18/release-18-4.html`; `https://www.postgresql.org/docs/18/functions-uuid.html` | 2026-07-12 |
+| PostgreSQL supplied extensions | `https://www.postgresql.org/docs/18/pgstatstatements.html`; `https://www.postgresql.org/docs/18/pgtrgm.html`; `https://www.postgresql.org/docs/18/pgcrypto.html` | 2026-07-12 |
 
 ## Lessons Ledger
 
@@ -87,6 +91,8 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 | TECH-LESSON-010 | 2026-07-12 | Active | Worktrees isolate files but do not communicate ownership or synchronize contents | GitHub Project/issue is live authority; one issue/branch/worktree/PR; structured handoffs | Process trial pending | Platform Engineering | Coordination tooling changes |
 | TECH-LESSON-011 | 2026-07-12 | Active | pg_durable 0.2.3 can durably orchestrate SQL but published images are evaluation-only and compensation is a proposal | Labs-only database-local comparison; retain Temporal/outbox boundaries | ADR-0023 prototype pending | Data Platform | Stable production evidence and passed gates |
 | TECH-LESSON-012 | 2026-07-12 | Active | Video summary named a nonexistent `df.weight` scheduler | Use official `df.wait_for_schedule()` and verify video claims against primary docs | Primary-source verification recorded | Data Platform | API changes |
+| TECH-LESSON-013 | 2026-07-12 | Active | PostgreSQL 18 natively supplies UUIDv7, so UUID helper extensions add no baseline value | Use core `uuidv7()` where approved; omit `uuid-ossp` and UUID-only `pgcrypto` use | ADR-0024 tests pending | Data Platform | PostgreSQL UUID policy changes |
+| TECH-LESSON-014 | 2026-07-12 | Active | Every preload/background-worker extension expands startup, failure, upgrade, restore, and provider constraints | Preload only `pg_stat_statements`; isolate conditional/Labs extensions | Extension matrix and recovery tests pending | Data Platform | Accepted extension admission |
 
 ## Entry Templates
 

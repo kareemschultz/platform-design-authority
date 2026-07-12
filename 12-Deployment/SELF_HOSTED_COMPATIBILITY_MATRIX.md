@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DEP-014
 title: Self Hosted Compatibility Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Self-Hosted Compatibility Matrix
@@ -20,7 +20,7 @@ The reference self-hosted architecture uses:
 - Linux on x86_64; arm64 requires separate certification
 - OCI-compatible containers
 - OpenTofu reference modules where applicable
-- PostgreSQL-compatible authoritative database
+- PostgreSQL 18 authoritative database on an approved patch with ADR-0024's minimal extension baseline
 - S3-compatible object storage
 - Redis or Valkey-compatible cache and bounded queue functions
 - Supported search, messaging, workflow, and observability adapters only when enabled
@@ -35,6 +35,7 @@ Each released version records:
 - Container runtime
 - Kubernetes versions where supported
 - PostgreSQL versions
+- Required, optional, unsupported, and Labs-only PostgreSQL extensions plus preload/restart privileges
 - Redis or Valkey versions
 - Object-storage compatibility
 - Search engine versions

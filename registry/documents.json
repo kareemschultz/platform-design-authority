@@ -38,13 +38,14 @@
       "document_id": "ADR-0004",
       "path": "18-Decisions/ADR-0004-TYPESCRIPT-POSTGRESQL-MODULAR-STACK.md",
       "title": "Adopt a TypeScript and PostgreSQL Platform Stack",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
       "related_adrs": [
         "ADR-0020",
-        "ADR-0023"
+        "ADR-0023",
+        "ADR-0024"
       ],
       "review_evidence": null
     },
@@ -277,14 +278,30 @@
       "document_id": "ADR-0023",
       "path": "18-Decisions/ADR-0023-EVALUATE-PG-DURABLE-FOR-DATABASE-LOCAL-WORKFLOWS.md",
       "title": "Evaluate pg_durable for Database-Local Workflows Without Replacing Temporal",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
       "related_adrs": [
         "ADR-0002",
         "ADR-0003",
-        "ADR-0004"
+        "ADR-0004",
+        "ADR-0024"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "ADR-0024",
+      "path": "18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md",
+      "title": "Adopt PostgreSQL 18 with a Minimal Extension Policy",
+      "version": "0.1.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0004",
+        "ADR-0023"
       ],
       "review_evidence": null
     },
@@ -382,7 +399,7 @@
       "document_id": "PDA-APP-001",
       "path": "19-Appendices/README.md",
       "title": "Appendices Section Index",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -470,6 +487,17 @@
       "document_id": "PDA-APP-015",
       "path": "19-Appendices/PG_DURABLE_VERIFICATION-2026-07-12.md",
       "title": "pg_durable Verification 2026-07-12",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-APP-016",
+      "path": "19-Appendices/POSTGRESQL_18_AND_EXTENSION_VERIFICATION-2026-07-12.md",
+      "title": "PostgreSQL 18 and Extension Verification 2026-07-12",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
@@ -578,7 +606,7 @@
       "document_id": "PDA-ARC-009",
       "path": "02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md",
       "title": "Recommended Technology Stack",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -589,7 +617,8 @@
         "ADR-0020",
         "ADR-0021",
         "ADR-0022",
-        "ADR-0023"
+        "ADR-0023",
+        "ADR-0024"
       ],
       "review_evidence": null
     },
@@ -712,6 +741,22 @@
       "document_id": "PDA-ARC-018",
       "path": "02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md",
       "title": "Workflow Runtime Decision Matrix",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0004",
+        "ADR-0023",
+        "ADR-0024"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-ARC-019",
+      "path": "02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md",
+      "title": "PostgreSQL 18 Extension Decision Matrix",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
@@ -719,7 +764,8 @@
       "related_adrs": [
         "ADR-0003",
         "ADR-0004",
-        "ADR-0023"
+        "ADR-0023",
+        "ADR-0024"
       ],
       "review_evidence": null
     },
@@ -891,11 +937,13 @@
       "document_id": "PDA-DAT-002",
       "path": "10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md",
       "title": "Search Relevance and Semantic Retrieval",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-10",
-      "related_adrs": [],
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0024"
+      ],
       "review_evidence": null
     },
     {
@@ -1012,13 +1060,14 @@
       "document_id": "PDA-DEP-012",
       "path": "12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md",
       "title": "Infrastructure as Code and Environment Topology",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [
         "ADR-0018",
-        "ADR-0023"
+        "ADR-0023",
+        "ADR-0024"
       ],
       "review_evidence": null
     },
@@ -1037,10 +1086,10 @@
       "document_id": "PDA-DEP-014",
       "path": "12-Deployment/SELF_HOSTED_COMPATIBILITY_MATRIX.md",
       "title": "Self Hosted Compatibility Matrix",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -1761,7 +1810,7 @@
       "document_id": "PDA-ENG-020",
       "path": "14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Engineering",
       "last_reviewed": "2026-07-12",
@@ -1772,7 +1821,8 @@
         "ADR-0020",
         "ADR-0021",
         "ADR-0022",
-        "ADR-0023"
+        "ADR-0023",
+        "ADR-0024"
       ],
       "review_evidence": null
     },

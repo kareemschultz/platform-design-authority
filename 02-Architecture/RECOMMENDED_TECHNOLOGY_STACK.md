@@ -1,12 +1,12 @@
 ---
 document_id: PDA-ARC-009
 title: Recommended Technology Stack
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
 verified_as_of: 2026-07-12
-related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0023]
+related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024]
 ---
 
 # Recommended Technology Stack
@@ -101,7 +101,7 @@ Bun/Hono/oRPC is the preferred Technical Prototypes 1–3 path under ADR-0020, n
 
 ### Primary Database
 
-Use PostgreSQL on an approved supported major as the authoritative transactional database.
+Use PostgreSQL 18 on the current approved security patch as the authoritative transactional database under ADR-0024. PostgreSQL 18.4 was current at the 2026-07-12 verification date; implementation pins the approved patch and immutable image/package digest.
 
 Database rules:
 
@@ -111,6 +111,15 @@ Database rules:
 - Append-oriented ledgers for finance, inventory, payroll, usage, and audit
 - Transactional outbox for reliable event publication
 - Read replicas, partitioning, and specialized extensions only when justified by evidence
+
+Extension baseline:
+
+- `pg_stat_statements` as the only always-preloaded module
+- `pg_trgm` only when an approved fuzzy-search index is implemented
+- Native PostgreSQL `uuidv7()` instead of UUID-generation extensions
+- pgvector, `pg_durable`, PostGIS, pgAudit, scheduling, partition-management, time-series, distributed, and replication extensions only after their named admission trigger
+
+See `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`.
 
 ### Database Access
 

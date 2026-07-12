@@ -1,14 +1,14 @@
 ---
 document_id: ADR-0023
 title: Evaluate pg_durable for Database-Local Workflows Without Replacing Temporal
-version: 0.1.0
+version: 0.2.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
 last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
-related_adrs: [ADR-0002, ADR-0003, ADR-0004]
+related_adrs: [ADR-0002, ADR-0003, ADR-0004, ADR-0024]
 ---
 
 # ADR-0023 — Evaluate pg_durable for Database-Local Workflows Without Replacing Temporal
@@ -73,7 +73,7 @@ Prohibited until a later accepted ADR:
 
 ## Required Prototype Controls
 
-- Use an isolated PostgreSQL 17/18 Labs instance with synthetic data and immutable image/package digest.
+- Use an isolated PostgreSQL 18 Labs instance with synthetic data and immutable image/package digest; PostgreSQL 17 support is vendor evidence, not a platform target.
 - Compile with HTTP disabled and deny external provider calls.
 - Map one platform tenant and actor context explicitly; prove that shared application roles cannot cross tenant state.
 - Measure connection, CPU, WAL, table growth, backup, PITR, failover, cancellation, retry, duplicate effect, and noisy-neighbor behavior.

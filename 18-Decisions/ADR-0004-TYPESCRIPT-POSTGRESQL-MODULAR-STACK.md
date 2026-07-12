@@ -1,14 +1,14 @@
 ---
 document_id: ADR-0004
 title: Adopt a TypeScript and PostgreSQL Platform Stack
-version: 0.4.0
+version: 0.5.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
 last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
-related_adrs: [ADR-0020, ADR-0023]
+related_adrs: [ADR-0020, ADR-0023, ADR-0024]
 ---
 
 # ADR-0004 — Adopt a TypeScript and PostgreSQL Platform Stack
@@ -52,7 +52,7 @@ The preferred initial implementation stack is:
 
 - Next.js and React for web applications
 - Bun, Hono, and oRPC as the preferred controlled-prototype backend under ADR-0020, with an active Node.js LTS fallback
-- PostgreSQL with explicit type-safe SQL access
+- PostgreSQL 18 on the current approved security patch, with explicit type-safe SQL access and the minimal extension policy in ADR-0024
 - Redis-compatible infrastructure for cache and short-lived coordination
 - A transactional outbox for event reliability
 - Temporal for durable workflows when the first qualifying workflows are implemented
@@ -113,6 +113,7 @@ Scaffolding convenience does not override architecture. Production adoption of B
 - Performance benchmarks before introducing additional infrastructure
 - ADR review before adopting a second general backend language or replacing PostgreSQL
 - ADR amendment before replacing the preferred production backend framework
+- Extension admission review before adding any PostgreSQL extension outside the ADR-0024 baseline
 
 ## Validation
 

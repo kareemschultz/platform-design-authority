@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-005
 title: Roadmap Section Index
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-12
 ---
 
 # Roadmap
@@ -15,6 +15,7 @@ last_reviewed: 2026-07-11
 - `FIRST_SLICE_MANIFEST.md`
 - `FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`
 - `TECHNICAL_PROTOTYPE_PLAN.md`
+- `FIRST_SLICE_IMPLEMENTATION_PLAN.md`
 - `RATIFICATION_WAVES.md`
 - `registry/first-slice.json`
 - `registry/first-slice-tests.json`
@@ -29,7 +30,7 @@ last_reviewed: 2026-07-11
 
 Technical Prototypes 1–3 may begin after the final audit checkpoint: identity and tenant context, Catalog and Inventory ledger, and POS cash workflow.
 
-The broader first slice proceeds only after named blockers, founder gates, provider and jurisdiction evidence, and prototype results are dispositioned.
+The broader first slice proceeds only after named blockers, founder gates, provider and jurisdiction evidence, and prototype results are dispositioned. Workstream sequencing, package targets, and per-milestone gates are defined in `FIRST_SLICE_IMPLEMENTATION_PLAN.md`.
 
 ## Remaining Execution Evidence
 

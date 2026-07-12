@@ -1946,7 +1946,7 @@
       "document_id": "PDA-ENGR-001",
       "path": "docs/blueprint/14-Engineering/README.md",
       "title": "Engineering Section Index",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -2035,6 +2035,17 @@
         "ADR-0005",
         "ADR-0022"
       ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-ENGR-016",
+      "path": "docs/blueprint/14-Engineering/ENGINEERING_NOTEBOOK.md",
+      "title": "Engineering Notebook",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
       "review_evidence": null
     },
     {
@@ -2202,9 +2213,20 @@
       "document_id": "PDA-FND-015",
       "path": "docs/blueprint/00-Foundation/README.md",
       "title": "Foundation Section Index",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-FND-016",
+      "path": "docs/blueprint/00-Foundation/PLATFORM_NORTH_STAR.md",
+      "title": "Platform North Star",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Founder",
       "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
@@ -3004,10 +3026,10 @@
       "document_id": "PDA-RDM-005",
       "path": "docs/blueprint/17-Roadmap/README.md",
       "title": "Roadmap Section Index",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3020,6 +3042,23 @@
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-RDM-007",
+      "path": "docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md",
+      "title": "Meridian First-Slice Implementation Plan",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0013",
+        "ADR-0020",
+        "ADR-0025"
+      ],
       "review_evidence": null
     },
     {
@@ -3098,6 +3137,28 @@
       "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": "docs/reviews/FABLE5_FOURTH_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-009",
+      "path": "docs/reviews/ARCHITECTURE_RISK_REGISTER.md",
+      "title": "Architecture Risk Register",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-REV-010",
+      "path": "docs/reviews/FABLE5_STANDING_AUDIT_CHARTER.md",
+      "title": "Fable 5 Standing Audit Charter",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Founder",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [],
+      "review_evidence": null
     },
     {
       "document_id": "PDA-SEC-001",

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-001
 title: Engineering Section Index
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -17,6 +17,7 @@ last_reviewed: 2026-07-12
 - `ENGINEERING_HANDBOOK.md`
 - `IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md`
 - `ARCHITECTURE_DEPENDENCY_RULES.md`
+- `ENGINEERING_NOTEBOOK.md`
 - `registry/architecture-rules.json`
 - `docs/blueprint/07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md`
 - `docs/blueprint/07-Developer-Platform/PROJECT_AGENT_SKILLS.md`

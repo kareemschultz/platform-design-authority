@@ -1,10 +1,71 @@
 ---
-title: User Guides
-description: Controlled-prototype information architecture
+title: Prototype User Guide
+description: Use the implemented Meridian web authentication and dashboard surfaces
 ---
 
-# User Guides
+# Use the current web prototype
 
-Task guidance follows implemented and reviewed behavior.
+The current prototype demonstrates connectivity, email-and-password authentication, session-protected navigation, theme selection, and one protected oRPC response. It is not the first-slice retail application.
 
-Bounded taxonomy placeholder under ADR-0021; not production publication approval.
+## Available actions
+
+| Action | Authentication | Current behavior |
+|---|---|---|
+| View the home page | Not required | Shows whether the API health query connected |
+| Create a prototype account | Not required | Creates a Better Auth user and session |
+| Sign in | Not required | Starts a session for an existing account |
+| Open the dashboard | Required | Redirects unauthenticated visitors to `/login` |
+| Read protected prototype data | Required | Returns the signed-in user through oRPC context |
+| Change color mode | Not required | Changes the local light/dark/system presentation |
+| Sign out | Required | Ends the session and returns home |
+
+No business permission, entitlement, tenant, organization, Party, or domain role is assigned by these actions.
+
+## Create an account
+
+1. Select **Sign In** in the header.
+2. If the sign-in form is visible, select **Need an account? Sign Up**.
+3. Enter a name with at least two characters.
+4. Enter a syntactically valid email address. Use synthetic data in prototype environments.
+5. Enter a password with at least eight characters.
+6. Select **Sign Up**.
+
+On success, the application opens the dashboard and displays a success notification. On failure, the form displays the Better Auth error without creating a business identity.
+
+## Sign in
+
+1. Open `/login`.
+2. Select **Already have an account? Sign In** if necessary.
+3. Enter the account email and password.
+4. Select **Sign In**.
+
+The application opens `/dashboard` after a successful sign-in. A failed attempt remains on the form and displays an error.
+
+## Use the dashboard
+
+The dashboard requires a current session. It shows the signed-in name and calls the protected `privateData` prototype procedure. If the session is absent, the server redirects to `/login`.
+
+The dashboard does not yet provide sales, inventory, register, customer, reporting, administration, offline, or financial workflows. Those remain governed first-slice requirements, not implemented behavior.
+
+## Sign out
+
+1. Open the account menu showing your name.
+2. Confirm the displayed email belongs to the prototype account.
+3. Select **Sign Out**.
+
+The application ends the session and returns to the home page.
+
+## Accessibility and responsive use
+
+The forms use labels, native input types, inline validation text, disabled submission states, and keyboard-operable owned UI primitives. Formal WCAG 2.2 AA evidence is not yet claimed. Report keyboard, focus, zoom, contrast, screen-reader, touch-target, or viewport problems as prototype defects.
+
+## Offline and degraded behavior
+
+- Authentication and the protected dashboard require the server and database.
+- The home page reports a disconnected API when the health query fails.
+- The PWA seam does not authorize offline business transactions.
+- Do not treat cached presentation as current authority.
+
+## Data and support boundaries
+
+Use synthetic data only. This prototype has no customer-support workflow, account recovery, email verification, MFA, tenant administration, privacy request UI, or production retention policy. Reset disposable local data only through the operator procedure in [Administration](/docs/administration).

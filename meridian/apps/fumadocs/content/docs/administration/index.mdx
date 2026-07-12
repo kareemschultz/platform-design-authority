@@ -1,10 +1,95 @@
 ---
-title: Administration
-description: Controlled-prototype information architecture
+title: Prototype Administration
+description: Operate the local Meridian scaffold without implying production readiness
 ---
 
-# Administration
+# Administer the local prototype
 
-Guidance names permissions, audit, reversal, and support boundaries.
+This guide is for developers or reviewers responsible for a disposable local Meridian environment. The scaffold does not implement a Platform Owner, tenant administrator, support operator, or delegated business-administration role.
 
-Bounded taxonomy placeholder under ADR-0021; not production publication approval.
+## Authority boundary
+
+Access to Docker or the local machine is infrastructure access, not an application permission. Better Auth owns prototype users and sessions only. Do not use database access to create Party records, business roles, permissions, entitlements, tenant relationships, or authoritative domain facts.
+
+## Required configuration
+
+The server validates these variables at startup:
+
+| Variable | Requirement |
+|---|---|
+| `BETTER_AUTH_SECRET` | At least 32 random characters |
+| `BETTER_AUTH_TRUSTED_ORIGINS` | Comma-separated exact origins |
+| `BETTER_AUTH_URL` | Server URL, normally `http://localhost:3000` |
+| `CORS_ORIGIN` | Exact web origin, normally `http://localhost:3001` |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `NODE_ENV` | `development`, `production`, or `test` |
+| `NEXT_PUBLIC_SERVER_URL` | Browser-visible server URL |
+
+Do not add paths, queries, fragments, or trailing slashes to trusted origins.
+
+## Start and inspect services
+
+```bash
+bun run docker:up
+docker compose exec server bun run --cwd /app/packages/db db:migrate
+bun run docker:logs
+```
+
+The PostgreSQL service must report healthy before schema or authentication operations. The database is intentionally not published to the host by Compose; application containers reach it through the Compose network. Direct source-mode server development therefore requires a separately configured host-reachable PostgreSQL 18 instance.
+
+## Health checks
+
+| Check | Command | Expected result |
+|---|---|---|
+| API root | `curl --fail http://localhost:3000/` | `OK` |
+| Web root | `curl --fail http://localhost:3001/` | Successful HTTP response |
+| PostgreSQL | `docker compose exec -T postgres pg_isready -U postgres` | Accepting connections |
+| Version | `docker compose exec -T postgres psql -U postgres -d meridian -Atc "SHOW server_version;"` | `18.4...` |
+| Extensions | `docker compose exec -T postgres psql -U postgres -d meridian -Atc "SELECT extname FROM pg_extension ORDER BY extname;"` | `pg_stat_statements` and `plpgsql` only |
+
+ADR-0024 prohibits adding optional extensions merely for convenience.
+
+## Backup and restore
+
+For synthetic local data, create a custom-format dump:
+
+```bash
+docker compose exec -T postgres pg_dump -U postgres -d meridian --format=custom > meridian.dump
+```
+
+Restore only into a disposable, compatible local environment:
+
+```bash
+docker compose exec -T postgres pg_restore -U postgres -d meridian --clean --if-exists < meridian.dump
+```
+
+These commands are prototype notes, not production backup or disaster-recovery evidence. Production requires encrypted storage, access control, retention, monitoring, point-in-time recovery, restore drills, privacy-journal replay, and documented recovery objectives.
+
+## Reset local data
+
+```bash
+docker compose down -v --remove-orphans
+bun run docker:up
+docker compose exec server bun run --cwd /app/packages/db db:migrate
+```
+
+This permanently removes the local Compose volume. Confirm that the environment contains only disposable synthetic data before running it.
+
+## Stop services
+
+```bash
+bun run docker:down
+```
+
+Use `docker compose down -v --remove-orphans` only when a complete disposable reset is intended.
+
+## Not yet implemented
+
+- tenant and organization administration;
+- business roles, permissions, entitlements, and feature policy;
+- support access or impersonation;
+- user suspension, recovery, verification, MFA, and risk controls;
+- audit review and privacy-request administration;
+- production secrets, backups, failover, observability, and incident procedures.
+
+Those controls remain required by the Platform Constitution and first-slice specifications.

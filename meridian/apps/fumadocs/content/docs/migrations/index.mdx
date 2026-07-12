@@ -1,10 +1,96 @@
 ---
-title: Migrations
-description: Controlled-prototype information architecture
+title: Database Migrations
+description: Generate, review, apply, and recover prototype Drizzle migrations
 ---
 
-# Migrations
+# Manage prototype database changes
 
-Guides derive from reviewed releases and rollback evidence.
+This guide applies to the local PostgreSQL 18.4 scaffold. It does not authorize a production migration or replace the platform migration, backup, privacy, and recovery specifications.
 
-Bounded taxonomy placeholder under ADR-0021; not production publication approval.
+## Choose the correct operation
+
+| Command | Appropriate use |
+|---|---|
+| `bun run db:generate` | Generate migration artifacts from reviewed Drizzle schema changes |
+| `bun run db:migrate` | Apply committed migrations in order |
+| `bun run db:push` | Not supported against the baseline database because extension-owned views are outside the Drizzle schema |
+| `bun run db:studio` | Inspect synthetic local data; never bypass application ownership rules |
+
+Use committed migrations for the bundled baseline. Do not use `db:push` to reconcile a database containing `pg_stat_statements`; schema introspection may attempt to alter extension-owned objects.
+
+## Before changing a schema
+
+1. Identify the authoritative owner and governing capability.
+2. Confirm the change does not write another domain's private data.
+3. Define tenant isolation, identifiers, money/quantity/time semantics, classification, retention, privacy, audit, and correction behavior.
+4. Determine whether an ADR or founder decision is required.
+5. Back up the disposable test database if its evidence matters.
+6. Confirm PostgreSQL 18 and extension-policy compatibility.
+
+Better Auth schema belongs to the authentication/session boundary. It must not absorb Party, business roles, permissions, entitlements, tenant hierarchy, or domain-owned records.
+
+## Generate a migration
+
+Update owned schema source under `packages/db/src/schema`, then run:
+
+```bash
+bun run db:generate
+```
+
+Review the generated SQL for:
+
+- destructive or locking operations;
+- missing tenant keys or isolation support;
+- unsafe defaults and nullability transitions;
+- identifier, currency, quantity, timezone, and precision errors;
+- extension or privilege changes;
+- cross-domain tables or foreign keys;
+- irreversible deletion of financial, inventory, payroll, stored-value, cash, audit, or privacy facts.
+
+Commit the schema and migration together.
+
+## Test the migration
+
+Test both an empty database and a representative synthetic upgrade path:
+
+```bash
+bun run db:migrate
+bun run test
+bun run check-types
+```
+
+The host command requires a host-reachable disposable PostgreSQL database. For the bundled private Compose database, start the stack and run the migration inside the server container:
+
+```bash
+bun run docker:up
+docker compose exec server bun run --cwd /app/packages/db db:migrate
+```
+
+Verify application startup, authentication, health, duplicate execution behavior, and expected constraints. Material migrations also require measured duration, lock behavior, failure injection, restart behavior, and recovery evidence.
+
+## Rollback and correction
+
+Do not assume generated down-SQL makes a migration safe. The change owner must define one of:
+
+- backward-compatible roll-forward;
+- application rollback with schema compatibility;
+- restored disposable environment;
+- reviewed compensating data migration.
+
+Ledger-like and evidentiary facts use reversal or compensation, not destructive history edits. Privacy transformations follow ADR-0014 and deletion-journal controls.
+
+## Local reset
+
+For a disposable synthetic environment only:
+
+```bash
+docker compose down -v --remove-orphans
+bun run docker:up
+docker compose exec server bun run --cwd /app/packages/db db:migrate
+```
+
+This deletes the local volume. Never use it against retained or customer data.
+
+## Release evidence still required
+
+Production migration approval requires reviewed artifacts, backups, restore proof, rollback/roll-forward procedure, observability, access control, tenant-isolation tests, data reconciliation, privacy handling, maintenance/online strategy, operator runbook, and release authorization.

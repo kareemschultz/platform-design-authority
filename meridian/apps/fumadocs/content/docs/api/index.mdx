@@ -1,10 +1,80 @@
 ---
-title: API Reference
-description: Controlled-prototype information architecture
+title: Prototype API Reference
+description: Implemented Hono, oRPC, OpenAPI, and Better Auth surfaces
 ---
 
-# API Reference
+# Prototype API surfaces
 
-Generated, source-labelled reference pending publication approval.
+This page documents only the implemented scaffold. The canonical first-slice contract remains `openapi/first-slice-v1.yaml`; the prototype does not claim to implement that business API.
 
-Bounded taxonomy placeholder under ADR-0021; not production publication approval.
+## Base URL
+
+The local server listens at `http://localhost:3000` by default.
+
+| Surface | Path | Authentication | Purpose |
+|---|---|---|---|
+| Process health | `GET /` | None | Returns plain-text `OK` |
+| Better Auth | `GET|POST /api/auth/*` | Endpoint-dependent | Email/password and session endpoints |
+| oRPC transport | `/rpc/*` | Procedure-dependent | Type-safe application procedures |
+| oRPC OpenAPI handler | `/api-reference/*` | Procedure-dependent | Generated prototype schema/reference surface |
+
+The server allows `GET`, `POST`, and `OPTIONS` from the exact configured `CORS_ORIGIN`. Credentials are enabled for the approved browser origin.
+
+## Implemented procedures
+
+### `healthCheck`
+
+- Classification: public prototype procedure
+- Input: none
+- Result: string `OK`
+- Used by: the web home-page connection indicator
+- Business authority: none
+
+### `privateData`
+
+- Classification: authenticated prototype procedure
+- Input: none
+- Result: a prototype message and current Better Auth user
+- Denial: unauthenticated requests are rejected by the protected procedure
+- Business authority: none
+
+The returned user is an authentication identity. It is not a Party, employee, customer, tenant membership, business role, permission set, or entitlement.
+
+## Typed client use
+
+Web clients consume the generated `AppRouterClient` through the repository oRPC/TanStack Query adapter. Do not duplicate request or response shapes manually. New procedures must declare ownership, authentication, tenant context, permission or explicit authenticated context, validation, error behavior, idempotency where applicable, audit, and tests.
+
+## OpenAPI authority
+
+There are two distinct artifacts:
+
+1. The scaffold-generated oRPC reference reflects only currently implemented prototype procedures.
+2. Root `openapi/first-slice-v1.yaml` is the governed draft contract for the planned vertical slice.
+
+Neither artifact proves production implementation. Generated reference pages must identify their source revision and must not become a separately edited contract.
+
+## Error and security behavior
+
+- Server errors pass through the oRPC error boundary and are logged in the prototype process.
+- Authentication cookies use hardened attributes according to environment.
+- Trusted origins must be exact URL origins.
+- The prototype does not yet implement tenant context, business permissions, entitlements, rate limits, audit records, idempotency, or production error redaction for domain procedures.
+
+Do not expose the prototype server to the public internet or use real tenant data.
+
+## Verification
+
+```bash
+curl --fail http://localhost:3000/
+bun run test
+bun run check-types
+```
+
+The CI workflow also builds the Bun server, starts the Node fallback entry, and probes the root health endpoint.
+
+## Governing sources
+
+- ADR-0006 and PDA-PLT-028 for Better Auth boundaries
+- ADR-0020 and PDA-ARC-019 for Bun/Hono/oRPC prototype policy
+- PDA-DEV-010 for generated reference ownership
+- `openapi/first-slice-v1.yaml` for the governed first-slice contract

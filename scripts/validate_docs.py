@@ -512,6 +512,16 @@ def validate_governance_exemptions() -> list[str]:
     scoped = [ROOT / "README.md", ROOT / "CLAUDE.md", ROOT / "AGENTS.md"]
     scoped.extend(sorted((ROOT / "reviews").glob("*.md")))
     errors: list[str] = []
+    seen: set[tuple[str, str]] = set()
+    for item in exemptions:
+        rel = str(item.get("path", ""))
+        rule = str(item.get("rule", ""))
+        key = (rel, rule)
+        if key in seen:
+            errors.append(f"registry/governance-exemptions.json: duplicate exemption {rel!r} for {rule!r}")
+        seen.add(key)
+        if not rel or not (ROOT / rel).exists():
+            errors.append(f"registry/governance-exemptions.json: exemption path does not exist: {rel!r}")
     for document in scoped:
         if not document.exists():
             continue

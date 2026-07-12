@@ -1,6 +1,9 @@
 name: Meridian Prototype
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     paths:
       - "apps/**"

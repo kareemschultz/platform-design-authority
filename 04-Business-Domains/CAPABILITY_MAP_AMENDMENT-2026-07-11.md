@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DOM-090
 title: Capability Map Amendment 2026-07-11
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -53,11 +53,7 @@ This document is a canonical capability source consumed by the registry generato
 
 Business DNA remains a shared-engine registration. Its profile data and recommendations use governed Platform Configuration, Extensible Metadata, Industry Pack, Jurisdiction Pack, and AI contracts.
 
-## Commerce
-
-- `commerce.customer-account-sales`
-
-Customer-account or on-account tender requires a Finance-owned receivable, credit policy, collection workflow, and jurisdiction review. It is registered for future ownership clarity but explicitly deferred from the first retail slice.
+`commerce.customer-account-sales` is already present in the main Business Capability Map and is explicitly deferred from the first slice.
 
 ## Governance Rules
 

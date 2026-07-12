@@ -328,6 +328,21 @@
       "review_evidence": null
     },
     {
+      "document_id": "ADR-0026",
+      "path": "docs/blueprint/18-Decisions/ADR-0026-USE-MERIDIAN-AS-INTERNAL-PLATFORM-CODENAME.md",
+      "title": "Use Meridian as Internal Platform Codename",
+      "version": "0.1.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0016",
+        "ADR-0020",
+        "ADR-0025"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-AI-001",
       "path": "docs/blueprint/06-AI/README.md",
       "title": "AI Platform Section Index",

@@ -18,12 +18,11 @@ on:
       - "18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md"
       - "registry/**"
       - "scripts/**"
-  push:
-    branches:
-      - "prototype/meridian-scaffold"
-    paths:
-      - "meridian/**"
-      - ".github/workflows/meridian-prototype.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: meridian-prototype-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

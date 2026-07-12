@@ -11,7 +11,7 @@ last_reviewed: 2026-07-11
 
 ## Purpose
 
-Explain the strategic reason for a governed Business DNA capability. The sole architectural and data-model authority is `03-Business-Engines/BUSINESS_DNA_ENGINE.md` (`PDA-ENG-019`). This strategy document cannot add dimensions, entities, ownership, lifecycle, or implementation rules independently.
+Explain the strategic reason for a governed Business DNA capability. The sole architectural and data-model authority is `docs/blueprint/03-Business-Engines/BUSINESS_DNA_ENGINE.md` (`PDA-ENG-019`). This strategy document cannot add dimensions, entities, ownership, lifecycle, or implementation rules independently.
 
 ## Authority Boundary
 

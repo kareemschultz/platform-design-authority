@@ -15,7 +15,7 @@ related_adrs: [ADR-0005, ADR-0022]
 
 Select the reproducible shadcn/create starting configuration for the authenticated platform web applications without treating a generated preset as the final design system. The selection is optimized for dense operational work, accessible touch workflows, white label, localization, charts, and source ownership.
 
-The official facts and screenshot evaluation behind this decision are recorded in `19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`.
+The official facts and screenshot evaluation behind this decision are recorded in `docs/blueprint/19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`.
 
 ## Selected Bootstrap Configuration
 
@@ -157,10 +157,10 @@ The selection remains Draft until the prototype covers:
 
 ## Related Documents
 
-- `09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
-- `09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md`
-- `09-UX/ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md`
-- `09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
-- `09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
-- `18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md`
-- `19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
+- `docs/blueprint/09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md`
+- `docs/blueprint/09-UX/ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md`
+- `docs/blueprint/09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
+- `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
+- `docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md`
+- `docs/blueprint/19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`

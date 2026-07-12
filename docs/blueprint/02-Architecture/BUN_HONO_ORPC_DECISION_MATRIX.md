@@ -86,6 +86,6 @@ Every workaround needs an owner, upstream link when available, regression eviden
 
 ## References
 
-- `18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md`
-- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
-- `19-Appendices/BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md`
+- `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
+- `docs/blueprint/19-Appendices/BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md`

@@ -10,7 +10,7 @@ Use this workflow before making a time-sensitive technology claim or changing th
 ## Read First
 
 - `CLAUDE.md`
-- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
+- `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
 - Governing ADRs and affected specifications
 - Implementation manifests, lockfiles, container files, and compatibility tests when they exist
 - `registry/documents.json` and `registry/architecture-rules.json`

@@ -15,7 +15,7 @@ Define workload sizing, performance isolation, cost governance, regional expansi
 
 ## First-Slice Capacity Envelope
 
-The provisional workload envelope is governed by `17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md` and includes pilot-scale tenants, stores, registers, products, sales, inventory ledger entries, stored-value instruments, webhook delivery, and offline queues.
+The provisional workload envelope is governed by `docs/blueprint/17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md` and includes pilot-scale tenants, stores, registers, products, sales, inventory ledger entries, stored-value instruments, webhook delivery, and offline queues.
 
 Capacity testing must cover:
 

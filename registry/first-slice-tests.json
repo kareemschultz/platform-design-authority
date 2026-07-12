@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "source_document": "16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
+  "source_document": "docs/blueprint/16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
   "source_registry": "registry/first-slice.json",
   "dimensions": [
     "happy_path",

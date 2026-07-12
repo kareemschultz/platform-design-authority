@@ -74,7 +74,7 @@ Select Option C for Technical Prototypes 1–3.
 5. Test Better Auth, PostgreSQL drivers, workflows/jobs, provider SDKs, files, streaming, webhooks, and native networking on exact versions.
 6. Keep a Node container buildable from the same commit. Node-only workers may not bypass application contracts or domain ownership.
 7. Prefer Web Standards APIs and isolate necessary Bun APIs in infrastructure adapters enforced by architecture tests.
-8. Record compatibility failures, workarounds, upstream issues, alternatives, expiry conditions, and regression tests in `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`.
+8. Record compatibility failures, workarounds, upstream issues, alternatives, expiry conditions, and regression tests in `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`.
 
 ## Consequences
 
@@ -121,11 +121,11 @@ Production candidacy requires exact environment records; Bun/Node portability su
 
 ## References
 
-- `02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md`
-- `02-Architecture/BETTER_T_STACK_AND_CLIENT_ARCHITECTURE.md`
-- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
-- `19-Appendices/BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md`
-- `17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md`
+- `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md`
+- `docs/blueprint/02-Architecture/BETTER_T_STACK_AND_CLIENT_ARCHITECTURE.md`
+- `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
+- `docs/blueprint/19-Appendices/BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md`
 
 ## Review Record
 

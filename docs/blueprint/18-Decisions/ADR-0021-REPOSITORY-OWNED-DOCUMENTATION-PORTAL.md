@@ -1,14 +1,14 @@
 ---
 document_id: ADR-0021
 title: Use a Repository-Owned Fumadocs Documentation Portal
-version: 0.1.0
+version: 0.2.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
 last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
-related_adrs: [ADR-0005, ADR-0016, ADR-0022]
+related_adrs: [ADR-0005, ADR-0016, ADR-0022, ADR-0025]
 ---
 
 # ADR-0021 — Use a Repository-Owned Fumadocs Documentation Portal
@@ -44,7 +44,7 @@ Use Fumadocs in `apps/docs` as the preferred controlled-prototype documentation 
 
 ## Rationale
 
-Fumadocs scored highest in `02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` because it aligns with Next.js, TypeScript, Tailwind, Base UI, Git review, self-hosting, search, and first-party OpenAPI rendering. Native MDX has lower dependency overhead but transfers navigation, search, API rendering, accessibility, redirects, and content tooling to the platform team.
+Fumadocs scored highest in `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` because it aligns with Next.js, TypeScript, Tailwind, Base UI, Git review, self-hosting, search, and first-party OpenAPI rendering. Native MDX has lower dependency overhead but transfers navigation, search, API rendering, accessibility, redirects, and content tooling to the platform team.
 
 ## Consequences
 
@@ -90,9 +90,9 @@ Begin with getting-started, task guides, administration, developer/API, troubles
 
 ## References
 
-- `02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md`
-- `07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md`
-- `19-Appendices/DOCUMENTATION_TANSTACK_AND_BASE_UI_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md`
+- `docs/blueprint/07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md`
+- `docs/blueprint/19-Appendices/DOCUMENTATION_TANSTACK_AND_BASE_UI_VERIFICATION-2026-07-12.md`
 
 ## Review Record
 
@@ -108,3 +108,4 @@ Begin with getting-started, task guides, administration, developer/API, troubles
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial proposal |
+| 0.2.0 | 2026-07-12 | Platform Design Authority | Align the selected documentation application path with the normalized root monorepo under ADR-0025 |

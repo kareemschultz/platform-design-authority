@@ -86,7 +86,7 @@ packages/
 
 Next.js is the default for administration, portals, storefronts, onboarding, and public pages. Authoritative domain behavior remains in backend application services rather than React components, route handlers, or Server Actions.
 
-The form standard is **not yet decided**. `02-Architecture/TANSTACK_DECISION_MATRIX.md` owns the evaluation criteria and result.
+The form standard is **not yet decided**. `docs/blueprint/02-Architecture/TANSTACK_DECISION_MATRIX.md` owns the evaluation criteria and result.
 
 ### Backend Application
 
@@ -97,7 +97,7 @@ The form standard is **not yet decided**. `02-Architecture/TANSTACK_DECISION_MAT
 - Internal command and query application contracts
 - Webhooks and versioned events
 
-Bun/Hono/oRPC is the preferred Technical Prototypes 1–3 path under ADR-0020, not a production ratification. Critical packages remain runtime-neutral, critical suites run on Bun and Node where portable, and the Node image stays buildable. NestJS/Fastify remains a structured alternative if Hono fails architecture or operability gates. `02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` owns the comparison.
+Bun/Hono/oRPC is the preferred Technical Prototypes 1–3 path under ADR-0020, not a production ratification. Critical packages remain runtime-neutral, critical suites run on Bun and Node where portable, and the Node image stays buildable. NestJS/Fastify remains a structured alternative if Hono fails architecture or operability gates. `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` owns the comparison.
 
 ### Primary Database
 
@@ -119,7 +119,7 @@ Extension baseline:
 - Native PostgreSQL `uuidv7()` instead of UUID-generation extensions
 - pgvector, `pg_durable`, PostGIS, pgAudit, scheduling, partition-management, time-series, distributed, and replication extensions only after their named admission trigger
 
-See `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`.
+See `docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`.
 
 ### Database Access
 
@@ -206,7 +206,7 @@ Use Better Auth for approved combinations of:
 - Organization-aware authentication context
 - OIDC, OAuth, SAML, SCIM, API keys, device authorization, and OIDC-provider scenarios after validation
 
-The first-slice composition is intentionally minimal and deny-by-default. Use `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before adding any official, managed-infrastructure, partner, or community plugin. Payment/subscription plugins do not own platform or tenant business billing; Agent Auth and MCP do not own platform AI authority; Better Auth Organization/Admin roles do not own business authorization.
+The first-slice composition is intentionally minimal and deny-by-default. Use `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before adding any official, managed-infrastructure, partner, or community plugin. Payment/subscription plugins do not own platform or tenant business billing; Agent Auth and MCP do not own platform AI authority; Better Auth Organization/Admin roles do not own business authorization.
 
 Better Auth v1.6.23 was the current stable release observed on 2026-07-12. Exact core and separate plugin package versions are pinned together and tested across Bun, Node fallback, Hono, Next.js, Expo, Drizzle, and PostgreSQL 18. The official Hono integration proves a Web `Request`/`Response` mounting shape, not complete Bun runtime compatibility.
 
@@ -248,7 +248,7 @@ GraphQL is not the initial primary public API. It may be introduced later for go
 
 ### Infrastructure and Deployment
 
-OpenTofu 1.12.x is the selected infrastructure-as-code engine under ADR-0018. Exact CLI, provider, and module versions are pinned in implementation repositories and reverified through `19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md` and the technology lifecycle ledger.
+OpenTofu 1.12.x is the selected infrastructure-as-code engine under ADR-0018. Exact CLI, provider, and module versions are pinned in implementation repositories and reverified through `docs/blueprint/19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md` and the technology lifecycle ledger.
 
 Local development:
 
@@ -324,7 +324,7 @@ Do not add a separate vector database before measured retrieval or scale require
 - Review major framework and runtime support quarterly.
 - Avoid canary, alpha, preview, or release-candidate dependencies in accounting, inventory, payroll, authorization, offline synchronization, or other critical paths unless isolated in Platform Labs.
 - Record major stack changes through ADRs.
-- Update `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for every material version, compatibility, workaround, breaking-change, or fallback finding.
+- Update `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for every material version, compatibility, workaround, breaking-change, or fallback finding.
 
 ## Explicitly Avoid Initially
 
@@ -358,8 +358,8 @@ Review this stack when:
 - Better Auth SSO plugin: `https://better-auth.com/docs/plugins/sso`
 - Better Auth SCIM plugin: `https://better-auth.com/docs/plugins/scim`
 - Better Auth pricing and managed infrastructure: `https://better-auth.com/pricing`
-- Better Auth complete verification: `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`
-- Better Auth plugin matrix: `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`
+- Better Auth complete verification: `docs/blueprint/19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`
+- Better Auth plugin matrix: `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`
 - Next.js App Router documentation: `https://nextjs.org/docs/app`
 - TanStack documentation: `https://tanstack.com`
 - Expo Router: `https://docs.expo.dev/router/introduction/`

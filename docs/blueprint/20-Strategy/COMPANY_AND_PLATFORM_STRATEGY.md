@@ -19,7 +19,7 @@ Small and mid-sized organizations are forced to choose between fragmented specia
 
 ## Initial Beachhead
 
-Guyana-first SMB retail is the provisional beachhead hypothesis. The expected access, cash/offline needs, regional-payment constraints, and reusable platform proof remain unvalidated until the evidence gate in `20-Strategy/MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md` and FDR-004 are satisfied.
+Guyana-first SMB retail is the provisional beachhead hypothesis. The expected access, cash/offline needs, regional-payment constraints, and reusable platform proof remain unvalidated until the evidence gate in `docs/blueprint/20-Strategy/MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md` and FDR-004 are satisfied.
 
 ## Expansion Logic
 

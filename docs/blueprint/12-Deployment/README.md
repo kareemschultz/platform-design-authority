@@ -17,12 +17,12 @@ last_reviewed: 2026-07-11
 - `BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`
 - `SELF_HOSTED_COMPATIBILITY_MATRIX.md`
 - `INFRASTRUCTURE_COST_WORKSHEET.md`
-- `../18-Decisions/ADR-0018-USE-OPENTOFU-FOR-INFRASTRUCTURE-AS-CODE.md`
-- `../02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md`
-- `../02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md`
-- `../15-Operations/OBSERVABILITY_INCIDENT_AND_SUPPORT_OPERATIONS.md`
-- `../15-Operations/SLO_AND_OPERATIONAL_READINESS.md`
-- `../registry/architecture-rules.json`
+- `docs/blueprint/18-Decisions/ADR-0018-USE-OPENTOFU-FOR-INFRASTRUCTURE-AS-CODE.md`
+- `docs/blueprint/02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md`
+- `docs/blueprint/02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md`
+- `docs/blueprint/15-Operations/OBSERVABILITY_INCIDENT_AND_SUPPORT_OPERATIONS.md`
+- `docs/blueprint/15-Operations/SLO_AND_OPERATIONAL_READINESS.md`
+- `registry/architecture-rules.json`
 
 ## Current Direction
 

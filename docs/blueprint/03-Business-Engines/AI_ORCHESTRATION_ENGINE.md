@@ -16,7 +16,7 @@ Define the shared engine that coordinates AI models, tools, retrieval, agents, a
 
 ## Architectural Position
 
-The AI Orchestration Engine is domain-neutral and owns no authoritative business records. It invokes approved application commands through governed tools. Detailed controls live in `06-AI/`.
+The AI Orchestration Engine is domain-neutral and owns no authoritative business records. It invokes approved application commands through governed tools. Detailed controls live in `docs/blueprint/06-AI/`.
 
 ## Responsibilities
 
@@ -45,7 +45,7 @@ The engine does not own domain records, grant access, execute unrestricted SQL o
 5. Approved Workflow
 6. Bounded Automation
 
-This ladder is authoritative across AI documents. Levels 4–6 require the controls in `06-AI/AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md`. The first slice remains at Levels 1–2.
+This ladder is authoritative across AI documents. Levels 4–6 require the controls in `docs/blueprint/06-AI/AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md`. The first slice remains at Levels 1–2.
 
 ## Tool Contract
 
@@ -65,7 +65,7 @@ A fallback must pass mandatory evaluation before activation.
 
 Retrieval is tenant-, permission-, purpose-, entitlement-, classification-, source-, and deletion-state-aware. Search owns indexing and retrieval contracts.
 
-Memory types, approvers, retention classes, purge SLOs, and reconstruction testing are defined in `06-AI/MEMORY_RETRIEVAL_AND_CONTEXT.md`.
+Memory types, approvers, retention classes, purge SLOs, and reconstruction testing are defined in `docs/blueprint/06-AI/MEMORY_RETRIEVAL_AND_CONTEXT.md`.
 
 ## Budgets and Delegation
 
@@ -75,7 +75,7 @@ Mutating multi-step workflows reserve compensation and reconciliation budget bef
 
 ## Evaluation and Release
 
-Evaluation thresholds, dataset sizes, grading methods, red-team cadence, and incident clocks are defined in `06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`.
+Evaluation thresholds, dataset sizes, grading methods, red-team cadence, and incident clocks are defined in `docs/blueprint/06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`.
 
 Release states:
 

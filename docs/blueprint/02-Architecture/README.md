@@ -9,4 +9,4 @@ last_reviewed: 2026-07-12
 
 # Architecture
 
-Read `RECOMMENDED_TECHNOLOGY_STACK.md`, `FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md`, `FIRST_SLICE_SEQUENCE_DIAGRAMS.md`, and the applicable decision matrices together with the ADRs under `../18-Decisions/`.
+Read `RECOMMENDED_TECHNOLOGY_STACK.md`, `FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md`, `FIRST_SLICE_SEQUENCE_DIAGRAMS.md`, and the applicable decision matrices together with the ADRs under `docs/blueprint/18-Decisions/`.

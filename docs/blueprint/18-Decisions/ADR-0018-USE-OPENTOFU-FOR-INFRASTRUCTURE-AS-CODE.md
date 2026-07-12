@@ -104,8 +104,8 @@ Validate through a disposable first-slice environment, isolated recovery environ
 ## Review Record
 
 - Current implementation evidence: not yet available; the decision remains Proposed.
-- Dated external evidence: `19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md`.
-- Lifecycle record: `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`.
+- Dated external evidence: `docs/blueprint/19-Appendices/OPENTOFU_VERIFICATION-2026-07-12.md`.
+- Lifecycle record: `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`.
 
 ## Change Log
 

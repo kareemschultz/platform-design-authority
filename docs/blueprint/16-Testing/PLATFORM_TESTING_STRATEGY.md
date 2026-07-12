@@ -87,7 +87,7 @@ Use real PostgreSQL and representative infrastructure through Testcontainers or 
 
 ### Performance
 
-Use provisional budgets from `17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md` for POS, product search and scanning, inventory posting, chart interaction, reports, exports, tenant isolation, queue recovery, webhooks, mobile startup, and offline database size.
+Use provisional budgets from `docs/blueprint/17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md` for POS, product search and scanning, inventory posting, chart interaction, reports, exports, tenant isolation, queue recovery, webhooks, mobile startup, and offline database size.
 
 ### Accessibility and Experience
 
@@ -111,7 +111,7 @@ Use provisional budgets from `17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS
 
 ## Mandatory Capability Test Matrix
 
-The normative matrix contract is `16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md`; the generated skeleton is `registry/first-slice-tests.json`.
+The normative matrix contract is `docs/blueprint/16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md`; the generated skeleton is `registry/first-slice-tests.json`.
 
 Every first-slice capability declares all thirteen dimensions: happy path; validation and denial; tenant isolation; permission and entitlement; idempotency; concurrency; events/jobs/projections; audit; privacy; offline; accessibility; performance; and recovery/reconciliation.
 
@@ -144,7 +144,7 @@ Use property-based and model-based tests for high-value invariants.
 
 ## Environments
 
-Use the canonical taxonomy in `12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md`: Local, CI Ephemeral, Integration, Shared Development, Staging, Pilot, Production, Recovery, Dedicated, and Self-Hosted.
+Use the canonical taxonomy in `docs/blueprint/12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md`: Local, CI Ephemeral, Integration, Shared Development, Staging, Pilot, Production, Recovery, Dedicated, and Self-Hosted.
 
 Testing selects the appropriate subset and does not create a competing environment vocabulary. Production data is not copied downward without approved de-identification.
 

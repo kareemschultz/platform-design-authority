@@ -15,14 +15,14 @@ last_reviewed: 2026-07-11
 - `SPECIALIST_TESTING_STANDARDS.md`
 - `TEST_DATA_ENVIRONMENTS_AND_RELEASE_EVIDENCE.md`
 - `FIRST_SLICE_CAPABILITY_TEST_MATRIX.md`
-- `../registry/first-slice-tests.json`
-- `../11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
-- `../09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
-- `../12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`
-- `../07-Developer-Platform/API_VERSIONING_AND_DEPRECATION.md`
-- `../06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`
-- `../openapi/first-slice-v1.yaml`
-- `../schemas/`
+- `registry/first-slice-tests.json`
+- `docs/blueprint/11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
+- `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
+- `docs/blueprint/12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`
+- `docs/blueprint/07-Developer-Platform/API_VERSIONING_AND_DEPRECATION.md`
+- `docs/blueprint/06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`
+- `openapi/first-slice-v1.yaml`
+- `schemas/`
 
 ## Current Governed Coverage
 

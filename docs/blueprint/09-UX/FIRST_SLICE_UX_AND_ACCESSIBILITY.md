@@ -135,7 +135,7 @@ Tender selection distinguishes:
 - Card or bank provider
 - Wallet or request-to-pay
 - Customer stored value
-- Customer account — deferred from the first slice; see `09-UX/FIRST_SLICE_TENDER_SCOPE_CLARIFICATION.md` and `registry/first-slice.json`
+- Customer account — deferred from the first slice; see `docs/blueprint/09-UX/FIRST_SLICE_TENDER_SCOPE_CLARIFICATION.md` and `registry/first-slice.json`
 - Split tender
 
 The interface shows whether an electronic payment is waiting for customer approval, authorized, captured, failed, uncertain, reversed, or refunded. It never displays an interactive payment request as an automatic charge.

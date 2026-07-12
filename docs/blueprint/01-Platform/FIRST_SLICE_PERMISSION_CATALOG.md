@@ -150,7 +150,7 @@ Assignments may be scoped by tenant, organization, legal entity, branch, store, 
 
 ## Endpoint Coverage
 
-Every endpoint listed in `02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md` references one permission in this catalog or explicitly states that an authenticated session or membership is sufficient.
+Every endpoint listed in `docs/blueprint/02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md` references one permission in this catalog or explicitly states that an authenticated session or membership is sufficient.
 
 The documentation validator fails when an endpoint references an unknown permission.
 

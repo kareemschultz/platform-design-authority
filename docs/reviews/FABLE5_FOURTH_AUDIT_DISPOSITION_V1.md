@@ -5,7 +5,7 @@ version: 0.1.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
-review_evidence: reviews/FABLE5_FOURTH_AUDIT_V1.md
+review_evidence: docs/reviews/FABLE5_FOURTH_AUDIT_V1.md
 ---
 
 # Fable 5 Fourth Audit Disposition V1
@@ -79,7 +79,7 @@ The prior README/FDR claim is corrected by the current README references. The hi
 
 ## Documentation Structure Decision
 
-The numbered root directories remain the governed architecture plane because registries, links, audit evidence and authority ordering depend on those paths. Product/user/developer documentation remains the Fumadocs content plane under `meridian/apps/fumadocs/content/docs`. Implementation-only notes move to top-level `docs/implementation/`; `docs/README.md` explains the planes. This is a bounded migration, not a duplicate architecture tree.
+The numbered root directories remain the governed architecture plane because registries, links, audit evidence and authority ordering depend on those paths. Product/user/developer documentation remains the Fumadocs content plane under `apps/docs/content/docs`. Implementation-only notes move to top-level `docs/implementation/`; `docs/README.md` explains the planes. This is a bounded migration, not a duplicate architecture tree.
 
 ## Residual Gates
 

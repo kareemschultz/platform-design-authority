@@ -151,4 +151,4 @@ Before pilot:
 
 ## Source References
 
-Dated sources and limitations are maintained in `19-Appendices/GUYANA_REGULATORY_VERIFICATION-2026-07-11.md`.
+Dated sources and limitations are maintained in `docs/blueprint/19-Appendices/GUYANA_REGULATORY_VERIFICATION-2026-07-11.md`.

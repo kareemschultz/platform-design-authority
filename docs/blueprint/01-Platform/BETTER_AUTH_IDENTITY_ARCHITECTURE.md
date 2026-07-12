@@ -51,7 +51,7 @@ Better Auth's organization plugin may support authentication-oriented membership
 
 ## Accounts and Credentials
 
-The controlled baseline is email/password plus the explicitly selected methods in `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`. Phone authentication and magic links are deferred by default because of SIM-swap, recovery, and email-channel takeover risks; they require a new matrix disposition and threat-model evidence before enablement. Other methods remain deny-by-default unless that matrix admits them.
+The controlled baseline is email/password plus the explicitly selected methods in `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`. Phone authentication and magic links are deferred by default because of SIM-swap, recovery, and email-channel takeover risks; they require a new matrix disposition and threat-model evidence before enablement. Other methods remain deny-by-default unless that matrix admits them.
 
 Platform policy determines which methods are enabled by tenant, user type, risk, region, and application.
 
@@ -254,7 +254,7 @@ Lifecycle hooks publish through the transactional outbox or another reliable bou
 
 ## Source References
 
-Dated verification and official URLs are maintained in `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`. Plugin decisions are governed by `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`.
+Dated verification and official URLs are maintained in `docs/blueprint/19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`. Plugin decisions are governed by `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`.
 
 ## Deny-by-Default Sign-In Clarification
 

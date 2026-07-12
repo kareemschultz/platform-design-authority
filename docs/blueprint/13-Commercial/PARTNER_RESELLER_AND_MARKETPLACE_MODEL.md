@@ -46,7 +46,7 @@ Define how partners sell, implement, brand, support, extend, and earn revenue fr
 
 ## Marketplace Settlement
 
-This settlement model is Phase 3 only and remains disabled until `08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md`, FDR-008, legal/tax review, and provider gates are complete. If admitted, track gross transaction value, platform fee, publisher share, tax, refunds, chargebacks, reserves, payout status, currency conversion, and accounting references; reconcile with provider transfers and Finance without introducing custody or payment facilitation by implication.
+This settlement model is Phase 3 only and remains disabled until `docs/blueprint/08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md`, FDR-008, legal/tax review, and provider gates are complete. If admitted, track gross transaction value, platform fee, publisher share, tax, refunds, chargebacks, reserves, payout status, currency conversion, and accounting references; reconcile with provider transfers and Finance without introducing custody or payment facilitation by implication.
 
 ## Partner Lifecycle
 
@@ -58,4 +58,4 @@ Support controlled transfer between direct and partner management or between par
 
 ## Paid-Marketplace Phase Gate
 
-Publisher settlement, tax onboarding, and payout are Phase 3-only design intent gated by `08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md` and FDR-008. No current phase authorizes custody or merchant-of-record behavior.
+Publisher settlement, tax onboarding, and payout are Phase 3-only design intent gated by `docs/blueprint/08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md` and FDR-008. No current phase authorizes custody or merchant-of-record behavior.

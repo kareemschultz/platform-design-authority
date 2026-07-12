@@ -3,63 +3,63 @@
   "status": "draft",
   "exemptions": [
     {
-      "path": "00-Foundation/README.md",
+      "path": "docs/blueprint/00-Foundation/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "01-Platform/README.md",
+      "path": "docs/blueprint/01-Platform/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "02-Architecture/README.md",
+      "path": "docs/blueprint/02-Architecture/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "03-Business-Engines/README.md",
+      "path": "docs/blueprint/03-Business-Engines/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "04-Business-Domains/README.md",
+      "path": "docs/blueprint/04-Business-Domains/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "05-Industry-Packs/README.md",
+      "path": "docs/blueprint/05-Industry-Packs/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "13-Commercial/README.md",
+      "path": "docs/blueprint/13-Commercial/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "18-Decisions/README.md",
+      "path": "docs/blueprint/18-Decisions/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional navigation file; authority derives from linked documents.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "20-Strategy/BEACHHEAD_EVIDENCE_LOG.md",
+      "path": "docs/blueprint/20-Strategy/BEACHHEAD_EVIDENCE_LOG.md",
       "rule": "document_front_matter",
       "reason": "Conventional contributor, prototype, or evidence-log file.",
       "owner": "Platform Design Authority",
@@ -73,14 +73,7 @@
       "review_date": "2026-10-11"
     },
     {
-      "path": "meridian/AGENTS.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional contributor, prototype, or evidence-log file.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "meridian/apps/fumadocs/README.md",
+      "path": "apps/docs/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional contributor, prototype, or evidence-log file.",
       "owner": "Platform Design Authority",
@@ -101,14 +94,14 @@
       "review_date": "2026-10-12"
     },
     {
-      "path": "meridian/ops/postgres/README.md",
+      "path": "ops/postgres/README.md",
       "rule": "document_front_matter",
       "reason": "Conventional contributor, prototype, or evidence-log file.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-12"
     },
     {
-      "path": "meridian/README.md",
+      "path": "docs/implementation/SCAFFOLD_README.md",
       "rule": "document_front_matter",
       "reason": "Conventional contributor, prototype, or evidence-log file.",
       "owner": "Platform Design Authority",
@@ -129,37 +122,37 @@
       "review_date": "2026-10-12"
     },
     {
-      "path": "reviews/FABLE5_THIRD_AUDIT_V1.md",
+      "path": "docs/reviews/FABLE5_THIRD_AUDIT_V1.md",
       "rule": "document_front_matter",
       "reason": "Immutable independent evidence file registered through PDA-REV-005 rather than edited after delivery.",
       "owner": "Platform Design Authority",
       "review_date": "2027-07-11",
-      "registration_document": "reviews/FABLE5_THIRD_AUDIT_REGISTRATION.md"
+      "registration_document": "docs/reviews/FABLE5_THIRD_AUDIT_REGISTRATION.md"
     },
     {
-      "path": "reviews/FABLE5_FOURTH_AUDIT_V1.md",
+      "path": "docs/reviews/FABLE5_FOURTH_AUDIT_V1.md",
       "rule": "document_front_matter",
       "reason": "Immutable independent evidence file registered through PDA-REV-007 rather than edited after delivery.",
       "owner": "Platform Design Authority",
       "review_date": "2027-07-12",
-      "registration_document": "reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md"
+      "registration_document": "docs/reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md"
     },
     {
-      "path": "reviews/FABLE5_MASTER_REPOSITORY_AUDIT_PROMPT.md",
+      "path": "docs/reviews/FABLE5_MASTER_REPOSITORY_AUDIT_PROMPT.md",
       "rule": "document_front_matter",
       "reason": "Historical independent-audit prompt retained as evidence, not an authoritative specification.",
       "owner": "Platform Design Authority",
       "review_date": "2027-07-12"
     },
     {
-      "path": "reviews/FABLE5_REVIEW_BRIEF_V1.md",
+      "path": "docs/reviews/FABLE5_REVIEW_BRIEF_V1.md",
       "rule": "document_front_matter",
       "reason": "Historical review brief retained as evidence, not an authoritative specification.",
       "owner": "Platform Design Authority",
       "review_date": "2027-07-12"
     },
     {
-      "path": "reviews/FABLE5_THIRD_AUDIT_PROMPT.md",
+      "path": "docs/reviews/FABLE5_THIRD_AUDIT_PROMPT.md",
       "rule": "document_front_matter",
       "reason": "Historical independent-audit prompt retained as evidence, not an authoritative specification.",
       "owner": "Platform Design Authority",

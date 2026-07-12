@@ -35,7 +35,7 @@ Publisher, Publisher Agreement, Listing, Listing Version, Extension Package, Rev
 
 ## Publisher Lifecycle
 
-Application, identity and business verification, agreement, sandbox access, certification, active publishing, monitoring, suspension, termination, and archival. Tax-form collection, payout-account setup, paid settlement, and publisher disbursement are Phase 3 only and remain disabled until `08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md`, FDR-008, legal/tax review, and provider gates are complete.
+Application, identity and business verification, agreement, sandbox access, certification, active publishing, monitoring, suspension, termination, and archival. Tax-form collection, payout-account setup, paid settlement, and publisher disbursement are Phase 3 only and remain disabled until `docs/blueprint/08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md`, FDR-008, legal/tax review, and provider gates are complete.
 
 ## Submission Review
 
@@ -69,7 +69,7 @@ Marketplace billing integrates with the Commercial Control Plane. Tenant custome
 
 ## Settlement
 
-Settlement is a Phase-3-only contract surface. If enabled after `08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md` and FDR-008 are complete, it records gross value, platform fee, publisher share, tax, refunds, chargebacks, reserves, payout currency, and status. No current phase authorizes publisher payout, platform custody, pooling, payment facilitation, aggregation, or merchant-of-record behavior.
+Settlement is a Phase-3-only contract surface. If enabled after `docs/blueprint/08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md` and FDR-008 are complete, it records gross value, platform fee, publisher share, tax, refunds, chargebacks, reserves, payout currency, and status. No current phase authorizes publisher payout, platform custody, pooling, payment facilitation, aggregation, or merchant-of-record behavior.
 
 ## Trust and Safety
 

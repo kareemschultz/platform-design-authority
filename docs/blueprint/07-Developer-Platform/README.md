@@ -20,13 +20,13 @@ last_reviewed: 2026-07-12
 - `REFERENCE_INTEGRATIONS_AND_PROVIDER_SIMULATORS.md`
 - `PROJECT_AGENT_SKILLS.md`
 - `PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md`
-- `../02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md`
-- `../18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md`
-- `../18-Decisions/ADR-0019-PHASED-EXTENSION-EXECUTION-MODEL.md`
-- `../openapi/first-slice-v1.yaml`
-- `../schemas/providers/provider-capability-v1.schema.json`
-- `../schemas/webhooks/webhook-envelope-v1.schema.json`
-- `../schemas/offline/sync-batch-v1.schema.json`
+- `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md`
+- `docs/blueprint/18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md`
+- `docs/blueprint/18-Decisions/ADR-0019-PHASED-EXTENSION-EXECUTION-MODEL.md`
+- `openapi/first-slice-v1.yaml`
+- `schemas/providers/provider-capability-v1.schema.json`
+- `schemas/webhooks/webhook-envelope-v1.schema.json`
+- `schemas/offline/sync-batch-v1.schema.json`
 
 ## Project Skills
 

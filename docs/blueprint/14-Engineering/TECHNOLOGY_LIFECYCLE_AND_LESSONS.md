@@ -1,12 +1,12 @@
 ---
 document_id: PDA-ENGR-013
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-12
 verified_as_of: 2026-07-12
-related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0018, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024]
+related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0018, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024, ADR-0025]
 ---
 
 # Technology Lifecycle, Compatibility, and Lessons Ledger
@@ -47,7 +47,7 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 | pg_trgm | PostgreSQL 18 supplied | Conditional approved search extension | Index write/storage cost and collation/search behavior | Relevance, GIN/GiST, size, write, locale and fallback tests | Core full-text/prefix search or external projection | Before first trigram index and PG patch |
 | Drizzle | Verify at implementation lock | Scaffold/evaluate | Complex ledger suitability unproven | Query, migration, ownership, transaction, decimal tests | Kysely or explicit SQL | Persistence work |
 | Node.js | Record active approved LTS | Runtime fallback | Exact line must match ecosystem support | Same critical suite and container build | Requires ADR to replace | Fallback build |
-| Fumadocs Core/UI | 16.11.3 | Preferred docs prototype | Package family versions differ and must be tested together | Bun/Node build, OpenAPI, search, accessibility, static/container preview | Nextra or Starlight | Before docs scaffold/upgrade |
+| Fumadocs Core/UI | 16.11.3 | Preferred docs prototype | Package family versions differ; Bun 1.3 isolated linking did not expose one declared Micromark transitive dependency to Next/Turbopack in the normalized workspace | Bun/Node build, OpenAPI, search, accessibility, static/container preview; keep the explicit Micromark pin while reproducible | Nextra or Starlight | Before docs scaffold/upgrade and each Bun release |
 | Fumadocs MDX/OpenAPI | 15.1.0 / 11.1.1 | Preferred content/API tooling | Executable MDX and API proxy require security controls | Restricted components, canonical contract freshness, proxy deny-by-default | Plain MDX plus generated static reference | Before docs scaffold/upgrade |
 | Base UI | 1.6.0 | Preferred new web primitive | API differs from Radix; source ownership retains test burden | Component/accessibility matrix and incremental migration | Radix for proven existing components | Every primitive upgrade |
 | shadcn CLI/presets | 4.13.0 | Selected source/scaffold tooling | Preset apply can rewrite components, theme, fonts, colors, and icons; style output evolves | Pinned decode/dry-run/diff, monorepo config parity, source provenance, visual/accessibility suite | Owned components; Nova style; prior reviewed CLI | Every CLI/style/preset change |
@@ -65,7 +65,7 @@ These stable releases were observed from official sources on 2026-07-12. Reverif
 
 | Technology | Primary sources | Verified on |
 |---|---|---|
-| Bun | `https://bun.sh/`; `https://bun.sh/docs/runtime/nodejs-compat`; `https://bun.sh/docs/runtime/node-api`; `https://github.com/oven-sh/bun/releases/tag/bun-v1.3.14` | 2026-07-12 |
+| Bun | `https://bun.sh/`; `https://bun.sh/docs/runtime/nodejs-compat`; `https://bun.sh/docs/runtime/node-api`; `https://bun.sh/docs/pm/isolated-installs`; `https://github.com/oven-sh/bun/releases/tag/bun-v1.3.14`; `https://github.com/oven-sh/bun/issues/23524` | 2026-07-12 |
 | Hono | `https://hono.dev/`; `https://github.com/honojs/hono/releases/tag/v4.12.29` | 2026-07-12 |
 | oRPC | `https://orpc.dev/docs/getting-started`; `https://orpc.dev/docs/adapters/hono`; `https://orpc.dev/docs/openapi/openapi-to-contract`; `https://github.com/middleapi/orpc/releases/tag/v1.14.8` | 2026-07-12 |
 | Better-T-Stack | `https://www.better-t-stack.dev/new`; `https://better-t-stack.dev/docs`; `https://github.com/AmanVarshney01/create-better-t-stack/releases/tag/v3.36.3` | 2026-07-12 |
@@ -112,6 +112,8 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 | TECH-LESSON-021 | 2026-07-12 | Active | Geist headings plus Inter body improve hierarchy but add a second-family performance and fallback obligation | Self-host/subset and compare against Inter-only; fall back without API change | Font performance/localization tests pending | Design System | Font budget or locale failure |
 | TECH-LESSON-022 | 2026-07-12 | Active | Bun `node:cluster` handle passing and multi-process HTTP load balancing are Linux-only | Keep application packages runtime-neutral; prove Bun and Node container behavior on every supported target | ADR-0020 dual-runtime CI; prototype evidence pending | Platform Engineering | Each Bun/Node runtime lock |
 | TECH-LESSON-023 | 2026-07-12 | Active | Infrastructure compatibility includes the OpenTofu CLI, providers, modules, state backend, and policy tooling, not only the CLI version | Pin and test the whole IaC lock set; record drift and recovery evidence | ADR-0018; disposable-environment tests pending | Platform Engineering | Every infrastructure lock change |
+| TECH-LESSON-024 | 2026-07-12 | Active | Better Auth documents MCP succession toward OAuth Provider | Keep MCP deferred; authentication grants no tool authority | Fourth-audit disposition | Developer Platform | Better Auth plugin or maturity change |
+| TECH-LESSON-025 | 2026-07-12 | Active | With Bun 1.3.14 isolated workspaces on Windows, Next/Turbopack could not resolve a dependency that `mdast-util-from-markdown` and `micromark-util-decode-string` both declare, although Bun installed and linked it inside the virtual store; Bun's narrow `hoistPattern` did not resolve this Turbopack traversal | Keep isolated linking and explicitly pin `micromark-util-decode-numeric-character-reference@2.0.2` as a root build-tool dependency; do not globally switch to hoisted linking | Clean install, frozen install, and full docs build; official Bun isolated-linker docs and issue 23524 | Developer Platform | Remove only after a clean isolated install and full build pass without the root pin on a reviewed Bun/Fumadocs upgrade |
 
 ## Entry Templates
 
@@ -134,14 +136,3 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 - Review at prototype start/closure, before scaffolds and majors, monthly during active implementation, quarterly otherwise, and immediately after material advisories, license changes, regressions, support changes, or incidents.
 
 Material updates increment this document's version and dates. A no-change review belongs in its review issue; avoid meaningless file churn.
-
-## Fourth-Audit Ledger Additions
-
-| Technology | Verified stable | Status | Constraint | Required proof | Fallback | Recheck |
-|---|---|---|---|---|---|---|
-| OpenTofu | 1.12.3 | Proposed under ADR-0018 | State/provider operations unproven | Pin, lock, drift, rollback, secrets, modules | Compatible reviewed alternative | Before prototype |
-
-| Lesson ID | Date | Status | Observation | Response | Evidence | Owner | Recheck |
-|---|---|---|---|---|---|---|---|
-| TECH-LESSON-021 | 2026-07-12 | Active | Bun node:cluster HTTP balancing is Linux-only | Retain Node-worker/external-queue fallback | Fourth audit | Platform Engineering | Runtime change |
-| TECH-LESSON-022 | 2026-07-12 | Active | Better Auth documents MCP succession toward OAuth Provider | Keep MCP deferred; authentication grants no tool authority | Fourth audit | Developer Platform | Plugin change |

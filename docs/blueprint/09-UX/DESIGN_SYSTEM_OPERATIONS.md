@@ -31,7 +31,7 @@ Every component defines purpose, anatomy, variants, controlled behavior, keyboar
 
 ## Canonical State Matrix
 
-`09-UX/COMPONENT_CATALOG_AND_STATE_MATRIX.md` is the sole canonical enumeration of component and workflow states.
+`docs/blueprint/09-UX/COMPONENT_CATALOG_AND_STATE_MATRIX.md` is the sole canonical enumeration of component and workflow states.
 
 Component documentation references the applicable subset of that matrix rather than creating another list. Additional component-specific states may be added only when they are mapped to the canonical state vocabulary and reviewed for cross-platform meaning.
 

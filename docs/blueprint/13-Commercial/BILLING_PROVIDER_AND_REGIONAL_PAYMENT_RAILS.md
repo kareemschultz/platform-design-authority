@@ -44,7 +44,7 @@ ADR-0015 proposes direct tenant-merchant contracts for the initial release.
 - The platform orchestrates transactions and reconciliation but does not pool or custody tenant funds.
 - A payment-facilitator, aggregator, sub-merchant, or merchant-of-record model is prohibited until separately approved.
 
-The platform legal entity and billing currency remain founder decisions in `20-Strategy/FOUNDER_DECISION_REGISTER.md`.
+The platform legal entity and billing currency remain founder decisions in `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`.
 
 ## Regional Findings
 
@@ -240,5 +240,5 @@ Every provider or cash integration reconciles:
 - Stripe global availability: https://stripe.com/global
 - MMG Business: https://mmg.gy/business/
 - MMG Developer API: https://mmg.gy/developer/
-- Founder decisions: `20-Strategy/FOUNDER_DECISION_REGISTER.md`
-- Guyana retail profile: `05-Industry-Packs/GUYANA_RETAIL_JURISDICTION_PROFILE.md`
+- Founder decisions: `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- Guyana retail profile: `docs/blueprint/05-Industry-Packs/GUYANA_RETAIL_JURISDICTION_PROFILE.md`

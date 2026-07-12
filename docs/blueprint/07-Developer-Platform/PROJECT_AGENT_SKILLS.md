@@ -134,7 +134,7 @@ Each skill requires representative cases covering:
 
 ## Vercel and Premium UI Integration
 
-Vercel v0, Tailwind, shadcn/ui, Magic UI Pro, and shadcn/studio premium assets are implementation accelerators. Skills must apply `09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`; third-party output remains subordinate to platform ownership, accessibility, licensing, performance, and maintenance rules.
+Vercel v0, Tailwind, shadcn/ui, Magic UI Pro, and shadcn/studio premium assets are implementation accelerators. Skills must apply `docs/blueprint/09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`; third-party output remains subordinate to platform ownership, accessibility, licensing, performance, and maintenance rules.
 
 ## Source References
 

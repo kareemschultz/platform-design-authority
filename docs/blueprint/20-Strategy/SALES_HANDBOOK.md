@@ -17,7 +17,7 @@ Define qualification, discovery, demonstration, solution fit, pricing, proposals
 
 This is a founding-stage operating design. It describes the process the company must establish as sales activity begins; it does not imply that a staffed sales organization, published pricing, certifications, customer references, or production capabilities already exist.
 
-Approved specifications under `13-Commercial/` are authoritative for editions, entitlements, billing, partners, services, marketplace, and contractual money flows. This handbook summarizes operating behavior and cannot override them.
+Approved specifications under `docs/blueprint/13-Commercial/` are authoritative for editions, entitlements, billing, partners, services, marketplace, and contractual money flows. This handbook summarizes operating behavior and cannot override them.
 
 ## Qualification
 

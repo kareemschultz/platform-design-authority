@@ -51,7 +51,7 @@ Cloud control plane with approved local services or offline clients for stores, 
 
 ## Environment Model
 
-Use the exact canonical taxonomy in `12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md`: Local, CI Ephemeral, Integration, Shared Development, Staging, Pilot, Production, Recovery, Dedicated, and Self-Hosted. Production data is not copied downward without approved de-identification.
+Use the exact canonical taxonomy in `docs/blueprint/12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md`: Local, CI Ephemeral, Integration, Shared Development, Staging, Pilot, Production, Recovery, Dedicated, and Self-Hosted. Production data is not copied downward without approved de-identification.
 
 ## Network and Trust Zones
 

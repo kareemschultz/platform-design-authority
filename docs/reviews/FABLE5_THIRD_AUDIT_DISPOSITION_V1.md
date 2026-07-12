@@ -5,7 +5,7 @@ version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
-review_evidence: reviews/FABLE5_THIRD_AUDIT_V1.md
+review_evidence: docs/reviews/FABLE5_THIRD_AUDIT_V1.md
 ---
 
 # Fable 5 Third Audit Disposition V1

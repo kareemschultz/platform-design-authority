@@ -16,14 +16,14 @@ last_reviewed: 2026-07-11
 - `FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`
 - `TECHNICAL_PROTOTYPE_PLAN.md`
 - `RATIFICATION_WAVES.md`
-- `../registry/first-slice.json`
-- `../registry/first-slice-tests.json`
-- `../02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md`
-- `../02-Architecture/FIRST_SLICE_ENTITY_AND_STATE_MODEL.md`
-- `../02-Architecture/FIRST_SLICE_SEQUENCE_DIAGRAMS.md`
-- `../openapi/first-slice-v1.yaml`
-- `../20-Strategy/STRATEGIC_RISKS_ASSUMPTIONS_AND_MILESTONES.md`
-- `../20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- `registry/first-slice.json`
+- `registry/first-slice-tests.json`
+- `docs/blueprint/02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md`
+- `docs/blueprint/02-Architecture/FIRST_SLICE_ENTITY_AND_STATE_MODEL.md`
+- `docs/blueprint/02-Architecture/FIRST_SLICE_SEQUENCE_DIAGRAMS.md`
+- `openapi/first-slice-v1.yaml`
+- `docs/blueprint/20-Strategy/STRATEGIC_RISKS_ASSUMPTIONS_AND_MILESTONES.md`
+- `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
 
 ## Current Delivery Position
 

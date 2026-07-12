@@ -30,10 +30,10 @@ last_reviewed: 2026-07-12
 - `TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
 - `SHADCN_CONFIGURATION_DECISION_MATRIX.md`
 - `MARKETING_WEBSITE_ARCHITECTURE.md`
-- `../10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`
-- `../20-Strategy/DESIGN_HANDBOOK.md`
-- `../20-Strategy/PLATFORM_EXPERIENCE_INDEX.md`
-- `../03-Business-Engines/BUSINESS_DNA_ENGINE.md`
+- `docs/blueprint/10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`
+- `docs/blueprint/20-Strategy/DESIGN_HANDBOOK.md`
+- `docs/blueprint/20-Strategy/PLATFORM_EXPERIENCE_INDEX.md`
+- `docs/blueprint/03-Business-Engines/BUSINESS_DNA_ENGINE.md`
 
 ## Implementation Direction
 

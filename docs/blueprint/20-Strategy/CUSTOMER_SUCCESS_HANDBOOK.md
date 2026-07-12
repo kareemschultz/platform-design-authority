@@ -17,7 +17,7 @@ Define how customers achieve measurable outcomes after implementation through ad
 
 This is a founding-stage operating design. It defines the Customer Success capability required as design partners and paid customers are onboarded; it does not imply an existing staffed organization, measured health model, renewal history, or established benchmarks.
 
-Commercial specifications under `13-Commercial/` are authoritative for subscriptions, pricing, renewal, expansion, credits, and partner terms.
+Commercial specifications under `docs/blueprint/13-Commercial/` are authoritative for subscriptions, pricing, renewal, expansion, credits, and partner terms.
 
 ## Lifecycle
 

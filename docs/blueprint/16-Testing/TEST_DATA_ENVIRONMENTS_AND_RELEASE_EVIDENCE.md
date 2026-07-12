@@ -30,7 +30,7 @@ Prefer synthetic datasets representing realistic tenants, currencies, products, 
 - Dedicated
 - Self-Hosted
 
-These exact names come from `12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md`; testing selects a subset and does not create variants. Every environment declares provider simulators, external dependencies, data policy, access, reset, and observability.
+These exact names come from `docs/blueprint/12-Deployment/INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md`; testing selects a subset and does not create variants. Every environment declares provider simulators, external dependencies, data policy, access, reset, and observability.
 
 ## Golden Scenarios
 

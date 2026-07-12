@@ -27,71 +27,75 @@ Conflicts are reported and dispositioned rather than resolved silently.
 ## Repository Structure
 
 ```text
-00-Foundation/          Constitution, canon, principles, glossary, governance
-01-Platform/            Platform kernel and shared services
-02-Architecture/        System, API, event, data, integration, and first-slice contracts
-03-Business-Engines/    Reusable shared engines
-04-Business-Domains/    Business domains, capability map, ownership, first-slice Finance handoff
-05-Industry-Packs/      Industry and jurisdiction configurations
-06-AI/                  AI architecture, registries, safety, evaluation, memory, agents
-07-Developer-Platform/  APIs, SDKs, CLI, webhooks, applications, extensions, sandboxes
-08-Marketplace/         Publisher, listing, review, installation, commercial phasing
-09-UX/                  Design system, Tailwind, shadcn/ui, charts, accessibility, marketing
-10-Data/                Data platform, contracts, lineage, metrics, search, retention
-11-Security/            Tenant isolation, privacy, risk, providers, controls, legal hold
-12-Deployment/          OpenTofu, environments, capacity, self-hosting, recovery, cost
-13-Commercial/          Packaging, entitlements, billing, partners, cash and disbursement
-14-Engineering/         Handbook, recipes, dependency rules
-15-Operations/          SLOs, incidents, runbooks, exercises, status, migration, repair
-16-Testing/             Quality strategy, specialist standards, first-slice matrix
-17-Roadmap/             First slice, prototypes, budgets, ratification
-18-Decisions/           Architecture Decision Records
-19-Appendices/          Dated evidence and completeness records
-20-Strategy/            Founder decisions, market strategy, handbooks, company operations
+apps/                    Web, server, native, and Fumadocs applications
+packages/                Shared API, auth, database, environment, UI, and configuration packages
+ops/                     Prototype operational assets and PostgreSQL controls
+docs/blueprint/00-Foundation/          Constitution, canon, principles, glossary, governance
+docs/blueprint/01-Platform/            Platform kernel and shared services
+docs/blueprint/02-Architecture/        System, API, event, data, integration, and first-slice contracts
+docs/blueprint/03-Business-Engines/    Reusable shared engines
+docs/blueprint/04-Business-Domains/    Business domains, capability map, ownership, first-slice Finance handoff
+docs/blueprint/05-Industry-Packs/      Industry and jurisdiction configurations
+docs/blueprint/06-AI/                  AI architecture, registries, safety, evaluation, memory, agents
+docs/blueprint/07-Developer-Platform/  APIs, SDKs, CLI, webhooks, applications, extensions, sandboxes
+docs/blueprint/08-Marketplace/         Publisher, listing, review, installation, commercial phasing
+docs/blueprint/09-UX/                  Design system, Tailwind, shadcn/ui, charts, accessibility, marketing
+docs/blueprint/10-Data/                Data platform, contracts, lineage, metrics, search, retention
+docs/blueprint/11-Security/            Tenant isolation, privacy, risk, providers, controls, legal hold
+docs/blueprint/12-Deployment/          OpenTofu, environments, capacity, self-hosting, recovery, cost
+docs/blueprint/13-Commercial/          Packaging, entitlements, billing, partners, cash and disbursement
+docs/blueprint/14-Engineering/         Handbook, recipes, dependency rules
+docs/blueprint/15-Operations/          SLOs, incidents, runbooks, exercises, status, migration, repair
+docs/blueprint/16-Testing/             Quality strategy, specialist standards, first-slice matrix
+docs/blueprint/17-Roadmap/             First slice, prototypes, budgets, ratification
+docs/blueprint/18-Decisions/           Architecture Decision Records
+docs/blueprint/19-Appendices/          Dated evidence and completeness records
+docs/blueprint/20-Strategy/            Founder decisions, market strategy, handbooks, company operations
 openapi/                Draft API contracts
 schemas/                Draft JSON Schemas for events, AI, offline, providers, exports
 registry/               Machine-readable governance and delivery artifacts
 scripts/                Deterministic validation and registry generation
-reviews/                Independent audits, registrations, and dispositions
-templates/              Standard authoring templates
+docs/reviews/                Independent audits, registrations, and dispositions
+docs/templates/              Standard authoring templates
 .agents/skills/          Agent Skills-compatible project workflows
 .claude/skills/         Project-local agent skills
-docs/                    Implementation documentation and documentation-plane guide
-meridian/                Governed Better-T-Stack technical-prototype monorepo
+docs/implementation/     Scaffold provenance, conflicts, and migration records
 .github/workflows/      Read-only documentation governance CI
 AGENTS.md                Agent-neutral contributor operating contract
 CLAUDE.md               AI-agent operating contract
+package.json             Bun/Turborepo workspace root
 ```
 
 ## Start Here
 
-- `PLATFORM_MANIFEST.md`
-- `00-Foundation/CONSTITUTION.md`
-- `00-Foundation/GLOSSARY.md`
-- `01-Platform/PLATFORM_KERNEL_OVERVIEW.md`
-- `04-Business-Domains/BUSINESS_CAPABILITY_MAP.md`
-- `04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md`
-- `17-Roadmap/FIRST_SLICE_MANIFEST.md`
-- `17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`
-- `18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md`
-- `02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md`
-- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
-- `14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md`
-- `02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md`
-- `02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md`
-- `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`
-- `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`
-- `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`
-- `09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md`
-- `19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`
-- `18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md`
-- `18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md`
-- `18-Decisions/ADR-0023-EVALUATE-PG-DURABLE-FOR-DATABASE-LOCAL-WORKFLOWS.md`
-- `18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md`
-- `20-Strategy/FOUNDER_DECISION_REGISTER.md`
-- `19-Appendices/DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md`
-- `reviews/FABLE5_THIRD_AUDIT_V1.md`
-- `reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
+- `docs/blueprint/PLATFORM_MANIFEST.md`
+- `docs/blueprint/00-Foundation/CONSTITUTION.md`
+- `docs/blueprint/00-Foundation/GLOSSARY.md`
+- `docs/blueprint/01-Platform/PLATFORM_KERNEL_OVERVIEW.md`
+- `docs/blueprint/04-Business-Domains/BUSINESS_CAPABILITY_MAP.md`
+- `docs/blueprint/04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md`
+- `docs/blueprint/17-Roadmap/FIRST_SLICE_MANIFEST.md`
+- `docs/blueprint/17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`
+- `docs/blueprint/18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md`
+- `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md`
+- `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
+- `docs/blueprint/14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md`
+- `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md`
+- `docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md`
+- `docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`
+- `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`
+- `docs/blueprint/19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md`
+- `docs/blueprint/19-Appendices/SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md`
+- `docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md`
+- `docs/blueprint/18-Decisions/ADR-0023-EVALUATE-PG-DURABLE-FOR-DATABASE-LOCAL-WORKFLOWS.md`
+- `docs/blueprint/18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md`
+- `docs/blueprint/18-Decisions/ADR-0025-NORMALIZE-MONOREPO-AND-DOCUMENTATION-LAYOUT.md`
+- `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- `docs/blueprint/19-Appendices/DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md`
+- `docs/reviews/FABLE5_THIRD_AUDIT_V1.md`
+- `docs/reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
 - `CLAUDE.md`
 
 ## UI Foundation
@@ -131,7 +135,7 @@ Approved or Ratified status requires review evidence. Production implementation 
 
 The repository is in **complete blueprint remediation and constrained technical-prototype readiness**.
 
-Four independent Fable 5 audits have been completed. The fourth audit is registered by `reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md` and fully dispositioned by `reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md`. Its remediation closes registry/prose drift, runtime portability propagation, AI schema mismatch, test-depth semantics, documentation governance gaps, and prior closure overclaims without altering the independent evidence.
+Four independent Fable 5 audits have been completed. The fourth audit is registered by `docs/reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md` and fully dispositioned by `docs/reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md`. Its remediation closes registry/prose drift, runtime portability propagation, AI schema mismatch, test-depth semantics, documentation governance gaps, and prior closure overclaims without altering the independent evidence.
 
 The intended readiness decision remains: **one constrained vertical-slice implementation after named blockers; Technical Prototypes 1–3 may start after final verification**. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
 

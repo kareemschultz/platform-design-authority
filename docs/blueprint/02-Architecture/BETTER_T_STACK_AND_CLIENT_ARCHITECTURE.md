@@ -31,7 +31,7 @@ Use:
 - Tailwind CSS
 - Base UI-backed source-owned shadcn/ui primitives for new components under ADR-0022; Radix remains an approved legacy/fallback primitive
 - A private platform design system and design-token package
-- The governed Base UI/Rhea/Neutral/Blue/Geist-Inter/Lucide/default-radius bootstrap from `09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md`
+- The governed Base UI/Rhea/Neutral/Blue/Geist-Inter/Lucide/default-radius bootstrap from `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md`
 - TanStack Query
 - TanStack Table
 - TanStack Virtual
@@ -110,7 +110,7 @@ Business components such as Money, Quantity, Product Picker, Party Picker, Appro
 
 Better Auth is selected under ADR-0006 for authentication, accounts, sessions, 2FA, passkeys, and approved protocol plugins.
 
-The generated Better Auth option selects the framework, not every plugin or generated authorization model. Keep only the composition permitted by `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`; record exact core and separate plugin versions; review generated schema, endpoints, secrets, hooks, cookies, origins, proxy trust, and migrations; and run the Bun/Node/Hono/Next/Expo compatibility suite.
+The generated Better Auth option selects the framework, not every plugin or generated authorization model. Keep only the composition permitted by `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`; record exact core and separate plugin versions; review generated schema, endpoints, secrets, hooks, cookies, origins, proxy trust, and migrations; and run the Bun/Node/Hono/Next/Expo compatibility suite.
 
 Better-T-Stack may scaffold Better Auth integration, but generated code must still use the platform identity adapter and must not make Better Auth the owner of:
 

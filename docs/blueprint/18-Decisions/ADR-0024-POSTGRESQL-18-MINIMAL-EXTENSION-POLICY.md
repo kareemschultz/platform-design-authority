@@ -36,7 +36,7 @@ The baseline is deliberately small:
 
 1. `pg_stat_statements` is the only always-preloaded extension, for query planning/execution observability.
 2. `pg_trgm` may be installed in an application database when an approved fuzzy/substring search path requires it and has index/query tests.
-3. All other extensions are absent by default and require the trigger, owner, security/license/provider review, performance evidence, backup/restore evidence, rollback, and ADR/specification propagation defined in `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`.
+3. All other extensions are absent by default and require the trigger, owner, security/license/provider review, performance evidence, backup/restore evidence, rollback, and ADR/specification propagation defined in `docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`.
 
 Use PostgreSQL 18 native `uuidv7()` for time-ordered internal identifiers where the identifier policy selects UUIDv7. Do not install `uuid-ossp` or `pgcrypto` merely to generate UUIDs.
 
@@ -90,9 +90,9 @@ Start from the official PostgreSQL 18 image/package at the approved patch and en
 
 ## References
 
-- `02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`
-- `19-Appendices/POSTGRESQL_18_AND_EXTENSION_VERIFICATION-2026-07-12.md`
-- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
+- `docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md`
+- `docs/blueprint/19-Appendices/POSTGRESQL_18_AND_EXTENSION_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
 
 ## Review Record
 

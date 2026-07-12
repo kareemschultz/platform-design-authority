@@ -47,7 +47,7 @@ Prove point-in-time restore, deletion-journal reapplication, outbox recovery, se
 
 ## Evidence
 
-Each prototype records source commit, exact dependency and container versions, official-source verification date, architecture assumptions, Bun and Node compatibility results, test results, performance, cost, security findings, UX findings, unresolved decisions, workarounds, rollback time, and recommendation. Findings update `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`.
+Each prototype records source commit, exact dependency and container versions, official-source verification date, architecture assumptions, Bun and Node compatibility results, test results, performance, cost, security findings, UX findings, unresolved decisions, workarounds, rollback time, and recommendation. Findings update `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`.
 
 ## Non-Goals
 

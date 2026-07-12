@@ -10,22 +10,21 @@ Meridian is controlled prototype evidence inside the Platform Design Authority r
 ## Repository layout
 
 ```text
-meridian/
-  apps/
-    fumadocs/   documentation portal on port 4000
+apps/
+    docs/       Fumadocs documentation portal on port 4000
     native/     Expo/React Native prototype
     server/     Hono server with Bun and Node entries
     web/        Next.js web prototype on port 3001
-  packages/
+packages/
     api/        oRPC procedures and context
     auth/       Better Auth configuration and security helpers
     db/         Drizzle schema, client, and migrations
     env/        runtime environment validation
     ui/         platform-owned shadcn-derived UI source
-  ops/postgres/ local PostgreSQL prototype controls
+ops/postgres/ local PostgreSQL prototype controls
 ```
 
-Architecture authority remains in the numbered root directories. Implementation notes live in root `docs/implementation/`; canonical API and message contracts live in root `openapi/` and `schemas/`.
+Architecture authority lives in `docs/blueprint/`. Implementation notes live in `docs/implementation/`; canonical API and message contracts remain in root `openapi/` and `schemas/`.
 
 ## Install and verify
 
@@ -46,7 +45,7 @@ The CI workflow additionally verifies the Node fallback, registry freshness, pro
 bun run dev:web
 bun run dev:server
 bun run dev:native
-bun run --filter fumadocs dev
+bun run --filter docs dev
 ```
 
 Use `bun run dev` to start the Turbo development graph. Environment variables are validated by `packages/env`; do not bypass validation except in a narrowly controlled build step that cannot access runtime data.
@@ -100,8 +99,8 @@ Run:
 ```bash
 python ../scripts/validate_docs.py
 python ../scripts/generate_registries.py --check
-bun run --filter fumadocs types:check
-bun run --filter fumadocs build
+bun run --filter docs types:check
+bun run --filter docs build
 ```
 
 ## Runtime compatibility

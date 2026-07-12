@@ -179,6 +179,6 @@ AI may assist classification, discovery, summarization, and redaction suggestion
 ## Source References
 
 - EU General Data Protection Regulation, including data-subject rights and portability: https://eur-lex.europa.eu/eli/reg/2016/679/oj
-- `18-Decisions/ADR-0014-PII-ISOLATION-AND-IRREVERSIBLE-PSEUDONYMIZATION.md`
-- `11-Security/PII_ERASURE_AND_PSEUDONYMIZATION.md`
-- `12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`
+- `docs/blueprint/18-Decisions/ADR-0014-PII-ISOLATION-AND-IRREVERSIBLE-PSEUDONYMIZATION.md`
+- `docs/blueprint/11-Security/PII_ERASURE_AND_PSEUDONYMIZATION.md`
+- `docs/blueprint/12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`

@@ -62,7 +62,7 @@ The following are optional capability declarations and are disabled until an app
 - Reserves and negative balances
 - Marketplace-of-record or merchant-of-record services
 
-Marketplace settlement cannot become a baseline billing-adapter requirement before the decisions and gates in `08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md` are satisfied.
+Marketplace settlement cannot become a baseline billing-adapter requirement before the decisions and gates in `docs/blueprint/08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md` are satisfied.
 
 Use of connected-account or settlement functionality requires a new ADR, founder decision, provider and legal review, Finance controls, and explicit protection against accidental payment facilitation or custody.
 

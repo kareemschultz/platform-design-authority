@@ -32,12 +32,12 @@ last_reviewed: 2026-07-11
 - `CUSTOMER_SUCCESS_HANDBOOK.md`
 - `PARTNER_HANDBOOK.md`
 - `SALES_HANDBOOK.md`
-- `../14-Engineering/ENGINEERING_HANDBOOK.md`
-- `../17-Roadmap/FIRST_SLICE_MANIFEST.md`
-- `../17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md`
-- `../08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md`
-- `../13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md`
-- `../05-Industry-Packs/GUYANA_RETAIL_JURISDICTION_PROFILE.md`
+- `docs/blueprint/14-Engineering/ENGINEERING_HANDBOOK.md`
+- `docs/blueprint/17-Roadmap/FIRST_SLICE_MANIFEST.md`
+- `docs/blueprint/17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md`
+- `docs/blueprint/08-Marketplace/MARKETPLACE_COMMERCIAL_PHASING.md`
+- `docs/blueprint/13-Commercial/CASH_COLLECTION_AND_DISBURSEMENT_BOUNDARIES.md`
+- `docs/blueprint/05-Industry-Packs/GUYANA_RETAIL_JURISDICTION_PROFILE.md`
 
 ## Company-Stage Discipline
 

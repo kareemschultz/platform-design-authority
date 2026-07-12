@@ -156,14 +156,14 @@ These are implementation-review contracts, not production evidence.
 
 ## Source-of-Truth Links
 
-- Constitution: `00-Foundation/CONSTITUTION.md`
-- Glossary: `00-Foundation/GLOSSARY.md`
-- Kernel: `01-Platform/PLATFORM_KERNEL_OVERVIEW.md`
-- Capability map: `04-Business-Domains/BUSINESS_CAPABILITY_MAP.md`
-- Capability amendment: `04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md`
-- First slice: `17-Roadmap/FIRST_SLICE_MANIFEST.md`
-- Founder decisions: `20-Strategy/FOUNDER_DECISION_REGISTER.md`
-- ADRs: `18-Decisions/`
+- Constitution: `docs/blueprint/00-Foundation/CONSTITUTION.md`
+- Glossary: `docs/blueprint/00-Foundation/GLOSSARY.md`
+- Kernel: `docs/blueprint/01-Platform/PLATFORM_KERNEL_OVERVIEW.md`
+- Capability map: `docs/blueprint/04-Business-Domains/BUSINESS_CAPABILITY_MAP.md`
+- Capability amendment: `docs/blueprint/04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md`
+- First slice: `docs/blueprint/17-Roadmap/FIRST_SLICE_MANIFEST.md`
+- Founder decisions: `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- ADRs: `docs/blueprint/18-Decisions/`
 - Contracts: `openapi/` and `schemas/`
 - Registries: `registry/`
-- Third audit and disposition: `reviews/`
+- Third audit and disposition: `docs/reviews/`

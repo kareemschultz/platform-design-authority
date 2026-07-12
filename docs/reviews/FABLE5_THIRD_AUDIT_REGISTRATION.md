@@ -5,14 +5,14 @@ version: 0.1.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
-review_evidence: reviews/FABLE5_THIRD_AUDIT_V1.md
+review_evidence: docs/reviews/FABLE5_THIRD_AUDIT_V1.md
 ---
 
 # Fable 5 Third Audit Registration
 
 ## Purpose
 
-Register `reviews/FABLE5_THIRD_AUDIT_V1.md` in document governance without altering the independent report after it was produced.
+Register `docs/reviews/FABLE5_THIRD_AUDIT_V1.md` in document governance without altering the independent report after it was produced.
 
 ## Evidence Integrity Decision
 
@@ -22,7 +22,7 @@ Rather than rewrite the independent evidence file after delivery, this governed 
 
 ## Registered Evidence
 
-- Report: `reviews/FABLE5_THIRD_AUDIT_V1.md`
+- Report: `docs/reviews/FABLE5_THIRD_AUDIT_V1.md`
 - Audited head: `aa8056b116b83366ab2131bf0d4bc789278a31b0`
 - Report commit: `6700f8c`
 - Audit date: 2026-07-11
@@ -33,7 +33,7 @@ Rather than rewrite the independent evidence file after delivery, this governed 
 
 The maintainer disposition is:
 
-`reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
+`docs/reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
 
 ## Governance Rule
 

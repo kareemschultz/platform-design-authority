@@ -25,15 +25,15 @@ last_reviewed: 2026-07-12
 
 ## Machine-Readable Evidence and Contracts
 
-- `../registry/`
-- `../openapi/first-slice-v1.yaml`
-- `../schemas/`
+- `registry/`
+- `openapi/first-slice-v1.yaml`
+- `schemas/`
 
 ## Review Evidence
 
-- `../reviews/FABLE5_THIRD_AUDIT_V1.md`
-- `../reviews/FABLE5_THIRD_AUDIT_REGISTRATION.md`
-- `../reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
+- `../../reviews/FABLE5_THIRD_AUDIT_V1.md`
+- `../../reviews/FABLE5_THIRD_AUDIT_REGISTRATION.md`
+- `../../reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
 
 ## Evidence Still Required
 

@@ -115,5 +115,5 @@ Validate with:
 - https://stripe.com/global
 - https://mmg.gy/business/
 - https://mmg.gy/developer/
-- `18-Decisions/ADR-0015-DIRECT-TENANT-MERCHANT-CONTRACTS-FIRST.md`
-- `20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- `docs/blueprint/18-Decisions/ADR-0015-DIRECT-TENANT-MERCHANT-CONTRACTS-FIRST.md`
+- `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`

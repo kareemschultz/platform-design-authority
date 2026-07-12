@@ -9,4 +9,4 @@ last_reviewed: 2026-07-12
 
 # Foundation
 
-Start with `CONSTITUTION.md`, `PLATFORM_CANON.md`, `DOCUMENT_GOVERNANCE.md`, `GLOSSARY.md`, and `NAMING_STANDARDS.md`. Namespace ownership is machine-readable in `../registry/domains.json`, and the generated document index is `../registry/documents.json`.
+Start with `CONSTITUTION.md`, `PLATFORM_CANON.md`, `DOCUMENT_GOVERNANCE.md`, `GLOSSARY.md`, and `NAMING_STANDARDS.md`. Namespace ownership is machine-readable in `registry/domains.json`, and the generated document index is `registry/documents.json`.

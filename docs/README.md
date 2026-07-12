@@ -1,10 +1,28 @@
-# Documentation Planes
+# Documentation
 
-This directory holds implementation-facing documentation that does not carry Platform Design Authority document IDs.
+This directory is the canonical home for repository prose. ADR-0025 separates four documentation classes without changing their authority.
 
-- `implementation/` contains scaffold provenance, compatibility conflicts, and migration proposals for the Meridian prototype.
-- `../00-Foundation/` through `../20-Strategy/` remain the governed architecture and evidence plane indexed by `../registry/documents.json`.
-- `../meridian/apps/fumadocs/content/docs/` is the product/user/developer documentation content plane. It may link or generate references from authoritative sources but must not duplicate them as independent authority.
-- `../openapi/` and `../schemas/` remain canonical machine contracts.
+| Directory | Purpose | Authority |
+|---|---|---|
+| `blueprint/` | Governed platform architecture, decisions, evidence, roadmap, and strategy | Constitution, lifecycle metadata, ADRs, and approved specifications |
+| `implementation/` | Scaffold provenance, implementation conflicts, and repository migration records | Implementation evidence only |
+| `reviews/` | Independent audits, immutable evidence, registrations, and dispositions | Evidence; dispositions do not rewrite independent audits |
+| `templates/` | ADR, specification, and review authoring templates | Guidance only |
 
-Moving the numbered architecture tree under this directory is intentionally deferred: doing so requires a separate accepted migration decision, history-preserving moves, registry/script/path rewrites, link migration, CI changes, and rollback evidence. `implementation/ROOT_DOCUMENT_MIGRATION_PROPOSAL.md` records that analysis.
+Product, user, administrator, developer, migration, troubleshooting, and release content is authored in `apps/docs/content/docs/` because it is compiled by the Fumadocs application. It derives from released or explicitly labelled prototype behavior and does not become architecture authority.
+
+Machine-consumed artifacts remain intentionally separate:
+
+- `openapi/` — canonical API contracts;
+- `schemas/` — canonical message and record schemas;
+- `registry/` — generated and curated governance registries;
+- `scripts/` — deterministic registry and validation tooling.
+
+Start with:
+
+- `docs/blueprint/PLATFORM_MANIFEST.md`
+- `docs/blueprint/00-Foundation/CONSTITUTION.md`
+- `docs/blueprint/18-Decisions/ADR-0025-NORMALIZE-MONOREPO-AND-DOCUMENTATION-LAYOUT.md`
+- `docs/implementation/ROOT_DOCUMENT_MIGRATION_PROPOSAL.md`
+
+The history-preserving migration from root numbered directories and the former `meridian/` wrapper is governed by ADR-0025. Historical audit contents retain the paths that were correct when issued; active documents, registries, tooling, and workflows use the normalized layout.

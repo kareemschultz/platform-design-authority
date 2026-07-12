@@ -14,7 +14,7 @@ related_adrs: [ADR-0006, ADR-0007, ADR-0016, ADR-0019]
 
 Govern which Better Auth core features, official plugins, managed-infrastructure plugins, and community plugins the platform may use. Availability in the Better Auth catalog is not architectural approval.
 
-This matrix is based on Better Auth v1.6.23 and the official v1.6 documentation verified on 2026-07-12 in `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`.
+This matrix is based on Better Auth v1.6.23 and the official v1.6 documentation verified on 2026-07-12 in `docs/blueprint/19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`.
 
 ## Decision Vocabulary
 
@@ -158,12 +158,12 @@ Any change to this matrix requires:
 
 ## Related Documents
 
-- `18-Decisions/ADR-0006-BETTER-AUTH-AS-AUTHENTICATION-FOUNDATION.md`
-- `01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md`
-- `01-Platform/IDENTITY_AND_AUTHENTICATION.md`
-- `01-Platform/AUTHORIZATION_AND_POLICY.md`
-- `01-Platform/TENANCY_AND_ORGANIZATIONS.md`
-- `07-Developer-Platform/PUBLIC_API_AND_APPLICATION_REGISTRATION.md`
-- `11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
-- `14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
-- `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/18-Decisions/ADR-0006-BETTER-AUTH-AS-AUTHENTICATION-FOUNDATION.md`
+- `docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md`
+- `docs/blueprint/01-Platform/IDENTITY_AND_AUTHENTICATION.md`
+- `docs/blueprint/01-Platform/AUTHORIZATION_AND_POLICY.md`
+- `docs/blueprint/01-Platform/TENANCY_AND_ORGANIZATIONS.md`
+- `docs/blueprint/07-Developer-Platform/PUBLIC_API_AND_APPLICATION_REGISTRATION.md`
+- `docs/blueprint/11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
+- `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
+- `docs/blueprint/19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`

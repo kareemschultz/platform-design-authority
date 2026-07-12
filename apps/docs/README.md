@@ -5,7 +5,7 @@ This Fumadocs application is the controlled prototype selected by ADR-0021. It i
 ## Content Boundaries
 
 - Authored product content: `content/docs/`
-- Architecture authority: repository root `00-Foundation/` through `20-Strategy/`
+- Architecture authority: repository root `docs/blueprint/00-Foundation/` through `docs/blueprint/20-Strategy/`
 - Canonical API contracts: root `openapi/` and `schemas/`
 - Implementation notes: root `docs/implementation/`
 - Generated API/reference pages must identify their source revision and must never become a second editable contract.
@@ -14,12 +14,12 @@ Only released or explicitly identified prototype behavior may be described as av
 
 ## Local Verification
 
-From `meridian/`:
+From the repository root:
 
 ```bash
 bun install --frozen-lockfile
-bun run --filter fumadocs typecheck
-bun run --filter fumadocs build
+bun run --filter docs types:check
+bun run --filter docs build
 ```
 
 The root Meridian CI runs the authoritative frozen-install and build gates. The application must also remain buildable through the approved Node fallback.

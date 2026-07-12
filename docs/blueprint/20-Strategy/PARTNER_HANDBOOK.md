@@ -17,7 +17,7 @@ Define how referral, reseller, implementation, managed-service, technology, mark
 
 This is a founding-stage operating design and does not imply an active partner program, certified partner network, or existing revenue-sharing capability.
 
-`13-Commercial/PARTNER_RESELLER_AND_MARKETPLACE_MODEL.md` and other approved Commercial specifications are authoritative for partner types, agreements, lifecycle, delegated authority, pricing, settlement, credits, refunds, and termination. This handbook describes operating practice and uses that specification's lifecycle terms exactly.
+`docs/blueprint/13-Commercial/PARTNER_RESELLER_AND_MARKETPLACE_MODEL.md` and other approved Commercial specifications are authoritative for partner types, agreements, lifecycle, delegated authority, pricing, settlement, credits, refunds, and termination. This handbook describes operating practice and uses that specification's lifecycle terms exactly.
 
 ## Lifecycle
 

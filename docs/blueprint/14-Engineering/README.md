@@ -17,13 +17,13 @@ last_reviewed: 2026-07-12
 - `ENGINEERING_HANDBOOK.md`
 - `IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md`
 - `ARCHITECTURE_DEPENDENCY_RULES.md`
-- `../registry/architecture-rules.json`
-- `../07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md`
-- `../07-Developer-Platform/PROJECT_AGENT_SKILLS.md`
-- `../02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md`
-- `../16-Testing/PLATFORM_TESTING_STRATEGY.md`
-- `../openapi/first-slice-v1.yaml`
-- `../schemas/`
+- `registry/architecture-rules.json`
+- `docs/blueprint/07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md`
+- `docs/blueprint/07-Developer-Platform/PROJECT_AGENT_SKILLS.md`
+- `docs/blueprint/02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md`
+- `docs/blueprint/16-Testing/PLATFORM_TESTING_STRATEGY.md`
+- `openapi/first-slice-v1.yaml`
+- `schemas/`
 
 ## Current Direction
 

@@ -189,7 +189,7 @@ Build the same small administrative application in Next.js and TanStack Start an
 
 Reconsider the conventional framework after stable v1 and successful vertical-slice evidence. Reconsider RSC only after its experimental label is removed and its Flight serialization, caching, streaming, security, accessibility, observability, and upgrade behavior pass the technique catalog gates.
 
-Detailed technique dispositions live in `14-Engineering/ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md`.
+Detailed technique dispositions live in `docs/blueprint/14-Engineering/ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md`.
 
 ## TanStack Store
 

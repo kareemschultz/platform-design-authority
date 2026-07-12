@@ -13,7 +13,7 @@ last_reviewed: 2026-07-10
 
 Define a shared service for in-app notifications, email, SMS, push, messaging channels, and other communications directed to people or governed conversational endpoints.
 
-External system-to-system webhook subscriptions, signing, retry, replay, and delivery administration are owned by the Developer Platform in `07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md`.
+External system-to-system webhook subscriptions, signing, retry, replay, and delivery administration are owned by the Developer Platform in `docs/blueprint/07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md`.
 
 ## Communication Types
 

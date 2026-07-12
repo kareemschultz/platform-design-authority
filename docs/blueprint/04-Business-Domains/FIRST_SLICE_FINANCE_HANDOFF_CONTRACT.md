@@ -142,7 +142,7 @@ The reviewer cannot edit a posted Commerce, Inventory, Cash, Payment, or Stored 
 - `GET /v1/exports/{exportId}`
 - `POST /v1/deposit-reconciliations`
 
-Permissions are defined in `01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md`.
+Permissions are defined in `docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md`.
 
 ## Events
 

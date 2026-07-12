@@ -53,7 +53,7 @@ Field-level permissions affect searchable text, facets, highlights, exports, and
 
 ## Relevance Governance
 
-Candidate retrieval quality uses precision and recall here. Ordering, command ranking, top-k success, and mean reciprocal rank are governed by `10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`; these are complementary evaluations, not competing authorities. See also `01-Platform/SEARCH_AND_DISCOVERY.md` and `09-UX/NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`.
+Candidate retrieval quality uses precision and recall here. Ordering, command ranking, top-k success, and mean reciprocal rank are governed by `docs/blueprint/10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`; these are complementary evaluations, not competing authorities. See also `docs/blueprint/01-Platform/SEARCH_AND_DISCOVERY.md` and `docs/blueprint/09-UX/NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`.
 
 Relevance changes are versioned and tested with:
 

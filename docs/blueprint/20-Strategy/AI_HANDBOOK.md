@@ -62,8 +62,8 @@ Monitor quality, unsupported claims, tool failures, budget use, latency, safety,
 
 ## Incident Response
 
-Use the severity and clocks in `06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`. Disable the narrowest component, preserve evidence, stop loops, determine scope, compensate or correct downstream state, communicate, add regression cases, and review provider and policy controls.
+Use the severity and clocks in `docs/blueprint/06-AI/EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`. Disable the narrowest component, preserve evidence, stop loops, determine scope, compensate or correct downstream state, communicate, add regression cases, and review provider and policy controls.
 
 ## Required Records
 
-Machine-readable records follow `schemas/ai/registry-records-v1.schema.json` and `06-AI/AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md`.
+Machine-readable records follow `schemas/ai/registry-records-v1.schema.json` and `docs/blueprint/06-AI/AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md`.

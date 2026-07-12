@@ -9,4 +9,4 @@ last_reviewed: 2026-07-12
 
 # Platform
 
-This section governs tenancy, identity, Party integration, authorization, entitlements, audit, privacy, devices, offline synchronization, jobs, events, files, notifications, search, and developer-facing platform primitives. Use `../registry/capabilities.json`, `../registry/events.json`, and `../registry/permissions.json` for generated lookup.
+This section governs tenancy, identity, Party integration, authorization, entitlements, audit, privacy, devices, offline synchronization, jobs, events, files, notifications, search, and developer-facing platform primitives. Use `registry/capabilities.json`, `registry/events.json`, and `registry/permissions.json` for generated lookup.

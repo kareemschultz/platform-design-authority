@@ -19,12 +19,12 @@ last_reviewed: 2026-07-11
 - `SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md`
 - `SEARCH_AND_COMMAND_RANKING_POLICY.md`
 - `DATA_CLASSIFICATION_AND_HANDLING.md`
-- `../01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md`
-- `../01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md`
-- `../02-Architecture/DATA_OWNERSHIP_AND_CONSISTENCY.md`
-- `../11-Security/PRIVACY_RIGHTS_AND_RETENTION.md`
-- `../schemas/import-export/import-export-v1.schema.json`
-- `../schemas/events/event-envelope-v1.schema.json`
+- `docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md`
+- `docs/blueprint/01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md`
+- `docs/blueprint/02-Architecture/DATA_OWNERSHIP_AND_CONSISTENCY.md`
+- `docs/blueprint/11-Security/PRIVACY_RIGHTS_AND_RETENTION.md`
+- `schemas/import-export/import-export-v1.schema.json`
+- `schemas/events/event-envelope-v1.schema.json`
 
 ## Machine-Readable Contracts
 

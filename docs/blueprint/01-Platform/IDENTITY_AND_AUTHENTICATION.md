@@ -85,9 +85,9 @@ Authentication is a critical dependency. Offline POS uses signed, expiring platf
 
 ## Related Specifications
 
-- `01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md`
-- `01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md`
-- `01-Platform/AUTHORIZATION_AND_POLICY.md`
-- `01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md`
-- `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`
-- `19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md`
+- `docs/blueprint/01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md`
+- `docs/blueprint/01-Platform/AUTHORIZATION_AND_POLICY.md`
+- `docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md`
+- `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md`
+- `docs/blueprint/19-Appendices/BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`

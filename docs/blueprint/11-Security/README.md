@@ -21,15 +21,15 @@ last_reviewed: 2026-07-11
 - `PRIVACY_RIGHTS_AND_RETENTION.md`
 - `PII_ERASURE_AND_PSEUDONYMIZATION.md`
 - `RISK_FRAUD_AND_ANOMALY.md`
-- `../15-Operations/SECURITY_OPERATIONS_AND_FORENSICS.md`
-- `../15-Operations/OPERATIONAL_EXERCISE_TEMPLATES.md`
-- `../01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md`
-- `../01-Platform/AUTHORIZATION_AND_POLICY.md`
-- `../01-Platform/SECRETS_KEYS_AND_CREDENTIALS.md`
-- `../01-Platform/RATE_LIMITS_QUOTAS_AND_ABUSE_CONTROLS.md`
-- `../01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md`
-- `../01-Platform/OFFLINE_SYNCHRONIZATION.md`
-- `../12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`
+- `docs/blueprint/15-Operations/SECURITY_OPERATIONS_AND_FORENSICS.md`
+- `docs/blueprint/15-Operations/OPERATIONAL_EXERCISE_TEMPLATES.md`
+- `docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md`
+- `docs/blueprint/01-Platform/AUTHORIZATION_AND_POLICY.md`
+- `docs/blueprint/01-Platform/SECRETS_KEYS_AND_CREDENTIALS.md`
+- `docs/blueprint/01-Platform/RATE_LIMITS_QUOTAS_AND_ABUSE_CONTROLS.md`
+- `docs/blueprint/01-Platform/DEVICE_AND_EDGE_MANAGEMENT.md`
+- `docs/blueprint/01-Platform/OFFLINE_SYNCHRONIZATION.md`
+- `docs/blueprint/12-Deployment/BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`
 
 ## Current Governed Controls
 

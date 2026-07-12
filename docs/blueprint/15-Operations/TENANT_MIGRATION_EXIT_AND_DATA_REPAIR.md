@@ -52,7 +52,7 @@ Include documented open formats for authoritative records, files, configuration,
 
 ## Data Repair Template
 
-The canonical repair record and mandatory independent-review controls are defined by `15-Operations/PROBLEM_CHANGE_RELEASE_AND_DATA_REPAIR_OPERATIONS.md`. Migration or exit repairs use that record without weakening it and add:
+The canonical repair record and mandatory independent-review controls are defined by `docs/blueprint/15-Operations/PROBLEM_CHANGE_RELEASE_AND_DATA_REPAIR_OPERATIONS.md`. Migration or exit repairs use that record without weakening it and add:
 
 - Migration/export/import manifest and hashes
 - Source and target schema versions

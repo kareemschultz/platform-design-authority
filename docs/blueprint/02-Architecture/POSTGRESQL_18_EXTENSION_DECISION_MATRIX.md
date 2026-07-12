@@ -77,4 +77,4 @@ An extension proposal identifies:
 - `https://www.postgresql.org/docs/18/functions-uuid.html`
 - `https://www.postgresql.org/docs/18/pgstatstatements.html`
 - `https://www.postgresql.org/docs/18/pgtrgm.html`
-- `18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md`
+- `docs/blueprint/18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md`

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from collections import defaultdict
@@ -67,21 +68,23 @@ def parse_simple_front_matter(path: Path) -> dict[str, str]:
 
 
 def all_markdown_files() -> list[Path]:
-    return [
-        path
-        for path in sorted(ROOT.rglob("*.md"))
-        if not any(
-            part.startswith(".") or part in IGNORED_TREE_PARTS
-            for part in path.relative_to(ROOT).parts
-        )
-    ]
+    files: list[Path] = []
+    for directory, subdirectories, filenames in os.walk(ROOT):
+        subdirectories[:] = [
+            name
+            for name in subdirectories
+            if not name.startswith(".") and name not in IGNORED_TREE_PARTS
+        ]
+        base = Path(directory)
+        files.extend(base / name for name in filenames if name.endswith(".md"))
+    return sorted(files)
 
 
 def governed_markdown_files() -> list[Path]:
     governed: list[Path] = []
     for path in all_markdown_files():
         rel = path.relative_to(ROOT)
-        if rel.parts and rel.parts[0] == "templates":
+        if rel.parts[:2] == ("docs", "templates"):
             continue
         first = path.read_text(encoding="utf-8").splitlines()[:1]
         if first and first[0].strip() == "---":
@@ -223,7 +226,7 @@ def validate_event_references(prefixes: dict[str, dict[str, object]]) -> list[st
     errors = list(definition_errors)
     for path in governed_markdown_files():
         rel = path.relative_to(ROOT)
-        if rel.parts and rel.parts[0] in {"reviews", "templates"}:
+        if rel.parts[:2] in {("docs", "reviews"), ("docs", "templates")}:
             continue
         for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
             for event_name in EVENT_CANDIDATE.findall(line):
@@ -240,7 +243,7 @@ def validate_event_references(prefixes: dict[str, dict[str, object]]) -> list[st
 
 def collect_permissions(prefixes: dict[str, dict[str, object]]) -> tuple[list[str], set[str]]:
     errors: list[str] = []
-    path = ROOT / "01-Platform" / "FIRST_SLICE_PERMISSION_CATALOG.md"
+    path = ROOT / "docs" / "blueprint" / "01-Platform" / "FIRST_SLICE_PERMISSION_CATALOG.md"
     definitions: set[str] = set()
     for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         match = PERMISSION_BULLET.match(line)
@@ -409,7 +412,7 @@ def validate_internal_links() -> list[str]:
         basename_index[item.name].append(item)
     for path in markdown_files:
         rel = path.relative_to(ROOT)
-        if rel.parts and rel.parts[0] in {"reviews", "templates"}:
+        if rel.parts[:2] in {("docs", "reviews"), ("docs", "templates")}:
             continue
         text = path.read_text(encoding="utf-8")
         targets = [match.group(1) for match in MARKDOWN_LINK.finditer(text)]
@@ -478,7 +481,7 @@ def validate_architecture_rules() -> list[str]:
 
 def validate_design_token_references() -> list[str]:
     registry_path = ROOT / "registry" / "design-tokens.json"
-    source_path = ROOT / "09-UX" / "DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md"
+    source_path = ROOT / "docs" / "blueprint" / "09-UX" / "DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md"
     if not registry_path.exists() or not source_path.exists():
         return []
     tokens = load_json(registry_path).get("tokens", {})
@@ -510,7 +513,7 @@ def validate_governance_exemptions() -> list[str]:
         if item.get("rule") == "document_front_matter"
     }
     scoped = [ROOT / "README.md", ROOT / "CLAUDE.md", ROOT / "AGENTS.md"]
-    scoped.extend(sorted((ROOT / "reviews").glob("*.md")))
+    scoped.extend(sorted((ROOT / "docs" / "reviews").glob("*.md")))
     errors: list[str] = []
     seen: set[tuple[str, str]] = set()
     for item in exemptions:
@@ -558,6 +561,50 @@ def validate_contract_files() -> list[str]:
     return errors
 
 
+def validate_repository_layout() -> list[str]:
+    """Keep the executable monorepo and governed documentation planes canonical."""
+    errors: list[str] = []
+    required_directories = [
+        "apps/web",
+        "apps/server",
+        "apps/native",
+        "apps/docs",
+        "packages/api",
+        "packages/auth",
+        "packages/db",
+        "docs/blueprint",
+        "docs/implementation",
+        "docs/reviews",
+        "docs/templates",
+        "openapi",
+        "schemas",
+        "registry",
+        "scripts",
+        "ops/postgres",
+    ]
+    for relative in required_directories:
+        if not (ROOT / relative).is_dir():
+            errors.append(f"missing canonical repository directory: {relative}")
+
+    required_root_files = [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md",
+        "package.json",
+        "bun.lock",
+        "turbo.json",
+        "docker-compose.yml",
+    ]
+    for relative in required_root_files:
+        if not (ROOT / relative).is_file():
+            errors.append(f"missing canonical repository file: {relative}")
+
+    for relative in ("meridian", "apps/fumadocs"):
+        if (ROOT / relative).exists():
+            errors.append(f"legacy repository layout must not exist: {relative}")
+    return errors
+
+
 def validate_skills() -> list[str]:
     errors: list[str] = []
     for skills_root in (ROOT / ".claude" / "skills", ROOT / ".agents" / "skills"):
@@ -594,6 +641,7 @@ def main() -> int:
         + validate_design_token_references()
         + validate_governance_exemptions()
         + validate_contract_files()
+        + validate_repository_layout()
         + validate_skills()
     )
     if errors:

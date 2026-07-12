@@ -51,8 +51,8 @@
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "test": "turbo run test",
-    "check": "ultracite check",
-    "fix": "ultracite fix"
+    "check": "ultracite check apps packages",
+    "fix": "ultracite fix apps packages"
   },
   "dependencies": {
     "@meridian/env": "workspace:*",
@@ -68,6 +68,7 @@
     "@biomejs/biome": "2.5.2",
     "@meridian/config": "workspace:*",
     "@types/bun": "catalog:",
+    "micromark-util-decode-numeric-character-reference": "2.0.2",
     "turbo": "^2.10.2",
     "typescript": "^6",
     "ultracite": "7.9.3"

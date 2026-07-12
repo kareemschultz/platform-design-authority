@@ -10,7 +10,7 @@ related_adrs: [ADR-0010, ADR-0013, ADR-0014]
 
 # Finance Domain
 
-The bounded first-slice export seam is governed by `04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`; it does not imply a complete General Ledger or financial-statement implementation.
+The bounded first-slice export seam is governed by `docs/blueprint/04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`; it does not imply a complete General Ledger or financial-statement implementation.
 
 ## Purpose
 

@@ -5,7 +5,7 @@ version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
-source_audit: reviews/FABLE5_SECOND_AUDIT_V1.md
+source_audit: docs/reviews/FABLE5_SECOND_AUDIT_V1.md
 source_audited_commit: 4070e2f94b8b977f257fb2b91e181f6ff5a76e17
 ---
 
@@ -75,7 +75,7 @@ Recommended and provisionally adopted through ADR-0015: direct tenant-provider m
 
 ### Platform Legal Entity and Billing Currency
 
-Open. `20-Strategy/FOUNDER_DECISION_REGISTER.md` records the required inputs. Architecture will not invent the contracting entity, tax residence, bank accounts, or final billing currency.
+Open. `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md` records the required inputs. Architecture will not invent the contracting entity, tax residence, bank accounts, or final billing currency.
 
 ### Storefront and Recurring Commerce
 

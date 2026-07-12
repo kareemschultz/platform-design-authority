@@ -116,7 +116,7 @@ Better Auth payment/subscription plugins do not own Platform Subscription, tenan
 - Keep production CSRF and origin checks enabled; explicitly configure trusted origins, secure cookies, and trusted proxy/IP headers
 - Review schema, endpoint, secret, hook, data-flow, and package changes for every enabled plugin and upgrade
 - Keep session caching disabled until revocation-staleness and sensitive-operation revalidation have passed policy review
-- Apply `01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling any plugin
+- Apply `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling any plugin
 
 ## Validation
 

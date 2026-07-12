@@ -11,7 +11,7 @@ last_reviewed: 2026-07-11
 
 ## Current Specifications
 
-- `../03-Business-Engines/AI_ORCHESTRATION_ENGINE.md`
+- `docs/blueprint/03-Business-Engines/AI_ORCHESTRATION_ENGINE.md`
 - `AI_PLATFORM_ARCHITECTURE.md`
 - `MODEL_PROMPT_TOOL_AND_AGENT_REGISTRIES.md`
 - `AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md`
@@ -19,11 +19,11 @@ last_reviewed: 2026-07-11
 - `EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`
 - `AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md`
 - `FIRST_SLICE_AI_BOUNDARY.md`
-- `../10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md`
-- `../10-Data/DATA_CLASSIFICATION_AND_HANDLING.md`
-- `../11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
-- `../20-Strategy/AI_HANDBOOK.md`
-- `../schemas/ai/registry-records-v1.schema.json`
+- `docs/blueprint/10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md`
+- `docs/blueprint/10-Data/DATA_CLASSIFICATION_AND_HANDLING.md`
+- `docs/blueprint/11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
+- `docs/blueprint/20-Strategy/AI_HANDBOOK.md`
+- `schemas/ai/registry-records-v1.schema.json`
 
 ## Canonical Controls
 

@@ -20,7 +20,7 @@ The repository is ready for controlled technical prototypes only.
 
 Production implementation is blocked until the governing documents for the selected vertical slice are approved and the audit remediation gates below are satisfied.
 
-The bounded human-readable scope is `17-Roadmap/FIRST_SLICE_MANIFEST.md`; the machine-readable index is `registry/first-slice.json`.
+The bounded human-readable scope is `docs/blueprint/17-Roadmap/FIRST_SLICE_MANIFEST.md`; the machine-readable index is `registry/first-slice.json`.
 
 ## Phase 0 — Audit Remediation and Governance
 

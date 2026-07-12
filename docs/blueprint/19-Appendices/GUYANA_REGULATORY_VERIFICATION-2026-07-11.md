@@ -33,7 +33,7 @@ The prototype tax pack fixes testable values, but production tax configuration r
 ### Sources
 
 - Guyana Revenue Authority: `https://www.gra.gov.gy/`
-- Dated prototype interpretation: `05-Industry-Packs/GUYANA_RETAIL_PROTOTYPE_TAX_PACK.md`
+- Dated prototype interpretation: `docs/blueprint/05-Industry-Packs/GUYANA_RETAIL_PROTOTYPE_TAX_PACK.md`
 
 ## Data Protection
 

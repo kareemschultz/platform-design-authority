@@ -122,7 +122,7 @@ A composite score is prohibited when any critical safety, accessibility, tenant-
 
 ## Experience Budgets
 
-First-slice provisional targets are defined in `17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`.
+First-slice provisional targets are defined in `docs/blueprint/17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`.
 
 Prototype measurements replace assumptions with baselines. Pilot budgets are frozen only after competitor and customer tests, and GA targets require production telemetry.
 

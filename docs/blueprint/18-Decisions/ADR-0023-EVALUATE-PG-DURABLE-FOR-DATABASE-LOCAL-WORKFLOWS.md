@@ -91,10 +91,10 @@ Prohibited until a later accepted ADR:
 
 ## References
 
-- `02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md`
-- `19-Appendices/PG_DURABLE_VERIFICATION-2026-07-12.md`
-- `01-Platform/JOBS_AND_SCHEDULING.md`
-- `03-Business-Engines/WORKFLOW_ENGINE.md`
+- `docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md`
+- `docs/blueprint/19-Appendices/PG_DURABLE_VERIFICATION-2026-07-12.md`
+- `docs/blueprint/01-Platform/JOBS_AND_SCHEDULING.md`
+- `docs/blueprint/03-Business-Engines/WORKFLOW_ENGINE.md`
 
 ## Review Record
 

@@ -6,18 +6,14 @@ import { env } from "@meridian/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
-import { getTrustedOrigins } from "./security";
+import { getCookieAttributes, getTrustedOrigins } from "./security";
 
 export function createAuth() {
 	const db = createDb();
 
 	return betterAuth({
 		advanced: {
-			defaultCookieAttributes: {
-				httpOnly: true,
-				sameSite: "lax",
-				secure: true,
-			},
+			defaultCookieAttributes: getCookieAttributes(env.NODE_ENV),
 		},
 		baseURL: env.BETTER_AUTH_URL,
 		database: drizzleAdapter(db, {

@@ -26,6 +26,16 @@ export function validateRedirectPath(value: string): string {
 	return `${parsed.pathname}${parsed.search}${parsed.hash}`;
 }
 
+export function getCookieAttributes(
+	nodeEnv: "development" | "production" | "test"
+) {
+	return {
+		httpOnly: true,
+		sameSite: "lax" as const,
+		secure: nodeEnv === "production",
+	};
+}
+
 export function getTrustedOrigins(options: {
 	authUrl: string;
 	corsOrigin: string;

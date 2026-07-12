@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	getCookieAttributes,
 	getTrustedOrigins,
 	toExactOrigin,
 	validateRedirectPath,
@@ -37,5 +38,14 @@ describe("auth security helpers", () => {
 		expect(() => validateRedirectPath("//evil.example.test")).toThrow(
 			"same-origin"
 		);
+	});
+
+	test("uses secure cookies only in production", () => {
+		expect(getCookieAttributes("development")).toEqual({
+			httpOnly: true,
+			sameSite: "lax",
+			secure: false,
+		});
+		expect(getCookieAttributes("production").secure).toBe(true);
 	});
 });

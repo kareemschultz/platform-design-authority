@@ -34,6 +34,7 @@ jobs:
       run:
         working-directory: meridian
     env:
+      # Fixed non-secret test fixtures; never reused outside this isolated CI job.
       BETTER_AUTH_SECRET: "ci-only-32-character-secret-value"
       BETTER_AUTH_TRUSTED_ORIGINS: "http://localhost:3000,http://localhost:3001"
       BETTER_AUTH_URL: "http://localhost:3000"
@@ -107,6 +108,27 @@ jobs:
 
       - name: Compose config validation
         run: docker compose config --quiet
+
+      - name: PostgreSQL 18.4 baseline smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'docker compose down -v --remove-orphans' EXIT
+          docker compose up -d postgres
+          cid=$(docker compose ps -q postgres)
+          for attempt in {1..30}; do
+            if [ "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$cid")" = "healthy" ]; then
+              break
+            fi
+            sleep 1
+          done
+          [ "$(docker inspect --format '{{.State.Health.Status}}' "$cid")" = "healthy" ]
+          docker compose exec -T postgres psql -U postgres -d meridian -Atc \
+            "SELECT current_setting('server_version') LIKE '18.4%';" | grep -qx t
+          docker compose exec -T postgres psql -U postgres -d meridian -Atc \
+            "SELECT extname FROM pg_extension ORDER BY extname;" | grep -qxF $'pg_stat_statements\nplpgsql'
+          docker compose exec -T postgres psql -U postgres -d meridian -Atc \
+            "SHOW shared_preload_libraries;" | grep -qx pg_stat_statements
 
       - name: Docker image build validation
         run: docker compose build web server

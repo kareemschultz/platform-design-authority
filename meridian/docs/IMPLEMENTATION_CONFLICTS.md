@@ -23,3 +23,9 @@ Disposition: the prototype pins the available stable `1.14.7` package set and do
 The governed Better-T-Stack 3.36.3 dry run passed on 2026-07-12 with `--addons pwa turborepo ultracite --examples none` and wrote zero files. Although the process was invoked with `bun create better-t-stack@3.36.3`, the tool's JSON result emitted a `reproducibleCommand` containing `better-t-stack@latest`.
 
 Disposition: treat the emitted `@latest` command as an upstream 3.36.3 reporting defect, not as repository authority. `README.md` and `bts.jsonc` retain the exact manually pinned invocation that was actually executed. Recheck this behaviour before adopting a later scaffold version.
+
+## Transitive security overrides
+
+The root lock forces `esbuild 0.28.1`, `postcss 8.5.17`, and `uuid 14.0.1` to avoid older vulnerable transitive resolutions reported during remediation. These are temporary controlled-prototype overrides, not platform-wide production authority.
+
+Compatibility evidence is the frozen Bun install, uncached type and test runs, production builds for web/server/Fumadocs, and Docker builds. Remove each override once all direct dependants naturally resolve an equal or newer non-vulnerable version; do not carry them forward without rerunning those gates.

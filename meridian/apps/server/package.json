@@ -8,7 +8,8 @@
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "bun run --hot src/index.ts",
     "start": "bun run dist/index.mjs",
-    "start:node": "node dist/node.mjs"
+    "start:node": "node dist/node.mjs",
+    "test": "bun test src/*.test.ts"
   },
   "dependencies": {
     "@hono/node-server": "2.0.8",

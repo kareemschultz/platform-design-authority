@@ -3588,7 +3588,7 @@
       "document_id": "PDA-UX-001",
       "path": "docs/blueprint/09-UX/README.md",
       "title": "UX and Design System Section Index",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -3803,6 +3803,20 @@
       "document_id": "PDA-UX-028",
       "path": "docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md",
       "title": "shadcn Configuration Decision Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-12",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-UX-029",
+      "path": "docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md",
+      "title": "Preferred Component Catalog",
       "version": "0.1.0",
       "status": "Draft",
       "owner": "Platform Design Authority",

@@ -195,6 +195,32 @@
       "name": "@meridian/config",
       "version": "0.0.0",
     },
+    "packages/contracts/api": {
+      "name": "@meridian/contracts-api",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@meridian/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/contracts/events": {
+      "name": "@meridian/contracts-events",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@meridian/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/contracts/permissions": {
+      "name": "@meridian/contracts-permissions",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@meridian/config": "workspace:*",
+        "typescript": "^6",
+      },
+    },
     "packages/db": {
       "name": "@meridian/db",
       "dependencies": {
@@ -220,6 +246,15 @@
         "dotenv": "catalog:",
         "zod": "catalog:",
       },
+      "devDependencies": {
+        "@meridian/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/foundation/core": {
+      "name": "@meridian/foundation-core",
+      "version": "0.0.0",
       "devDependencies": {
         "@meridian/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -729,9 +764,17 @@
 
     "@meridian/config": ["@meridian/config@workspace:packages/config"],
 
+    "@meridian/contracts-api": ["@meridian/contracts-api@workspace:packages/contracts/api"],
+
+    "@meridian/contracts-events": ["@meridian/contracts-events@workspace:packages/contracts/events"],
+
+    "@meridian/contracts-permissions": ["@meridian/contracts-permissions@workspace:packages/contracts/permissions"],
+
     "@meridian/db": ["@meridian/db@workspace:packages/db"],
 
     "@meridian/env": ["@meridian/env@workspace:packages/env"],
+
+    "@meridian/foundation-core": ["@meridian/foundation-core@workspace:packages/foundation/core"],
 
     "@meridian/ui": ["@meridian/ui@workspace:packages/ui"],
 

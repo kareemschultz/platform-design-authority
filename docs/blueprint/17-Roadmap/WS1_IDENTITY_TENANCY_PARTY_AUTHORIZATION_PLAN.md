@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-008
 title: "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization"
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -40,7 +40,7 @@ This is a **Draft plan for a controlled prototype**, not production authority. I
 |---|---:|---|
 | `platform.tenancy` | full | tenant membership and governed context resolution |
 | `platform.organizations` | full | organization and location context required by Prototype 1 |
-| `platform.authentication` | full | Better Auth boundary, account/session lifecycle, and the required 2FA or passkey seam |
+| `platform.authentication` | full | Better Auth boundary, account/session lifecycle, and the adopted Two-Factor and Passkey baseline |
 | `platform.identity` | full | principal resolution, Party linkage, user administration, and session revocation |
 | `platform.authorization` | full | current scoped policy decision and canonical permission enforcement |
 | `platform.entitlements` | full | effective capability evaluation independent of permissions |
@@ -56,7 +56,7 @@ The 2026-07-13 independent consistency review was verified against the current b
 
 | Finding | Disposition | Severity | Required closure | Owner | Timing |
 |---|---|---:|---|---|---|
-| Global `foundation/database` singleton conflicts with runtime-neutral and composition-root rules | Accepted → **Resolved by ADR-0027** (review record pending) | Critical | No database adapter in Foundation; package-owned adapters injected from composition root; serial migration orchestration | Platform Architecture | Before PR2 |
+| Global `foundation/database` singleton conflicts with runtime-neutral and composition-root rules | Accepted → **Proposed resolution in ADR-0027 v0.2.0** | Critical | Owner-specific Persistence packages; no embedded adapter in runtime-neutral core; composition-root injection; serial migrations; required ADR reviews complete | Platform Architecture | Before PR2 |
 | Whole-family `applications -> platform/domains` grant is broader than the composition-root rule | Accepted | Critical | Keep family grant narrow; add path-aware composition-root enforcement and negative import tests | Platform Architecture | PR1 |
 | Canonical OpenAPI payloads and session operations are incomplete | Accepted | Critical | Complete request, response, error, pagination, idempotency, and session contracts before handlers | API Platform | PR1 |
 | User invitation and suspension lifecycle is ambiguous across Identity, Tenancy, and Party | Accepted | Critical | Define command owner, tenant/global scope, state machine, idempotency, failure recovery, session effects, audit, and events | Identity/Tenancy/Party | PR1 |
@@ -65,7 +65,7 @@ The 2026-07-13 independent consistency review was verified against the current b
 | `AuthorizationDecision`, `AuthenticatedPrincipal`, and `AuditRecord` were under-specified | Accepted | High | Align shared contracts with governing specifications and OpenAPI nullability | Authorization/Audit/Identity | PR1 |
 | Tenant isolation lacked schema, threat-model, and classification controls | Accepted | High | Add data-flow/abuse review, tenant constraints, RLS disposition, and classification evidence | Security/Data | Before migrations |
 | Migration streams lacked ordering, rollback, and exact-version evidence | Accepted | High | Serialize migration execution and prove clean, upgrade, failure, and recovery paths | Platform Engineering | PR2 |
-| Better Auth Organization choice was routed as informal founder sign-off | Accepted → **Resolved** (adopt ADR-0006 baseline, no amendment) | High | Adopt constrained Organization behind Platform Identity per ADR-0006 `:56` / matrix `:67`; exact plugin manifest recorded in PR1 | Platform Identity/PDA | PR1 |
+| Better Auth Organization choice was routed as informal founder sign-off | Accepted → **Selection recorded; implementation closure remains in PR1** | High | Adopt the complete ADR-0006 baseline behind Platform Identity; exact routes/options/schema/evidence recorded in PR1; Platform Tenancy remains mutation authority | Platform Identity/PDA | PR1 |
 
 Architecture closure in this plan does not substitute for implementation tests. Founder, legal, provider, customer, pilot, and production evidence remains open where recorded elsewhere.
 
@@ -90,30 +90,32 @@ PR1 is a governance-and-contract pull request. No schema-owning WS1 package begi
 
 ### G3 — Decide and govern the persistence adapter boundary
 
-**Resolved by ADR-0027** (Proposed; needs the review record in its own table before PR2 merges). `packages/foundation/database` is prohibited. Foundation remains dependency-light and runtime-neutral; it does not import `pg`, Drizzle, `@meridian/tooling-env`, or environment state. ADR-0027 adopts package-owned persistence adapters with composition-root injection:
+**Proposed resolution: ADR-0027 v0.2.0.** Its named review rows must be complete before PR2 merges. `packages/foundation/database` and embedded adapters in runtime-neutral owner packages are prohibited. ADR-0027 adopts owner-specific Persistence packages with composition-root injection:
 
 - domain/platform core, application, contract, and authorization code depend on repository or unit-of-work interfaces only;
-- concrete PostgreSQL/Drizzle adapters and migrations remain owned by the module whose data changes, in an explicitly registered adapter boundary (owning-package sub-path, e.g. `src/adapter/**` + `src/migrations/**`);
+- concrete PostgreSQL/Drizzle adapters and migration artifacts live under `packages/persistence/*`, one package per authoritative owner/backend; location does not transfer table or migration ownership;
 - `apps/server/composition/**` reads validated environment configuration, creates the single process pool, supplies transaction-capable adapters, and owns graceful shutdown;
-- no package locates a global pool or reads `process.env`/`@meridian/tooling-env` for a connection — this includes retrofitting today's self-constructed pool in `platform/identity/src/db.ts` (WS1 PR2);
+- application commands own transaction boundaries; the composition root binds the coordinator, and state-plus-outbox atomicity cannot become unrestricted cross-module table mutation;
+- no Persistence or core package creates a pool, locates a global connection, or reads `process.env`/`@meridian/tooling-env` for a connection — this includes retrofitting today's self-constructed pool in `platform/identity/src/db.ts` (WS1 PR2);
 - migrations run through a deterministic serial orchestrator, not a bare `turbo run db:migrate`.
 
 ### G4 — Resolve exact Better Auth composition
 
 PDA-PLT-028 remains deny-by-default. PR1 records the exact Better Auth package/version composition, schema and endpoint diff, secrets, hooks, data flows, rollback, and Bun/Node tests.
 
-**Resolved: adopt the ADR-0006 first-slice baseline (option 1), no ADR-0006/PDA-PLT-028 amendment required.** ADR-0006 (`:56`) already names the baseline — database-backed sessions, email/password + account lifecycle, Two-Factor, Passkey, constrained Admin, constrained Organization, and test-only Test Utils — and the plugin matrix (`:67`) records Organization as "Constrained adopt." WS1 therefore *aligns with* the ADR rather than amending it; no informal founder sign-off is involved. The concrete PR1 manifest moves the current single-plugin config (only `emailAndPassword` today, per `packages/platform/identity/src/auth.ts`) to the baseline set:
+**Architecture selection recorded; PR1 evidence gate remains open.** WS1 adopts the complete ADR-0006 (`:56`) baseline without amending it: database-backed sessions, email/password + account lifecycle, Two-Factor, Passkey, constrained Admin, constrained Organization, and test-only Test Utils. ADR-0006 and PDA-PLT-028 are both pre-acceptance material, so they guide this named controlled prototype but do not authorize production. PR1 must turn this selection into an exact implementation manifest rather than treating the table below as closure.
 
 | Baseline feature | WS1 posture | Authoritative-state rule |
 |---|---|---|
 | Email/password + account lifecycle | already enabled; extend with lifecycle hooks | Platform Identity owns auth accounts/sessions |
 | Database-backed sessions | already enabled | session revocation ≤60s p95 (§11) |
-| Two-Factor + Passkey | enable at least one as the required Prototype-1 auth seam | assurance level surfaced on `AuthenticatedPrincipal` |
-| Constrained Admin | enable behind platform policy wrappers | never bypasses canonical permissions |
-| Constrained Organization | enable **only** for authentication membership + active-context mechanics | **Platform Tenancy remains authoritative**; Better Auth `organization`/`member`/`invitation` tables are non-authoritative, one-way-mapped into `platform/tenancy`; Better Auth roles never grant canonical permissions/entitlements; deletion/invitation endpoints require platform policy wrappers (matrix `:67`) |
+| Two-Factor Authentication | enable for the full-prototype baseline | prove enrollment verification, encrypted secrets, backup-code lifecycle, lockout, trusted-device/recovery policy, and step-up mapping |
+| Passkey | enable for the full-prototype baseline | prove RP ID/origin policy, user verification, inventory/revocation, recovery, account linking, and assurance mapping |
+| Constrained Admin | enable only through platform policy wrappers | Better Auth default roles grant no canonical authority; enumerate and disable or intercept every native mutation route that lacks platform permission, scope, recent-authentication, reason, approval, impersonation visibility, and audit controls |
+| Constrained Organization | enable only as an authentication projection and active-context aid | **Platform Tenancy is the mutation authority**; Platform commands commit authoritative organization/membership/invitation state first, then an idempotent adapter/outbox flow projects the minimum authentication state into Better Auth. Native plugin mutation routes are disabled or intercepted. Better Auth roles and `activeOrganizationId` never grant canonical authority, and drift is reconciled visibly. |
 | Test Utils | test builds only | excluded from production bundles |
 
-The exact pinned `better-auth` catalog version and per-plugin schema/endpoint deltas are recorded in the PR1 manifest and the technology ledger (PDA-ENGR-013), not asserted here. Full-depth `platform.authentication` evidence remains incomplete until this baseline plus all required test dimensions pass.
+The current catalog pin is `better-auth` 1.6.23. PR1 must reverify that exact lock against official documentation, list every enabled server/client plugin, option, schema field/table, route (including `disabledPaths` or equivalent interception), hook, secret, data flow, rollback step, and Bun/Node regression test in PDA-ENGR-013. Full-depth `platform.authentication` evidence remains incomplete until both adopted factors and all required test dimensions pass.
 
 ### G5 — Define identity lifecycle orchestration
 
@@ -141,7 +143,7 @@ Migration commands execute deterministically and serially; a bare unfiltered `tu
 
 ## 4. Package and Ownership Plan
 
-The exact persistence-adapter package names remain gated by G3. Core ownership is fixed:
+ADR-0027 selects owner-specific `packages/persistence/*` adapters; exact package manifests and the ADR's named reviews remain gated by G3. Core ownership is fixed:
 
 | Core package | Authoritative behavior/data | Allowed direct dependencies |
 |---|---|---|
@@ -150,7 +152,7 @@ The exact persistence-adapter package names remain gated by G3. Core ownership i
 | `platform/authorization` | runtime-neutral policy evaluation; no persistence adapter | Foundation and published Contracts |
 | `platform/entitlements` | effective entitlement grants, limits, state, source, dates, and change history | Foundation and published Contracts |
 | `platform/audit` | append-oriented audit evidence, redaction, retention, privacy transformation | Foundation and published Contracts |
-| `platform/events` | transactional outbox contract and infrastructure adapter selected under G3 | Foundation and published Contracts |
+| `platform/events` | transactional outbox contract; owner-specific concrete adapter under G3 | Foundation and published Contracts |
 | `domains/party` | Party, Person/Organization details, contact/address/identifier records, relationships, duplicate/merge evidence, `PlatformIdentityLink` | Foundation, published Contracts, and injected Platform contracts |
 
 No sibling Platform implementation imports another sibling. Party consumes published tenancy/identity contracts only. Concrete adapters are bound in `apps/server/composition/**`.
@@ -277,7 +279,7 @@ Each pull request uses one issue, branch, worktree, owner, migration/API/securit
 
 1. **PR1 — Governance, canonical contracts, and architecture enforcement.** Close TD-007; complete WS1 OpenAPI/error/session contracts; map every endpoint and permission; expand shared types; record identity lifecycle; resolve Better Auth composition; add event schemas; update the persistence ADR/spec; implement path-aware architecture tests. No business schema migration.
 2. **PR2 — Persistence adapters, serial migration runner, and minimum outbox.** Implement the G3 boundary, process pool/composition lifecycle, module-owned migration streams, deterministic serial migration orchestration, minimum `platform/events` outbox, technology evidence, and clean/upgrade/recovery tests.
-3. **PR3 — Authentication, tenancy, active context, and user administration.** Implement Better Auth ACL, selected 2FA/passkey seam, tenancy schema, memberships, active context, the six Identity/Tenancy operations in §6, invitation/suspension state machine, two-tenant tests, and events/audit.
+3. **PR3 — Authentication, tenancy, active context, and user administration.** Implement the governed Better Auth boundary, Two-Factor and Passkey baseline, tenancy schema, memberships, active context, the six Identity/Tenancy operations in §6, invitation/suspension state machine, two-tenant tests, and events/audit.
 4. **PR4 — Party and identity linkage.** Implement Party prototype schema, `PlatformIdentityLink`, four Party endpoints, onboarding/reconciliation, privacy/classification defaults, events, and tests.
 5. **PR5 — Authorization.** Implement scoped policy outcomes, roles/assignments, delegation seam, permission middleware, direct-call denial tests, and current-authority invalidation.
 6. **PR6 — Entitlements.** Implement grants, states, sources, dates, limits/dependencies needed by the slice, read API, internal change command, entitlement middleware, change events/audit, and permission/entitlement independence tests. No billing implementation.
@@ -315,7 +317,7 @@ Required WS1 scenarios include:
 - permission and entitlement independence;
 - audit redaction, tamper resistance, retention, privacy transformation, tenant isolation, and audit-of-access;
 - outbox atomicity, duplicate delivery, replay, recovery, and privacy-safe payloads;
-- 2FA or passkey seam, recovery/abuse denial, and Bun/Node compatibility;
+- Two-Factor and Passkey enrollment/sign-in/recovery/abuse denial, assurance mapping, and Bun/Node compatibility;
 - thin-shell keyboard, screen-reader, zoom, responsive, loading, empty, error, denial, and re-authentication states.
 
 An authorized cross-tenant identity fixture may be added only after the shared-identity decision in PDA-PLT-002 is resolved. Until then, organization switching is demonstrated within Tenant A and cross-tenant selection is denied.

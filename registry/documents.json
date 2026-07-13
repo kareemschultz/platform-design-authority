@@ -344,9 +344,9 @@
     },
     {
       "document_id": "ADR-0027",
-      "path": "docs/blueprint/18-Decisions/ADR-0027-PACKAGE-OWNED-PERSISTENCE-ADAPTERS-WITH-COMPOSITION-ROOT-INJECTION.md",
-      "title": "Package-Owned Persistence Adapters with Composition-Root Injection",
-      "version": "0.1.0",
+      "path": "docs/blueprint/18-Decisions/ADR-0027-OWNER-SPECIFIC-PERSISTENCE-ADAPTER-PACKAGES.md",
+      "title": "Owner-Specific Persistence Adapter Packages with Composition-Root Injection",
+      "version": "0.2.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",
@@ -1996,14 +1996,15 @@
       "document_id": "PDA-ENGR-012",
       "path": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-13",
       "related_adrs": [
         "ADR-0002",
         "ADR-0003",
-        "ADR-0020"
+        "ADR-0020",
+        "ADR-0027"
       ],
       "review_evidence": null
     },
@@ -3065,7 +3066,7 @@
       "document_id": "PDA-RDM-007",
       "path": "docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md",
       "title": "Meridian First-Slice Implementation Plan",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",
@@ -3074,7 +3075,8 @@
         "ADR-0003",
         "ADR-0013",
         "ADR-0020",
-        "ADR-0025"
+        "ADR-0025",
+        "ADR-0027"
       ],
       "review_evidence": null
     },
@@ -3082,7 +3084,7 @@
       "document_id": "PDA-RDM-008",
       "path": "docs/blueprint/17-Roadmap/WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md",
       "title": "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",

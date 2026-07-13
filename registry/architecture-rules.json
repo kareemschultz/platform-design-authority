@@ -81,6 +81,19 @@
       ]
     },
     {
+      "id": "persistence",
+      "globs": [
+        "packages/persistence/*"
+      ],
+      "may_depend_on": [
+        "foundation",
+        "contracts",
+        "platform",
+        "engines",
+        "domains"
+      ]
+    },
+    {
       "id": "ui-web",
       "globs": [
         "packages/ui-web/*"
@@ -195,6 +208,16 @@
       "id": "database-adapter-contract-leak",
       "description": "Contracts and authorization policies cannot import database adapters.",
       "pattern": "packages/**/(contracts|authorization)/** -> database-adapter"
+    },
+    {
+      "id": "persistence-cross-owner-import",
+      "description": "An owner-specific persistence package cannot import another owner's repository, private schema, tables, or migrations.",
+      "pattern": "packages/persistence/<owner> -> non-owner/(repository|schema|tables|migrations)"
+    },
+    {
+      "id": "connection-lifecycle-outside-composition",
+      "description": "Pool creation, shutdown, and connection-bearing environment reads belong to registered composition roots.",
+      "pattern": "**/!(composition)/** -> (pool-construction|pool-shutdown|connection-environment)"
     }
   ],
   "requirements": {
@@ -206,6 +229,13 @@
       "apps/*/composition",
       "packages/tooling/composition/*"
     ],
+    "composition_root_may_depend_on": [
+      "persistence",
+      "platform",
+      "engines",
+      "domains"
+    ],
+    "persistence_requires_owner": true,
     "family_grants_are_contract_only": true,
     "runtime_neutral_families": [
       "foundation",

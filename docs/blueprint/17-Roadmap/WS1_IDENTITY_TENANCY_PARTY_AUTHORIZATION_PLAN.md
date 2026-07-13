@@ -14,7 +14,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0006, ADR-0007, ADR-0014, ADR-0016, ADR-0
 
 This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) §5 "WS1 — Identity, Tenancy, Party, Authorization (P1)" into an implementation-control plan. It maps owners, capability depth, contracts, packages, pull requests, evidence, and unresolved architecture gates. It does not override higher-authority material. Where this document conflicts with the Constitution, an ADR, PDA-RDM-003, PDA-RDM-004, PDA-RDM-007, or another governing specification, the higher-authority source wins and WS1 stops until the conflict is dispositioned.
 
-This is a **Draft plan for a controlled prototype**, not production authority. It must not be described as decision-complete while any gate in §3 remains open. Closing WS1 demonstrates Technical Prototype 1 and its declared evidence; it does not promote a capability, ADR, or specification beyond its recorded lifecycle.
+This is a **Draft plan for a controlled prototype**, not production authority. It must not be described as decision-complete while any gate in §3 remains open. Closing WS1 demonstrates Technical Prototype 1 and its declared evidence; it does not promote a capability, ADR, or specification beyond its recorded lifecycle. In particular, ADR-0007 (Party and Relationship model) is `Proposed`, not `Accepted`: WS1 *exercises* it at prototype depth and surfaces implementation evidence for its eventual ratification review, but building `domains/party` here does not ratify ADR-0007.
 
 ### 1.1 Governing sources
 
@@ -238,7 +238,7 @@ The following registered operations are mandatory. PR1 completes their schemas; 
 | `POST /v1/parties/organizations` | `party.record.create` | PR4 |
 | `PATCH /v1/parties/{partyId}` | `party.record.update` | PR4 |
 
-PR1 also disposes `party.record.merge`, `party.identifier.read-restricted`, and `platform.organization.update`: either add a governed operation/application command and tests, or explicitly defer the permission from WS1 without deleting the canonical permission.
+PR1 also disposes `party.record.merge`, `party.identifier.read-restricted`, and `platform.organization.update`: either add a governed operation/application command and tests, or explicitly defer the permission from WS1 without deleting the canonical permission. A permission-level deferral is recorded here in §6 with rationale, not in `registry/first-slice.json`'s `explicitly_deferred` list, which is capability-grained (`{id, reason}` at capability granularity such as `platform.party`, not permission granularity); the canonical permission remains registered and unchanged.
 
 Session list/revoke, organization detail, location list, Party detail, and identity-link operations require canonical OpenAPI registration, authorization metadata, schemas, and tests before implementation. Better Auth-native endpoints do not become public Platform API contracts automatically.
 

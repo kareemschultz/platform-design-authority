@@ -346,7 +346,7 @@
       "document_id": "ADR-0027",
       "path": "docs/blueprint/18-Decisions/ADR-0027-OWNER-SPECIFIC-PERSISTENCE-ADAPTER-PACKAGES.md",
       "title": "Owner-Specific Persistence Adapter Packages with Composition-Root Injection",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",
@@ -783,13 +783,16 @@
       "document_id": "PDA-ARC-014",
       "path": "docs/blueprint/02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md",
       "title": "First Slice API and Event Contracts",
-      "version": "0.3.1",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-13",
       "related_adrs": [
+        "ADR-0006",
+        "ADR-0007",
         "ADR-0016",
-        "ADR-0017"
+        "ADR-0017",
+        "ADR-0020"
       ],
       "review_evidence": null
     },
@@ -1996,7 +1999,7 @@
       "document_id": "PDA-ENGR-012",
       "path": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",
@@ -2012,7 +2015,7 @@
       "document_id": "PDA-ENGR-013",
       "path": "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.13.0",
+      "version": "0.14.0",
       "status": "Draft",
       "owner": "Platform Engineering",
       "last_reviewed": "2026-07-13",
@@ -2248,6 +2251,22 @@
       "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
+    },
+    {
+      "document_id": "PDA-IMPL-001",
+      "path": "docs/implementation/WS1_PR1_IDENTITY_LIFECYCLE_AND_AUTH_COMPOSITION.md",
+      "title": "WS1 PR1 Identity Lifecycle and Better Auth Composition Manifest",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Identity",
+      "last_reviewed": "2026-07-13",
+      "related_adrs": [
+        "ADR-0006",
+        "ADR-0007",
+        "ADR-0020",
+        "ADR-0027"
+      ],
+      "review_evidence": []
     },
     {
       "document_id": "PDA-IND-001",
@@ -3084,7 +3103,7 @@
       "document_id": "PDA-RDM-008",
       "path": "docs/blueprint/17-Roadmap/WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md",
       "title": "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",
@@ -3181,7 +3200,7 @@
       "document_id": "PDA-REV-009",
       "path": "docs/reviews/ARCHITECTURE_RISK_REGISTER.md",
       "title": "Architecture Risk Register",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",

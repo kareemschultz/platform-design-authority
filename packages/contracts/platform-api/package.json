@@ -1,5 +1,5 @@
 {
-  "name": "@meridian/platform-clients-api-client",
+  "name": "@meridian/contracts-platform-api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,14 +7,17 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun test src/*.test.ts"
   },
   "dependencies": {
-    "@meridian/contracts-platform-api": "workspace:*",
-    "@orpc/contract": "catalog:"
+    "@meridian/foundation-core": "workspace:*",
+    "@orpc/contract": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@meridian/tooling-config": "workspace:*",
+    "@types/bun": "catalog:",
     "typescript": "^6"
   }
 }

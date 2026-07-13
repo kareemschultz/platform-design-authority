@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -228,7 +228,7 @@ Distinct from risk: a debt entry records a deliberate suboptimal choice accepted
 | TD-004 | Status-token CSS variables are hand-copied literals pending the token-generation pipeline | Pipeline (PDA-UX-023) not yet built; literals unblock UI work | Token-generation pipeline lands (PDA-UX-023) | Implementation |
 | TD-005 | Registry capability governance fields (packaging_class and similar) remain namespace defaults pending curation | Curated overlay exists but per-capability curation is deferred to workstream owners | Capability curation pass per workstream | PDA |
 | TD-006 | First-slice event schemas exist for only 4 of 197 events (schemas/ holds the finance/offline/events subset) | Representative-schema approach proves the envelope; full coverage deferred | Expand per workstream as events enter implementation | Implementation |
-| TD-007 | `packages/platform-clients/api-client` re-exports its `AppRouterClient` type directly from `apps/server/src/router.ts` (type-only, erased at build time), which is a real source-level dependency edge outside `platform-clients`' declared family grant (foundation/contracts only). Recorded in `registry/architecture-rules.json` `exceptions[]` as `platform-clients-api-client-server-type-import`. | No contract-first oRPC definition (input/output schemas independent of the server's concrete implementation) exists yet; building one now would be premature given only 2 trivial procedures exist | WS1 lands a contract-first oRPC setup; must close before WS2 begins per `FIRST_SLICE_IMPLEMENTATION_PLAN.md` DoD item 4 | Implementation |
+| TD-007 | **Closed 2026-07-13.** `packages/contracts/platform-api` now defines transport-neutral oRPC contracts derived from canonical OpenAPI metadata, a semantic-parity test compares route/method/operation/authority/schema metadata, and `packages/platform-clients/api-client` derives from that contract without importing `apps/server`. The former exception is removed and the path-aware architecture checker passes. Evidence: PDA-RDM-008 PR1 and PDA-IMPL-001. | Initial scaffold exposed only two procedures and accepted the temporary type-only import | WS1 PR1 contract-first closure | Implementation |
 
 ## Maintenance
 

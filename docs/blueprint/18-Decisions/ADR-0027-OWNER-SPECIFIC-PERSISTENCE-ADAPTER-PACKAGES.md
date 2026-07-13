@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.2.2
+version: 0.2.3
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
@@ -27,7 +27,7 @@ That shape conflicts with governed boundaries:
 - PDA-ENGR-012 requires runtime-neutral core packages, limits database clients to approved persistence packages, and confines concrete binding to composition roots or approved module bootstraps.
 - `foundation.may_depend_on` is empty in `registry/architecture-rules.json`; Foundation cannot own environment or database dependencies.
 
-The current scaffold's `platform/identity/src/db.ts` constructs a pool and reads connection configuration inside a runtime-neutral Platform package. That is recorded implementation debt, not precedent for the remaining WS1 modules.
+The current scaffold's `platform/identity/src/db.ts` constructs a pool and reads connection configuration inside a runtime-neutral Platform package. The executable ruleset records this narrowly as `platform-identity-persistence-relocation`; it is implementation debt expiring in WS1 PR2, not precedent for the remaining WS1 modules.
 
 ## Options Considered
 
@@ -118,6 +118,7 @@ The `database-outside-persistence` forbidden pattern in `registry/architecture-r
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.3 | 2026-07-13 | Platform Design Authority | Recorded the executable path-aware checker and the narrow, expiring `platform-identity-persistence-relocation` exception; specialist reviews and PR2 gate remain pending. |
 | 0.2.2 | 2026-07-13 | Platform Design Authority | Codex review: added an explicit composition-root `except` to the `database-outside-persistence` registry pattern so the ADR's composition-root pool factory is registry-sanctioned, not a test that ignores the registry. |
 | 0.2.1 | 2026-07-13 | Platform Design Authority | Recorded Claude Code's independent concurrence with v0.2.0; lifecycle and specialist review gates remain unchanged. |
 | 0.2.0 | 2026-07-13 | Platform Design Authority | Replaced contradictory embedded adapters with owner-specific persistence packages; narrowed composition and transaction responsibilities. |

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-008
 title: "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization"
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -233,6 +233,11 @@ The following registered operations are mandatory. PR1 completes their schemas; 
 | `GET /v1/me` | authenticated session | PR3 |
 | `POST /v1/session/active-context` | authenticated membership | PR3 |
 | `GET /v1/organizations` | `platform.organization.read` | PR3 |
+| `GET /v1/organizations/{organizationId}` | `platform.organization.read` | PR3 |
+| `PATCH /v1/organizations/{organizationId}` | `platform.organization.update` | PR3 |
+| `GET /v1/locations` | `platform.organization.read` | PR3 |
+| `GET /v1/sessions` | authenticated session | PR7 |
+| `DELETE /v1/sessions/{sessionId}` | authenticated session | PR7 |
 | `GET /v1/users` | `platform.user.read` | PR3 |
 | `POST /v1/users/invitations` | `platform.user.invite` | PR3 |
 | `POST /v1/users/{userId}/suspend` | `platform.user.suspend` | PR3, after G5 |
@@ -241,11 +246,13 @@ The following registered operations are mandatory. PR1 completes their schemas; 
 | `GET /v1/entitlements` | `platform.entitlement.read` | PR6 |
 | `GET /v1/audit-records` | `platform.audit.read` | PR7 |
 | `GET /v1/parties` | `party.record.read` | PR4 |
+| `GET /v1/parties/{partyId}` | `party.record.read` | PR4 |
 | `POST /v1/parties/persons` | `party.record.create` | PR4 |
 | `POST /v1/parties/organizations` | `party.record.create` | PR4 |
 | `PATCH /v1/parties/{partyId}` | `party.record.update` | PR4 |
+| `POST /v1/party-identity-links` | `party.record.update` | PR4 |
 
-PR1 also disposes `party.record.merge`, `party.identifier.read-restricted`, and `platform.organization.update`: either add a governed operation/application command and tests, or explicitly defer the permission from WS1 without deleting the canonical permission. A permission-level deferral is recorded here in §6 with rationale, not in `registry/first-slice.json`'s `explicitly_deferred` list, which is capability-grained (`{id, reason}` at capability granularity such as `platform.party`, not permission granularity); the canonical permission remains registered and unchanged.
+PR1 disposition: `platform.organization.update` is implemented by the governed `PATCH /v1/organizations/{organizationId}` contract. `party.record.merge` is deferred from WS1 because the prototype Party depth does not yet carry the duplicate-evidence, survivorship, reversal, and privacy review required for an irreversible merge command. `party.identifier.read-restricted` is deferred because WS1 adds no restricted-identifier read representation or qualified purpose policy. Both permissions remain canonical and registered; neither is granted or implied by a broader Party permission. These are permission-level deferrals and therefore do not alter capability-grained `registry/first-slice.json`.
 
 Session list/revoke, organization detail, location list, Party detail, and identity-link operations require canonical OpenAPI registration, authorization metadata, schemas, and tests before implementation. Better Auth-native endpoints do not become public Platform API contracts automatically.
 
@@ -279,8 +286,8 @@ Each pull request uses one issue, branch, worktree, owner, migration/API/securit
 
 1. **PR1 — Governance, canonical contracts, and architecture enforcement.** Close TD-007; complete WS1 OpenAPI/error/session contracts; map every endpoint and permission; expand shared types; record identity lifecycle; resolve Better Auth composition; add event schemas; update the persistence ADR/spec; implement path-aware architecture tests. No business schema migration.
 2. **PR2 — Persistence adapters, serial migration runner, and minimum outbox.** Implement the G3 boundary, process pool/composition lifecycle, module-owned migration streams, deterministic serial migration orchestration, minimum `platform/events` outbox, technology evidence, and clean/upgrade/recovery tests.
-3. **PR3 — Authentication, tenancy, active context, and user administration.** Implement the governed Better Auth boundary, Two-Factor and Passkey baseline, tenancy schema, memberships, active context, the six Identity/Tenancy operations in §6, invitation/suspension state machine, two-tenant tests, and events/audit.
-4. **PR4 — Party and identity linkage.** Implement Party prototype schema, `PlatformIdentityLink`, four Party endpoints, onboarding/reconciliation, privacy/classification defaults, events, and tests.
+3. **PR3 — Authentication, tenancy, active context, and user administration.** Implement the governed Better Auth boundary, Two-Factor and Passkey baseline, tenancy schema, memberships, active context, the nine Identity/Tenancy administration operations assigned to PR3 in §6, invitation/suspension state machine, two-tenant tests, and events/audit.
+4. **PR4 — Party and identity linkage.** Implement Party prototype schema, `PlatformIdentityLink`, six Party endpoints, onboarding/reconciliation, privacy/classification defaults, events, and tests.
 5. **PR5 — Authorization.** Implement scoped policy outcomes, roles/assignments, delegation seam, permission middleware, direct-call denial tests, and current-authority invalidation.
 6. **PR6 — Entitlements.** Implement grants, states, sources, dates, limits/dependencies needed by the slice, read API, internal change command, entitlement middleware, change events/audit, and permission/entitlement independence tests. No billing implementation.
 7. **PR7 — Audit and session revocation.** Implement the Audit contract/storage boundary, query API, redaction/tamper/retention/privacy tests, session list/revoke contract selected in PR1, audit-of-audit-access, and measured revocation propagation.

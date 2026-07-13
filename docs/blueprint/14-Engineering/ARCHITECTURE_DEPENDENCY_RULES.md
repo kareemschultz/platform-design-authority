@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -153,9 +153,11 @@ An exception records:
 
 Expired exceptions fail CI.
 
-## Reference Ruleset
+## Executable Ruleset
 
-A machine-readable ruleset should eventually define package globs, allowed dependencies, forbidden dependencies, owners, exception file, and ADR links. Until code packages exist, this document is the normative source.
+`registry/architecture-rules.json` carries the machine-readable package globs, dependency grants, composition roots, and governed exceptions derived from this document. `scripts/check_architecture.py` enforces the rules in CI and `scripts/test_architecture_checker.py` proves both denial outside a composition root and allowance inside one. This document remains authoritative; the registry and checker must be updated together when it changes.
+
+The temporary `platform-identity-persistence-relocation` exception records the pre-WS1 embedded Better Auth persistence shape. It permits only the named database, migration, and connection-lifecycle violations under `packages/platform/identity/**`; it does not permit another schema owner or an application import. ADR-0027 and PDA-RDM-008 require its removal in WS1 PR2.
 
 ## Quality Gates
 
@@ -168,4 +170,5 @@ A machine-readable ruleset should eventually define package globs, allowed depen
 
 ## Change Log
 
+- 2026-07-13 — v0.4.0 made the path-aware rules executable in CI, added positive/negative regression probes, closed TD-007, and recorded the expiring Platform Identity persistence-relocation exception for PR2.
 - 2026-07-13 — v0.3.0 registered owner-specific Persistence packages under ADR-0027 and separated composition binding from business transaction ownership.

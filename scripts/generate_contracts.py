@@ -34,6 +34,9 @@ OPENAPI_METHOD = re.compile(r"^    (get|post|put|patch|delete|options|head|trace
 OPENAPI_OPERATION_ID = re.compile(r"^      operationId:\s*(\S+)\s*$")
 OPENAPI_PERMISSION = re.compile(r"^      x-permission:\s*(\S+)\s*$")
 OPENAPI_AUTHORIZATION = re.compile(r"^      x-authorization:\s*(\S+)\s*$")
+OPENAPI_RESPONSE_STATUS = re.compile(r"^        ['\"]?(2\d\d)['\"]?:\s*$")
+OPENAPI_ANY_RESPONSE = re.compile(r"^        (?:['\"]?\d{3}['\"]?|default):\s*$")
+OPENAPI_REF = re.compile(r"\$ref:\s*['\"]([^'\"]+)['\"]")
 
 HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE"]
 
@@ -155,11 +158,15 @@ def collect_openapi_operations(path: Path) -> dict[tuple[str, str], dict[str, st
     operations: dict[tuple[str, str], dict[str, str]] = {}
     current_path: str | None = None
     current_key: tuple[str, str] | None = None
+    current_section: str | None = None
+    current_response_status: str | None = None
     for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         path_match = OPENAPI_PATH.match(line)
         if path_match:
             current_path = path_match.group(1)
             current_key = None
+            current_section = None
+            current_response_status = None
             continue
         method_match = OPENAPI_METHOD.match(line)
         if method_match and current_path:
@@ -170,9 +177,22 @@ def collect_openapi_operations(path: Path) -> dict[tuple[str, str], dict[str, st
                     f"{current_key[0]} {current_path}"
                 )
             operations[current_key] = {"source_line": str(line_number), "openapi_path": current_path}
+            current_section = None
+            current_response_status = None
             continue
         if current_key is None:
             continue
+        if line == "      requestBody:":
+            current_section = "request"
+            current_response_status = None
+            continue
+        if line == "      responses:":
+            current_section = "responses"
+            current_response_status = None
+            continue
+        if line.startswith("      ") and not line.startswith("        "):
+            current_section = None
+            current_response_status = None
         for field, pattern in (
             ("operation_id", OPENAPI_OPERATION_ID),
             ("permission", OPENAPI_PERMISSION),
@@ -182,6 +202,27 @@ def collect_openapi_operations(path: Path) -> dict[tuple[str, str], dict[str, st
             if match:
                 operations[current_key][field] = match.group(1)
                 break
+        if current_section == "responses":
+            status_match = OPENAPI_RESPONSE_STATUS.match(line)
+            if status_match:
+                current_response_status = status_match.group(1)
+                if "success_status" not in operations[current_key]:
+                    operations[current_key]["success_status"] = current_response_status
+                continue
+            if OPENAPI_ANY_RESPONSE.match(line):
+                current_response_status = None
+                continue
+        ref_match = OPENAPI_REF.search(line)
+        if not ref_match:
+            continue
+        if current_section == "request" and "request_ref" not in operations[current_key]:
+            operations[current_key]["request_ref"] = ref_match.group(1)
+        elif (
+            current_section == "responses"
+            and current_response_status == operations[current_key].get("success_status")
+            and "response_ref" not in operations[current_key]
+        ):
+            operations[current_key]["response_ref"] = ref_match.group(1)
     return operations
 
 
@@ -207,7 +248,12 @@ def build_endpoints() -> tuple[list[dict[str, Any]], int, int]:
             "method": method,
             "path": route,
             "operationId": operation["operation_id"],
+            "successStatus": int(operation.get("success_status", "200")),
         }
+        if operation.get("request_ref"):
+            row["requestRef"] = operation["request_ref"]
+        if operation.get("response_ref"):
+            row["responseRef"] = operation["response_ref"]
         if item.get("permission"):
             row["permission"] = str(item["permission"])
         if item.get("authorization"):
@@ -286,6 +332,43 @@ def render_api_index(rows: list[dict[str, Any]], permission_ids: list[str]) -> s
     lines.append("};")
     lines.append("")
     return "\n".join(lines) + "\n"
+
+
+def render_platform_api_metadata(rows: list[dict[str, Any]]) -> str:
+    lines = [
+        GENERATED_HEADER,
+        "// Source: openapi/first-slice-v1.yaml + registry/endpoint-permissions.json",
+        "",
+        "export const OPENAPI_OPERATION_METADATA = [",
+    ]
+    for row in rows:
+        parts = []
+        for key in (
+            "authorization",
+            "method",
+            "operationId",
+            "path",
+            "permission",
+            "requestRef",
+            "responseRef",
+            "successStatus",
+        ):
+            if key not in row:
+                continue
+            value = row[key]
+            rendered = str(value) if isinstance(value, int) else ts_string(value)
+            parts.append(f"{key}: {rendered}")
+        lines.append(f"\t{{ {', '.join(parts)} }},")
+    lines.extend(
+        [
+            "] as const;",
+            "",
+            "export type OpenApiOperationMetadata =",
+            "\t(typeof OPENAPI_OPERATION_METADATA)[number];",
+            "",
+        ]
+    )
+    return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
@@ -393,6 +476,9 @@ def main() -> int:
         ),
         ROOT / "packages" / "contracts" / "api" / "src" / "index.ts": render_api_index(
             endpoint_rows, permission_ids
+        ),
+        ROOT / "packages" / "contracts" / "platform-api" / "src" / "generated.ts": render_platform_api_metadata(
+            endpoint_rows
         ),
     }
 

@@ -13,8 +13,9 @@
  * schema text that doesn't exist.
  *
  * Required schema properties (`required` array): id, name, occurredAt,
- * publishedAt, tenantId, producerNamespace, schemaVersion, classification,
- * data. Every other property has type `["string", "null"]` and is not
+ * publishedAt, tenantId, producerNamespace, schemaVersion, schemaRef,
+ * classification, retentionClass, data. Every other property has type
+ * `["string", "null"]` and is not
  * `required`, so it may be omitted entirely or present as `string | null`;
  * that is modeled here as an optional `string | null` field.
  */
@@ -75,6 +76,12 @@ export interface EventEnvelope<
 
 	/** Business or legal purpose the event's data may be used for, if constrained. */
 	purpose?: string | null;
+
+	/** Retention policy class applied to the event and replay copies. */
+	retentionClass: string;
+
+	/** Governed schema location for this event payload. */
+	schemaRef: string;
 
 	/** Semantic version of the event's `data` payload shape. Schema pattern: `^\d+\.\d+\.\d+$`. */
 	schemaVersion: string;

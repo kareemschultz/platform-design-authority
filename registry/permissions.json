@@ -684,7 +684,7 @@
       "source_heading": "Party and CRM",
       "source_line": 49,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "party.record.update",
@@ -696,7 +696,7 @@
       "source_heading": "Party and CRM",
       "source_line": 51,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "payment.intent.confirm",
@@ -924,7 +924,7 @@
       "source_heading": "Platform Administration",
       "source_line": 25,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 3
     },
     {
       "id": "platform.organization.update",
@@ -936,7 +936,7 @@
       "source_heading": "Platform Administration",
       "source_line": 26,
       "status": "Draft",
-      "endpoint_count": 0
+      "endpoint_count": 1
     },
     {
       "id": "platform.role.assign",

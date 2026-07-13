@@ -251,13 +251,26 @@
   },
   "exceptions": [
     {
-      "id": "platform-clients-api-client-server-type-import",
-      "package": "packages/platform-clients/api-client",
-      "violates": "platform-clients may depend only on foundation and contracts",
-      "description": "packages/platform-clients/api-client re-exports the AppRouterClient type directly from apps/server/src/router.ts (a type-only import, erased at build time) because no contract-first oRPC definition (input/output schemas independent of the server's concrete procedure implementation) exists yet. This lets apps/web and apps/native get a fully-typed oRPC client without depending on the server's runtime code.",
+      "id": "platform-identity-persistence-relocation",
+      "package": "packages/platform/identity",
+      "violates": "ADR-0027 owner-specific persistence and composition-root connection lifecycle",
+      "description": "The pre-WS1 scaffold keeps Better Auth's Drizzle schema, migration, pool, and environment access inside platform/identity. PR1 makes the architecture rule executable without pretending this known debt is already removed; WS1 PR2 relocates these artifacts into owner-specific Persistence and composition packages before adding another schema owner.",
+      "rules": [
+        "database-outside-persistence",
+        "connection-lifecycle-outside-composition",
+        "migration-outside-persistence"
+      ],
+      "paths": [
+        "packages/platform/identity/**"
+      ],
       "recorded": "2026-07-13",
-      "expires_when": "WS1 lands a contract-first oRPC setup (e.g. an @orpc/contract-based definition in packages/contracts) that both apps/server and packages/platform-clients/api-client can depend on independently, per FIRST_SLICE_IMPLEMENTATION_PLAN.md",
-      "recheck_trigger": "Every WS1 milestone review; must be closed before WS2 begins per the plan's architecture-rules-compliance Definition of Done item"
+      "expires_when": "WS1 PR2 merges the ADR-0027 owner-specific Platform Identity Persistence adapter and composition-owned pool",
+      "recheck_trigger": "Every WS1 PR; this exception blocks PR2 merge and any new schema-owning package",
+      "owner": "Platform Identity",
+      "risk": "A runtime-neutral Platform package still owns concrete database and process-resource lifecycle concerns until PR2.",
+      "compensating_control": "Path-aware CI limits the exception to the named package and rules; no new schema owner may use it.",
+      "removal_plan": "Move schema/migrations to packages/persistence/platform-identity-postgres and pool lifecycle to apps/server/composition in WS1 PR2.",
+      "approval": "PDA-RDM-008 §3 G3 and ADR-0027 (Proposed controlled-prototype guidance; specialist review pending)"
     }
   ]
 }

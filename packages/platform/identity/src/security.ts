@@ -61,3 +61,40 @@ export function getTrustedOrigins(options: {
 
 	return [...origins].sort();
 }
+
+const BLOCKED_ORGANIZATION_PATHS = new Set([
+	"/organization/accept-invitation",
+	"/organization/cancel-invitation",
+	"/organization/create",
+	"/organization/delete",
+	"/organization/invite-member",
+	"/organization/leave",
+	"/organization/reject-invitation",
+	"/organization/remove-member",
+	"/organization/set-active",
+	"/organization/update",
+	"/organization/update-member-role",
+]);
+
+function authRelativePath(pathname: string): string {
+	const mountPath = "/api/auth";
+	const mountIndex = pathname.indexOf(mountPath);
+	return mountIndex === -1
+		? pathname
+		: pathname.slice(mountIndex + mountPath.length) || "/";
+}
+
+/**
+ * Deny native HTTP authority-changing routes that WS1 exposes only through
+ * governed platform application contracts. Server-side Better Auth APIs stay
+ * available to composition-owned adapters; this guard controls the public
+ * mounted handler only.
+ */
+export function isBlockedNativeAuthHttpRoute(request: Request): boolean {
+	const relativePath = authRelativePath(new URL(request.url).pathname);
+	if (relativePath === "/admin" || relativePath.startsWith("/admin/")) {
+		return true;
+	}
+
+	return BLOCKED_ORGANIZATION_PATHS.has(relativePath);
+}

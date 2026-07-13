@@ -15,6 +15,7 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@better-auth/passkey": "catalog:",
     "@meridian/tooling-env": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/platform.membership.ended.v1.schema.json",
+  "title": "platform.membership.ended.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "platform.membership.ended.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["membershipId", "authUserId", "organizationId", "endedAt", "reasonCode"],
+          "properties": {
+            "membershipId": {"type": "string"},
+            "authUserId": {"type": "string"},
+            "organizationId": {"type": "string"},
+            "endedAt": {"type": "string", "format": "date-time"},
+            "reasonCode": {"type": "string", "maxLength": 100}
+          }
+        }
+      }
+    }
+  ]
+}

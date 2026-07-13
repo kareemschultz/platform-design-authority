@@ -1845,7 +1845,7 @@
       "source_heading": "Events",
       "source_line": 126,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.membership.activated.v1.schema.json"
     },
     {
       "name": "platform.membership.ended.v1",
@@ -1858,7 +1858,7 @@
       "source_heading": "Events",
       "source_line": 128,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.membership.ended.v1.schema.json"
     },
     {
       "name": "platform.membership.invited.v1",
@@ -1871,7 +1871,7 @@
       "source_heading": "Events",
       "source_line": 125,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.membership.invited.v1.schema.json"
     },
     {
       "name": "platform.membership.suspended.v1",
@@ -1884,7 +1884,7 @@
       "source_heading": "Events",
       "source_line": 127,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.membership.suspended.v1.schema.json"
     },
     {
       "name": "platform.mention.created.v1",
@@ -2092,7 +2092,7 @@
       "source_heading": "Events",
       "source_line": 129,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.role-assignment.granted.v1.schema.json"
     },
     {
       "name": "platform.role-assignment.revoked.v1",
@@ -2105,7 +2105,7 @@
       "source_heading": "Events",
       "source_line": 130,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.role-assignment.revoked.v1.schema.json"
     },
     {
       "name": "platform.sequence.definition-changed.v1",

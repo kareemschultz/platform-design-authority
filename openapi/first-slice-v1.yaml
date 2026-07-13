@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Business Operating Platform First Slice API
-  version: 0.2.0
+  version: 0.3.0
   description: >-
     Draft implementation-review contract for the Guyana Retail Foundation Slice.
     This is not a GA public API and does not assert production provider or jurisdiction certification.
@@ -30,6 +30,8 @@ paths:
       tags: [Identity]
       operationId: getCurrentIdentity
       x-authorization: authenticated_session
+      parameters:
+        - $ref: '#/components/parameters/ActiveContextId'
       responses:
         '200':
           description: Current authenticated identity and active context
@@ -37,19 +39,80 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentIdentity'
+        default:
+          $ref: '#/components/responses/Error'
   /organizations:
     get:
       tags: [Identity]
       operationId: listOrganizations
       x-permission: platform.organization.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
           $ref: '#/components/responses/PagedOrganizations'
+        default:
+          $ref: '#/components/responses/Error'
+  /organizations/{organizationId}:
+    get:
+      tags: [Identity]
+      operationId: getOrganization
+      x-permission: platform.organization.read
+      parameters:
+        - {name: organizationId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Organization in the authenticated tenant
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Organization'}
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      tags: [Identity]
+      operationId: updateOrganization
+      x-permission: platform.organization.update
+      parameters:
+        - {name: organizationId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/UpdateOrganizationRequest'}
+      responses:
+        '200':
+          description: Organization updated
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Organization'}
+        default:
+          $ref: '#/components/responses/Error'
+  /locations:
+    get:
+      tags: [Identity]
+      operationId: listLocations
+      x-permission: platform.organization.read
+      parameters:
+        - {name: organizationId, in: query, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Locations in the requested authorized organization
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedLocations'}
+        default:
+          $ref: '#/components/responses/Error'
   /session/active-context:
     post:
       tags: [Identity]
       operationId: setActiveContext
       x-authorization: authenticated_membership
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -57,8 +120,42 @@ paths:
             schema:
               $ref: '#/components/schemas/ActiveContextRequest'
       responses:
+        '201':
+          description: Server-verified, tab-safe context reference created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActiveContext'}
+        default:
+          $ref: '#/components/responses/Error'
+  /sessions:
+    get:
+      tags: [Identity]
+      operationId: listCurrentUserSessions
+      x-authorization: authenticated_session
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
         '200':
-          description: Context accepted
+          description: Database-current sessions owned by the authenticated account
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedSessions'}
+        default:
+          $ref: '#/components/responses/Error'
+  /sessions/{sessionId}:
+    delete:
+      tags: [Identity]
+      operationId: revokeCurrentUserSession
+      x-authorization: authenticated_session
+      parameters:
+        - {name: sessionId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '204':
+          description: Session revoked or already absent
+        default:
+          $ref: '#/components/responses/Error'
   /parties:
     get:
       tags: [Parties]
@@ -77,6 +174,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PagedParties'
+        default:
+          $ref: '#/components/responses/Error'
   /parties/persons:
     post:
       tags: [Parties]
@@ -467,17 +566,34 @@ paths:
       tags: [Identity]
       operationId: getEntitlements
       x-permission: platform.entitlement.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Effective capability entitlements for the active tenant context
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedEntitlements'}
+        default:
+          $ref: '#/components/responses/Error'
   /users:
     get:
       tags: [Identity]
       operationId: getUsers
       x-permission: platform.user.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: query, in: query, schema: {type: string, maxLength: 200}}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Tenant memberships joined to safe authentication-account and Party references
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedUsers'}
+        default:
+          $ref: '#/components/responses/Error'
   /users/invitations:
     post:
       tags: [Identity]
@@ -485,28 +601,56 @@ paths:
       x-permission: platform.user.invite
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateUserInvitationRequest'}
       responses:
-        '200':
-          description: Contract response; the owning specification defines state and error semantics
+        '202':
+          description: Authoritative tenant invitation accepted for idempotent provisioning and delivery
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/UserInvitation'}
+        default:
+          $ref: '#/components/responses/Error'
   /users/{userId}/suspend:
     post:
       tags: [Identity]
-      operationId: postUsersByUserIdSuspend
+      operationId: suspendTenantMembership
       x-permission: platform.user.suspend
       parameters:
         - {name: userId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SuspendTenantMembershipRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Membership in the active tenant suspended; unrelated tenant memberships are unchanged
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/UserSummary'}
+        default:
+          $ref: '#/components/responses/Error'
   /roles:
     get:
       tags: [Identity]
       operationId: getRoles
       x-permission: platform.role.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Roles defined for the active tenant
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedRoles'}
+        default:
+          $ref: '#/components/responses/Error'
   /role-assignments:
     post:
       tags: [Identity]
@@ -514,17 +658,39 @@ paths:
       x-permission: platform.role.assign
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateRoleAssignmentRequest'}
       responses:
-        '200':
-          description: Contract response; the owning specification defines state and error semantics
+        '201':
+          description: Scoped role assignment granted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RoleAssignment'}
+        default:
+          $ref: '#/components/responses/Error'
   /audit-records:
     get:
       tags: [Identity]
       operationId: getAuditRecords
       x-permission: platform.audit.read
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: actorUserId, in: query, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: action, in: query, schema: {type: string, maxLength: 200}}
+        - {name: occurredAfter, in: query, schema: {type: string, format: date-time}}
+        - {name: occurredBefore, in: query, schema: {type: string, format: date-time}}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Privacy-filtered audit evidence; access to this result is itself audited
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedAuditRecords'}
+        default:
+          $ref: '#/components/responses/Error'
   /parties/organizations:
     post:
       tags: [Parties]
@@ -532,10 +698,34 @@ paths:
       x-permission: party.record.create
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateOrganizationParty'}
+      responses:
+        '201':
+          description: Organization Party created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Party'}
+        default:
+          $ref: '#/components/responses/Error'
+  /parties/{partyId}:
+    get:
+      tags: [Parties]
+      operationId: getParty
+      x-permission: party.record.read
+      parameters:
+        - {name: partyId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
-  /parties/{partyId}:
+          description: Party visible in the active tenant context
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Party'}
+        default:
+          $ref: '#/components/responses/Error'
     patch:
       tags: [Parties]
       operationId: patchPartiesByPartyId
@@ -543,9 +733,39 @@ paths:
       parameters:
         - {name: partyId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/UpdatePartyRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Party updated with optimistic concurrency
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Party'}
+        default:
+          $ref: '#/components/responses/Error'
+  /party-identity-links:
+    post:
+      tags: [Parties]
+      operationId: createPartyIdentityLink
+      x-permission: party.record.update
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreatePartyIdentityLinkRequest'}
+      responses:
+        '201':
+          description: Authentication account linked to a tenant-scoped Party without transferring ownership
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PlatformIdentityLink'}
+        default:
+          $ref: '#/components/responses/Error'
   /customers:
     get:
       tags: [Parties]
@@ -1038,6 +1258,14 @@ components:
       in: header
       required: true
       schema: {type: string, minLength: 16, maxLength: 128}
+    ActiveContextId:
+      name: X-Active-Context-Id
+      in: header
+      required: false
+      description: >-
+        Opaque server-issued context reference bound to the authenticated session. It selects a tab-local
+        workspace but is never trusted as authority without current membership validation.
+      schema: {$ref: '#/components/schemas/Identifier'}
     RegisterId:
       name: registerId
       in: path
@@ -1070,7 +1298,7 @@ components:
         application/json:
           schema:
             type: object
-            required: [items]
+            required: [items, nextCursor]
             properties:
               items:
                 type: array
@@ -1088,33 +1316,223 @@ components:
         amountMinor: {type: integer}
     CurrentIdentity:
       type: object
-      required: [userId, memberships]
+      required: [authUserId, sessionId, assuranceLevel, memberships]
       properties:
-        userId: {$ref: '#/components/schemas/Identifier'}
+        authUserId: {$ref: '#/components/schemas/Identifier'}
+        sessionId: {$ref: '#/components/schemas/Identifier'}
         partyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        assuranceLevel: {type: string, enum: [aal1, aal2, phishing-resistant]}
+        activeContext: {oneOf: [{$ref: '#/components/schemas/ActiveContext'}, {type: 'null'}]}
         memberships:
           type: array
-          items: {$ref: '#/components/schemas/Identifier'}
+          items: {$ref: '#/components/schemas/MembershipSummary'}
     ActiveContextRequest:
       type: object
       required: [organizationId]
       properties:
         organizationId: {$ref: '#/components/schemas/Identifier'}
+        legalEntityId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        branchId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         locationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    ActiveContext:
+      type: object
+      required: [contextId, tenantId, organizationId, authUserId, issuedAt, expiresAt]
+      properties:
+        contextId: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        organizationId: {$ref: '#/components/schemas/Identifier'}
+        legalEntityId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        branchId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        locationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        authUserId: {$ref: '#/components/schemas/Identifier'}
+        partyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        delegationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        issuedAt: {type: string, format: date-time}
+        expiresAt: {type: string, format: date-time}
+    MembershipSummary:
+      type: object
+      required: [membershipId, tenantId, organizationId, state, version]
+      properties:
+        membershipId: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        organizationId: {$ref: '#/components/schemas/Identifier'}
+        state: {type: string, enum: [Invited, Provisioning, Active, Suspended, Ended]}
+        roleAssignmentIds:
+          type: array
+          items: {$ref: '#/components/schemas/Identifier'}
+        version: {type: integer, minimum: 1}
     Organization:
       type: object
-      required: [id, name]
+      required: [id, tenantId, name, state, version]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
         name: {type: string, maxLength: 200}
+        state: {type: string, enum: [Provisioning, Active, Suspended, Archived]}
+        timezone: {type: string, maxLength: 100}
+        locale: {type: string, maxLength: 35}
+        version: {type: integer, minimum: 1}
+    UpdateOrganizationRequest:
+      type: object
+      required: [version]
+      minProperties: 2
+      properties:
+        name: {type: string, minLength: 1, maxLength: 200}
+        timezone: {type: string, maxLength: 100}
+        locale: {type: string, maxLength: 35}
+        version: {type: integer, minimum: 1}
+    Location:
+      type: object
+      required: [id, tenantId, organizationId, name, type, timezone, state, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        organizationId: {$ref: '#/components/schemas/Identifier'}
+        name: {type: string, minLength: 1, maxLength: 200}
+        type: {type: string, enum: [Store, Warehouse, Office, Mobile, Virtual, Other]}
+        timezone: {type: string, maxLength: 100}
+        state: {type: string, enum: [Active, Suspended, Archived]}
+        version: {type: integer, minimum: 1}
+    PagedLocations:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Location'}}
+        nextCursor: {type: [string, 'null']}
+    SessionSummary:
+      type: object
+      required: [id, createdAt, updatedAt, expiresAt, current]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+        expiresAt: {type: string, format: date-time}
+        current: {type: boolean}
+        ipAddressMasked: {type: [string, 'null'], maxLength: 64}
+        userAgentSummary: {type: [string, 'null'], maxLength: 200}
+        deviceLabel: {type: [string, 'null'], maxLength: 100}
+    PagedSessions:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/SessionSummary'}}
+        nextCursor: {type: [string, 'null']}
+    UserSummary:
+      type: object
+      required: [authUserId, email, authenticationState, memberships]
+      properties:
+        authUserId: {$ref: '#/components/schemas/Identifier'}
+        partyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        email: {type: string, format: email}
+        displayName: {type: string, maxLength: 200}
+        authenticationState: {type: string, enum: [Active, Suspended]}
+        memberships: {type: array, items: {$ref: '#/components/schemas/MembershipSummary'}}
+    PagedUsers:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/UserSummary'}}
+        nextCursor: {type: [string, 'null']}
+    CreateUserInvitationRequest:
+      type: object
+      required: [email, organizationId, roleIds]
+      properties:
+        email: {type: string, format: email}
+        organizationId: {$ref: '#/components/schemas/Identifier'}
+        roleIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: {$ref: '#/components/schemas/Identifier'}
+        partyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        expiresAt: {type: [string, 'null'], format: date-time}
+    UserInvitation:
+      type: object
+      required: [id, tenantId, organizationId, email, state, createdAt, expiresAt]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        organizationId: {$ref: '#/components/schemas/Identifier'}
+        email: {type: string, format: email}
+        state: {type: string, enum: [Pending, Provisioning, Delivered, Accepted, Failed, Cancelled, Expired]}
+        createdAt: {type: string, format: date-time}
+        expiresAt: {type: string, format: date-time}
+        failureCode: {type: [string, 'null'], maxLength: 100}
+    SuspendTenantMembershipRequest:
+      type: object
+      required: [membershipId, reason, version]
+      properties:
+        membershipId: {$ref: '#/components/schemas/Identifier'}
+        reason: {type: string, minLength: 1, maxLength: 500}
+        version: {type: integer, minimum: 1}
+        revokeSessionsWhenNoActiveMembershipsRemain: {type: boolean, default: true}
+    Role:
+      type: object
+      required: [id, tenantId, name, permissionIds, state, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        name: {type: string, minLength: 1, maxLength: 120}
+        description: {type: [string, 'null'], maxLength: 500}
+        permissionIds: {type: array, uniqueItems: true, items: {type: string}}
+        state: {type: string, enum: [Active, Inactive]}
+        version: {type: integer, minimum: 1}
+    PagedRoles:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Role'}}
+        nextCursor: {type: [string, 'null']}
+    CreateRoleAssignmentRequest:
+      type: object
+      required: [membershipId, roleId, scopeType, startsAt]
+      properties:
+        membershipId: {$ref: '#/components/schemas/Identifier'}
+        roleId: {$ref: '#/components/schemas/Identifier'}
+        scopeType: {type: string, enum: [Tenant, Organization, LegalEntity, Branch, Location]}
+        scopeId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        startsAt: {type: string, format: date-time}
+        endsAt: {type: [string, 'null'], format: date-time}
+    RoleAssignment:
+      allOf:
+        - $ref: '#/components/schemas/CreateRoleAssignmentRequest'
+        - type: object
+          required: [id, tenantId, state, version]
+          properties:
+            id: {$ref: '#/components/schemas/Identifier'}
+            tenantId: {$ref: '#/components/schemas/Identifier'}
+            state: {type: string, enum: [Active, Revoked, Expired]}
+            version: {type: integer, minimum: 1}
+    Entitlement:
+      type: object
+      required: [id, tenantId, capabilityId, state, source, startsAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        capabilityId: {type: string, pattern: '^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$'}
+        state: {type: string, enum: [Active, Grace, Suspended, Expired]}
+        source: {type: string, enum: [PlatformSubscription, ManualGrant, Trial, Migration]}
+        startsAt: {type: string, format: date-time}
+        endsAt: {type: [string, 'null'], format: date-time}
+        limits: {type: object, additionalProperties: true}
+        version: {type: integer, minimum: 1}
+    PagedEntitlements:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Entitlement'}}
+        nextCursor: {type: [string, 'null']}
     Party:
       type: object
-      required: [id, type, displayName, state]
+      required: [id, tenantId, type, displayName, state, classification, version]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
         type: {type: string, enum: [Person, Organization]}
         displayName: {type: string, maxLength: 300}
-        state: {type: string}
+        state: {type: string, enum: [Active, Inactive, Merged, Restricted]}
+        classification: {type: string, enum: [Internal, Confidential, Restricted]}
+        version: {type: integer, minimum: 1}
     CreatePersonParty:
       type: object
       required: [displayName]
@@ -1122,9 +1540,44 @@ components:
         displayName: {type: string, minLength: 1, maxLength: 300}
         email: {type: string, format: email}
         phone: {type: string, maxLength: 50}
+    CreateOrganizationParty:
+      type: object
+      required: [displayName]
+      properties:
+        displayName: {type: string, minLength: 1, maxLength: 300}
+        registeredName: {type: [string, 'null'], maxLength: 300}
+        email: {type: [string, 'null'], format: email}
+        phone: {type: [string, 'null'], maxLength: 50}
+    UpdatePartyRequest:
+      type: object
+      required: [version]
+      minProperties: 2
+      properties:
+        displayName: {type: string, minLength: 1, maxLength: 300}
+        state: {type: string, enum: [Active, Inactive, Restricted]}
+        version: {type: integer, minimum: 1}
+    CreatePartyIdentityLinkRequest:
+      type: object
+      required: [authUserId, membershipId, partyId]
+      properties:
+        authUserId: {$ref: '#/components/schemas/Identifier'}
+        membershipId: {$ref: '#/components/schemas/Identifier'}
+        partyId: {$ref: '#/components/schemas/Identifier'}
+    PlatformIdentityLink:
+      type: object
+      required: [id, tenantId, authUserId, membershipId, partyId, state, createdAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        authUserId: {$ref: '#/components/schemas/Identifier'}
+        membershipId: {$ref: '#/components/schemas/Identifier'}
+        partyId: {$ref: '#/components/schemas/Identifier'}
+        state: {type: string, enum: [Active, Suspended, Ended]}
+        createdAt: {type: string, format: date-time}
+        version: {type: integer, minimum: 1}
     PagedParties:
       type: object
-      required: [items]
+      required: [items, nextCursor]
       properties:
         items: {type: array, items: {$ref: '#/components/schemas/Party'}}
         nextCursor: {type: [string, 'null']}
@@ -1315,15 +1768,111 @@ components:
         requestType: {type: string, enum: [Access, Export, Correct, Restrict, Erase, Object]}
         subjectReference: {type: string}
         intakeChannel: {type: string, enum: [SelfService, StaffAssisted, AuthorizedAgent]}
+    AuthenticatedPrincipal:
+      type: object
+      required: [authUserId, sessionId, assuranceLevel]
+      properties:
+        authUserId: {$ref: '#/components/schemas/Identifier'}
+        sessionId: {$ref: '#/components/schemas/Identifier'}
+        partyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        assuranceLevel: {type: string, enum: [aal1, aal2, phishing-resistant]}
+        activeContext: {oneOf: [{$ref: '#/components/schemas/ActiveContext'}, {type: 'null'}]}
+    AuthorizationDecision:
+      oneOf:
+        - type: object
+          required: [outcome, permission, matchedAssignments]
+          properties:
+            outcome: {const: allow}
+            permission: {type: string}
+            matchedAssignments: {type: array, items: {$ref: '#/components/schemas/Identifier'}}
+        - type: object
+          required: [outcome, reason]
+          properties:
+            outcome: {const: deny}
+            reason: {type: string, enum: [not_authenticated, wrong_tenant, no_assignment, scope_mismatch, assignment_inactive, policy_denied]}
+        - type: object
+          required: [outcome, policyId]
+          properties:
+            outcome: {const: require_approval}
+            policyId: {type: string}
+        - type: object
+          required: [outcome, assuranceLevel]
+          properties:
+            outcome: {const: require_step_up}
+            assuranceLevel: {type: string}
+        - type: object
+          required: [outcome, permission, fieldPolicyId]
+          properties:
+            outcome: {const: allow_masked}
+            permission: {type: string}
+            fieldPolicyId: {type: string}
+        - type: object
+          required: [outcome, permission, limitPolicyId]
+          properties:
+            outcome: {const: allow_with_limit}
+            permission: {type: string}
+            limitPolicyId: {type: string}
+        - type: object
+          required: [outcome, permission, policyId]
+          properties:
+            outcome: {const: allow_read_only}
+            permission: {type: string}
+            policyId: {type: string}
+    AuditRecord:
+      type: object
+      required: [id, tenantId, actorType, action, targetType, sourceChannel, outcome, correlationId, classification, retentionClass, occurredAt, metadata]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        organizationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        locationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        actorType: {type: string, enum: [human, service, device, integration, automation, ai, support]}
+        actorPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        actorUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        originalActorId: {type: [string, 'null']}
+        action: {type: string, maxLength: 200}
+        targetType: {type: string, maxLength: 200}
+        targetId: {type: [string, 'null'], maxLength: 200}
+        sourceChannel: {type: string, maxLength: 100}
+        outcome: {type: string, enum: [success, denied, failure]}
+        reasonCode: {type: [string, 'null'], maxLength: 100}
+        correlationId: {type: string, minLength: 12, maxLength: 128}
+        causationId: {type: [string, 'null'], maxLength: 128}
+        approvalId: {type: [string, 'null'], maxLength: 128}
+        delegationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        changeSummary: {type: [object, 'null'], additionalProperties: true}
+        classification: {type: string, enum: [Internal, Confidential, Restricted]}
+        retentionClass: {type: string, maxLength: 100}
+        privacyCaseId: {type: [string, 'null'], maxLength: 128}
+        privacyTransformationVersion: {type: [string, 'null'], maxLength: 50}
+        occurredAt: {type: string, format: date-time}
+        metadata: {type: object, additionalProperties: true}
+    PagedAuditRecords:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/AuditRecord'}}
+        nextCursor: {type: [string, 'null']}
     Problem:
       type: object
-      required: [type, title, status, code, correlationId]
+      required: [type, title, status, code, safeMessageKey, correlationId, retryable, uncertainty]
       properties:
         type: {type: string, format: uri-reference}
         title: {type: string}
         status: {type: integer}
-        code: {type: string}
-        detail: {type: string}
-        correlationId: {type: string}
+        code: {type: string, enum: [validation, authentication, authorization, entitlement, conflict, state_transition, rate_limit, provider_uncertainty, dependency_unavailable, internal_failure]}
+        safeMessageKey: {type: string, pattern: '^[a-z][a-z0-9_.-]+$'}
+        detail: {type: [string, 'null'], maxLength: 1000}
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            required: [field, code, messageKey]
+            properties:
+              field: {type: string, maxLength: 200}
+              code: {type: string, maxLength: 100}
+              messageKey: {type: string, pattern: '^[a-z][a-z0-9_.-]+$'}
+        correlationId: {type: string, minLength: 12, maxLength: 128}
         retryable: {type: boolean}
         uncertainty: {type: boolean}
+        nextAction: {type: [string, 'null'], enum: [retry, reauthenticate, step_up, request_approval, contact_support, null]}

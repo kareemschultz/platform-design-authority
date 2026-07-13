@@ -73,6 +73,11 @@ jobs:
       - name: Typecheck
         run: bun run check-types
 
+      - name: Architecture dependency rules
+        run: |
+          bun run architecture:check
+          python scripts/test_architecture_checker.py
+
       - name: Migration freshness
         run: |
           bun run db:generate

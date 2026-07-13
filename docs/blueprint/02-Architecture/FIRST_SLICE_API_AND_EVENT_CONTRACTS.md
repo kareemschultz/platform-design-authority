@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ARC-014
 title: First Slice API and Event Contracts
-version: 0.3.1
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
-related_adrs: [ADR-0016, ADR-0017]
+last_reviewed: 2026-07-13
+related_adrs: [ADR-0006, ADR-0007, ADR-0016, ADR-0017, ADR-0020]
 ---
 
 # First Slice API and Event Contracts
@@ -26,6 +26,7 @@ Define the minimum public and first-party contracts required for the Guyana reta
 - Explicit currency and unit fields
 - ETags or version tokens for optimistic concurrency where appropriate
 - OpenAPI as the generated-client contract once implementation begins
+- Active context selected by a server-issued `X-Active-Context-Id`; tenant identifiers in request bodies never establish authority
 
 ## Contract Families
 
@@ -35,7 +36,12 @@ Define the minimum public and first-party contracts required for the Guyana reta
 |---|---|
 | `GET /v1/me` | authenticated session |
 | `GET /v1/organizations` | `platform.organization.read` |
+| `GET /v1/organizations/{organizationId}` | `platform.organization.read` |
+| `PATCH /v1/organizations/{organizationId}` | `platform.organization.update` |
+| `GET /v1/locations` | `platform.organization.read` |
 | `POST /v1/session/active-context` | authenticated membership |
+| `GET /v1/sessions` | authenticated session |
+| `DELETE /v1/sessions/{sessionId}` | authenticated session |
 | `GET /v1/entitlements` | `platform.entitlement.read` |
 
 ### Users, Roles, and Administration
@@ -54,9 +60,11 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | Method and path | Permission |
 |---|---|
 | `GET /v1/parties` | `party.record.read` |
+| `GET /v1/parties/{partyId}` | `party.record.read` |
 | `POST /v1/parties/persons` | `party.record.create` |
 | `POST /v1/parties/organizations` | `party.record.create` |
 | `PATCH /v1/parties/{partyId}` | `party.record.update` |
+| `POST /v1/party-identity-links` | `party.record.update` |
 | `GET /v1/customers` | `crm.customer.read` |
 | `POST /v1/customers` | `crm.customer.create` |
 | `PATCH /v1/customers/{customerId}` | `crm.customer.update` |
@@ -179,6 +187,10 @@ Define the minimum public and first-party contracts required for the Guyana reta
 ## Command Semantics
 
 Every consequential command declares idempotency, authorization, entitlement, state preconditions, concurrency, audit, canonical event output, retry safety, and provider uncertainty.
+
+`POST /v1/users/{userId}/suspend` suspends the target user's membership in the active tenant context. It does not globally disable the Better Auth account or mutate memberships in another tenant. Global protective account action belongs to a separately governed Security/Platform Identity command.
+
+`POST /v1/session/active-context` validates a current membership and returns a server-issued active-context identifier bound to the authenticated session. Subsequent context-bound calls present that identifier in `X-Active-Context-Id`; the server revalidates it. The operation does not mutate Better Auth's session-global `activeOrganizationId`, which would make concurrent browser tabs interfere.
 
 ## Referenced Canonical Event Contracts
 

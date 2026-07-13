@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/platform.role-assignment.revoked.v1.schema.json",
+  "title": "platform.role-assignment.revoked.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "platform.role-assignment.revoked.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["roleAssignmentId", "membershipId", "roleId", "revokedAt", "reasonCode"],
+          "properties": {
+            "roleAssignmentId": {"type": "string"},
+            "membershipId": {"type": "string"},
+            "roleId": {"type": "string"},
+            "revokedAt": {"type": "string", "format": "date-time"},
+            "reasonCode": {"type": "string", "maxLength": 100}
+          }
+        }
+      }
+    }
+  ]
+}

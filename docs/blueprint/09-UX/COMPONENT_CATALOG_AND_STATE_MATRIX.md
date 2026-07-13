@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-017
 title: Component Catalog and State Matrix
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-13
 ---
 
 # Component Catalog and State Matrix
@@ -100,6 +100,30 @@ Every POS component defines touch, keyboard, scanner, screen-reader, offline, pe
 - Import mapping grid
 - Sync and offline status
 - Conflict resolver
+
+## AI-Assisted and Explainable Components
+
+- Suggestion and recommendation card with rationale, confidence, and source disclosure
+- Context-scoped copilot panel
+- Draft-to-review handoff
+- Autonomy-level indicator aligned with `docs/blueprint/06-AI/AI_PLATFORM_ARCHITECTURE.md`
+- Proposed-action preview with affected scope and ordinary permission/entitlement result
+- Explicit approval, denial, and edit-before-approval controls
+- Explainability and provenance inspector
+- Citation and retrieved-evidence list
+- Budget, cost, and usage-limit indicator where applicable
+- Provider/model degraded, unavailable, uncertain, and AI-disabled fallback
+- Accept, reject, and edit-and-accept feedback controls
+
+Every AI-assisted component additionally defines:
+
+- Inform, Draft, Recommend, Act with Approval, and Policy-Bounded Autonomous presentation where the governed workflow permits that level
+- Streaming, interrupted, partial, stale-source, missing-citation, policy-denied, tool-denied, approval-required, approval-expired, provider-uncertain, and deterministic-fallback states
+- The exact proposed command, tenant and record scope, affected data, authority result, and approval consequence before mutation
+- Traceability from displayed rationale and citations to governed AI records
+- A fully usable non-AI path for every essential first-slice workflow
+
+AI presentation never grants tool authority, hides normal permissions or entitlements, or converts generated confidence into business truth.
 
 ## State Matrix
 

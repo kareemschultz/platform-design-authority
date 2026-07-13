@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 related_adrs: [ADR-0002, ADR-0003, ADR-0013, ADR-0020, ADR-0025]
 ---
 
@@ -24,9 +24,9 @@ Where this plan and those documents conflict, they win. All work scheduled here 
 
 ## 2. Baseline: Verified Code Reality (2026-07-12)
 
-**Exists and is green:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); working Better Auth email/password with Drizzle on PostgreSQL 18 (4 auth tables, 1 migration); Hono + oRPC server with health probe and one protected procedure; Next.js web app with login and a dashboard stub; empty Expo native app; Fumadocs portal; contract artifacts (`openapi/first-slice-v1.yaml` 84 operations, `registry/endpoint-permissions.json` 84 rows, `registry/permissions.json` 95 permissions, `registry/events.json` 197 events, `registry/first-slice-tests.json` 103×13 dimensions); five green gates (`check-types` 9/9, `test`, ultracite, `validate_docs.py`, registry `--check`) and CI with a live Docker/migration/health gate.
+**Exists and is green:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); working Better Auth email/password with Drizzle on PostgreSQL 18 (4 auth tables, 1 migration); Hono + oRPC server with health probe and one protected procedure; Next.js web app with login and a dashboard stub; Expo native health shell with authentication explicitly deferred behind RR-001; Fumadocs portal; contract artifacts (`openapi/first-slice-v1.yaml` 82 operations, `registry/endpoint-permissions.json` 82 rows, `registry/permissions.json` 94 permissions, `registry/events.json` 197 events, `registry/first-slice-tests.json` 103×13 dimensions); five green gates (`check-types` 13/13, `test`, ultracite, `validate_docs.py`, registry `--check`) and CI with a live Docker/migration/health gate.
 
-**Does not exist:** any domain code. No tenancy, Party, authorization, entitlements, catalog, inventory, POS, stored value, offline sync, payments, or recovery tooling. The six packages (`api`, `auth`, `config`, `db`, `env`, `ui`) do not yet match the `registry/architecture-rules.json` package families. This section is the honesty anchor: everything below is planned, not built.
+**Does not exist:** any domain code. No tenancy, Party, authorization, entitlements, catalog, inventory, POS, stored value, offline sync, payments, or recovery tooling. The ten workspace packages (`api`, `auth`, `config`, three contract packages, `db`, `env`, foundation core, and `ui`) do not yet match the `registry/architecture-rules.json` package families. This section is the honesty anchor: everything below is planned, not built.
 
 ## 3. Package Architecture Target
 

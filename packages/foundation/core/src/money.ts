@@ -61,6 +61,12 @@ export function registerCurrency(
 	code: string,
 	minorUnitExponent: number
 ): void {
+	if (!Number.isInteger(minorUnitExponent) || minorUnitExponent < 0) {
+		throw new RangeError(
+			`Currency minor-unit exponent must be a non-negative integer, received ${minorUnitExponent}`
+		);
+	}
+
 	const normalized = code.toUpperCase();
 	const existing = currencyRegistry.get(normalized);
 	if (existing !== undefined && existing !== minorUnitExponent) {

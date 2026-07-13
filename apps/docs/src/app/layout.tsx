@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
 	description:
-		"Controlled prototype documentation portal for the Meridian scaffold (internal).",
+		"Controlled prototype documentation portal for the platform scaffold.",
 	title: {
 		default: appName,
 		template: `%s | ${appName}`,

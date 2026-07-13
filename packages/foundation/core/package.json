@@ -1,0 +1,22 @@
+{
+  "name": "@meridian/foundation-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./id": "./src/id.ts",
+    "./money": "./src/money.ts",
+    "./result": "./src/result.ts",
+    "./time": "./src/time.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "bun test src/*.test.ts"
+  },
+  "devDependencies": {
+    "@meridian/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "^6"
+  }
+}

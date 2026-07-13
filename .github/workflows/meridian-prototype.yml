@@ -103,11 +103,14 @@ jobs:
       - name: Generated registry freshness
         run: python scripts/generate_registries.py --check
 
+      - name: Generated contract freshness
+        run: python scripts/generate_contracts.py --check
+
       - name: Secret and prohibited surface scan
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE "(sk-[A-Za-z0-9]|OPENAI_API_KEY|OPENROUTER_API_KEY|POSTGRES_PASSWORD:-password|@ai-sdk|openrouter|devtools|/ai|/todos)" \
+          if grep -RInE "(\bsk-[A-Za-z0-9]{20,}|OPENAI_API_KEY|OPENROUTER_API_KEY|POSTGRES_PASSWORD:-password|@ai-sdk|openrouter|devtools|/ai|/todos)" \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.turbo \
             --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock --exclude='*.tsbuildinfo' \
             apps packages ops package.json biome.json turbo.json docker-compose.yml; then

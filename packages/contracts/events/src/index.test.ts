@@ -41,6 +41,8 @@ describe("EventEnvelope", () => {
 			producerNamespace: sampleName.split(".")[0] ?? sampleName,
 			publishedAt: "2026-07-12T00:00:00.100Z",
 			purpose: null,
+			retentionClass: "platform-security-evidence",
+			schemaRef: `schemas/events/${sampleName}.schema.json`,
 			schemaVersion: "1.0.0",
 			sourceChannel: null,
 			tenantId: "tenant_demo",

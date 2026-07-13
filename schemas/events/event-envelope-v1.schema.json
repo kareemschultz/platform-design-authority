@@ -4,7 +4,7 @@
   "title": "Canonical Event Envelope V1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "name", "occurredAt", "publishedAt", "tenantId", "producerNamespace", "schemaVersion", "classification", "data"],
+  "required": ["id", "name", "occurredAt", "publishedAt", "tenantId", "producerNamespace", "schemaVersion", "schemaRef", "classification", "retentionClass", "data"],
   "properties": {
     "id": {"type": "string", "minLength": 12, "maxLength": 64},
     "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.v[1-9][0-9]*$"},
@@ -24,7 +24,9 @@
     "traceId": {"type": ["string", "null"]},
     "aggregateId": {"type": ["string", "null"]},
     "schemaVersion": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "schemaRef": {"type": "string", "format": "uri-reference"},
     "classification": {"type": "string"},
+    "retentionClass": {"type": "string", "minLength": 1, "maxLength": 100},
     "purpose": {"type": ["string", "null"]},
     "data": {"type": "object"}
   }

@@ -1,4 +1,3 @@
-import { auth, closeDb } from "@meridian/platform-identity";
 import { env } from "@meridian/tooling-env/server";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
@@ -8,6 +7,11 @@ import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import {
+	closeIdentityComposition,
+	identityHttpHandler,
+	identitySessionService,
+} from "../composition/identity";
 import { createContext } from "./context";
 import { appRouter } from "./router";
 
@@ -16,8 +20,13 @@ const app = new Hono();
 app.use(
 	"/*",
 	cors({
-		allowHeaders: ["Content-Type", "Authorization"],
-		allowMethods: ["GET", "POST", "OPTIONS"],
+		allowHeaders: [
+			"Authorization",
+			"Content-Type",
+			"Idempotency-Key",
+			"X-Active-Context-Id",
+		],
+		allowMethods: ["DELETE", "GET", "PATCH", "POST", "OPTIONS"],
 		credentials: true,
 		maxAge: 600,
 		origin: env.CORS_ORIGIN,
@@ -28,7 +37,7 @@ app.use(
 app.get("/", (c) => c.text("OK"));
 app.get("/health", (c) => c.json({ status: "ok" }));
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET"], "/api/auth/*", (c) => identityHttpHandler(c.req.raw));
 
 // Do not log expected client errors (4xx); log everything unexpected without
 // serializing request payloads.
@@ -56,7 +65,10 @@ export const rpcHandler = new RPCHandler(appRouter, {
 // round trip inside createContext) runs only for RPC/OpenAPI traffic, never
 // for health checks or unmatched routes.
 const handleRpc: MiddlewareHandler = async (c, next) => {
-	const context = await createContext({ context: c });
+	const context = await createContext({
+		context: c,
+		identity: identitySessionService,
+	});
 	const result = await rpcHandler.handle(c.req.raw, {
 		context,
 		prefix: "/rpc",
@@ -70,7 +82,10 @@ app.use("/rpc", handleRpc);
 app.use("/rpc/*", handleRpc);
 
 const handleApiReference: MiddlewareHandler = async (c, next) => {
-	const context = await createContext({ context: c });
+	const context = await createContext({
+		context: c,
+		identity: identitySessionService,
+	});
 	const result = await apiHandler.handle(c.req.raw, {
 		context,
 		prefix: "/api-reference",
@@ -95,7 +110,7 @@ if ("bun" in process.versions) {
 			return;
 		}
 		shuttingDown = true;
-		closeDb()
+		closeIdentityComposition()
 			.catch((error: unknown) => {
 				console.error("Error while closing database pool:", error);
 			})

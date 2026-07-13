@@ -10,3 +10,4 @@
 // biome-ignore lint/performance/noBarrelFile: this is the package's deliberate anti-corruption-layer entry point, not an accidental re-export barrel.
 export { auth } from "./auth";
 export { closeDb } from "./db";
+export { isBlockedNativeAuthHttpRoute } from "./security";

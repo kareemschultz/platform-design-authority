@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
 	getCookieAttributes,
 	getTrustedOrigins,
+	isBlockedNativeAuthHttpRoute,
 	toExactOrigin,
 	validateRedirectPath,
 } from "./security";
@@ -47,5 +48,37 @@ describe("auth security helpers", () => {
 			secure: false,
 		});
 		expect(getCookieAttributes("production").secure).toBe(true);
+	});
+
+	test("blocks native admin and organization authority mutation routes", () => {
+		expect(
+			isBlockedNativeAuthHttpRoute(
+				new Request("https://api.example.test/api/auth/admin/set-role", {
+					method: "POST",
+				})
+			)
+		).toBe(true);
+		expect(
+			isBlockedNativeAuthHttpRoute(
+				new Request(
+					"https://api.example.test/api/auth/organization/set-active",
+					{
+						method: "POST",
+					}
+				)
+			)
+		).toBe(true);
+		expect(
+			isBlockedNativeAuthHttpRoute(
+				new Request("https://api.example.test/api/auth/organization/list")
+			)
+		).toBe(false);
+		expect(
+			isBlockedNativeAuthHttpRoute(
+				new Request("https://api.example.test/api/auth/sign-in/email", {
+					method: "POST",
+				})
+			)
+		).toBe(false);
 	});
 });

@@ -56,7 +56,7 @@ The 2026-07-13 independent consistency review was verified against the current b
 
 | Finding | Disposition | Severity | Required closure | Owner | Timing |
 |---|---|---:|---|---|---|
-| Global `foundation/database` singleton conflicts with runtime-neutral and composition-root rules | Accepted → **Proposed resolution in ADR-0027 v0.2.0** | Critical | Owner-specific Persistence packages; no embedded adapter in runtime-neutral core; composition-root injection; serial migrations; required ADR reviews complete | Platform Architecture | Before PR2 |
+| Global `foundation/database` singleton conflicts with runtime-neutral and composition-root rules | Accepted → **Proposed resolution in ADR-0027 v0.2.1** | Critical | Owner-specific Persistence packages; no embedded adapter in runtime-neutral core; composition-root injection; serial migrations; required ADR reviews complete | Platform Architecture | Before PR2 |
 | Whole-family `applications -> platform/domains` grant is broader than the composition-root rule | Accepted | Critical | Keep family grant narrow; add path-aware composition-root enforcement and negative import tests | Platform Architecture | PR1 |
 | Canonical OpenAPI payloads and session operations are incomplete | Accepted | Critical | Complete request, response, error, pagination, idempotency, and session contracts before handlers | API Platform | PR1 |
 | User invitation and suspension lifecycle is ambiguous across Identity, Tenancy, and Party | Accepted | Critical | Define command owner, tenant/global scope, state machine, idempotency, failure recovery, session effects, audit, and events | Identity/Tenancy/Party | PR1 |
@@ -90,7 +90,7 @@ PR1 is a governance-and-contract pull request. No schema-owning WS1 package begi
 
 ### G3 — Decide and govern the persistence adapter boundary
 
-**Proposed resolution: ADR-0027 v0.2.0.** Its named review rows must be complete before PR2 merges. `packages/foundation/database` and embedded adapters in runtime-neutral owner packages are prohibited. ADR-0027 adopts owner-specific Persistence packages with composition-root injection:
+**Proposed resolution: ADR-0027 v0.2.1.** Codex and Claude Code concur on the architecture; the ADR's specialist Platform Architecture, Data Platform, and Security rows must still be complete before PR2 merges. `packages/foundation/database` and embedded adapters in runtime-neutral owner packages are prohibited. ADR-0027 adopts owner-specific Persistence packages with composition-root injection:
 
 - domain/platform core, application, contract, and authorization code depend on repository or unit-of-work interfaces only;
 - concrete PostgreSQL/Drizzle adapters and migration artifacts live under `packages/persistence/*`, one package per authoritative owner/backend; location does not transfer table or migration ownership;

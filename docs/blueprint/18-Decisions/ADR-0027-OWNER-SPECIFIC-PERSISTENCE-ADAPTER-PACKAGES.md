@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.2.0
+version: 0.2.1
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
@@ -107,7 +107,7 @@ PDA-ENGR-012 and `registry/architecture-rules.json` register the `persistence` f
 | Reviewer | Perspective | Decision | Date | Notes |
 |---|---|---|---|---|
 | Codex | Independent architecture consistency | Changes required on v0.1.0 | 2026-07-13 | Embedded adapters and the Drizzle-import control contradicted ADR-0020/PDA-ENGR-012; v0.2.0 separates owner-specific persistence packages and narrows transaction scope. |
-| Claude Code | Independent architecture consistency | Pending re-review | | Review v0.2.0 against the authority order and machine rules. |
+| Claude Code | Independent architecture consistency | Concurred with v0.2.0 | 2026-07-13 | Independently verified the registered Persistence family, open G3 lifecycle, transaction limits, and complete Two-Factor/Passkey baseline; evidence: PR #33 comment `4962106902`. |
 | Platform Architecture | Dependency boundaries, composition root | Pending | | |
 | Data Platform | Pooling, transactions, migration orchestration | Pending | | |
 | Security | Env/secret handling, tenant-safe connections | Pending | | |
@@ -116,5 +116,6 @@ PDA-ENGR-012 and `registry/architecture-rules.json` register the `persistence` f
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.1 | 2026-07-13 | Platform Design Authority | Recorded Claude Code's independent concurrence with v0.2.0; lifecycle and specialist review gates remain unchanged. |
 | 0.2.0 | 2026-07-13 | Platform Design Authority | Replaced contradictory embedded adapters with owner-specific persistence packages; narrowed composition and transaction responsibilities. |
 | 0.1.0 | 2026-07-13 | Platform Design Authority | Initial persistence-boundary proposal. |

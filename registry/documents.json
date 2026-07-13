@@ -346,7 +346,7 @@
       "document_id": "ADR-0027",
       "path": "docs/blueprint/18-Decisions/ADR-0027-OWNER-SPECIFIC-PERSISTENCE-ADAPTER-PACKAGES.md",
       "title": "Owner-Specific Persistence Adapter Packages with Composition-Root Injection",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-001
 title: UX and Design System Section Index
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -23,6 +23,9 @@ last_reviewed: 2026-07-12
 - `DESIGN_SYSTEM_OPERATIONS.md`
 - `COMPONENT_CATALOG_AND_STATE_MATRIX.md`
 - `PREFERRED_COMPONENT_CATALOG.md`
+- `COMPONENT_ACQUISITION_POLICY.md`
+- `COMPONENT_NORMALIZATION_STANDARD.md`
+- `COMPONENT_ACCEPTANCE_CHECKLIST.md`
 - `CONTENT_DESIGN_LOCALIZATION_AND_MOTION.md`
 - `ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md`
 - `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`
@@ -45,7 +48,20 @@ last_reviewed: 2026-07-12
 - Magic UI Pro and shadcn/studio premium sources under the premium UI policy
 - Platform semantic tokens in `registry/design-tokens.json`
 - Storybook or equivalent component workbench with visual regression
-- Preferred external-source candidates must pass the catalog workflow before platform adoption
+- Preferred external-source candidates must pass acquisition, normalization, and acceptance gates before platform adoption
+- MCPs and registries are discovery tools, never design-system authority
+
+## Component Source Governance
+
+Before importing, generating, adapting, or promoting reusable UI, contributors and agents must:
+
+1. Consult `PREFERRED_COMPONENT_CATALOG.md`.
+2. Follow `COMPONENT_ACQUISITION_POLICY.md`.
+3. Normalize resulting source under `COMPONENT_NORMALIZATION_STANDARD.md`.
+4. Complete the applicable gates in `COMPONENT_ACCEPTANCE_CHECKLIST.md`.
+5. Record provenance, Storybook evidence, tests, owner, and revisit trigger.
+
+Paid access, MCP availability, visual quality, or source popularity never grants Platform Approved status.
 
 ## Project Agent Skills
 

@@ -1,221 +1,352 @@
 ---
 document_id: PDA-RDM-008
 title: "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization"
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
-related_adrs: [ADR-0007, ADR-0020]
+related_adrs: [ADR-0002, ADR-0003, ADR-0006, ADR-0007, ADR-0014, ADR-0016, ADR-0020]
 ---
 
 # WS1 Implementation Plan: Identity, Tenancy, Party, Authorization
 
-## 1. Purpose and Position
+## 1. Purpose, Authority, and Lifecycle
 
-This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) §5 "WS1 — Identity, Tenancy, Party, Authorization (P1)" into a decision-complete implementation plan: package boundaries, data model, contract surface, PR sequence, seed data, and exit gate. It sits under PDA-RDM-007 and does not override it; where the two conflict, PDA-RDM-007 wins. It is written against the verified repository state as of `4f7a08e` (WS0 complete, main green on five gates).
+This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) §5 "WS1 — Identity, Tenancy, Party, Authorization (P1)" into an implementation-control plan. It maps owners, capability depth, contracts, packages, pull requests, evidence, and unresolved architecture gates. It does not override higher-authority material. Where this document conflicts with the Constitution, an ADR, PDA-RDM-003, PDA-RDM-004, PDA-RDM-007, or another governing specification, the higher-authority source wins and WS1 stops until the conflict is dispositioned.
 
-**WS1 is the first real end-to-end platform prototype, not "add auth."** Its purpose is to prove the platform can safely and verifiably answer: *who is this person, which tenant and organization are they acting in, what are they allowed to do, what are they entitled to access, and can every decision be audited?* Every subsequent workstream (WS2 onward) is allowed to assume tenant context, identity, permissions, entitlements, Party linkage, audit, and navigation already work — WS1 is where that assumption is earned, not asserted.
+This is a **Draft plan for a controlled prototype**, not production authority. It must not be described as decision-complete while any gate in §3 remains open. Closing WS1 demonstrates Technical Prototype 1 and its declared evidence; it does not promote a capability, ADR, or specification beyond its recorded lifecycle.
 
-## 2. Standing precondition: close TD-007 before domain work begins
+### 1.1 Governing sources
 
-`registry/architecture-rules.json`'s `exceptions[]` entry `platform-clients-api-client-server-type-import` records that `packages/platform-clients/api-client` currently re-exports `AppRouterClient` directly from `apps/server/src/router.ts` — a type-only import that crosses the `applications` → `platform-clients` boundary in the wrong direction. Its own expiry condition is "closes when WS1 lands a contract-first oRPC setup; must close before WS2 begins." **This is WS1's first PR (WS1.0 / PR1), not its last** — deferring it to the end of WS1 (as an earlier draft of this plan did) risks every subsequent WS1 package being built against the router-coupled client shape, making the eventual fix a rewrite instead of a clean extraction.
+| Concern | Governing source |
+|---|---|
+| First-slice scope and depth | PDA-RDM-003, `registry/first-slice.json`, PDA-RDM-004, PDA-RDM-007 |
+| Modular boundaries and persistence | ADR-0002, ADR-0003, PDA-ENGR-012, `registry/architecture-rules.json` |
+| Runtime and contract authority | ADR-0020, `openapi/first-slice-v1.yaml`, JSON Schemas |
+| Identity and plugin composition | ADR-0006, PDA-PLT-003, PDA-PLT-020, PDA-PLT-028 |
+| Party and identity links | ADR-0007, PDA-PLT-021 |
+| Authorization and entitlements | PDA-PLT-004, PDA-PLT-005, permission and capability registries |
+| Audit, privacy, and classification | ADR-0014, PDA-PLT-007, PDA-DAT-010 |
+| Events and reliable publication | ADR-0016, PDA-ARC-005, PDA-PLT-008 |
+| Tenant isolation and threat model | PDA-SEC-011 |
+| Test evidence | PDA-TST-013, `registry/first-slice-tests.json`, PDA-RDM-006 |
+| Technology evidence | PDA-ENGR-013 and the exact implementation lock |
+| Work and release coordination | PDA-ENGR-014 |
+| Founder scope authority | FDR-004; first-slice ratification remains open |
 
-WS1.0 scope:
-- Extract transport-neutral procedure contracts (input/output schemas, not handler implementations) out of `apps/server` into a new package. Candidate name — confirm against `registry/architecture-rules.json`'s registered families before creating it: `packages/contracts/platform-api` (family `contracts`, matching the existing `packages/contracts/{api,permissions}` pattern) is preferred over `packages/platform/contracts` because the `platform` family's `may_depend_on` (`foundation`, `contracts`, `tooling`) does not include itself — a `platform/contracts` package would be an immediate sibling-import trap for every other `platform/*` package that needs it.
-- Derive `packages/platform-clients/api-client`'s exported client type from the new contracts package instead of from `apps/server/src/router.ts`.
-- Remove the direct `apps/server` type import from `platform-clients/api-client`.
-- Delete the `exceptions[]` entry once the import is gone (do not leave a stale exception on the books).
-- Add an architecture-rules regression check (see §9, DoD item) so this specific violation class cannot silently reappear.
+### 1.2 Capability disposition
 
-## 3. Verified package architecture (WS1.1–WS1.6)
+| Capability | First-slice depth | WS1 responsibility |
+|---|---:|---|
+| `platform.tenancy` | full | tenant membership and governed context resolution |
+| `platform.organizations` | full | organization and location context required by Prototype 1 |
+| `platform.authentication` | full | Better Auth boundary, account/session lifecycle, and the required 2FA or passkey seam |
+| `platform.identity` | full | principal resolution, Party linkage, user administration, and session revocation |
+| `platform.authorization` | full | current scoped policy decision and canonical permission enforcement |
+| `platform.entitlements` | full | effective capability evaluation independent of permissions |
+| `platform.audit` | full | tamper-resistant, privacy-safe access and identity evidence |
+| `platform.events` | full | minimum transactional outbox required by WS1 state changes |
+| `party.records` | prototype | Person/Organization Party and authentication identity-link proof |
 
-**Constraint governing every package below:** `registry/architecture-rules.json` gives `platform`'s `may_depend_on` as `["foundation","contracts","tooling"]` — not `platform` itself. `platform/tenancy`, `platform/authorization`, `platform/entitlements`, `platform/audit`, and the existing `platform/identity` are siblings that must never import one another.
+All thirteen test dimensions remain required at the depth recorded in `registry/first-slice-tests.json`. A pull request may prove only part of a capability, but WS1 may not claim that capability's depth is complete until all required evidence is linked.
 
-**Family grants are a graph envelope, not permission to import implementations** (`ARCHITECTURE_DEPENDENCY_RULES.md:63`: "A reference to Platform, Shared Engine, or another Domain means its published contract package only unless a narrower adapter family is explicitly registered"; `:111`: "Dependency injection and concrete adapter binding occur only in application composition roots"). So although `domains`'s grant includes the whole `platform` family, `domains/party` does **not** directly import `platform/tenancy`'s concrete service. Instead: `platform/tenancy` publishes a contract/interface (a `contracts`-family package, or a narrow interface exported for injection); `domains/party` depends on that contract only and receives a concrete tenancy service by injection; the concrete `platform/tenancy` ⇄ `domains/party` binding happens exclusively in the `apps/server/composition/` root. `domains/party`'s dependency row below therefore reads `platform` **contracts**, not the whole implementation family — matching the contract-only rule and keeping the planned architecture tests green.
+## 2. Review Disposition
 
-`applications`'s grant does **not** currently include `platform` even though `apps/server/src/{index.ts,node.ts,context.ts}` already import `@meridian/platform-identity` today (grep-confirmed) — this gap has no enforcement yet (`validate_docs.py`'s `validate_architecture_rules()` only checks the registry file's internal consistency, not real imports). **Action in WS1.0/WS1.1:** add `platform` and `domains` to `applications`'s `may_depend_on`, and introduce `apps/server/composition/` (matching the registered `composition_roots` glob) as the *only* module allowed to import all five new packages' concrete implementations plus `platform/identity` — ordinary `apps/server/src/procedures.ts` code only ever sees `context.services.*`.
+The 2026-07-13 independent consistency review was verified against the current branch and is accepted as follows.
 
-| Package | Owns (Postgres schema) | Depends on |
+| Finding | Disposition | Severity | Required closure | Owner | Timing |
+|---|---|---:|---|---|---|
+| Global `foundation/database` singleton conflicts with runtime-neutral and composition-root rules | Accepted | Critical | No database adapter in Foundation; persistence boundary recorded through ADR/spec amendment; adapters injected from composition root | Platform Architecture | Before PR2 |
+| Whole-family `applications -> platform/domains` grant is broader than the composition-root rule | Accepted | Critical | Keep family grant narrow; add path-aware composition-root enforcement and negative import tests | Platform Architecture | PR1 |
+| Canonical OpenAPI payloads and session operations are incomplete | Accepted | Critical | Complete request, response, error, pagination, idempotency, and session contracts before handlers | API Platform | PR1 |
+| User invitation and suspension lifecycle is ambiguous across Identity, Tenancy, and Party | Accepted | Critical | Define command owner, tenant/global scope, state machine, idempotency, failure recovery, session effects, audit, and events | Identity/Tenancy/Party | PR1 |
+| New events have no payload schemas or WS1 outbox | Accepted | Critical | Add schemas and minimum transactional outbox before any producer emits them | Event Backbone | PR1–PR2 |
+| "Full DoD" was claimed without a capability-by-dimension evidence map | Accepted | High | Add §11 matrix and retain evidence status until executable proof exists | Test Engineering | Before WS1 close |
+| `AuthorizationDecision`, `AuthenticatedPrincipal`, and `AuditRecord` were under-specified | Accepted | High | Align shared contracts with governing specifications and OpenAPI nullability | Authorization/Audit/Identity | PR1 |
+| Tenant isolation lacked schema, threat-model, and classification controls | Accepted | High | Add data-flow/abuse review, tenant constraints, RLS disposition, and classification evidence | Security/Data | Before migrations |
+| Migration streams lacked ordering, rollback, and exact-version evidence | Accepted | High | Serialize migration execution and prove clean, upgrade, failure, and recovery paths | Platform Engineering | PR2 |
+| Better Auth Organization choice was routed as informal founder sign-off | Accepted | High | Resolve through ADR-0006/PDA-PLT-028 change gate and exact plugin manifest | Platform Identity/PDA | PR1 |
+
+Architecture closure in this plan does not substitute for implementation tests. Founder, legal, provider, customer, pilot, and production evidence remains open where recorded elsewhere.
+
+## 3. Mandatory Pre-Implementation Gates
+
+PR1 is a governance-and-contract pull request. No schema-owning WS1 package begins implementation until every gate below is either closed or recorded as an approved, expiring exception.
+
+### G1 — Close TD-007 without creating a second contract authority
+
+- Complete the canonical OpenAPI request/response/error schemas for all WS1 operations before deriving procedure contracts.
+- Add or explicitly defer canonical session-list and session-revoke operations; do not hide a session collection inside `/v1/me` merely to avoid registering the resource.
+- Implement transport-neutral oRPC contracts in `packages/contracts/platform-api` only after the OpenAPI change is reviewed.
+- Maintain a semantic-parity test from the governed OpenAPI to the oRPC surface; the beta OpenAPI-to-oRPC generator remains evaluation-only under ADR-0020.
+- Derive `packages/platform-clients/api-client` from the contract package, remove the `apps/server/src/router.ts` import, and delete the TD-007 exception only after the import-graph test passes.
+
+### G2 — Preserve composition-root-only concrete binding
+
+- Do **not** add `platform` or `domains` to the whole `applications.may_depend_on` grant.
+- Extend the architecture test to recognize only registered composition-root paths such as `apps/server/composition/**` as concrete binding locations.
+- Ordinary routes, procedures, and application code receive `context.services.*` interfaces and cannot import a concrete domain, platform implementation, repository, schema, or migration.
+- Update PDA-ENGR-012 and `registry/architecture-rules.json` together if the machine rule needs a narrower representation.
+
+### G3 — Decide and govern the persistence adapter boundary
+
+`packages/foundation/database` is prohibited. Foundation remains dependency-light and runtime-neutral; it does not import `pg`, Drizzle, `@meridian/tooling-env`, or environment state.
+
+Before PR2, an ADR or amendment must select the concrete persistence-adapter location and import rule. The recommended shape is:
+
+- domain/platform core, application, contract, and authorization code depend on repository or unit-of-work interfaces;
+- concrete PostgreSQL/Drizzle adapters and migrations remain owned by the module whose data changes, in an explicitly registered adapter boundary;
+- `apps/server/composition/**` reads validated environment configuration, creates the process pool, supplies transaction-capable adapters, and owns graceful shutdown;
+- no package locates a global pool or reads `process.env` directly.
+
+### G4 — Resolve exact Better Auth composition
+
+PDA-PLT-028 remains deny-by-default. PR1 records the exact Better Auth package/version composition, schema and endpoint diff, secrets, hooks, data flows, rollback, and Bun/Node tests.
+
+ADR-0006 currently includes constrained Organization context in the first-slice baseline. WS1 must either:
+
+1. adopt the plugin behind Platform Identity with a one-way mapping to authoritative Platform Tenancy and no business-role authority; or
+2. amend ADR-0006 and PDA-PLT-028 through their review gates before omitting it.
+
+An informal founder approval does not amend the ADR or matrix. Technical Prototype 1 must also prove at least a 2FA or passkey seam. Full-depth `platform.authentication` evidence remains incomplete until the selected first-slice baseline and all required test dimensions pass.
+
+### G5 — Define identity lifecycle orchestration
+
+The application contract must distinguish:
+
+- authentication-account suspension owned by Platform Identity;
+- tenant-membership suspension owned by Platform Tenancy;
+- session revocation owned by Platform Identity;
+- Party status and identity-link lifecycle owned by Party.
+
+`POST /v1/users/{userId}/suspend` must name which operation it performs. A tenant administrator cannot disable an authentication account across unrelated tenants without separately governed authority. Invitation and provisioning define an orchestrator, idempotency key, partial-failure states, retry/compensation, delivery behavior, audit, and transactional event publication.
+
+### G6 — Introduce reliable event publication in WS1
+
+- Add payload schemas for the six new membership and role-assignment events.
+- Use the standard event envelope with tenant, organization, actor, source, correlation, causation, idempotency, classification, retention, and schema reference.
+- Introduce the minimum `platform/events` transactional outbox in PR2; WS2 extends it rather than creating it.
+- Prove state change plus outbox atomicity, duplicate delivery, consumer idempotency, tenant isolation, redaction, and recovery.
+
+### G7 — Record security, privacy, and migration evidence
+
+Before a migration is generated, each table declares owner, tenant scope, classification/default, retention, erasure behavior, offline eligibility, and audit implications. Tenant-owned rows use tenant-preserving uniqueness and foreign-key constraints where practical. Database roles and PostgreSQL RLS are explicitly adopted, rejected, or deferred with rationale and tests.
+
+Migration commands execute deterministically and serially; a bare unfiltered `turbo run db:migrate` is insufficient. PR2 records exact Drizzle, `pg`, Bun, Node, and PostgreSQL locks and proves empty-database migration, representative upgrade, repeat run, failed migration recovery, rollback/forward-fix, and freshness.
+
+## 4. Package and Ownership Plan
+
+The exact persistence-adapter package names remain gated by G3. Core ownership is fixed:
+
+| Core package | Authoritative behavior/data | Allowed direct dependencies |
 |---|---|---|
-| `platform/tenancy` | `tenant`, `organization`, `legal_entity`, `business_unit`, `branch`, `location`, `tenant_membership`, `role`, `role_assignment`, `delegation` — schema `tenancy` | `foundation`, `contracts`, `tooling` |
-| `platform/identity` (existing) | Better Auth core tables — schema `public`; ACL barrel exports only `auth`/`closeDb` (verified: `packages/platform/identity/src/index.ts`) | `foundation`, `tooling` |
-| `platform/authorization` | none — pure decision function, no DB adapter | `foundation`, `contracts` |
-| `platform/entitlements` | `entitlement` — schema `entitlements` | `foundation`, `contracts`, `tooling` |
-| `platform/audit` | `audit_record` (append-only) — schema `audit` | `foundation`, `contracts`, `tooling` |
-| `domains/party` | `party`, `person`, `organization_party`, `contact_point`, `address`, `party_identifier`, `party_relationship`, `duplicate_candidate`, `merge_record`, `platform_identity_link` — schema `party` | `foundation`, `contracts`, `platform` **contracts only** (tenancy interface injected at the composition root — never a direct import of `platform/tenancy`'s implementation), `tooling` |
+| `platform/tenancy` | tenant hierarchy, memberships, roles, role assignments, delegations, context resolution | Foundation and published Contracts |
+| `platform/identity` | Better Auth ACL, authentication accounts, sessions, factors, principal resolution | Foundation and published Contracts |
+| `platform/authorization` | runtime-neutral policy evaluation; no persistence adapter | Foundation and published Contracts |
+| `platform/entitlements` | effective entitlement grants, limits, state, source, dates, and change history | Foundation and published Contracts |
+| `platform/audit` | append-oriented audit evidence, redaction, retention, privacy transformation | Foundation and published Contracts |
+| `platform/events` | transactional outbox contract and infrastructure adapter selected under G3 | Foundation and published Contracts |
+| `domains/party` | Party, Person/Organization details, contact/address/identifier records, relationships, duplicate/merge evidence, `PlatformIdentityLink` | Foundation, published Contracts, and injected Platform contracts |
 
-**Shared DB pool without a sibling import:** new `packages/foundation/database` (`@meridian/foundation-database`) exports a lazy process-wide `pg.Pool` singleton (`getSharedPgPool`/`closeSharedPgPool`); every schema-owning package — including a small refactor of `platform/identity/src/db.ts`, which today constructs its own pool — calls this instead. `foundation` may depend on nothing and everything may depend on `foundation`, so this is a legal edge everywhere it's needed.
+No sibling Platform implementation imports another sibling. Party consumes published tenancy/identity contracts only. Concrete adapters are bound in `apps/server/composition/**`.
 
-**Migration ownership:** one Postgres database (`meridian`), one logical schema and one independent Drizzle migration stream per owning package (never a new database), following `platform/identity/drizzle.config.ts`'s existing pattern plus two additions every new package's config needs: `schemaFilter: ["<its-schema>"]` and a distinct `migrations: { schema: "<its-schema>", table: "__drizzle_migrations" }`, so six packages sharing one physical database never collide on migration-tracking tables. Root `db:*` turbo scripts move from `-F @meridian/platform-identity` to unfiltered `turbo run db:generate`/`db:migrate` so one command drives all six streams.
+## 5. Shared Contract Vocabulary
 
-**Open item, not silently worked around:** `docker-compose.yml`'s `postgres` service has no host port mapping (only `server`/`web` do, confirmed by reading the file). Any host-run `drizzle-kit` command, or a two-tenant-isolation test harness run outside the compose network, cannot reach it as-is. Decide before migration tooling starts in WS1.1: add a `127.0.0.1:5432:5432` mapping (recommended — simplest for solo-founder + agent workflows, Postgres stays localhost-only), or require all migration/test tooling to run via `docker compose run --rm server ...`.
-
-**Better Auth Organization plugin — recommend NOT enabling it in WS1.** Build tenancy/org/membership/role as custom tables in `platform/tenancy` behind the ACL. `BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` marks Organization as "Prototype/seam" depth while `registry/first-slice-tests.json` requires `platform.tenancy`/`platform.organizations` at **full** depth with all 13 test dimensions — the plugin's depth doesn't match what's needed, and enabling it creates a second, overlapping membership representation to reconcile against `platform/tenancy`'s own tables. **This is a "Constrained adopt" plugin decision — flag for founder sign-off before implementation.** Alternative: enable the plugin purely for its invitation-email UX, treating its tables as non-authoritative convenience state reconciled against `platform/tenancy`. Either way, Better Auth continues to own only authentication/session state; it never becomes the source of truth for tenancy, roles, or Party.
-
-## 4. Core types (shared vocabulary across WS1.1–WS1.6)
+These shapes are requirements for the PR1 contract review, not permission to bypass OpenAPI or JSON Schema.
 
 ```ts
-// platform/tenancy — resolved once per request from the authenticated session + memberships,
-// never trusted from client-supplied values.
 type ActiveContext = {
+  contextId: Id<"ActiveContext">;
   tenantId: Id<"Tenant">;
   organizationId?: Id<"Organization">;
+  legalEntityId?: Id<"LegalEntity">;
+  branchId?: Id<"Branch">;
   locationId?: Id<"Location">;
-  userId: Id<"AuthUser">;   // Better Auth's user id, opaque outside platform/identity
-  partyId: Id<"Party">;
+  authUserId: Id<"AuthUser">;
+  partyId?: Id<"Party">;
+  delegationId?: Id<"Delegation">;
 };
 
-// platform/identity's public surface — the input to authorization, never raw cookies
-// or Better Auth records directly.
 type AuthenticatedPrincipal = {
   authUserId: Id<"AuthUser">;
-  partyId: Id<"Party">;
   sessionId: Id<"Session">;
-  activeContext: ActiveContext;
+  partyId?: Id<"Party">;
+  assuranceLevel: string;
+  activeContext?: ActiveContext;
 };
 
-// platform/authorization — explainable, never a bare boolean.
 type AuthorizationDecision =
-  | { allowed: true; permission: PermissionId; matchedAssignments: Id<"RoleAssignment">[] }
-  | { allowed: false; reason: "not_authenticated" | "wrong_tenant" | "no_assignment" | "scope_mismatch" | "assignment_inactive" };
+  | { outcome: "allow"; permission: PermissionId; matchedAssignments: Id<"RoleAssignment">[] }
+  | { outcome: "deny"; reason: "not_authenticated" | "wrong_tenant" | "no_assignment" | "scope_mismatch" | "assignment_inactive" | "policy_denied" }
+  | { outcome: "require_approval"; policyId: string }
+  | { outcome: "require_step_up"; assuranceLevel: string }
+  | { outcome: "allow_masked"; permission: PermissionId; fieldPolicyId: string }
+  | { outcome: "allow_with_limit"; permission: PermissionId; limitPolicyId: string }
+  | { outcome: "allow_read_only"; permission: PermissionId; policyId: string };
 
-// platform/audit
 type AuditRecord = {
   id: Id<"AuditRecord">;
   tenantId: Id<"Tenant">;
+  organizationId?: Id<"Organization">;
+  locationId?: Id<"Location">;
+  actorType: "human" | "service" | "device" | "integration" | "automation" | "ai" | "support";
   actorPartyId?: Id<"Party">;
   actorUserId?: Id<"AuthUser">;
+  originalActorId?: string;
   action: string;
   targetType: string;
   targetId?: string;
-  organizationId?: Id<"Organization">;
-  locationId?: Id<"Location">;
+  sourceChannel: string;
   outcome: "success" | "denied" | "failure";
   reasonCode?: string;
   correlationId: string;
-  occurredAt: Instant;       // packages/foundation/core time semantics
-  metadata: Record<string, unknown>;
+  causationId?: string;
+  approvalId?: string;
+  delegationId?: Id<"Delegation">;
+  changeSummary?: Readonly<Record<string, unknown>>;
+  classification: "Internal" | "Confidential" | "Restricted";
+  retentionClass: string;
+  privacyCaseId?: string;
+  privacyTransformationVersion?: string;
+  occurredAt: Instant;
+  metadata: Readonly<Record<string, unknown>>;
 };
 ```
 
-`Id<TBrand>` is `packages/foundation/core/src/id.ts`'s existing branded-UUIDv7 type — reused as-is, not reinvented. `AuthorizationDecision`'s `allowed: false` branch never carries `matchedAssignments` or role names into an ordinary user-facing error; sensitive detail stays server-side (see §8's error bridge).
+Authentication may exist before a Party link is provisioned, matching `CurrentIdentity.partyId` nullability. Business commands that require a Party use a separate `requirePartyLink` guard. Active context is a server-verified reference, never authority merely because the client presents it. PR1 must choose a multi-tab-safe context design; a session-global organization mutation that silently changes another tab is prohibited by PDA-PLT-020.
 
-`AuthorizationDecision` and entitlement checks are evaluated **independently** — "a permission does not create an entitlement, and an entitlement does not grant an actor permission" (`AUTHORIZATION_AND_POLICY.md` rule 9). Example: a user with `inventory.transfer.create` whose tenant lacks the `inventory.transfers` entitlement gets "entitlement unavailable," not "permission denied" — and the reverse (entitled tenant, unpermitted user) gets the opposite message. These are visually and semantically distinct states per `COMPONENT_CATALOG_AND_STATE_MATRIX.md`.
+Permissions and entitlements remain independent. Policy outcomes are not flattened to a boolean. Audit metadata and change summaries pass classification/redaction rules before persistence.
 
-## 5. Contract surface (verified against the registries — do not invent ids not listed here)
+## 6. Canonical Contract Surface
 
-**14 endpoints currently registered** in `registry/endpoint-permissions.json` that WS1 must implement for real:
+The following registered operations are mandatory. PR1 completes their schemas; later PRs implement them.
 
-| Method | Path | Authorization |
-|---|---|---|
-| GET | `/v1/me` | `authenticated_session` |
-| POST | `/v1/session/active-context` | `authenticated_membership` |
-| GET | `/v1/organizations` | `platform.organization.read` |
-| GET | `/v1/entitlements` | `platform.entitlement.read` |
-| GET | `/v1/users` | `platform.user.read` |
-| POST | `/v1/users/invitations` | `platform.user.invite` |
-| POST | `/v1/users/{userId}/suspend` | `platform.user.suspend` |
-| GET | `/v1/roles` | `platform.role.read` |
-| POST | `/v1/role-assignments` | `platform.role.assign` |
-| GET | `/v1/audit-records` | `platform.audit.read` |
-| GET | `/v1/parties` | `party.record.read` |
-| POST | `/v1/parties/persons` | `party.record.create` |
-| POST | `/v1/parties/organizations` | `party.record.create` |
-| PATCH | `/v1/parties/{partyId}` | `party.record.update` |
+| Operation | Authority | Implementation PR |
+|---|---|---:|
+| `GET /v1/me` | authenticated session | PR3 |
+| `POST /v1/session/active-context` | authenticated membership | PR3 |
+| `GET /v1/organizations` | `platform.organization.read` | PR3 |
+| `GET /v1/users` | `platform.user.read` | PR3 |
+| `POST /v1/users/invitations` | `platform.user.invite` | PR3 |
+| `POST /v1/users/{userId}/suspend` | `platform.user.suspend` | PR3, after G5 |
+| `GET /v1/roles` | `platform.role.read` | PR5 |
+| `POST /v1/role-assignments` | `platform.role.assign` | PR5 |
+| `GET /v1/entitlements` | `platform.entitlement.read` | PR6 |
+| `GET /v1/audit-records` | `platform.audit.read` | PR7 |
+| `GET /v1/parties` | `party.record.read` | PR4 |
+| `POST /v1/parties/persons` | `party.record.create` | PR4 |
+| `POST /v1/parties/organizations` | `party.record.create` | PR4 |
+| `PATCH /v1/parties/{partyId}` | `party.record.update` | PR4 |
 
-**14 permission ids** in scope (`registry/permissions.json`): the 9 `platform.*`/`party.*` ids above plus `party.record.merge`, `party.identifier.read-restricted`, `platform.organization.update`. There is no dedicated `tenant.*`/`legal-entity.*`/`branch.*`/`location.*` permission id yet — only organization-level enforcement is registered, matching Prototype-1 scope.
+PR1 also disposes `party.record.merge`, `party.identifier.read-restricted`, and `platform.organization.update`: either add a governed operation/application command and tests, or explicitly defer the permission from WS1 without deleting the canonical permission.
 
-**Gap vs. a broader session/tenancy API surface (e.g. session revocation endpoints, `GET /organizations/{id}`, a `/locations` list, `GET /parties/{id}`, a `/parties/{id}/identity-links` sub-resource, a session-list/revoke set of endpoints):** none of these are currently registered in `openapi/first-slice-v1.yaml` or `registry/endpoint-permissions.json`. WS1.1/WS1.2 need to decide, before building them, whether to add these to the registries (regenerating via `scripts/generate_registries.py` and passing `validate_docs.py`) or to fold their behavior into the existing 14 endpoints (e.g. session list/revoke as fields on `/v1/me`'s response plus new dedicated endpoints registered explicitly). **Do not implement an endpoint that isn't in the registry** — that's exactly the "contract conformance: zero undeclared drift" rule in PDA-RDM-007 §6 DoD item 3.
+Session list/revoke, organization detail, location list, Party detail, and identity-link operations require canonical OpenAPI registration, authorization metadata, schemas, and tests before implementation. Better Auth-native endpoints do not become public Platform API contracts automatically.
 
-**Event registry:** `platform.tenant.created.v1`, `platform.tenant.suspended.v1`, `platform.organization.created.v1` already exist (`registry/events.json`, owner `TENANCY_AND_ORGANIZATIONS.md`). All ten `party.*` lifecycle events (person/organization/contact-point/address/relationship/duplicate/merge/identity-link/privacy-state) are fully registered already. **Genuinely missing and needed:** membership lifecycle events (`platform.membership.invited.v1`, `.activated.v1`, `.suspended.v1`, `.ended.v1`) and role-assignment-specific events (`platform.role-assignment.granted.v1`, `.revoked.v1` — the existing generic `platform.assignment.created.v1`, owned by `COLLABORATION_PRIMITIVES.md`, doesn't cover revocation or role-scoping). Register these in `TENANCY_AND_ORGANIZATIONS.md`'s Events section and regenerate before `platform/tenancy` emits them.
+## 7. Authorization, Entitlement, Audit, and Error Enforcement
 
-## 6. Error-taxonomy bridge and authorization/entitlement middleware
+- `requireAuthentication`, `requireActiveContext`, `requirePartyLink`, `requirePermission`, and `requireEntitlement` remain independently composable.
+- Current membership, role assignment, delegation, session, permission, policy, and entitlement state is re-evaluated for consequential operations.
+- Enforcement exists at procedure, application-command, and tenant-scoped repository boundaries; UI visibility is advisory.
+- Sensitive denial detail remains server-side. Client errors use the canonical OpenAPI error contract and safe message keys.
+- Successful and denied consequential actions use a published Audit contract. Other packages never write the Audit table directly.
+- Audit failure policy is declared per action class: high-risk actions fail closed unless a same-transaction durable audit/outbox record exists.
+- Audit access is itself permissioned and audited; append orientation is supplemented by tamper, retention, redaction, privacy-transformation, and export tests.
+- Entitlement changes use governed internal commands even when no public write endpoint exists; tests do not mutate entitlement tables directly.
 
-New `apps/server/composition/errors.ts`, `toORPCError(error: PlatformError): ORPCError`, mapping each of `packages/foundation/core`'s `PlatformErrorCode`s to an oRPC code/status (`validation`→400, `authentication`→401, `authorization`→403, `entitlement`→403 with a distinct custom code `ENTITLEMENT_REQUIRED` so clients can special-case "upgrade" UX vs. plain denial, `not-found`→404, `conflict`→409, `idempotency-replay`→409 with a distinct custom code, `rate-limited`→429, `provider-uncertain`→502 custom code, `internal`→500). `error.details` is never forwarded to the client — logged server-side only, extending the existing `onError` interceptor in `apps/server/src/index.ts`.
+## 8. Thin Experience Shell
 
-Two independently-composable oRPC middlewares in `apps/server/composition/middleware.ts`, both built on a shared `requireMembership` base that resolves and re-verifies the actor's active tenant membership on every request (the session's cached `activeTenantId` hint is never trusted standalone):
+The shell proves the platform boundary for a real user without pretending to be a complete administration product.
 
-```ts
-export const requirePermission = (permissionId: PermissionId) => /* ... */;
-export const requireEntitlement = (capabilityId: CapabilityId) => /* ... */;
-```
+- Login uses the owned Platform Identity boundary.
+- Tenant/organization context shows only authorized memberships and uses the multi-tab-safe design accepted in PR1.
+- `Home` and `Administration` expose only implemented routes: Users, Roles, Entitlements, Sessions, and Audit.
+- Party linkage is visible, including a safe onboarding state when no Party link exists.
+- Permission denial, entitlement unavailability, approval required, step-up required, and revoked-session states are semantically distinct.
+- Revocation produces a clear re-authentication path.
+- The shell covers loading, empty, error, stale, offline/degraded, responsive, keyboard, screen-reader, zoom, and reduced-motion behavior required by the governed UX/test sources.
+- Native implementation remains outside WS1; this does not waive API, mobile-session, or offline-authority seams assigned elsewhere.
 
-A procedure declares both independently where applicable — neither informs the other. Enforcement is layered, not single-point: procedure middleware, application-command boundary, repository tenant filter, and direct-API-call tests all independently reject an unauthorized action; the UI may additionally hide unavailable actions, but hiding is never the only enforcement (§7's exit gate makes this a hard requirement, not an aspiration).
+## 9. Pull Request Sequence
 
-## 7. Thin application shell (Prototype-1 depth, not full UX)
+Each pull request uses one issue, branch, worktree, owner, migration/API/security disposition, and handoff record under PDA-ENGR-014. Each is green before its dependent begins.
 
-Current state (confirmed by prior exploration): no `middleware.ts`, no dashboard layout/sidebar, native app has zero auth code. WS1's shell proves the backend works for a real user — it is not a polished ERP UI. Minimum scope:
+1. **PR1 — Governance, canonical contracts, and architecture enforcement.** Close TD-007; complete WS1 OpenAPI/error/session contracts; map every endpoint and permission; expand shared types; record identity lifecycle; resolve Better Auth composition; add event schemas; update the persistence ADR/spec; implement path-aware architecture tests. No business schema migration.
+2. **PR2 — Persistence adapters, serial migration runner, and minimum outbox.** Implement the G3 boundary, process pool/composition lifecycle, module-owned migration streams, deterministic serial migration orchestration, minimum `platform/events` outbox, technology evidence, and clean/upgrade/recovery tests.
+3. **PR3 — Authentication, tenancy, active context, and user administration.** Implement Better Auth ACL, selected 2FA/passkey seam, tenancy schema, memberships, active context, the six Identity/Tenancy operations in §6, invitation/suspension state machine, two-tenant tests, and events/audit.
+4. **PR4 — Party and identity linkage.** Implement Party prototype schema, `PlatformIdentityLink`, four Party endpoints, onboarding/reconciliation, privacy/classification defaults, events, and tests.
+5. **PR5 — Authorization.** Implement scoped policy outcomes, roles/assignments, delegation seam, permission middleware, direct-call denial tests, and current-authority invalidation.
+6. **PR6 — Entitlements.** Implement grants, states, sources, dates, limits/dependencies needed by the slice, read API, internal change command, entitlement middleware, change events/audit, and permission/entitlement independence tests. No billing implementation.
+7. **PR7 — Audit and session revocation.** Implement the Audit contract/storage boundary, query API, redaction/tamper/retention/privacy tests, session list/revoke contract selected in PR1, audit-of-audit-access, and measured revocation propagation.
+8. **PR8 — Thin experience shell.** Implement §8 with canonical states, responsive/accessibility evidence, authorized context switching, and real API enforcement.
+9. **PR9 — WS1 evidence closeout.** Run the complete §11 matrix, Bun/Node critical suites, OpenAPI parity, migration/outbox recovery, performance and accessibility checks; link evidence; update risks, technology lessons, registry evidence, and PDA-RDM-007 without overstating lifecycle.
 
-- Login (already exists) → tenant-context resolution via `POST /v1/session/active-context`.
-- Application shell with a visible tenant/organization switcher (functionally changes context, not just a UI toggle).
-- Primary navigation: `Home`, `Administration` (with `Users`, `Roles`, `Entitlements`, `Sessions`, `Audit` underneath) — start small; do not expose empty future workspaces merely because they appear in the capability registry.
-- Party identity summary on the user's profile.
-- Distinct, non-conflatable "Permission denied" vs. "Entitlement unavailable" states per `COMPONENT_CATALOG_AND_STATE_MATRIX.md`.
-- Session revocation produces a clear, non-alarming re-authentication path, not a silent failure.
-- Responsive (narrow mobile through wide desktop), basic keyboard/screen-reader navigation, ≤2 persistent navigation levels, predictable URLs and back behavior, per `FIRST_SLICE_UX_AND_ACCESSIBILITY.md` and `NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`.
-- Native app stays out of WS1 scope (zero auth code today; native auth remains behind RR-001).
+## 10. Canonical Synthetic Fixtures and Scenarios
 
-**Component sourcing:** official shadcn primitives (Button, Input, Form, Dialog, Dropdown, Tabs, Alert, Table, Pagination, Sheet, Skeleton, empty-state) per `COMPONENT_ACQUISITION_POLICY.md`'s source priority. At most one Shadcn Studio application-shell candidate as layout inspiration only — decomposed and normalized per `COMPONENT_NORMALIZATION_STANDARD.md` (replace primitives with `@meridian/ui-web`, strip example nav/branding, wire real tenant context and permission behavior) — never imported as a whole block.
-
-## 8. PR sequence
-
-Each PR gate-green before the next starts, per `WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md` (one issue, one branch, one worktree, one PR).
-
-1. **PR1 — Contract-first API boundary, close TD-007** (§2). `feat(ws1): establish contract-first platform API boundary`. Includes: new contracts package, generated-client update, `applications`/`domains` architecture-rules fix, removed server type import, `exceptions[]` entry deleted, `foundation/database` shared-pool package (and `platform/identity`'s refactor to use it), missing membership/role-assignment event registrations.
-2. **PR2 — Tenancy and active context.** `feat(ws1): add tenant organization and active-context foundation`. `platform/tenancy` schema + migration stream, `resolveActiveMembership`/`listEffectivePermissionIds`, `ActiveContext` resolution, `GET /v1/me` + `POST /v1/session/active-context` + `GET /v1/organizations`, two-tenant-isolation fixtures and tests.
-3. **PR3 — Party and identity linkage.** `feat(ws1): add Party identity linkage boundary`. `domains/party` schema, `PlatformIdentityLink`, the four party endpoints, provisioning flow, events.
-4. **PR4 — Authorization.** `feat(ws1): enforce scoped role-based authorization`. `platform/authorization`, `GET /v1/roles` + `POST /v1/role-assignments`, the `requirePermission` middleware, direct-API-call denial tests, tenant/organization scoping.
-5. **PR5 — Entitlements.** `feat(ws1): add capability entitlement evaluation`. `platform/entitlements`, `GET /v1/entitlements`, the `requireEntitlement` middleware, authorization/entitlement-separation tests (§4), prototype seed grants — no billing implementation.
-6. **PR6 — Audit and session revocation.** `feat(ws1): add audit records and session revocation`. `platform/audit`, `GET /v1/audit-records`, session list/revoke on `platform/identity`, deny-outcome auto-recording wired into PR4/PR5's middleware, revocation-propagation measurement against the ≤60s p95 budget (`FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md` line 159).
-7. **PR7 — Thin experience shell.** `feat(ws1): deliver identity and tenant context experience shell` (§7).
-8. **PR8 — WS1 verification closeout.** `test(ws1): complete prototype one isolation and fallback evidence`. Two-tenant acceptance scenario, Bun + Node fallback critical suites, contract-conformance diff, accessibility checks, performance evidence, Architecture Risk Register + `FIRST_SLICE_IMPLEMENTATION_PLAN.md` status updates, `TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` entry.
-
-## 9. Seed data and required test scenarios
-
-Two synthetic tenants, matching the existing `"Demerara Retail Test Group"`-style fixture pattern:
+Use the fixture defined by PDA-TST-013 rather than replacing it.
 
 ```text
-Tenant A: Georgetown Retail Demo
-  Organization: Georgetown Retail Ltd.
-  Locations: Main Street Store, Warehouse
-  Users: Owner A, Administrator A, Cashier A, Inventory Clerk A
+Tenant A: Demerara Retail Test Group
+  Legal entity: Demerara Retail Test Inc.
+  Locations: Georgetown Main Store, East Bank Store, Offline Test Store, Central Stock Location
+  Users/roles: Tenant Administrator, Privacy Administrator, Store Manager, Cashier,
+               Store Associate, Inventory Clerk, Finance Reviewer, Support Operator
 
-Tenant B: Essequibo Retail Demo
-  Organization: Essequibo Retail Ltd.
-  Location: Anna Regina Store
-  Users: Owner B
+Tenant B: Essequibo Isolation Test Tenant
+  Organization: Essequibo Isolation Test Inc.
+  Location: Anna Regina Test Store
+  Users: Tenant B Administrator
 ```
 
-Required tenant-isolation tests (the `tenant_isolation` dimension, required at full depth for `platform.identity`/`tenancy`/`organizations`/`authorization`/`entitlements`/`audit` and at prototype depth for `party.records` — all 13 dimensions listed as required in `registry/first-slice-tests.json`, a large surface to plan for explicitly rather than discover at M1):
+Required WS1 scenarios include:
 
-- A user from Tenant A cannot resolve a Tenant B context; client-supplied tenant-id manipulation is rejected server-side.
-- Organization selection must belong to the active tenant; location selection must belong to the organization.
-- A disabled/suspended membership blocks context selection.
-- Active-context change is audited.
-- Context survives a valid session refresh but not session revocation.
-- Cashier A cannot enter Administration; Administrator A cannot access Tenant B; Owner A can switch locations only within Tenant A.
-- A revoked Cashier A session loses access within the ≤60s p95 budget.
-- Removing an entitlement hides a capability without rewriting permissions; removing a role denies the action even while the tenant remains entitled (proves §4's independence rule empirically, not just by code review).
+- same-tenant happy path plus cross-tenant read/write/list/count/identifier-substitution denial;
+- server derivation of tenant scope from an authenticated membership, never a trusted body/header tenant ID;
+- organization/location membership validation and tenant-preserving identifiers;
+- disabled membership, suspended authentication account, revoked session, expired delegation, and inactive assignment as distinct states;
+- invitation retries and partial failures without duplicate user, Party, membership, link, audit, or event effects;
+- tenant-scoped suspension that does not disable unrelated tenant memberships;
+- active context surviving valid refresh but not revocation, with multi-tab behavior proven;
+- current role, membership, delegation, policy, and entitlement changes affecting access without re-login;
+- permission and entitlement independence;
+- audit redaction, tamper resistance, retention, privacy transformation, tenant isolation, and audit-of-access;
+- outbox atomicity, duplicate delivery, replay, recovery, and privacy-safe payloads;
+- 2FA or passkey seam, recovery/abuse denial, and Bun/Node compatibility;
+- thin-shell keyboard, screen-reader, zoom, responsive, loading, empty, error, denial, and re-authentication states.
 
-This test suite needs the Postgres host-port decision (§3) resolved first, since it needs direct host-side seeding/teardown between runs unless run inside the compose network.
+An authorized cross-tenant identity fixture may be added only after the shared-identity decision in PDA-PLT-002 is resolved. Until then, organization switching is demonstrated within Tenant A and cross-tenant selection is denied.
 
-## 10. WS1 exit gate
+## 11. Evidence Matrix and Exit Gate
 
-Do not close WS1 (M1) until every item below is demonstrated with evidence, not asserted:
+PR9 attaches executable evidence for every `required` cell in `registry/first-slice-tests.json` for the capabilities in §1.2:
 
-- Two-tenant isolation (§9) proven, including denial at the API layer directly, not just hidden in the UI.
-- Better Auth remains behind `platform/identity`'s ACL; no domain package touches its tables.
-- Auth user and Party are separate; a Party can exist without a login, and a login can be disabled without deleting Party history.
-- Active context is server-resolved and re-verified per request, never trusted from a client-supplied value.
-- Permissions are enforced server-side independent of UI visibility.
-- Entitlements are evaluated independently of permissions (§4, §9's last bullet).
-- Role and membership changes affect active access without requiring re-login.
-- Session revocation reaches enforcement within the ≤60s p95 budget, measured.
-- Audit records exist for every consequential identity/access change (login, logout, revocation, context change, invitation, membership grant/removal, role assignment/removal, entitlement change, identity-link change, sensitive-action denial).
-- The thin shell (§7) is real, responsive, and accessible — not stubbed.
-- "Permission denied" and "Entitlement unavailable" are visibly and semantically distinct states.
-- Bun and Node fallback critical suites both pass (ADR-0020).
-- TD-007 is closed (§2) — verified gone from `registry/architecture-rules.json`'s `exceptions[]`, not just declared closed in prose.
-- All docs, contracts, registries, migrations, tests, and CI gates are green.
+1. happy path;
+2. validation and denial;
+3. tenant isolation;
+4. permission and entitlement;
+5. idempotency and duplicate handling;
+6. concurrency and conflict;
+7. events, jobs, and projections;
+8. audit and observability;
+9. privacy and classification;
+10. offline and degraded behavior;
+11. accessibility and responsive behavior;
+12. performance and capacity;
+13. recovery, replay, and reconciliation.
 
-This satisfies `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) §5 WS1's Exit criteria and §6 Definition of Done in full; that document remains authoritative on scope and change control.
+WS1 closes only when:
+
+- G1–G7 are closed or governed exceptions remain valid and do not contradict the prototype exit;
+- all operations in §6 have complete canonical contracts and assigned implementation/evidence;
+- all in-scope permissions are implemented or explicitly deferred;
+- Better Auth remains behind Platform Identity and domain code cannot import its persistence;
+- auth accounts, Parties, memberships, domain roles, and identity links retain separate ownership and lifecycle;
+- current tenant, organization, Party, permission, policy, entitlement, delegation, and session authority is enforced server-side;
+- session and membership revocation meet the ≤60-second p95 budget with sensitive operations revalidated immediately where policy requires;
+- every consequential identity/access action has privacy-safe, tamper-resistant audit evidence;
+- the minimum outbox prevents lost or phantom events and passes replay/recovery tests;
+- the shell is real, accessible, responsive, and semantically distinguishes governed states;
+- Bun and the approved Node LTS run the declared critical contract, authorization, tenancy, migration, outbox, and identity suites;
+- evidence paths, exact versions, unresolved risks, rollback time, and lifecycle claims are recorded;
+- documentation, generated contracts, registries, migrations, tests, and all repository gates are green.
+
+Only after those criteria are met may PDA-RDM-007 record WS1 as complete. Pilot and production readiness remain blocked by their separately named founder, customer, jurisdiction, security, accessibility, provider, and operational gates.

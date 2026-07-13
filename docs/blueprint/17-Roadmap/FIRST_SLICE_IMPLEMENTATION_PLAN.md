@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -115,10 +115,10 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 ### WS1 — Identity, Tenancy, Party, Authorization (P1)
 
 - **Why:** Every subsequent behavior is meaningless without enforceable tenant scope and separated authentication/Party/permission/entitlement concepts — retrofitting isolation is the most expensive failure in multi-tenant systems, and the audits' hardest rules (Better Auth owns sessions only; Party owns identity; domains own roles) must be encoded before any domain exists to violate them.
-- **Detailed plan:** `WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md` (PDA-RDM-008) — package boundaries, contract surface, PR sequence (PR1–PR8), seed data, and exit gate. This entry stays the authoritative summary; PDA-RDM-008 does not override it.
+- **Detailed plan:** `WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md` (PDA-RDM-008) — governance gates, package boundaries, canonical contract surface, PR sequence (PR1–PR9), fixtures, evidence matrix, and exit gate. This entry stays the authoritative summary; PDA-RDM-008 does not override it.
 - **Entry:** WS0 done. **First PR closes TD-007** (contract-first oRPC boundary for `platform-clients/api-client`, per its recorded exception's own expiry condition) before any domain package is built against the router-coupled client shape.
 - **Proves:** PDA-RDM-004 §Prototype 1.
-- **Packages:** NEW `platform/tenancy`, `platform/identity` (Better Auth behind an anti-corruption layer), `platform/authorization`, `platform/entitlements`, `platform/audit`; NEW `domains/party` (ADR-0007).
+- **Packages:** NEW `platform/tenancy`, `platform/authorization`, `platform/entitlements`, `platform/audit`, and the minimum `platform/events` transactional outbox; EXTEND the existing `platform/identity` Better Auth anti-corruption layer; NEW `domains/party` (ADR-0007). Concrete persistence-adapter packaging remains gated by PDA-RDM-008 §3 G3.
 - **Contracts:** identity/tenancy/user-admin operation group (`/me`, `/session/active-context`, `/organizations`, `/users*`, `/roles`, `/role-assignments`, `/entitlements`, `/parties*`, `/audit-records` — per `registry/endpoint-permissions.json`); `platform.*` and `party.*` event families.
 - **Tests:** dominant dimensions `tenant_isolation`, `permission_and_entitlement`, `audit_and_observability` for the in-scope `platform.*`/`party.records` capabilities; budgets: session/permission checks inside the 750ms p95 sale path allowance; credential revocation ≤60s p95; two-tenant isolation proof (acceptance scenario 1).
 - **Exit:** scenario 1 demonstrated; Better Auth tables invisible to domain code (architecture test); **the thin experience shell required by §1.1 is real and demonstrated, not stubbed** — specifically:
@@ -139,7 +139,7 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Why:** Inventory is the first append-only business ledger — it proves the platform's correction-by-reversal doctrine, outbox eventing, and domain data ownership on the least regulated ledger before money is at stake.
 - **Entry:** WS1 done.
 - **Proves:** PDA-RDM-004 §Prototype 2.
-- **Packages:** NEW `domains/catalog`, `domains/inventory` (own schemas/migrations), `platform/events` (transactional outbox + publication), `platform/numbering` (sequence service consumed later by receipts).
+- **Packages:** NEW `domains/catalog`, `domains/inventory` (own schemas/migrations), EXTEND the minimum `platform/events` transactional outbox introduced by WS1 into publication/consumer infrastructure, NEW `platform/numbering` (sequence service consumed later by receipts).
 - **Contracts:** `/products*`, `/product-imports*`, `/opening-stock-imports`, `/stock-balances`, `/inventory-adjustments*`, `/stock-counts*`, `/stock-transfers*`; `catalog.*` + `inventory.*` events (registered in `registry/events.json`).
 - **Tests:** dominant dimensions `idempotency_and_duplicate`, `concurrency_and_conflict`, `events_jobs_and_projections`; budgets: inventory ledger 99.95% correctness; barcode lookup 300ms p95; search 800ms p95; outbox 99.99% eventual publication.
 - **Exit:** scenarios 2 and 8 demonstrated; ledger corrections only by reversal; DoD §6.

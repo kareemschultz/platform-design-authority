@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-019
 title: Enterprise Table and Data Grid Standard
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -162,8 +162,10 @@ Requirements:
 - Total count when reliably and cheaply available; if computing an exact total is expensive or unstable, say so rather than presenting a false-precision number
 - First, previous, next, and last controls where the list is long enough to benefit
 - Configurable page size within governed bounds
-- Filter, sort, and page number preserved in the URL
+- Filter and sort preserved in the URL always
 - Returning from a record detail restores the same page, filter, and sort the user came from
+
+**API-contract constraint (first-slice):** `PDA-ARC-014` (`docs/blueprint/02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md`) mandates cursor pagination for every first-slice list endpoint, and `openapi/first-slice-v1.yaml` defines only `cursor`/`limit` query parameters — there is no `page`/`offset` parameter to request an arbitrary page directly. A numbered-page *presentation* over a cursor-only API is still permitted, but it can only be built as a client-maintained sequential walk: the client caches the cursor reached at each page number as the user pages forward, and a URL can preserve "the page number the user was last on" as a display label plus the cursor needed to reach it, not as a parameter the server can resolve from a cold reload or a shared link to an arbitrary page in one request. Do not promise direct URL-addressable jump-to-page-N for a first-slice list until the API contract adds an offset/page lookup or a documented cursor-to-page mapping; until then, "page number in the URL" means the cached cursor for that position, and a cold load of that URL walks from the nearest known cursor rather than performing a single random-access fetch.
 
 ### Cursor pagination
 

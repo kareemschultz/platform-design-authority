@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-034
 title: Component Discovery Audit
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -138,7 +138,7 @@ Custom Required means compose owned behavior from accepted primitives; it does n
 | Marketing motion can leak into operations | Cognitive load, motion harm, latency | Enforce ANIMATION_AND_MOTION_GUIDE.md |
 | Copied source shifts maintenance to Meridian | Upgrade and regression burden | Record provenance, owner, tests, and recheck trigger |
 | Codex's MCP configuration named the Studio credential `LICENSE_KEY`, which `shadcn-studio-mcp@1.0.7` does not recognize (only `API_KEY`/`EMAIL`) — the founder has since reported correcting this locally to `API_KEY`, not yet independently verified | Historical: Codex-side Studio calls ran in freemium mode despite a valid license being configured. Current: the correction is unverified until Codex restarts and a controlled with/without-credential comparison is run against it | Treat Codex Studio results as unauthenticated until both the restart and a passing controlled comparison are observed; do not migrate or print the credential value without an explicit request |
-| The Claude Code desktop application's running host process was found (2026-07-13) to carry a stale, pre-migration MCP configuration snapshot baked into its own process command line, predating both the `shadcn` connector addition and the credential/version-pinning fixes — **this persisted even after the user performed a full quit-and-relaunch of the desktop application** | The official `shadcn` MCP connector remains unreachable in-session; both open `claude.exe` host processes (including this session's own) still exposed the credential in their command line after the relaunch | The Studio credential was moved out of `~/.claude.json` entirely into Windows user-level environment variables (`setx`), leaving the config file's `env` object empty so no future snapshot can serialize a value that isn't there. This mitigation is unverified end-to-end pending inheritance by a freshly-spawned (not resumed) process tree; see TECH-LESSON-031 |
+| The Claude Code desktop application's running host process was found (2026-07-13) to carry a stale, pre-migration MCP configuration snapshot baked into its own process command line, predating both the `shadcn` connector addition and the credential/version-pinning fixes — this persisted even after a believed quit-and-relaunch, because the underlying OS processes had not actually been terminated | **Resolved as of the confirmed process-tree termination**: independently re-verified at 0 `claude.exe` processes and 0 process command lines containing the credential, with authenticated Studio metadata confirmed still working from the fresh process tree. See TECH-LESSON-031 for the full before/after evidence | The Studio credential was moved out of `~/.claude.json` entirely into Windows user-level environment variables (`setx`), and the stale process tree was subsequently terminated and confirmed clean. The remaining open item is **not exposure** but long-term secret scoping: a user-wide `API_KEY` variable is broader than the Studio MCP needs and should be replaced with a Studio-specific launcher backed by an OS credential store; see TECH-LESSON-031 |
 
 ## Recommended next prototypes
 

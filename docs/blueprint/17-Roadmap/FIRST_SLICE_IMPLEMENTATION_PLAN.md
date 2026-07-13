@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -39,21 +39,21 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 
 ## 2. Baseline: Verified Code Reality (2026-07-13)
 
-**Exists and is green:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); working Better Auth email/password with Drizzle on PostgreSQL 18 (4 auth tables, 1 migration); Hono + oRPC server with health probe and one protected procedure; Next.js web app with login and a dashboard stub; Expo native health shell with authentication explicitly deferred behind RR-001; Fumadocs portal; contract artifacts (`openapi/first-slice-v1.yaml` 82 operations, `registry/endpoint-permissions.json` 82 rows, `registry/permissions.json` 94 permissions, `registry/events.json` 197 events, `registry/first-slice-tests.json` 103×13 dimensions); five green gates (`check-types` 13/13, `test`, ultracite, `validate_docs.py`, registry `--check`) and CI with a live Docker/migration/health gate.
+**Exists on the WS1 PR2 implementation branch:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); Better Auth email/password behind the runtime-neutral Platform Identity factory; owner-specific Identity and Event Backbone PostgreSQL adapters; four Identity tables plus the minimum `platform_event_outbox`; deterministic serial migration orchestration; Hono + oRPC server with health probe and one protected procedure; Next.js web app with login and a dashboard stub; Expo native health shell with authentication explicitly deferred behind RR-001; Fumadocs portal; and the canonical contract/registry artifacts. Green-gate and live PostgreSQL evidence must be attached to PR2 before this branch state is treated as merged baseline.
 
 **WS0 package restructuring is complete as of 2026-07-13** (verified: fresh `bun install`, `check-types` 12/12, `test` 126/126, `check`, and `build` all green across the whole workspace). The workspace now matches `registry/architecture-rules.json`'s families:
 
 | Old package | New location | Family |
 |---|---|---|
-| `@meridian/db` + `@meridian/auth` | `packages/platform/identity` (`@meridian/platform-identity`) | `platform` — Better Auth, the Drizzle connection, and the auth schema are internal details behind an anti-corruption layer; only `auth` and `closeDb` are exported |
+| `@meridian/db` + `@meridian/auth` | `packages/platform/identity` plus `packages/persistence/platform-identity-postgres` | `platform` + `persistence` — Platform Identity exports its factory/port; the owner-specific package holds Better Auth's Drizzle schema and migration; the server composition root owns the only pool |
 | `@meridian/api` | Dissolved: router/context/procedures moved into `apps/server`; typed client surface moved to `packages/platform-clients/api-client` (`@meridian/platform-clients-api-client`) | `applications` (router) + `platform-clients` (client type) |
 | `@meridian/ui` | `packages/ui-web/core` (`@meridian/ui-web`) | `ui-web` |
 | `@meridian/env` | `packages/tooling/env` (`@meridian/tooling-env`) | `tooling` |
 | `@meridian/config` | `packages/tooling/config` (`@meridian/tooling-config`) | `tooling` |
 
-One tracked, expiring exception was recorded rather than silently introduced: `packages/platform-clients/api-client` currently re-exports its `AppRouterClient` type directly from `apps/server/src/router.ts` (type-only, erased at build time) because no contract-first oRPC definition independent of the server's concrete implementation exists yet. See `registry/architecture-rules.json`'s `exceptions[]` entry `platform-clients-api-client-server-type-import` for the full rationale and its expiry condition (closes when WS1 lands a contract-first oRPC setup; must close before WS2 begins per DoD item 4).
+The contract-first oRPC/client exception closed in WS1 PR1. The temporary embedded Identity persistence exception closes in PR2 through ADR-0027's owner-specific adapter and composition-owned pool. No exception may be silently recreated for later WS1 owners.
 
-**Does not exist:** any domain code. No tenancy, Party, authorization, entitlements, catalog, inventory, POS, stored value, offline sync, payments, or recovery tooling. This section is the honesty anchor: WS0's package alignment is built; everything else below is planned, not built.
+**Does not yet exist:** tenancy, Party, authorization, entitlements, catalog, inventory, POS, stored value, offline sync, payments, or recovery tooling. The Event Backbone currently stops at the minimum transactional outbox; delivery workers and consumers remain later work. This section is the honesty anchor: PR2 persistence is bounded infrastructure, not completion of WS1.
 
 ## 3. Package Architecture Target
 

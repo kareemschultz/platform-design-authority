@@ -507,6 +507,43 @@ def validate_architecture_rules() -> list[str]:
                 "registry/architecture-rules.json: database-outside-persistence exceptions must exactly match "
                 "requirements.composition_roots"
             )
+
+    persistence_owners = data.get("persistence_owners", [])
+    if requirements.get("persistence_requires_owner") and not persistence_owners:
+        errors.append("registry/architecture-rules.json: persistence owner registry is required")
+    owner_ids = [str(item.get("id", "")) for item in persistence_owners]
+    owner_packages = [str(item.get("package", "")) for item in persistence_owners]
+    owner_package_names = [
+        str(item.get("package_name", "")) for item in persistence_owners
+    ]
+    for label, values in (
+        ("persistence owner id", owner_ids),
+        ("persistence package", owner_packages),
+        ("persistence package name", owner_package_names),
+    ):
+        if any(not value for value in values) or len(values) != len(set(values)):
+            errors.append(f"registry/architecture-rules.json: invalid or duplicate {label}")
+
+    table_owners: dict[str, str] = {}
+    for item in persistence_owners:
+        package = str(item.get("package", ""))
+        migration_directory = str(item.get("migration_directory", ""))
+        if not package.startswith("packages/persistence/"):
+            errors.append(
+                f"registry/architecture-rules.json: persistence package must use packages/persistence/*: {package}"
+            )
+        if not migration_directory.startswith(f"{package}/"):
+            errors.append(
+                f"registry/architecture-rules.json: migration directory must be inside {package}"
+            )
+        for table in item.get("tables", []):
+            table_name = str(table)
+            previous = table_owners.get(table_name)
+            if previous is not None:
+                errors.append(
+                    f"registry/architecture-rules.json: table {table_name!r} has multiple owners: {previous}, {item.get('owner')}"
+                )
+            table_owners[table_name] = str(item.get("owner", ""))
     return errors
 
 

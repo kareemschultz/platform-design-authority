@@ -31,7 +31,7 @@ Do not add paths, queries, fragments, or trailing slashes to trusted origins.
 
 ```bash
 bun run docker:up
-docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
+docker compose exec server bun run db:migrate
 bun run docker:logs
 ```
 
@@ -70,7 +70,7 @@ These commands are prototype notes, not production backup or disaster-recovery e
 ```bash
 docker compose down -v --remove-orphans
 bun run docker:up
-docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
+docker compose exec server bun run db:migrate
 ```
 
 This permanently removes the local Compose volume. Confirm that the environment contains only disposable synthetic data before running it.

@@ -12,9 +12,9 @@ This guide applies to the local PostgreSQL 18.4 scaffold. It does not authorize 
 | Command | Appropriate use |
 |---|---|
 | `bun run db:generate` | Generate migration artifacts from reviewed Drizzle schema changes |
-| `bun run db:migrate` | Apply committed migrations in order |
-| `bun run db:push` | Not supported against the baseline database because extension-owned views are outside the Drizzle schema |
-| `bun run db:studio` | Inspect synthetic local data; never bypass application ownership rules |
+| `bun run db:migrate` | Apply every owner stream through the deterministic serial composition runner |
+| `bun run db:test` | Run clean, upgrade, repeat, failure-recovery, and atomicity evidence against a disposable database |
+| `db:push` / `db:studio` | Not exposed by the governed baseline workflow |
 
 Use committed migrations for the bundled baseline. Do not use `db:push` to reconcile a database containing `pg_stat_statements`; schema introspection may attempt to alter extension-owned objects.
 
@@ -31,7 +31,7 @@ Better Auth schema belongs to the authentication/session boundary. It must not a
 
 ## Generate a migration
 
-Update owned schema source under `packages/platform/identity/src/schema`, then run:
+Update the schema in its registered owner-specific package, such as `packages/persistence/platform-identity-postgres/src/schema` or `packages/persistence/platform-events-postgres/src/schema`, then run:
 
 ```bash
 bun run db:generate
@@ -55,6 +55,7 @@ Test both an empty database and a representative synthetic upgrade path:
 
 ```bash
 bun run db:migrate
+bun run db:test
 bun run test
 bun run check-types
 ```
@@ -63,7 +64,7 @@ The host command requires a host-reachable disposable PostgreSQL database. For t
 
 ```bash
 bun run docker:up
-docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
+docker compose exec server bun run db:migrate
 ```
 
 Verify application startup, authentication, health, duplicate execution behavior, and expected constraints. Material migrations also require measured duration, lock behavior, failure injection, restart behavior, and recovery evidence.
@@ -86,7 +87,7 @@ For a disposable synthetic environment only:
 ```bash
 docker compose down -v --remove-orphans
 bun run docker:up
-docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
+docker compose exec server bun run db:migrate
 ```
 
 This deletes the local volume. Never use it against retained or customer data.

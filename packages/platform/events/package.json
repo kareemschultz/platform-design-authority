@@ -1,22 +1,21 @@
 {
-  "name": "@meridian/platform-identity",
+  "name": "@meridian/platform-events",
+  "version": "0.0.0",
+  "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "default": "./src/index.ts"
-    }
+    ".": "./src/index.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
     "test": "bun test src/*.test.ts"
   },
   "dependencies": {
-    "@better-auth/passkey": "catalog:",
-    "better-auth": "catalog:",
-    "zod": "catalog:"
+    "@meridian/contracts-events": "workspace:*"
   },
   "devDependencies": {
     "@meridian/tooling-config": "workspace:*",
+    "@types/bun": "catalog:",
     "typescript": "^6"
   }
 }

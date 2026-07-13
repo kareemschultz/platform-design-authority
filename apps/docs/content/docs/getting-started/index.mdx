@@ -40,10 +40,10 @@ The values above are example markers, not usable secrets. Start the stack and in
 
 ```bash
 bun run docker:up
-docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
+docker compose exec server bun run db:migrate
 ```
 
-The server container can reach the private Compose database and applies the committed authentication migration. Do not use Drizzle `push` against the baseline database: extension-owned `pg_stat_statements` views are outside the application schema.
+The server container can reach the private Compose database and applies the committed owner-specific streams serially (`platform.identity`, then `platform.events`). Do not use Drizzle `push` against the baseline database: extension-owned `pg_stat_statements` views are outside the application schema.
 
 The local surfaces are:
 

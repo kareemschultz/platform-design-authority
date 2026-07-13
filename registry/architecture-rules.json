@@ -249,28 +249,25 @@
       "domains"
     ]
   },
-  "exceptions": [
+  "persistence_owners": [
     {
-      "id": "platform-identity-persistence-relocation",
-      "package": "packages/platform/identity",
-      "violates": "ADR-0027 owner-specific persistence and composition-root connection lifecycle",
-      "description": "The pre-WS1 scaffold keeps Better Auth's Drizzle schema, migration, pool, and environment access inside platform/identity. PR1 makes the architecture rule executable without pretending this known debt is already removed; WS1 PR2 relocates these artifacts into owner-specific Persistence and composition packages before adding another schema owner.",
-      "rules": [
-        "database-outside-persistence",
-        "connection-lifecycle-outside-composition",
-        "migration-outside-persistence"
-      ],
-      "paths": [
-        "packages/platform/identity/**"
-      ],
-      "recorded": "2026-07-13",
-      "expires_when": "WS1 PR2 merges the ADR-0027 owner-specific Platform Identity Persistence adapter and composition-owned pool",
-      "recheck_trigger": "Every WS1 PR; this exception blocks PR2 merge and any new schema-owning package",
-      "owner": "Platform Identity",
-      "risk": "A runtime-neutral Platform package still owns concrete database and process-resource lifecycle concerns until PR2.",
-      "compensating_control": "Path-aware CI limits the exception to the named package and rules; no new schema owner may use it.",
-      "removal_plan": "Move schema/migrations to packages/persistence/platform-identity-postgres and pool lifecycle to apps/server/composition in WS1 PR2.",
-      "approval": "PDA-RDM-008 §3 G3 and ADR-0027 (Proposed controlled-prototype guidance; specialist review pending)"
+      "id": "platform-identity-postgres",
+      "package": "packages/persistence/platform-identity-postgres",
+      "package_name": "@meridian/persistence-platform-identity-postgres",
+      "owner": "platform.identity",
+      "owner_package": "@meridian/platform-identity",
+      "tables": ["account", "session", "user", "verification"],
+      "migration_directory": "packages/persistence/platform-identity-postgres/src/migrations"
+    },
+    {
+      "id": "platform-events-postgres",
+      "package": "packages/persistence/platform-events-postgres",
+      "package_name": "@meridian/persistence-platform-events-postgres",
+      "owner": "platform.events",
+      "owner_package": "@meridian/platform-events",
+      "tables": ["platform_event_outbox"],
+      "migration_directory": "packages/persistence/platform-events-postgres/src/migrations"
     }
-  ]
+  ],
+  "exceptions": []
 }

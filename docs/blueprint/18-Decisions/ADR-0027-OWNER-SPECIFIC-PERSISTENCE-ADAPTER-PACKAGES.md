@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.2.3
+version: 0.2.4
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
@@ -44,7 +44,7 @@ Adopt option C for WS1 and retrofit `platform/identity`.
 2. **Concrete adapters use owner-specific persistence packages.** Packages live under `packages/persistence/*`, with one package per owner and backend, for example `platform-identity-postgres`, `platform-tenancy-postgres`, `platform-events-postgres`, and `domain-party-postgres`. They may import only the owning module's published ports and schemas plus approved persistence dependencies. They may not import another owner's repository, migrations, or private tables.
 3. **Ownership is logical, not inferred from the folder family.** The authoritative module remains accountable for its tables, schema policy, migration stream, compatibility, and rollback even though concrete artifacts live in its owner-specific persistence package. Ownership metadata and architecture tests map every adapter, table, and migration to exactly one module.
 4. **One pool is created at the composition root.** `apps/server/composition/**` reads validated configuration, creates the process `pg.Pool`, constructs approved persistence adapters over it, injects them through published ports, and owns graceful shutdown. No persistence package reads `process.env` or `@meridian/tooling-env`, creates a pool, or locates a global connection.
-5. **Application services own transaction boundaries.** A command or workflow defines the unit of work. The composition root only binds an injected transaction coordinator; it does not contain business orchestration. A transaction handle is adapter-internal and never appears in a domain, application, OpenAPI, event, or authorization contract.
+5. **Application services own transaction boundaries.** A command or workflow defines the unit of work. The composition root only binds an injected transaction coordinator; it does not contain business orchestration. The binding function may receive a concrete `PoolClient` and construct a scope containing only the selected owner ports plus the outbox-append port; the application callback never receives that client. A transaction handle is adapter/composition-internal and never appears in a domain, application, OpenAPI, event, or authorization contract.
 6. **Atomicity is narrow.** An authoritative module may atomically commit its own state and an outbox record through the published outbox port. It may not use the shared handle to mutate another module's business tables. Cross-domain completion uses orchestration, idempotency, events, and compensation per PDA-ARC-005.
 7. **Migrations are deterministic and serial.** A composition-owned runner invokes owner-specific migration streams in a fixed dependency-respecting order. A bare unfiltered `turbo run db:migrate` is insufficient.
 
@@ -118,6 +118,7 @@ The `database-outside-persistence` forbidden pattern in `registry/architecture-r
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.4 | 2026-07-13 | Platform Design Authority | Clarified how the composition root binds owner and outbox adapters over one transaction while keeping the concrete client out of application contracts; lifecycle and specialist review gates remain unchanged. |
 | 0.2.3 | 2026-07-13 | Platform Design Authority | Recorded the executable path-aware checker and the narrow, expiring `platform-identity-persistence-relocation` exception; specialist reviews and PR2 gate remain pending. |
 | 0.2.2 | 2026-07-13 | Platform Design Authority | Codex review: added an explicit composition-root `except` to the `database-outside-persistence` registry pattern so the ADR's composition-root pool factory is registry-sanctioned, not a test that ignores the registry. |
 | 0.2.1 | 2026-07-13 | Platform Design Authority | Recorded Claude Code's independent concurrence with v0.2.0; lifecycle and specialist review gates remain unchanged. |

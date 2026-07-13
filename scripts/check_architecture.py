@@ -49,6 +49,11 @@ TRANSPORT_MODULE_PREFIXES = (
     "@orpc/zod",
     "hono",
 )
+PG_TABLE_PATTERN = re.compile(r"\bpgTable\s*\(\s*[\"']([^\"']+)[\"']")
+SQL_TABLE_PATTERN = re.compile(
+    r"\bCREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\"']?([a-zA-Z0-9_]+)[\"']?",
+    re.IGNORECASE,
+)
 
 
 def load_json(path: Path) -> Any:
@@ -149,13 +154,35 @@ def main() -> int:
         str(item) for item in requirements.get("runtime_neutral_families", [])
     )
     exceptions = data.get("exceptions", [])
+    persistence_owners = data.get("persistence_owners", [])
+
+    owner_ids = [str(item.get("id", "")) for item in persistence_owners]
+    if len(owner_ids) != len(set(owner_ids)):
+        errors: list[str] = ["persistence owner ids must be unique"]
+    else:
+        errors = []
+    owner_by_root: dict[Path, dict[str, Any]] = {}
+    table_owner: dict[str, str] = {}
+    for record in persistence_owners:
+        root = ROOT / str(record.get("package", ""))
+        if root in owner_by_root:
+            errors.append(f"{posix(root)}: duplicate persistence owner mapping")
+        owner_by_root[root] = record
+        for table in record.get("tables", []):
+            table_name = str(table)
+            previous = table_owner.get(table_name)
+            if previous is not None:
+                errors.append(
+                    f"table {table_name}: multiple persistence owners ({previous}, {record.get('owner')})"
+                )
+            table_owner[table_name] = str(record.get("owner", ""))
 
     roots = package_roots()
     package_by_name: dict[str, Path] = {}
     family_by_root: dict[Path, str] = {}
     manifest_dependencies: dict[Path, set[str]] = defaultdict(set)
     runtime_manifest_dependencies: dict[Path, set[str]] = defaultdict(set)
-    errors: list[str] = []
+    discovered_tables: dict[Path, set[str]] = defaultdict(set)
 
     for root in roots:
         relative = posix(root)
@@ -170,6 +197,20 @@ def main() -> int:
             if name in package_by_name:
                 errors.append(f"{relative}: duplicate package name {name}")
             package_by_name[name] = root
+        if family == "persistence":
+            owner = owner_by_root.get(root)
+            if owner is None:
+                errors.append(f"{relative}: persistence package has no registered owner")
+            else:
+                if owner.get("package_name") != name:
+                    errors.append(
+                        f"{relative}: registered package_name does not match manifest name"
+                    )
+                owner_package = str(owner.get("owner_package", ""))
+                if owner_package not in manifest.get("dependencies", {}):
+                    errors.append(
+                        f"{relative}: owner package {owner_package} must be a runtime dependency"
+                    )
         for section in ("dependencies", "devDependencies", "peerDependencies"):
             manifest_dependencies[root].update(manifest.get(section, {}).keys())
         for section in ("dependencies", "peerDependencies"):
@@ -186,6 +227,13 @@ def main() -> int:
         for source in source_files(package_root):
             source_path = posix(source)
             text = source.read_text(encoding="utf-8")
+
+            if source_family == "persistence":
+                discovered_tables[package_root].update(PG_TABLE_PATTERN.findall(text))
+                if source.suffix == ".sql":
+                    discovered_tables[package_root].update(
+                        SQL_TABLE_PATTERN.findall(text)
+                    )
 
             if source_family in runtime_neutral and not is_test_source(source):
                 if re.search(r"""(?:from\s*|import\s*\()["']bun:""", text) or re.search(
@@ -227,6 +275,18 @@ def main() -> int:
                 imported_internal_dependencies[package_root].add(module)
                 package_edges[package_root].add(target_root)
                 target_family = family_by_root[target_root]
+
+                if (
+                    source_family == "persistence"
+                    and target_family in {"platform", "engines", "domains"}
+                ):
+                    owner = owner_by_root.get(package_root)
+                    owner_package = str(owner.get("owner_package", "")) if owner else ""
+                    if module != owner_package:
+                        errors.append(
+                            f"{source_path}: persistence-cross-owner-import: "
+                            f"registered owner package is {owner_package}, imported {module}"
+                        )
 
                 allowed_families = set(
                     str(item)
@@ -279,6 +339,32 @@ def main() -> int:
             ):
                 errors.append(
                     f"{source_path}: migration-outside-persistence: runtime-neutral package owns a concrete migration artifact"
+                )
+
+    for root, record in owner_by_root.items():
+        if root not in family_by_root:
+            errors.append(f"{posix(root)}: registered persistence package does not exist")
+            continue
+        registered_tables = {str(item) for item in record.get("tables", [])}
+        actual_tables = discovered_tables.get(root, set())
+        for table in sorted(actual_tables - registered_tables):
+            errors.append(
+                f"{posix(root)}: table {table} has no owner entry in persistence_owners"
+            )
+        for table in sorted(registered_tables - actual_tables):
+            errors.append(
+                f"{posix(root)}: registered table {table} is not declared by this package"
+            )
+
+        migration_directory = ROOT / str(record.get("migration_directory", ""))
+        if not migration_directory.is_dir() or not list(migration_directory.glob("*.sql")):
+            errors.append(
+                f"{posix(root)}: registered migration directory has no SQL migrations"
+            )
+        for migration in root.rglob("*.sql"):
+            if migration_directory not in migration.parents:
+                errors.append(
+                    f"{posix(migration)}: migration is outside the registered owner directory"
                 )
 
     for root, dependencies in manifest_dependencies.items():

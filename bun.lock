@@ -97,6 +97,9 @@
       "name": "server",
       "dependencies": {
         "@hono/node-server": "2.0.8",
+        "@meridian/persistence-platform-events-postgres": "workspace:*",
+        "@meridian/persistence-platform-identity-postgres": "workspace:*",
+        "@meridian/platform-events": "workspace:*",
         "@meridian/platform-identity": "workspace:*",
         "@meridian/tooling-env": "workspace:*",
         "@orpc/openapi": "catalog:",
@@ -105,12 +108,15 @@
         "better-auth": "catalog:",
         "dotenv": "catalog:",
         "hono": "catalog:",
+        "pg": "8.22.0",
         "zod": "catalog:",
       },
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
         "tsdown": "^0.22.3",
+        "tsx": "4.21.0",
         "typescript": "^6",
       },
     },
@@ -197,6 +203,39 @@
         "typescript": "^6",
       },
     },
+    "packages/persistence/platform-events-postgres": {
+      "name": "@meridian/persistence-platform-events-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/platform-events": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
+        "typescript": "^6",
+      },
+    },
+    "packages/persistence/platform-identity-postgres": {
+      "name": "@meridian/persistence-platform-identity-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/platform-identity": "workspace:*",
+        "better-auth": "catalog:",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
+        "typescript": "^6",
+      },
+    },
     "packages/platform-clients/api-client": {
       "name": "@meridian/platform-clients-api-client",
       "version": "0.0.0",
@@ -209,21 +248,27 @@
         "typescript": "^6",
       },
     },
+    "packages/platform/events": {
+      "name": "@meridian/platform-events",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/contracts-events": "workspace:*",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
     "packages/platform/identity": {
       "name": "@meridian/platform-identity",
       "dependencies": {
         "@better-auth/passkey": "catalog:",
-        "@meridian/tooling-env": "workspace:*",
         "better-auth": "catalog:",
-        "dotenv": "catalog:",
-        "drizzle-orm": "catalog:",
-        "pg": "^8.22.0",
         "zod": "catalog:",
       },
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",
-        "@types/pg": "catalog:",
-        "drizzle-kit": "^0.31.10",
         "typescript": "^6",
       },
     },
@@ -758,7 +803,13 @@
 
     "@meridian/foundation-core": ["@meridian/foundation-core@workspace:packages/foundation/core"],
 
+    "@meridian/persistence-platform-events-postgres": ["@meridian/persistence-platform-events-postgres@workspace:packages/persistence/platform-events-postgres"],
+
+    "@meridian/persistence-platform-identity-postgres": ["@meridian/persistence-platform-identity-postgres@workspace:packages/persistence/platform-identity-postgres"],
+
     "@meridian/platform-clients-api-client": ["@meridian/platform-clients-api-client@workspace:packages/platform-clients/api-client"],
+
+    "@meridian/platform-events": ["@meridian/platform-events@workspace:packages/platform/events"],
 
     "@meridian/platform-identity": ["@meridian/platform-identity@workspace:packages/platform/identity"],
 
@@ -2540,7 +2591,7 @@
 
     "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
-    "tsx": ["tsx@4.23.1", "", { "dependencies": { "esbuild": "~0.28.0" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-GQHnkIfxyx1wYCOS/wonik5MVRZU9hi1TEZmzGZSCJB1y9YgoZ8H6itNE/u4suE+yLmOzuE4E5S4TZ/ZX2wcWQ=="],
+    "tsx": ["tsx@4.21.0", "", { "dependencies": { "esbuild": "~0.27.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw=="],
 
     "tsyringe": ["tsyringe@4.10.0", "", { "dependencies": { "tslib": "^1.9.3" } }, "sha512-axr3IdNuVIxnaK5XGEUFTu3YmAQ6lllgrvqfEoR16g/HGnYY/6We4oWENtAnzK6/LpJ2ur9PAb80RBt7/U4ugw=="],
 
@@ -2815,6 +2866,8 @@
     "docs/@biomejs/biome": ["@biomejs/biome@2.5.3", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "2.5.3", "@biomejs/cli-darwin-x64": "2.5.3", "@biomejs/cli-linux-arm64": "2.5.3", "@biomejs/cli-linux-arm64-musl": "2.5.3", "@biomejs/cli-linux-x64": "2.5.3", "@biomejs/cli-linux-x64-musl": "2.5.3", "@biomejs/cli-win32-arm64": "2.5.3", "@biomejs/cli-win32-x64": "2.5.3" }, "bin": { "biome": "bin/biome" } }, "sha512-MrJswFdei9EfDwwUy2tQrPDpK0AO+RmMFvBoaaJ6ayBc3sUbHdCE+XG5N8vp+5So41ZupZJQm0roHFFhMGVD7A=="],
 
     "dot-prop/is-obj": ["is-obj@2.0.0", "", {}, "sha512-drqDG3cbczxxEJRoOXcOjtdp1J/lyp1mNn0xaznRs8+muBhgQcrnbspox5X5fOw0HnMnbfDzvnEMEtqDEJEo8w=="],
+
+    "drizzle-kit/tsx": ["tsx@4.23.1", "", { "dependencies": { "esbuild": "~0.28.0" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-GQHnkIfxyx1wYCOS/wonik5MVRZU9hi1TEZmzGZSCJB1y9YgoZ8H6itNE/u4suE+yLmOzuE4E5S4TZ/ZX2wcWQ=="],
 
     "enquirer/strip-ansi": ["strip-ansi@6.0.1", "", { "dependencies": { "ansi-regex": "^5.0.1" } }, "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="],
 

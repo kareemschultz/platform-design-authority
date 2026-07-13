@@ -20,12 +20,14 @@ def run_checker() -> subprocess.CompletedProcess[str]:
     )
 
 
-def probe(path: Path, expected_success: bool, expected_text: str = "") -> None:
+def probe(
+    path: Path,
+    expected_success: bool,
+    expected_text: str = "",
+    source: str = 'import { createIdentityAuth } from "@meridian/platform-identity";\nvoid createIdentityAuth;\n',
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        'import { auth } from "@meridian/platform-identity";\nvoid auth;\n',
-        encoding="utf-8",
-    )
+    path.write_text(source, encoding="utf-8")
     try:
         result = run_checker()
         output = result.stdout + result.stderr
@@ -66,6 +68,36 @@ def main() -> int:
         / "composition"
         / "__architecture_positive_fixture.ts",
         expected_success=True,
+    )
+    probe(
+        ROOT
+        / "packages"
+        / "persistence"
+        / "platform-events-postgres"
+        / "src"
+        / "__architecture_cross_owner_fixture.ts",
+        expected_success=False,
+        expected_text="persistence-cross-owner-import",
+    )
+    probe(
+        ROOT
+        / "packages"
+        / "persistence"
+        / "platform-events-postgres"
+        / "src"
+        / "__architecture_table_owner_fixture.ts",
+        expected_success=False,
+        expected_text="table unregistered_fixture has no owner entry",
+        source=(
+            'import { pgTable, text } from "drizzle-orm/pg-core";\n'
+            'export const fixture = pgTable("unregistered_fixture", { id: text("id") });\n'
+        ),
+    )
+    probe(
+        ROOT / "apps" / "server" / "src" / "__architecture_pool_fixture.ts",
+        expected_success=False,
+        expected_text="connection-lifecycle-outside-composition",
+        source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
     )
     print("architecture checker regression probes passed")
     return 0

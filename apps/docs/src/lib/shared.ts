@@ -1,4 +1,4 @@
-export const appName = "Meridian Docs";
+export const appName = "Platform Documentation";
 export const docsRoute = "/docs";
 export const docsImageRoute = "/og/docs";
 export const docsContentRoute = "/llms.mdx/docs";

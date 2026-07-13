@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 ---
 
 # Architecture Risk Register
@@ -209,6 +209,7 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | TA-055 | FDR-001 through FDR-010 ratification | Founder | Pilot and production |
 | FA4-014 | Marketplace payout gating (FDR-008 plus legal/tax/provider review) | Founder | Paid marketplace phase |
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
+| FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |
 | RR-001 | Expo auth plugin approval per the BETTER_AUTH plugin matrix | PDA | Native app authentication implementation |
 | RR-002 | PWA manifest theme-color tokens decision | PDA | Web app shell and PWA manifest implementation |
 | RR-003 | apps/native Biome lint exclusion | Implementation | Uniform lint enforcement across workspaces |

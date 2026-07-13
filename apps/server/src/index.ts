@@ -14,19 +14,6 @@ import { cors } from "hono/cors";
 
 const app = new Hono();
 
-// Request logging hygiene: log method, pathname, status, and duration only.
-// The query string is deliberately excluded because authentication flows
-// (e.g. verification links) carry one-time tokens as query parameters.
-const requestLog: MiddlewareHandler = async (c, next) => {
-	const start = performance.now();
-	await next();
-	const durationMs = Math.round(performance.now() - start);
-	console.log(
-		`${c.req.method} ${new URL(c.req.url).pathname} ${c.res.status} ${durationMs}ms`
-	);
-};
-app.use(requestLog);
-
 app.use(
 	"/*",
 	cors({
@@ -104,12 +91,11 @@ app.use("/api-reference/*", handleApiReference);
 // moves this module into a shared chunk that is never the entrypoint.
 if ("bun" in process.versions) {
 	let shuttingDown = false;
-	const shutdown = (signal: string) => {
+	const shutdown = () => {
 		if (shuttingDown) {
 			return;
 		}
 		shuttingDown = true;
-		console.log(`Received ${signal}, draining database pool`);
 		closeDb()
 			.catch((error: unknown) => {
 				console.error("Error while closing database pool:", error);
@@ -118,8 +104,8 @@ if ("bun" in process.versions) {
 				process.exit(0);
 			});
 	};
-	process.on("SIGTERM", () => shutdown("SIGTERM"));
-	process.on("SIGINT", () => shutdown("SIGINT"));
+	process.on("SIGTERM", shutdown);
+	process.on("SIGINT", shutdown);
 }
 
 export default app;

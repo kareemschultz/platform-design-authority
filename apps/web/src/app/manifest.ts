@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
 	return {
 		background_color: "#ffffff",
-		description: "Meridian controlled prototype",
+		description: "Controlled platform prototype",
 		display: "standalone",
 		icons: [
 			{
@@ -17,10 +17,8 @@ export default function manifest(): MetadataRoute.Manifest {
 				type: "image/png",
 			},
 		],
-		// Internal codename (ADR-0026): replace with tenant branding before any
-		// tenant-visible release.
-		name: "Meridian Prototype (Internal)",
-		short_name: "Meridian",
+		name: "Platform Prototype (Internal)",
+		short_name: "Platform",
 		start_url: "/",
 		theme_color: "#000000",
 	};

@@ -44,6 +44,14 @@ describe("Instant: now/toIso/fromIso", () => {
 		});
 	});
 
+	test("fromIso accepts an explicit numeric offset", () => {
+		const result = fromIso("2026-07-11T23:04:05.000-04:00");
+		expect(result).toEqual({
+			ok: true,
+			value: Date.UTC(2026, 6, 12, 3, 4, 5),
+		});
+	});
+
 	test("toIso and fromIso round-trip", () => {
 		const instant = Date.UTC(2025, 11, 31, 23, 59, 59, 999);
 		const result = fromIso(toIso(instant));
@@ -57,6 +65,21 @@ describe("Instant: now/toIso/fromIso", () => {
 			expect(result.error.code).toBe("validation");
 			expect(result.error.retriable).toBe(false);
 		}
+	});
+
+	test("fromIso rejects an instant without an explicit offset", () => {
+		const result = fromIso("2026-07-12T03:04:05");
+		expect(result.ok).toBe(false);
+	});
+
+	test("fromIso rejects normalized impossible dates", () => {
+		const result = fromIso("2026-02-30T00:00:00.000Z");
+		expect(result.ok).toBe(false);
+	});
+
+	test("fromIso rejects offsets beyond the supported ISO range", () => {
+		const result = fromIso("2026-07-12T03:04:05.000+14:01");
+		expect(result.ok).toBe(false);
 	});
 });
 
@@ -79,8 +102,22 @@ describe("BusinessDate: isBusinessDate / parseBusinessDate", () => {
 		expect(isBusinessDate("2026-07-12T00:00:00Z")).toBe(false);
 	});
 
+	test("rejects impossible calendar dates", () => {
+		expect(isBusinessDate("2026-02-30")).toBe(false);
+		expect(isBusinessDate("2025-02-29")).toBe(false);
+		expect(isBusinessDate("2028-02-29")).toBe(true);
+	});
+
 	test("parseBusinessDate returns validation error for malformed input", () => {
 		const result = parseBusinessDate("not-a-date");
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.error.code).toBe("validation");
+		}
+	});
+
+	test("parseBusinessDate returns validation error for impossible dates", () => {
+		const result = parseBusinessDate("2026-02-30");
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
 			expect(result.error.code).toBe("validation");

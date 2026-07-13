@@ -406,7 +406,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: 'schemas/offline/sync-batch-v1.schema.json'}
+            schema: {$ref: '../schemas/offline/sync-batch-v1.schema.json'}
       responses:
         '202':
           description: Batch accepted for validation and application

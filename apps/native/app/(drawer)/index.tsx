@@ -1,14 +1,11 @@
-import { Button, Column, Text as ExpoUIText, Host } from "@expo/ui";
+import { Column, Text as ExpoUIText, Host } from "@expo/ui";
 import { useQuery } from "@tanstack/react-query";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { Container } from "@/components/container";
-import { SignIn } from "@/components/sign-in";
-import { SignUp } from "@/components/sign-up";
-import { authClient } from "@/lib/auth-client";
 import { NAV_THEME, STATUS_COLORS } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
-import { orpc, queryClient } from "@/utils/orpc";
+import { orpc } from "@/utils/orpc";
 
 export default function Home() {
 	const { colorScheme } = useColorScheme();
@@ -16,10 +13,8 @@ export default function Home() {
 	const statusColors =
 		colorScheme === "dark" ? STATUS_COLORS.dark : STATUS_COLORS.light;
 	const healthCheck = useQuery(orpc.healthCheck.queryOptions());
-	const privateData = useQuery(orpc.privateData.queryOptions());
 	const isConnected = healthCheck?.data === "OK";
 	const isLoading = healthCheck?.isLoading;
-	const { data: session } = authClient.useSession();
 
 	return (
 		<Container>
@@ -40,42 +35,6 @@ export default function Home() {
 							Controlled Prototype
 						</ExpoUIText>
 					</Host>
-
-					{session?.user ? (
-						<View
-							style={[
-								styles.userCard,
-								{ backgroundColor: theme.card, borderColor: theme.border },
-							]}
-						>
-							<Host
-								matchContents={{ vertical: true }}
-								style={styles.userHeader}
-							>
-								<Column spacing={8}>
-									<ExpoUIText textStyle={{ color: theme.text, fontSize: 16 }}>
-										{`Welcome, ${session.user.name}`}
-									</ExpoUIText>
-									<ExpoUIText
-										style={{ opacity: 0.7 }}
-										textStyle={{ color: theme.text, fontSize: 14 }}
-									>
-										{session.user.email}
-									</ExpoUIText>
-								</Column>
-							</Host>
-							<Host matchContents={{ vertical: true }}>
-								<Button
-									label="Sign Out"
-									onPress={() => {
-										authClient.signOut();
-										queryClient.invalidateQueries();
-									}}
-									variant="outlined"
-								/>
-							</Host>
-						</View>
-					) : null}
 
 					<View
 						style={[
@@ -136,44 +95,15 @@ export default function Home() {
 						</View>
 					</View>
 
-					<View
-						style={[
-							styles.privateDataCard,
-							{ backgroundColor: theme.card, borderColor: theme.border },
-						]}
-					>
-						<Host
-							matchContents={{ vertical: true }}
-							style={styles.cardTitleHost}
+					<Host matchContents={{ vertical: true }}>
+						<ExpoUIText
+							style={{ opacity: 0.7 }}
+							textStyle={{ color: theme.text, fontSize: 14 }}
 						>
-							<ExpoUIText
-								textStyle={{
-									color: theme.text,
-									fontSize: 16,
-									fontWeight: "bold",
-								}}
-							>
-								Private Data
-							</ExpoUIText>
-						</Host>
-						{privateData && (
-							<Host matchContents={{ vertical: true }}>
-								<ExpoUIText
-									style={{ opacity: 0.7 }}
-									textStyle={{ color: theme.text, fontSize: 14 }}
-								>
-									{privateData.data?.message ?? ""}
-								</ExpoUIText>
-							</Host>
-						)}
-					</View>
-
-					{!session?.user && (
-						<>
-							<SignIn />
-							<SignUp />
-						</>
-					)}
+							Native authentication remains disabled until the governed Expo
+							integration gates and tests are complete.
+						</ExpoUIText>
+					</Host>
 				</View>
 			</ScrollView>
 		</Container>
@@ -188,12 +118,6 @@ const styles = StyleSheet.create({
 		paddingBottom: 32,
 		paddingHorizontal: 20,
 		paddingTop: 28,
-	},
-	privateDataCard: {
-		borderRadius: 16,
-		borderWidth: 1,
-		marginBottom: 16,
-		padding: 16,
 	},
 	scrollView: {
 		flex: 1,
@@ -220,14 +144,5 @@ const styles = StyleSheet.create({
 		alignSelf: "stretch",
 		height: 34,
 		marginBottom: 24,
-	},
-	userCard: {
-		borderRadius: 16,
-		borderWidth: 1,
-		marginBottom: 16,
-		padding: 16,
-	},
-	userHeader: {
-		marginBottom: 8,
 	},
 });

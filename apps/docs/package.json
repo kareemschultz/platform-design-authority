@@ -3,8 +3,8 @@
   "version": "0.0.4",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev --port=4000",
+    "build": "next build --webpack",
+    "dev": "next dev --webpack --port=4000",
     "start": "next start",
     "check-types": "next typegen && fumadocs-mdx && tsc --noEmit",
     "postinstall": "fumadocs-mdx",

@@ -26,7 +26,6 @@
       "@tailwindcss/postcss": "^4.3.2",
       "@types/react-dom": "^19.2.3",
       "tailwindcss": "^4.3.2",
-      "@better-auth/expo": "1.6.23",
       "drizzle-orm": "^0.45.2",
       "@types/pg": "^8.20.0"
     }
@@ -71,7 +70,6 @@
     "@biomejs/biome": "2.5.2",
     "@meridian/config": "workspace:*",
     "@types/bun": "catalog:",
-    "micromark-util-decode-numeric-character-reference": "2.0.2",
     "turbo": "^2.10.2",
     "typescript": "^6",
     "ultracite": "7.9.3"

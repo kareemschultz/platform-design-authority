@@ -21,13 +21,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-	// "Meridian" is the internal codename (ADR-0026). This scaffold title is
-	// internal-only and must be replaced by tenant branding before any
-	// tenant-visible release.
 	description: "Internal controlled prototype. Not a tenant-facing surface.",
 	title: {
-		default: "Meridian Prototype (Internal)",
-		template: "%s | Meridian Prototype",
+		default: "Platform Prototype (Internal)",
+		template: "%s | Platform Prototype",
 	},
 };
 

@@ -48,6 +48,40 @@ export function now(): Instant {
 	return Date.now();
 }
 
+const ISO_INSTANT_PATTERN =
+	/^(\d{4})-(\d{2})-(\d{2})T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:\.\d{1,3})?(Z|[+-](?:(?:0\d|1[0-3]):[0-5]\d|14:00))$/;
+
+function isLeapYear(year: number): boolean {
+	return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
+function parseMatchedInteger(match: RegExpExecArray, index: number): number {
+	return Number.parseInt(match[index] ?? "", 10);
+}
+
+function isValidCalendarDate(
+	year: number,
+	month: number,
+	day: number
+): boolean {
+	const daysInMonth = [
+		31,
+		isLeapYear(year) ? 29 : 28,
+		31,
+		30,
+		31,
+		30,
+		31,
+		31,
+		30,
+		31,
+		30,
+		31,
+	];
+	const maximumDay = daysInMonth[month - 1];
+	return maximumDay !== undefined && day >= 1 && day <= maximumDay;
+}
+
 /**
  * Format an {@link Instant} as an ISO-8601 UTC string
  * (e.g. `2026-07-12T03:04:05.000Z`).
@@ -62,6 +96,25 @@ export function toIso(instant: Instant): string {
  * does not parse to a valid instant.
  */
 export function fromIso(iso: string): Result<Instant, PlatformError> {
+	const match = ISO_INSTANT_PATTERN.exec(iso);
+	if (
+		!(
+			match &&
+			isValidCalendarDate(
+				parseMatchedInteger(match, 1),
+				parseMatchedInteger(match, 2),
+				parseMatchedInteger(match, 3)
+			)
+		)
+	) {
+		return err(
+			validationError(
+				`"${iso}" is not a canonical ISO-8601 instant with an explicit Z or numeric offset`,
+				{ details: { iso } }
+			)
+		);
+	}
+
 	const parsed = Date.parse(iso);
 	if (Number.isNaN(parsed)) {
 		return err(
@@ -82,14 +135,21 @@ export function fromIso(iso: string): Result<Instant, PlatformError> {
  */
 export type BusinessDate = string & { readonly __brand: "BusinessDate" };
 
-const BUSINESS_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const BUSINESS_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 /**
- * Structural check for `YYYY-MM-DD` shape (does not validate that the date
- * is a real calendar date, e.g. `2026-02-30` passes the shape check).
+ * Check both the `YYYY-MM-DD` shape and calendar validity.
  */
 export function isBusinessDate(value: string): value is BusinessDate {
-	return BUSINESS_DATE_PATTERN.test(value);
+	const match = BUSINESS_DATE_PATTERN.exec(value);
+	return (
+		match !== null &&
+		isValidCalendarDate(
+			parseMatchedInteger(match, 1),
+			parseMatchedInteger(match, 2),
+			parseMatchedInteger(match, 3)
+		)
+	);
 }
 
 /**

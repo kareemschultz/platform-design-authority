@@ -6,25 +6,17 @@ import { parsePort } from "./port";
 
 const port = parsePort(process.env.PORT);
 
-const server = serve(
-	{
-		fetch: app.fetch,
-		port,
-	},
-	(info) => {
-		console.log(
-			`Meridian Node fallback listening on http://localhost:${info.port}`
-		);
-	}
-);
+const server = serve({
+	fetch: app.fetch,
+	port,
+});
 
 let shuttingDown = false;
-function shutdown(signal: string): void {
+function shutdown(): void {
 	if (shuttingDown) {
 		return;
 	}
 	shuttingDown = true;
-	console.log(`Received ${signal}, closing server`);
 	server.close((closeError) => {
 		if (closeError) {
 			console.error("Error while closing HTTP server:", closeError);
@@ -39,5 +31,5 @@ function shutdown(signal: string): void {
 	});
 }
 
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);

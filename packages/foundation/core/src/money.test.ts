@@ -54,6 +54,21 @@ describe("toCurrencyCode / registerCurrency", () => {
 		registerCurrency("BHD_TEST", 3);
 		expect(() => registerCurrency("BHD_TEST", 2)).toThrow();
 	});
+
+	test("rejects negative and non-integer currency exponents", () => {
+		expect(() => registerCurrency("NEG_TEST", -1)).toThrow(
+			"non-negative integer"
+		);
+		expect(() => registerCurrency("FRACTION_TEST", 1.5)).toThrow(
+			"non-negative integer"
+		);
+		expect(() => registerCurrency("NAN_TEST", Number.NaN)).toThrow(
+			"non-negative integer"
+		);
+		expect(toCurrencyCode("NEG_TEST").ok).toBe(false);
+		expect(toCurrencyCode("FRACTION_TEST").ok).toBe(false);
+		expect(toCurrencyCode("NAN_TEST").ok).toBe(false);
+	});
 });
 
 describe("fromMinor / toDecimalString", () => {

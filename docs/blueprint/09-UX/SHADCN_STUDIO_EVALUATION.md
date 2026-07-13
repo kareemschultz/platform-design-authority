@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-035
 title: Shadcn Studio Evaluation
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -38,7 +38,7 @@ The public documentation describes /ftc as primarily installing blocks represent
 
 ## Codex support status
 
-Studio's current FAQ lists Visual Studio Code, Cursor, Windsurf, and VS Code with Cline as supported clients. It explicitly says Codex is not supported because Studio's instruction payload exceeds a Codex MCP response-size limit, and directs readers to upstream issues.
+Studio's current documentation lists VS Code, Cursor, Windsurf, Cline, and Claude Code as supported clients and provides a dedicated Claude Code setup section. It explicitly says Codex is not supported because Studio's instruction payload exceeds a Codex MCP response-size limit, and directs readers to upstream issues.
 
 In this audit, the MCP server initialized and safe metadata calls returned usable results inside a MCP-enabled Codex task. This proves only bounded local interoperability for those calls. It does not contradict the vendor support statement, prove full command reliability, or justify fetching large licensed payloads through Codex.
 

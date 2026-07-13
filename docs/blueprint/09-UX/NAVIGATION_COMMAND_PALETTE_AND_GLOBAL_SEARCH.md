@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-020
 title: Navigation Command Palette and Global Search
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -19,7 +19,7 @@ More nested menus are not automatically simpler. The failure mode this document 
 
 ## Navigation Model
 
-The model has five layers, each with a distinct job. A destination belongs in exactly one layer; do not let a lower layer duplicate what a higher layer already owns.
+The model has five layers, each with a distinct job. A destination has exactly one **owning** layer among primary navigation, the nested capability-group level, contextual navigation, and record navigation — do not let one of those four duplicate what another already owns. The fifth layer, fast access, is deliberately the exception: it is an accelerator, not a competing owner, and rule 12 requires every destination it surfaces to also exist at its proper owning layer. Search, the command palette, recents, and favorites referencing a destination is not a duplicate-ownership violation; a second *persistent menu* claiming the same destination is.
 
 1. **Primary navigation** — a small, role-based list of frequent workspaces. This is the only layer visible at all times regardless of context.
 2. **One nested level** — capability groups related to the selected workspace (secondary navigation). This is the only permitted level of nesting beneath primary navigation.

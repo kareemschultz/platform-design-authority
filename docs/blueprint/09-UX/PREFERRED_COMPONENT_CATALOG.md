@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -188,6 +188,20 @@ Progressive disclosure must never hide fees, destructive impact, permission cons
 - Security event and support-access evidence
 - Service status and operational-readiness panel
 
+### AI-assisted and explainable actions
+
+- Suggestion and recommendation card with confidence and rationale disclosure
+- Inline copilot panel scoped to the current record or workflow
+- Draft-to-review handoff (AI proposes, human edits and confirms)
+- Autonomy-level indicator matching the canonical ladder in `docs/blueprint/06-AI/AI_PLATFORM_ARCHITECTURE.md`
+- Explicit approval control for any action above Inform/Draft autonomy — never an implicit confirm
+- Explainability drawer showing inputs, retrieved evidence, and policy basis
+- Cost, token, or budget indicator where usage-based limits apply
+- Provider or model-degraded and AI-disabled fallback states
+- Feedback capture (accept, reject, edit-and-accept) feeding evaluation records
+
+AI-assisted components must never let a mutating action execute above the autonomy level a human explicitly granted, and every essential workflow's non-AI path must remain fully usable when these components are absent or disabled.
+
 ### Documentation and marketing
 
 - Documentation shell and search
@@ -303,6 +317,7 @@ The first discovery pass should evaluate candidates for:
 10. Documentation API reference and capability catalog
 11. Marketing hero, product demonstration, feature comparison, pricing, FAQ, and changelog
 12. Tokenized, reduced-motion disclosure and explanatory animations
+13. AI suggestion card, autonomy-level indicator, and approval control
 
 This priority list authorizes research only. It does not authorize installation or adoption.
 

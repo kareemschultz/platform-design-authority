@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-033
 title: Component Source Matrix
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -47,7 +47,7 @@ The official `shadcn` MCP server is configured in the Claude Code user-level con
 
 | Source | Governed role | Allowed discovery | Prohibited shortcut | Default disposition |
 |---|---|---|---|---|
-| Platform-owned `@meridian/ui` | Canonical implementation after evidence gates | Existing components, stories, tests, owners | Assuming existence means current acceptance | Highest trust after acceptance |
+| Platform-owned `@meridian/ui-web` | Canonical implementation after evidence gates | Existing components, stories, tests, owners | Assuming existence means current acceptance | Highest trust after acceptance |
 | Official `@shadcn` | Primitive/component baseline | Metadata list and search | Treating a registry item or block as approved | Preferred Candidate |
 | Shadcn Studio | Composition and visual exploration | Metadata and documented capabilities | Copying licensed source, installing wholesale, or importing hidden business logic | Researching/Restricted |
 | AI-generated UI | Bounded prototype evidence | Task-specific exploration | Promotion without provenance and tests | Untrusted |

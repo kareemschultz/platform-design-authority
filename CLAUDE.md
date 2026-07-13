@@ -192,7 +192,7 @@ Code conventions:
 - TypeScript strict everywhere; every workspace carries a working `check-types` script.
 - Core packages stay runtime-neutral per ADR-0020 and `ARCHITECTURE_DEPENDENCY_RULES.md`: no Bun globals, `bun:*` imports, Hono context types, oRPC transport objects, or database adapters in domain, application, contract, or authorization code.
 - All external input is validated with zod v4 schemas at the boundary; oRPC procedures declare typed errors.
-- Environment access goes only through `@meridian/env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed.
+- Environment access goes only through `@meridian/tooling-env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed.
 - Database changes go through Drizzle schema + `db:generate`; committed migrations are never hand-edited (CI enforces migration freshness).
 - Tests are colocated `*.test.ts` using `bun:test` and assert real behavior — no placeholder assertions.
 - No `console.log` in committed code; use the structured logger. No commented-out code blocks.

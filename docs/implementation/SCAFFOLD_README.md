@@ -42,7 +42,7 @@ Known limitations:
 - **React Native** - Build mobile apps using React
 - **Expo** - Tools for React Native development
 - **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
+- **Shared UI package** - shadcn/ui primitives live in `packages/ui-web/core`
 - **Hono** - Lightweight, performant server framework
 - **oRPC** - End-to-end type-safe APIs with OpenAPI integration
 - **Bun** - Primary prototype runtime with Node fallback checks
@@ -81,7 +81,7 @@ bun run docker:up
 3. Apply the committed authentication migration from inside the server container:
 
 ```bash
-docker compose exec server bun run --cwd /app/packages/db db:migrate
+docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
 ```
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
@@ -91,24 +91,24 @@ The bundled PostgreSQL service is deliberately not published to the host. Direct
 
 ## UI Customization
 
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
+React web apps in this stack share shadcn/ui primitives through `packages/ui-web/core`.
 
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
+- Change design tokens and global styles in `packages/ui-web/core/src/styles/globals.css`
+- Update shared primitives in `packages/ui-web/core/src/components/*`
+- Adjust shadcn aliases or style config in `packages/ui-web/core/components.json` and `apps/web/components.json`
 
 ### Add more shared components
 
 Run this from the project root to add more primitives to the shared UI package:
 
 ```bash
-bunx shadcn@4.13.0 add accordion dialog popover sheet table -c packages/ui
+bunx shadcn@4.13.0 add accordion dialog popover sheet table -c packages/ui-web/core
 ```
 
 Import shared components like this:
 
 ```tsx
-import { Button } from "@meridian/ui/components/button";
+import { Button } from "@meridian/ui-web/components/button";
 ```
 
 ### Add app-specific blocks

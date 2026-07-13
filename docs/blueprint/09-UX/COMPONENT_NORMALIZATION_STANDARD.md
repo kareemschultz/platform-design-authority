@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-031
 title: Component Normalization Standard
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -46,7 +46,7 @@ Before adoption:
 
 ## Naming and Ownership
 
-- Reusable platform components live under the approved `@meridian/ui` family.
+- Reusable platform components live under the approved `@meridian/ui-web` family.
 - Domain-specific compositions remain with their owning domain until a justified shared abstraction exists.
 - Application-local components must be marked as local and must not masquerade as platform standards.
 - External vendor or block names do not become public component APIs.

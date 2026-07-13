@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-005
 title: Roadmap Section Index
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 ---
 
 # Roadmap
@@ -16,6 +16,7 @@ last_reviewed: 2026-07-12
 - `FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`
 - `TECHNICAL_PROTOTYPE_PLAN.md`
 - `FIRST_SLICE_IMPLEMENTATION_PLAN.md`
+- `WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md`
 - `RATIFICATION_WAVES.md`
 - `registry/first-slice.json`
 - `registry/first-slice-tests.json`

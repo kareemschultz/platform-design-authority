@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-002
 title: Tenancy and Organization Model
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-13
 ---
 
 # Tenancy and Organization Model
@@ -122,6 +122,12 @@ Initial event family:
 - `platform.branch.created.v1`
 - `platform.location.created.v1`
 - `platform.partner.delegation-granted.v1`
+- `platform.membership.invited.v1`
+- `platform.membership.activated.v1`
+- `platform.membership.suspended.v1`
+- `platform.membership.ended.v1`
+- `platform.role-assignment.granted.v1`
+- `platform.role-assignment.revoked.v1`
 
 ## Open Decisions
 

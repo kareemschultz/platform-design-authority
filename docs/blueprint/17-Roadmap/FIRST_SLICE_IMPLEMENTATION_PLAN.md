@@ -1,11 +1,11 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.4.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
-related_adrs: [ADR-0002, ADR-0003, ADR-0013, ADR-0020, ADR-0025]
+related_adrs: [ADR-0002, ADR-0003, ADR-0013, ADR-0020, ADR-0025, ADR-0027]
 ---
 
 # Meridian First-Slice Implementation Plan
@@ -63,7 +63,7 @@ Disposition of the six original packages (completed 2026-07-13; see §2's table 
 
 | Package | Disposition |
 |---|---|
-| `@meridian/db` | Splits: Better Auth tables become `platform/identity` persistence; every new domain owns its own schema and migrations (`single_migration_owner`) |
+| `@meridian/db` | Splits under ADR-0027: runtime-neutral owners publish persistence ports; owner-specific `packages/persistence/*` adapters hold concrete schema/migration artifacts while every table and migration retains one authoritative module owner (`single_migration_owner`) |
 | `@meridian/auth` | Becomes the internal detail of `packages/platform/identity` (anti-corruption layer; domains never touch auth tables) |
 | `@meridian/api` | Dissolves into `apps/server` transport composition plus generated `packages/platform-clients/api-client` |
 | `@meridian/ui` | Moves under the `ui-web` family |
@@ -115,9 +115,10 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 ### WS1 — Identity, Tenancy, Party, Authorization (P1)
 
 - **Why:** Every subsequent behavior is meaningless without enforceable tenant scope and separated authentication/Party/permission/entitlement concepts — retrofitting isolation is the most expensive failure in multi-tenant systems, and the audits' hardest rules (Better Auth owns sessions only; Party owns identity; domains own roles) must be encoded before any domain exists to violate them.
-- **Entry:** WS0 done.
+- **Detailed plan:** `WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md` (PDA-RDM-008) — governance gates, package boundaries, canonical contract surface, PR sequence (PR1–PR9), fixtures, evidence matrix, and exit gate. This entry stays the authoritative summary; PDA-RDM-008 does not override it.
+- **Entry:** WS0 done. **First PR closes TD-007** (contract-first oRPC boundary for `platform-clients/api-client`, per its recorded exception's own expiry condition) before any domain package is built against the router-coupled client shape.
 - **Proves:** PDA-RDM-004 §Prototype 1.
-- **Packages:** NEW `platform/tenancy`, `platform/identity` (Better Auth behind an anti-corruption layer), `platform/authorization`, `platform/entitlements`, `platform/audit`; NEW `domains/party` (ADR-0007).
+- **Packages:** NEW `platform/tenancy`, `platform/authorization`, `platform/entitlements`, `platform/audit`, and the minimum `platform/events` transactional outbox; EXTEND the existing `platform/identity` Better Auth anti-corruption layer; NEW `domains/party` (ADR-0007); add owner-specific `packages/persistence/*` adapters under proposed ADR-0027. PR2 remains blocked until ADR-0027's named reviews and PDA-RDM-008 §3 G3 controls are complete.
 - **Contracts:** identity/tenancy/user-admin operation group (`/me`, `/session/active-context`, `/organizations`, `/users*`, `/roles`, `/role-assignments`, `/entitlements`, `/parties*`, `/audit-records` — per `registry/endpoint-permissions.json`); `platform.*` and `party.*` event families.
 - **Tests:** dominant dimensions `tenant_isolation`, `permission_and_entitlement`, `audit_and_observability` for the in-scope `platform.*`/`party.records` capabilities; budgets: session/permission checks inside the 750ms p95 sale path allowance; credential revocation ≤60s p95; two-tenant isolation proof (acceptance scenario 1).
 - **Exit:** scenario 1 demonstrated; Better Auth tables invisible to domain code (architecture test); **the thin experience shell required by §1.1 is real and demonstrated, not stubbed** — specifically:
@@ -138,7 +139,7 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Why:** Inventory is the first append-only business ledger — it proves the platform's correction-by-reversal doctrine, outbox eventing, and domain data ownership on the least regulated ledger before money is at stake.
 - **Entry:** WS1 done.
 - **Proves:** PDA-RDM-004 §Prototype 2.
-- **Packages:** NEW `domains/catalog`, `domains/inventory` (own schemas/migrations), `platform/events` (transactional outbox + publication), `platform/numbering` (sequence service consumed later by receipts).
+- **Packages:** NEW `domains/catalog`, `domains/inventory` (own schemas/migrations), EXTEND the minimum `platform/events` transactional outbox introduced by WS1 into publication/consumer infrastructure, NEW `platform/numbering` (sequence service consumed later by receipts).
 - **Contracts:** `/products*`, `/product-imports*`, `/opening-stock-imports`, `/stock-balances`, `/inventory-adjustments*`, `/stock-counts*`, `/stock-transfers*`; `catalog.*` + `inventory.*` events (registered in `registry/events.json`).
 - **Tests:** dominant dimensions `idempotency_and_duplicate`, `concurrency_and_conflict`, `events_jobs_and_projections`; budgets: inventory ledger 99.95% correctness; barcode lookup 300ms p95; search 800ms p95; outbox 99.99% eventual publication.
 - **Exit:** scenarios 2 and 8 demonstrated; ledger corrections only by reversal; DoD §6.

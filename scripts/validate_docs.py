@@ -474,9 +474,39 @@ def validate_architecture_rules() -> list[str]:
                 errors.append(
                     f"registry/architecture-rules.json: family {family!r} references unknown family {dependency!r}"
                 )
-    for family in data.get("requirements", {}).get("runtime_neutral_families", []):
+    requirements = data.get("requirements", {})
+    for family in requirements.get("runtime_neutral_families", []):
         if family not in known:
             errors.append(f"registry/architecture-rules.json: unknown runtime-neutral family {family!r}")
+
+    for family in requirements.get("composition_root_may_depend_on", []):
+        if family not in known:
+            errors.append(
+                f"registry/architecture-rules.json: composition root references unknown family {family!r}"
+            )
+
+    composition_roots = [str(item) for item in requirements.get("composition_roots", [])]
+    if len(composition_roots) != len(set(composition_roots)):
+        errors.append("registry/architecture-rules.json: duplicate composition root")
+
+    forbidden_patterns = data.get("forbidden_patterns", [])
+    pattern_ids = [str(item.get("id", "")) for item in forbidden_patterns]
+    if len(pattern_ids) != len(set(pattern_ids)):
+        errors.append("registry/architecture-rules.json: duplicate forbidden pattern id")
+
+    database_rule = next(
+        (item for item in forbidden_patterns if item.get("id") == "database-outside-persistence"),
+        None,
+    )
+    if database_rule is None:
+        errors.append("registry/architecture-rules.json: missing database-outside-persistence rule")
+    else:
+        pool_factory_exceptions = [str(item) for item in database_rule.get("except", [])]
+        if set(pool_factory_exceptions) != set(composition_roots):
+            errors.append(
+                "registry/architecture-rules.json: database-outside-persistence exceptions must exactly match "
+                "requirements.composition_roots"
+            )
     return errors
 
 

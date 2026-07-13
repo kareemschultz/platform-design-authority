@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-001
 title: UX and Design System Section Index
-version: 0.9.0
+version: 1.0.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 ---
 
 # UX and Design System
@@ -23,6 +23,11 @@ last_reviewed: 2026-07-12
 - `DESIGN_SYSTEM_OPERATIONS.md`
 - `COMPONENT_CATALOG_AND_STATE_MATRIX.md`
 - `PREFERRED_COMPONENT_CATALOG.md`
+- `COMPONENT_SOURCE_MATRIX.md`
+- `COMPONENT_DISCOVERY_AUDIT.md`
+- `SHADCN_STUDIO_EVALUATION.md`
+- `ANIMATION_AND_MOTION_GUIDE.md`
+- `PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md`
 - `COMPONENT_ACQUISITION_POLICY.md`
 - `COMPONENT_NORMALIZATION_STANDARD.md`
 - `COMPONENT_ACCEPTANCE_CHECKLIST.md`
@@ -78,6 +83,6 @@ Project-local skills cover frontend architecture, UI-pattern audit, dashboard de
 - Business DNA onboarding prototype
 - Measured Platform Experience Index and competitor benchmarks
 - Private premium-source license inventory
-- Authenticated shadcn/studio candidate inventory and evaluated preferred sources
+- Item-level authenticated Studio source, dependency, entitlement, and license evidence for any selected candidate after credential rotation
 
 The design system makes common work fast without hiding financial, privacy, security, accessibility, offline, or regulated consequences.

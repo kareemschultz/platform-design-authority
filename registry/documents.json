@@ -3588,7 +3588,7 @@
       "document_id": "PDA-UX-001",
       "path": "docs/blueprint/09-UX/README.md",
       "title": "UX and Design System Section Index",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
@@ -3665,10 +3665,10 @@
       "document_id": "PDA-UX-016",
       "path": "docs/blueprint/09-UX/DESIGN_SYSTEM_OPERATIONS.md",
       "title": "Design System Operations",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-12",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3731,10 +3731,10 @@
       "document_id": "PDA-UX-022",
       "path": "docs/blueprint/09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md",
       "title": "Tailwind shadcn and Premium UI Source Policy",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-12",
+      "last_reviewed": "2026-07-13",
       "related_adrs": [
         "ADR-0005",
         "ADR-0022"
@@ -3817,6 +3817,48 @@
       "document_id": "PDA-UX-029",
       "path": "docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md",
       "title": "Preferred Component Catalog",
+      "version": "0.3.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-13",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-UX-030",
+      "path": "docs/blueprint/09-UX/COMPONENT_ACQUISITION_POLICY.md",
+      "title": "Component Acquisition Policy",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-13",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-UX-031",
+      "path": "docs/blueprint/09-UX/COMPONENT_NORMALIZATION_STANDARD.md",
+      "title": "Component Normalization Standard",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-13",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-UX-032",
+      "path": "docs/blueprint/09-UX/COMPONENT_ACCEPTANCE_CHECKLIST.md",
+      "title": "Component Acceptance Checklist",
       "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",

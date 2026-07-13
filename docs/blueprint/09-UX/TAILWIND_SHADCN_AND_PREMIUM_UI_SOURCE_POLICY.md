@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-022
 title: Tailwind shadcn and Premium UI Source Policy
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 verified_as_of: 2026-07-12
 related_adrs: [ADR-0005, ADR-0022]
 ---
@@ -118,6 +118,8 @@ Marketing animation must respect reduced motion, loading performance, accessibil
 Premium page and form blocks may be used for customer portal, partner portal, setup, onboarding, and Business DNA flows when they satisfy the same product standards.
 
 ## Import Workflow
+
+This sequence is the shadcn/premium-specific file-copy mechanics — which files to copy, which values to replace — that operationalize `COMPONENT_ACQUISITION_POLICY.md`'s acquisition steps for this source class. It is not a separate acquisition decision process; the acquisition policy is authoritative on when and whether to acquire.
 
 Every premium or external UI import follows this sequence:
 

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -30,6 +30,9 @@ This document governs component-source selection and preferred implementation pa
 - `DESIGN_TOKENS_AND_VISUAL_SYSTEM.md` and `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md` for visual authority
 - `STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md` for implementation evidence
 - `FIRST_SLICE_UX_AND_ACCESSIBILITY.md` for first-slice acceptance
+- `COMPONENT_ACQUISITION_POLICY.md` for the detailed, canonical acquisition procedure and per-source rules
+- `COMPONENT_NORMALIZATION_STANDARD.md` for the required transformation from external source to owned implementation
+- `COMPONENT_ACCEPTANCE_CHECKLIST.md` for the itemized evidence checklist used at promotion
 
 When a preferred candidate conflicts with those documents, the governing specification wins and the candidate must be modified or rejected.
 
@@ -77,6 +80,8 @@ Before creating or importing a reusable UI component, block, page layout, animat
 10. Update this catalog entry and provenance record before promoting the implementation.
 
 Agents must not select a block merely because it is described as recommended, popular, modern, beautiful, premium, AI-generated, or available through an MCP.
+
+This list is the summary an agent must not skip. `COMPONENT_ACQUISITION_POLICY.md` is the detailed, canonical procedure — including per-source-class rules and the full provenance record — and is authoritative where the two differ in specifics.
 
 ## Evaluation Matrix
 
@@ -336,6 +341,8 @@ A candidate reaches Platform Approved only when:
 - Security and privacy review passes for consequential surfaces.
 - Offline and degraded behavior is honest where relevant.
 - Upgrade, deprecation, fallback, and removal ownership are named.
+
+`COMPONENT_ACCEPTANCE_CHECKLIST.md` is the itemized, checkable version of these gates and is the record of evidence used at promotion.
 
 ## Change and Retirement
 

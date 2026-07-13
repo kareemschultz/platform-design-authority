@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-030
 title: Component Acquisition Policy
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -32,7 +32,7 @@ Premium UI assets may accelerate implementation but are never authoritative. Eve
 
 Use this order unless a documented exception is approved:
 
-1. Existing Platform Approved component in `@meridian/ui`
+1. Existing Platform Approved component in `@meridian/ui-web`
 2. Existing application-local component suitable for graduation
 3. Official shadcn/ui source-owned primitive or composition
 4. shadcn/studio Pro candidate

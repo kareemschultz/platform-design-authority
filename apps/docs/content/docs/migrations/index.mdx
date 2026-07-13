@@ -31,7 +31,7 @@ Better Auth schema belongs to the authentication/session boundary. It must not a
 
 ## Generate a migration
 
-Update owned schema source under `packages/db/src/schema`, then run:
+Update owned schema source under `packages/platform/identity/src/schema`, then run:
 
 ```bash
 bun run db:generate
@@ -63,7 +63,7 @@ The host command requires a host-reachable disposable PostgreSQL database. For t
 
 ```bash
 bun run docker:up
-docker compose exec server bun run --cwd /app/packages/db db:migrate
+docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
 ```
 
 Verify application startup, authentication, health, duplicate execution behavior, and expected constraints. Material migrations also require measured duration, lock behavior, failure injection, restart behavior, and recovery evidence.
@@ -86,7 +86,7 @@ For a disposable synthetic environment only:
 ```bash
 docker compose down -v --remove-orphans
 bun run docker:up
-docker compose exec server bun run --cwd /app/packages/db db:migrate
+docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
 ```
 
 This deletes the local volume. Never use it against retained or customer data.

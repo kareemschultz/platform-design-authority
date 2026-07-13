@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -16,7 +16,7 @@ Define how Meridian discovers, evaluates, adopts, adapts, composes, versions, an
 
 This catalog prevents agents and contributors from independently selecting visually attractive components that conflict with platform tokens, accessibility, task efficiency, progressive disclosure, offline behavior, performance, white-label requirements, source ownership, or licensing.
 
-It is the mandatory decision point between an external source such as shadcn/ui, shadcn/studio, Magic UI Pro, a Figma library, a registry, or an MCP response and platform-owned implementation under `@meridian/ui`.
+It is the mandatory decision point between an external source such as shadcn/ui, shadcn/studio, Magic UI Pro, a Figma library, a registry, or an MCP response and platform-owned implementation under `@meridian/ui-web`.
 
 ## Authority and Scope
 
@@ -78,7 +78,7 @@ An MCP result, registry listing, screenshot, generated file, or paid-library ent
 Before creating or importing a reusable UI component, block, page layout, animation, or disclosure pattern, an agent must:
 
 1. Read this catalog and the governing documents listed above.
-2. Search `@meridian/ui`, Storybook, application-local components, and this catalog for an existing approved solution.
+2. Search `@meridian/ui-web`, Storybook, application-local components, and this catalog for an existing approved solution.
 3. State the user task, target roles, surfaces, devices, data density, risk level, and required canonical states.
 4. Search approved MCPs or registries only for candidates matching that requirement.
 5. Compare at least the platform-owned option, official shadcn/ui option, and premium-source option when each exists.

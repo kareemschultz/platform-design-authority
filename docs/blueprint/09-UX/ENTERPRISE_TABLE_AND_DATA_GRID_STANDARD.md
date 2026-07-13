@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-019
 title: Enterprise Table and Data Grid Standard
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -148,6 +148,39 @@ Provisional defaults:
 - Horizontal virtualization requires explicit accessibility review.
 
 Thresholds are measured and may change by device and row complexity.
+
+## Pagination Strategy Selection
+
+This is the platform's single authority for pagination strategy; other documents (including `NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`'s URL-state rule) cross-reference this section rather than restate it. Pagination strategy depends on the data and task, not aesthetic preference. Choose per list, not once for the whole platform.
+
+### Numbered pages
+
+Use for stable, boundable lists where a user needs a sense of total size and position — administrative lists, reports, invoices, audit evidence, user and role directories, and any work where "page 4 of 20" is meaningful to the task.
+
+Requirements:
+
+- Total count when reliably and cheaply available; if computing an exact total is expensive or unstable, say so rather than presenting a false-precision number
+- First, previous, next, and last controls where the list is long enough to benefit
+- Configurable page size within governed bounds
+- Filter, sort, and page number preserved in the URL
+- Returning from a record detail restores the same page, filter, and sort the user came from
+
+### Cursor pagination
+
+Use for large or actively changing operational datasets where a stable offset would skip or duplicate rows as data mutates underneath the user — event streams, activity logs, transaction history, search results, and webhook deliveries.
+
+Requirements:
+
+- A stable ordering key that does not shift under concurrent writes (e.g., a monotonic id or `(timestamp, id)` tuple, never a raw offset into a mutating set)
+- No duplicate or skipped records under concurrent writes — this must be tested, not assumed
+- A clear "new results available" affordance when data arrives ahead of the user's current cursor position, rather than silently reordering what they are looking at
+- Do not present a total-count figure when computing one is expensive or the underlying set is actively changing; say the count is unavailable rather than estimating it silently
+
+### Infinite scroll
+
+Use sparingly, for non-consequential browsing only — marketing content, image or inspiration galleries, and similar low-stakes feeds where losing your place has no real cost.
+
+Do not use infinite scroll for finance, inventory, permissions, audit, bulk actions, or reconciliation work, or for anything a user must count, select, compare, export, or revisit at a specific position. Those tasks require a stable, addressable position (numbered pages or cursor pagination), which infinite scroll does not provide. The bulk-selection standard in `ADVANCED_INTERFACE_PATTERNS.md` already requires selection to be explicit about page/filter/all-matching scope; infinite scroll makes that boundary harder for users to reason about and is disallowed wherever bulk selection applies.
 
 ## Responsive Transformation
 

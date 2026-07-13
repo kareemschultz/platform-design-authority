@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -21,6 +21,21 @@ This plan maps the governed planning inputs into concrete engineering workstream
 - `registry/first-slice.json` — the 103 in-scope capabilities (depth `full`/`prototype`/`seam`) and 13 explicit deferrals
 
 Where this plan and those documents conflict, they win. All work scheduled here proceeds under the ratification-wave **prototype exception**: Draft/Proposed documents guide non-production prototypes that name the decisions they test (chiefly ADR-0020 runtime, ADR-0002/0003 boundaries, ADR-0013 stored-value ownership).
+
+### 1.1 Implementation Posture: Backend Foundation First, Not Entire Backend First
+
+This plan's WS0→WS1 sequencing (§4) already builds contracts and identity/tenancy/authorization before any domain workflow — that is deliberate and correct, but it is **backend-foundation-first, not entire-backend-first**. Building every backend capability before any real frontend exists is explicitly rejected, because it lets APIs get designed without validating real workflows, produces domain models that are elegant but awkward to use, defers permission/navigation/accessibility/offline testing until they are expensive retrofits, risks building endpoints nobody needs, and still forces contract changes once a frontend finally exercises them.
+
+The governed sequence is:
+
+1. **Contract and domain first** — entities, invariants, commands, queries, permissions, entitlements, events, API schemas, and failure/uncertainty states (WS0, and the contract portion of each subsequent workstream).
+2. **Foundational backend** — identity, sessions, tenancy, Party linkage, authorization, entitlements, audit, session revocation, tenant isolation (WS1).
+3. **Thin experience shell** — just enough frontend to prove the WS1 foundation actually works for a user, before any domain vertical slice is built on top of it. See WS1's exit criteria (§5) for the explicit proof points this shell must demonstrate.
+4. **Vertical slices thereafter** — each subsequent workstream (WS2–WS7) delivers API → permission → persistence → event → audit → web UI → mobile/offline behavior → tests as one unit, never backend-only.
+
+**Effort balance for early prototypes (WS0–WS1):** roughly 70% backend and contracts, 20% thin-but-real workflow UI, 10% design-system and integration validation. This ratio is a planning guide for where attention goes, not a budget line item measured in the Definition of Done — later vertical-slice workstreams (WS2 onward) rebalance toward full-stack delivery per slice, since by then the thin shell has already retired the risks this ratio exists to manage.
+
+WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone; WS1's Exit criteria below fold in the specific frontend proof points that make this posture verifiable rather than aspirational.
 
 ## 2. Baseline: Verified Code Reality (2026-07-12)
 
@@ -93,7 +108,17 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Packages:** NEW `platform/tenancy`, `platform/identity` (Better Auth behind an anti-corruption layer), `platform/authorization`, `platform/entitlements`, `platform/audit`; NEW `domains/party` (ADR-0007).
 - **Contracts:** identity/tenancy/user-admin operation group (`/me`, `/session/active-context`, `/organizations`, `/users*`, `/roles`, `/role-assignments`, `/entitlements`, `/parties*`, `/audit-records` — per `registry/endpoint-permissions.json`); `platform.*` and `party.*` event families.
 - **Tests:** dominant dimensions `tenant_isolation`, `permission_and_entitlement`, `audit_and_observability` for the in-scope `platform.*`/`party.records` capabilities; budgets: session/permission checks inside the 750ms p95 sale path allowance; credential revocation ≤60s p95; two-tenant isolation proof (acceptance scenario 1).
-- **Exit:** scenario 1 demonstrated; Better Auth tables invisible to domain code (architecture test); DoD §6.
+- **Exit:** scenario 1 demonstrated; Better Auth tables invisible to domain code (architecture test); **the thin experience shell required by §1.1 is real and demonstrated, not stubbed** — specifically:
+  - Login works end to end against the real identity/session backend
+  - Tenant and organization switching is visible and functionally changes context (not just a UI toggle)
+  - Party linkage is visible for the authenticated user
+  - Permissions actually alter available actions in the shell (not just visually disable them — an unauthorized action must be rejected server-side too)
+  - Entitlements alter available capabilities without being presented as permissions (the two must be visually and semantically distinguishable per `COMPONENT_CATALOG_AND_STATE_MATRIX.md`'s "Permission denied" vs. "Entitlement unavailable" states)
+  - Session revocation is understandable to the user (a revoked session produces a clear, non-alarming re-authentication path, not a silent failure or an opaque error)
+  - The shell is responsive (narrow mobile through wide desktop) and passes basic keyboard and screen-reader navigation per `FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
+  - Navigation in the shell honors `NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`'s depth and context-visibility rules even at this early stage (role-based primary navigation, visible tenant/organization context) — it does not need every workspace built yet, but the shell it does have must not violate the navigation contract it will keep growing under
+  - The same critical contracts and shell behavior are verified under both Bun and the Node fallback (ADR-0020)
+  - DoD §6.
 - **Gates:** Better Auth plugin matrix deny-by-default honored (no new plugins without matrix disposition).
 
 ### WS2 — Catalog and Inventory Ledger (P2)

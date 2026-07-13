@@ -78,10 +78,10 @@ export BETTER_AUTH_SECRET="$(openssl rand -hex 32)"
 bun run docker:up
 ```
 
-3. Apply the committed authentication migration from inside the server container:
+3. Apply the committed owner-specific migration streams from inside the server container:
 
 ```bash
-docker compose exec server bun run --cwd /app/packages/platform/identity db:migrate
+docker compose exec server bun run db:migrate
 ```
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
@@ -144,12 +144,11 @@ apps/
 ├── server/      # Hono and oRPC server
 └── web/         # Next.js web application
 packages/
-├── api/         # Shared API procedures and context
-├── auth/        # Better Auth configuration
-├── config/      # Shared TypeScript configuration
-├── db/          # Drizzle schemas and migrations
-├── env/         # Environment validation
-└── ui/          # Shared source-owned UI components
+├── contracts/   # Canonical transport and event contracts
+├── persistence/ # Owner-specific PostgreSQL adapters and migrations
+├── platform/    # Runtime-neutral Platform services and ports
+├── tooling/     # Environment and TypeScript configuration
+└── ui-web/      # Shared source-owned UI components
 ```
 
 ## Available Scripts
@@ -161,10 +160,9 @@ packages/
 - `bun run check-types`: Check TypeScript types across all apps
 - `bun run test`: Run local Bun tests
 - `bun run dev:native`: Start the React Native/Expo development server
-- `bun run db:push`: Experimental disposable-database synchronization; prohibited against the bundled extension-bearing baseline
-- `bun run db:generate`: Generate database client/types
-- `bun run db:migrate`: Run database migrations
-- `bun run db:studio`: Open database studio UI
+- `bun run db:generate`: Generate each owner's migration artifacts in deterministic order
+- `bun run db:migrate`: Run every owner stream serially through the composition root
+- `bun run db:test`: Prove clean/upgrade/repeat/failure recovery and state-plus-outbox atomicity against a disposable host-reachable database
 - `bun run check`: Run the pinned Ultracite formatting and linting authority
 - `cd apps/web && bun run generate-pwa-assets`: Generate PWA assets
 - `bun run docker:build`: Build the Docker Compose images

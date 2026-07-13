@@ -9,11 +9,17 @@
     "dev": "bun run --hot src/index.ts",
     "start": "bun run dist/index.mjs",
     "start:node": "node dist/node.mjs",
-    "test": "bun test src/*.test.ts"
+    "test": "bun test src/*.test.ts",
+    "db:migrate": "bun run composition/migrate.ts",
+    "db:test": "bun test composition/*.integration.test.ts",
+    "db:test:node": "node node_modules/tsx/dist/cli.mjs composition/persistence.node-check.ts"
   },
   "dependencies": {
     "@hono/node-server": "2.0.8",
     "@meridian/platform-identity": "workspace:*",
+    "@meridian/persistence-platform-events-postgres": "workspace:*",
+    "@meridian/persistence-platform-identity-postgres": "workspace:*",
+    "@meridian/platform-events": "workspace:*",
     "@meridian/tooling-env": "workspace:*",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
@@ -21,12 +27,15 @@
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "hono": "catalog:",
+    "pg": "8.22.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@meridian/tooling-config": "workspace:*",
     "@types/bun": "catalog:",
+    "@types/pg": "catalog:",
     "tsdown": "^0.22.3",
+    "tsx": "4.21.0",
     "typescript": "^6"
   }
 }

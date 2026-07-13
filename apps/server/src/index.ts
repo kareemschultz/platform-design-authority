@@ -8,10 +8,10 @@ import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import {
-	closeIdentityComposition,
 	identityHttpHandler,
 	identitySessionService,
 } from "../composition/identity";
+import { closeDatabaseComposition } from "../composition/postgres";
 import { createContext } from "./context";
 import { appRouter } from "./router";
 
@@ -110,7 +110,7 @@ if ("bun" in process.versions) {
 			return;
 		}
 		shuttingDown = true;
-		closeIdentityComposition()
+		closeDatabaseComposition()
 			.catch((error: unknown) => {
 				console.error("Error while closing database pool:", error);
 			})

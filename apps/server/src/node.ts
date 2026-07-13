@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { env } from "@meridian/tooling-env/server";
 
-import { closeIdentityComposition } from "../composition/identity";
+import { closeDatabaseComposition } from "../composition/postgres";
 import app from "./index";
 
 const port = env.PORT ?? 3000;
@@ -21,7 +21,7 @@ function shutdown(): void {
 		if (closeError) {
 			console.error("Error while closing HTTP server:", closeError);
 		}
-		closeIdentityComposition()
+		closeDatabaseComposition()
 			.catch((error: unknown) => {
 				console.error("Error while closing database pool:", error);
 			})

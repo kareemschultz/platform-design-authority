@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -66,6 +66,15 @@ Family-level entries in `registry/architecture-rules.json` are a conservative gr
 ### Persistence Adapters
 
 `packages/persistence/*` contains owner-specific database adapters and migrations selected under ADR-0027. Each package maps to one authoritative Platform, Engine, or Domain owner and may import only that owner's published ports and schemas. Persistence packages do not read environment configuration, create pools, expose database types through contracts, or import another owner's repositories, tables, or migrations.
+
+### Registered Persistence Owners
+
+The executable registry maps every concrete package, table, and migration stream to exactly one logical owner. Package location does not transfer accountability.
+
+| Persistence package | Logical owner | Published owner package | Owned tables | Migration directory |
+|---|---|---|---|---|
+| `packages/persistence/platform-identity-postgres` | `platform.identity` | `@meridian/platform-identity` | `user`, `session`, `account`, `verification` | `packages/persistence/platform-identity-postgres/src/migrations` |
+| `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
 
 ### UI Packages
 
@@ -155,9 +164,9 @@ Expired exceptions fail CI.
 
 ## Executable Ruleset
 
-`registry/architecture-rules.json` carries the machine-readable package globs, dependency grants, composition roots, and governed exceptions derived from this document. `scripts/check_architecture.py` enforces the rules in CI and `scripts/test_architecture_checker.py` proves both denial outside a composition root and allowance inside one. This document remains authoritative; the registry and checker must be updated together when it changes.
+`registry/architecture-rules.json` carries the machine-readable package globs, dependency grants, composition roots, persistence-owner mappings, and governed exceptions derived from this document. `scripts/check_architecture.py` enforces the rules in CI and `scripts/test_architecture_checker.py` proves composition-root, owner-import, pool-lifecycle, and table-ownership behavior. This document remains authoritative; the registry and checker must be updated together when it changes.
 
-The temporary `platform-identity-persistence-relocation` exception records the pre-WS1 embedded Better Auth persistence shape. It permits only the named database, migration, and connection-lifecycle violations under `packages/platform/identity/**`; it does not permit another schema owner or an application import. ADR-0027 and PDA-RDM-008 require its removal in WS1 PR2.
+The temporary `platform-identity-persistence-relocation` exception was removed by WS1 PR2 when the Identity schema and migrations moved to the registered owner-specific adapter and pool lifecycle moved to the server composition root.
 
 ## Quality Gates
 
@@ -170,5 +179,6 @@ The temporary `platform-identity-persistence-relocation` exception records the p
 
 ## Change Log
 
+- 2026-07-13 — v0.5.0 registered the first owner/table/migration mappings, removed the Identity relocation exception, and made ownership plus pool-lifecycle denials executable.
 - 2026-07-13 — v0.4.0 made the path-aware rules executable in CI, added positive/negative regression probes, closed TD-007, and recorded the expiring Platform Identity persistence-relocation exception for PR2.
 - 2026-07-13 — v0.3.0 registered owner-specific Persistence packages under ADR-0027 and separated composition binding from business transaction ownership.

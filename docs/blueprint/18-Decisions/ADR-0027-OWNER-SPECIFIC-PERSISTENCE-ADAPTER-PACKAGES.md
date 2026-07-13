@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.2.3
+version: 0.2.5
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
@@ -15,7 +15,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0024, ADR-0025]
 
 ## Status
 
-Proposed. This decision may guide the named Technical Prototype 1 work in PDA-RDM-008, but it is not production authority. Its Platform Architecture, Data Platform, and Security review rows must be complete before WS1 PR2 merges.
+Proposed. This decision may guide the named Technical Prototype 1 work in PDA-RDM-008, but it is not production authority. The three architecture-consistency review rows required before WS1 PR2 merges — Platform Architecture, Data Platform, and Security — are **recorded as Approved at prototype scope (2026-07-13)** against PR #37's CI-green implementation; that merge gate is satisfied. These were performed by Claude Code as the reviewer designated by the repository owner (one reviewer covering all three lenses, transparently attributed), not by three independent human specialists, and they do not constitute production acceptance. The Security row carries a forward caveat: DB-level tenant-isolation controls (RLS disposition, tenant-scoped constraints per PDA-SEC-011) remain an open gate for the PRs that introduce tenancy/domain tables.
 
 ## Context
 
@@ -44,7 +44,7 @@ Adopt option C for WS1 and retrofit `platform/identity`.
 2. **Concrete adapters use owner-specific persistence packages.** Packages live under `packages/persistence/*`, with one package per owner and backend, for example `platform-identity-postgres`, `platform-tenancy-postgres`, `platform-events-postgres`, and `domain-party-postgres`. They may import only the owning module's published ports and schemas plus approved persistence dependencies. They may not import another owner's repository, migrations, or private tables.
 3. **Ownership is logical, not inferred from the folder family.** The authoritative module remains accountable for its tables, schema policy, migration stream, compatibility, and rollback even though concrete artifacts live in its owner-specific persistence package. Ownership metadata and architecture tests map every adapter, table, and migration to exactly one module.
 4. **One pool is created at the composition root.** `apps/server/composition/**` reads validated configuration, creates the process `pg.Pool`, constructs approved persistence adapters over it, injects them through published ports, and owns graceful shutdown. No persistence package reads `process.env` or `@meridian/tooling-env`, creates a pool, or locates a global connection.
-5. **Application services own transaction boundaries.** A command or workflow defines the unit of work. The composition root only binds an injected transaction coordinator; it does not contain business orchestration. A transaction handle is adapter-internal and never appears in a domain, application, OpenAPI, event, or authorization contract.
+5. **Application services own transaction boundaries.** A command or workflow defines the unit of work. The composition root only binds an injected transaction coordinator; it does not contain business orchestration. The binding function may receive a concrete `PoolClient` and construct a scope containing only the selected owner ports plus the outbox-append port; the application callback never receives that client. A transaction handle is adapter/composition-internal and never appears in a domain, application, OpenAPI, event, or authorization contract.
 6. **Atomicity is narrow.** An authoritative module may atomically commit its own state and an outbox record through the published outbox port. It may not use the shared handle to mutate another module's business tables. Cross-domain completion uses orchestration, idempotency, events, and compensation per PDA-ARC-005.
 7. **Migrations are deterministic and serial.** A composition-owned runner invokes owner-specific migration streams in a fixed dependency-respecting order. A bare unfiltered `turbo run db:migrate` is insufficient.
 
@@ -110,14 +110,16 @@ The `database-outside-persistence` forbidden pattern in `registry/architecture-r
 |---|---|---|---|---|
 | Codex | Independent architecture consistency | Changes required on v0.1.0 | 2026-07-13 | Embedded adapters and the Drizzle-import control contradicted ADR-0020/PDA-ENGR-012; v0.2.0 separates owner-specific persistence packages and narrows transaction scope. |
 | Claude Code | Independent architecture consistency | Concurred with v0.2.0 | 2026-07-13 | Independently verified the registered Persistence family, open G3 lifecycle, transaction limits, and complete Two-Factor/Passkey baseline; evidence: PR #33 comment `4962106902`. |
-| Platform Architecture | Dependency boundaries, composition root | Pending | | |
-| Data Platform | Pooling, transactions, migration orchestration | Pending | | |
-| Security | Env/secret handling, tenant-safe connections | Pending | | |
+| Claude Code (Platform Architecture perspective) | Dependency boundaries, composition root | Approved — prototype scope | 2026-07-13 | Verified against PR #37 (`codex/36-ws1-persistence`, CI-green). Owner cores publish ports and import no DB client (`platform/identity` removed `db.ts`; `auth.ts` takes injected persistence + secret); concrete adapters live only in `packages/persistence/{platform-identity,platform-events}-postgres`; the pool factory is the sole composition-root database-client site (`apps/server/composition/postgres.ts`). Enforcement is executable and gated in CI — `scripts/check_architecture.py` + `scripts/test_architecture_checker.py` run in `meridian-prototype.yml`. The `exceptions[]` array is now empty: TD-007 (PR1) and `platform-identity-persistence-relocation` (this PR) closed by real resolution, not waiver. |
+| Claude Code (Data Platform perspective) | Pooling, transactions, migration orchestration | Approved — prototype scope | 2026-07-13 | Single process pool (`postgres.ts`); narrow unit-of-work that BEGIN/COMMIT/ROLLBACKs without leaking `PoolClient` (`postgres-unit-of-work.ts`); deterministic serial migration runner with per-stream error wrapping (`migrations.ts`); distinct per-owner migration tables (`platform_identity_migrations` / `platform_events_migrations`) preserving `single_migration_owner`. `persistence.integration.test.ts` proves empty-migrate, repeat-without-drift, representative upgrade, failed-stream recovery without partial state, atomic owner-state+outbox commit/rollback, and event-id idempotency. Exact locks recorded in PDA-APP-020 (Drizzle 0.45.2 / drizzle-kit 0.31.10 / pg 8.22.0 / PostgreSQL 18.4 / Bun 1.3.14 / Node 24). |
+| Claude Code (Security perspective) | Env/secret handling, tenant-safe connections | Approved — prototype scope, with a forward caveat | 2026-07-13 | `DATABASE_URL`/pool construction confined to `apps/server/composition/**`; no persistence or runtime-neutral package reads connection env; Better Auth `secret` injected via options, never from env inside the package; no secret logging (only `error.message` on idle-client). Outbox is tenant-scoped (`tenant_id NOT NULL` + tenant index) with classification/retention/idempotency columns. Enforced by the `connection-lifecycle-outside-composition` and `database-outside-persistence` CI patterns. **Caveat:** DB-level tenant-isolation controls (RLS disposition, tenant-scoped uniqueness/FKs per PDA-SEC-011) are a separate gate that applies when tenancy/domain tables land in PR3+; PR2's schemas are Better Auth core + the outbox only, so that gate is not yet exercised and remains open for later PRs. |
 
 ## Change Log
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.5 | 2026-07-13 | Platform Design Authority | Recorded the three required pre-PR2-merge architecture-consistency reviews (Platform Architecture, Data Platform, Security) as Approved at prototype scope against PR #37's CI-green implementation, by the owner-designated reviewer; Security row carries a forward tenant-isolation caveat. PR2 merge gate satisfied; production acceptance remains separate. |
+| 0.2.4 | 2026-07-13 | Platform Design Authority | Clarified how the composition root binds owner and outbox adapters over one transaction while keeping the concrete client out of application contracts; lifecycle and specialist review gates remain unchanged. |
 | 0.2.3 | 2026-07-13 | Platform Design Authority | Recorded the executable path-aware checker and the narrow, expiring `platform-identity-persistence-relocation` exception; specialist reviews and PR2 gate remain pending. |
 | 0.2.2 | 2026-07-13 | Platform Design Authority | Codex review: added an explicit composition-root `except` to the `database-outside-persistence` registry pattern so the ADR's composition-root pool factory is registry-sanctioned, not a test that ignores the registry. |
 | 0.2.1 | 2026-07-13 | Platform Design Authority | Recorded Claude Code's independent concurrence with v0.2.0; lifecycle and specialist review gates remain unchanged. |

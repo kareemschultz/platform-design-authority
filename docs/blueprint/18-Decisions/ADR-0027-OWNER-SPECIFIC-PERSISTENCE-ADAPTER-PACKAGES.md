@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.2.1
+version: 0.2.2
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
@@ -61,6 +61,8 @@ PDA-ENGR-012 and `registry/architecture-rules.json` register the `persistence` f
 - no runtime-neutral package imports a database client or adapter;
 - every table and migration resolves to one authoritative module owner.
 
+The `database-outside-persistence` forbidden pattern in `registry/architecture-rules.json` carries an explicit `except` for the registered `composition_roots` paths so the composition-root pool factory is a registry-sanctioned allowance rather than a test that ignores the registry. Persistence packages and the composition-root pool factory are the only database-client import sites.
+
 ## Consequences
 
 ### Positive
@@ -116,6 +118,7 @@ PDA-ENGR-012 and `registry/architecture-rules.json` register the `persistence` f
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.2 | 2026-07-13 | Platform Design Authority | Codex review: added an explicit composition-root `except` to the `database-outside-persistence` registry pattern so the ADR's composition-root pool factory is registry-sanctioned, not a test that ignores the registry. |
 | 0.2.1 | 2026-07-13 | Platform Design Authority | Recorded Claude Code's independent concurrence with v0.2.0; lifecycle and specialist review gates remain unchanged. |
 | 0.2.0 | 2026-07-13 | Platform Design Authority | Replaced contradictory embedded adapters with owner-specific persistence packages; narrowed composition and transaction responsibilities. |
 | 0.1.0 | 2026-07-13 | Platform Design Authority | Initial persistence-boundary proposal. |

@@ -151,8 +151,12 @@
     },
     {
       "id": "database-outside-persistence",
-      "description": "Database clients are limited to approved persistence packages.",
-      "pattern": "**/!(persistence)/** -> database-client"
+      "description": "Database clients are limited to approved persistence packages, except that registered composition-root paths (`requirements.composition_roots`) may import a database client solely to construct the single process pool/connection and inject it through published ports, per ADR-0027. No other path may import a database client.",
+      "pattern": "**/!(persistence)/** -> database-client",
+      "except": [
+        "apps/*/composition",
+        "packages/tooling/composition/*"
+      ]
     },
     {
       "id": "provider-type-leak",

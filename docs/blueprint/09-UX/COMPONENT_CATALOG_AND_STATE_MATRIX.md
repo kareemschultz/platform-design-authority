@@ -117,7 +117,7 @@ Every POS component defines touch, keyboard, scanner, screen-reader, offline, pe
 
 Every AI-assisted component additionally defines:
 
-- Inform, Draft, Recommend, Act with Approval, and Policy-Bounded Autonomous presentation where the governed workflow permits that level
+- Inform, Draft, Recommend, Confirm Single Action, Approved Workflow, and Bounded Automation presentation where the governed workflow permits that level; Levels 4–6 require separately approved mutating-agent controls, and Bounded Automation remains outside the first slice
 - Streaming, interrupted, partial, stale-source, missing-citation, policy-denied, tool-denied, approval-required, approval-expired, provider-uncertain, and deterministic-fallback states
 - The exact proposed command, tenant and record scope, affected data, authority result, and approval consequence before mutation
 - Traceability from displayed rationale and citations to governed AI records

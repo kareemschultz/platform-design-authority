@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-034
 title: Component Discovery Audit
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -29,26 +29,27 @@ The audit:
 5. Classified sources against Meridian task fit, architecture, canonical states, accessibility, responsiveness, white label, offline operation, dependencies, performance, Storybook, and AI-generation constraints.
 6. Recorded the complete discovered names in COMPONENT_SOURCE_MATRIX.md.
 
-The baseline was main at 8986977a3fa04a4b38c9b82c6a7384014dc8fadb. Discovery used shadcn 4.13.0 and shadcn-studio-mcp 1.0.7 on 2026-07-12/13.
+The baseline was main at 8986977a3fa04a4b38c9b82c6a7384014dc8fadb at original authoring; re-verified current on 2026-07-13 against main at a350732204aa33bebd4e9de6c1b64366372e1653 (this branch's merge-base equals that tip — no rebase required). Discovery used exactly pinned `shadcn@4.13.0` and `shadcn-studio-mcp@1.0.7` (never `@latest`) on 2026-07-12/13, with an authenticated re-verification pass on 2026-07-13. The official-registry figures below were independently reproduced by driving the pinned `shadcn@4.13.0` package directly over its stdio JSON-RPC interface, since the equivalent Claude-side MCP connector was not reachable this session (see COMPONENT_SOURCE_MATRIX.md's Connector status section). The Studio authenticated figures were reproduced by calling the metadata-only `get-block-meta-content` endpoint for all 61 families with a valid credential, and validated as genuinely credential-gated via a controlled with/without-credential comparison on one family (1 variant unauthenticated vs. 18 authenticated, 3 of them `isPro: true`).
 
 ## Inventory totals
 
 | Inventory | Verified total | Counting meaning |
 |---|---:|---|
-| Official shadcn registry entries | 471 | All configured @shadcn metadata entries |
+| Official shadcn registry entries | 471 | All configured @shadcn metadata entries; independently reproduced via direct JSON-RPC |
 | Official UI entries | 61 | Primitive and component candidates |
 | Official block entries | 97 | Page or composition examples, chiefly charts, sidebars, and authentication |
 | Official example entries | 239 | Documentation examples, not reusable platform contracts |
 | Official font entries | 52 | Typeface choices rejected by current token authority except already selected families |
 | Official theme entries | 5 | External theme entries rejected as token authority |
-| Other official entries | 17 | Hook, internal, library, and style entries |
-| Studio block families | 61 | Metadata families across five categories |
-| Studio inspiration variants | 146 | Named inspiration variants, not 146 accepted components |
-| Studio premium-only items | Unverified | Item metadata did not expose entitlement |
+| Other official entries | 17 | Hook (1), internal (13), library (1), and style (2) entries |
+| Studio block families | 61 | Metadata families across five categories (catalog level, unaffected by authentication) |
+| Studio inspiration variants (catalog level) | 146 | Named inspiration variants from the catalog listing, not 146 accepted components |
+| Studio variant records (authenticated, per-family) | 735 | Actual variant records returned by authenticated per-family metadata across all 61 families — substantially more than the catalog implies; see COMPONENT_SOURCE_MATRIX.md for the per-family breakdown |
+| Studio Pro-tagged variants (authenticated) | 74, across 21 of 61 families | Variants whose metadata carries an explicit `isPro: true` tag. The remaining 661 authenticated variant records carry no entitlement tag at all — this is unestablished entitlement, not confirmed Free |
 | Studio independent pages/templates/layouts | Unverified | The response did not provide reliable independent types or totals |
 | Studio independent animations/themes | Unverified | The response did not provide reliable independent types or totals |
 
-Unknown is intentionally not reported as zero. Studio markets premium blocks and landing-page generation, but the safe metadata response cannot prove which item is Pro-only or whether a family is a block, page, layout, template, or animation independently.
+Unknown is intentionally not reported as zero. Studio's per-family authenticated metadata now proves Pro-tagging exists and is credential-gated for at least 74 observed variants; it still does not classify any family as independently a page, layout, template, or animation, so those totals remain unverified rather than zero.
 
 ## Source decision matrix
 
@@ -131,6 +132,8 @@ Custom Required means compose owned behavior from accepted primitives; it does n
 | Dashboard examples can invent metrics | Misleading operational decisions | Use governed metric IDs, freshness, provenance, and drill-down |
 | Marketing motion can leak into operations | Cognitive load, motion harm, latency | Enforce ANIMATION_AND_MOTION_GUIDE.md |
 | Copied source shifts maintenance to Meridian | Upgrade and regression burden | Record provenance, owner, tests, and recheck trigger |
+| Codex's MCP configuration names the Studio credential `LICENSE_KEY`, which `shadcn-studio-mcp@1.0.7` does not recognize (only `API_KEY`/`EMAIL`) | Codex-side Studio calls likely run in freemium mode despite a valid license being configured; any prior claim of Codex-authenticated Pro access is unproven | Treat Codex Studio results as unauthenticated until its configuration is corrected; do not migrate or print the credential value without an explicit request |
+| The Claude Code desktop application's running host process was found (2026-07-13) to carry a stale, pre-migration MCP configuration snapshot baked into its own process command line, predating both the `shadcn` connector addition and the credential/version-pinning fixes | The official `shadcn` MCP connector is unreachable in-session; new claude.exe processes keep re-embedding the stale snapshot until the app is fully quit and relaunched | Requires a full quit-and-relaunch of the desktop application (not just a new chat) to pick up the current `~/.claude.json`; flagged to the user separately |
 
 ## Recommended next prototypes
 

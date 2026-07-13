@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-033
 title: Component Source Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -14,18 +14,24 @@ related_adrs: [ADR-0005, ADR-0022]
 
 Official shadcn/ui is Meridian's canonical external registry interface and primitive starting point. Shadcn Studio is a licensed design-exploration source. Neither source is architectural authority, and no item discovered here is Platform Approved.
 
-This is a metadata-only inventory taken on 2026-07-12/13. No component source, premium asset, installation command, page, or theme was retrieved or installed.
+This is a metadata-only inventory taken on 2026-07-12/13, with an authenticated re-verification pass on 2026-07-13. No component source, premium asset, installation command, page, or theme was retrieved or installed.
 
 ## Evidence and counting rules
 
-- Remote baseline: `main` at `8986977a3fa04a4b38c9b82c6a7384014dc8fadb`.
-- Official shadcn MCP package: `shadcn@4.13.0`; configured registry: `@shadcn`.
-- Shadcn Studio MCP package: `shadcn-studio-mcp@1.0.7`.
-- Official registry inventory: 471 entries. Counts are registry entries, not 471 approved components.
-- Studio inventory: 61 block families and 146 inspiration variants in five categories.
-- Studio's safe metadata response did not identify free versus Pro entitlement per family and did not expose independent totals for pages, templates, themes, animated components, or primitive components. Those counts are **unverified**, not zero.
+- Remote baseline: `main` at `8986977a3fa04a4b38c9b82c6a7384014dc8fadb` at original authoring; re-verified current against `main` at `a350732204aa33bebd4e9de6c1b64366372e1653` on 2026-07-13, with this branch's merge-base equal to that tip (no rebase required).
+- Official shadcn MCP package: pinned exactly to `shadcn@4.13.0` (not `@latest`); configured registry: `@shadcn`. Reproduced independently on 2026-07-13 by driving the pinned server directly over its stdio JSON-RPC interface (`initialize` → `get_project_registries` → `list_items_in_registries`) against a project's existing `components.json`, since the equivalent Claude-side MCP connector was not reachable in this session (see Connector status below). No item, block, page, theme, or file content was installed or retrieved; only registry metadata (name, registry type) was read.
+- Shadcn Studio MCP package: pinned exactly to `shadcn-studio-mcp@1.0.7` (not unpinned/`@latest`).
+- Official registry inventory: 471 entries, independently reproduced via the direct JSON-RPC session above, with an exact type breakdown: 239 `example`, 97 `block`, 61 `ui`, 52 `font`, 13 `internal`, 5 `theme`, 2 `style`, 1 `lib`, 1 `hook` (239+97+61+52+13+5+2+1+1 = 471). Counts are registry entries, not 471 approved components.
+- Studio catalog-level inventory: 61 block families and 146 inspiration variants in five categories, as returned by `get-blocks-metadata` (unchanged whether or not Studio credentials are configured — this call is catalog-level and does not vary with entitlement).
+- Studio authenticated re-verification (2026-07-13): calling the metadata-only, non-source-fetching `get-block-meta-content` endpoint per family with a valid `API_KEY`/`EMAIL` credential returns substantially more than the catalog implies. Across all 61 families this returned **735 total variant records** (not 146), of which **74 variants across 21 of the 61 families carry an explicit `isPro: true` tag** in their `meta` object; the remaining 661 variant records do not carry an `isPro` field at all (this is recorded as **not established as Free** — the field's absence is not evidence of a Free/Pro classification either way). Per-family authenticated variant and Pro-tagged counts are in the family table below alongside the original catalog-declared counts.
+- **Controlled comparison establishing this is genuinely credential-gated** (not merely a richer public response): the identical `get-block-meta-content` call for `dashboard-and-application/application-shell/registry` was run twice from an isolated process, once with `API_KEY`/`EMAIL` set and once with both unset. Without credentials the endpoint returned exactly 1 variant (`application-shell-01`, the basic/free entry). With credentials it returned 18 variants, 3 of them `isPro: true`. This is direct, reproducible evidence that the configured credential is live and authenticating, not merely present.
 - Studio documents Free and Pro modes and the `/cui`, `/iui`, `/rui`, and `/ftc` workflows and requires an initialized shadcn project: [Studio MCP documentation](https://shadcnstudio.com/docs/getting-started/shadcn-studio-mcp-server).
 - Official shadcn documents MCP registry browsing, search, inspection, and installation through configured registries: [official shadcn MCP documentation](https://ui.shadcn.com/docs/mcp).
+- Independent totals for pages, templates, themes, and animated/motion components beyond what is captured above remain **unverified**, not zero — the metadata-only endpoints used here do not expose a dedicated classification for those categories.
+
+## Connector status (2026-07-13)
+
+The official `shadcn` MCP server is configured in the Claude Code user-level config (`shadcn@4.13.0`, pinned) and its command was independently confirmed to work correctly when driven directly (see JSON-RPC evidence above). However, its tools did not load as an available Claude Code connector in this session. Investigation traced this to the running `claude.exe` host process itself carrying a stale, pre-migration snapshot of the MCP server configuration baked into its own process command line at launch time — meaning the desktop application has not yet picked up either the `shadcn` server addition or the later credential/version-pinning corrections made to `~/.claude.json`. This requires a full quit-and-relaunch of the desktop application (not just a new chat/session) to resolve, and is recorded as an open recheck trigger below. All official-registry evidence in this document was gathered as a workaround by driving the pinned package directly over stdio JSON-RPC, not through the (currently unreachable) Claude Code connector.
 
 ## Source-role matrix
 
@@ -57,73 +63,73 @@ Each name below inherits the source, type, recommendation, and rationale on its 
 
 Every family is recorded individually. “Variants” is the inspiration-variant count returned by the metadata endpoint, not a licensed-source or quality count.
 
-| Source | Category | Name | Type | Variants | Recommendation | Rationale |
-|---|---|---|---|---:|---|---|
-| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | 10 | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
-| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | 2 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | 9 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | Card Nav | Block family | 1 | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
-| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | 5 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | 2 | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
-| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | 2 | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
-| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | 1 | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
-| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | 6 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | 9 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | 2 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | 1 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | 1 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | 2 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | multi step form | Block family | 3 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | Onboarding Feed | Block family | 1 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | 3 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | 2 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
-| Shadcn Studio MCP | Datatable | DataTable | Block family | 2 | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
-| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | category-filter | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | checkout-page | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | Gift Card | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | mega-footer | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | offer-modal | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | order-summary | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | product-category | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | product-list | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | product-overview | Block family | 2 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | product-quick-view | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | product-reviews | Block family | 2 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | eCommerce | shopping-cart | Block family | 1 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
-| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | 6 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Cookies Consent | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Download | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Error | Block family | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Features | Block family | 7 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Forgot Password | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | 15 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Login Page | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Register | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Reset Password | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | 3 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Team | Block family | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | 4 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Timeline Component | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Two Factor Authentication | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | User Schedule | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
-| Shadcn Studio MCP | Marketing UI Components | Verify Email | Block family | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Source | Category | Name | Type | Catalog variants | Authenticated variants | Pro-tagged variants | Recommendation | Rationale |
+|---|---|---|---|---:|---:|---:|---|---|
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | 10 | 24 | 0 | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | 2 | 7 | 0 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | 9 | 18 | 3 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Card Nav | Block family | 1 | 6 | 0 | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | 5 | 56 | 19 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | 2 | 26 | 0 | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | 2 | 23 | 0 | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | 1 | 10 | 0 | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | 6 | 18 | 0 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | 9 | 9 | 5 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | 2 | 11 | 3 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | 1 | 8 | 1 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | 1 | 7 | 0 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | 2 | 9 | 0 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | multi step form | Block family | 3 | 3 | 0 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Onboarding Feed | Block family | 1 | 5 | 0 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | 3 | 22 | 3 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | 2 | 20 | 1 | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Datatable | DataTable | Block family | 2 | 7 | 0 | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | 1 | 12 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | category-filter | Block family | 1 | 6 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | checkout-page | Block family | 1 | 4 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Gift Card | Block family | 1 | 3 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | mega-footer | Block family | 1 | 5 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | offer-modal | Block family | 1 | 5 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | order-summary | Block family | 1 | 5 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | 1 | 12 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | 1 | 9 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | 2 | 9 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-quick-view | Block family | 1 | 5 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-reviews | Block family | 2 | 5 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | shopping-cart | Block family | 1 | 4 | 0 | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | 6 | 24 | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | 1 | 10 | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | 2 | 17 | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | 1 | 7 | 3 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | 2 | 16 | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Cookies Consent | Block family | 1 | 3 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | 1 | 14 | 3 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Download | Block family | 1 | 6 | 1 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Error | Block family | 2 | 4 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | 2 | 19 | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | 7 | 29 | 9 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | 1 | 9 | 4 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Forgot Password | Block family | 1 | 5 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | 1 | 10 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | 15 | 41 | 6 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Login Page | Block family | 1 | 5 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | 1 | 9 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | 2 | 14 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | 2 | 18 | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | 2 | 20 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Register | Block family | 1 | 5 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Reset Password | Block family | 1 | 5 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | 3 | 11 | 2 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | 2 | 20 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | 4 | 24 | 3 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Timeline Component | Block family | 1 | 5 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Two Factor Authentication | Block family | 1 | 5 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | User Schedule | Block family | 1 | 2 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Verify Email | Block family | 1 | 5 | 0 | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
 
 ## Shadcn Studio inspiration-variant identifiers
 
-The Studio metadata endpoint returned the following 146 inspiration identifiers. They inherit the source, recommendation, rationale, and restrictions of their family in the table above. Only identifier basenames are recorded; internal source paths and licensed source content are intentionally omitted.
+The Studio catalog-level metadata endpoint (`get-blocks-metadata`) returned the following 146 inspiration identifiers; this is the catalog listing and does not vary with Studio authentication. Authenticated per-family metadata (`get-block-meta-content`) exposes substantially more actual variant records (735 total, see the family table above) plus explicit `isPro` tagging on 74 of them, but at a volume (735 individually-named entries) not reproduced identifier-by-identifier here; the per-family authenticated and Pro-tagged counts above are the governed record of that finding. They inherit the source, recommendation, rationale, and restrictions of their family in the table above. Only identifier basenames are recorded; internal source paths and licensed source content are intentionally omitted.
 
 | Category | Family | Variant identifiers |
 |---|---|---|
@@ -195,8 +201,10 @@ Any item selected for a prototype must be separately reviewed for keyboard and f
 
 ## Provenance and credential boundary
 
-The audit used only public official documentation and metadata returned by already callable MCP tools. It did not authenticate with or use a Pro license credential. Any credential previously shared in conversation is treated as compromised and must be rotated outside the repository before a later authenticated item-level review. Credentials, private registry URLs, cookies, account details, and licensed source are prohibited from commits.
+This pass authenticated with a Shadcn Studio Pro credential already confirmed by the founder to be a previously-rotated, non-compromised key, supplied only through local MCP configuration (`API_KEY`/`EMAIL` environment variables) and never typed, pasted, or echoed into this repository, any commit, any document, or any conversation transcript. Only metadata-only, non-source-fetching endpoints (`get-blocks-metadata`, `get-block-meta-content`) were used; no install, collect, `/ftc`, or content-fetching endpoint was called. Credentials, private registry URLs, cookies, account details, and licensed source remain prohibited from commits, and none appear in this document or elsewhere on this branch (verified by a full-diff secret scan; see the PR's verification section).
+
+A separate, unrelated `.codex/config.toml` MCP configuration for the same repository stores the identical credential value under the names `LICENSE_KEY`/`EMAIL` rather than `API_KEY`/`EMAIL`. Because the `shadcn-studio-mcp@1.0.7` package only recognizes `API_KEY` and `EMAIL` (confirmed by reading its `build/utils/config.js` source), a client configured with `LICENSE_KEY` does not authenticate — `isPro()` in that package requires both `apiKey` and `email` to be set, and `LICENSE_KEY` is never mapped to `apiKey`. This is recorded as a **compatibility finding, not a fix applied here**: the Codex configuration was left untouched and its credential value was not printed, migrated, or otherwise handled beyond this observation. Any prior claim that Codex-side tool calls against this package exercised authenticated Pro access should be treated as unproven until its configuration is corrected.
 
 ## Recheck triggers
 
-Re-run this inventory when the configured registry set changes, either MCP package changes, Studio metadata adds entitlement/version fields, the governed shadcn configuration changes, or a candidate is proposed for Prototype Approved status.
+Re-run this inventory when the configured registry set changes, either MCP package changes, Studio metadata adds entitlement/version fields, the governed shadcn configuration changes, a candidate is proposed for Prototype Approved status, the `shadcn` MCP connector becomes reachable in-session (allowing direct comparison against the JSON-RPC workaround used here), or the Codex `LICENSE_KEY`/`API_KEY` naming discrepancy is resolved.

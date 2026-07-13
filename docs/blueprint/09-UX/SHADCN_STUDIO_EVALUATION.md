@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-035
 title: Shadcn Studio Evaluation
-version: 0.1.1
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -30,11 +30,15 @@ No Studio item is Prototype Approved or Platform Approved by this evaluation.
 | /ftc | Figma-to-code workflow with Figma MCP | Composition/install aid; Figma names and output are not contracts |
 | Free mode | Essential features and limited block set | Suitable only for limited exploration |
 | Pro mode | Premium blocks, advanced capability, and priority support | Entitlement does not imply architectural acceptance |
-| Returned metadata | 61 block families and 146 inspiration identifiers | Complete safe metadata response observed in this audit |
-| Item entitlement fields | Not returned | Premium-only count remains unverified |
+| Returned metadata (catalog level) | 61 block families and 146 inspiration identifiers | Catalog-level response; does not vary with authentication |
+| Returned metadata (authenticated, per-family) | 735 total variant records across the same 61 families, of which 74 (across 21 families) carry an explicit `isPro: true` tag | Substantially deeper than the catalog implies; see COMPONENT_SOURCE_MATRIX.md for the full per-family breakdown |
+| Item entitlement fields | Returned at the per-family metadata level (`get-block-meta-content`'s `meta.isPro` field) for authenticated variants that carry it; absent (not false) for the remainder | Premium-only count is now partially observed, not fully unverified — see below |
+| Credential-gating confirmed | Yes, by controlled comparison: identical call returned 1 variant unauthenticated vs. 18 variants (3 `isPro: true`) authenticated for the same family | The configured credential is live and authenticating, not merely configured |
 | Independent page/template/layout/animation/theme types | Not returned reliably | Do not invent totals |
 
 The public documentation describes /ftc as primarily installing blocks represented by Figma frame names and allowing minor changes. That is not evidence that it can safely translate complex operational layout, state machines, authority, or application contracts.
+
+Entitlement caveat: the presence of `isPro: true` on 74 of 735 authenticated variant records is direct evidence those specific variants are Pro-tier. The absence of the field on the remaining 661 is **not** evidence they are Free-tier — Studio's metadata schema does not appear to positively tag Free items, only Pro ones observed so far. Treat un-tagged variants' entitlement as unverified, not Free-by-default.
 
 ## Codex support status
 
@@ -49,6 +53,8 @@ Required fallback:
 - Keep each result bounded and record truncation or missing fields.
 - Never silently interpret an incomplete response as a complete catalog.
 
+**Compatibility finding (2026-07-13): Codex's configured credential likely does not authenticate at all.** The `shadcn-studio-mcp@1.0.7` package (confirmed by reading its `build/utils/config.js` source) only recognizes the environment variables `API_KEY` and `EMAIL`; `isPro()` requires both to resolve to non-empty values. The `.codex/config.toml` MCP entry for this server sets `EMAIL` correctly but names the license variable `LICENSE_KEY`, which the package does not read — so `apiKey` never gets set and Studio calls made from that Codex configuration run in freemium mode regardless of the license actually held. Any earlier claim that a Codex-side Studio call succeeding proved authenticated Pro access should be treated as unproven; a successful call only proves the server started, not that it authenticated (freemium calls also succeed). This is recorded as a compatibility finding only — the Codex configuration was not modified, and its credential value was not printed or migrated, per the standing instruction to leave it untouched unless a fix is explicitly requested.
+
 ## Inventory profile
 
 | Studio category | Families | Typical value | Meridian disposition |
@@ -58,9 +64,9 @@ Required fallback:
 | Datatable | 1 | Table visual composition | Researching; custom enterprise behavior required |
 | eCommerce | 13 | Storefront and checkout presentation | Restricted; production storefront deferred |
 | Marketing UI Components | 29 | Landing, auth-page presentation, social proof, pricing, portfolio | Restricted to marketing or visual research |
-| Total | 61 | 146 inspiration variants | No automatic approval |
+| Total | 61 | 146 catalog-level inspiration variants; 735 actual variant records observed via authenticated per-family metadata (74 explicitly `isPro: true`) | No automatic approval |
 
-The complete family and variant names are in COMPONENT_SOURCE_MATRIX.md.
+The complete family and variant names, plus the full per-family authenticated/Pro-tagged breakdown, are in COMPONENT_SOURCE_MATRIX.md.
 
 ## Strengths
 
@@ -72,7 +78,7 @@ The complete family and variant names are in COMPONENT_SOURCE_MATRIX.md.
 
 ## Weaknesses
 
-- Catalog metadata does not expose per-item version, entitlement, dependency, accessibility evidence, license scope, or independent content type.
+- Catalog-level metadata does not expose per-item version, entitlement, accessibility evidence, license scope, or independent content type. Authenticated per-family metadata does expose `dependencies`, `registryDependencies`, file paths/types, and an `isPro` tag on some variants (see Verified environment and capabilities), but still no version, accessibility, or license-scope evidence.
 - Vendor claims such as production-ready or accessible are discovery claims, not acceptance evidence.
 - Visual compositions do not model Meridian canonical states, offline truth, tenant scope, permissions, entitlements, provider uncertainty, reconciliation, or reversal semantics.
 - Authentication and checkout pages can appear complete while hiding serious architectural gaps.
@@ -138,7 +144,7 @@ Before retrieving a selected Studio item:
 
 License keys, account email addresses, invoices, cookies, access tokens, private registry URLs, billing records, and prohibited licensed source must never enter repository files, issues, pull requests, logs, screenshots, fixtures, or generated evidence.
 
-Any Studio credential disclosed in a conversation is treated as compromised. It must be revoked or rotated through the vendor account before later authenticated work. This audit neither used nor persisted such a credential.
+This evaluation's 2026-07-13 authenticated pass used a Shadcn Studio Pro credential already confirmed by the founder to be the previously-rotated, non-compromised key, configured only through local MCP `env` settings (`API_KEY`/`EMAIL`) — never typed, pasted, logged, or committed. Only metadata-only endpoints (`get-blocks-metadata`, `get-block-meta-content`) were called; no install, collect, or content-fetching endpoint was used, and no licensed source was retrieved or persisted. A full-diff secret scan of this branch found no credential, private URL, or account detail in any committed file. Any *future* credential believed to be exposed must still be revoked or rotated through the vendor account before further authenticated work — this standing rule is unchanged.
 
 ## Recommendation
 

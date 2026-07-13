@@ -1,5 +1,5 @@
-import type { AppRouterClient } from "@meridian/api/routers/index";
-import { env } from "@meridian/env/web";
+import type { AppRouterClient } from "@meridian/platform-clients-api-client";
+import { env } from "@meridian/tooling-env/web";
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";

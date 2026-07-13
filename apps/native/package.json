@@ -14,8 +14,8 @@
   "dependencies": {
     "@expo/ui": "~57.0.1",
     "@expo/vector-icons": "^15.1.1",
-    "@meridian/api": "workspace:*",
-    "@meridian/env": "workspace:*",
+    "@meridian/platform-clients-api-client": "workspace:*",
+    "@meridian/tooling-env": "workspace:*",
     "@orpc/client": "catalog:",
     "@orpc/tanstack-query": "catalog:",
     "@stardazed/streams-text-encoding": "^1.0.2",
@@ -44,7 +44,7 @@
     "react-native-worklets": "0.10.0"
   },
   "devDependencies": {
-    "@meridian/config": "workspace:*",
+    "@meridian/tooling-config": "workspace:*",
     "@types/react": "~19.2.17",
     "typescript": "~6.0.3"
   }

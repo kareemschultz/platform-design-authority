@@ -38,10 +38,10 @@
     "dev:native": "turbo run dev -F native",
     "dev:web": "turbo run dev -F web",
     "dev:server": "turbo run dev -F server",
-    "db:push": "turbo run db:push -F @meridian/db",
-    "db:studio": "turbo run db:studio -F @meridian/db",
-    "db:generate": "turbo run db:generate -F @meridian/db",
-    "db:migrate": "turbo run db:migrate -F @meridian/db",
+    "db:push": "turbo run db:push -F @meridian/platform-identity",
+    "db:studio": "turbo run db:studio -F @meridian/platform-identity",
+    "db:generate": "turbo run db:generate -F @meridian/platform-identity",
+    "db:migrate": "turbo run db:migrate -F @meridian/platform-identity",
     "db:start": "docker compose up -d postgres",
     "db:watch": "docker compose up postgres",
     "db:stop": "docker compose stop postgres",
@@ -57,7 +57,7 @@
     "contracts:check": "python scripts/generate_contracts.py --check"
   },
   "dependencies": {
-    "@meridian/env": "workspace:*",
+    "@meridian/tooling-env": "workspace:*",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },
@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.2",
-    "@meridian/config": "workspace:*",
+    "@meridian/tooling-config": "workspace:*",
     "@types/bun": "catalog:",
     "turbo": "^2.10.2",
     "typescript": "^6",

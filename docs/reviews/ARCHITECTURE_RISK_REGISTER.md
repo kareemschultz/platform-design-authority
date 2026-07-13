@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -222,12 +222,13 @@ Distinct from risk: a debt entry records a deliberate suboptimal choice accepted
 
 | ID | Description | Why accepted | Revisit trigger | Owner class |
 |---|---|---|---|---|
-| TD-001 | packages/api dissolves into server transport plus generated client during WS0; current shape is scaffold expedience | Scaffold expedience to unblock initial workspace wiring | WS0 execution | Implementation |
-| TD-002 | @meridian/db holds Better Auth tables that move to platform/identity ownership at WS1 | Single-migration-owner rule keeps one migration stream during scaffold phase | WS1 identity workstream | Implementation |
+| TD-001 | **Closed 2026-07-13.** packages/api dissolved into `apps/server` transport (router/context/procedures) plus a generated client type surface in `packages/platform-clients/api-client` during WS0's package restructuring. Evidence: `FIRST_SLICE_IMPLEMENTATION_PLAN.md` §2/§5 WS0; fresh install/typecheck (12/12)/test (126/126)/lint/build all green. | Scaffold expedience to unblock initial workspace wiring | WS0 execution | Implementation |
+| TD-002 | **Closed 2026-07-13 (one workstream early).** `@meridian/db`'s Better Auth tables moved to `packages/platform/identity` (`@meridian/platform-identity`) ownership during WS0 rather than waiting for WS1, since no domain code yet depends on the shared connection. Evidence: same as TD-001. | Single-migration-owner rule keeps one migration stream during scaffold phase | WS1 identity workstream | Implementation |
 | TD-003 | apps/native excluded from Biome linting | Better-T-Stack scaffold default; no native work is active yet | Native app work starts | Implementation |
 | TD-004 | Status-token CSS variables are hand-copied literals pending the token-generation pipeline | Pipeline (PDA-UX-023) not yet built; literals unblock UI work | Token-generation pipeline lands (PDA-UX-023) | Implementation |
 | TD-005 | Registry capability governance fields (packaging_class and similar) remain namespace defaults pending curation | Curated overlay exists but per-capability curation is deferred to workstream owners | Capability curation pass per workstream | PDA |
 | TD-006 | First-slice event schemas exist for only 4 of 197 events (schemas/ holds the finance/offline/events subset) | Representative-schema approach proves the envelope; full coverage deferred | Expand per workstream as events enter implementation | Implementation |
+| TD-007 | `packages/platform-clients/api-client` re-exports its `AppRouterClient` type directly from `apps/server/src/router.ts` (type-only, erased at build time), which is a real source-level dependency edge outside `platform-clients`' declared family grant (foundation/contracts only). Recorded in `registry/architecture-rules.json` `exceptions[]` as `platform-clients-api-client-server-type-import`. | No contract-first oRPC definition (input/output schemas independent of the server's concrete implementation) exists yet; building one now would be premature given only 2 trivial procedures exist | WS1 lands a contract-first oRPC setup; must close before WS2 begins per `FIRST_SLICE_IMPLEMENTATION_PLAN.md` DoD item 4 | Implementation |
 
 ## Maintenance
 

@@ -10,7 +10,7 @@
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
-    "@meridian/config": "workspace:*",
+    "@meridian/tooling-config": "workspace:*",
     "typescript": "^6"
   }
 }

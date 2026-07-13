@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@meridian/ui/components/button";
-import { Input } from "@meridian/ui/components/input";
-import { Label } from "@meridian/ui/components/label";
+import { Button } from "@meridian/ui-web/components/button";
+import { Input } from "@meridian/ui-web/components/input";
+import { Label } from "@meridian/ui-web/components/label";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

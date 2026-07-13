@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -37,17 +37,29 @@ The governed sequence is:
 
 WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone; WS1's Exit criteria below fold in the specific frontend proof points that make this posture verifiable rather than aspirational.
 
-## 2. Baseline: Verified Code Reality (2026-07-12)
+## 2. Baseline: Verified Code Reality (2026-07-13)
 
 **Exists and is green:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); working Better Auth email/password with Drizzle on PostgreSQL 18 (4 auth tables, 1 migration); Hono + oRPC server with health probe and one protected procedure; Next.js web app with login and a dashboard stub; Expo native health shell with authentication explicitly deferred behind RR-001; Fumadocs portal; contract artifacts (`openapi/first-slice-v1.yaml` 82 operations, `registry/endpoint-permissions.json` 82 rows, `registry/permissions.json` 94 permissions, `registry/events.json` 197 events, `registry/first-slice-tests.json` 103×13 dimensions); five green gates (`check-types` 13/13, `test`, ultracite, `validate_docs.py`, registry `--check`) and CI with a live Docker/migration/health gate.
 
-**Does not exist:** any domain code. No tenancy, Party, authorization, entitlements, catalog, inventory, POS, stored value, offline sync, payments, or recovery tooling. The ten workspace packages (`api`, `auth`, `config`, three contract packages, `db`, `env`, foundation core, and `ui`) do not yet match the `registry/architecture-rules.json` package families. This section is the honesty anchor: everything below is planned, not built.
+**WS0 package restructuring is complete as of 2026-07-13** (verified: fresh `bun install`, `check-types` 12/12, `test` 126/126, `check`, and `build` all green across the whole workspace). The workspace now matches `registry/architecture-rules.json`'s families:
+
+| Old package | New location | Family |
+|---|---|---|
+| `@meridian/db` + `@meridian/auth` | `packages/platform/identity` (`@meridian/platform-identity`) | `platform` — Better Auth, the Drizzle connection, and the auth schema are internal details behind an anti-corruption layer; only `auth` and `closeDb` are exported |
+| `@meridian/api` | Dissolved: router/context/procedures moved into `apps/server`; typed client surface moved to `packages/platform-clients/api-client` (`@meridian/platform-clients-api-client`) | `applications` (router) + `platform-clients` (client type) |
+| `@meridian/ui` | `packages/ui-web/core` (`@meridian/ui-web`) | `ui-web` |
+| `@meridian/env` | `packages/tooling/env` (`@meridian/tooling-env`) | `tooling` |
+| `@meridian/config` | `packages/tooling/config` (`@meridian/tooling-config`) | `tooling` |
+
+One tracked, expiring exception was recorded rather than silently introduced: `packages/platform-clients/api-client` currently re-exports its `AppRouterClient` type directly from `apps/server/src/router.ts` (type-only, erased at build time) because no contract-first oRPC definition independent of the server's concrete implementation exists yet. See `registry/architecture-rules.json`'s `exceptions[]` entry `platform-clients-api-client-server-type-import` for the full rationale and its expiry condition (closes when WS1 lands a contract-first oRPC setup; must close before WS2 begins per DoD item 4).
+
+**Does not exist:** any domain code. No tenancy, Party, authorization, entitlements, catalog, inventory, POS, stored value, offline sync, payments, or recovery tooling. This section is the honesty anchor: WS0's package alignment is built; everything else below is planned, not built.
 
 ## 3. Package Architecture Target
 
 Work lands in the families defined by `docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md` and `registry/architecture-rules.json` (contract-only dependencies between families; ADR-0020 runtime neutrality — no Bun globals, `bun:*`, Hono context types, oRPC transport objects, or database adapters inside `foundation`, `contracts`, `platform`, `engines`, `domains`).
 
-Disposition of the six existing packages:
+Disposition of the six original packages (completed 2026-07-13; see §2's table for the resulting names and locations):
 
 | Package | Disposition |
 |---|---|
@@ -89,7 +101,7 @@ graph LR
 
 Template per workstream: **Why · Entry · Proves · Packages · Contracts · Tests · Exit · Gates.** "Proves" cites PDA-RDM-004 and is not restated here.
 
-### WS0 — Scaffold Alignment and Contract Materialization
+### WS0 — Scaffold Alignment and Contract Materialization — **complete (2026-07-13)**
 
 - **Why:** The contracts and rules exist only as registry artifacts; code that grows before the package families and generated contracts exist will calcify in the wrong shape and every later workstream inherits the misalignment.
 - **Entry:** none (first work).
@@ -97,7 +109,7 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Packages:** NEW `packages/contracts/*` (types generated/derived from OpenAPI, events, permissions registries), NEW `packages/foundation/core` (opaque ids, money/decimal per CLAUDE §7, result/error taxonomy, time semantics); restructure of the six existing packages per §3; dependency-rule enforcement wired into CI (architecture tests per `ARCHITECTURE_DEPENDENCY_RULES.md`).
 - **Contracts:** `openapi/first-slice-v1.yaml`, `registry/events.json`, `registry/permissions.json` as codegen sources — generated code never hand-edited.
 - **Tests:** foundation unit tests (money/id/time invariants); architecture tests fail on any forbidden import; all existing gates stay green through the restructure.
-- **Exit:** families in place or exceptions-with-expiry recorded; contracts package consumed by `apps/server`; DoD §6.
+- **Exit:** families in place or exceptions-with-expiry recorded; contracts package consumed by `apps/server`; DoD §6. **Satisfied:** all six original packages now sit in their target families or a tracked, expiring exception (see §2); fresh install/typecheck/test/lint/build all pass (126 tests, 0 failures, 12/12 packages typecheck clean). Automated architecture-rules import-graph enforcement (the "architecture tests" bullet above) does not exist yet as a CI-enforced check — it is recorded as a gap for a follow-up workstream, not silently assumed done.
 - **Gates:** none external.
 
 ### WS1 — Identity, Tenancy, Party, Authorization (P1)

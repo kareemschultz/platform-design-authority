@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@meridian/ui/components/button";
+import { Button } from "@meridian/ui-web/components/button";
 import { useEffect } from "react";
 
 export default function ErrorPage({

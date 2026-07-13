@@ -1,4 +1,4 @@
-import { env } from "@meridian/env/web";
+import { env } from "@meridian/tooling-env/web";
 import { createAuthClient } from "better-auth/react";
 
 function getServerUrl(url: string) {

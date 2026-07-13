@@ -1,4 +1,4 @@
-import { Button } from "@meridian/ui/components/button";
+import { Button } from "@meridian/ui-web/components/button";
 import Link from "next/link";
 
 export default function NotFound() {

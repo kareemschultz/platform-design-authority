@@ -1,0 +1,19 @@
+{
+  "name": "@meridian/platform-clients-api-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@orpc/server": "catalog:"
+  },
+  "devDependencies": {
+    "@meridian/tooling-config": "workspace:*",
+    "typescript": "^6"
+  }
+}

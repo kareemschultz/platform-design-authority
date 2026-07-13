@@ -20,7 +20,12 @@ const app = new Hono();
 app.use(
 	"/*",
 	cors({
-		allowHeaders: ["Content-Type", "Authorization"],
+		allowHeaders: [
+			"Authorization",
+			"Content-Type",
+			"Idempotency-Key",
+			"X-Active-Context-Id",
+		],
 		allowMethods: ["DELETE", "GET", "PATCH", "POST", "OPTIONS"],
 		credentials: true,
 		maxAge: 600,

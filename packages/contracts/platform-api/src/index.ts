@@ -70,6 +70,12 @@ const IdempotencyHeadersSchema = z.object({
 const ActiveContextHeadersSchema = z.object({
 	"x-active-context-id": IdentifierSchema.optional(),
 });
+const RequiredActiveContextHeadersSchema = z.object({
+	"x-active-context-id": IdentifierSchema,
+});
+const TenantCommandHeadersSchema = IdempotencyHeadersSchema.extend({
+	"x-active-context-id": IdentifierSchema,
+});
 
 export const getCurrentIdentityContract = base
 	.route({ method: "GET", path: "/v1/me", successStatus: 200 })
@@ -105,7 +111,12 @@ export const getOrganizationContract = base
 		responseRef: "#/components/schemas/Organization",
 		successStatus: 200,
 	})
-	.input(z.object({ params: z.object({ organizationId: IdentifierSchema }) }))
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ organizationId: IdentifierSchema }),
+		})
+	)
 	.output(OrganizationSchema);
 
 export const updateOrganizationContract = base
@@ -124,7 +135,7 @@ export const updateOrganizationContract = base
 	.input(
 		z.object({
 			body: UpdateOrganizationRequestSchema,
-			headers: IdempotencyHeadersSchema,
+			headers: TenantCommandHeadersSchema,
 			params: z.object({ organizationId: IdentifierSchema }),
 		})
 	)
@@ -140,6 +151,7 @@ export const listLocationsContract = base
 	})
 	.input(
 		z.object({
+			headers: RequiredActiveContextHeadersSchema,
 			query: PageQuerySchema.extend({ organizationId: IdentifierSchema }),
 		})
 	)
@@ -206,6 +218,7 @@ export const listUsersContract = base
 	})
 	.input(
 		z.object({
+			headers: RequiredActiveContextHeadersSchema,
 			query: PageQuerySchema.extend({ query: z.string().max(200).optional() }),
 		})
 	)
@@ -223,7 +236,7 @@ export const createUserInvitationContract = base
 	.input(
 		z.object({
 			body: CreateUserInvitationRequestSchema,
-			headers: IdempotencyHeadersSchema,
+			headers: TenantCommandHeadersSchema,
 		})
 	)
 	.output(UserInvitationSchema);
@@ -244,7 +257,7 @@ export const suspendTenantMembershipContract = base
 	.input(
 		z.object({
 			body: SuspendTenantMembershipRequestSchema,
-			headers: IdempotencyHeadersSchema,
+			headers: TenantCommandHeadersSchema,
 			params: z.object({ userId: IdentifierSchema }),
 		})
 	)
@@ -258,7 +271,12 @@ export const listRolesContract = base
 		responseRef: "#/components/schemas/PagedRoles",
 		successStatus: 200,
 	})
-	.input(z.object({ query: PageQuerySchema }))
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema,
+		})
+	)
 	.output(PagedRolesSchema);
 
 export const createRoleAssignmentContract = base
@@ -273,7 +291,7 @@ export const createRoleAssignmentContract = base
 	.input(
 		z.object({
 			body: CreateRoleAssignmentRequestSchema,
-			headers: IdempotencyHeadersSchema,
+			headers: TenantCommandHeadersSchema,
 		})
 	)
 	.output(RoleAssignmentSchema);
@@ -286,7 +304,12 @@ export const listEntitlementsContract = base
 		responseRef: "#/components/schemas/PagedEntitlements",
 		successStatus: 200,
 	})
-	.input(z.object({ query: PageQuerySchema }))
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema,
+		})
+	)
 	.output(PagedEntitlementsSchema);
 
 export const listAuditRecordsContract = base
@@ -299,6 +322,7 @@ export const listAuditRecordsContract = base
 	})
 	.input(
 		z.object({
+			headers: RequiredActiveContextHeadersSchema,
 			query: PageQuerySchema.extend({
 				action: z.string().max(200).optional(),
 				actorUserId: IdentifierSchema.optional(),
@@ -319,6 +343,7 @@ export const listPartiesContract = base
 	})
 	.input(
 		z.object({
+			headers: RequiredActiveContextHeadersSchema,
 			query: PageQuerySchema.extend({ query: z.string().max(200).optional() }),
 		})
 	)
@@ -332,7 +357,12 @@ export const getPartyContract = base
 		responseRef: "#/components/schemas/Party",
 		successStatus: 200,
 	})
-	.input(z.object({ params: z.object({ partyId: IdentifierSchema }) }))
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ partyId: IdentifierSchema }),
+		})
+	)
 	.output(PartySchema);
 
 export const createPersonPartyContract = base
@@ -347,7 +377,7 @@ export const createPersonPartyContract = base
 	.input(
 		z.object({
 			body: CreatePersonPartySchema,
-			headers: IdempotencyHeadersSchema,
+			headers: TenantCommandHeadersSchema,
 		})
 	)
 	.output(PartySchema);
@@ -368,7 +398,7 @@ export const createOrganizationPartyContract = base
 	.input(
 		z.object({
 			body: CreateOrganizationPartySchema,
-			headers: IdempotencyHeadersSchema,
+			headers: TenantCommandHeadersSchema,
 		})
 	)
 	.output(PartySchema);
@@ -385,7 +415,7 @@ export const updatePartyContract = base
 	.input(
 		z.object({
 			body: UpdatePartyRequestSchema,
-			headers: IdempotencyHeadersSchema,
+			headers: TenantCommandHeadersSchema,
 			params: z.object({ partyId: IdentifierSchema }),
 		})
 	)
@@ -407,7 +437,7 @@ export const createPartyIdentityLinkContract = base
 	.input(
 		z.object({
 			body: CreatePartyIdentityLinkRequestSchema,
-			headers: IdempotencyHeadersSchema,
+			headers: TenantCommandHeadersSchema,
 		})
 	)
 	.output(PlatformIdentityLinkSchema);

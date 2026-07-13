@@ -53,6 +53,16 @@ def main() -> int:
         ROOT
         / "apps"
         / "server"
+        / "src"
+        / "composition"
+        / "__architecture_nested_negative_fixture.ts",
+        expected_success=False,
+        expected_text="concrete application binding belongs in a registered composition root",
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "server"
         / "composition"
         / "__architecture_positive_fixture.ts",
         expected_success=True,

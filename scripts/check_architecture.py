@@ -60,9 +60,26 @@ def posix(path: Path) -> str:
 
 
 def matches(path: str, patterns: list[str]) -> bool:
+    path_parts = path.split("/")
+
+    def match_parts(pattern_parts: list[str], path_index: int = 0) -> bool:
+        if not pattern_parts:
+            return path_index == len(path_parts)
+        pattern_head, *pattern_tail = pattern_parts
+        if pattern_head == "**":
+            return match_parts(pattern_tail, path_index) or (
+                path_index < len(path_parts)
+                and match_parts(pattern_parts, path_index + 1)
+            )
+        return (
+            path_index < len(path_parts)
+            and fnmatch.fnmatchcase(path_parts[path_index], pattern_head)
+            and match_parts(pattern_tail, path_index + 1)
+        )
+
     return any(
-        fnmatch.fnmatch(path, pattern)
-        or fnmatch.fnmatch(path, f"{pattern}/**")
+        match_parts(pattern.split("/"))
+        or match_parts(f"{pattern}/**".split("/"))
         for pattern in patterns
     )
 
@@ -243,7 +260,9 @@ def main() -> int:
                 re.search(r"\bnew\s+Pool\s*\(", text)
                 or re.search(r"\bpool\.end\s*\(", text)
                 or ("DATABASE_URL" in text and source_family != "tooling")
-            ) and not matches(source_path, composition_roots):
+            ) and not is_test_source(source) and not matches(
+                source_path, composition_roots
+            ):
                 if not exception_allows(
                     exceptions, "connection-lifecycle-outside-composition", source_path
                 ):

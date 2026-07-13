@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -34,6 +34,14 @@ This document governs component-source selection and preferred implementation pa
 - `COMPONENT_NORMALIZATION_STANDARD.md` for the required transformation from external source to owned implementation
 - `COMPONENT_ACCEPTANCE_CHECKLIST.md` for the itemized evidence checklist used at promotion
 
+The current source evidence and pattern detail are recorded in:
+
+- COMPONENT_SOURCE_MATRIX.md for the complete official and Studio metadata inventory
+- COMPONENT_DISCOVERY_AUDIT.md for source comparison, gaps, and recommendations
+- SHADCN_STUDIO_EVALUATION.md for Studio support, license, and acquisition constraints
+- ANIMATION_AND_MOTION_GUIDE.md for governed operational and marketing motion
+- PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md for pattern choice and domain-specific disclosure
+
 When a preferred candidate conflicts with those documents, the governing specification wins and the candidate must be modified or rejected.
 
 ## Catalog Statuses
@@ -43,6 +51,7 @@ Every catalog entry uses one status:
 - **Needed** — a governed requirement exists, but no candidate has been selected.
 - **Researching** — candidate sources are being compared.
 - **Preferred Candidate** — best current source for a prototype; not yet platform-approved.
+- **Custom Required** — the governed need exists, but external sources cannot own the required behavior; compose an owned solution from accepted primitives.
 - **Prototype Approved** — normalized implementation may be used in a bounded prototype.
 - **Platform Approved** — owned implementation has passed all required gates and is the default for new work.
 - **Restricted** — permitted only for named surfaces or use cases.
@@ -326,6 +335,61 @@ The first discovery pass should evaluate candidates for:
 
 This priority list authorizes research only. It does not authorize installation or adoption.
 
+## Discovery Dispositions
+
+The 2026-07-13 metadata audit found 471 official shadcn registry entries and 61 Studio block families with 146 inspiration variants. The complete names and counting rules are in COMPONENT_SOURCE_MATRIX.md. None is Platform Approved.
+
+### Preferred Candidate
+
+| Family | Preferred source direction | Required normalization |
+|---|---|---|
+| Buttons, fields, inputs, checkboxes, radio groups, switches, selects, comboboxes | Official shadcn UI | Semantic tokens, canonical states, form errors, touch, zoom, RTL, white label |
+| Dialog, alert dialog, drawer, sheet, popover, tooltip | Official shadcn UI | Consequence-based pattern choice, focus, dismissal, mobile transformation, reduced motion |
+| Command palette and search interaction | Official Command/Combobox plus Meridian ranking and authority | Tenant and permission filtering, offline/no-results states, result provenance |
+| Application shell and dashboard composition | Official Sidebar/Dashboard plus selected Studio Application Shell/dashboard candidates | Meridian navigation, tenant context, landmarks, density, responsive and hydration budgets |
+| Account settings, form layout, multi-step form | Official form primitives plus selected Studio compositions | Application contracts, validation, draft/resume, review/confirm, accessibility |
+| Empty, loading, error, and unavailable states | Official Empty/Skeleton/Alert plus Studio Empty State inspiration | Canonical state language, recovery, announcements, offline and uncertainty semantics |
+| Ordinary operational charts and KPIs | Official chart/Recharts plus selected Studio visual inspiration | Governed metric IDs, source/freshness, text/table alternative, token and point budgets |
+
+Preferred Candidate authorizes a bounded normalization prototype only.
+
+### Custom Required
+
+| Platform component or workflow | Why external blocks are insufficient |
+|---|---|
+| Enterprise data grid and responsive record view | Bulk scope, server operations, virtualization, permissions, audit, export, density, offline, and accessible alternatives |
+| POS product picker, scanner, cart, tender, split payment, cash, receipt, return, and register | High-volume device workflow, financial consequence, offline leases, idempotency, provider uncertainty, and deterministic first-slice operation |
+| Tenant/organization switcher and tenant administration | Current authority, role, unsaved work, offline state, and safe boundary transition |
+| Party/entity picker | Tenant scope, canonical Party linkage, permissions, search authority, duplicate handling, and offline behavior |
+| Permission matrix, role editor, entitlement visibility, and access-scope preview | Permissions and entitlements remain separate; grants require scope and consequence evidence |
+| Inventory adjustment, count, transfer, barcode, receiving, and reconciliation | Ledger, reversal, units, location, scanner ambiguity, conflicts, queueing, and evidence |
+| Provider uncertainty, payment reconciliation, retry, duplicate-risk, and diagnostics | External sources do not model pending/unknown authority and safe recovery |
+| Offline queue, sync, conflict, tombstone, and reconciliation | Requires explicit leases, versions, idempotency, authority, and recovery |
+| Audit, activity, event, diff, and provenance viewers | Immutability, chronology, redaction, correlation, incomplete evidence, and protected access |
+| Accounting/financial review and reversal/compensation | Money, currency, classification, source references, audit, and non-destructive correction |
+| AI sidebar, provenance, approval, citations, autonomy controls, and deterministic fallback | AI must use normal commands and cannot redefine tool authority or essential workflow behavior |
+
+Custom Required means compose Meridian-owned behavior from accepted primitives, not duplicate the primitive foundation.
+
+### Restricted
+
+- Studio marketing, authentication-page, Bento, timeline, portfolio, and eCommerce families.
+- Official whole-page authentication, sidebar, dashboard, and chart blocks when used as more than composition evidence.
+- DataTable candidates when presented as an enterprise-grid solution.
+- Carousels, pie/radar/radial charts, novelty visualization, and decorative or continuous motion.
+- Any premium, generated, or third-party candidate before item-level provenance and license review.
+
+Restricted items may be used only for a named marketing, deferred storefront, onboarding, demonstration, or low-risk research surface.
+
+### Rejected
+
+- External theme entries replacing Meridian semantic tokens.
+- Alternative font entries outside the governed Inter/Geist decision.
+- Registry-internal artifacts as product contracts.
+- Whole-block adoption for financial, access-control, privacy, tenant, POS, offline, inventory, audit, or AI-authority workflows.
+- Candidate source with unclear redistribution rights, inaccessible critical path, secret requirement in source, unsafe network behavior, or hidden business authority.
+- Motion that pressures a purchase or approval, implies success early, or is required to understand a task.
+
 ## Promotion Gates
 
 A candidate reaches Platform Approved only when:
@@ -370,10 +434,10 @@ Agents and contributors must not:
 
 ## Remaining Implementation Work
 
-- Configure official shadcn/ui MCP for supported agents using a reviewed pinned CLI.
-- Configure licensed shadcn/studio MCP locally in a supported client without committing secrets.
-- Create a machine-readable candidate inventory after the first authenticated discovery pass.
+- Rotate the previously exposed Studio credential before any authenticated item-level work.
+- Re-run selected Studio item review in a vendor-supported client; Codex metadata interoperability is not vendor support.
+- Add a machine-readable candidate inventory only when an implementation consumer and freshness validator are defined.
 - Implement Storybook and the first platform-owned primitive set.
-- Evaluate the initial candidate priorities and record preferred candidates.
+- Prototype the strongest Preferred Candidates and the first Custom Required operational composites.
 - Add automated checks for raw palette values, prohibited dependencies, provenance, and stale candidate records.
 - Connect approved components to design-token generation and visual-regression evidence.

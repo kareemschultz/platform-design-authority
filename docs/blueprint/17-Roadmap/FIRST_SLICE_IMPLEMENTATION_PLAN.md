@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -115,7 +115,8 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 ### WS1 — Identity, Tenancy, Party, Authorization (P1)
 
 - **Why:** Every subsequent behavior is meaningless without enforceable tenant scope and separated authentication/Party/permission/entitlement concepts — retrofitting isolation is the most expensive failure in multi-tenant systems, and the audits' hardest rules (Better Auth owns sessions only; Party owns identity; domains own roles) must be encoded before any domain exists to violate them.
-- **Entry:** WS0 done.
+- **Detailed plan:** `WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md` (PDA-RDM-008) — package boundaries, contract surface, PR sequence (PR1–PR8), seed data, and exit gate. This entry stays the authoritative summary; PDA-RDM-008 does not override it.
+- **Entry:** WS0 done. **First PR closes TD-007** (contract-first oRPC boundary for `platform-clients/api-client`, per its recorded exception's own expiry condition) before any domain package is built against the router-coupled client shape.
 - **Proves:** PDA-RDM-004 §Prototype 1.
 - **Packages:** NEW `platform/tenancy`, `platform/identity` (Better Auth behind an anti-corruption layer), `platform/authorization`, `platform/entitlements`, `platform/audit`; NEW `domains/party` (ADR-0007).
 - **Contracts:** identity/tenancy/user-admin operation group (`/me`, `/session/active-context`, `/organizations`, `/users*`, `/roles`, `/role-assignments`, `/entitlements`, `/parties*`, `/audit-records` — per `registry/endpoint-permissions.json`); `platform.*` and `party.*` event families.

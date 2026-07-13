@@ -2638,10 +2638,10 @@
       "document_id": "PDA-PLT-002",
       "path": "docs/blueprint/01-Platform/TENANCY_AND_ORGANIZATIONS.md",
       "title": "Tenancy and Organization Model",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-10",
+      "last_reviewed": "2026-07-13",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3026,10 +3026,10 @@
       "document_id": "PDA-RDM-005",
       "path": "docs/blueprint/17-Roadmap/README.md",
       "title": "Roadmap Section Index",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-12",
+      "last_reviewed": "2026-07-13",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3048,7 +3048,7 @@
       "document_id": "PDA-RDM-007",
       "path": "docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md",
       "title": "Meridian First-Slice Implementation Plan",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",
@@ -3058,6 +3058,20 @@
         "ADR-0013",
         "ADR-0020",
         "ADR-0025"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-RDM-008",
+      "path": "docs/blueprint/17-Roadmap/WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md",
+      "title": "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-13",
+      "related_adrs": [
+        "ADR-0007",
+        "ADR-0020"
       ],
       "review_evidence": null
     },

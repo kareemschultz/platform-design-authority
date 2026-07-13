@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-032
 title: Component Acceptance Checklist
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -15,6 +15,8 @@ related_adrs: [ADR-0005, ADR-0022]
 Provide the evidence checklist required to promote a component, pattern, block, layout, or animation from discovery to Prototype Approved or Platform Approved status in the Preferred Component Catalog.
 
 A checklist is completed for the resulting Meridian-owned implementation, not merely for the external source demo.
+
+This is the itemized, checkable form of `PREFERRED_COMPONENT_CATALOG.md`'s Promotion Gates, referenced by step 8 of `COMPONENT_ACQUISITION_POLICY.md`'s acquisition workflow.
 
 ## Candidate Record
 

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-030
 title: Component Acquisition Policy
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -15,6 +15,14 @@ related_adrs: [ADR-0005, ADR-0022]
 Define how Meridian discovers, evaluates, imports, adapts, approves, versions, and retires user-interface primitives, components, blocks, page compositions, and animation assets from official shadcn/ui, shadcn/studio Pro, Magic UI Pro, Figma, third-party registries, MCP servers, and AI generation.
 
 External libraries and MCPs are discovery and retrieval sources. They are never design authority.
+
+## Authority and Scope
+
+`PREFERRED_COMPONENT_CATALOG.md` remains the single authority for catalog statuses, source classes, and promotion decisions. This document is the canonical, detailed acquisition procedure that the catalog's Mandatory Agent Workflow summarizes — it is not a parallel or competing workflow.
+
+`TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md` §Import Workflow describes the shadcn/premium-specific file-copy mechanics (steps 3-6 there: which files to copy, which values to replace) that operationalize the acquisition steps below for that source class specifically; it does not define a separate acquisition decision process.
+
+`COMPONENT_NORMALIZATION_STANDARD.md` and `COMPONENT_ACCEPTANCE_CHECKLIST.md` are the detailed procedures referenced by steps 7 and 8 of the workflow below.
 
 ## Governing Principle
 

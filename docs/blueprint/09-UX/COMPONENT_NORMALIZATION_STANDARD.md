@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-031
 title: Component Normalization Standard
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-13
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -15,6 +15,8 @@ related_adrs: [ADR-0005, ADR-0022]
 Define the mandatory transformation from an external component, block, layout, animation, registry item, or AI-generated candidate into Meridian-owned, testable, upgradeable UI source.
 
 Normalization is not cosmetic cleanup. It establishes platform ownership and removes accidental architecture.
+
+This document is referenced by step 7 of `COMPONENT_ACQUISITION_POLICY.md`'s acquisition workflow; `PREFERRED_COMPONENT_CATALOG.md` remains the authority for whether and when a component is acquired at all.
 
 ## Required Outcome
 

@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@meridian/ui/components/button";
+import { Button } from "@meridian/ui-web/components/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@meridian/ui/components/dropdown-menu";
+} from "@meridian/ui-web/components/dropdown-menu";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 

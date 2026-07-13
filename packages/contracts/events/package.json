@@ -11,7 +11,7 @@
     "test": "bun test src/*.test.ts"
   },
   "devDependencies": {
-    "@meridian/config": "workspace:*",
+    "@meridian/tooling-config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "^6"
   }

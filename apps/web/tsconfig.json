@@ -21,7 +21,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@meridian/ui/*": ["../../packages/ui/src/*"]
+      "@meridian/ui-web/*": ["../../packages/ui-web/core/src/*"]
     }
   },
   "include": [

@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import { closeDb } from "@meridian/db";
+import { closeDb } from "@meridian/platform-identity";
 
 import app from "./index";
 import { parsePort } from "./port";

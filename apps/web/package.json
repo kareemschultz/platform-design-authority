@@ -9,9 +9,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "@meridian/api": "workspace:*",
-    "@meridian/env": "workspace:*",
-    "@meridian/ui": "workspace:*",
+    "@meridian/platform-clients-api-client": "workspace:*",
+    "@meridian/tooling-env": "workspace:*",
+    "@meridian/ui-web": "workspace:*",
     "@orpc/client": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/tanstack-query": "catalog:",
@@ -30,7 +30,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@meridian/config": "workspace:*",
+    "@meridian/tooling-config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@types/node": "^20",
     "@types/react": "^19.2.17",

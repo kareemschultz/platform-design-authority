@@ -76,7 +76,7 @@ jobs:
       - name: Migration freshness
         run: |
           bun run db:generate
-          git diff --exit-code -- packages/db/src/migrations
+          git diff --exit-code -- packages/platform/identity/src/migrations
 
       - name: Tests
         run: bun run test
@@ -174,6 +174,6 @@ jobs:
           done
           [ "$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q server)")" = healthy ]
           [ "$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q web)")" = healthy ]
-          docker compose exec -T server bun run --cwd /app/packages/db db:migrate
+          docker compose exec -T server bun run --cwd /app/packages/platform/identity db:migrate
           curl --fail --silent --show-error http://127.0.0.1:3000/ | grep -qx OK
           curl --fail --silent --show-error http://127.0.0.1:3001/ >/dev/null

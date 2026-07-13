@@ -12,7 +12,7 @@
   "radius": "default",
   "tailwind": {
     "config": "",
-    "css": "../../packages/ui/src/styles/globals.css",
+    "css": "../../packages/ui-web/core/src/styles/globals.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -20,8 +20,8 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
-    "utils": "@meridian/ui/lib/utils",
-    "ui": "@meridian/ui/components",
+    "utils": "@meridian/ui-web/lib/utils",
+    "ui": "@meridian/ui-web/components",
     "lib": "@/lib",
     "hooks": "@/hooks"
   },

@@ -1,8 +1,5 @@
-import { createContext } from "@meridian/api/context";
-import { appRouter } from "@meridian/api/routers/index";
-import { auth } from "@meridian/auth";
-import { closeDb } from "@meridian/db";
-import { env } from "@meridian/env/server";
+import { auth, closeDb } from "@meridian/platform-identity";
+import { env } from "@meridian/tooling-env/server";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
 import { ORPCError, onError } from "@orpc/server";
@@ -11,6 +8,8 @@ import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { createContext } from "./context";
+import { appRouter } from "./router";
 
 const app = new Hono();
 

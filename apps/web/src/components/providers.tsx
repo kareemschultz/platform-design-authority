@@ -1,6 +1,6 @@
 "use client";
 
-import { Toaster } from "@meridian/ui/components/sonner";
+import { Toaster } from "@meridian/ui-web/components/sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 
 import { queryClient } from "@/utils/orpc";

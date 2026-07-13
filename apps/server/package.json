@@ -13,10 +13,8 @@
   },
   "dependencies": {
     "@hono/node-server": "2.0.8",
-    "@meridian/api": "workspace:*",
-    "@meridian/auth": "workspace:*",
-    "@meridian/db": "workspace:*",
-    "@meridian/env": "workspace:*",
+    "@meridian/platform-identity": "workspace:*",
+    "@meridian/tooling-env": "workspace:*",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
@@ -26,7 +24,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@meridian/config": "workspace:*",
+    "@meridian/tooling-config": "workspace:*",
     "@types/bun": "catalog:",
     "tsdown": "^0.22.3",
     "typescript": "^6"

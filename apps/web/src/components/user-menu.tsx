@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@meridian/ui/components/button";
+import { Button } from "@meridian/ui-web/components/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -9,8 +9,8 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@meridian/ui/components/dropdown-menu";
-import { Skeleton } from "@meridian/ui/components/skeleton";
+} from "@meridian/ui-web/components/dropdown-menu";
+import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

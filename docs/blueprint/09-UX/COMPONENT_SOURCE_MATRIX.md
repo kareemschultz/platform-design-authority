@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-033
 title: Component Source Matrix
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -25,13 +25,23 @@ This is a metadata-only inventory taken on 2026-07-12/13, with an authenticated 
 - Studio catalog-level inventory: 61 block families and 146 inspiration variants in five categories, as returned by `get-blocks-metadata` (unchanged whether or not Studio credentials are configured — this call is catalog-level and does not vary with entitlement).
 - Studio authenticated re-verification (2026-07-13): calling the metadata-only, non-source-fetching `get-block-meta-content` endpoint per family with a valid `API_KEY`/`EMAIL` credential returns substantially more than the catalog implies. Across all 61 families this returned **735 total variant records** (not 146), of which **74 variants across 21 of the 61 families carry an explicit `isPro: true` tag** in their `meta` object; the remaining 661 variant records do not carry an `isPro` field at all (this is recorded as **not established as Free** — the field's absence is not evidence of a Free/Pro classification either way). Per-family authenticated variant and Pro-tagged counts are in the family table below alongside the original catalog-declared counts.
 - **Controlled comparison establishing this is genuinely credential-gated** (not merely a richer public response): the identical `get-block-meta-content` call for `dashboard-and-application/application-shell/registry` was run twice from an isolated process, once with `API_KEY`/`EMAIL` set and once with both unset. Without credentials the endpoint returned exactly 1 variant (`application-shell-01`, the basic/free entry). With credentials it returned 18 variants, 3 of them `isPro: true`. This is direct, reproducible evidence that the configured credential is live and authenticating, not merely present.
+- Studio also exposes a **separate component library** (`accordion`, `button`, `dialog`, `select`, etc.), distinct from the block-family catalog above, queried one family at a time via the same metadata-only `get-component-meta-content` endpoint. 54 candidate slugs were tried on 2026-07-13; 28 were found (573 total variant records, 44 tagged `isAnimated: true`, 0 tagged `isPro: true` — recorded as entitlement unclassified for all 573, not Free), and 26 returned a server-confirmed "Component not found" (recorded as unverified for that slug, not evidence Studio lacks the concept entirely — see the component-library section below for the full breakdown, per-family table, and complete identifier list).
 - Studio documents Free and Pro modes and the `/cui`, `/iui`, `/rui`, and `/ftc` workflows and requires an initialized shadcn project: [Studio MCP documentation](https://shadcnstudio.com/docs/getting-started/shadcn-studio-mcp-server).
 - Official shadcn documents MCP registry browsing, search, inspection, and installation through configured registries: [official shadcn MCP documentation](https://ui.shadcn.com/docs/mcp).
-- Independent totals for pages, templates, themes, and animated/motion components beyond what is captured above remain **unverified**, not zero — the metadata-only endpoints used here do not expose a dedicated classification for those categories.
+- Independent totals for pages, templates, themes, and animated/motion components beyond what is captured above remain **unverified**, not zero — the metadata-only endpoints used here do not expose a dedicated classification for those categories. Studio's own marketing pages claim broader page/template/animation libraries than this metadata classifies; those vendor claims are recorded separately, below, as vendor-claimed and not independently reproduced, rather than folded into this document's verified counts.
+
+## Vendor-claimed totals not independently reproduced
+
+Studio's public marketing and documentation pages describe additional scope — for example broader page, template, and animation libraries — beyond what any metadata-only MCP call classifies or counts. These claims are recorded here for completeness, explicitly labeled as **vendor-claimed, not independently reproduced**, and must not be merged into or cited alongside this document's verified inventory totals:
+
+| Vendor claim | Source | Independent reproduction attempted | Result |
+|---|---|---|---|
+| Broader "Pro" block/page/template library beyond the 61 families and 735 authenticated variants captured here | Studio marketing site and MCP documentation | Yes — exhausted `get-blocks-metadata` (catalog) and `get-block-meta-content` (per-family, authenticated) across all 61 catalog families | No additional families or a distinct page/template/layout/theme/animation classification were exposed by either endpoint; the 735-variant, 74-Pro-tagged figure is the full authenticated result these endpoints will safely yield |
+| A distinct animation/motion component set | Studio marketing site | Partial — `isAnimated: true` tagging was found on 44 of 573 component-library variants and referenced within some block variants' `meta` | No separate, independently-countable "animation library" endpoint or classification exists in the metadata; the 44-variant figure is the full observed tagging, not a vendor-declared animation library total |
 
 ## Connector status (2026-07-13)
 
-The official `shadcn` MCP server is configured in the Claude Code user-level config (`shadcn@4.13.0`, pinned) and its command was independently confirmed to work correctly when driven directly (see JSON-RPC evidence above). However, its tools did not load as an available Claude Code connector in this session. Investigation traced this to the running `claude.exe` host process itself carrying a stale, pre-migration snapshot of the MCP server configuration baked into its own process command line at launch time — meaning the desktop application has not yet picked up either the `shadcn` server addition or the later credential/version-pinning corrections made to `~/.claude.json`. This requires a full quit-and-relaunch of the desktop application (not just a new chat/session) to resolve, and is recorded as an open recheck trigger below. All official-registry evidence in this document was gathered as a workaround by driving the pinned package directly over stdio JSON-RPC, not through the (currently unreachable) Claude Code connector.
+The official `shadcn` MCP server is configured in the Claude Code user-level config (`shadcn@4.13.0`, pinned) and its command was independently confirmed to work correctly when driven directly (see JSON-RPC evidence above). Its tools did not load as an available Claude Code connector earlier in this session, and **remained unreachable after the user performed a full quit-and-relaunch of the desktop application**. Re-investigation after that relaunch found the credential still present in the live `claude.exe` host process's own command line (in its old, pre-migration raw-argument form), for both open windows including this session's own host process — indicating the relaunch did not fully clear whatever cached configuration snapshot the application (or its per-session resume mechanism) serializes into that process's command line. As a further mitigation, the Studio credential was moved out of `~/.claude.json` entirely into genuine Windows user-level environment variables (`setx API_KEY`/`setx EMAIL`, persisted in `HKCU\Environment`), with the config file's `env` object now empty — so nothing in the on-disk config remains for any future snapshot to serialize. This has not yet been verified end-to-end, since it requires inheritance by a freshly-spawned (not resumed) process tree; see TECH-LESSON-031's updated entry. All official-registry and Studio evidence in this document was gathered as a workaround by driving the pinned packages directly over stdio JSON-RPC, not through the (still unreachable) Claude Code connector.
 
 ## Source-role matrix
 
@@ -195,6 +205,1400 @@ The Studio catalog-level metadata endpoint (`get-blocks-metadata`) returned the 
 | eCommerce | Announcement Banner | `announcement-banner` |
 | eCommerce | Gift Card | `gift-card` |
 
+## Complete authenticated Shadcn Studio variant identifiers (all 735)
+
+Every variant record returned by the authenticated, metadata-only `get-block-meta-content` endpoint is listed individually. Each inherits its family's source, category, type, recommendation, and rationale from the family table above; only the Pro tag is per-variant. `isPro: true` is recorded as `Pro`; its absence is recorded as `Unclassified` (not `Free` — Studio's schema does not appear to positively tag Free items).
+
+| Source | Category | Family | Type | Variant identifier | Entitlement | Recommendation | Rationale |
+|---|---|---|---|---|---|---|---|
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-16` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-17` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-18` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-19` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-20` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-21` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-22` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-23` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-24` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-25` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-26` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-27` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-28` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-29` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-30` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-31` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-32` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-33` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-34` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-35` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-36` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-37` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-38` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-39` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-40` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Hero | Block family | `hero-section-41` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-04` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-05` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-06` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-07` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-08` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-shell | Block family | `dashboard-shell-09` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | `empty-state-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | `empty-state-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | `empty-state-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | `empty-state-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | `empty-state-05` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | `empty-state-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | `empty-state-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Empty State | Block family | `empty-state-08` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-16` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-17` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-18` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-19` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Pricing | Block family | `pricing-component-20` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-06` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-08` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-09` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-10` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-sidebar | Block family | `dashboard-sidebar-11` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | eCommerce | mega-footer | Block family | `mega-footer-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | mega-footer | Block family | `mega-footer-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | mega-footer | Block family | `mega-footer-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | mega-footer | Block family | `mega-footer-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | mega-footer | Block family | `mega-footer-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | Marketing UI Components | Error | Block family | `error-page-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Error | Block family | `error-page-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Error | Block family | `error-page-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Error | Block family | `error-page-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-06` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-07` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-08` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-list | Block family | `product-list-09` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | Marketing UI Components | User Schedule | Block family | `user-schedule-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | User Schedule | Block family | `user-schedule-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | `account-settings-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | `account-settings-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | `account-settings-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | `account-settings-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | `account-settings-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | `account-settings-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Account Settings | Block family | `account-settings-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Logo Cloud | Block family | `logo-cloud-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | eCommerce | checkout-page | Block family | `checkout-page-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | checkout-page | Block family | `checkout-page-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | checkout-page | Block family | `checkout-page-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | checkout-page | Block family | `checkout-page-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-08` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-09` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-10` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-11` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-12` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-13` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-14` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-15` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-16` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-17` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-header | Block family | `dashboard-header-18` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-01` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-02` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-03` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-04` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-05` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-06` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-07` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-08` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-09` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-10` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-11` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-12` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-13` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-14` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-15` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-16` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-17` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-18` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-19` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-20` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-21` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-22` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-23` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-24` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-25` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dialog | Block family | `dashboard-dialog-26` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | Card Nav | Block family | `card-nav-01` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | Card Nav | Block family | `card-nav-02` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | Card Nav | Block family | `card-nav-03` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | Card Nav | Block family | `card-nav-04` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | Card Nav | Block family | `card-nav-05` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | Card Nav | Block family | `card-nav-06` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-06` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-07` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-08` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-09` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-10` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-11` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Announcement Banner | Block family | `announcement-banner-12` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-08` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-09` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-10` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-11` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-12` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-13` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-14` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-15` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-16` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-17` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-18` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-19` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | widgets-component | Block family | `widget-component-20` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Marketing UI Components | Login Page | Block family | `login-page-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Login Page | Block family | `login-page-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Login Page | Block family | `login-page-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Login Page | Block family | `login-page-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Login Page | Block family | `login-page-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-04` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-05` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-08` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-09` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-10` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-11` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-12` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-13` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-14` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-15` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-16` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-17` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Application Shell | Block family | `application-shell-18` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Marketing UI Components | Two Factor Authentication | Block family | `two-factor-authentication-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Two Factor Authentication | Block family | `two-factor-authentication-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Two Factor Authentication | Block family | `two-factor-authentication-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Two Factor Authentication | Block family | `two-factor-authentication-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Two Factor Authentication | Block family | `two-factor-authentication-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-08` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-09` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-10` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-11` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-12` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-13` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-14` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-15` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-16` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-17` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-18` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-19` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-20` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-21` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-22` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-23` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-24` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-25` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-26` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-27` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-28` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-29` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-30` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-31` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-32` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-33` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-34` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-35` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-36` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-37` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-38` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-39` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-40` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-41` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-42` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-43` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-44` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-45` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-46` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-47` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-48` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-49` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-50` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-51` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-52` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-53` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-54` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-55` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Charts Component | Block family | `chart-component-56` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-16` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-17` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-18` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-19` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-20` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-21` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-22` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-23` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-24` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-25` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-26` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-27` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-28` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Features | Block family | `features-section-29` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | `file-upload-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | `file-upload-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | `file-upload-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | `file-upload-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | `file-upload-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | `file-upload-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | File Upload | Block family | `file-upload-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-06` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-07` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-08` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-overview | Block family | `product-overview-09` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-11` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-13` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | CTA | Block family | `cta-section-14` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-16` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-17` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-18` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-19` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-20` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-21` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-22` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-23` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | About US Page | Block family | `about-us-page-24` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Datatable | DataTable | Block family | `datatable-component-01` | Unclassified | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
+| Shadcn Studio MCP | Datatable | DataTable | Block family | `datatable-component-02` | Unclassified | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
+| Shadcn Studio MCP | Datatable | DataTable | Block family | `datatable-component-03` | Unclassified | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
+| Shadcn Studio MCP | Datatable | DataTable | Block family | `datatable-component-04` | Unclassified | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
+| Shadcn Studio MCP | Datatable | DataTable | Block family | `datatable-component-05` | Unclassified | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
+| Shadcn Studio MCP | Datatable | DataTable | Block family | `datatable-component-06` | Unclassified | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
+| Shadcn Studio MCP | Datatable | DataTable | Block family | `datatable-component-07` | Unclassified | Researching | Visual candidate only; Meridian's enterprise grid requires governed behavior, virtualization, accessibility, bulk scope, and offline states. |
+| Shadcn Studio MCP | Marketing UI Components | Forgot Password | Block family | `forgot-password-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Forgot Password | Block family | `forgot-password-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Forgot Password | Block family | `forgot-password-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Forgot Password | Block family | `forgot-password-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Forgot Password | Block family | `forgot-password-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Cookies Consent | Block family | `cookies-consent-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Cookies Consent | Block family | `cookies-consent-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Cookies Consent | Block family | `cookies-consent-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | `compare-01` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | `compare-02` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | `compare-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | `compare-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | `compare-05` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | `compare-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Compare | Block family | `compare-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-16` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-17` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-18` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | FAQ | Block family | `faq-component-19` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-10` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Social Proof | Block family | `social-proof-11` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-08` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-09` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-10` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-11` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-12` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-13` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-14` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-15` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-16` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-17` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-18` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-19` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-20` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-21` | Pro | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | statistics-component | Block family | `statistics-component-22` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Contact US | Block family | `contact-us-page-16` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-16` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-17` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | portfolio | Block family | `portfolio-18` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | eCommerce | offer-modal | Block family | `offer-modal-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | offer-modal | Block family | `offer-modal-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | offer-modal | Block family | `offer-modal-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | offer-modal | Block family | `offer-modal-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | offer-modal | Block family | `offer-modal-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | Marketing UI Components | Download | Block family | `download-01` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Download | Block family | `download-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Download | Block family | `download-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Download | Block family | `download-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Download | Block family | `download-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Download | Block family | `download-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Verify Email | Block family | `verify-email-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Verify Email | Block family | `verify-email-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Verify Email | Block family | `verify-email-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Verify Email | Block family | `verify-email-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Verify Email | Block family | `verify-email-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Reset Password | Block family | `reset-password-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Reset Password | Block family | `reset-password-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Reset Password | Block family | `reset-password-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Reset Password | Block family | `reset-password-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Reset Password | Block family | `reset-password-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | eCommerce | product-quick-view | Block family | `product-quick-view-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-quick-view | Block family | `product-quick-view-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-quick-view | Block family | `product-quick-view-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-quick-view | Block family | `product-quick-view-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-quick-view | Block family | `product-quick-view-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-16` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Blog | Block family | `blog-component-17` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | App Integration | Block family | `app-integration-10` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-01` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-02` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-03` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-04` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-05` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-06` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-07` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-08` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-09` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-footer | Block family | `dashboard-footer-10` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-06` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-07` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-08` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Form Layout | Block family | `form-layout-09` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Marketing UI Components | Timeline Component | Block family | `timeline-component-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Timeline Component | Block family | `timeline-component-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Timeline Component | Block family | `timeline-component-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Timeline Component | Block family | `timeline-component-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Timeline Component | Block family | `timeline-component-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | eCommerce | order-summary | Block family | `order-summary-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | order-summary | Block family | `order-summary-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | order-summary | Block family | `order-summary-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | order-summary | Block family | `order-summary-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | order-summary | Block family | `order-summary-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | dashboard-and-application | Onboarding Feed | Block family | `onboarding-feed-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Onboarding Feed | Block family | `onboarding-feed-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Onboarding Feed | Block family | `onboarding-feed-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Onboarding Feed | Block family | `onboarding-feed-04` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | Onboarding Feed | Block family | `onboarding-feed-05` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-01` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-02` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-03` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-04` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-05` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-06` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-07` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-08` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-09` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-10` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-11` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-12` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-13` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-14` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-15` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-16` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-17` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-18` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-19` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-20` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-21` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-22` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | dashboard-and-application | dashboard-dropdown | Block family | `dashboard-dropdown-23` | Unclassified | Researching | Potential dashboard composition evidence; requires a governed task and item-level review. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-01` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-02` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-03` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-04` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-05` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-06` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-07` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-08` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-09` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-10` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-11` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-12` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-13` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-14` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-15` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-16` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-17` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-18` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-19` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-20` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-21` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-22` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-23` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Bento Grid | Bento Grid | Block family | `bento-grid-24` | Unclassified | Restricted | Marketing or low-risk summaries only; avoid novelty-driven operational layout. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Gallery | Block family | `gallery-component-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | eCommerce | product-reviews | Block family | `product-reviews-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-reviews | Block family | `product-reviews-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-reviews | Block family | `product-reviews-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-reviews | Block family | `product-reviews-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-reviews | Block family | `product-reviews-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | shopping-cart | Block family | `shopping-cart-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | shopping-cart | Block family | `shopping-cart-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | shopping-cart | Block family | `shopping-cart-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | shopping-cart | Block family | `shopping-cart-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | dashboard-and-application | multi step form | Block family | `multi-step-form-01` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | multi step form | Block family | `multi-step-form-02` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | dashboard-and-application | multi step form | Block family | `multi-step-form-03` | Unclassified | Preferred Candidate | Useful composition evidence after token, state, accessibility, responsive, performance, and business-logic normalization. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-06` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-07` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-08` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Footer | Block family | `footer-component-09` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-06` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-07` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-08` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-09` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-10` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-11` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | product-category | Block family | `product-category-12` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Navbar | Block family | `navbar-component-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-16` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-17` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-18` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-19` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Team | Block family | `team-section-20` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | eCommerce | category-filter | Block family | `category-filter-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | category-filter | Block family | `category-filter-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | category-filter | Block family | `category-filter-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | category-filter | Block family | `category-filter-04` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | category-filter | Block family | `category-filter-05` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | category-filter | Block family | `category-filter-06` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Gift Card | Block family | `gift-card-01` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Gift Card | Block family | `gift-card-02` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | eCommerce | Gift Card | Block family | `gift-card-03` | Unclassified | Restricted | Storefront evidence only; production storefront is deferred and POS semantics differ. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-06` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-07` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-08` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-09` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-10` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-11` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-12` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-13` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-14` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-15` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-16` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-17` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-18` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-19` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-20` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-21` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-22` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-23` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Testimonials | Block family | `testimonials-component-24` | Pro | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Register | Block family | `register-01` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Register | Block family | `register-02` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Register | Block family | `register-03` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Register | Block family | `register-04` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+| Shadcn Studio MCP | Marketing UI Components | Register | Block family | `register-05` | Unclassified | Restricted | Marketing/auth exploration only; never an operational workflow contract. |
+
+## Complete Shadcn Studio component-library metadata inventory
+
+Distinct from the block-family inventory above, Shadcn Studio also exposes a separate per-primitive component library (e.g. `button`, `dialog`, `select`) queried through the same metadata-only `get-component-meta-content` endpoint, one bare family slug at a time (no listing/catalog tool exists for this content type, unlike `get-blocks-metadata` for blocks). 54 candidate slugs were tried — the shadcn/ui primitive names plus a small number of common additions — on 2026-07-13, using the same authenticated credential and metadata-only calls as the block-family inventory (no source or install endpoint was called).
+
+**28 families were found** with a total of **573 variant records**. **0 of these carry an explicit `isPro: true` tag** (0 — this component library's metadata does not appear to tag any variant Pro; absence of the tag is recorded as entitlement **unclassified**, not Free, consistent with the block-family findings). **44 variants carry an explicit `isAnimated: true` tag.**
+
+**26 candidate slugs returned an explicit "Component not found" response** (a real, well-formed error from the server, not a parse failure) under the exact name tried: `alert-dialog`, `autocomplete`, `carousel`, `command`, `drawer`, `empty`, `field`, `hover-card`, `item`, `kbd`, `label`, `menubar`, `navigation-menu`, `progress`, `resizable`, `scroll-area`, `separator`, `sidebar`, `skeleton`, `slider`, `spinner`, `stepper`, `toast`, `toggle`, `toggle-group`, `typography`. This means Studio does not expose a separate component-gallery page under that specific slug — it does **not** mean Studio has zero coverage of that concept; a different naming convention was not exhaustively guessed, per the standing instruction not to invent unverified data. These remain **unverified**, not zero.
+
+### Component-library family summary
+
+| Source | Family | Variants | Pro-tagged | Animated-tagged | Dependencies observed | Recommendation | Rationale |
+|---|---|---:|---:|---:|---|---|---|
+| Shadcn Studio MCP | accordion | 16 | 0 | 0 | `lucide-react`, `radix-ui` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | alert | 30 | 0 | 0 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | avatar | 21 | 0 | 0 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | badge | 24 | 0 | 0 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | breadcrumb | 8 | 0 | 0 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | button | 55 | 0 | 17 | `class-variance-authority`, `lucide-react`, `motion` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | calendar | 25 | 0 | 0 | `little-date`, `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | card | 17 | 0 | 2 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | checkbox | 19 | 0 | 3 | `lucide-react`, `motion`, `radix-ui` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | collapsible | 10 | 0 | 1 | `lucide-react`, `react-payment-inputs` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | combobox | 14 | 0 | 2 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | data-table | 13 | 0 | 0 | `@dnd-kit/core`, `@dnd-kit/modifiers`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@tanstack/react-table`, `lucide-react`, `papaparse`, `xlsx` | Researching | Visual gallery only; Meridian requires a custom enterprise-grid composite per ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md, not a Studio data-table variant. |
+| Shadcn Studio MCP | dialog | 26 | 0 | 3 | `input-otp`, `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | dropdown-menu | 16 | 0 | 2 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | form | 10 | 0 | 0 | `@hookform/resolvers`, `date-fns`, `lucide-react`, `react-hook-form`, `sonner`, `zod@3.25.76` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | input | 46 | 0 | 0 | `lucide-react`, `react-aria-components` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | input-otp | 10 | 0 | 0 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | pagination | 15 | 0 | 0 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | popover | 15 | 0 | 3 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | radio-group | 15 | 0 | 2 | `lucide-react`, `motion`, `radix-ui` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | select | 38 | 0 | 2 | `lucide-react`, `react-aria-components` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | sheet | 7 | 0 | 0 | `@hookform/resolvers`, `@tanstack/react-table`, `lucide-react`, `react-hook-form`, `sonner`, `zod@3.25.76` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | sonner | 20 | 0 | 0 | `lucide-react`, `sonner` | Preferred Candidate | Toast/notification variant gallery for a pattern already governed at the official-registry level; item-level selection still requires full acceptance evidence. |
+| Shadcn Studio MCP | switch | 20 | 0 | 2 | `lucide-react`, `motion`, `radix-ui` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | table | 16 | 0 | 0 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | tabs | 29 | 0 | 3 | `lucide-react`, `motion` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | textarea | 21 | 0 | 0 | `lucide-react` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+| Shadcn Studio MCP | tooltip | 17 | 0 | 2 | `lucide-react`, `motion` | Preferred Candidate | Visual variant gallery of a primitive already Preferred Candidate via the official shadcn registry; item-level selection still requires full normalization and acceptance evidence. |
+
+### Component-library candidate slugs not found
+
+| Slug tried | Result |
+|---|---|
+| `alert-dialog` | Component not found (server-confirmed, not a parse error) |
+| `autocomplete` | Component not found (server-confirmed, not a parse error) |
+| `carousel` | Component not found (server-confirmed, not a parse error) |
+| `command` | Component not found (server-confirmed, not a parse error) |
+| `drawer` | Component not found (server-confirmed, not a parse error) |
+| `empty` | Component not found (server-confirmed, not a parse error) |
+| `field` | Component not found (server-confirmed, not a parse error) |
+| `hover-card` | Component not found (server-confirmed, not a parse error) |
+| `item` | Component not found (server-confirmed, not a parse error) |
+| `kbd` | Component not found (server-confirmed, not a parse error) |
+| `label` | Component not found (server-confirmed, not a parse error) |
+| `menubar` | Component not found (server-confirmed, not a parse error) |
+| `navigation-menu` | Component not found (server-confirmed, not a parse error) |
+| `progress` | Component not found (server-confirmed, not a parse error) |
+| `resizable` | Component not found (server-confirmed, not a parse error) |
+| `scroll-area` | Component not found (server-confirmed, not a parse error) |
+| `separator` | Component not found (server-confirmed, not a parse error) |
+| `sidebar` | Component not found (server-confirmed, not a parse error) |
+| `skeleton` | Component not found (server-confirmed, not a parse error) |
+| `slider` | Component not found (server-confirmed, not a parse error) |
+| `spinner` | Component not found (server-confirmed, not a parse error) |
+| `stepper` | Component not found (server-confirmed, not a parse error) |
+| `toast` | Component not found (server-confirmed, not a parse error) |
+| `toggle` | Component not found (server-confirmed, not a parse error) |
+| `toggle-group` | Component not found (server-confirmed, not a parse error) |
+| `typography` | Component not found (server-confirmed, not a parse error) |
+
+### Complete component-library variant identifiers (all 573)
+
+Every variant record returned for a found family is listed individually. Each inherits its family's source, recommendation, and rationale from the summary table above.
+
+| Source | Family | Variant identifier | Entitlement | Animated | Recommendation |
+|---|---|---|---|---|---|
+| Shadcn Studio MCP | accordion | `accordion-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | accordion | `accordion-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-22` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-23` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-24` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-25` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-26` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-27` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-28` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-29` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | alert | `alert-30` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | avatar | `avatar-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-22` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-23` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | badge | `badge-24` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | breadcrumb | `breadcrumb-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | breadcrumb | `breadcrumb-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | breadcrumb | `breadcrumb-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | breadcrumb | `breadcrumb-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | breadcrumb | `breadcrumb-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | breadcrumb | `breadcrumb-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | breadcrumb | `breadcrumb-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | breadcrumb | `breadcrumb-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-22` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-23` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-24` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-25` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-26` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-27` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-28` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-29` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-30` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-31` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-32` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-33` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-34` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-35` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-36` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-37` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-38` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-39` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-40` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-41` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-42` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-43` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-44` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-45` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-46` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-47` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-48` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-49` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-50` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-51` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-52` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-53` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-54` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | button | `button-55` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-22` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-23` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-24` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | calendar | `calendar-25` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-16` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | card | `card-17` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-17` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-18` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | checkbox | `checkbox-19` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | collapsible | `collapsible-10` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-13` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | combobox | `combobox-14` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | data-table | `data-table-01` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-02` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-03` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-04` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-05` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-06` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-07` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-08` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-09` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-10` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-11` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-12` | Unclassified | No | Researching |
+| Shadcn Studio MCP | data-table | `data-table-13` | Unclassified | No | Researching |
+| Shadcn Studio MCP | dialog | `dialog-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-22` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-23` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-24` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-25` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | dialog | `dialog-26` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-15` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | dropdown-menu | `dropdown-menu-16` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | form | `form-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-22` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-23` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-24` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-25` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-26` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-27` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-28` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-29` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-30` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-31` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-32` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-33` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-34` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-35` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-36` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-37` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-38` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-39` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-40` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-41` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-42` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-43` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-44` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-45` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input | `input-46` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | input-otp | `input-otp-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | pagination | `pagination-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-13` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-14` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | popover | `popover-15` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-14` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | radio-group | `radio-group-15` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-22` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-23` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-24` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-25` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-26` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-27` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-28` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-29` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-30` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-31` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-32` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-33` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-34` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-35` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-36` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-37` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | select | `select-38` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | sheet | `sheet-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sheet | `sheet-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sheet | `sheet-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sheet | `sheet-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sheet | `sheet-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sheet | `sheet-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sheet | `sheet-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | sonner | `sonner-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-19` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | switch | `switch-20` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | table | `table-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-22` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-23` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-24` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-25` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-26` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-27` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-28` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | tabs | `tabs-29` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-16` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-17` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-18` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-19` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-20` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | textarea | `textarea-21` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-01` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-02` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-03` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-04` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-05` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-06` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-07` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-08` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-09` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-10` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-11` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-12` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-13` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-14` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-15` | Unclassified | No | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-16` | Unclassified | Yes | Preferred Candidate |
+| Shadcn Studio MCP | tooltip | `tooltip-17` | Unclassified | Yes | Preferred Candidate |
+
 ## Cross-cutting acceptance dimensions
 
 Any item selected for a prototype must be separately reviewed for keyboard and focus behavior, semantics and screen readers, contrast, zoom, touch, reduced motion, RTL, responsive transformation, kiosk/POS density, offline and stale authority, semantic-token coverage, white-label safety, dependencies, hydration, virtualization, Storybook suitability, and AI-generation constraints.
@@ -203,7 +1607,7 @@ Any item selected for a prototype must be separately reviewed for keyboard and f
 
 This pass authenticated with a Shadcn Studio Pro credential already confirmed by the founder to be a previously-rotated, non-compromised key, supplied only through local MCP configuration (`API_KEY`/`EMAIL` environment variables) and never typed, pasted, or echoed into this repository, any commit, any document, or any conversation transcript. Only metadata-only, non-source-fetching endpoints (`get-blocks-metadata`, `get-block-meta-content`) were used; no install, collect, `/ftc`, or content-fetching endpoint was called. Credentials, private registry URLs, cookies, account details, and licensed source remain prohibited from commits, and none appear in this document or elsewhere on this branch (verified by a full-diff secret scan; see the PR's verification section).
 
-A separate, unrelated `.codex/config.toml` MCP configuration for the same repository stores the identical credential value under the names `LICENSE_KEY`/`EMAIL` rather than `API_KEY`/`EMAIL`. Because the `shadcn-studio-mcp@1.0.7` package only recognizes `API_KEY` and `EMAIL` (confirmed by reading its `build/utils/config.js` source), a client configured with `LICENSE_KEY` does not authenticate — `isPro()` in that package requires both `apiKey` and `email` to be set, and `LICENSE_KEY` is never mapped to `apiKey`. This is recorded as a **compatibility finding, not a fix applied here**: the Codex configuration was left untouched and its credential value was not printed, migrated, or otherwise handled beyond this observation. Any prior claim that Codex-side tool calls against this package exercised authenticated Pro access should be treated as unproven until its configuration is corrected.
+A separate, unrelated `.codex/config.toml` MCP configuration for the same repository was **found on 2026-07-13** to store the identical credential value under the names `LICENSE_KEY`/`EMAIL` rather than `API_KEY`/`EMAIL`. Because the `shadcn-studio-mcp@1.0.7` package only recognizes `API_KEY` and `EMAIL` (confirmed by reading its `build/utils/config.js` source), a client configured with `LICENSE_KEY` does not authenticate — `isPro()` in that package requires both `apiKey` and `email` to be set, and `LICENSE_KEY` is never mapped to `apiKey`. This was recorded as a compatibility finding rather than fixed in that session; the founder has since reported correcting the local Codex configuration's variable name from `LICENSE_KEY` to `API_KEY` independently of this document. That correction has **not** been independently verified here — Codex has not yet been restarted and no controlled with/without-credential comparison (the same technique used to prove Claude's own authenticated access above) has been run against the corrected Codex configuration. Do not treat Codex-side Studio calls as authenticated until both of those happen; any prior or current claim that a Codex-side call succeeding proves authenticated Pro access remains unproven on its own.
 
 ## Recheck triggers
 

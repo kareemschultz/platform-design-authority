@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-035
 title: Shadcn Studio Evaluation
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -34,7 +34,8 @@ No Studio item is Prototype Approved or Platform Approved by this evaluation.
 | Returned metadata (authenticated, per-family) | 735 total variant records across the same 61 families, of which 74 (across 21 families) carry an explicit `isPro: true` tag | Substantially deeper than the catalog implies; see COMPONENT_SOURCE_MATRIX.md for the full per-family breakdown |
 | Item entitlement fields | Returned at the per-family metadata level (`get-block-meta-content`'s `meta.isPro` field) for authenticated variants that carry it; absent (not false) for the remainder | Premium-only count is now partially observed, not fully unverified — see below |
 | Credential-gating confirmed | Yes, by controlled comparison: identical call returned 1 variant unauthenticated vs. 18 variants (3 `isPro: true`) authenticated for the same family | The configured credential is live and authenticating, not merely configured |
-| Independent page/template/layout/animation/theme types | Not returned reliably | Do not invent totals |
+| Separate component library (distinct from block families) | 28 of 54 candidate primitive slugs found (573 variant records, 44 `isAnimated: true`, 0 `isPro: true`); 26 slugs returned "Component not found" | A second, per-primitive catalog exists alongside the block families; its coverage is partial and no listing tool exists for it, so absence for a given slug is unverified, not proof of non-coverage |
+| Independent page/template/layout/animation/theme types | Not returned reliably | Do not invent totals; Studio's own marketing claims broader coverage, recorded separately as vendor-claimed and not independently reproduced |
 
 The public documentation describes /ftc as primarily installing blocks represented by Figma frame names and allowing minor changes. That is not evidence that it can safely translate complex operational layout, state machines, authority, or application contracts.
 
@@ -53,7 +54,9 @@ Required fallback:
 - Keep each result bounded and record truncation or missing fields.
 - Never silently interpret an incomplete response as a complete catalog.
 
-**Compatibility finding (2026-07-13): Codex's configured credential likely does not authenticate at all.** The `shadcn-studio-mcp@1.0.7` package (confirmed by reading its `build/utils/config.js` source) only recognizes the environment variables `API_KEY` and `EMAIL`; `isPro()` requires both to resolve to non-empty values. The `.codex/config.toml` MCP entry for this server sets `EMAIL` correctly but names the license variable `LICENSE_KEY`, which the package does not read — so `apiKey` never gets set and Studio calls made from that Codex configuration run in freemium mode regardless of the license actually held. Any earlier claim that a Codex-side Studio call succeeding proved authenticated Pro access should be treated as unproven; a successful call only proves the server started, not that it authenticated (freemium calls also succeed). This is recorded as a compatibility finding only — the Codex configuration was not modified, and its credential value was not printed or migrated, per the standing instruction to leave it untouched unless a fix is explicitly requested.
+**Compatibility finding (historical, 2026-07-13): Codex's configured credential did not authenticate at all.** The `shadcn-studio-mcp@1.0.7` package (confirmed by reading its `build/utils/config.js` source) only recognizes the environment variables `API_KEY` and `EMAIL`; `isPro()` requires both to resolve to non-empty values. The `.codex/config.toml` MCP entry for this server set `EMAIL` correctly but named the license variable `LICENSE_KEY`, which the package does not read — so `apiKey` never got set and Studio calls made from that Codex configuration ran in freemium mode regardless of the license actually held. A successful call only proves the server started, not that it authenticated (freemium calls also succeed).
+
+**Status update:** the founder has since reported correcting the local Codex configuration's variable name from `LICENSE_KEY` to `API_KEY`. This document does not independently verify that correction — Codex has not been restarted and no controlled with/without-credential comparison has been run against it (the technique used above to prove Claude's own access is genuinely authenticated, not merely configured). Until both of those happen, treat Codex-side Studio calls as unauthenticated; do not claim Codex-side Pro access from this correction alone.
 
 ## Inventory profile
 

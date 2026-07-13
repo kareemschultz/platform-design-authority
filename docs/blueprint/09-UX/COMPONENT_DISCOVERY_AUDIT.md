@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-034
 title: Component Discovery Audit
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -46,8 +46,13 @@ The baseline was main at 8986977a3fa04a4b38c9b82c6a7384014dc8fadb at original au
 | Studio inspiration variants (catalog level) | 146 | Named inspiration variants from the catalog listing, not 146 accepted components |
 | Studio variant records (authenticated, per-family) | 735 | Actual variant records returned by authenticated per-family metadata across all 61 families — substantially more than the catalog implies; see COMPONENT_SOURCE_MATRIX.md for the per-family breakdown |
 | Studio Pro-tagged variants (authenticated) | 74, across 21 of 61 families | Variants whose metadata carries an explicit `isPro: true` tag. The remaining 661 authenticated variant records carry no entitlement tag at all — this is unestablished entitlement, not confirmed Free |
+| Studio component-library families discovered | 28 of 54 candidate slugs tried | A separate per-primitive component catalog (`accordion`, `button`, `dialog`, `select`, etc.), distinct from the 61 block families, queried one slug at a time via `get-component-meta-content` (no listing tool exists for this content type) |
+| Studio component-library variant records | 573 | Total variant records across the 28 found component families |
+| Studio component-library Pro-tagged variants | 0 of 573 | No component-library variant carries `isPro: true` in this pass; recorded as entitlement unclassified for all 573, not confirmed Free |
+| Studio component-library animated-tagged variants | 44 of 573 | Variants carrying an explicit `isAnimated: true` tag |
+| Studio component-library slugs not found | 26 of 54 tried | Server returned an explicit "Component not found" (a real response, not a parse error) for these slugs; recorded as unverified for that name, not evidence Studio lacks the concept |
 | Studio independent pages/templates/layouts | Unverified | The response did not provide reliable independent types or totals |
-| Studio independent animations/themes | Unverified | The response did not provide reliable independent types or totals |
+| Studio independent animations/themes | Unverified (44 tagged component variants observed; no separate animation-library classification or total exists) | The response did not provide reliable independent types or totals; Studio's own marketing claims a broader animation set, recorded separately as vendor-claimed, not independently reproduced |
 
 Unknown is intentionally not reported as zero. Studio's per-family authenticated metadata now proves Pro-tagging exists and is credential-gated for at least 74 observed variants; it still does not classify any family as independently a page, layout, template, or animation, so those totals remain unverified rather than zero.
 
@@ -132,8 +137,8 @@ Custom Required means compose owned behavior from accepted primitives; it does n
 | Dashboard examples can invent metrics | Misleading operational decisions | Use governed metric IDs, freshness, provenance, and drill-down |
 | Marketing motion can leak into operations | Cognitive load, motion harm, latency | Enforce ANIMATION_AND_MOTION_GUIDE.md |
 | Copied source shifts maintenance to Meridian | Upgrade and regression burden | Record provenance, owner, tests, and recheck trigger |
-| Codex's MCP configuration names the Studio credential `LICENSE_KEY`, which `shadcn-studio-mcp@1.0.7` does not recognize (only `API_KEY`/`EMAIL`) | Codex-side Studio calls likely run in freemium mode despite a valid license being configured; any prior claim of Codex-authenticated Pro access is unproven | Treat Codex Studio results as unauthenticated until its configuration is corrected; do not migrate or print the credential value without an explicit request |
-| The Claude Code desktop application's running host process was found (2026-07-13) to carry a stale, pre-migration MCP configuration snapshot baked into its own process command line, predating both the `shadcn` connector addition and the credential/version-pinning fixes | The official `shadcn` MCP connector is unreachable in-session; new claude.exe processes keep re-embedding the stale snapshot until the app is fully quit and relaunched | Requires a full quit-and-relaunch of the desktop application (not just a new chat) to pick up the current `~/.claude.json`; flagged to the user separately |
+| Codex's MCP configuration named the Studio credential `LICENSE_KEY`, which `shadcn-studio-mcp@1.0.7` does not recognize (only `API_KEY`/`EMAIL`) — the founder has since reported correcting this locally to `API_KEY`, not yet independently verified | Historical: Codex-side Studio calls ran in freemium mode despite a valid license being configured. Current: the correction is unverified until Codex restarts and a controlled with/without-credential comparison is run against it | Treat Codex Studio results as unauthenticated until both the restart and a passing controlled comparison are observed; do not migrate or print the credential value without an explicit request |
+| The Claude Code desktop application's running host process was found (2026-07-13) to carry a stale, pre-migration MCP configuration snapshot baked into its own process command line, predating both the `shadcn` connector addition and the credential/version-pinning fixes — **this persisted even after the user performed a full quit-and-relaunch of the desktop application** | The official `shadcn` MCP connector remains unreachable in-session; both open `claude.exe` host processes (including this session's own) still exposed the credential in their command line after the relaunch | The Studio credential was moved out of `~/.claude.json` entirely into Windows user-level environment variables (`setx`), leaving the config file's `env` object empty so no future snapshot can serialize a value that isn't there. This mitigation is unverified end-to-end pending inheritance by a freshly-spawned (not resumed) process tree; see TECH-LESSON-031 |
 
 ## Recommended next prototypes
 

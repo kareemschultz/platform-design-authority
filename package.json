@@ -4,7 +4,8 @@
   "workspaces": {
     "packages": [
       "apps/*",
-      "packages/*"
+      "packages/*",
+      "packages/*/*"
     ],
     "catalog": {
       "dotenv": "^17.4.2",
@@ -52,7 +53,9 @@
     "docker:logs": "docker compose logs -f",
     "test": "turbo run test",
     "check": "ultracite check apps packages",
-    "fix": "ultracite fix apps packages"
+    "fix": "ultracite fix apps packages",
+    "contracts:generate": "python scripts/generate_contracts.py",
+    "contracts:check": "python scripts/generate_contracts.py --check"
   },
   "dependencies": {
     "@meridian/env": "workspace:*",

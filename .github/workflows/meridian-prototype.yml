@@ -103,6 +103,9 @@ jobs:
       - name: Generated registry freshness
         run: python scripts/generate_registries.py --check
 
+      - name: Generated contract freshness
+        run: python scripts/generate_contracts.py --check
+
       - name: Secret and prohibited surface scan
         shell: bash
         run: |

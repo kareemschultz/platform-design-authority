@@ -53,6 +53,7 @@ Before inventing an identifier or boundary, consult:
 - `docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
 - `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
 - `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before creating, applying, changing, or recommending a shadcn preset, style, base/theme/chart color, font, icon library, radius, menu treatment, RTL, or density default
+- `docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md` before searching, importing, generating, adapting, approving, or replacing reusable components, blocks, animations, page compositions, or progressive-disclosure patterns
 - `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` before changing runtime, HTTP shell, transport, or Node fallback policy
 - `docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md` before selecting or changing durable/background workflow infrastructure
 - `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before changing the documentation platform or content-delivery architecture
@@ -125,6 +126,8 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 - Ordinary charts use shadcn chart composition and Recharts.
 - Specialized visualization libraries require a justified requirement and review.
 - Magic UI Pro and shadcn/studio premium assets follow the premium source policy and provenance template.
+- External components, blocks, animations, and page compositions remain candidates until `PREFERRED_COMPONENT_CATALOG.md` promotion gates pass; MCP availability or paid access never grants approval.
+- Agents must search platform-owned components first, record provenance, review diffs, avoid duplicate primitive systems, and never let imported UI redefine domain, permission, entitlement, payment, privacy, or workflow semantics.
 - Never commit premium credentials, license keys, private download URLs, or prohibited redistributable source.
 - Every component and workflow covers canonical states, accessibility, responsive behavior, offline behavior, performance, and white label.
 - `ui-pattern-audit` reviews pattern selection; `accessibility-review` performs formal accessibility review.
@@ -194,7 +197,7 @@ Code conventions:
 - Tests are colocated `*.test.ts` using `bun:test` and assert real behavior — no placeholder assertions.
 - No `console.log` in committed code; use the structured logger. No commented-out code blocks.
 - Line endings are LF, enforced by `.gitattributes` — Windows contributors should not fight the formatter.
-- New UI follows the governed shadcn bootstrap (§8) and semantic tokens; raw palette values in real components are lint-visible defects.
+- New UI follows the governed shadcn bootstrap (§8), preferred-component catalog, and semantic tokens; raw palette values in real components are lint-visible defects.
 
 ## 12. Change Process
 
@@ -217,32 +220,3 @@ After editing:
 6. Do not claim readiness beyond evidence.
 7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
 8. Record documentation and release-note impact for user-visible, API, configuration, migration, permission, workflow, or troubleshooting changes.
-
-## 13. ADR Triggers
-
-Create or amend an ADR for ownership, boundaries, stack, persistence, offline semantics, public contracts, extension execution, deployment, security, privacy, payments, settlement, commercial runtime, or platform-wide lifecycle changes.
-
-Business facts architecture cannot infer belong in the Founder Decision Register.
-
-## 14. Prohibited Behavior
-
-- Silent contradiction resolution
-- Cross-domain persistence shortcuts
-- Business rules in UI, provider adapters, or prompts
-- Provider SDKs as platform abstractions
-- Unscoped administrator, support, extension, or AI authority
-- Secret or protected-data exposure
-- False lifecycle promotion
-- Scope expansion for feature count
-- Assumed provider capabilities
-- Unsupported legal, tax, privacy, fiscal, security, accessibility, or regulatory claims
-- Treating AI, search, cache, analytics, or offline projections as current authority
-- Editing independent audit evidence instead of writing a disposition
-
-## 15. Current Readiness
-
-The repository targets one constrained vertical-slice implementation after named blockers. Technical Prototypes 1–3 are cleared to proceed per the fourth audit (reviews family FA4) and its disposition; the monorepo scaffold under apps/ and packages/ is that prototype surface.
-
-Pilot and production remain blocked on founder decisions, customer evidence, qualified Guyana review, provider certification, implementation tests, penetration testing, accessibility evidence, and operational exercises.
-
-When uncertain, stop and record the missing decision or evidence rather than inventing it.

@@ -81,7 +81,7 @@ Not yet complete:
 
 1. Deliver the WS1 thin experience shell using `@meridian/ui-web`, accepted official shadcn primitives, and only normalized Studio composition evidence.
 2. Run WS1 closeout: two-tenant proof, permission-versus-entitlement semantics, revocation budget, audit completeness, accessibility, responsive navigation, Bun/Node critical suites, and the 13-dimension capability evidence matrix.
-3. Prepare and review `WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md` without starting WS2 code before WS1 exits.
+3. Prepare and review the WS2 Catalog and Inventory implementation plan (to be authored under `docs/blueprint/17-Roadmap/`) without starting WS2 code before WS1 exits.
 4. Generate a machine-readable program-status input or evidence rollup so the dashboard can be freshness-checked rather than maintained only by prose.
 
 ## Open risk summary

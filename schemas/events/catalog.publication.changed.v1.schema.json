@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/catalog.publication.changed.v1.schema.json",
+  "title": "catalog.publication.changed.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "catalog.publication.changed.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["productId", "channelId", "publicationState", "version"],
+          "properties": {
+            "productId": {"type": "string"},
+            "channelId": {"type": "string"},
+            "publicationState": {"type": "string", "enum": ["Published", "Unpublished", "Scheduled"]},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    }
+  ]
+}

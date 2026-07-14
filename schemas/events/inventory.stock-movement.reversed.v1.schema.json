@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/inventory.stock-movement.reversed.v1.schema.json",
+  "title": "inventory.stock-movement.reversed.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "inventory.stock-movement.reversed.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["originalMovementId", "reversalMovementId", "productId", "locationId", "quantity", "unit", "reason"],
+          "properties": {
+            "originalMovementId": {"type": "string"},
+            "reversalMovementId": {"type": "string"},
+            "productId": {"type": "string"},
+            "locationId": {"type": "string"},
+            "quantity": {"type": "string", "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,6})?$"},
+            "unit": {"type": "string"},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 500}
+          }
+        }
+      }
+    }
+  ]
+}

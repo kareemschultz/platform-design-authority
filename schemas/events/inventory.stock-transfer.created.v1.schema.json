@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/inventory.stock-transfer.created.v1.schema.json",
+  "title": "inventory.stock-transfer.created.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "inventory.stock-transfer.created.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["transferId", "sourceLocationId", "destinationLocationId", "lineCount", "version"],
+          "properties": {
+            "transferId": {"type": "string"},
+            "sourceLocationId": {"type": "string"},
+            "destinationLocationId": {"type": "string"},
+            "lineCount": {"type": "integer", "minimum": 1},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    }
+  ]
+}

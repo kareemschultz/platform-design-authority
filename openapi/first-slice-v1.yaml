@@ -210,6 +210,7 @@ paths:
       operationId: listProducts
       x-permission: catalog.product.read
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
         - name: query
@@ -230,6 +231,7 @@ paths:
       operationId: createProduct
       x-permission: catalog.product.create
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -250,6 +252,7 @@ paths:
       operationId: listStockBalances
       x-permission: inventory.balance.read
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - name: locationId
           in: query
           required: true
@@ -266,11 +269,28 @@ paths:
                 type: array
                 items: {$ref: '#/components/schemas/StockBalance'}
   /inventory-adjustments:
+    get:
+      tags: [Inventory]
+      operationId: listInventoryAdjustments
+      x-permission: inventory.adjustment.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: locationId, in: query, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: state, in: query, schema: {type: string, enum: [Draft, PendingApproval, Approved, Posted, Reversed, Rejected]}}
+      responses:
+        '200':
+          description: Tenant-scoped adjustment results
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedInventoryAdjustments'}
     post:
       tags: [Inventory]
       operationId: createInventoryAdjustment
       x-permission: inventory.adjustment.create
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -284,11 +304,28 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/InventoryAdjustment'}
   /stock-counts:
+    get:
+      tags: [Inventory]
+      operationId: listStockCounts
+      x-permission: inventory.count.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: locationId, in: query, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: state, in: query, schema: {type: string, enum: [Draft, InProgress, Submitted, Approved, Posted, Rejected]}}
+      responses:
+        '200':
+          description: Tenant-scoped count results
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedStockCounts'}
     post:
       tags: [Inventory]
       operationId: createStockCount
       x-permission: inventory.count.create
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -298,12 +335,32 @@ paths:
       responses:
         '201':
           description: Stock count created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockCount'}
   /stock-transfers:
+    get:
+      tags: [Inventory]
+      operationId: listStockTransfers
+      x-permission: inventory.transfer.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: locationId, in: query, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: state, in: query, schema: {type: string, enum: [Draft, Dispatched, PartiallyReceived, Received, Exception, Cancelled]}}
+      responses:
+        '200':
+          description: Tenant-scoped transfer results
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedStockTransfers'}
     post:
       tags: [Inventory]
       operationId: createStockTransfer
       x-permission: inventory.transfer.create
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -313,6 +370,9 @@ paths:
       responses:
         '201':
           description: Transfer created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockTransfer'}
   /registers/{registerId}/open:
     post:
       tags: [Commerce]
@@ -817,41 +877,105 @@ paths:
       operationId: getProductsByProductId
       x-permission: catalog.product.read
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - {name: productId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Tenant-scoped Product detail
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Product'}
     patch:
       tags: [Catalog]
       operationId: patchProductsByProductId
       x-permission: catalog.product.update
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - {name: productId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/UpdateProduct'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Product updated at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Product'}
+  /products/{productId}/activate:
+    post:
+      tags: [Catalog]
+      operationId: activateProduct
+      x-permission: catalog.product.activate
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: productId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      responses:
+        '200':
+          description: Product activated
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Product'}
+        default:
+          $ref: '#/components/responses/Error'
+  /products/{productId}/archive:
+    post:
+      tags: [Catalog]
+      operationId: archiveProduct
+      x-permission: catalog.product.archive
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: productId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/TransitionReason'}
+      responses:
+        '200':
+          description: Product archived without deletion
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Product'}
+        default:
+          $ref: '#/components/responses/Error'
   /product-imports:
     post:
       tags: [Catalog]
       operationId: postProductImports
       x-permission: catalog.import.create
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: CSV Product import job accepted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
   /product-imports/{importId}/approve:
     post:
       tags: [Catalog]
       operationId: postProductImportsByImportIdApprove
       x-permission: catalog.import.approve
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Import approved at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
   /customer-imports:
     post:
       tags: [Identity]
@@ -868,54 +992,144 @@ paths:
       operationId: postOpeningStockImports
       x-permission: inventory.import.create
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: CSV opening-stock import job accepted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
   /inventory-adjustments/{id}/approve:
     post:
       tags: [Inventory]
       operationId: postInventoryAdjustmentsByIdApprove
       x-permission: inventory.adjustment.approve
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Adjustment approved at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InventoryAdjustment'}
+  /inventory-adjustments/{id}:
+    get:
+      tags: [Inventory]
+      operationId: getInventoryAdjustment
+      x-permission: inventory.adjustment.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Tenant-scoped adjustment detail
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InventoryAdjustment'}
+        default:
+          $ref: '#/components/responses/Error'
   /stock-counts/{id}/submit:
     post:
       tags: [Inventory]
       operationId: postStockCountsByIdSubmit
       x-permission: inventory.count.submit
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Count submitted at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockCount'}
+  /stock-counts/{id}:
+    get:
+      tags: [Inventory]
+      operationId: getStockCount
+      x-permission: inventory.count.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Tenant-scoped count detail
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockCount'}
+        default:
+          $ref: '#/components/responses/Error'
   /stock-counts/{id}/approve:
     post:
       tags: [Inventory]
       operationId: postStockCountsByIdApprove
       x-permission: inventory.count.approve
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Count approved and posted at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockCount'}
   /stock-transfers/{id}/receive:
     post:
       tags: [Inventory]
       operationId: postStockTransfersByIdReceive
       x-permission: inventory.transfer.receive
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Transfer receipt applied at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockTransfer'}
+  /stock-transfers/{id}:
+    get:
+      tags: [Inventory]
+      operationId: getStockTransfer
+      x-permission: inventory.transfer.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Tenant-scoped transfer detail
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockTransfer'}
+        default:
+          $ref: '#/components/responses/Error'
+  /stock-transfers/{id}/dispatch:
+    post:
+      tags: [Inventory]
+      operationId: dispatchStockTransfer
+      x-permission: inventory.transfer.dispatch
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      responses:
+        '200':
+          description: Transfer dispatched and custody moved in transit
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockTransfer'}
+        default:
+          $ref: '#/components/responses/Error'
   /sales/{saleId}/hold:
     post:
       tags: [Commerce]
@@ -1275,6 +1489,12 @@ components:
       in: header
       required: true
       schema: {type: string, minLength: 16, maxLength: 128}
+    ExpectedVersion:
+      name: If-Match
+      in: header
+      required: true
+      description: Positive aggregate version required for an explicit state transition.
+      schema: {type: string, pattern: '^[1-9][0-9]*$'}
     ActiveContextId:
       name: X-Active-Context-Id
       in: header
@@ -1611,16 +1831,25 @@ components:
         nextCursor: {type: [string, 'null']}
     Product:
       type: object
-      required: [id, name, state]
+      required: [id, name, state, version]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         name: {type: string, maxLength: 300}
         sku: {type: string, maxLength: 100}
         barcode: {type: string, maxLength: 64}
-        state: {type: string}
+        state: {type: string, enum: [Draft, Active, Suspended, Discontinued, Archived]}
+        version: {type: integer, minimum: 1}
     CreateProduct:
       type: object
       required: [name]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 300}
+        sku: {type: string, maxLength: 100}
+        barcode: {type: string, maxLength: 64}
+    UpdateProduct:
+      type: object
+      additionalProperties: false
+      minProperties: 1
       properties:
         name: {type: string, minLength: 1, maxLength: 300}
         sku: {type: string, maxLength: 100}
@@ -1638,32 +1867,76 @@ components:
         productId: {$ref: '#/components/schemas/Identifier'}
         locationId: {$ref: '#/components/schemas/Identifier'}
         unit: {type: string}
-        onHand: {type: number}
-        available: {type: number}
+        onHand: {$ref: '#/components/schemas/DecimalQuantity'}
+        available: {$ref: '#/components/schemas/DecimalQuantity'}
         asOf: {type: string, format: date-time}
+        reconciled: {type: boolean}
+    DecimalQuantity:
+      type: string
+      pattern: '^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
+      description: Exact decimal quantity with at most six fractional digits; exponent notation is prohibited.
+    TransitionReason:
+      type: object
+      additionalProperties: false
+      required: [reason]
+      properties:
+        reason: {type: string, minLength: 1, maxLength: 500}
+    ImportJob:
+      type: object
+      additionalProperties: false
+      required: [id, state, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        state:
+          type: string
+          enum: [Uploaded, Validating, ReadyForApproval, Approved, Committing, Completed, Failed, Cancelled]
+        version: {type: integer, minimum: 1}
     CreateInventoryAdjustment:
       type: object
       required: [locationId, productId, quantity, unit, reason]
       properties:
         locationId: {$ref: '#/components/schemas/Identifier'}
         productId: {$ref: '#/components/schemas/Identifier'}
-        quantity: {type: number}
+        quantity: {$ref: '#/components/schemas/DecimalQuantity'}
         unit: {type: string}
         reason: {type: string, maxLength: 500}
+        conversionSourceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
     InventoryAdjustment:
       allOf:
         - $ref: '#/components/schemas/CreateInventoryAdjustment'
         - type: object
-          required: [id, state]
+          required: [id, state, version]
           properties:
             id: {$ref: '#/components/schemas/Identifier'}
-            state: {type: string}
+            state: {type: string, enum: [Draft, PendingApproval, Approved, Posted, Reversed, Rejected]}
+            version: {type: integer, minimum: 1}
+    PagedInventoryAdjustments:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/InventoryAdjustment'}}
+        nextCursor: {type: [string, 'null']}
     CreateStockCount:
       type: object
       required: [locationId]
       properties:
         locationId: {$ref: '#/components/schemas/Identifier'}
         blind: {type: boolean, default: true}
+    StockCount:
+      type: object
+      required: [id, locationId, blind, state, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        locationId: {$ref: '#/components/schemas/Identifier'}
+        blind: {type: boolean}
+        state: {type: string, enum: [Draft, InProgress, Submitted, Approved, Posted, Rejected]}
+        version: {type: integer, minimum: 1}
+    PagedStockCounts:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/StockCount'}}
+        nextCursor: {type: [string, 'null']}
     CreateStockTransfer:
       type: object
       required: [sourceLocationId, destinationLocationId, lines]
@@ -1671,13 +1944,29 @@ components:
         sourceLocationId: {$ref: '#/components/schemas/Identifier'}
         destinationLocationId: {$ref: '#/components/schemas/Identifier'}
         lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/QuantityLine'}}
+    StockTransfer:
+      allOf:
+        - $ref: '#/components/schemas/CreateStockTransfer'
+        - type: object
+          required: [id, state, version]
+          properties:
+            id: {$ref: '#/components/schemas/Identifier'}
+            state: {type: string, enum: [Draft, Dispatched, PartiallyReceived, Received, Exception, Cancelled]}
+            version: {type: integer, minimum: 1}
+    PagedStockTransfers:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/StockTransfer'}}
+        nextCursor: {type: [string, 'null']}
     QuantityLine:
       type: object
       required: [productId, quantity, unit]
       properties:
         productId: {$ref: '#/components/schemas/Identifier'}
-        quantity: {type: number, exclusiveMinimum: 0}
+        quantity: {$ref: '#/components/schemas/DecimalQuantity'}
         unit: {type: string}
+        conversionSourceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
     OpenRegisterRequest:
       type: object
       required: [currency, openingFloat]

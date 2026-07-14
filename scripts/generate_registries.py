@@ -525,19 +525,35 @@ def build_architecture_rules_registry() -> dict[str, Any]:
     data = load_json(registry_path)
     records: list[dict[str, Any]] = []
     rule_allowances: dict[str, list[str]] = {}
+    composition_roots: list[str] = []
     in_owner_table = False
     in_allowance_table = False
+    in_composition_table = False
     for line in source_path.read_text(encoding="utf-8").splitlines():
+        if line == "### Registered Composition Roots":
+            in_composition_table = True
+            continue
         if line == "### Registered Persistence Owners":
+            in_composition_table = False
             in_owner_table = True
             continue
         if line == "### Registered Rule Allowances":
+            in_composition_table = False
+            in_owner_table = False
             in_allowance_table = True
             continue
         if in_owner_table and line.startswith("### "):
             in_owner_table = False
         if in_allowance_table and line.startswith("### "):
             in_allowance_table = False
+        if in_composition_table and line.startswith("### "):
+            in_composition_table = False
+        if in_composition_table and line.startswith("| `"):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if len(cells) != 4:
+                raise ValueError(f"invalid composition-root row: {line}")
+            composition_roots.append(cells[0].strip("`"))
+            continue
         if in_allowance_table and line.startswith("| `"):
             cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
             if len(cells) != 3:
@@ -570,7 +586,10 @@ def build_architecture_rules_registry() -> dict[str, Any]:
         raise ValueError("registered persistence-owner table is empty")
     if not rule_allowances:
         raise ValueError("registered architecture-rule allowance table is empty")
+    if not composition_roots:
+        raise ValueError("registered composition-root table is empty")
     apply_rule_allowances(data, rule_allowances)
+    data["requirements"]["composition_roots"] = composition_roots
     data["persistence_owners"] = records
     return data
 

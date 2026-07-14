@@ -6,6 +6,8 @@ import {
 	IdentifierSchema,
 	platformApiContract,
 	WS1_OPENAPI_OPERATION_METADATA,
+	WS2_OPENAPI_OPERATION_METADATA,
+	ws2CatalogInventoryApiContract,
 } from "./index";
 
 interface ContractProcedureShape {
@@ -87,5 +89,27 @@ describe("WS1 platform API contract", () => {
 	test("rejects identifiers outside the governed opaque shape", () => {
 		expect(IdentifierSchema.safeParse("short").success).toBe(false);
 		expect(IdentifierSchema.safeParse("../tenant").success).toBe(false);
+	});
+});
+
+describe("WS2 Catalog and Inventory API contract", () => {
+	test("is semantically aligned with every generated Catalog and Inventory operation", () => {
+		const actual = collectProcedures(ws2CatalogInventoryApiContract)
+			.map((procedure) => ({
+				...procedure["~orpc"].meta,
+				method: procedure["~orpc"].route.method,
+				path: procedure["~orpc"].route.path,
+			}))
+			.sort((left, right) =>
+				String((left as Record<string, unknown>).operationId).localeCompare(
+					String((right as Record<string, unknown>).operationId)
+				)
+			);
+		const expected = [...WS2_OPENAPI_OPERATION_METADATA].sort((left, right) =>
+			left.operationId.localeCompare(right.operationId)
+		);
+
+		expect(actual).toEqual(expected);
+		expect(actual).toHaveLength(24);
 	});
 });

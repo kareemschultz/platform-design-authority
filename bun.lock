@@ -101,11 +101,14 @@
         "@meridian/contracts-permissions": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
         "@meridian/domain-party": "workspace:*",
+        "@meridian/persistence-catalog-postgres": "workspace:*",
+        "@meridian/persistence-inventory-postgres": "workspace:*",
         "@meridian/persistence-party-postgres": "workspace:*",
         "@meridian/persistence-platform-audit-postgres": "workspace:*",
         "@meridian/persistence-platform-entitlements-postgres": "workspace:*",
         "@meridian/persistence-platform-events-postgres": "workspace:*",
         "@meridian/persistence-platform-identity-postgres": "workspace:*",
+        "@meridian/persistence-platform-numbering-postgres": "workspace:*",
         "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
         "@meridian/platform-audit": "workspace:*",
         "@meridian/platform-authorization": "workspace:*",
@@ -128,6 +131,7 @@
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/pg": "catalog:",
+        "drizzle-orm": "catalog:",
         "tsdown": "^0.22.3",
         "tsx": "4.21.0",
         "typescript": "^6",
@@ -217,6 +221,24 @@
         "typescript": "^6",
       },
     },
+    "packages/domains/catalog": {
+      "name": "@meridian/domain-catalog",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/domains/inventory": {
+      "name": "@meridian/domain-inventory",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
     "packages/domains/party": {
       "name": "@meridian/domain-party",
       "version": "0.0.0",
@@ -236,6 +258,36 @@
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/persistence/catalog-postgres": {
+      "name": "@meridian/persistence-catalog-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/domain-catalog": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/persistence/inventory-postgres": {
+      "name": "@meridian/persistence-inventory-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/domain-inventory": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
         "typescript": "^6",
       },
     },
@@ -317,6 +369,21 @@
         "@types/bun": "catalog:",
         "@types/pg": "catalog:",
         "drizzle-kit": "0.31.10",
+        "typescript": "^6",
+      },
+    },
+    "packages/persistence/platform-numbering-postgres": {
+      "name": "@meridian/persistence-platform-numbering-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/platform-numbering": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
         "typescript": "^6",
       },
     },
@@ -414,6 +481,15 @@
         "@meridian/tooling-config": "workspace:*",
         "typescript": "^6",
         "vitest": "4.1.10",
+      },
+    },
+    "packages/platform/numbering": {
+      "name": "@meridian/platform-numbering",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
       },
     },
     "packages/platform/tenancy": {
@@ -961,9 +1037,17 @@
 
     "@meridian/contracts-platform-api": ["@meridian/contracts-platform-api@workspace:packages/contracts/platform-api"],
 
+    "@meridian/domain-catalog": ["@meridian/domain-catalog@workspace:packages/domains/catalog"],
+
+    "@meridian/domain-inventory": ["@meridian/domain-inventory@workspace:packages/domains/inventory"],
+
     "@meridian/domain-party": ["@meridian/domain-party@workspace:packages/domains/party"],
 
     "@meridian/foundation-core": ["@meridian/foundation-core@workspace:packages/foundation/core"],
+
+    "@meridian/persistence-catalog-postgres": ["@meridian/persistence-catalog-postgres@workspace:packages/persistence/catalog-postgres"],
+
+    "@meridian/persistence-inventory-postgres": ["@meridian/persistence-inventory-postgres@workspace:packages/persistence/inventory-postgres"],
 
     "@meridian/persistence-party-postgres": ["@meridian/persistence-party-postgres@workspace:packages/persistence/party-postgres"],
 
@@ -974,6 +1058,8 @@
     "@meridian/persistence-platform-events-postgres": ["@meridian/persistence-platform-events-postgres@workspace:packages/persistence/platform-events-postgres"],
 
     "@meridian/persistence-platform-identity-postgres": ["@meridian/persistence-platform-identity-postgres@workspace:packages/persistence/platform-identity-postgres"],
+
+    "@meridian/persistence-platform-numbering-postgres": ["@meridian/persistence-platform-numbering-postgres@workspace:packages/persistence/platform-numbering-postgres"],
 
     "@meridian/persistence-platform-tenancy-postgres": ["@meridian/persistence-platform-tenancy-postgres@workspace:packages/persistence/platform-tenancy-postgres"],
 
@@ -988,6 +1074,8 @@
     "@meridian/platform-events": ["@meridian/platform-events@workspace:packages/platform/events"],
 
     "@meridian/platform-identity": ["@meridian/platform-identity@workspace:packages/platform/identity"],
+
+    "@meridian/platform-numbering": ["@meridian/platform-numbering@workspace:packages/platform/numbering"],
 
     "@meridian/platform-tenancy": ["@meridian/platform-tenancy@workspace:packages/platform/tenancy"],
 

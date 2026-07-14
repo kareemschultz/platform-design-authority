@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/inventory.stock-count.posted.v1.schema.json",
+  "title": "inventory.stock-count.posted.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "inventory.stock-count.posted.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["countId", "locationId", "movementIds", "varianceLineCount", "version"],
+          "properties": {
+            "countId": {"type": "string"},
+            "locationId": {"type": "string"},
+            "movementIds": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+            "varianceLineCount": {"type": "integer", "minimum": 0},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    }
+  ]
+}

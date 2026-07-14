@@ -5,29 +5,45 @@ import { OPENAPI_OPERATION_METADATA } from "./generated";
 import {
 	ActiveContextRequestSchema,
 	ActiveContextSchema,
+	CreateInventoryAdjustmentSchema,
 	CreateOrganizationPartySchema,
 	CreatePartyIdentityLinkRequestSchema,
 	CreatePersonPartySchema,
+	CreateProductSchema,
 	CreateRoleAssignmentRequestSchema,
+	CreateStockCountSchema,
+	CreateStockTransferSchema,
 	CreateUserInvitationRequestSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
+	ImportJobSchema,
+	InventoryAdjustmentSchema,
 	OrganizationSchema,
 	PagedAuditRecordsSchema,
 	PagedEntitlementsSchema,
+	PagedInventoryAdjustmentsSchema,
 	PagedLocationsSchema,
 	PagedOrganizationsSchema,
 	PagedPartiesSchema,
+	PagedProductsSchema,
 	PagedRolesSchema,
 	PagedSessionsSchema,
+	PagedStockCountsSchema,
+	PagedStockTransfersSchema,
 	PagedUsersSchema,
 	PartySchema,
 	PlatformIdentityLinkSchema,
 	ProblemSchema,
+	ProductSchema,
 	RoleAssignmentSchema,
+	StockBalanceSchema,
+	StockCountSchema,
+	StockTransferSchema,
 	SuspendTenantMembershipRequestSchema,
+	TransitionReasonSchema,
 	UpdateOrganizationRequestSchema,
 	UpdatePartyRequestSchema,
+	UpdateProductSchema,
 	UserInvitationSchema,
 	UserSummarySchema,
 } from "./schemas";
@@ -77,6 +93,9 @@ const RequiredActiveContextHeadersSchema = z.object({
 });
 const TenantCommandHeadersSchema = IdempotencyHeadersSchema.extend({
 	"x-active-context-id": IdentifierSchema,
+});
+const VersionedTenantCommandHeadersSchema = TenantCommandHeadersSchema.extend({
+	"if-match": z.string().regex(/^[1-9][0-9]*$/),
 });
 
 export const getCurrentIdentityContract = base
@@ -449,6 +468,495 @@ export const createPartyIdentityLinkContract = base
 	)
 	.output(PlatformIdentityLinkSchema);
 
+export const listProductsContract = base
+	.route({ method: "GET", path: "/v1/products", successStatus: 200 })
+	.meta({
+		operationId: "listProducts",
+		permission: "catalog.product.read",
+		responseRef: "#/components/schemas/PagedProducts",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				barcode: z.string().max(64).optional(),
+				query: z.string().max(200).optional(),
+			}),
+		})
+	)
+	.output(PagedProductsSchema);
+
+export const getProductContract = base
+	.route({
+		method: "GET",
+		path: "/v1/products/{productId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getProductsByProductId",
+		permission: "catalog.product.read",
+		responseRef: "#/components/schemas/Product",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ productId: IdentifierSchema }),
+		})
+	)
+	.output(ProductSchema);
+
+export const createProductContract = base
+	.route({ method: "POST", path: "/v1/products", successStatus: 201 })
+	.meta({
+		operationId: "createProduct",
+		permission: "catalog.product.create",
+		requestRef: "#/components/schemas/CreateProduct",
+		responseRef: "#/components/schemas/Product",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateProductSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(ProductSchema);
+
+export const updateProductContract = base
+	.route({
+		method: "PATCH",
+		path: "/v1/products/{productId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "patchProductsByProductId",
+		permission: "catalog.product.update",
+		requestRef: "#/components/schemas/UpdateProduct",
+		responseRef: "#/components/schemas/Product",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: UpdateProductSchema,
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ productId: IdentifierSchema }),
+		})
+	)
+	.output(ProductSchema);
+
+export const activateProductContract = base
+	.route({
+		method: "POST",
+		path: "/v1/products/{productId}/activate",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "activateProduct",
+		permission: "catalog.product.activate",
+		responseRef: "#/components/schemas/Product",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ productId: IdentifierSchema }),
+		})
+	)
+	.output(ProductSchema);
+
+export const archiveProductContract = base
+	.route({
+		method: "POST",
+		path: "/v1/products/{productId}/archive",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "archiveProduct",
+		permission: "catalog.product.archive",
+		requestRef: "#/components/schemas/TransitionReason",
+		responseRef: "#/components/schemas/Product",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: TransitionReasonSchema,
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ productId: IdentifierSchema }),
+		})
+	)
+	.output(ProductSchema);
+
+export const createProductImportContract = base
+	.route({ method: "POST", path: "/v1/product-imports", successStatus: 200 })
+	.meta({
+		operationId: "postProductImports",
+		permission: "catalog.import.create",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 200,
+	})
+	.input(z.object({ headers: TenantCommandHeadersSchema }))
+	.output(ImportJobSchema);
+
+export const approveProductImportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/product-imports/{importId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postProductImportsByImportIdApprove",
+		permission: "catalog.import.approve",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportJobSchema);
+
+export const listStockBalancesContract = base
+	.route({ method: "GET", path: "/v1/stock-balances", successStatus: 200 })
+	.meta({
+		operationId: "listStockBalances",
+		permission: "inventory.balance.read",
+		responseRef: "#/components/schemas/StockBalance",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: z.object({
+				locationId: IdentifierSchema,
+				productId: IdentifierSchema.optional(),
+			}),
+		})
+	)
+	.output(z.array(StockBalanceSchema));
+
+export const listInventoryAdjustmentsContract = base
+	.route({
+		method: "GET",
+		path: "/v1/inventory-adjustments",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "listInventoryAdjustments",
+		permission: "inventory.adjustment.read",
+		responseRef: "#/components/schemas/PagedInventoryAdjustments",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				locationId: IdentifierSchema.optional(),
+				state: InventoryAdjustmentSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedInventoryAdjustmentsSchema);
+
+export const createInventoryAdjustmentContract = base
+	.route({
+		method: "POST",
+		path: "/v1/inventory-adjustments",
+		successStatus: 202,
+	})
+	.meta({
+		operationId: "createInventoryAdjustment",
+		permission: "inventory.adjustment.create",
+		requestRef: "#/components/schemas/CreateInventoryAdjustment",
+		responseRef: "#/components/schemas/InventoryAdjustment",
+		successStatus: 202,
+	})
+	.input(
+		z.object({
+			body: CreateInventoryAdjustmentSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(InventoryAdjustmentSchema);
+
+export const getInventoryAdjustmentContract = base
+	.route({
+		method: "GET",
+		path: "/v1/inventory-adjustments/{id}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getInventoryAdjustment",
+		permission: "inventory.adjustment.read",
+		responseRef: "#/components/schemas/InventoryAdjustment",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
+		})
+	)
+	.output(InventoryAdjustmentSchema);
+
+export const approveInventoryAdjustmentContract = base
+	.route({
+		method: "POST",
+		path: "/v1/inventory-adjustments/{id}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postInventoryAdjustmentsByIdApprove",
+		permission: "inventory.adjustment.approve",
+		responseRef: "#/components/schemas/InventoryAdjustment",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
+		})
+	)
+	.output(InventoryAdjustmentSchema);
+
+export const createOpeningStockImportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/opening-stock-imports",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postOpeningStockImports",
+		permission: "inventory.import.create",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 200,
+	})
+	.input(z.object({ headers: TenantCommandHeadersSchema }))
+	.output(ImportJobSchema);
+
+export const listStockCountsContract = base
+	.route({ method: "GET", path: "/v1/stock-counts", successStatus: 200 })
+	.meta({
+		operationId: "listStockCounts",
+		permission: "inventory.count.read",
+		responseRef: "#/components/schemas/PagedStockCounts",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				locationId: IdentifierSchema.optional(),
+				state: StockCountSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedStockCountsSchema);
+
+export const createStockCountContract = base
+	.route({ method: "POST", path: "/v1/stock-counts", successStatus: 201 })
+	.meta({
+		operationId: "createStockCount",
+		permission: "inventory.count.create",
+		requestRef: "#/components/schemas/CreateStockCount",
+		responseRef: "#/components/schemas/StockCount",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateStockCountSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(StockCountSchema);
+
+export const getStockCountContract = base
+	.route({ method: "GET", path: "/v1/stock-counts/{id}", successStatus: 200 })
+	.meta({
+		operationId: "getStockCount",
+		permission: "inventory.count.read",
+		responseRef: "#/components/schemas/StockCount",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
+		})
+	)
+	.output(StockCountSchema);
+
+const stockCountTransitionContract = (
+	operationId: "postStockCountsByIdSubmit" | "postStockCountsByIdApprove",
+	path: "/v1/stock-counts/{id}/submit" | "/v1/stock-counts/{id}/approve",
+	permission: "inventory.count.submit" | "inventory.count.approve"
+) =>
+	base
+		.route({ method: "POST", path, successStatus: 200 })
+		.meta({
+			operationId,
+			permission,
+			responseRef: "#/components/schemas/StockCount",
+			successStatus: 200,
+		})
+		.input(
+			z.object({
+				headers: VersionedTenantCommandHeadersSchema,
+				params: z.object({ id: IdentifierSchema }),
+			})
+		)
+		.output(StockCountSchema);
+
+export const submitStockCountContract = stockCountTransitionContract(
+	"postStockCountsByIdSubmit",
+	"/v1/stock-counts/{id}/submit",
+	"inventory.count.submit"
+);
+export const approveStockCountContract = stockCountTransitionContract(
+	"postStockCountsByIdApprove",
+	"/v1/stock-counts/{id}/approve",
+	"inventory.count.approve"
+);
+
+export const listStockTransfersContract = base
+	.route({ method: "GET", path: "/v1/stock-transfers", successStatus: 200 })
+	.meta({
+		operationId: "listStockTransfers",
+		permission: "inventory.transfer.read",
+		responseRef: "#/components/schemas/PagedStockTransfers",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				locationId: IdentifierSchema.optional(),
+				state: StockTransferSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedStockTransfersSchema);
+
+export const createStockTransferContract = base
+	.route({ method: "POST", path: "/v1/stock-transfers", successStatus: 201 })
+	.meta({
+		operationId: "createStockTransfer",
+		permission: "inventory.transfer.create",
+		requestRef: "#/components/schemas/CreateStockTransfer",
+		responseRef: "#/components/schemas/StockTransfer",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateStockTransferSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(StockTransferSchema);
+
+export const getStockTransferContract = base
+	.route({
+		method: "GET",
+		path: "/v1/stock-transfers/{id}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getStockTransfer",
+		permission: "inventory.transfer.read",
+		responseRef: "#/components/schemas/StockTransfer",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
+		})
+	)
+	.output(StockTransferSchema);
+
+const stockTransferTransitionContract = (
+	operationId: "dispatchStockTransfer" | "postStockTransfersByIdReceive",
+	path:
+		| "/v1/stock-transfers/{id}/dispatch"
+		| "/v1/stock-transfers/{id}/receive",
+	permission: "inventory.transfer.dispatch" | "inventory.transfer.receive",
+	withResponseRef: boolean
+) =>
+	base
+		.route({ method: "POST", path, successStatus: 200 })
+		.meta({
+			operationId,
+			permission,
+			...(withResponseRef
+				? { responseRef: "#/components/schemas/StockTransfer" }
+				: {}),
+			successStatus: 200,
+		})
+		.input(
+			z.object({
+				headers: VersionedTenantCommandHeadersSchema,
+				params: z.object({ id: IdentifierSchema }),
+			})
+		)
+		.output(StockTransferSchema);
+
+export const dispatchStockTransferContract = stockTransferTransitionContract(
+	"dispatchStockTransfer",
+	"/v1/stock-transfers/{id}/dispatch",
+	"inventory.transfer.dispatch",
+	true
+);
+export const receiveStockTransferContract = stockTransferTransitionContract(
+	"postStockTransfersByIdReceive",
+	"/v1/stock-transfers/{id}/receive",
+	"inventory.transfer.receive",
+	true
+);
+
+export const ws2CatalogInventoryApiContract = {
+	catalog: {
+		imports: {
+			approve: approveProductImportContract,
+			create: createProductImportContract,
+		},
+		products: {
+			activate: activateProductContract,
+			archive: archiveProductContract,
+			create: createProductContract,
+			get: getProductContract,
+			list: listProductsContract,
+			update: updateProductContract,
+		},
+	},
+	inventory: {
+		adjustments: {
+			approve: approveInventoryAdjustmentContract,
+			create: createInventoryAdjustmentContract,
+			get: getInventoryAdjustmentContract,
+			list: listInventoryAdjustmentsContract,
+		},
+		balances: { list: listStockBalancesContract },
+		counts: {
+			approve: approveStockCountContract,
+			create: createStockCountContract,
+			get: getStockCountContract,
+			list: listStockCountsContract,
+			submit: submitStockCountContract,
+		},
+		imports: { createOpeningStock: createOpeningStockImportContract },
+		transfers: {
+			create: createStockTransferContract,
+			dispatch: dispatchStockTransferContract,
+			get: getStockTransferContract,
+			list: listStockTransfersContract,
+			receive: receiveStockTransferContract,
+		},
+	},
+};
+
 export const platformApiContract = {
 	audit: { list: listAuditRecordsContract },
 	entitlements: { list: listEntitlementsContract },
@@ -523,4 +1031,11 @@ export const WS1_OPERATION_IDS = [
 export const WS1_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(
 	(operation) =>
 		(WS1_OPERATION_IDS as readonly string[]).includes(operation.operationId)
+);
+
+export const WS2_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(
+	(operation) =>
+		"permission" in operation &&
+		(operation.permission.startsWith("catalog.") ||
+			operation.permission.startsWith("inventory."))
 );

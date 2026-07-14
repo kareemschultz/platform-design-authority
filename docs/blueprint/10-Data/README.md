@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DAT-001
 title: Data Platform Section Index
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -19,6 +19,7 @@ last_reviewed: 2026-07-11
 - `SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md`
 - `SEARCH_AND_COMMAND_RANKING_POLICY.md`
 - `DATA_CLASSIFICATION_AND_HANDLING.md`
+- `WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md`
 - `docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md`
 - `docs/blueprint/01-Platform/EXTENSIBLE_METADATA_AND_CUSTOM_FIELDS.md`
 - `docs/blueprint/02-Architecture/DATA_OWNERSHIP_AND_CONSISTENCY.md`

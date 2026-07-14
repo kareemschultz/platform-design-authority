@@ -350,6 +350,142 @@ export const AuthorizationDecisionSchema = z.discriminatedUnion("outcome", [
 	}),
 ]);
 
+export const ProductStateSchema = z.enum([
+	"Draft",
+	"Active",
+	"Suspended",
+	"Discontinued",
+	"Archived",
+]);
+
+export const ProductSchema = z.object({
+	barcode: z.string().max(64).optional(),
+	id: IdentifierSchema,
+	name: z.string().min(1).max(300),
+	sku: z.string().max(100).optional(),
+	state: ProductStateSchema,
+	version: z.number().int().min(1),
+});
+
+export const CreateProductSchema = z.object({
+	barcode: z.string().max(64).optional(),
+	name: z.string().min(1).max(300),
+	sku: z.string().max(100).optional(),
+});
+
+export const UpdateProductSchema = CreateProductSchema.partial().refine(
+	(value) => Object.keys(value).length > 0,
+	{ message: "At least one mutable Product field is required" }
+);
+
+export const TransitionReasonSchema = z.object({
+	reason: z.string().min(1).max(500),
+});
+
+export const DecimalQuantitySchema = z
+	.string()
+	.regex(/^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+
+export const QuantityLineSchema = z.object({
+	conversionSourceId: NullableIdentifierSchema.optional(),
+	productId: IdentifierSchema,
+	quantity: DecimalQuantitySchema,
+	unit: z.string().min(1).max(50),
+});
+
+export const StockBalanceSchema = z.object({
+	asOf: InstantSchema,
+	available: DecimalQuantitySchema,
+	locationId: IdentifierSchema,
+	onHand: DecimalQuantitySchema,
+	productId: IdentifierSchema,
+	reconciled: z.boolean().optional(),
+	unit: z.string().min(1).max(50),
+});
+
+export const CreateInventoryAdjustmentSchema = z.object({
+	conversionSourceId: NullableIdentifierSchema.optional(),
+	locationId: IdentifierSchema,
+	productId: IdentifierSchema,
+	quantity: DecimalQuantitySchema,
+	reason: z.string().min(1).max(500),
+	unit: z.string().min(1).max(50),
+});
+
+export const InventoryAdjustmentSchema = CreateInventoryAdjustmentSchema.extend(
+	{
+		id: IdentifierSchema,
+		state: z.enum([
+			"Draft",
+			"PendingApproval",
+			"Approved",
+			"Posted",
+			"Reversed",
+			"Rejected",
+		]),
+		version: z.number().int().min(1),
+	}
+);
+
+export const CreateStockCountSchema = z.object({
+	blind: z.boolean().default(true),
+	locationId: IdentifierSchema,
+});
+
+export const StockCountSchema = CreateStockCountSchema.extend({
+	id: IdentifierSchema,
+	state: z.enum([
+		"Draft",
+		"InProgress",
+		"Submitted",
+		"Approved",
+		"Posted",
+		"Rejected",
+	]),
+	version: z.number().int().min(1),
+});
+
+export const CreateStockTransferSchema = z
+	.object({
+		destinationLocationId: IdentifierSchema,
+		lines: z.array(QuantityLineSchema).min(1),
+		sourceLocationId: IdentifierSchema,
+	})
+	.refine((value) => value.sourceLocationId !== value.destinationLocationId, {
+		message: "Transfer source and destination must differ",
+	});
+
+export const StockTransferSchema = z.object({
+	destinationLocationId: IdentifierSchema,
+	id: IdentifierSchema,
+	lines: z.array(QuantityLineSchema).min(1),
+	sourceLocationId: IdentifierSchema,
+	state: z.enum([
+		"Draft",
+		"Dispatched",
+		"PartiallyReceived",
+		"Received",
+		"Exception",
+		"Cancelled",
+	]),
+	version: z.number().int().min(1),
+});
+
+export const ImportJobSchema = z.object({
+	id: IdentifierSchema,
+	state: z.enum([
+		"Uploaded",
+		"Validating",
+		"ReadyForApproval",
+		"Approved",
+		"Committing",
+		"Completed",
+		"Failed",
+		"Cancelled",
+	]),
+	version: z.number().int().min(1),
+});
+
 export const ProblemSchema = z.object({
 	code: z.enum([
 		"validation",
@@ -406,6 +542,12 @@ export const PagedRolesSchema = pageOf(RoleSchema);
 export const PagedEntitlementsSchema = pageOf(EntitlementSchema);
 export const PagedPartiesSchema = pageOf(PartySchema);
 export const PagedAuditRecordsSchema = pageOf(AuditRecordSchema);
+export const PagedProductsSchema = pageOf(ProductSchema);
+export const PagedInventoryAdjustmentsSchema = pageOf(
+	InventoryAdjustmentSchema
+);
+export const PagedStockCountsSchema = pageOf(StockCountSchema);
+export const PagedStockTransfersSchema = pageOf(StockTransferSchema);
 
 export type ActiveContext = z.infer<typeof ActiveContextSchema>;
 export type ActiveContextRequest = z.infer<typeof ActiveContextRequestSchema>;
@@ -443,3 +585,8 @@ export type SuspendTenantMembershipRequest = z.infer<
 export type UpdateOrganizationRequest = z.infer<
 	typeof UpdateOrganizationRequestSchema
 >;
+export type Product = z.infer<typeof ProductSchema>;
+export type InventoryAdjustment = z.infer<typeof InventoryAdjustmentSchema>;
+export type StockBalance = z.infer<typeof StockBalanceSchema>;
+export type StockCount = z.infer<typeof StockCountSchema>;
+export type StockTransfer = z.infer<typeof StockTransferSchema>;

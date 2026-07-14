@@ -154,7 +154,8 @@
       "description": "Database clients are limited to approved persistence packages, except that registered composition-root paths (`requirements.composition_roots`) may import a database client solely to construct the single process pool/connection and inject it through published ports, per ADR-0027. No other path may import a database client.",
       "pattern": "**/!(persistence)/** -> database-client",
       "except": [
-        "apps/*/composition",
+        "apps/server/composition",
+        "apps/worker/composition",
         "packages/tooling/composition/*"
       ]
     },
@@ -233,7 +234,8 @@
     "circular_dependencies": "prohibited_without_exception",
     "exceptions_require_expiry": true,
     "composition_roots": [
-      "apps/*/composition",
+      "apps/server/composition",
+      "apps/worker/composition",
       "packages/tooling/composition/*"
     ],
     "composition_root_may_depend_on": [
@@ -344,6 +346,33 @@
         "party_record"
       ],
       "migration_directory": "packages/persistence/party-postgres/src/migrations"
+    },
+    {
+      "id": "catalog-postgres",
+      "package": "packages/persistence/catalog-postgres",
+      "package_name": "@meridian/persistence-catalog-postgres",
+      "owner": "catalog",
+      "owner_package": "@meridian/domain-catalog",
+      "tables": [],
+      "migration_directory": "packages/persistence/catalog-postgres/src/migrations"
+    },
+    {
+      "id": "inventory-postgres",
+      "package": "packages/persistence/inventory-postgres",
+      "package_name": "@meridian/persistence-inventory-postgres",
+      "owner": "inventory",
+      "owner_package": "@meridian/domain-inventory",
+      "tables": [],
+      "migration_directory": "packages/persistence/inventory-postgres/src/migrations"
+    },
+    {
+      "id": "platform-numbering-postgres",
+      "package": "packages/persistence/platform-numbering-postgres",
+      "package_name": "@meridian/persistence-platform-numbering-postgres",
+      "owner": "platform.numbering",
+      "owner_package": "@meridian/platform-numbering",
+      "tables": [],
+      "migration_directory": "packages/persistence/platform-numbering-postgres/src/migrations"
     }
   ],
   "exceptions": []

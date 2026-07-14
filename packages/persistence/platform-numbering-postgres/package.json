@@ -1,0 +1,24 @@
+{
+  "name": "@meridian/persistence-platform-numbering-postgres",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "bun test src/*.test.ts"
+  },
+  "dependencies": {
+    "@meridian/platform-numbering": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "pg": "8.22.0"
+  },
+  "devDependencies": {
+    "@meridian/tooling-config": "workspace:*",
+    "@types/bun": "catalog:",
+    "@types/pg": "catalog:",
+    "typescript": "^6"
+  }
+}

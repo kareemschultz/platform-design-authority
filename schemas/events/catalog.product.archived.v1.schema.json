@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/catalog.product.archived.v1.schema.json",
+  "title": "catalog.product.archived.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "catalog.product.archived.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["productId", "previousState", "reason", "version"],
+          "properties": {
+            "productId": {"type": "string"},
+            "previousState": {"type": "string", "enum": ["Draft", "Suspended", "Discontinued"]},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    }
+  ]
+}

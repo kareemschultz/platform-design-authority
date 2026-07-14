@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/catalog.product.discontinued.v1.schema.json",
+  "title": "catalog.product.discontinued.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "catalog.product.discontinued.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["productId", "reason", "effectiveAt", "version"],
+          "properties": {
+            "productId": {"type": "string"},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+            "effectiveAt": {"type": "string", "format": "date-time"},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    }
+  ]
+}

@@ -366,9 +366,13 @@ def main() -> int:
             )
 
         migration_directory = ROOT / str(record.get("migration_directory", ""))
-        if not migration_directory.is_dir() or not list(migration_directory.glob("*.sql")):
+        if not migration_directory.is_dir():
             errors.append(
-                f"{posix(root)}: registered migration directory has no SQL migrations"
+                f"{posix(root)}: registered migration directory does not exist"
+            )
+        elif registered_tables and not list(migration_directory.glob("*.sql")):
+            errors.append(
+                f"{posix(root)}: registered tables require at least one SQL migration"
             )
         for migration in root.rglob("*.sql"):
             if migration_directory not in migration.parents:

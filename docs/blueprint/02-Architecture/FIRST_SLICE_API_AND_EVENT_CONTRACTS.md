@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-014
 title: First Slice API and Event Contracts
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -77,6 +77,8 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | `GET /v1/products/{productId}` | `catalog.product.read` |
 | `POST /v1/products` | `catalog.product.create` |
 | `PATCH /v1/products/{productId}` | `catalog.product.update` |
+| `POST /v1/products/{productId}/activate` | `catalog.product.activate` |
+| `POST /v1/products/{productId}/archive` | `catalog.product.archive` |
 | `POST /v1/product-imports` | `catalog.import.create` |
 | `POST /v1/product-imports/{importId}/approve` | `catalog.import.approve` |
 | `POST /v1/customer-imports` | `platform.import.create` |
@@ -87,12 +89,19 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | Method and path | Permission |
 |---|---|
 | `GET /v1/stock-balances` | `inventory.balance.read` |
+| `GET /v1/inventory-adjustments` | `inventory.adjustment.read` |
+| `GET /v1/inventory-adjustments/{id}` | `inventory.adjustment.read` |
 | `POST /v1/inventory-adjustments` | `inventory.adjustment.create` |
 | `POST /v1/inventory-adjustments/{id}/approve` | `inventory.adjustment.approve` |
+| `GET /v1/stock-counts` | `inventory.count.read` |
+| `GET /v1/stock-counts/{id}` | `inventory.count.read` |
 | `POST /v1/stock-counts` | `inventory.count.create` |
 | `POST /v1/stock-counts/{id}/submit` | `inventory.count.submit` |
 | `POST /v1/stock-counts/{id}/approve` | `inventory.count.approve` |
+| `GET /v1/stock-transfers` | `inventory.transfer.read` |
+| `GET /v1/stock-transfers/{id}` | `inventory.transfer.read` |
 | `POST /v1/stock-transfers` | `inventory.transfer.create` |
+| `POST /v1/stock-transfers/{id}/dispatch` | `inventory.transfer.dispatch` |
 | `POST /v1/stock-transfers/{id}/receive` | `inventory.transfer.receive` |
 
 ### Commerce, Registers, Cash, and Deposits
@@ -188,6 +197,8 @@ Define the minimum public and first-party contracts required for the Guyana reta
 
 Every consequential command declares idempotency, authorization, entitlement, state preconditions, concurrency, audit, canonical event output, retry safety, and provider uncertainty.
 
+WS2 Product activation/archive and Inventory dispatch commands require `Idempotency-Key` plus an expected version. Adjustment, Count, and Transfer list/detail queries use resource-specific read permissions; mutation permissions do not grant inspection, and `inventory.balance.read` does not expose workflow evidence. Quantities are decimal strings with an explicit unit and optional governed conversion provenance.
+
 `POST /v1/users/{userId}/suspend` suspends the target user's membership in the active tenant context. It does not globally disable the Better Auth account or mutate memberships in another tenant. Global protective account action belongs to a separately governed Security/Platform Identity command.
 
 `POST /v1/session/active-context` validates a current membership and returns a server-issued active-context identifier bound to the authenticated session. Subsequent context-bound calls present that identifier in `X-Active-Context-Id`; the server revalidates it. The operation does not mutate Better Auth's session-global `activeOrganizationId`, which would make concurrent browser tabs interfere.
@@ -200,8 +211,12 @@ Every consequential command declares idempotency, authorization, entitlement, st
 | `platform.device.enrolled.v1` | Device and Edge Management |
 | `party.person.created.v1` | Party and Relationship Model |
 | `catalog.product.created.v1` | Product Catalog Domain |
+| `catalog.product.activated.v1` | Product Catalog Domain |
+| `catalog.product.archived.v1` | Product Catalog Domain |
 | `inventory.stock.adjusted.v1` | Inventory Domain |
 | `inventory.stock-count.posted.v1` | Inventory Domain |
+| `inventory.stock-transfer.dispatched.v1` | Inventory Domain |
+| `inventory.stock-transfer.received.v1` | Inventory Domain |
 | `commerce.sale.completed.v1` | Commerce Domain |
 | `commerce.return.completed.v1` | Commerce Domain |
 | `commerce.register.opened.v1` | Commerce Domain |

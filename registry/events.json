@@ -1169,7 +1169,7 @@
       "source_heading": "Events",
       "source_line": 218,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/party.identity-link.created.v1.schema.json"
     },
     {
       "name": "party.organization.created.v1",
@@ -1182,7 +1182,7 @@
       "source_heading": "Events",
       "source_line": 211,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/party.organization.created.v1.schema.json"
     },
     {
       "name": "party.person.created.v1",
@@ -1195,7 +1195,7 @@
       "source_heading": "Events",
       "source_line": 210,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/party.person.created.v1.schema.json"
     },
     {
       "name": "party.privacy-state.changed.v1",

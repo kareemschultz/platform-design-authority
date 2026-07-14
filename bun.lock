@@ -98,6 +98,8 @@
       "dependencies": {
         "@hono/node-server": "2.0.8",
         "@meridian/contracts-platform-api": "workspace:*",
+        "@meridian/domain-party": "workspace:*",
+        "@meridian/persistence-party-postgres": "workspace:*",
         "@meridian/persistence-platform-events-postgres": "workspace:*",
         "@meridian/persistence-platform-identity-postgres": "workspace:*",
         "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
@@ -197,12 +199,41 @@
         "typescript": "^6",
       },
     },
+    "packages/domains/party": {
+      "name": "@meridian/domain-party",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/contracts-events": "workspace:*",
+        "@meridian/contracts-platform-api": "workspace:*",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
     "packages/foundation/core": {
       "name": "@meridian/foundation-core",
       "version": "0.0.0",
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/persistence/party-postgres": {
+      "name": "@meridian/persistence-party-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/domain-party": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
         "typescript": "^6",
       },
     },
@@ -834,7 +865,11 @@
 
     "@meridian/contracts-platform-api": ["@meridian/contracts-platform-api@workspace:packages/contracts/platform-api"],
 
+    "@meridian/domain-party": ["@meridian/domain-party@workspace:packages/domains/party"],
+
     "@meridian/foundation-core": ["@meridian/foundation-core@workspace:packages/foundation/core"],
+
+    "@meridian/persistence-party-postgres": ["@meridian/persistence-party-postgres@workspace:packages/persistence/party-postgres"],
 
     "@meridian/persistence-platform-events-postgres": ["@meridian/persistence-platform-events-postgres@workspace:packages/persistence/platform-events-postgres"],
 

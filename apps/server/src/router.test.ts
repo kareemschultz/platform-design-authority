@@ -31,6 +31,9 @@ function context(input?: {
 }): Context {
 	return {
 		application: {
+			createIdentityLink: () => Promise.reject(new Error("not used")),
+			createOrganizationParty: () => Promise.reject(new Error("not used")),
+			createPersonParty: () => Promise.reject(new Error("not used")),
 			getCurrentIdentity: async ({
 				activeContextId,
 				authUserId,
@@ -53,9 +56,11 @@ function context(input?: {
 				sessionId,
 			}),
 			getOrganization: () => Promise.reject(new Error("not used")),
+			getParty: () => Promise.reject(new Error("not used")),
 			inviteUser: () => Promise.reject(new Error("not used")),
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
+			listParties: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
 			setActiveContext: async ({ authUserId, body }) => ({
 				authUserId,
@@ -67,6 +72,7 @@ function context(input?: {
 			}),
 			suspendMembership: () => Promise.reject(new Error("not used")),
 			updateOrganization: () => Promise.reject(new Error("not used")),
+			updateParty: () => Promise.reject(new Error("not used")),
 			...input?.application,
 		},
 		authorizer: { can: async () => input?.allowed ?? false },
@@ -76,11 +82,12 @@ function context(input?: {
 }
 
 describe("appRouter contract surface", () => {
-	test("exposes the governed PR3 procedure families", () => {
+	test("exposes the governed PR3 and PR4 procedure families", () => {
 		expect(Object.keys(appRouter).sort()).toEqual([
 			"healthCheck",
 			"identity",
 			"organizations",
+			"parties",
 			"privateData",
 			"users",
 		]);
@@ -98,6 +105,14 @@ describe("appRouter contract surface", () => {
 			"invite",
 			"list",
 			"suspendMembership",
+		]);
+		expect(Object.keys(appRouter.parties).sort()).toEqual([
+			"createIdentityLink",
+			"createOrganization",
+			"createPerson",
+			"get",
+			"list",
+			"update",
 		]);
 	});
 
@@ -217,6 +232,59 @@ describe("appRouter contract surface", () => {
 			code: "SERVICE_UNAVAILABLE",
 			data: { retryable: true, uncertainty: true },
 		});
+	});
+
+	test("derives Party list scope from the revalidated active context", async () => {
+		let dispatchedContextId: string | undefined;
+		const result = await call(
+			appRouter.parties.list,
+			{
+				headers: { "x-active-context-id": "context_unit_test_0001" },
+				query: { limit: 20, query: "Georgetown" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						listParties: ({ contextId }) => {
+							dispatchedContextId = contextId;
+							return Promise.resolve({ items: [], nextCursor: null });
+						},
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(dispatchedContextId).toBe("context_unit_test_0001");
+		expect(result).toEqual({ items: [], nextCursor: null });
+	});
+
+	test("denies Party creation before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		await expect(
+			call(
+				appRouter.parties.createPerson,
+				{
+					body: { displayName: "Denied Party" },
+					headers: {
+						"idempotency-key": "idempotency-party-denied-0001",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+				},
+				{
+					context: context({
+						application: {
+							createPersonParty: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		expect(dispatched).toBe(false);
 	});
 
 	test("privateData returns the session user for authenticated callers", async () => {

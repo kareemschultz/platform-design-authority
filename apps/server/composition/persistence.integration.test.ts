@@ -1,5 +1,10 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import {
+	createPartyService,
+	type PartyIdFactory,
+} from "@meridian/domain-party";
+import { createPartyRepository } from "@meridian/persistence-party-postgres";
+import {
 	createPostgresOutbox,
 	migratePlatformEvents,
 } from "@meridian/persistence-platform-events-postgres";
@@ -81,6 +86,7 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform.identity",
 			"platform.tenancy",
 			"platform.events",
+			"party.records",
 		]);
 	});
 
@@ -96,6 +102,12 @@ describe.serial("WS1 persistence orchestration", () => {
 			"invitation",
 			"member",
 			"organization",
+			"party_command_receipt",
+			"party_contact_point",
+			"party_identity_link",
+			"party_organization_detail",
+			"party_person_detail",
+			"party_record",
 			"passkey",
 			"platform_active_context",
 			"platform_event_outbox",
@@ -115,11 +127,269 @@ describe.serial("WS1 persistence orchestration", () => {
 			"SELECT table_name FROM information_schema.tables WHERE table_schema = 'drizzle' ORDER BY table_name"
 		);
 		expect(histories.rows.map((row) => row.table_name)).toEqual([
+			"party_migrations",
 			"platform_events_migrations",
 			"platform_identity_migrations",
 			"platform_tenancy_migrations",
 		]);
 	});
+
+	test("persists tenant-isolated Party onboarding, reconciliation, and atomic events", async () => {
+		const tenancyRepository = createTenancyRepository(testPool);
+		await tenancyRepository.seed({
+			locations: [],
+			memberships: [
+				{
+					authUserId: "user_multitenant",
+					id: "membership_demerara",
+					organizationId: "organization_demerara",
+					roleAssignmentIds: [],
+					state: "Active",
+					tenantId: "tenant_demerara",
+					version: 1,
+				},
+			],
+			organizations: [
+				{
+					id: "organization_demerara",
+					name: "Demerara Party Test Organization",
+					state: "Active",
+					tenantId: "tenant_demerara",
+					timezone: "America/Guyana",
+					version: 1,
+				},
+			],
+			tenant: {
+				id: "tenant_demerara",
+				name: "Demerara Party Test Tenant",
+				state: "Active",
+				version: 1,
+			},
+		});
+		await tenancyRepository.seed({
+			locations: [],
+			memberships: [
+				{
+					authUserId: "user_essequibo_admin",
+					id: "membership_essequibo",
+					organizationId: "organization_essequibo",
+					roleAssignmentIds: [],
+					state: "Active",
+					tenantId: "tenant_essequibo",
+					version: 1,
+				},
+			],
+			organizations: [
+				{
+					id: "organization_essequibo",
+					name: "Essequibo Party Test Organization",
+					state: "Active",
+					tenantId: "tenant_essequibo",
+					timezone: "America/Guyana",
+					version: 1,
+				},
+			],
+			tenant: {
+				id: "tenant_essequibo",
+				name: "Essequibo Party Test Tenant",
+				state: "Active",
+				version: 1,
+			},
+		});
+		let sequence = 0;
+		const ids: PartyIdFactory = {
+			create(kind) {
+				sequence += 1;
+				return `${kind}_party_integration_${sequence}`;
+			},
+		};
+		const service = createPartyService({
+			clock: () => new Date("2026-07-14T01:00:00.000Z"),
+			ids,
+			membershipAuthority: {
+				async requireActiveMembership(input) {
+					const membership = await createTenancyRepository(
+						testPool
+					).getMembership(input.tenantId, input.membershipId);
+					if (
+						membership?.state !== "Active" ||
+						membership.authUserId !== input.authUserId ||
+						membership.organizationId !== input.organizationId
+					) {
+						throw Object.assign(new Error("membership denied"), {
+							code: "wrong_tenant",
+						});
+					}
+				},
+			},
+			unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+				events: createPostgresOutbox(client),
+				repository: createPartyRepository(client),
+			})),
+		});
+
+		const person = await service.createPerson({
+			actorUserId: "user_multitenant",
+			body: {
+				displayName: "Georgetown Test Person",
+				email: "georgetown.person@example.test",
+			},
+			correlationId: "correlation_party_integration_0001",
+			idempotencyKey: "party-person-integration-0001",
+			organizationId: "organization_demerara",
+			tenantId: "tenant_demerara",
+		});
+		const organization = await service.createOrganization({
+			actorUserId: "user_essequibo_admin",
+			body: {
+				displayName: "Essequibo Retail Demo",
+				registeredName: "Essequibo Retail Demo Inc.",
+			},
+			correlationId: "correlation_party_integration_0002",
+			idempotencyKey: "party-organization-integration-0001",
+			organizationId: "organization_essequibo",
+			tenantId: "tenant_essequibo",
+		});
+		expect(person.classification).toBe("Confidential");
+		expect(organization.tenantId).toBe("tenant_essequibo");
+
+		const repository = createPartyRepository(testPool);
+		expect(await repository.getParty("tenant_essequibo", person.id)).toBeNull();
+		expect(
+			await repository.getParty("tenant_demerara", organization.id)
+		).toBeNull();
+		expect(
+			(
+				await repository.listParties("tenant_demerara", { limit: 20 })
+			).items.map((party) => party.id)
+		).toEqual([person.id]);
+
+		const link = await service.createIdentityLink({
+			actorUserId: "user_multitenant",
+			body: {
+				authUserId: "user_multitenant",
+				membershipId: "membership_demerara",
+				partyId: person.id,
+			},
+			correlationId: "correlation_party_integration_0003",
+			idempotencyKey: "party-link-integration-0001",
+			organizationId: "organization_demerara",
+			tenantId: "tenant_demerara",
+		});
+		expect(link.partyId).toBe(person.id);
+		expect(
+			await service.createIdentityLink({
+				actorUserId: "user_multitenant",
+				body: {
+					authUserId: "user_multitenant",
+					membershipId: "membership_demerara",
+					partyId: person.id,
+				},
+				correlationId: "correlation_party_integration_replay",
+				idempotencyKey: "party-link-integration-0001",
+				organizationId: "organization_demerara",
+				tenantId: "tenant_demerara",
+			})
+		).toEqual(link);
+
+		const eventRows = await testPool.query<{
+			data: Record<string, unknown>;
+			name: string;
+		}>(
+			"SELECT name, data FROM platform_event_outbox WHERE producer_namespace = 'party' ORDER BY name"
+		);
+		expect(eventRows.rows.map((row) => row.name)).toEqual([
+			"party.identity-link.created.v1",
+			"party.organization.created.v1",
+			"party.person.created.v1",
+		]);
+		expect(JSON.stringify(eventRows.rows)).not.toContain(
+			"georgetown.person@example.test"
+		);
+		const concurrentCommand = {
+			actorUserId: "user_multitenant",
+			body: { displayName: "Concurrent Idempotent Party" },
+			correlationId: "correlation_party_concurrent",
+			idempotencyKey: "party-person-concurrent-0001",
+			organizationId: "organization_demerara",
+			tenantId: "tenant_demerara",
+		};
+		const [concurrentFirst, concurrentSecond] = await Promise.all([
+			service.createPerson(concurrentCommand),
+			service.createPerson(concurrentCommand),
+		]);
+		expect(concurrentSecond.id).toBe(concurrentFirst.id);
+		const concurrentRows = await testPool.query<{ count: string }>(
+			"SELECT count(*)::text AS count FROM party_record WHERE tenant_id = 'tenant_demerara' AND display_name = 'Concurrent Idempotent Party'"
+		);
+		expect(concurrentRows.rows[0]?.count).toBe("1");
+		const concurrentEvents = await testPool.query<{ count: string }>(
+			"SELECT count(*)::text AS count FROM platform_event_outbox WHERE tenant_id = 'tenant_demerara' AND name = 'party.person.created.v1' AND idempotency_key = 'party-person-concurrent-0001'"
+		);
+		expect(concurrentEvents.rows[0]?.count).toBe("1");
+
+		const rollbackUnitOfWork = createPostgresUnitOfWork(testPool, (client) => ({
+			events: createPostgresOutbox(client),
+			repository: createPartyRepository(client),
+		}));
+		let partyRollbackError: unknown;
+		try {
+			await rollbackUnitOfWork.execute(
+				async ({ events, repository: transactionRepository }) => {
+					const now = new Date("2026-07-14T01:05:00.000Z");
+					await transactionRepository.createPerson({
+						contacts: [],
+						detail: {
+							partyId: "party_forced_rollback",
+							tenantId: "tenant_demerara",
+						},
+						party: {
+							classification: "Confidential",
+							createdAt: now,
+							displayName: "Rolled Back Party",
+							id: "party_forced_rollback",
+							privacyState: "Normal",
+							provenance: "Manual",
+							state: "Active",
+							tenantId: "tenant_demerara",
+							type: "Person",
+							updatedAt: now,
+							version: 1,
+						},
+					});
+					await events.append({
+						...event("evt_party_forced_rollback"),
+						aggregateId: "party_forced_rollback",
+						capabilityId: "party.records",
+						data: { partyId: "party_forced_rollback" },
+						name: "party.person.created.v1",
+						producerNamespace: "party",
+						schemaRef: "schemas/events/party.person.created.v1.schema.json",
+						tenantId: "tenant_demerara",
+					});
+					throw new Error("forced Party transaction rollback");
+				}
+			);
+		} catch (error) {
+			partyRollbackError = error;
+		}
+		expect((partyRollbackError as Error).message).toBe(
+			"forced Party transaction rollback"
+		);
+		expect(
+			await repository.getParty("tenant_demerara", "party_forced_rollback")
+		).toBeNull();
+		expect(
+			(
+				await testPool.query<{ id: string }>(
+					"SELECT id FROM platform_event_outbox WHERE id = 'evt_party_forced_rollback'"
+				)
+			).rows
+		).toHaveLength(0);
+		expect(
+			(await repository.listParties("tenant_demerara", { limit: 20 })).items
+		).toHaveLength(2);
+	}, 30_000);
 
 	test("upgrades a representative identity-only database", async () => {
 		const name = `${databaseName}_upgrade`;

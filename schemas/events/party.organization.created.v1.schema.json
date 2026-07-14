@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/party.organization.created.v1.schema.json",
+  "title": "party.organization.created.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {"type": "object", "properties": {"name": {"const": "party.organization.created.v1"}, "data": {"type": "object", "additionalProperties": false, "required": ["partyId", "classification", "createdAt"], "properties": {"partyId": {"type": "string"}, "classification": {"const": "Confidential"}, "createdAt": {"type": "string", "format": "date-time"}}}}}
+  ]
+}

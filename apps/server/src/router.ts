@@ -1,13 +1,19 @@
 import {
+	createOrganizationPartyContract,
+	createPartyIdentityLinkContract,
+	createPersonPartyContract,
 	createUserInvitationContract,
 	getCurrentIdentityContract,
 	getOrganizationContract,
+	getPartyContract,
 	listLocationsContract,
 	listOrganizationsContract,
+	listPartiesContract,
 	listUsersContract,
 	setActiveContextContract,
 	suspendTenantMembershipContract,
 	updateOrganizationContract,
+	updatePartyContract,
 } from "@meridian/contracts-platform-api";
 import type { RouterClient } from "@orpc/server";
 import { implement, ORPCError } from "@orpc/server";
@@ -128,7 +134,11 @@ function mapApplicationError(context: Context, error: unknown): never {
 			}),
 		});
 	}
-	if (code === "version_conflict" || code === "idempotency_conflict") {
+	if (
+		code === "version_conflict" ||
+		code === "idempotency_conflict" ||
+		code === "identity_link_conflict"
+	) {
 		throw new ORPCError("CONFLICT", {
 			data: problem(context, {
 				code: "conflict",
@@ -375,6 +385,158 @@ const suspendMembership = implement(suspendTenantMembershipContract)
 		}
 	});
 
+const listParties = implement(listPartiesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"party.record.read",
+			activeContext.tenantId
+		);
+		try {
+			return await context.application.listParties({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getParty = implement(getPartyContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"party.record.read",
+			activeContext.tenantId
+		);
+		try {
+			return await context.application.getParty({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				partyId: input.params.partyId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createPersonParty = implement(createPersonPartyContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"party.record.create",
+			activeContext.tenantId
+		);
+		try {
+			return await context.application.createPersonParty({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createOrganizationParty = implement(createOrganizationPartyContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"party.record.create",
+			activeContext.tenantId
+		);
+		try {
+			return await context.application.createOrganizationParty({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const updateParty = implement(updatePartyContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"party.record.update",
+			activeContext.tenantId
+		);
+		try {
+			return await context.application.updateParty({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				idempotencyKey: input.headers["idempotency-key"],
+				partyId: input.params.partyId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createPartyIdentityLink = implement(createPartyIdentityLinkContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"party.record.update",
+			activeContext.tenantId
+		);
+		try {
+			return await context.application.createIdentityLink({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 export const appRouter = {
 	healthCheck: publicProcedure.handler(() => "OK"),
 	identity: {
@@ -386,6 +548,14 @@ export const appRouter = {
 		list: listOrganizations,
 		listLocations,
 		update: updateOrganization,
+	},
+	parties: {
+		createIdentityLink: createPartyIdentityLink,
+		createOrganization: createOrganizationParty,
+		createPerson: createPersonParty,
+		get: getParty,
+		list: listParties,
+		update: updateParty,
 	},
 	privateData: protectedProcedure.handler(({ context }) => ({
 		message: "This is private",

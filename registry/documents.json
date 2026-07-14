@@ -1162,6 +1162,22 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-DAT-017",
+      "path": "docs/blueprint/10-Data/PARTY_PROTOTYPE_SCHEMA_CLASSIFICATION_AND_ISOLATION.md",
+      "title": "Party Prototype Schema Classification and Isolation",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-14",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0007",
+        "ADR-0014",
+        "ADR-0027"
+      ],
+      "review_evidence": []
+    },
+    {
       "document_id": "PDA-DEC-001",
       "path": "docs/blueprint/18-Decisions/README.md",
       "title": "Architecture Decision Record Index",
@@ -2014,10 +2030,10 @@
       "document_id": "PDA-ENGR-012",
       "path": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
-      "version": "0.5.1",
+      "version": "0.6.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-13",
+      "last_reviewed": "2026-07-14",
       "related_adrs": [
         "ADR-0002",
         "ADR-0003",

@@ -1,0 +1,26 @@
+{
+  "name": "@meridian/persistence-party-postgres",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "bun test src/*.test.ts",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@meridian/domain-party": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "pg": "8.22.0"
+  },
+  "devDependencies": {
+    "@meridian/tooling-config": "workspace:*",
+    "@types/bun": "catalog:",
+    "@types/pg": "catalog:",
+    "drizzle-kit": "0.31.10",
+    "typescript": "^6"
+  }
+}

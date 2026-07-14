@@ -380,6 +380,16 @@ export type CurrentIdentity = z.infer<typeof CurrentIdentitySchema>;
 export type Location = z.infer<typeof LocationSchema>;
 export type MembershipSummary = z.infer<typeof MembershipSummarySchema>;
 export type Organization = z.infer<typeof OrganizationSchema>;
+export type Party = z.infer<typeof PartySchema>;
+export type CreatePersonParty = z.infer<typeof CreatePersonPartySchema>;
+export type CreateOrganizationParty = z.infer<
+	typeof CreateOrganizationPartySchema
+>;
+export type UpdatePartyRequest = z.infer<typeof UpdatePartyRequestSchema>;
+export type CreatePartyIdentityLinkRequest = z.infer<
+	typeof CreatePartyIdentityLinkRequestSchema
+>;
+export type PlatformIdentityLink = z.infer<typeof PlatformIdentityLinkSchema>;
 export type UserInvitation = z.infer<typeof UserInvitationSchema>;
 export type UserSummary = z.infer<typeof UserSummarySchema>;
 export type SuspendTenantMembershipRequest = z.infer<

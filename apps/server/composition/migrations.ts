@@ -1,3 +1,4 @@
+import { migrateParty } from "@meridian/persistence-party-postgres";
 import { migratePlatformEvents } from "@meridian/persistence-platform-events-postgres";
 import { migratePlatformIdentity } from "@meridian/persistence-platform-identity-postgres";
 import { migratePlatformTenancy } from "@meridian/persistence-platform-tenancy-postgres";
@@ -12,6 +13,7 @@ export const WS1_MIGRATION_STREAMS: readonly MigrationStream[] = [
 	{ id: "platform.identity", migrate: migratePlatformIdentity },
 	{ id: "platform.tenancy", migrate: migratePlatformTenancy },
 	{ id: "platform.events", migrate: migratePlatformEvents },
+	{ id: "party.records", migrate: migrateParty },
 ];
 
 export async function runMigrationStreams(

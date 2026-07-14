@@ -1,7 +1,7 @@
 ---
 document_id: PDA-IMPL-005
 title: Ecommerce Dashboard and Shadcn Studio Candidate Audit
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -18,6 +18,8 @@ The supplied Vercel application is **not a verified official Shadcn Studio templ
 The live application is useful as visual and interaction research. It is not an acceptable source package or Meridian shell. It has good compact spacing, a clear page title, responsive stacking, readable action labels, a functional order filter, and several bounded composition ideas. It also has placeholder hash navigation, no visible tenant/organization/location/offline/entitlement context, no governed metric definitions or freshness, no URL-backed table state, inaccessible or weakly described charts, undersized targets, a mixed storefront/admin information architecture, and a 899,598-byte uncompressed single JavaScript asset. Its navigation model is rejected.
 
 Studio is viable as a **candidate source**, not an authority. The Studio MCP genuinely worked in this Codex session for metadata and command generation, including Pro-tagged results. No Claude Code retrieval was required. No candidate was installed, no complete template was downloaded, and no licensed Studio output was written to the repository. Five exact one-item commands were generated for audit evidence only and were not executed because they use `@latest`, can write broad dependency/component diffs, and require the repository's acquisition gates.
+
+The follow-up catalog sweep materially broadens that conclusion. The MCP returned 735 exact records across all 61 exposed block families and 595 exact records across 30 component families. Studio's public component catalog currently enumerates 58 families and 902 displayed variants; 28 newer family slugs were visible publicly but did not resolve through the MCP metadata endpoint used in this session. First-party template pages exposed 13 named landing/full-site templates and six named admin/application templates. The broader catalog contains several strong bounded references, but no additional full template or page displaces Meridian's current shell, context, authorization, offline, or domain contracts.
 
 The current Meridian implementation is materially ahead of the demo on trust boundaries: the thin administration shell already has server-validated workspace context, canonical denial/offline/reauth states, two persistent navigation levels, semantic desktop tables plus mobile cards, Base UI-backed primitives, and cursor navigation. The useful gap is shared, governed composites and Storybook evidence—not another generic dashboard shell.
 
@@ -557,7 +559,7 @@ Do not start with a dashboard widget, notification-only feed, user-menu-only ent
 12. Suitable for back-office ecommerce? **As visual research only.**
 13. Suitable for WS2? **Toolbar density, list hierarchy, and bounded chart/card structures only; not contracts or shell.**
 14. Consumer-oriented portions? **Yes: storefront footer, imagery, product quick views/cart-oriented Studio family.**
-15. Better exact Studio candidates? **CommerceO, `application-shell-15`, `statistics-component-12`, `chart-component-47`, and `datatable-component-06`, all bounded and conditional.**
+15. Better exact Studio candidates? **Yes.** In addition to CommerceO, `application-shell-15`, `statistics-component-12`, `chart-component-47`, and `datatable-component-06`, the expanded sweep found bounded value in `file-upload-06`, `dashboard-dialog-19`, `dashboard-dropdown-13`, `timeline-component-05`, `account-settings-05`, `account-settings-06`, and component variants for expandable/pinnable tables, sticky-action dialogs, progress, pagination, and searchable selection. All remain conditional references.
 16. Custom components? **ContextSwitcher, MetricCard contract, AccessibleChartFrame, ProductVariantMatrix, InventoryByLocation, RowInspector, ActivityTimeline, denial/entitlement states and domain lists.**
 17. Prototype first? **Product list/filter/cursor behavior in the existing shell.**
 18. Reject permanently? **Full demo/template adoption, demo nav, storefront/admin mixing, ambiguous donuts/KPIs, consumer checkout as inventory/POS, and ungoverned dependencies.**
@@ -575,11 +577,162 @@ Do not start with a dashboard widget, notification-only feed, user-menu-only ent
 | First prototype | WS2 product list/filter/cursor in current Meridian shell |
 | Component lifecycle | No promotion; all remain candidates |
 | New changelog blueprint standard | Not necessary now; implement/refine existing `PDA-DEV-010` first |
+| Expanded Studio catalog | Audited across block, component, page, admin, application, ecommerce, and marketing families; retain only bounded references |
 
-## 29. Primary sources inspected
+## 29. Expanded Studio catalog sweep
+
+This pass intentionally widened discovery beyond the original ecommerce demo and five-candidate shortlist. It used first-party catalog pages for published family/template inventory and the authenticated Studio MCP for exact metadata. It did not fetch component source, execute installation commands, download complete templates, or infer that a public count equals an installable licensed count.
+
+### 29.1 Block coverage
+
+`get_blocks_metadata` exposed 61 families. Sequential `get_block_meta_content` retrieval returned 735 exact variant records:
+
+| Published area | Families | Exact MCP records | Audit conclusion |
+|---|---:|---:|---|
+| Dashboard and application | 17 | 258 | Highest Meridian relevance; most value is bounded workflow, settings, upload, dialog, dropdown, shell-region, and operational-summary composition |
+| Marketing UI | 29 | 362 | Useful for public docs/marketing only; reject as operational application authority |
+| Ecommerce | 13 | 84 | Separate consumer commerce from back-office operations; list/order hierarchy can inform research, checkout/cart/review flows cannot define WS2 |
+| Bento grid | 1 | 24 | Dense visual research; frequent motion/decorative dependencies make it unsuitable as an operational layout system |
+| Datatable | 1 | 7 | Useful enterprise table compositions; all require contract, pagination, export, responsiveness, and accessibility normalization |
+| **Total** | **61** | **735** | Complete sweep of the families exposed by the MCP on 2026-07-14 |
+
+This verified count differs from Studio's broader marketing count because the surfaces are not equivalent. Treat the MCP result as a dated metadata observation, not a permanent vendor inventory guarantee.
+
+### 29.2 Component coverage
+
+The first-party component catalog displayed 58 named families whose visible per-family counts sum to 902 variants. The page headline says “1000+”; the audit records both facts and does not reconcile the marketing headline by invention. The MCP `get_component_meta_content` endpoint returned exact metadata for 30 established family slugs totaling 595 variants. Twenty-eight publicly listed newer families—including Autocomplete, Command, Drawer, Kanban, List, Progress, Skeleton, Spinner, Stepper, and Sortable—did not resolve under their public slugs through that endpoint during this session.
+
+This is a service-surface gap, not proof those variants are unavailable or defective. Any candidate from those 28 families needs a later licensed retrieval or Studio support confirmation before source-level assessment.
+
+### 29.3 Template coverage
+
+The public template catalog exposed these named landing/full-site candidates: Ink, Track, Bistro, Grow, Orion, Matter, Craft, Flow, Swipe, Neural, Brandly, Shopix, and SkillSphere. The admin/application catalog exposed AdminCN Free, AdminCN Pro, CommerceO, PropXYZ, Promptly, and Calendrix.
+
+| Template family | Potential value | Disposition |
+|---|---|---|
+| AdminCN Free / Pro | General settings, tables, navigation, responsive application composition | Useful composition reference only; current shell and trust boundaries remain authoritative |
+| CommerceO | Product/order/customer/vendor page hierarchy and back-office density | Strongest WS2 template research source; no wholesale adoption |
+| PropXYZ | Entity/list/detail and tenant-like property workflows | Domain-mismatched composition reference; do not transfer tenancy or booking assumptions |
+| Promptly | Command/chat, authentication, pricing, and conversation layouts | AI/product-marketing specific; command/search regions may be researched separately |
+| Calendrix | Calendar, event, task, note, and contact interaction patterns | Scheduling reference only; no calendar capability is implied for Meridian |
+| Track | Public changelog presentation | Useful release-note visual reference; canonical content model remains owned by `PDA-DEV-010` |
+| Shopix | Consumer ecommerce storefront | Consumer Ecommerce Only; keep outside WS2 back-office authority |
+| Ink, Bistro, Grow, Orion, Matter, Craft, Flow, Swipe, Neural, Brandly, SkillSphere | Marketing/blog/restaurant/AI/product/portfolio/SaaS/mobile/agency/LMS compositions | Public-site research only unless a separately governed capability creates a matching need |
+
+## 30. High-value exact block findings
+
+The following records are the strongest additional findings from the 735-record block sweep. “Gold” means a high-value bounded reference, not approved source.
+
+| Exact Studio identifier | Useful composition | Required replacement or constraint | Disposition |
+|---|---|---|---|
+| `file-upload-06` | Upload manager with active, failed, and completed work plus progress and retry affordances | Use governed import-job contracts, durable job IDs, validation reports, offline rules, permissions, and non-optimistic completion | **Gold: reserve prototype bench** |
+| `dashboard-dialog-19` | Search/command dialog | Use canonical routes, permission-filtered results, keyboard/focus evidence, and server-derived context | **Gold: GlobalSearch/CommandPalette reference** |
+| `dashboard-dialog-20` | Activity-tracking sheet/dialog | Replace event types, identity, timestamps, redaction, retention, and audit authority | Useful RowInspector/ActivityTimeline reference |
+| `dashboard-dialog-22` | Destructive confirmation structure | Reject “do not ask again” for consequential operations; add named object, consequences, reauth/approval state, and error recovery | Useful confirmation reference |
+| `dashboard-dialog-25` | Four-step configuration flow | Replace invented CI/CD semantics; preserve URL/draft/recovery only when the real workflow requires them | Workflow structure only |
+| `dashboard-dialog-26` | Sharing and permission dialog | Replace all role/permission assumptions with canonical capability and grant contracts | Useful administration composition reference |
+| `dashboard-dropdown-13` | Workspace/environment switcher | Replace every option and authority check with server-derived ContextSwitcher contracts; never trust client selection alone | **Gold: ContextSwitcher reference** |
+| `dashboard-dropdown-14` | Search and filter dropdown | Normalize to URL-backed, labeled, keyboard-usable query state | Useful toolbar reference |
+| `dashboard-dropdown-20` / `-21` | Tag and assignment selectors | Only if canonical tag/assignment capabilities exist; never create domain concepts from the UI | Useful searchable-assignment reference |
+| `account-settings-05` | Team member, role, invite, and pending-invitation organization | Reuse existing user/role routes and permission vocabulary; replace invitations and status logic | **Gold: admin information architecture** |
+| `account-settings-06` | Security settings, two-factor auth, API keys, and sessions table | Current Meridian session/security authority wins; split concerns and preserve step-up/reauth/revocation states | **Gold: security-page composition** |
+| `account-settings-02` | Notification channels, categories, and do-not-disturb preferences | Requires a real notification capability, delivery semantics, timezone, and failure model | Future composition reference |
+| `account-settings-03` | Workspace identity, timezone, branding, export, backup, danger zone | Split governed concerns; context remains server-derived and export/backup need owned jobs | Useful only after decomposition |
+| `account-settings-04` | Grouped integration catalog | Requires canonical integration ownership, connection state, permissions, secrets, and error handling | Developer/integrations reference |
+| `account-settings-07` | Billing, payment, AI credits, usage, and add-ons | Inherits an unapproved commercial/payment model and third-party payment inputs | Rejected |
+| `form-layout-02` | Multi-section responsive form with helper text and preferences | Normalize to TanStack Form, canonical Field primitives, durable drafts where needed, and visible error summary | Strong composition reference |
+| `form-layout-05` | Tabbed personal/account/social form | Avoid hiding invalid fields behind tabs; separate unrelated concerns | Conditional reference |
+| `form-layout-08` | Five-step product-creation flow | Reject inherited `@stepperize/react`/React Aria stack; require WS2 product contract, draft/recovery, validation, permission, and concurrency design | **Gold: reserve prototype bench** |
+| `form-layout-03` / `-09` | Schema-backed tier/payment forms | React Hook Form/Zod-form stack duplicates selected TanStack Form concern; payment semantics are unapproved | Rejected as implementation source |
+| `onboarding-feed-01` | Task checklist with completion and per-step actions | Use owned onboarding criteria and durable completion state | Useful tenant/admin onboarding reference |
+| `onboarding-feed-04` | Workspace-setup event timeline | Replace events/statuses with canonical activity records | Useful ActivityTimeline reference |
+| `timeline-component-05` | Version/date changelog timeline with anchors and responsive layout | Preserve date/version on mobile; remove questionable copy dependency; use canonical release-note routes/content | **Gold: release-note presentation reference** |
+| `category-filter-03` | Dialog filters, removable summary badges, clear-all action | Keep URL/query source of truth, accessible labels, applied/pending distinction, and server-supported operators | **Gold: FilterBuilder reference** |
+| `category-filter-02` | Collapsible multi-facet filters with responsive sheet | Replace consumer/company examples and `react-use`; prove mobile task completion | Useful complex-filter reference |
+| `datatable-component-04` | Administration table with search, filters, selection, roles, and pagination | Replace subscription/role model; use cursor navigation and canonical bulk-action permissions | Strong admin-table reference |
+| `statistics-component-18` | Segmented operational counts for orders, stock, and shipments | Define metric owner, filters, units, freshness, comparison, empty/error, and drill-down | Strong MetricCard/distribution reference |
+| `application-shell-02` | Collapsible navigation with command/search | Current Meridian shell wins; only command/search and responsive-region composition may transfer | Better general shell reference than ecommerce shell |
+
+The reserve bench does not expand the five active prototypes in section 21. It identifies the next evidence candidates only if one of the current five fails or a governed implementation issue creates the need.
+
+## 31. High-value exact component findings
+
+Component variants are narrower and often safer research inputs than whole blocks, but they still carry behavior, primitive, dependency, and accessibility assumptions.
+
+| Exact component identifier(s) | Finding | Meridian disposition |
+|---|---|---|
+| `data-table-06` | Expandable rows with only TanStack Table plus the table primitive | Strong RowInspector/table-detail reference; prove keyboard semantics, responsive representation, and server data loading |
+| `data-table-07` | Pinnable left/right columns | Useful only for demonstrated wide-table tasks; preserve reading order and provide a usable mobile representation |
+| `data-table-02` | User-controlled density | Useful preference reference; must not reduce touch targets or readability below governed minimums |
+| `data-table-10` | Sorting, selection, pagination, and page-size controls | Composition reference only; replace page-number assumptions with cursor contracts where the API is cursor-based |
+| `data-table-13` | Inline text/status/progress editing | High-risk: requires cell-level validation, concurrency, permissions, save/error state, and undo/recovery; not an automatic productivity win |
+| `data-table-12` | Browser CSV/XLSX export through PapaParse/XLSX | Rejected by default; export must be governed, permissioned, auditable, redacted, and usually server-generated |
+| `pagination-14` / `-15` | Page-size and detailed navigation chrome | Reuse labels/affordances only; implement cursor semantics and unknown-total behavior from Meridian contracts |
+| `combobox-07` | Searchable timezone selection using `Intl` data | Strong settings reference if timezone is a canonical field; store canonical identifiers and localize labels |
+| `combobox-08` | Searchable user selector with identity detail | Strong assignee/member reference; filter by permission and avoid exposing unauthorized identity data |
+| `combobox-10` / `-11` / `-12` | Searchable multi-select with removable or summarized selections | Strong filter/form reference; verify keyboard removal, announcement, overflow, and server-supported limits |
+| `dialog-05` / `-06` | Scrollable dialogs with sticky header/footer | Strong long-form/modal action reference; keep title, errors, and actions reachable at zoom and small viewports |
+| `dialog-01` | Basic destructive alert dialog | Useful only after consequence-specific copy, pending/error state, focus return, and reauth/approval rules are added |
+| `popover-06` | Download progress with pause/cancel/retry | Strong long-running job control reference; progress must be truthful and resumability server-backed |
+| `alert-07` / `-09` | File/task progress with actions and completion | Useful import/job status reference; avoid transient-only reporting for durable work |
+| `calendar-19` / `-20` | Calendar synchronized with date/time input | Strong accessible-entry concept; require business-date/timezone rules and text-entry validation |
+| `calendar-22` / `-23` | Date and range presets | Useful analytics filters only when preset semantics and inclusive boundaries are explicit |
+| `input-34` / `-35` | Character count/remaining guidance | Strong constrained-field reference; announce limits without noisy live regions |
+| `input-36` | Clearable input | Useful search-field behavior; provide accessible name and do not erase without predictable focus/result behavior |
+| `input-37` | Search input with keyboard shortcut | Useful GlobalSearch affordance; shortcut must avoid conflicts and be documented semantically |
+| `input-39` | Search loading state | Useful asynchronous-filter reference; coordinate busy state, cancellation, and stale-result handling |
+| `form-10` | Comprehensive form composition | Reject implementation stack: React Hook Form/resolvers/Zod form wiring duplicates Meridian's selected TanStack Form approach |
+| `tabs-27` / `-28` / `-29`, animated inputs/switches/cards | Motion-heavy styling | Reject for operational defaults; consider only with a demonstrated purpose and reduced-motion behavior |
+| `table-10` / `-11` / `-12` | Sticky header, sticky first column, and key/value table | Useful primitives for dense read-only information; test zoom, overflow, reading order, and header associations |
+
+## 32. Patterns rejected across the broader catalog
+
+The expanded audit strengthens these cross-catalog rejections:
+
+1. **Kitchen-sink shells:** `dashboard-shell-01`, `dashboard-shell-02`, `dashboard-shell-09`, and complete admin templates mix too many concerns and dependencies to serve as Meridian architecture.
+2. **Decorative analytics:** charts or bento grids without an owned decision, definition, unit, freshness, comparison, and drill-down remain filler regardless of polish.
+3. **Consumer-to-operations substitution:** carts, checkout, gift cards, reviews, product quick views, offer modals, and storefront footers do not define inventory, purchasing, fulfillment, order administration, or POS.
+4. **Client-side export by convenience:** PapaParse/XLSX dependencies do not establish lawful, secure, scalable export behavior.
+5. **Dependency inheritance:** React Hook Form, Zustand, `react-use`, React Aria Components, motion packages, stepper libraries, DnD kits, payment inputs, or custom animation helpers require an explicit need and technology disposition.
+6. **Hidden validation:** tabbed and stepped forms may not conceal blocking errors or discard unsaved work.
+7. **Unsafe consequence suppression:** “do not ask again” is rejected for destructive, security, permission, and financial actions.
+8. **Client-authored authority:** workspace, environment, role, entitlement, assignment, integration, or security state in a demo is display data only until backed by canonical server contracts.
+9. **Animation as default feedback:** operational state must remain understandable with reduced motion and without motion.
+10. **Catalog accessibility claims as evidence:** every retained variant still needs keyboard, focus, screen-reader, contrast, zoom, reflow, touch-target, loading/error, and reduced-motion verification in Meridian.
+
+## 33. Updated candidate tiers and prototype discipline
+
+| Tier | Candidates | Action |
+|---|---|---|
+| Active isolated shortlist | The five candidates already named in section 21 | Keep the cap at five; no expansion from catalog abundance |
+| Reserve gold bench | `file-upload-06`, `dashboard-dialog-19`, `dashboard-dropdown-13`, `timeline-component-05`, `form-layout-08`, `category-filter-03`, `data-table-06`, `combobox-08`/`-10` | Open only when a matching governed issue exists or an active prototype is rejected |
+| Composition reference | Settings, security, onboarding, activity, filter, sticky-dialog, pagination, calendar, progress, and table variants listed above | Capture screenshots/metadata and rebuild through Meridian primitives/contracts; no source promotion by resemblance |
+| Domain-mismatched research | PropXYZ, Promptly, Calendrix, consumer ecommerce, finance/marketing charts | Use only for interaction questions that survive domain normalization |
+| Rejected | Full shell/template adoption, payment/billing assumptions, client export, motion-heavy operational defaults, inherited duplicate state/form stacks | Do not prototype without a new authority-changing decision |
+
+Prototype acceptance remains evidence-based. A retained candidate must identify the real task, owner, permission, contract, states, URL/draft behavior, responsive transformation, accessibility evidence, performance budget, dependency diff, license/provenance, deletion criteria, and exact normalization boundary. Visual attractiveness alone is not an acceptance criterion.
+
+## 34. Updated acquisition and implementation sequence
+
+1. Keep the current five-prototype cap and finish WS1 gates.
+2. Use public metadata and screenshots for composition research; do not retrieve licensed source until a matching issue has acceptance criteria.
+3. For the WS2 product list, compare the existing `datatable-component-06` reference with narrower `data-table-06`, `-07`, and `-10` behaviors; prefer the smallest evidence-bearing composition.
+4. When bulk import is authorized, prototype `file-upload-06` concepts against a canonical import-job contract and durable validation report.
+5. When global search is authorized, prototype `dashboard-dialog-19` plus `input-37`/`-39` against permission-filtered, context-aware results.
+6. When context switching is expanded, compare `dashboard-dropdown-13` only at the presentation layer; preserve server validation and canonical denial/offline/reauth states.
+7. When settings/security work is scheduled, use `account-settings-05`/`-06` to test information architecture, not to replace current routes or security authority.
+8. When release-note presentation is implemented under `PDA-DEV-010`, compare Track and `timeline-component-05` while preserving accessible mobile date/version context and stable routes.
+9. Retrieve at most one exact candidate per acquisition PR. Pin the CLI/registry input, retain license evidence and generated manifest, scan the full diff and dependencies, normalize through `packages/ui-web/core`, and delete rejected source.
+10. Promote only after Storybook/canonical-state, accessibility, responsive, performance, test, and ownership evidence closes the candidate's acceptance record.
+
+## 35. Primary sources inspected
 
 - Demo: <https://e-commerce-dashboard-vite-demo.vercel.app/#>
 - Studio introduction: <https://shadcnstudio.com/docs/getting-started/introduction>
+- Studio blocks catalog: <https://shadcnstudio.com/blocks>
+- Studio components catalog: <https://shadcnstudio.com/components>
+- Studio templates catalog: <https://shadcnstudio.com/templates>
+- Studio admin/application template catalog: <https://shadcnstudio.com/templates/admin-dashboard>
 - Studio Pro guide: <https://shadcnstudio.com/docs/getting-started/introduction-pro>
 - Studio MCP: <https://shadcnstudio.com/docs/getting-started/shadcn-studio-mcp-server>
 - Studio CLI/registry guidance: <https://shadcnstudio.com/docs/getting-started/how-to-use-shadcn-cli>

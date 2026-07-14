@@ -5,14 +5,18 @@ on:
     paths:
       - "docs/project/PROGRAM_STATUS.md"
       - "docs/project/PROGRESS_MEASUREMENT_STANDARD.md"
+      - ".github/workflows/program-status-freshness.yml"
       - "scripts/validate_program_status.py"
+      - "scripts/test_validate_program_status.py"
   push:
     branches:
       - main
     paths:
       - "docs/project/PROGRAM_STATUS.md"
       - "docs/project/PROGRESS_MEASUREMENT_STANDARD.md"
+      - ".github/workflows/program-status-freshness.yml"
       - "scripts/validate_program_status.py"
+      - "scripts/test_validate_program_status.py"
 
 permissions:
   contents: read
@@ -40,8 +44,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
-          python scripts/validate_program_status.py > program-status-validation-report.txt 2>&1
-          status=$?
+          python -m unittest scripts/test_validate_program_status.py > program-status-validation-report.txt 2>&1
+          test_status=$?
+          if [ "$test_status" -eq 0 ]; then
+            python scripts/validate_program_status.py >> program-status-validation-report.txt 2>&1
+            status=$?
+          else
+            status=$test_status
+          fi
           cat program-status-validation-report.txt
           echo "status=$status" >> "$GITHUB_OUTPUT"
           exit 0

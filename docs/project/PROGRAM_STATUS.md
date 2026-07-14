@@ -33,8 +33,8 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 | Workstream | Weight | Status | Stage completion | Weighted contribution | Current evidence / next gate |
 |---|---:|---|---:|---:|---|
 | WS0 — Scaffold alignment and contracts | 8% | complete | 100% | 8.0% | PR #23, #31, #32; package families, foundation types, generated contracts, contract parity, and executable architecture gates are merged. |
-| WS1 — Identity, tenancy, Party, authorization | 17% | complete | 100% | 17.0% | PR1–PR9 complete at controlled-prototype depth; PDA-IMPL-005 and the generated matrix record evidence and residual gates. |
-| WS2 — Catalog and inventory ledger | 17% | planned | 0% | 0% | WS1 implementation and RR-011 remediation are both complete; broad code waits on a governed WS2 implementation-control plan (issue #12). |
+| WS1 — Identity, tenancy, Party, authorization | 17% | complete | 100% | 17.0% | PR #54 merged the PR1–PR9 controlled-prototype closeout; PDA-IMPL-005 and the generated matrix record evidence and residual gates. |
+| WS2 — Catalog and inventory ledger | 17% | planned | 0% | 0% | WS1 implementation and RR-011 remediation are complete; broad code waits on a governed WS2 implementation-control plan (issue #12). |
 | WS3 — POS cash | 17% | planned | 0% | 0% | Blocked on WS2. |
 | WS4 — Stored value | 11% | planned | 0% | 0% | Blocked on WS3. |
 | WS5 — Offline sync | 12% | planned | 0% | 0% | Full workstream blocked on WS3; bounded client-engine research may begin after WS1 under the parallelism rule. |
@@ -84,9 +84,8 @@ Not yet complete:
 
 ## Immediate priorities
 
-1. RR-011 is closed: PR #57 merged (issue #56 closed), disposing 0 P0, 1 P1, 5 P2, and 4 P3 findings under PDA-REV-011/012 with exact-head-green CI.
-2. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12, now that RR-011 has closed.
-3. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
+1. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12, now that RR-011 has closed.
+2. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
 
 ## Open risk summary
 

@@ -31,46 +31,64 @@ body:
     attributes:
       label: Non-goals
       description: What this issue explicitly does not cover.
+    validations:
+      required: true
   - type: textarea
     id: packages
     attributes:
       label: Packages
-      description: Packages/apps this work touches.
+      description: Packages/apps this work touches. Enter "None" when not applicable.
+    validations:
+      required: true
   - type: textarea
     id: contracts
     attributes:
       label: Contracts
-      description: OpenAPI operations, event names, or capability/permission ids affected.
+      description: OpenAPI operations, event names, or capability/permission ids affected. Enter "None" when not applicable.
+    validations:
+      required: true
   - type: textarea
     id: migrations
     attributes:
       label: Migrations
-      description: Schema or migration changes expected, and their owning package.
+      description: Schema or migration changes expected, and their owning package. Enter "None" when not applicable.
+    validations:
+      required: true
   - type: textarea
     id: permissions
     attributes:
       label: Permissions
-      description: Registered permission ids enforced or introduced.
+      description: Registered permission ids enforced or introduced. Enter "None" when not applicable.
+    validations:
+      required: true
   - type: textarea
     id: events
     attributes:
       label: Events
-      description: Registered event names emitted or consumed.
+      description: Registered event names emitted or consumed. Enter "None" when not applicable.
+    validations:
+      required: true
   - type: textarea
     id: frontend-impact
     attributes:
       label: Frontend impact
       description: Routes, components, or canonical states affected. Write "None" if not applicable.
+    validations:
+      required: true
   - type: textarea
     id: test-dimensions
     attributes:
       label: Test dimensions
-      description: Which of the 13 `registry/first-slice-tests.json` dimensions this work must evidence.
+      description: Which of the 13 `registry/first-slice-tests.json` dimensions this work must evidence. Enter "None" with rationale when not applicable.
+    validations:
+      required: true
   - type: textarea
     id: quality-budgets
     attributes:
       label: Quality budgets
-      description: Any PDA-RDM-006 numeric budgets this work must measure.
+      description: Any PDA-RDM-006 numeric budgets this work must measure. Enter "None" with rationale when not applicable.
+    validations:
+      required: true
   - type: textarea
     id: acceptance-criteria
     attributes:
@@ -82,3 +100,5 @@ body:
     attributes:
       label: Risks and deferrals
       description: Link an existing RR-### / TD-### entry, or note a new one this issue will create.
+    validations:
+      required: true

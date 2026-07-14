@@ -10,7 +10,9 @@ body:
     id: risk-id
     attributes:
       label: Risk / debt ID
-      description: e.g. RR-012 or TD-008. Leave blank if this issue is proposing a new one.
+      description: Existing RR-### / TD-###, or the proposed identifier to register with this issue.
+    validations:
+      required: true
   - type: dropdown
     id: severity
     attributes:
@@ -60,3 +62,5 @@ body:
     attributes:
       label: Linked workstream
       description: e.g. WS1. Add the matching `wsN` label as well.
+    validations:
+      required: true

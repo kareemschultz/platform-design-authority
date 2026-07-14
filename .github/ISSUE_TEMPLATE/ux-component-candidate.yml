@@ -20,46 +20,69 @@ body:
     id: exact-item-identifier
     attributes:
       label: Exact item identifier
+      description: Exact registry/block/component identifier, or "Custom" when no external item exists.
+    validations:
+      required: true
   - type: textarea
     id: provenance
     attributes:
       label: Provenance
       description: Retrieval date, exact version, repository path if already sourced.
+    validations:
+      required: true
   - type: textarea
     id: license
     attributes:
       label: License
       description: License holder and permitted use. Never paste a license key or credential here.
+    validations:
+      required: true
   - type: input
     id: target-surface
     attributes:
       label: Target surface
       description: Web, native, POS/kiosk, etc.
+    validations:
+      required: true
   - type: textarea
     id: accessibility
     attributes:
       label: Accessibility
       description: Known accessibility requirements or risks per FIRST_SLICE_UX_AND_ACCESSIBILITY.md.
+    validations:
+      required: true
   - type: textarea
     id: responsive-behavior
     attributes:
       label: Responsive behavior
+      description: Required transformations and preserved tasks at supported viewport classes.
+    validations:
+      required: true
   - type: textarea
     id: canonical-states
     attributes:
       label: Canonical states
       description: Which of the 15 states in COMPONENT_NORMALIZATION_STANDARD.md this component must represent.
+    validations:
+      required: true
   - type: textarea
     id: performance
     attributes:
       label: Performance
+      description: Relevant budgets, runtime/dependency impact, and measurement evidence.
+    validations:
+      required: true
   - type: textarea
     id: normalization-work
     attributes:
       label: Normalization work required
       description: Per COMPONENT_NORMALIZATION_STANDARD.md — tokens, primitives, security, motion, etc.
+    validations:
+      required: true
   - type: textarea
     id: acceptance-evidence
     attributes:
       label: Acceptance evidence
       description: Storybook stories, tests, and reviews required before promotion per COMPONENT_ACCEPTANCE_CHECKLIST.md.
+    validations:
+      required: true

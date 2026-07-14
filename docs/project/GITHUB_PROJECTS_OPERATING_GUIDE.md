@@ -2,20 +2,24 @@
 
 This directory's status is [`README.md`](./README.md): lightweight, non-authoritative program-control documents. This guide follows the same posture. It does not replace the blueprint, ADRs, registries, the Architecture Risk Register, GitHub Issues, or pull requests.
 
-## Current state (as of this document's authoring)
+## Current state (verified 2026-07-14)
 
-**No GitHub Projects (v2) board exists for this repository.** This was verified two ways: `gh project list --owner kareemschultz` fails with `your authentication token is missing required scopes [read:project]`, and a live, authenticated browser session against `https://github.com/kareemschultz/platform-design-authority/projects` returned "No projects found... There are no projects linked to this repository." Both checks agree; this is a verified absence, not an unchecked assumption.
+No GitHub Projects (v2) board was created by PR #58. The repository Projects page showed no linked project, but account-level enumeration remains unverified because the active GitHub CLI token lacks `read:project`. A user-owned project can contain repository items without being linked on the repository Projects page, so absence of a linked project is not proof that no owner project exists. Issue #59 tracks the external authorization and board-configuration closure criteria. Run `gh auth refresh -s read:project -s project`, then `gh project list --owner kareemschultz --format json`, before creating or declaring the absence of `Meridian Delivery Program`.
 
 What **is** configured and live today:
 
-- Labels: workstream (`ws0`–`ws7`), work-type (`backend`, `frontend`, `native`, `contracts`, `data`, `security`, `ux`, `infrastructure`, `testing`, `research`, `operations`, plus the pre-existing `documentation`), state/attention (`blocked`, `risk`, `technical-debt`, `external-gate`, `production-readiness`, `controlled-prototype`), and the pre-existing `risk-register`, `workstream`, `founder-decision`, `bug`, `enhancement`, `question`, `wontfix`, `duplicate`, `invalid`, `good first issue`, `help wanted`.
-- Milestones: `Prototype 1 — Identity and Tenancy` through `Prototype 7 — Recovery and Operations`, plus `First Slice Closeout`. No due dates — none are founder-approved yet.
-- Issue forms under `.github/ISSUE_TEMPLATE/`: Workstream implementation, Bug report, Architecture or governance change, UX/component candidate, Risk or technical debt.
-- A pull request template at `.github/PULL_REQUEST_TEMPLATE.md`.
+- Labels: 37 total, including 25 added by the tracking setup: workstream (`ws0`–`ws7`), work type (`backend`, `frontend`, `native`, `contracts`, `data`, `security`, `ux`, `infrastructure`, `testing`, `research`, `operations`), and attention/lifecycle (`blocked`, `risk`, `technical-debt`, `external-gate`, `production-readiness`, `controlled-prototype`). Existing labels include `documentation`, `risk-register`, `workstream`, and `founder-decision`.
+- Milestones: `Prototype 1 — Identity and Tenancy` through `Prototype 7 — Recovery and Operations`, plus `First Slice Closeout`. No due dates were invented. Prototype 1 is closed at controlled-prototype depth after PR #54 and RR-011 remediation PR #57; this does not imply production readiness.
 - Closing keywords (`Closes #N`) are already in active use and work today with zero additional configuration — GitHub auto-closes the linked issue when the PR merges.
 - GitHub's native sub-issue relationships are available on this repository (confirmed via the API) but unused; consider using them for future workstream/sub-task hierarchies instead of a text "Blocked By" field.
 
-What is **not** configured: any GitHub Projects (v2) board, its fields/views/charts, or any issue-to-project/PR-to-project automation. This guide records the target design below so a future session (once granted `project` scope) or a human with board-creation access can stand it up without re-deriving the schema, and so no automation is built against a board that does not exist.
+The following repository files are staged in draft PR #58 and become live only after that PR merges with green exact-head checks:
+
+- five required-field issue forms under `.github/ISSUE_TEMPLATE/`;
+- `.github/PULL_REQUEST_TEMPLATE.md`;
+- `.github/workflows/program-status-freshness.yml` and its tested validator.
+
+What is **not yet verified or configured by this change**: an owner-level GitHub Projects inventory, the `Meridian Delivery Program` board, its fields/views/charts, or issue-to-project/PR-to-project automation. The target below is an implementation specification, not a description of deployed state.
 
 ## Target board design (not yet created)
 
@@ -93,4 +97,4 @@ Never derive a project or workstream completion percentage from: issue count, PR
 
 ## Weekly or milestone status-review procedure
 
-At each workstream closeout PR: update `PROGRAM_STATUS.md` per `STATUS_UPDATE_TEMPLATE.md`, close the corresponding milestone issue(s), verify the Architecture Risk Register reflects any status change, and confirm `python scripts/generate_registries.py --check` and `python scripts/validate_docs.py` are green on the exact merged head before considering the stage closed.
+At each workstream closeout PR: update `PROGRAM_STATUS.md` per `STATUS_UPDATE_TEMPLATE.md`, close the matching milestone only when its governed exit gate is met, verify the Architecture Risk Register reflects any status change, and confirm the program-status validator, repository tests, generated-registry checks, and documentation validation are green on the exact reviewed head before considering the stage closed.

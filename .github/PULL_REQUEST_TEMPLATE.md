@@ -41,7 +41,11 @@ Closes #
 
 ## Test evidence
 
-- [ ] Bun evidence attached/described
+- [ ] `bun install --frozen-lockfile`
+- [ ] `bun run check-types`
+- [ ] `bun run test`
+- [ ] `bun run check`
+- [ ] `bun run build`
 - [ ] Node fallback evidence attached/described (when applicable per ADR-0020)
 
 ## Documentation and registry freshness
@@ -49,6 +53,7 @@ Closes #
 - [ ] `python scripts/validate_docs.py` passes
 - [ ] `python scripts/generate_registries.py --check` passes (no drift)
 - [ ] `python scripts/generate_contracts.py --check` passes (when contracts changed)
+- [ ] `python -m unittest scripts/test_validate_program_status.py` and `python scripts/validate_program_status.py` pass (when project-status tracking changed)
 
 ## Lifecycle statement
 

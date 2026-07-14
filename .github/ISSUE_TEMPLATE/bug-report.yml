@@ -56,9 +56,13 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Paste logs with secrets, tokens, and credentials removed.
+      description: Paste logs with secrets, tokens, and credentials removed. Enter "Unavailable" with a reason when no logs exist.
+    validations:
+      required: true
   - type: textarea
     id: regression-evidence
     attributes:
       label: Regression evidence
       description: A failing test, or a proposal for one, that would catch this in CI.
+    validations:
+      required: true

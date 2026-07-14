@@ -25,19 +25,30 @@ body:
     id: affected-adrs
     attributes:
       label: Affected ADRs
+      description: List affected ADRs, or enter "None" with a rationale.
+    validations:
+      required: true
   - type: textarea
     id: affected-contracts
     attributes:
       label: Affected contracts
       description: OpenAPI operations, permissions, events, or capability registrations affected.
+    validations:
+      required: true
   - type: textarea
     id: migration-impact
     attributes:
       label: Migration impact
+      description: Describe migration impact, or enter "None" with a rationale.
+    validations:
+      required: true
   - type: textarea
     id: compatibility-impact
     attributes:
       label: Compatibility impact
+      description: Describe compatibility impact, or enter "None" with a rationale.
+    validations:
+      required: true
   - type: textarea
     id: evidence
     attributes:

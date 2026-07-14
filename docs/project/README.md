@@ -9,6 +9,8 @@ These documents are deliberately outside the governed document registry and are 
 - `PROGRAM_STATUS.md` — current executive view of blueprint completeness, first-slice implementation, capability evidence, and production readiness.
 - `PROGRESS_MEASUREMENT_STANDARD.md` — provisional reporting convention for calculating and advancing progress.
 - `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` — bounded evidence for declaring the implementation-start baseline complete.
+- `STATUS_UPDATE_TEMPLATE.md` — evidence checklist for a workstream-stage or readiness-gate update.
+- `GITHUB_PROJECTS_OPERATING_GUIDE.md` — deployed tracking metadata, permission limitations, and the target GitHub Projects design; it must distinguish configured state from planned state.
 
 ## Authority
 

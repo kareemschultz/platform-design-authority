@@ -1,66 +1,74 @@
 #!/usr/bin/env python3
-"""Validate docs/project/PROGRAM_STATUS.md for internal consistency and staleness.
+"""Validate docs/project/PROGRAM_STATUS.md without rewriting it.
 
-This is a validation-only check: it never rewrites PROGRAM_STATUS.md. It fails
-(non-zero exit) on a hard inconsistency and prints warnings for checks that
-could not be completed (e.g. no network/`gh` auth available).
-
-Checks:
-1. The evidence-cutoff commit SHA is a real ancestor of the current checkout.
-2. Every workstream Status value uses PROGRESS_MEASUREMENT_STANDARD.md's
-   status vocabulary.
-3. A workstream marked `complete` cites at least one merged PR/issue reference
-   and contains no leftover "pending" qualifier (the exact defect this script
-   was written to catch: a PR9 row that stayed "complete pending merge gate"
-   after the PR had actually merged).
-4. A workstream marked `planned` shows 0% stage completion and 0% weighted
-   contribution.
-5. The declared weights sum to 100% and the sum of weighted contributions
-   matches each row's weight * stage completion, and matches the declared
-   total / first-slice-implementation percentage.
-6. The production-readiness row never claims readiness; it must read as
-   explicitly not-claimed regardless of the implementation percentage.
-7. Every `#NNN` issue/PR reference in the document resolves to a real GitHub
-   issue or PR, when `gh` is authenticated. Skipped (warning only) otherwise.
+The validator checks governed vocabulary and weights, cutoff ancestry,
+stage-weighted arithmetic, merged evidence for completed workstreams,
+current-work references, and the separation of implementation completion from
+production readiness. GitHub state checks run when ``gh`` is authenticated and
+degrade to an explicit warning when external verification is unavailable.
 """
 
+import json
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 STATUS_FILE = REPO_ROOT / "docs" / "project" / "PROGRAM_STATUS.md"
 STANDARD_FILE = REPO_ROOT / "docs" / "project" / "PROGRESS_MEASUREMENT_STANDARD.md"
-
-ALLOWED_STATUSES = {
-    "not-started",
-    "planned",
-    "in-progress",
-    "evidence-pending",
-    "complete",
-    "blocked",
-    "deferred",
-}
-
+DEFAULT_REPOSITORY = "kareemschultz/platform-design-authority"
+EXPECTED_WORKSTREAMS = tuple(f"WS{index}" for index in range(8))
 STALE_QUALIFIERS = ("pending merge gate", "pending merge", "awaiting merge")
 
 errors: list[str] = []
 warnings: list[str] = []
 
 
-def fail(msg: str) -> None:
-    errors.append(msg)
+def fail(message: str) -> None:
+    errors.append(message)
 
 
-def warn(msg: str) -> None:
-    warnings.append(msg)
+def warn(message: str) -> None:
+    warnings.append(message)
 
 
-def run_git(*args: str) -> subprocess.CompletedProcess:
+def run_git(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", *args], cwd=REPO_ROOT, capture_output=True, text=True, check=False
+        ["git", *args],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
     )
+
+
+def section(text: str, heading: str) -> str:
+    match = re.search(
+        rf"^## {re.escape(heading)}\s*$([\s\S]*?)(?=^## |\Z)",
+        text,
+        re.MULTILINE,
+    )
+    return match.group(1) if match else ""
+
+
+def parse_status_vocabulary(standard_text: str) -> set[str]:
+    body = section(standard_text, "Status vocabulary")
+    return set(re.findall(r"^- `([a-z-]+)`\s*$", body, re.MULTILINE))
+
+
+def parse_standard_weights(standard_text: str) -> dict[str, int]:
+    body = section(standard_text, "First-slice implementation percentage")
+    return {
+        key: int(weight)
+        for key, weight in re.findall(
+            r"^\|\s*(WS[0-7])\b[^|]*\|\s*(\d+)%\s*\|\s*$",
+            body,
+            re.MULTILINE,
+        )
+    }
 
 
 def check_evidence_cutoff(text: str) -> None:
@@ -80,101 +88,124 @@ def check_evidence_cutoff(text: str) -> None:
         )
         return
     sha = sha_match.group(1)
-    result = run_git("cat-file", "-e", f"{sha}^{{commit}}")
-    if result.returncode != 0:
+    if run_git("cat-file", "-e", f"{sha}^{{commit}}").returncode != 0:
         fail(f"Evidence-cutoff commit {sha} is not present in this checkout's history.")
         return
-    merge_base = run_git("merge-base", "--is-ancestor", sha, "HEAD")
-    if merge_base.returncode != 0:
-        warn(
-            f"Evidence-cutoff commit {sha} exists but is not an ancestor of HEAD in "
-            "this checkout (may be a shallow clone, or main has diverged)."
-        )
+    if run_git("merge-base", "--is-ancestor", sha, "HEAD").returncode != 0:
+        fail(f"Evidence-cutoff commit {sha} is not an ancestor of the evaluated HEAD.")
 
 
-def parse_workstream_rows(text: str) -> list[dict]:
-    # | WS0 — Scaffold alignment and contracts | 8% | complete | 100% | 8.0% | ... |
+def parse_workstream_rows(text: str) -> list[dict[str, Any]]:
     pattern = re.compile(
         r"^\|\s*(WS\d[^|]*?)\s*\|\s*(\d+)%\s*\|\s*([a-z-]+)\s*\|\s*(\d+)%\s*\|\s*([\d.]+)%\s*\|\s*(.*?)\s*\|\s*$",
         re.MULTILINE,
     )
-    rows = []
-    for m in pattern.finditer(text):
-        rows.append(
-            {
-                "name": m.group(1),
-                "weight": int(m.group(2)),
-                "status": m.group(3),
-                "stage_completion": int(m.group(4)),
-                "weighted_contribution": float(m.group(5)),
-                "evidence": m.group(6),
-            }
-        )
-    return rows
+    return [
+        {
+            "key": match.group(1).split()[0],
+            "name": match.group(1),
+            "weight": int(match.group(2)),
+            "status": match.group(3),
+            "stage_completion": int(match.group(4)),
+            "weighted_contribution": float(match.group(5)),
+            "evidence": match.group(6),
+        }
+        for match in pattern.finditer(text)
+    ]
 
 
-def check_workstream_rows(rows: list[dict], text: str) -> None:
+def check_workstream_rows(
+    rows: list[dict[str, Any]],
+    text: str,
+    allowed_statuses: set[str],
+    standard_weights: dict[str, int],
+) -> None:
     if not rows:
         fail("Found no parseable workstream rows in the First-slice workstreams table.")
         return
 
-    total_weight = sum(r["weight"] for r in rows)
+    keys = [row["key"] for row in rows]
+    if tuple(keys) != EXPECTED_WORKSTREAMS:
+        fail(
+            "Workstream rows must appear exactly once in WS0-WS7 order; "
+            f"found {keys}."
+        )
+    if set(standard_weights) != set(EXPECTED_WORKSTREAMS):
+        fail(
+            "PROGRESS_MEASUREMENT_STANDARD.md must define weights for exactly WS0-WS7; "
+            f"found {sorted(standard_weights)}."
+        )
+
+    total_weight = sum(row["weight"] for row in rows)
     if total_weight != 100:
         fail(f"Workstream weights sum to {total_weight}%, not 100%.")
 
     total_weighted = 0.0
-    for r in rows:
-        if r["status"] not in ALLOWED_STATUSES:
+    for row in rows:
+        key = row["key"]
+        if key in standard_weights and row["weight"] != standard_weights[key]:
             fail(
-                f"{r['name']}: status '{r['status']}' is not in the allowed vocabulary "
-                f"({sorted(ALLOWED_STATUSES)}); see PROGRESS_MEASUREMENT_STANDARD.md."
+                f"{key}: dashboard weight {row['weight']}% does not match the governed "
+                f"weight {standard_weights[key]}%."
+            )
+        if row["status"] not in allowed_statuses:
+            fail(
+                f"{row['name']}: status '{row['status']}' is not in the vocabulary "
+                f"declared by PROGRESS_MEASUREMENT_STANDARD.md ({sorted(allowed_statuses)})."
             )
 
-        expected = round(r["weight"] * r["stage_completion"] / 100, 1)
-        if abs(expected - r["weighted_contribution"]) > 0.05:
+        expected = round(row["weight"] * row["stage_completion"] / 100, 1)
+        if abs(expected - row["weighted_contribution"]) > 0.05:
             fail(
-                f"{r['name']}: weighted contribution {r['weighted_contribution']}% does not "
-                f"match weight {r['weight']}% * stage completion {r['stage_completion']}% "
-                f"(expected {expected}%)."
+                f"{row['name']}: weighted contribution {row['weighted_contribution']}% "
+                f"does not match weight {row['weight']}% * stage completion "
+                f"{row['stage_completion']}% (expected {expected}%)."
             )
-        total_weighted += r["weighted_contribution"]
+        total_weighted += row["weighted_contribution"]
 
-        if r["status"] == "complete":
-            if not re.search(r"(PR\s*#\d+|Issue\s*#\d+|PDA-[A-Z]+-\d+)", r["evidence"]):
+        if row["status"] == "complete":
+            if not re.search(r"PR\s*#\d+", row["evidence"]):
                 fail(
-                    f"{r['name']}: marked complete but its evidence column cites no "
-                    "merged PR/issue/document reference."
+                    f"{row['name']}: marked complete but its evidence column cites no "
+                    "explicit PR #N merge evidence."
                 )
-            lowered = r["evidence"].lower()
+            lowered = row["evidence"].lower()
             for qualifier in STALE_QUALIFIERS:
                 if qualifier in lowered:
                     fail(
-                        f"{r['name']}: marked complete but evidence still reads "
-                        f"'{qualifier}' — this is the exact staleness pattern this "
-                        "check exists to catch."
+                        f"{row['name']}: marked complete but evidence still reads "
+                        f"'{qualifier}'."
                     )
 
-        if r["status"] == "planned":
-            if r["stage_completion"] != 0 or r["weighted_contribution"] != 0:
-                fail(
-                    f"{r['name']}: marked planned but shows nonzero stage completion "
-                    f"({r['stage_completion']}%) or weighted contribution "
-                    f"({r['weighted_contribution']}%). Future/unstarted work must not "
-                    "be counted complete."
-                )
-
-    total_row = re.search(
-        r"\*\*Total\*\*\s*\|\s*\*\*100%\*\*.*?\*\*([\d.]+)%\*\*", text
-    )
-    if total_row:
-        declared_total = float(total_row.group(1))
-        if abs(declared_total - total_weighted) > 0.05:
+        if row["status"] in {"planned", "not-started", "deferred"} and (
+            row["stage_completion"] != 0 or row["weighted_contribution"] != 0
+        ):
             fail(
-                f"Declared total weighted completion {declared_total}% does not match "
-                f"the sum of row contributions {round(total_weighted, 1)}%."
+                f"{row['name']}: status {row['status']} cannot carry nonzero completion."
             )
-    else:
-        warn("Could not find a parseable '**Total** | **100%** | ... | **N%**' row to cross-check.")
+
+    total_match = re.search(
+        r"\*\*Total\*\*\s*\|\s*\*\*100%\*\*.*?\*\*([\d.]+)%\*\*",
+        text,
+    )
+    if not total_match:
+        fail("Could not find the declared weighted-completion total row.")
+        return
+    declared_total = float(total_match.group(1))
+    if abs(declared_total - total_weighted) > 0.05:
+        fail(
+            f"Declared total {declared_total}% does not match row contributions "
+            f"{round(total_weighted, 1)}%."
+        )
+
+    executive_match = re.search(
+        r"\|\s*First-slice implementation\s*\|\s*\*\*([\d.]+)%",
+        text,
+    )
+    if not executive_match:
+        fail("Could not find the executive first-slice implementation percentage.")
+    elif abs(float(executive_match.group(1)) - total_weighted) > 0.05:
+        fail("Executive first-slice percentage does not match the workstream total.")
 
 
 def check_production_readiness(text: str) -> None:
@@ -185,70 +216,128 @@ def check_production_readiness(text: str) -> None:
     )
     if not match:
         fail("Could not find the Production readiness row in the Executive view table.")
-        return
-    result_cell = match.group(1).lower()
-    if "not claimed" not in result_cell:
-        fail(
-            "Production readiness row must explicitly read 'Not claimed' — it must "
-            "never be inferred from implementation completion percentage."
-        )
+    elif "not claimed" not in match.group(1).lower():
+        fail("Production readiness must explicitly read 'Not claimed'.")
 
 
-def check_issue_pr_references(text: str) -> None:
-    refs = sorted({int(n) for n in re.findall(r"#(\d+)\b", text)})
-    if not refs:
-        return
-
-    auth_check = subprocess.run(
-        ["gh", "auth", "status"], capture_output=True, text=True, check=False
-    )
-    if auth_check.returncode != 0:
-        warn(
-            f"Skipping existence check for {len(refs)} referenced issue/PR numbers "
-            "(gh CLI not authenticated in this environment)."
-        )
-        return
-
-    for n in refs:
-        result = subprocess.run(
-            ["gh", "api", f"repos/kareemschultz/platform-design-authority/issues/{n}"],
+def gh_authenticated() -> bool:
+    return (
+        subprocess.run(
+            ["gh", "auth", "status"],
             capture_output=True,
             text=True,
             check=False,
+        ).returncode
+        == 0
+    )
+
+
+def gh_json(endpoint: str) -> dict[str, Any] | None:
+    result = subprocess.run(
+        ["gh", "api", endpoint],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return None
+
+
+def current_work_references(text: str) -> set[int]:
+    current_text = section(text, "Immediate priorities")
+    not_complete = re.search(
+        r"Not yet complete:\s*([\s\S]*?)(?=^## )",
+        text,
+        re.MULTILINE,
+    )
+    if not_complete:
+        current_text += not_complete.group(1)
+    return {int(number) for number in re.findall(r"#(\d+)\b", current_text)}
+
+
+def check_github_state(text: str, rows: list[dict[str, Any]]) -> None:
+    references = sorted({int(number) for number in re.findall(r"#(\d+)\b", text)})
+    if not references:
+        return
+    if not gh_authenticated():
+        warn(
+            f"Skipped GitHub state verification for {len(references)} references because "
+            "gh is not authenticated."
         )
-        if result.returncode != 0:
-            fail(f"Referenced #{n} does not resolve to an existing GitHub issue or PR.")
+        return
+
+    repository = os.environ.get("GITHUB_REPOSITORY", DEFAULT_REPOSITORY)
+    issue_cache: dict[int, dict[str, Any]] = {}
+    for number in references:
+        item = gh_json(f"repos/{repository}/issues/{number}")
+        if item is None:
+            fail(f"Referenced #{number} does not resolve in {repository}.")
+        else:
+            issue_cache[number] = item
+
+    for row in rows:
+        if row["status"] != "complete":
+            continue
+        pr_numbers = {int(number) for number in re.findall(r"PR\s*#(\d+)\b", row["evidence"])}
+        if not pr_numbers:
+            continue
+        if not any(
+            (pull := gh_json(f"repos/{repository}/pulls/{number}")) is not None
+            and pull.get("merged_at")
+            for number in pr_numbers
+        ):
+            fail(
+                f"{row['name']}: no cited PR is verified merged in {repository}: "
+                f"{sorted(pr_numbers)}."
+            )
+
+    for number in sorted(current_work_references(text)):
+        item = issue_cache.get(number)
+        if item is not None and item.get("state") == "closed":
+            fail(
+                f"Current-work section references closed #{number}; update or remove the stale item."
+            )
 
 
-def main() -> int:
-    if not STATUS_FILE.exists():
-        fail(f"{STATUS_FILE} does not exist.")
-        print_and_exit()
-        return 1
-    if not STANDARD_FILE.exists():
-        warn(f"{STANDARD_FILE} does not exist; status-vocabulary check uses a hardcoded copy.")
-
-    text = STATUS_FILE.read_text(encoding="utf-8")
-
-    check_evidence_cutoff(text)
-    rows = parse_workstream_rows(text)
-    check_workstream_rows(rows, text)
-    check_production_readiness(text)
-    check_issue_pr_references(text)
-
-    return print_and_exit()
-
-
-def print_and_exit() -> int:
-    for w in warnings:
-        print(f"WARNING: {w}")
-    for e in errors:
-        print(f"ERROR: {e}")
+def print_result() -> int:
+    for message in warnings:
+        print(f"WARNING: {message}")
+    for message in errors:
+        print(f"ERROR: {message}")
     if errors:
         print(f"\n{len(errors)} error(s), {len(warnings)} warning(s).")
         return 1
     print(f"OK — 0 errors, {len(warnings)} warning(s).")
     return 0
+
+
+def main() -> int:
+    errors.clear()
+    warnings.clear()
+    if not STATUS_FILE.exists():
+        fail(f"{STATUS_FILE} does not exist.")
+        return print_result()
+    if not STANDARD_FILE.exists():
+        fail(f"{STANDARD_FILE} does not exist.")
+        return print_result()
+
+    text = STATUS_FILE.read_text(encoding="utf-8")
+    standard_text = STANDARD_FILE.read_text(encoding="utf-8")
+    allowed_statuses = parse_status_vocabulary(standard_text)
+    standard_weights = parse_standard_weights(standard_text)
+    if not allowed_statuses:
+        fail("Could not parse the governed status vocabulary.")
+
+    check_evidence_cutoff(text)
+    rows = parse_workstream_rows(text)
+    check_workstream_rows(rows, text, allowed_statuses, standard_weights)
+    check_production_readiness(text)
+    check_github_state(text, rows)
+    return print_result()
 
 
 if __name__ == "__main__":

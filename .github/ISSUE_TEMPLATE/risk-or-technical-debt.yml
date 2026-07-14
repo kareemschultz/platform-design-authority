@@ -1,0 +1,62 @@
+name: Risk or technical debt
+description: Record a new risk or technical-debt item, or track work to close an existing one.
+labels: ["risk"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check `docs/reviews/ARCHITECTURE_RISK_REGISTER.md` first — this issue should reference an RR-### or TD-### id, new or existing.
+  - type: input
+    id: risk-id
+    attributes:
+      label: Risk / debt ID
+      description: e.g. RR-012 or TD-008. Leave blank if this issue is proposing a new one.
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+        - None
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+    validations:
+      required: true
+  - type: textarea
+    id: trigger
+    attributes:
+      label: Trigger
+      description: What condition caused or reopens this risk.
+    validations:
+      required: true
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Mitigation
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+    validations:
+      required: true
+  - type: textarea
+    id: expiry
+    attributes:
+      label: Expiry or closure condition
+      description: What evidence closes this risk permanently.
+    validations:
+      required: true
+  - type: input
+    id: linked-workstream
+    attributes:
+      label: Linked workstream
+      description: e.g. WS1. Add the matching `wsN` label as well.

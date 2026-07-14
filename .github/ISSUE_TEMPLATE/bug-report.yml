@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a defect in merged code, contracts, or generated registries.
+labels: ["bug"]
+body:
+  - type: input
+    id: main-sha
+    attributes:
+      label: Exact main SHA
+      description: The commit you reproduced this against. Do not report against an unmerged branch.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment / runtime
+      description: Bun or Node, version, OS, browser if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P0 Critical
+        - P1 High
+        - P2 Normal
+        - P3 Low
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Tenant / security / data impact
+      description: Does this cross a tenant boundary, expose protected data, or corrupt authoritative state? Write "None observed" if not applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste logs with secrets, tokens, and credentials removed.
+  - type: textarea
+    id: regression-evidence
+    attributes:
+      label: Regression evidence
+      description: A failing test, or a proposal for one, that would catch this in CI.

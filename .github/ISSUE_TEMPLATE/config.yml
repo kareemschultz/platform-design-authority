@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Program status dashboard
+    url: https://github.com/kareemschultz/platform-design-authority/blob/main/docs/project/PROGRAM_STATUS.md
+    about: Check current workstream, capability-evidence, and production-readiness status before filing.
+  - name: Architecture Risk Register
+    url: https://github.com/kareemschultz/platform-design-authority/blob/main/docs/reviews/ARCHITECTURE_RISK_REGISTER.md
+    about: Check whether a risk or technical-debt item is already tracked before filing a new one.

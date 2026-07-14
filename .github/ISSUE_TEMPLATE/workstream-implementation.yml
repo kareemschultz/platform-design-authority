@@ -1,0 +1,84 @@
+name: Workstream implementation
+description: Track implementation work inside a governed workstream (WS0–WS7 or cross-cutting).
+labels: ["workstream"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, check `docs/project/PROGRAM_STATUS.md` and the workstream's governing plan under `docs/blueprint/17-Roadmap/`.
+  - type: input
+    id: parent-workstream
+    attributes:
+      label: Parent workstream
+      description: e.g. WS1, WS2, Cross-cutting. Add the matching `wsN` label as well.
+    validations:
+      required: true
+  - type: textarea
+    id: governing-documents
+    attributes:
+      label: Governing documents
+      description: Document IDs and paths this work is scoped by (e.g. PDA-RDM-008, an ADR, a registry).
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+    validations:
+      required: true
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+      description: What this issue explicitly does not cover.
+  - type: textarea
+    id: packages
+    attributes:
+      label: Packages
+      description: Packages/apps this work touches.
+  - type: textarea
+    id: contracts
+    attributes:
+      label: Contracts
+      description: OpenAPI operations, event names, or capability/permission ids affected.
+  - type: textarea
+    id: migrations
+    attributes:
+      label: Migrations
+      description: Schema or migration changes expected, and their owning package.
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Permissions
+      description: Registered permission ids enforced or introduced.
+  - type: textarea
+    id: events
+    attributes:
+      label: Events
+      description: Registered event names emitted or consumed.
+  - type: textarea
+    id: frontend-impact
+    attributes:
+      label: Frontend impact
+      description: Routes, components, or canonical states affected. Write "None" if not applicable.
+  - type: textarea
+    id: test-dimensions
+    attributes:
+      label: Test dimensions
+      description: Which of the 13 `registry/first-slice-tests.json` dimensions this work must evidence.
+  - type: textarea
+    id: quality-budgets
+    attributes:
+      label: Quality budgets
+      description: Any PDA-RDM-006 numeric budgets this work must measure.
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: textarea
+    id: risks-deferrals
+    attributes:
+      label: Risks and deferrals
+      description: Link an existing RR-### / TD-### entry, or note a new one this issue will create.

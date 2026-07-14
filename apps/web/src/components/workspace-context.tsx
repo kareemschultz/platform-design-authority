@@ -109,7 +109,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			return;
 		}
 		if (identityQuery.isError && storedContextId) {
-			initialContextAttempted.current = true;
+			// The next query runs without the stale context header. Keep activation
+			// eligible so an active membership can establish a replacement context.
+			initialContextAttempted.current = false;
 			persistContext(null);
 			return;
 		}

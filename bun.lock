@@ -136,6 +136,7 @@
       "name": "web",
       "version": "0.1.0",
       "dependencies": {
+        "@meridian/contracts-platform-api": "workspace:*",
         "@meridian/platform-clients-api-client": "workspace:*",
         "@meridian/tooling-env": "workspace:*",
         "@meridian/ui-web": "workspace:*",
@@ -159,6 +160,7 @@
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
+        "@types/bun": "catalog:",
         "@types/node": "^20",
         "@types/react": "^19.2.17",
         "@types/react-dom": "catalog:",

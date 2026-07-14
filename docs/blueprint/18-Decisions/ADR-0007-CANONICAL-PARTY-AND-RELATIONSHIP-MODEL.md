@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0007
 title: Adopt a Canonical Party and Relationship Model
-version: 0.1.1
+version: 0.1.2
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
@@ -155,11 +155,13 @@ The broader relationship, cross-domain role, merge/deduplication, rich identifie
 
 | Reviewer | Perspective | Decision | Date | Notes |
 |---|---|---|---|---|
-| Codex | WS1 implementation consistency | Prototype evidence recorded | 2026-07-14 | PDA-IMPL-005 proves only the registered Party prototype subset. Consolidated independent Claude Code review remains pending under RR-011. |
+| Codex | WS1 implementation consistency | Prototype evidence recorded | 2026-07-14 | PDA-IMPL-005 proves only the registered Party prototype subset. The subsequently completed consolidated review is registered by PDA-REV-011/012. |
+| Claude Code | Consolidated WS1 independent audit | Concurred after remediation — prototype scope | 2026-07-14 | PDA-REV-011 found the production `/v1/me` path did not resolve an existing `PlatformIdentityLink`. PDA-REV-012 closes the finding through a Party-owned query port, composition binding, tenant-context lookup proof, and non-null composed response. Deeper Party validation remains open. |
 
 ## Change Log
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.1.2 | 2026-07-14 | Platform Design Authority | Recorded the RR-011 Party-link finding, remediation, and independent concurrence without expanding prototype depth. |
 | 0.1.1 | 2026-07-14 | Platform Design Authority | Linked bounded WS1 Party evidence; lifecycle and full-model validation remain open. |
 | 0.1.0 | 2026-07-10 | Platform Design Authority | Initial proposal. |

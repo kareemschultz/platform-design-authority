@@ -138,6 +138,14 @@
       "registration_document": "docs/reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md"
     },
     {
+      "path": "docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_V1.md",
+      "rule": "document_front_matter",
+      "reason": "Independent review transcription registered through PDA-REV-011 rather than assigned authoritative front matter.",
+      "owner": "Platform Design Authority",
+      "review_date": "2027-07-14",
+      "registration_document": "docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_REGISTRATION.md"
+    },
+    {
       "path": "docs/reviews/FABLE5_MASTER_REPOSITORY_AUDIT_PROMPT.md",
       "rule": "document_front_matter",
       "reason": "Historical independent-audit prompt retained as evidence, not an authoritative specification.",

@@ -299,7 +299,7 @@ Each pull request uses one issue, branch, worktree, owner, migration/API/securit
 8. **PR8 — Thin experience shell.** Implement §8 with canonical states, responsive/accessibility evidence, authorized context switching, and real API enforcement.
 9. **PR9 — WS1 evidence closeout.** Run the complete §11 matrix, Bun/Node critical suites, OpenAPI parity, migration/outbox recovery, performance and accessibility checks; link evidence; update risks, technology lessons, registry evidence, and PDA-RDM-007 without overstating lifecycle.
 
-Completion record (2026-07-14): PR1-PR8 are merged and PR9 is implemented under issue #52. PDA-IMPL-005 records the generated 11-capability/143-cell evidence result, 40-sample database and independent-HTTP revocation measurements, formal prototype accessibility disposition, runtime checks, explicit deferrals, and lifecycle boundary. Exact-head CI remains the merge gate; a failed gate reopens this completion record.
+Completion record (2026-07-14): PR1-PR9 are merged through PR #54 at `8f9d93f5d5f80b9c11a8a5c30b956bdac638a284`. PDA-IMPL-005 records the generated 11-capability/143-cell evidence result, 40-sample database and independent-HTTP revocation measurements, formal prototype accessibility disposition, runtime checks, explicit deferrals, and lifecycle boundary. PDA-REV-011/012 register and remediate the post-merge RR-011 audit under issue #56; its exact-head merge is the remaining audit-closure gate.
 
 ## 10. Canonical Synthetic Fixtures and Scenarios
 

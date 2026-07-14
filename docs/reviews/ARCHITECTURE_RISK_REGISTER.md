@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -220,7 +220,7 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | RR-008 | Production OTP delivery and provider evidence remain blocked by FDR-007 | Founder/External evidence | Production factor delivery and recovery |
 | RR-009 | Independent assistive-technology conformance, penetration testing, and production-content review remain open | External evidence | Pilot and production accessibility/security claims |
 | RR-010 | Party merge, rich identifiers/relationships, duplicate resolution, and privacy-request execution remain beyond WS1 prototype depth | Platform/Party | Any claim or workflow requiring full Party depth |
-| RR-011 | Consolidated independent Claude Code audit of the exact merged WS1 PR1-PR9 state is pending | PDA review | Start of broad WS2 implementation; findings require formal disposition |
+| RR-011 | **Remediation in progress 2026-07-14.** PDA-REV-011 audited exact merge `8f9d93f` and found 0 P0/1 P1/5 P2/4 P3. PDA-REV-012 accepts and remediates all ten findings under issue #56. Closure awaits exact-head-green merge evidence. | PDA review / Implementation | Broad WS2 implementation; close with PDA-REV-011/012, issue #56, remediation PR, exact CI, and merge SHA |
 
 ## Technical Debt Register
 

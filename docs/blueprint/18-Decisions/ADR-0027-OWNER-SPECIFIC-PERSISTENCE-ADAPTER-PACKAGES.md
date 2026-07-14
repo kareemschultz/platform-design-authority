@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.2.6
+version: 0.2.7
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
@@ -110,6 +110,8 @@ PDA-IMPL-005 extends the original PR2 evidence across Tenancy, Entitlements, Aud
 
 The prior Security caveat is partially exercised by tenant-scoped constraints, repositories, and tests; production RLS topology remains open as RR-007. The ADR remains Proposed and its prototype-scoped review decisions are not production acceptance.
 
+PDA-REV-011 found that the validated Tooling environment schema's necessary `DATABASE_URL` declaration was exempted by a hidden Tooling-family condition in the checker. PDA-REV-012 removes that bypass: PDA-ENGR-012 now registers the exact declaration path, registry generation derives the executable allowance, and a negative Tooling fixture proves the allowance does not broaden to other files or permit connection lifecycle.
+
 ## Review Record
 
 | Reviewer | Perspective | Decision | Date | Notes |
@@ -119,11 +121,13 @@ The prior Security caveat is partially exercised by tenant-scoped constraints, r
 | Claude Code (Platform Architecture perspective) | Dependency boundaries, composition root | Approved — prototype scope | 2026-07-13 | Verified against PR #37 (`codex/36-ws1-persistence`, CI-green). Owner cores publish ports and import no DB client (`platform/identity` removed `db.ts`; `auth.ts` takes injected persistence + secret); concrete adapters live only in `packages/persistence/{platform-identity,platform-events}-postgres`; the pool factory is the sole composition-root database-client site (`apps/server/composition/postgres.ts`). Enforcement is executable and gated in CI — `scripts/check_architecture.py` + `scripts/test_architecture_checker.py` run in `meridian-prototype.yml`. The `exceptions[]` array is now empty: TD-007 (PR1) and `platform-identity-persistence-relocation` (this PR) closed by real resolution, not waiver. |
 | Claude Code (Data Platform perspective) | Pooling, transactions, migration orchestration | Approved — prototype scope | 2026-07-13 | Single process pool (`postgres.ts`); narrow unit-of-work that BEGIN/COMMIT/ROLLBACKs without leaking `PoolClient` (`postgres-unit-of-work.ts`); deterministic serial migration runner with per-stream error wrapping (`migrations.ts`); distinct per-owner migration tables (`platform_identity_migrations` / `platform_events_migrations`) preserving `single_migration_owner`. `persistence.integration.test.ts` proves empty-migrate, repeat-without-drift, representative upgrade, failed-stream recovery without partial state, atomic owner-state+outbox commit/rollback, and event-id idempotency. Exact locks recorded in PDA-APP-020 (Drizzle 0.45.2 / drizzle-kit 0.31.10 / pg 8.22.0 / PostgreSQL 18.4 / Bun 1.3.14 / Node 24). |
 | Claude Code (Security perspective) | Env/secret handling, tenant-safe connections | Approved — prototype scope, with a forward caveat | 2026-07-13 | `DATABASE_URL`/pool construction confined to `apps/server/composition/**`; no persistence or runtime-neutral package reads connection env; Better Auth `secret` injected via options, never from env inside the package; no secret logging (only `error.message` on idle-client). Outbox is tenant-scoped (`tenant_id NOT NULL` + tenant index) with classification/retention/idempotency columns. Enforced by the `connection-lifecycle-outside-composition` and `database-outside-persistence` CI patterns. **Caveat:** DB-level tenant-isolation controls (RLS disposition, tenant-scoped uniqueness/FKs per PDA-SEC-011) are a separate gate that applies when tenancy/domain tables land in PR3+; PR2's schemas are Better Auth core + the outbox only, so that gate is not yet exercised and remains open for later PRs. |
+| Claude Code | Consolidated WS1 architecture audit | Concurred after remediation — prototype scope | 2026-07-14 | PDA-REV-011 identified the hidden Tooling-family connection-rule carve-out; PDA-REV-012 replaces it with an authoritative, generated, exact-path allowance and negative regression proof. RR-007 remains open. |
 
 ## Change Log
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.7 | 2026-07-14 | Platform Design Authority | Replaced the hidden Tooling connection-rule bypass with a source-derived exact-path allowance under the RR-011 disposition. |
 | 0.2.6 | 2026-07-14 | Platform Design Authority | Linked complete WS1 owner-adapter prototype evidence and narrowed the earlier Security caveat to the still-open production RLS topology. |
 | 0.2.5 | 2026-07-13 | Platform Design Authority | Recorded the three required pre-PR2-merge architecture-consistency reviews (Platform Architecture, Data Platform, Security) as Approved at prototype scope against PR #37's CI-green implementation, by the owner-designated reviewer; Security row carries a forward tenant-isolation caveat. PR2 merge gate satisfied; production acceptance remains separate. |
 | 0.2.4 | 2026-07-13 | Platform Design Authority | Clarified how the composition root binds owner and outbox adapters over one transaction while keeping the concrete client out of application contracts; lifecycle and specialist review gates remain unchanged. |

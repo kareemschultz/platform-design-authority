@@ -98,6 +98,13 @@ class ProgramStatusValidatorTests(unittest.TestCase):
         )
         self.assertTrue(any("not an ancestor" in error for error in validator.errors))
 
+    @patch("subprocess.run", side_effect=FileNotFoundError(2, "No such file or directory", "gh"))
+    def test_missing_gh_binary_degrades_to_unauthenticated(self, _run) -> None:
+        self.assertFalse(validator.gh_authenticated())
+        self.assertIsNone(validator.gh_json("repos/owner/repo/issues/1"))
+        # check_github_state must degrade to a warning, not raise, when gh is absent.
+        validator.check_github_state("PR #23", [])
+
 
 if __name__ == "__main__":
     unittest.main()

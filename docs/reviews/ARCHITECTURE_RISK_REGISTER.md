@@ -220,7 +220,8 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | RR-008 | Production OTP delivery and provider evidence remain blocked by FDR-007 | Founder/External evidence | Production factor delivery and recovery |
 | RR-009 | Independent assistive-technology conformance, penetration testing, and production-content review remain open | External evidence | Pilot and production accessibility/security claims |
 | RR-010 | Party merge, rich identifiers/relationships, duplicate resolution, and privacy-request execution remain beyond WS1 prototype depth | Platform/Party | Any claim or workflow requiring full Party depth |
-| RR-011 | **Closes on PR #57 merge.** PDA-REV-011 audited exact merge `8f9d93f` and found 0 P0/1 P1/5 P2/4 P3. PDA-REV-012 accepts and remediates all ten findings under issue #56 / PR #57. Closure is effective only after exact-head-green merge. | PDA review / Implementation | Broad WS2 implementation; closure evidence is PDA-REV-011/012, issue #56, PR #57, exact CI, and the GitHub merge record |
+
+**RR-011 — Closed.** PDA-REV-011 audited exact merge `8f9d93f` and found 0 P0/1 P1/5 P2/4 P3. PDA-REV-012 accepted and remediated all ten findings; PR #57 merged at exact-head-green CI, closing issue #56. Removed from the not-fully-closed list above per Register Rule 4; reopens only on new evidence invalidating PDA-REV-012's disposition.
 
 ## Technical Debt Register
 

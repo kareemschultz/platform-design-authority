@@ -221,24 +221,28 @@ def check_production_readiness(text: str) -> None:
 
 
 def gh_authenticated() -> bool:
-    return (
-        subprocess.run(
+    try:
+        result = subprocess.run(
             ["gh", "auth", "status"],
             capture_output=True,
             text=True,
             check=False,
-        ).returncode
-        == 0
-    )
+        )
+    except FileNotFoundError:
+        return False
+    return result.returncode == 0
 
 
 def gh_json(endpoint: str) -> dict[str, Any] | None:
-    result = subprocess.run(
-        ["gh", "api", endpoint],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            ["gh", "api", endpoint],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return None
     if result.returncode != 0:
         return None
     try:

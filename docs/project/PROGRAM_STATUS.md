@@ -85,7 +85,7 @@ Not yet complete:
 ## Immediate priorities
 
 1. Run WS1 closeout: two-tenant proof, permission-versus-entitlement semantics, revocation budget, audit completeness, accessibility, responsive navigation, Bun/Node critical suites, and the 13-dimension capability evidence matrix.
-2. Prepare and review the WS2 Catalog and Inventory implementation plan tracked by issue #12 without starting WS2 code before WS1 exits.
+2. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12, without starting WS2 code before WS1 exits.
 3. Generate a machine-readable program-status input or evidence rollup so the dashboard can be freshness-checked rather than maintained only by prose.
 
 ## Open risk summary

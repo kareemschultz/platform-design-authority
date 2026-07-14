@@ -331,7 +331,11 @@ export function createAuthorizationService(
 			now,
 			state.membership.id
 		);
-		if (evaluation.matchedAssignments.length === 0 && !delegated) {
+		if (
+			state.context.delegationId
+				? !delegated
+				: evaluation.matchedAssignments.length === 0
+		) {
 			return authorityDenial(state, evaluation);
 		}
 		const policy = policyOutcome(options.policies ?? [], state, request);
@@ -340,7 +344,9 @@ export function createAuthorizationService(
 		}
 
 		return {
-			matchedAssignments: evaluation.matchedAssignments,
+			matchedAssignments: state.context.delegationId
+				? []
+				: evaluation.matchedAssignments,
 			outcome: "allow",
 			permission: request.permission,
 		};

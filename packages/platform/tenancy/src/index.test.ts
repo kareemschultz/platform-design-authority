@@ -1,11 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	createTenancyApplication,
 	createTenancyService,
 	type EventAppendPort,
 	type InvitationRecord,
 	type MembershipRecord,
 	type PendingEvent,
+	type PermissionDecisionPort,
 	type RoleAssignmentRecord,
 	type RoleRecord,
 	type TenancyRepository,
@@ -342,5 +344,150 @@ describe("Platform Tenancy application rules", () => {
 				body: { ...command.body, roleId: "role_substituted_0001" },
 			})
 		).rejects.toMatchObject({ code: "idempotency_conflict" });
+	});
+
+	test("binds administrative permission checks to target and requested scopes", async () => {
+		const tenantId = "tenant_admin_scope_0001";
+		const organizationId = "organization_admin_scope_0001";
+		const siblingOrganizationId = "organization_admin_scope_0002";
+		const context = {
+			authUserId: "user_admin_scope_0001",
+			contextId: "context_admin_scope_0001",
+			expiresAt: new Date("2026-07-13T13:00:00.000Z"),
+			idempotencyKey: "context-admin-scope-0001",
+			issuedAt: new Date("2026-07-13T12:00:00.000Z"),
+			organizationId,
+			sessionId: "session_admin_scope_0001",
+			tenantId,
+		};
+		const membership = (
+			id: string,
+			organization: string
+		): MembershipRecord => ({
+			authUserId: `user_${id}`,
+			id,
+			organizationId: organization,
+			roleAssignmentIds: [],
+			state: "Active",
+			tenantId,
+			version: 1,
+		});
+		const localTarget = membership(
+			"membership_admin_scope_0001",
+			organizationId
+		);
+		const siblingTarget = membership(
+			"membership_admin_scope_0002",
+			siblingOrganizationId
+		);
+		let mutationDispatched = false;
+		let listedTenantId: string | undefined;
+		const service = {
+			getMembershipForAdministration: (input: { membershipId: string }) =>
+				Promise.resolve(
+					input.membershipId === localTarget.id ? localTarget : siblingTarget
+				),
+			grantRoleAssignment: () => {
+				mutationDispatched = true;
+				return Promise.reject(new Error("role mutation must remain denied"));
+			},
+			listOrganizations: (input: { tenantId: string }) => {
+				listedTenantId = input.tenantId;
+				return Promise.resolve({ items: [], nextCursor: null });
+			},
+			requireContext: () => Promise.resolve(context),
+			suspendMembership: () => {
+				mutationDispatched = true;
+				return Promise.reject(new Error("suspension must remain denied"));
+			},
+		} as unknown as ReturnType<typeof createTenancyService>;
+		const permissionChecks: Parameters<
+			PermissionDecisionPort["requirePermission"]
+		>[0][] = [];
+		const permissions: PermissionDecisionPort = {
+			requirePermission(input) {
+				permissionChecks.push(input);
+				if (
+					input.resourceScope?.scopeType !== "Organization" ||
+					input.resourceScope.scopeId !== organizationId
+				) {
+					return Promise.reject(
+						Object.assign(new Error("scope denied"), {
+							code: "authorization_denied" as const,
+						})
+					);
+				}
+				return Promise.resolve({
+					matchedAssignments: ["assignment_admin_scope_0001"],
+					outcome: "allow",
+					permission: input.permission,
+				});
+			},
+		};
+		const application = createTenancyApplication({
+			directory: { findUsers: async () => [] },
+			permissions,
+			projection: {
+				projectInvitation: async () => undefined,
+				projectOrganization: async () => undefined,
+				removeMembership: async () => undefined,
+			},
+			service,
+		});
+		const assignmentInput = {
+			actorUserId: context.authUserId,
+			body: {
+				membershipId: localTarget.id,
+				roleId: "role_admin_scope_0001",
+				scopeType: "Tenant" as const,
+				startsAt: "2026-07-13T12:00:00.000Z",
+			},
+			contextId: context.contextId,
+			correlationId: "correlation_admin_scope_0001",
+			idempotencyKey: "idempotency_admin_scope_0001",
+			sessionId: context.sessionId,
+		};
+
+		await expect(
+			application.createRoleAssignment(assignmentInput)
+		).rejects.toMatchObject({ code: "authorization_denied" });
+		await expect(
+			application.createRoleAssignment({
+				...assignmentInput,
+				body: { ...assignmentInput.body, membershipId: siblingTarget.id },
+			})
+		).rejects.toMatchObject({ code: "authorization_denied" });
+		await expect(
+			application.suspendMembership({
+				actorUserId: context.authUserId,
+				body: {
+					membershipId: siblingTarget.id,
+					reason: "scope regression",
+					revokeSessionsWhenNoActiveMembershipsRemain: true,
+					version: 1,
+				},
+				contextId: context.contextId,
+				correlationId: "correlation_admin_scope_0002",
+				idempotencyKey: "idempotency_admin_scope_0002",
+				sessionId: context.sessionId,
+				targetAuthUserId: siblingTarget.authUserId,
+			})
+		).rejects.toMatchObject({ code: "authorization_denied" });
+		await application.listOrganizations({
+			authUserId: context.authUserId,
+			contextId: context.contextId,
+			page: { limit: 20 },
+			sessionId: context.sessionId,
+		});
+
+		expect(mutationDispatched).toBe(false);
+		expect(listedTenantId).toBe(tenantId);
+		expect(permissionChecks.map((check) => check.resourceScope)).toEqual([
+			{ scopeId: organizationId, scopeType: "Organization" },
+			{ scopeId: undefined, scopeType: "Tenant" },
+			{ scopeId: siblingOrganizationId, scopeType: "Organization" },
+			{ scopeId: siblingOrganizationId, scopeType: "Organization" },
+			{ scopeId: organizationId, scopeType: "Organization" },
+		]);
 	});
 });

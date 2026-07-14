@@ -249,6 +249,7 @@ export interface TenancyRepository {
 	listMemberships: (authUserId: string) => Promise<MembershipRecord[]>;
 	listOrganizations: (
 		authUserId: string,
+		tenantId: string,
 		page: PageRequest
 	) => Promise<Page<OrganizationRecord>>;
 	listRoleAssignments: (
@@ -890,6 +891,22 @@ export function createTenancyService(options: TenancyServiceOptions) {
 			});
 		},
 
+		getMembershipForAdministration(input: {
+			membershipId: string;
+			tenantId: string;
+		}): Promise<MembershipRecord> {
+			return options.unitOfWork.execute(async ({ repository }) => {
+				const membership = await repository.getMembership(
+					input.tenantId,
+					input.membershipId
+				);
+				if (!membership) {
+					throw new TenancyError("not_found", "Membership was not found");
+				}
+				return membership;
+			});
+		},
+
 		async getOrganization(input: {
 			authUserId: string;
 			contextId: string;
@@ -979,9 +996,14 @@ export function createTenancyService(options: TenancyServiceOptions) {
 		listOrganizations(input: {
 			authUserId: string;
 			page: PageRequest;
+			tenantId: string;
 		}): Promise<Page<OrganizationRecord>> {
 			return options.unitOfWork.execute(({ repository }) =>
-				repository.listOrganizations(input.authUserId, input.page)
+				repository.listOrganizations(
+					input.authUserId,
+					input.tenantId,
+					input.page
+				)
 			);
 		},
 
@@ -1365,11 +1387,31 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 				contextId: input.contextId,
 				sessionId: input.sessionId,
 			});
+			const targetMembership =
+				await options.service.getMembershipForAdministration({
+					membershipId: input.body.membershipId,
+					tenantId: context.tenantId,
+				});
 			await options.permissions.requirePermission({
 				assuranceLevel: "aal1",
 				authUserId: input.actorUserId,
 				contextId: input.contextId,
 				permission: "platform.role.assign",
+				resourceScope: {
+					scopeId: targetMembership.organizationId,
+					scopeType: "Organization",
+				},
+				sessionId: input.sessionId,
+			});
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.actorUserId,
+				contextId: input.contextId,
+				permission: "platform.role.assign",
+				resourceScope: {
+					scopeId: input.body.scopeId ?? undefined,
+					scopeType: input.body.scopeType,
+				},
 				sessionId: input.sessionId,
 			});
 			const assignment = await options.service.grantRoleAssignment({
@@ -1526,6 +1568,7 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 			return options.service.listOrganizations({
 				authUserId: input.authUserId,
 				page: input.page,
+				tenantId: context.tenantId,
 			});
 		},
 
@@ -1621,11 +1664,20 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 				contextId: input.contextId,
 				sessionId: input.sessionId,
 			});
+			const targetMembership =
+				await options.service.getMembershipForAdministration({
+					membershipId: input.body.membershipId,
+					tenantId: context.tenantId,
+				});
 			await options.permissions.requirePermission({
 				assuranceLevel: "aal1",
 				authUserId: input.actorUserId,
 				contextId: input.contextId,
 				permission: "platform.user.suspend",
+				resourceScope: {
+					scopeId: targetMembership.organizationId,
+					scopeType: "Organization",
+				},
 				sessionId: input.sessionId,
 			});
 			const membership = await options.service.suspendMembership({

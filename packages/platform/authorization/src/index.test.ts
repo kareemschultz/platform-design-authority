@@ -133,12 +133,50 @@ describe("Platform Authorization current policy", () => {
 		});
 
 		state.delegation.endsAt = new Date("2026-07-14T11:59:59.000Z");
+		const ordinaryRole = firstAssignment(state).role;
+		if (!ordinaryRole) {
+			throw new Error("authorization fixture requires an ordinary role");
+		}
+		ordinaryRole.permissionIds = ["platform.role.read"];
 		await expect(
 			serviceWith(async () => state).decide(request)
 		).resolves.toEqual({
 			outcome: "deny",
 			reason: "scope_mismatch",
 		});
+	});
+
+	test("does not let organization authority reach sibling or tenant scope", async () => {
+		const state = currentState();
+		const scoped = firstAssignment(state);
+		scoped.assignment.scopeId = state.context.organizationId;
+		scoped.assignment.scopeType = "Organization";
+		const service = serviceWith(async () => state);
+
+		await expect(
+			service.decide({
+				...request,
+				resourceScope: {
+					scopeId: state.context.organizationId,
+					scopeType: "Organization",
+				},
+			})
+		).resolves.toMatchObject({ outcome: "allow" });
+		await expect(
+			service.decide({
+				...request,
+				resourceScope: { scopeType: "Tenant" },
+			})
+		).resolves.toEqual({ outcome: "deny", reason: "scope_mismatch" });
+		await expect(
+			service.decide({
+				...request,
+				resourceScope: {
+					scopeId: "organization_authorization_sibling_0001",
+					scopeType: "Organization",
+				},
+			})
+		).resolves.toEqual({ outcome: "deny", reason: "scope_mismatch" });
 	});
 
 	test("preserves conditional policy outcomes instead of flattening to boolean", async () => {

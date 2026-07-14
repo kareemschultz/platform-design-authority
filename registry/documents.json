@@ -2320,7 +2320,7 @@
       "document_id": "PDA-IMPL-003",
       "path": "docs/implementation/WS1_PR5_AUTHORIZATION_SECURITY_DATA_AND_POLICY_DISPOSITION.md",
       "title": "WS1 PR5 Authorization Security, Data, and Policy Disposition",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "status": "Draft",
       "owner": "Platform Tenancy and Platform Authorization",
       "last_reviewed": "2026-07-14",

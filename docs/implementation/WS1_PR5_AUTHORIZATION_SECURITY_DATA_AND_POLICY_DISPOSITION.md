@@ -1,7 +1,7 @@
 ---
 document_id: PDA-IMPL-003
 title: WS1 PR5 Authorization Security, Data, and Policy Disposition
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Tenancy and Platform Authorization
 last_reviewed: 2026-07-14
@@ -46,6 +46,8 @@ Every new child table has tenant-preserving composite constraints. The active-co
 ## Scope, assignment, and delegation behavior
 
 Tenant scope carries no foreign scope identifier. Organization and Location scopes must resolve inside the target membership's tenant and organization. Legal-entity and Branch scopes remain explicit fail-closed seams until their authoritative records exist; PR5 does not accept unvalidated identifiers. Current time, role state, assignment state, membership state, start, expiry, active context, and selected delegation are evaluated on every call.
+
+Administrative mutations bind authority to the affected resource rather than checking only the permission name. Role assignment requires both authority over the target membership's organization and authority over the requested grant scope; an organization-scoped administrator therefore cannot grant tenant scope or reach a sibling organization. Membership suspension evaluates `platform.user.suspend` against the target membership's organization. Organization listing carries the server-derived tenant into the repository and cannot enumerate another tenant's memberships. These controls are covered by direct-call and PostgreSQL negative tests.
 
 A selected delegation replaces ordinary assignment authority for that context and must match the current tenant, delegate membership, canonical permission, scope, start, expiry, and active state. PR5 does not expose delegation creation or further delegation. Support access, break-glass, reason approval, and enhanced audit remain blocked on their governed commands and PR7 audit storage.
 

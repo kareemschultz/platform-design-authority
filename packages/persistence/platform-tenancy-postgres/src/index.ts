@@ -472,7 +472,7 @@ export function createTenancyRepository(
 			return rows.map(mapMembership);
 		},
 
-		async listOrganizations(authUserId, page) {
+		async listOrganizations(authUserId, tenantId, page) {
 			const rows = await database
 				.select({ organization: organizations })
 				.from(memberships)
@@ -486,6 +486,7 @@ export function createTenancyRepository(
 				.where(
 					and(
 						eq(memberships.authUserId, authUserId),
+						eq(memberships.tenantId, tenantId),
 						eq(memberships.state, "Active"),
 						cursorCondition(page.cursor, organizations.id)
 					)

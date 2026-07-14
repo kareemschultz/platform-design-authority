@@ -327,7 +327,7 @@ describe.serial("WS1 persistence orchestration", () => {
 		} catch (error) {
 			crossTenantError = error;
 		}
-		expect(crossTenantError).toMatchObject({ code: "membership_inactive" });
+		expect(crossTenantError).toMatchObject({ code: "not_found" });
 
 		await service.suspendMembership({
 			actorUserId: "user_authorization_admin_a",
@@ -849,6 +849,22 @@ describe.serial("WS1 persistence orchestration", () => {
 				)
 			)?.tenantId
 		).toBe("tenant_demerara");
+		expect(
+			(
+				await repository.listOrganizations(
+					"user_multitenant",
+					"tenant_demerara",
+					{ limit: 20 }
+				)
+			).items.map((organization) => organization.id)
+		).toEqual(["organization_demerara"]);
+		expect(
+			await repository.listOrganizations(
+				"user_multitenant",
+				"tenant_essequibo",
+				{ limit: 20 }
+			)
+		).toEqual({ items: [], nextCursor: null });
 		const organizationUpdate = {
 			authUserId: "user_multitenant",
 			contextId: demeraraContext.contextId,

@@ -383,6 +383,31 @@ describe("appRouter contract surface", () => {
 		expect(result.items[0]?.capabilityId).toBe("platform.entitlements");
 	});
 
+	test("denies entitlement inspection at the transport boundary before dispatch", async () => {
+		let dispatched = false;
+		await expect(
+			call(
+				appRouter.entitlements.list,
+				{
+					headers: { "x-active-context-id": "context_unit_test_0001" },
+					query: { limit: 50 },
+				},
+				{
+					context: context({
+						application: {
+							listEntitlements: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		expect(dispatched).toBe(false);
+	});
+
 	test("denies role assignment before application dispatch", async () => {
 		let dispatched = false;
 		await expect(

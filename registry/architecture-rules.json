@@ -221,7 +221,10 @@
     {
       "id": "connection-lifecycle-outside-composition",
       "description": "Pool creation, shutdown, and connection-bearing environment reads belong to registered composition roots.",
-      "pattern": "**/!(composition)/** -> (pool-construction|pool-shutdown|connection-environment)"
+      "pattern": "**/!(composition)/** -> (pool-construction|pool-shutdown|connection-environment)",
+      "except": [
+        "packages/tooling/env/src/server.ts"
+      ]
     }
   ],
   "requirements": {

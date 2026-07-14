@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "../index.css";
 import Header from "@/components/header";
 import Providers from "@/components/providers";
+import { RouteFocusManager } from "@/components/route-focus-manager";
 import { SkipLink } from "@/components/skip-link";
 
 const geistSans = Geist({
@@ -41,6 +42,7 @@ export default function RootLayout({
 			>
 				<Providers>
 					<SkipLink />
+					<RouteFocusManager />
 					<div className="grid h-svh min-w-0 grid-rows-[auto_1fr]">
 						<Header />
 						<main className="min-w-0" id="main-content" tabIndex={-1}>

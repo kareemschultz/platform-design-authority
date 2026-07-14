@@ -2,9 +2,10 @@ import { createTenancyApplication } from "@meridian/platform-tenancy";
 
 import { auditTransportApplication } from "./audit";
 import { permissionAuthorizer } from "./authorization";
+import { createCurrentIdentityResolver } from "./current-identity";
 import { entitlementTransportApplication } from "./entitlements";
 import { identitySessionTransportApplication } from "./identity";
-import { partyTransportApplication } from "./party";
+import { partyIdentityLinkDirectory, partyTransportApplication } from "./party";
 import {
 	identityDirectory,
 	identityOrganizationProjection,
@@ -18,10 +19,16 @@ const tenancyApplication = createTenancyApplication({
 	service: tenancyService,
 });
 
+const getCurrentIdentity = createCurrentIdentityResolver({
+	base: tenancyApplication.getCurrentIdentity,
+	partyLinks: partyIdentityLinkDirectory,
+});
+
 export const serverApplication = {
 	...auditTransportApplication,
 	...entitlementTransportApplication,
 	...identitySessionTransportApplication,
 	...tenancyApplication,
 	...partyTransportApplication,
+	getCurrentIdentity,
 };

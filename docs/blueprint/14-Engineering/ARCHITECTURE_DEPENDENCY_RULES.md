@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.9.0
+version: 0.9.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -172,6 +172,18 @@ Expired exceptions fail CI.
 
 The temporary `platform-identity-persistence-relocation` exception was removed by WS1 PR2 when the Identity schema and migrations moved to the registered owner-specific adapter and pool lifecycle moved to the server composition root.
 
+### Registered Rule Allowances
+
+These paths are part of the rule definition, not temporary risk exceptions. They are narrow cases where the matched token is required to declare or compose the controlled resource. They do not permit connection creation or use outside the stated scope.
+
+| Rule | Allowed path | Reason |
+|---|---|---|
+| `database-outside-persistence` | `apps/*/composition` | Application composition roots may construct and inject the single process connection. |
+| `database-outside-persistence` | `packages/tooling/composition/*` | Approved Tooling composition packages may construct a governed infrastructure connection. |
+| `connection-lifecycle-outside-composition` | `packages/tooling/env/src/server.ts` | The validated environment schema must declare `DATABASE_URL`; it exports validated configuration and may not import a database client, construct a pool, or close a connection. |
+
+The generator derives each executable pattern's `except` list from this table. A broader allowance, an expiring waiver, or permission to construct/use a connection requires a governed source change and the normal ADR/risk process.
+
 ## Quality Gates
 
 - Architecture tests run in CI
@@ -182,6 +194,8 @@ The temporary `platform-identity-persistence-relocation` exception was removed b
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 2026-07-14 — v0.9.1 registered the validated Tooling environment-schema allowance in the authoritative source and removed the checker's hidden family-level carve-out.
 
 - 2026-07-14 — v0.8.0 registered the Platform Entitlements owner package, its current-state, append-only change-history, and command-receipt tables, and its serial migration stream for WS1 PR6.
 

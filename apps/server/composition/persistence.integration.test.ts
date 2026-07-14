@@ -541,6 +541,20 @@ describe.serial("WS1 persistence orchestration", () => {
 		});
 		expect(link.partyId).toBe(person.id);
 		expect(
+			await repository.getIdentityLinkForUserContext(
+				"tenant_demerara",
+				"organization_demerara",
+				"user_multitenant"
+			)
+		).toMatchObject({ partyId: person.id, state: "Active" });
+		expect(
+			await repository.getIdentityLinkForUserContext(
+				"tenant_essequibo",
+				"organization_essequibo",
+				"user_multitenant"
+			)
+		).toBeNull();
+		expect(
 			await service.createIdentityLink({
 				actorUserId: "user_multitenant",
 				body: {

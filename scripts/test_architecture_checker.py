@@ -99,6 +99,17 @@ def main() -> int:
         expected_text="connection-lifecycle-outside-composition",
         source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
     )
+    probe(
+        ROOT
+        / "packages"
+        / "tooling"
+        / "env"
+        / "src"
+        / "__architecture_connection_fixture.ts",
+        expected_success=False,
+        expected_text="connection-lifecycle-outside-composition",
+        source='export const connectionName = "DATABASE_URL";\n',
+    )
     print("architecture checker regression probes passed")
     return 0
 

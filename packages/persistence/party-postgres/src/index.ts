@@ -168,6 +168,22 @@ export function createPartyRepository(
 			return row ? mapIdentityLink(row) : null;
 		},
 
+		async getIdentityLinkForUserContext(tenantId, organizationId, authUserId) {
+			const [row] = await database
+				.select()
+				.from(identityLinks)
+				.where(
+					and(
+						eq(identityLinks.tenantId, tenantId),
+						eq(identityLinks.organizationId, organizationId),
+						eq(identityLinks.authUserId, authUserId),
+						eq(identityLinks.state, "Active")
+					)
+				)
+				.limit(1);
+			return row ? mapIdentityLink(row) : null;
+		},
+
 		async getParty(tenantId, partyId) {
 			const [row] = await database
 				.select()

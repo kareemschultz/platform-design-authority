@@ -92,6 +92,11 @@ export interface PartyRepository {
 		tenantId: string,
 		membershipId: string
 	) => Promise<IdentityLinkRecord | null>;
+	getIdentityLinkForUserContext: (
+		tenantId: string,
+		organizationId: string,
+		authUserId: string
+	) => Promise<IdentityLinkRecord | null>;
 	getParty: (tenantId: string, partyId: string) => Promise<PartyRecord | null>;
 	listParties: (
 		tenantId: string,

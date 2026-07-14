@@ -276,6 +276,7 @@
       "contains": [
         "fails closed when canonical authorization is not bound",
         "derives Party list scope from the revalidated active context",
+        "denies entitlement inspection at the transport boundary before dispatch",
         "denies Audit access before application dispatch when permission fails"
       ],
       "command": "bun test apps/server/src/router.test.ts",
@@ -307,6 +308,7 @@
       "contains": [
         "enforces current scoped authorization and atomic role assignment",
         "enforces two-tenant isolation, context binding, and composite ownership",
+        "getIdentityLinkForUserContext",
         "commits and rolls back owner state with its outbox record"
       ],
       "command": "bun run db:test",
@@ -346,7 +348,7 @@
       "contains": [
         "measures database-current revocation propagation below the 60 second p95 budget",
 		"measures independent protected-HTTP rejection after Better Auth session revocation",
-        "persists tenant-isolated audit-of-access, privacy overlays, and tamper evidence"
+        "ingests the committed revocation outbox fact before tenant-isolated audit, privacy, and tamper checks"
       ],
       "command": "bun run db:test",
       "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
@@ -440,7 +442,9 @@
       "contains": [
         "WS1_OPENAPI_OPERATION_METADATA",
         "authorizationState.membership.state = \"Suspended\"",
-        "retentionDisposition"
+        "retentionDisposition",
+        "nodeHttpResponse.status, 200",
+        "nodeHttpIdentity.partyId, linkedParty.id"
       ],
       "command": "bun run --cwd apps/server db:test:node",
       "runtimes": ["Node 24", "PostgreSQL 18.4"],
@@ -466,6 +470,36 @@
         "performance_and_capacity",
         "recovery_replay_and_reconciliation"
       ]
+    },
+    {
+      "id": "ws1-shell-accessibility-regressions",
+      "kind": "automated-test",
+      "path": "apps/web/src/components/route-focus-manager.test.ts",
+      "contains": [
+        "moves focus to main content after client-side navigation"
+      ],
+      "command": "bun test apps/web/src",
+      "runtimes": ["Bun 1.3.14", "Next.js 16.2.1"],
+      "capabilities": [
+        "platform.administration",
+        "platform.authentication"
+      ],
+      "dimensions": ["accessibility_and_responsive"]
+    },
+    {
+      "id": "ws1-shell-touch-target-regression",
+      "kind": "automated-test",
+      "path": "apps/web/src/components/query-state.test.ts",
+      "contains": [
+        "keeps the reauthentication action at the governed minimum height"
+      ],
+      "command": "bun test apps/web/src",
+      "runtimes": ["Bun 1.3.14", "Next.js 16.2.1"],
+      "capabilities": [
+        "platform.administration",
+        "platform.authentication"
+      ],
+      "dimensions": ["accessibility_and_responsive"]
     },
     {
       "id": "ws1-architecture-boundaries",

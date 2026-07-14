@@ -154,6 +154,10 @@ def main() -> int:
         str(item) for item in requirements.get("runtime_neutral_families", [])
     )
     exceptions = data.get("exceptions", [])
+    pattern_exceptions = {
+        str(pattern["id"]): [str(value) for value in pattern.get("except", [])]
+        for pattern in data.get("forbidden_patterns", [])
+    }
     persistence_owners = data.get("persistence_owners", [])
 
     owner_ids = [str(item.get("id", "")) for item in persistence_owners]
@@ -319,9 +323,14 @@ def main() -> int:
             if (
                 re.search(r"\bnew\s+Pool\s*\(", text)
                 or re.search(r"\bpool\.end\s*\(", text)
-                or ("DATABASE_URL" in text and source_family != "tooling")
+                or "DATABASE_URL" in text
             ) and not is_test_source(source) and not matches(
                 source_path, composition_roots
+            ) and not matches(
+                source_path,
+                pattern_exceptions.get(
+                    "connection-lifecycle-outside-composition", []
+                ),
             ):
                 if not exception_allows(
                     exceptions, "connection-lifecycle-outside-composition", source_path

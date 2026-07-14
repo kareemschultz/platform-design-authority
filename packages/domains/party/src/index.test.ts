@@ -49,6 +49,17 @@ function fixture() {
 		getIdentityLinkForMembership(tenantId, membershipId) {
 			return Promise.resolve(links.get(key(tenantId, membershipId)) ?? null);
 		},
+		getIdentityLinkForUserContext(tenantId, organizationId, authUserId) {
+			return Promise.resolve(
+				[...links.values()].find(
+					(link) =>
+						link.tenantId === tenantId &&
+						link.organizationId === organizationId &&
+						link.authUserId === authUserId &&
+						link.state === "Active"
+				) ?? null
+			);
+		},
 		getParty(tenantId, partyId) {
 			return Promise.resolve(parties.get(key(tenantId, partyId)) ?? null);
 		},

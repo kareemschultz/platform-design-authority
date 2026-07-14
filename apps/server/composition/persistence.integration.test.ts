@@ -4,6 +4,7 @@ import {
 	type PartyIdFactory,
 } from "@meridian/domain-party";
 import { createPartyRepository } from "@meridian/persistence-party-postgres";
+import { createEntitlementRepository } from "@meridian/persistence-platform-entitlements-postgres";
 import {
 	createPostgresOutbox,
 	migratePlatformEvents,
@@ -14,6 +15,10 @@ import {
 	migratePlatformTenancy,
 } from "@meridian/persistence-platform-tenancy-postgres";
 import { createAuthorizationService } from "@meridian/platform-authorization";
+import {
+	createEntitlementEvaluator,
+	createEntitlementService,
+} from "@meridian/platform-entitlements";
 import type { OutboxEvent } from "@meridian/platform-events";
 import {
 	createTenancyApplication,
@@ -87,6 +92,7 @@ describe.serial("WS1 persistence orchestration", () => {
 		expect(WS1_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual([
 			"platform.identity",
 			"platform.tenancy",
+			"platform.entitlements",
 			"platform.events",
 			"party.records",
 		]);
@@ -113,6 +119,9 @@ describe.serial("WS1 persistence orchestration", () => {
 			"passkey",
 			"platform_active_context",
 			"platform_delegation",
+			"platform_entitlement",
+			"platform_entitlement_change",
+			"platform_entitlement_command_receipt",
 			"platform_event_outbox",
 			"platform_location",
 			"platform_membership",
@@ -133,6 +142,7 @@ describe.serial("WS1 persistence orchestration", () => {
 		);
 		expect(histories.rows.map((row) => row.table_name)).toEqual([
 			"party_migrations",
+			"platform_entitlements_migrations",
 			"platform_events_migrations",
 			"platform_identity_migrations",
 			"platform_tenancy_migrations",
@@ -1118,6 +1128,132 @@ describe.serial("WS1 persistence orchestration", () => {
 				"suspend-idempotency-rollback"
 			)
 		).toBeNull();
+	});
+
+	test("enforces tenant-isolated entitlements through the governed command", async () => {
+		let sequence = 0;
+		const ids = {
+			create(kind: "change" | "entitlement" | "event") {
+				sequence += 1;
+				return `${kind}_integration_${sequence.toString().padStart(4, "0")}`;
+			},
+		};
+		const unitOfWork = createPostgresUnitOfWork(testPool, (client) => ({
+			events: createPostgresOutbox(client),
+			repository: createEntitlementRepository(client),
+		}));
+		const service = createEntitlementService({
+			clock: () => new Date("2026-07-14T12:00:00.000Z"),
+			ids,
+			unitOfWork,
+		});
+		const created = await service.change({
+			actorId: "user_entitlement_admin",
+			capabilityId: "platform.entitlements",
+			correlationId: "correlation_entitlement_0001",
+			endsAt: new Date("2026-08-14T12:00:00.000Z"),
+			idempotencyKey: "entitlement-change-idempotency-0001",
+			limits: { organizations: 2 },
+			reason: "Time-bounded controlled prototype grant",
+			source: "ManualGrant",
+			startsAt: new Date("2026-07-14T00:00:00.000Z"),
+			state: "Active",
+			tenantId: "tenant_entitlement_a",
+		});
+		const replay = await service.change({
+			actorId: "user_entitlement_admin",
+			capabilityId: "platform.entitlements",
+			correlationId: "correlation_entitlement_0001",
+			endsAt: new Date("2026-08-14T12:00:00.000Z"),
+			idempotencyKey: "entitlement-change-idempotency-0001",
+			limits: { organizations: 2 },
+			reason: "Time-bounded controlled prototype grant",
+			source: "ManualGrant",
+			startsAt: new Date("2026-07-14T00:00:00.000Z"),
+			state: "Active",
+			tenantId: "tenant_entitlement_a",
+		});
+		expect(replay).toEqual(created);
+
+		const evaluator = createEntitlementEvaluator({
+			clock: () => new Date("2026-07-14T12:00:00.000Z"),
+			state: {
+				load: (input) =>
+					createEntitlementRepository(testPool).listCurrent(input),
+			},
+		});
+		expect(
+			await evaluator.decide({
+				access: "Write",
+				capabilityId: "platform.entitlements",
+				projectedUsage: { organizations: 2 },
+				tenantId: "tenant_entitlement_a",
+			})
+		).toMatchObject({ outcome: "allow" });
+		expect(
+			await evaluator.decide({
+				access: "Read",
+				capabilityId: "platform.entitlements",
+				tenantId: "tenant_entitlement_b",
+			})
+		).toEqual({
+			capabilityId: "platform.entitlements",
+			outcome: "deny",
+			reason: "not_entitled",
+		});
+		expect(
+			await evaluator.decide({
+				access: "Write",
+				capabilityId: "platform.entitlements",
+				projectedUsage: { organizations: 3 },
+				tenantId: "tenant_entitlement_a",
+			})
+		).toMatchObject({ outcome: "deny", reason: "limit_reached" });
+
+		const rollbackUnitOfWork = createPostgresUnitOfWork(testPool, (client) => ({
+			events: {
+				append() {
+					return Promise.reject(new Error("entitlement outbox rollback proof"));
+				},
+			},
+			repository: createEntitlementRepository(client),
+		}));
+		const rollbackService = createEntitlementService({
+			clock: () => new Date("2026-07-14T12:00:00.000Z"),
+			ids,
+			unitOfWork: rollbackUnitOfWork,
+		});
+		await expect(
+			rollbackService.change({
+				actorId: "user_entitlement_admin",
+				capabilityId: "platform.authorization",
+				correlationId: "correlation_entitlement_rollback",
+				idempotencyKey: "entitlement-change-rollback-0001",
+				reason: "Rollback test",
+				source: "Migration",
+				startsAt: new Date("2026-07-14T00:00:00.000Z"),
+				state: "Active",
+				tenantId: "tenant_entitlement_a",
+			})
+		).rejects.toThrow("entitlement outbox rollback proof");
+		expect(
+			await createEntitlementRepository(testPool).getByScope({
+				capabilityId: "platform.authorization",
+				tenantId: "tenant_entitlement_a",
+			})
+		).toBeNull();
+		const rollbackArtifacts = await testPool.query<{
+			changes: number;
+			outbox: number;
+			receipts: number;
+		}>(
+			"SELECT (SELECT count(*)::int FROM platform_entitlement_change WHERE tenant_id = 'tenant_entitlement_a' AND entitlement_id LIKE 'entitlement_integration_%' AND snapshot->>'capabilityId' = 'platform.authorization') AS changes, (SELECT count(*)::int FROM platform_event_outbox WHERE idempotency_key = 'entitlement-change-rollback-0001') AS outbox, (SELECT count(*)::int FROM platform_entitlement_command_receipt WHERE tenant_id = 'tenant_entitlement_a' AND idempotency_key = 'entitlement-change-rollback-0001') AS receipts"
+		);
+		expect(rollbackArtifacts.rows[0]).toEqual({
+			changes: 0,
+			outbox: 0,
+			receipts: 0,
+		});
 	});
 
 	test("commits and rolls back owner state with its outbox record", async () => {

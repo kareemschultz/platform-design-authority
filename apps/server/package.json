@@ -15,13 +15,16 @@
     "db:test:node": "node node_modules/tsx/dist/cli.mjs composition/persistence.node-check.ts"
   },
   "dependencies": {
+    "@meridian/contracts-capabilities": "workspace:*",
     "@hono/node-server": "2.0.8",
     "@meridian/contracts-permissions": "workspace:*",
     "@meridian/contracts-platform-api": "workspace:*",
     "@meridian/domain-party": "workspace:*",
     "@meridian/platform-authorization": "workspace:*",
+    "@meridian/platform-entitlements": "workspace:*",
     "@meridian/platform-identity": "workspace:*",
     "@meridian/persistence-platform-events-postgres": "workspace:*",
+    "@meridian/persistence-platform-entitlements-postgres": "workspace:*",
     "@meridian/persistence-platform-identity-postgres": "workspace:*",
     "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
     "@meridian/persistence-party-postgres": "workspace:*",

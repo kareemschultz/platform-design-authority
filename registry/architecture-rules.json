@@ -290,6 +290,19 @@
       "migration_directory": "packages/persistence/platform-tenancy-postgres/src/migrations"
     },
     {
+      "id": "platform-entitlements-postgres",
+      "package": "packages/persistence/platform-entitlements-postgres",
+      "package_name": "@meridian/persistence-platform-entitlements-postgres",
+      "owner": "platform.entitlements",
+      "owner_package": "@meridian/platform-entitlements",
+      "tables": [
+        "platform_entitlement",
+        "platform_entitlement_change",
+        "platform_entitlement_command_receipt"
+      ],
+      "migration_directory": "packages/persistence/platform-entitlements-postgres/src/migrations"
+    },
+    {
       "id": "platform-events-postgres",
       "package": "packages/persistence/platform-events-postgres",
       "package_name": "@meridian/persistence-platform-events-postgres",

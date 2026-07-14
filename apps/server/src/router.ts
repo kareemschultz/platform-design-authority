@@ -8,6 +8,7 @@ import {
 	getCurrentIdentityContract,
 	getOrganizationContract,
 	getPartyContract,
+	listEntitlementsContract,
 	listLocationsContract,
 	listOrganizationsContract,
 	listPartiesContract,
@@ -29,6 +30,7 @@ type ProblemCode =
 	| "authorization"
 	| "conflict"
 	| "dependency_unavailable"
+	| "entitlement"
 	| "internal_failure"
 	| "state_transition"
 	| "validation";
@@ -195,6 +197,15 @@ function mapApplicationError(context: Context, error: unknown): never {
 				code: "authorization",
 				status: 403,
 				title: "Tenant context denied",
+			}),
+		});
+	}
+	if (code === "entitlement_denied") {
+		throw new ORPCError("FORBIDDEN", {
+			data: problem(context, {
+				code: "entitlement",
+				status: 403,
+				title: "Capability entitlement denied",
 			}),
 		});
 	}
@@ -632,7 +643,27 @@ const createPartyIdentityLink = implement(createPartyIdentityLinkContract)
 		}
 	});
 
+const listEntitlements = implement(listEntitlementsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listEntitlements({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 export const appRouter = {
+	entitlements: { list: listEntitlements },
 	healthCheck: publicProcedure.handler(() => "OK"),
 	identity: {
 		getCurrent: currentIdentity,

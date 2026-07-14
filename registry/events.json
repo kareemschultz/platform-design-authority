@@ -1741,7 +1741,7 @@
       "source_heading": "Events",
       "source_line": 83,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.entitlement.activated.v1.schema.json"
     },
     {
       "name": "platform.entitlement.changed.v1",
@@ -1754,7 +1754,7 @@
       "source_heading": "Events",
       "source_line": 84,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.entitlement.changed.v1.schema.json"
     },
     {
       "name": "platform.entitlement.expired.v1",
@@ -1767,7 +1767,7 @@
       "source_heading": "Events",
       "source_line": 85,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.entitlement.expired.v1.schema.json"
     },
     {
       "name": "platform.file.deleted.v1",

@@ -1,0 +1,3 @@
+ALTER TABLE "platform_entitlement" ADD CONSTRAINT "platform_entitlement_scope_key_check" CHECK ("platform_entitlement"."scope_key" = coalesce("platform_entitlement"."organization_id", '__tenant__'));--> statement-breakpoint
+ALTER TABLE "platform_entitlement" ADD CONSTRAINT "platform_entitlement_dates_check" CHECK ("platform_entitlement"."ends_at" is null or "platform_entitlement"."ends_at" > "platform_entitlement"."starts_at");--> statement-breakpoint
+ALTER TABLE "platform_entitlement" ADD CONSTRAINT "platform_entitlement_version_check" CHECK ("platform_entitlement"."version" > 0);

@@ -1530,16 +1530,19 @@ components:
             version: {type: integer, minimum: 1}
     Entitlement:
       type: object
-      required: [id, tenantId, capabilityId, state, source, startsAt, version]
+      required: [id, tenantId, capabilityId, state, source, startsAt, dependencies, exclusions, limits, version]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         tenantId: {$ref: '#/components/schemas/Identifier'}
         capabilityId: {type: string, pattern: '^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$'}
-        state: {type: string, enum: [Active, Grace, Suspended, Expired]}
-        source: {type: string, enum: [PlatformSubscription, ManualGrant, Trial, Migration]}
+        organizationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        state: {type: string, enum: [Pending, Trial, Active, Grace, Suspended, Expired, Revoked, Archived]}
+        source: {type: string, enum: [PlatformSubscription, ManualGrant, Trial, Migration, AddOn, Contract, PartnerPolicy]}
         startsAt: {type: string, format: date-time}
         endsAt: {type: [string, 'null'], format: date-time}
-        limits: {type: object, additionalProperties: true}
+        dependencies: {type: array, items: {type: string, pattern: '^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$'}}
+        exclusions: {type: array, items: {type: string, pattern: '^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$'}}
+        limits: {type: object, additionalProperties: {type: integer, minimum: 0}}
         version: {type: integer, minimum: 1}
     PagedEntitlements:
       type: object

@@ -1,0 +1,24 @@
+{
+  "name": "@meridian/platform-entitlements",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "bun test src/*.test.ts"
+  },
+  "dependencies": {
+    "@meridian/contracts-capabilities": "workspace:*",
+    "@meridian/contracts-events": "workspace:*",
+    "@meridian/contracts-permissions": "workspace:*",
+    "@meridian/contracts-platform-api": "workspace:*"
+  },
+  "devDependencies": {
+    "@meridian/tooling-config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "^6"
+  }
+}

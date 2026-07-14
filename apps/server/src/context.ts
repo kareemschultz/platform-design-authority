@@ -9,6 +9,7 @@ import type {
 	CreateRoleAssignmentRequest,
 	CreateUserInvitationRequest,
 	CurrentIdentity,
+	Entitlement,
 	Location,
 	Organization,
 	Party,
@@ -187,8 +188,18 @@ export interface PartyApplication {
 	}) => Promise<Party>;
 }
 
+export interface EntitlementsApplication {
+	listEntitlements: (input: {
+		authUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number };
+		sessionId: string;
+	}) => Promise<Page<Entitlement>>;
+}
+
 export interface ServerApplication
-	extends PartyApplication,
+	extends EntitlementsApplication,
+		PartyApplication,
 		TenancyApplication {}
 
 export interface PermissionAuthorizer {

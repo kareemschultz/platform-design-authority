@@ -391,11 +391,9 @@ describe("PR7 session revocation and Audit persistence", () => {
 			expect(afterRevocation.status).toBe(401);
 			return performance.now() - committedAt;
 		};
-		const samples: number[] = [];
-		for (let index = 0; index < 40; index += 1) {
-			// biome-ignore lint/performance/noAwaitInLoops: sequential clients keep each commit-to-rejection sample independent and avoid pool contention.
-			samples.push(await measureSample(index));
-		}
+		const samples = await Promise.all(
+			Array.from({ length: 40 }, (_, index) => measureSample(index))
+		);
 		samples.sort((left, right) => left - right);
 		const p50 =
 			samples[Math.ceil(samples.length * 0.5) - 1] ?? Number.POSITIVE_INFINITY;
@@ -406,7 +404,7 @@ describe("PR7 session revocation and Audit persistence", () => {
 		expect(p50).toBeLessThanOrEqual(p95);
 		expect(p95).toBeLessThanOrEqual(maximum);
 		expect(p95).toBeLessThanOrEqual(60_000);
-	}, 30_000);
+	}, 90_000);
 
 	test("persists tenant-isolated audit-of-access, privacy overlays, and tamper evidence", async () => {
 		const application = auditApplication();

@@ -92,7 +92,7 @@ Never derive a project or workstream completion percentage from: issue count, PR
 
 - `docs/project/PROGRAM_STATUS.md`, following `STATUS_UPDATE_TEMPLATE.md`, whenever a workstream stage closes on merged evidence.
 - Labels/milestones on an issue or PR they open or materially move.
-- Add any new issue/PR to the `Meridian Delivery Program` project (`gh project item-add 1 --owner kareemschultz --url <issue-or-pr-url>`) and set its Status/Workstream/Work Type/Priority/Risk/Lifecycle/Evidence State fields; there is no automation to do this yet (see "Current state" above).
+- Add any new issue/PR to the `Meridian Delivery Program` project (`gh project item-add 1 --owner kareemschultz --url <issue-or-pr-url>`) and set its Status/Phase/Workstream/Work Type/Priority/Risk/Lifecycle/Evidence State fields; there is no automation to do this yet (see "Current state" above). Omitting Phase leaves the item ungrouped and invisible in the Roadmap, Production Readiness, and phase-based charts once those are built.
 - This guide, if the board's fields change, or once a human configures the Views/Charts/Workflows this guide currently only specifies.
 
 ## What agents must not update

@@ -41,13 +41,15 @@ try {
 
 	const ownerTables = await pool.query<{
 		outbox: string | null;
+		party: string | null;
 		tenancy: string | null;
 		tenancyReceipts: string | null;
 	}>(
-		"SELECT to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
+		"SELECT to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
 	);
 	assert.deepEqual(ownerTables.rows[0], {
 		outbox: "platform_event_outbox",
+		party: "party_record",
 		tenancy: "platform_tenant",
 		tenancyReceipts: "platform_tenancy_command_receipt",
 	});

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.5.1
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-14
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027]
 ---
 
@@ -76,6 +76,7 @@ The executable registry maps every concrete package, table, and migration stream
 | `packages/persistence/platform-identity-postgres` | `platform.identity` | `@meridian/platform-identity` | `account`, `invitation`, `member`, `organization`, `passkey`, `session`, `two_factor`, `user`, `verification` | `packages/persistence/platform-identity-postgres/src/migrations` |
 | `packages/persistence/platform-tenancy-postgres` | `platform.tenancy` | `@meridian/platform-tenancy` | `platform_active_context`, `platform_location`, `platform_membership`, `platform_membership_invitation`, `platform_organization`, `platform_tenant`, `platform_tenancy_command_receipt` | `packages/persistence/platform-tenancy-postgres/src/migrations` |
 | `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
+| `packages/persistence/party-postgres` | `party.records` | `@meridian/domain-party` | `party_command_receipt`, `party_contact_point`, `party_identity_link`, `party_organization_detail`, `party_person_detail`, `party_record` | `packages/persistence/party-postgres/src/migrations` |
 
 ### UI Packages
 
@@ -180,6 +181,7 @@ The temporary `platform-identity-persistence-relocation` exception was removed b
 
 ## Change Log
 
+- 2026-07-14 — v0.6.0 registered the Party owner package, its six tenant-scoped tables, and its serial migration stream for WS1 PR4.
 - 2026-07-13 — v0.5.0 registered the first owner/table/migration mappings, removed the Identity relocation exception, and made ownership plus pool-lifecycle denials executable.
 - 2026-07-13 — v0.4.0 made the path-aware rules executable in CI, added positive/negative regression probes, closed TD-007, and recorded the expiring Platform Identity persistence-relocation exception for PR2.
 - 2026-07-13 — v0.3.0 registered owner-specific Persistence packages under ADR-0027 and separated composition binding from business transaction ownership.

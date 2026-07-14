@@ -1,12 +1,18 @@
 import type {
 	ActiveContext,
 	ActiveContextRequest,
+	CreateOrganizationParty,
+	CreatePartyIdentityLinkRequest,
+	CreatePersonParty,
 	CreateUserInvitationRequest,
 	CurrentIdentity,
 	Location,
 	Organization,
+	Party,
+	PlatformIdentityLink,
 	SuspendTenantMembershipRequest,
 	UpdateOrganizationRequest,
+	UpdatePartyRequest,
 	UserInvitation,
 	UserSummary,
 } from "@meridian/contracts-platform-api";
@@ -39,7 +45,7 @@ export interface IdentitySession {
 }
 
 export interface CreateContextOptions {
-	application: TenancyApplication;
+	application: ServerApplication;
 	authorizer: PermissionAuthorizer;
 	context: HonoContext;
 	identity: IdentitySessionService;
@@ -110,6 +116,57 @@ export interface TenancyApplication {
 		sessionId: string;
 	}) => Promise<Organization>;
 }
+
+export interface PartyApplication {
+	createIdentityLink: (input: {
+		actorUserId: string;
+		body: CreatePartyIdentityLinkRequest;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<PlatformIdentityLink>;
+	createOrganizationParty: (input: {
+		actorUserId: string;
+		body: CreateOrganizationParty;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<Party>;
+	createPersonParty: (input: {
+		actorUserId: string;
+		body: CreatePersonParty;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<Party>;
+	getParty: (input: {
+		authUserId: string;
+		contextId: string;
+		partyId: string;
+		sessionId: string;
+	}) => Promise<Party>;
+	listParties: (input: {
+		authUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number; query?: string };
+		sessionId: string;
+	}) => Promise<Page<Party>>;
+	updateParty: (input: {
+		actorUserId: string;
+		body: UpdatePartyRequest;
+		contextId: string;
+		idempotencyKey: string;
+		partyId: string;
+		sessionId: string;
+	}) => Promise<Party>;
+}
+
+export interface ServerApplication
+	extends PartyApplication,
+		TenancyApplication {}
 
 export interface PermissionAuthorizer {
 	can: (input: {

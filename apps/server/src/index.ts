@@ -12,12 +12,14 @@ import {
 	identityHttpHandler,
 	identitySessionService,
 } from "../composition/identity";
+import { partyTransportApplication } from "../composition/party";
 import { closeDatabaseComposition } from "../composition/postgres";
 import { tenancyApplication } from "../composition/tenancy";
 import { createContext } from "./context";
 import { appRouter } from "./router";
 
 const app = new Hono();
+const application = { ...tenancyApplication, ...partyTransportApplication };
 
 app.use(
 	"/*",
@@ -68,7 +70,7 @@ export const rpcHandler = new RPCHandler(appRouter, {
 // for health checks or unmatched routes.
 const handleRpc: MiddlewareHandler = async (c, next) => {
 	const context = await createContext({
-		application: tenancyApplication,
+		application,
 		authorizer: permissionAuthorizer,
 		context: c,
 		identity: identitySessionService,
@@ -87,7 +89,7 @@ app.use("/rpc/*", handleRpc);
 
 const handleApiReference: MiddlewareHandler = async (c, next) => {
 	const context = await createContext({
-		application: tenancyApplication,
+		application,
 		authorizer: permissionAuthorizer,
 		context: c,
 		identity: identitySessionService,

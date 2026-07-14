@@ -2387,6 +2387,23 @@
       "review_evidence": []
     },
     {
+      "document_id": "PDA-IMPL-005",
+      "path": "docs/implementation/ECOMMERCE_DASHBOARD_AND_SHADCN_STUDIO_CANDIDATE_AUDIT.md",
+      "title": "Ecommerce Dashboard and Shadcn Studio Candidate Audit",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-14",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0021",
+        "ADR-0022",
+        "ADR-0025"
+      ],
+      "review_evidence": []
+    },
+    {
       "document_id": "PDA-IND-001",
       "path": "docs/blueprint/05-Industry-Packs/INDUSTRY_PACKS_OVERVIEW.md",
       "title": "Industry Packs Overview",

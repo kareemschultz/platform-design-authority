@@ -44,6 +44,7 @@ describe("EventEnvelope", () => {
 			retentionClass: "platform-security-evidence",
 			schemaRef: `schemas/events/${sampleName}.schema.json`,
 			schemaVersion: "1.0.0",
+			scopeType: "Tenant",
 			sourceChannel: null,
 			tenantId: "tenant_demo",
 			traceId: null,
@@ -51,5 +52,23 @@ describe("EventEnvelope", () => {
 
 		expect(sample.name).toBe(sampleName);
 		expect(sample.data.amount).toBe(100);
+	});
+
+	test("represents a registered platform-global fact without fabricated tenant scope", () => {
+		const sample: EventEnvelope<{ sessionId: string }> = {
+			classification: "Confidential",
+			data: { sessionId: "session_global_0001" },
+			id: "evt_platform_session_revoked_0001",
+			name: "platform.session.revoked.v1",
+			occurredAt: "2026-07-13T00:00:00.000Z",
+			producerNamespace: "platform",
+			publishedAt: "2026-07-13T00:00:00.100Z",
+			retentionClass: "platform-security-evidence",
+			schemaRef: "schemas/events/platform.session.revoked.v1.schema.json",
+			schemaVersion: "1.0.0",
+			scopeType: "Platform",
+		};
+
+		expect(sample.tenantId).toBeUndefined();
 	});
 });

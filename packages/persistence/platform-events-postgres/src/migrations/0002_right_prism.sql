@@ -1,0 +1,6 @@
+DROP INDEX "platform_event_outbox_logical_idempotency_uidx";--> statement-breakpoint
+ALTER TABLE "platform_event_outbox" ALTER COLUMN "tenant_id" DROP NOT NULL;--> statement-breakpoint
+ALTER TABLE "platform_event_outbox" ADD COLUMN "scope_key" text GENERATED ALWAYS AS (coalesce("tenant_id", 'platform')) STORED NOT NULL;--> statement-breakpoint
+ALTER TABLE "platform_event_outbox" ADD COLUMN "scope_type" text DEFAULT 'Tenant' NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "platform_event_outbox_logical_idempotency_uidx" ON "platform_event_outbox" USING btree ("scope_type","scope_key","name","idempotency_key") WHERE "platform_event_outbox"."idempotency_key" is not null;--> statement-breakpoint
+ALTER TABLE "platform_event_outbox" ADD CONSTRAINT "platform_event_outbox_scope_ck" CHECK (("platform_event_outbox"."scope_type" = 'Tenant' AND "platform_event_outbox"."tenant_id" IS NOT NULL AND "platform_event_outbox"."scope_key" = "platform_event_outbox"."tenant_id") OR ("platform_event_outbox"."scope_type" = 'Platform' AND "platform_event_outbox"."tenant_id" IS NULL AND "platform_event_outbox"."organization_id" IS NULL AND "platform_event_outbox"."legal_entity_id" IS NULL AND "platform_event_outbox"."location_id" IS NULL AND "platform_event_outbox"."scope_key" = 'platform'));

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { getTableName } from "drizzle-orm";
 import {
 	account,
+	identitySessionCommandReceipt,
 	invitation,
 	member,
 	organization,
@@ -13,10 +14,11 @@ import {
 } from "./schema";
 
 describe("Platform Identity PostgreSQL ownership", () => {
-	test("declares only the selected Better Auth owner tables", () => {
+	test("declares the selected Better Auth tables and Identity command receipt", () => {
 		const tableNames = [
 			account,
 			invitation,
+			identitySessionCommandReceipt,
 			member,
 			organization,
 			passkey,
@@ -34,6 +36,7 @@ describe("Platform Identity PostgreSQL ownership", () => {
 			"member",
 			"organization",
 			"passkey",
+			"platform_identity_session_command_receipt",
 			"session",
 			"two_factor",
 			"user",

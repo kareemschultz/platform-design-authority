@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+	check,
 	index,
 	integer,
 	jsonb,
@@ -50,9 +51,13 @@ export const eventOutbox = pgTable(
 		retentionClass: text("retention_class").notNull(),
 		schemaRef: text("schema_ref").notNull(),
 		schemaVersion: text("schema_version").notNull(),
+		scopeKey: text("scope_key")
+			.generatedAlwaysAs(() => sql`coalesce("tenant_id", 'platform')`)
+			.notNull(),
+		scopeType: text("scope_type").default("Tenant").notNull(),
 		sourceChannel: text("source_channel"),
 		status: text("status").default("pending").notNull(),
-		tenantId: text("tenant_id").notNull(),
+		tenantId: text("tenant_id"),
 		traceId: text("trace_id"),
 	},
 	(table) => [
@@ -64,8 +69,12 @@ export const eventOutbox = pgTable(
 			table.tenantId,
 			table.occurredAt
 		),
+		check(
+			"platform_event_outbox_scope_ck",
+			sql`(${table.scopeType} = 'Tenant' AND ${table.tenantId} IS NOT NULL AND ${table.scopeKey} = ${table.tenantId}) OR (${table.scopeType} = 'Platform' AND ${table.tenantId} IS NULL AND ${table.organizationId} IS NULL AND ${table.legalEntityId} IS NULL AND ${table.locationId} IS NULL AND ${table.scopeKey} = 'platform')`
+		),
 		uniqueIndex("platform_event_outbox_logical_idempotency_uidx")
-			.on(table.tenantId, table.name, table.idempotencyKey)
+			.on(table.scopeType, table.scopeKey, table.name, table.idempotencyKey)
 			.where(sql`${table.idempotencyKey} is not null`),
 	]
 );

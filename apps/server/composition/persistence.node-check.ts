@@ -28,6 +28,7 @@ function event(id: string): OutboxEvent<{ runtime: string }> {
 		retentionClass: "platform-security-evidence",
 		schemaRef: "schemas/events/platform.membership.activated.v1.schema.json",
 		schemaVersion: "1.0.0",
+		scopeType: "Tenant",
 		tenantId: "tenant_pr2_node",
 	};
 }
@@ -40,6 +41,7 @@ try {
 	await runMigrationStreams(pool);
 
 	const ownerTables = await pool.query<{
+		audit: string | null;
 		outbox: string | null;
 		entitlements: string | null;
 		party: string | null;
@@ -47,9 +49,10 @@ try {
 		tenancy: string | null;
 		tenancyReceipts: string | null;
 	}>(
-		"SELECT to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_entitlement')::text AS entitlements, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_role')::text AS role, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
+		"SELECT to_regclass('public.platform_audit_record')::text AS audit, to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_entitlement')::text AS entitlements, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_role')::text AS role, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
 	);
 	assert.deepEqual(ownerTables.rows[0], {
+		audit: "platform_audit_record",
 		entitlements: "platform_entitlement",
 		outbox: "platform_event_outbox",
 		party: "party_record",

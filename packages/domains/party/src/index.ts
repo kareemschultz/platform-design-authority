@@ -308,6 +308,7 @@ function eventBase(input: {
 		retentionClass: "party-profile-event",
 		schemaRef: input.schemaRef,
 		schemaVersion: "1.0.0",
+		scopeType: "Tenant",
 		sourceChannel: "api",
 		tenantId: input.tenantId,
 	};

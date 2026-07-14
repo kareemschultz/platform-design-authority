@@ -4,13 +4,14 @@
   "title": "Canonical Event Envelope V1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "name", "occurredAt", "publishedAt", "tenantId", "producerNamespace", "schemaVersion", "schemaRef", "classification", "retentionClass", "data"],
+  "required": ["id", "name", "occurredAt", "publishedAt", "scopeType", "producerNamespace", "schemaVersion", "schemaRef", "classification", "retentionClass", "data"],
   "properties": {
     "id": {"type": "string", "minLength": 12, "maxLength": 64},
     "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.v[1-9][0-9]*$"},
     "occurredAt": {"type": "string", "format": "date-time"},
     "publishedAt": {"type": "string", "format": "date-time"},
-    "tenantId": {"type": "string"},
+    "scopeType": {"type": "string", "enum": ["Tenant", "Platform"]},
+    "tenantId": {"type": ["string", "null"]},
     "organizationId": {"type": ["string", "null"]},
     "legalEntityId": {"type": ["string", "null"]},
     "locationId": {"type": ["string", "null"]},
@@ -29,5 +30,22 @@
     "retentionClass": {"type": "string", "minLength": 1, "maxLength": 100},
     "purpose": {"type": ["string", "null"]},
     "data": {"type": "object"}
-  }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"scopeType": {"const": "Tenant"}}, "required": ["scopeType"]},
+      "then": {"required": ["tenantId"], "properties": {"tenantId": {"type": "string", "minLength": 1}}}
+    },
+    {
+      "if": {"properties": {"scopeType": {"const": "Platform"}}, "required": ["scopeType"]},
+      "then": {
+        "properties": {
+          "tenantId": {"type": "null"},
+          "organizationId": {"type": "null"},
+          "legalEntityId": {"type": "null"},
+          "locationId": {"type": "null"}
+        }
+      }
+    }
+  ]
 }

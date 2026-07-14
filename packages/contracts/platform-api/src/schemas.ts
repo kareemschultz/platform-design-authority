@@ -263,7 +263,7 @@ export const PlatformIdentityLinkSchema = z.object({
 	version: z.number().int().min(1),
 });
 
-export const AuditRecordSchema = z.object({
+const AuditRecordCommonSchema = z.object({
 	action: z.string().max(200),
 	actorPartyId: NullableIdentifierSchema.optional(),
 	actorType: z.enum([
@@ -283,10 +283,8 @@ export const AuditRecordSchema = z.object({
 	correlationId: z.string().min(12).max(128),
 	delegationId: NullableIdentifierSchema.optional(),
 	id: IdentifierSchema,
-	locationId: NullableIdentifierSchema.optional(),
 	metadata: z.record(z.string(), z.unknown()),
 	occurredAt: InstantSchema,
-	organizationId: NullableIdentifierSchema.optional(),
 	originalActorId: z.string().nullable().optional(),
 	outcome: z.enum(["success", "denied", "failure"]),
 	privacyCaseId: z.string().max(128).nullable().optional(),
@@ -296,8 +294,22 @@ export const AuditRecordSchema = z.object({
 	sourceChannel: z.string().max(100),
 	targetId: z.string().max(200).nullable().optional(),
 	targetType: z.string().max(200),
-	tenantId: IdentifierSchema,
 });
+
+export const AuditRecordSchema = z.discriminatedUnion("scopeType", [
+	AuditRecordCommonSchema.extend({
+		locationId: NullableIdentifierSchema.optional(),
+		organizationId: NullableIdentifierSchema.optional(),
+		scopeType: z.literal("Tenant"),
+		tenantId: IdentifierSchema,
+	}),
+	AuditRecordCommonSchema.extend({
+		locationId: z.null().optional(),
+		organizationId: z.null().optional(),
+		scopeType: z.literal("Platform"),
+		tenantId: z.null().optional(),
+	}),
+]);
 
 export const AuthorizationDecisionSchema = z.discriminatedUnion("outcome", [
 	z.object({
@@ -422,6 +434,7 @@ export type CreatePartyIdentityLinkRequest = z.infer<
 export type PlatformIdentityLink = z.infer<typeof PlatformIdentityLinkSchema>;
 export type Role = z.infer<typeof RoleSchema>;
 export type RoleAssignment = z.infer<typeof RoleAssignmentSchema>;
+export type SessionSummary = z.infer<typeof SessionSummarySchema>;
 export type UserInvitation = z.infer<typeof UserInvitationSchema>;
 export type UserSummary = z.infer<typeof UserSummarySchema>;
 export type SuspendTenantMembershipRequest = z.infer<

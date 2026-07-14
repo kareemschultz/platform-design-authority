@@ -566,6 +566,7 @@ function eventBase(input: {
 		retentionClass: "platform-security-evidence",
 		schemaRef: input.schemaRef,
 		schemaVersion: "1.0.0",
+		scopeType: "Tenant",
 		sourceChannel: "api",
 		tenantId: input.tenantId,
 	};

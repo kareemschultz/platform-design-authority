@@ -1848,10 +1848,11 @@ components:
             policyId: {type: string}
     AuditRecord:
       type: object
-      required: [id, tenantId, actorType, action, targetType, sourceChannel, outcome, correlationId, classification, retentionClass, occurredAt, metadata]
+      required: [id, scopeType, actorType, action, targetType, sourceChannel, outcome, correlationId, classification, retentionClass, occurredAt, metadata]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
-        tenantId: {$ref: '#/components/schemas/Identifier'}
+        scopeType: {type: string, enum: [Tenant, Platform]}
+        tenantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         organizationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         locationId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         actorType: {type: string, enum: [human, service, device, integration, automation, ai, support]}
@@ -1875,6 +1876,17 @@ components:
         privacyTransformationVersion: {type: [string, 'null'], maxLength: 50}
         occurredAt: {type: string, format: date-time}
         metadata: {type: object, additionalProperties: true}
+      oneOf:
+        - required: [scopeType, tenantId]
+          properties:
+            scopeType: {const: Tenant}
+            tenantId: {$ref: '#/components/schemas/Identifier'}
+        - required: [scopeType]
+          properties:
+            scopeType: {const: Platform}
+            tenantId: {type: 'null'}
+            organizationId: {type: 'null'}
+            locationId: {type: 'null'}
     PagedAuditRecords:
       type: object
       required: [items, nextCursor]

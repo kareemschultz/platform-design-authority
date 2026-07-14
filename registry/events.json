@@ -1401,7 +1401,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 229,
+      "source_line": 231,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -1414,7 +1414,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 230,
+      "source_line": 232,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -1440,7 +1440,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 225,
+      "source_line": 227,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -1453,7 +1453,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 226,
+      "source_line": 228,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2064,7 +2064,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 227,
+      "source_line": 229,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2220,7 +2220,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 223,
+      "source_line": 225,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2233,9 +2233,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 224,
+      "source_line": 226,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.session.revoked.v1.schema.json"
     },
     {
       "name": "platform.sso-session.created.v1",
@@ -2246,7 +2246,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 228,
+      "source_line": 230,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2337,7 +2337,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 222,
+      "source_line": 224,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2350,7 +2350,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "source_heading": "Event Integration",
-      "source_line": 231,
+      "source_line": 233,
       "document_status": "Draft",
       "schema_path": null
     },

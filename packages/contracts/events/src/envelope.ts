@@ -13,13 +13,13 @@
  * schema text that doesn't exist.
  *
  * Required schema properties (`required` array): id, name, occurredAt,
- * publishedAt, tenantId, producerNamespace, schemaVersion, schemaRef,
+ * publishedAt, scopeType, producerNamespace, schemaVersion, schemaRef,
  * classification, retentionClass, data. Every other property has type
  * `["string", "null"]` and is not
  * `required`, so it may be omitted entirely or present as `string | null`;
  * that is modeled here as an optional `string | null` field.
  */
-export interface EventEnvelope<
+interface EventEnvelopeBase<
 	TData extends Record<string, unknown> = Record<string, unknown>,
 > {
 	/** Identity of the actor (user, service account, or system) that caused the event, if attributable. */
@@ -48,12 +48,6 @@ export interface EventEnvelope<
 	/** Idempotency key of the operation that produced this event, if the operation was idempotency-guarded. */
 	idempotencyKey?: string | null;
 
-	/** Legal entity scope, when the event is scoped to one. */
-	legalEntityId?: string | null;
-
-	/** Location scope, when the event is scoped to one. */
-	locationId?: string | null;
-
 	/**
 	 * Canonical event name. Schema pattern:
 	 * `^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*$`
@@ -64,9 +58,6 @@ export interface EventEnvelope<
 
 	/** When the fact this event describes actually occurred. Schema: `format: date-time`. */
 	occurredAt: string;
-
-	/** Organization scope within the tenant, when applicable. */
-	organizationId?: string | null;
 
 	/** Namespace of the producing domain/engine/platform service. Schema pattern: `^[a-z][a-z0-9-]*$`. */
 	producerNamespace: string;
@@ -89,9 +80,28 @@ export interface EventEnvelope<
 	/** Channel the triggering request arrived through (e.g. `web`, `native`, `api`, `job`), if applicable. */
 	sourceChannel?: string | null;
 
-	/** Tenant the event belongs to. Required on every event; never `null`. */
-	tenantId: string;
-
 	/** Distributed trace id, if tracing is active for the producing request. */
 	traceId?: string | null;
 }
+
+interface TenantEventScope {
+	legalEntityId?: string | null;
+	locationId?: string | null;
+	organizationId?: string | null;
+	/** Tenant-scoped fact. A real tenant id is mandatory. */
+	scopeType: "Tenant";
+	tenantId: string;
+}
+
+interface PlatformEventScope {
+	legalEntityId?: null;
+	locationId?: null;
+	organizationId?: null;
+	/** Registered platform-global fact under ADR-0028. */
+	scopeType: "Platform";
+	tenantId?: null;
+}
+
+export type EventEnvelope<
+	TData extends Record<string, unknown> = Record<string, unknown>,
+> = EventEnvelopeBase<TData> & (TenantEventScope | PlatformEventScope);

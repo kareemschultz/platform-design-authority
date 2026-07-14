@@ -265,7 +265,8 @@
         "session",
         "two_factor",
         "user",
-        "verification"
+        "verification",
+        "platform_identity_session_command_receipt"
       ],
       "migration_directory": "packages/persistence/platform-identity-postgres/src/migrations"
     },
@@ -301,6 +302,18 @@
         "platform_entitlement_command_receipt"
       ],
       "migration_directory": "packages/persistence/platform-entitlements-postgres/src/migrations"
+    },
+    {
+      "id": "platform-audit-postgres",
+      "package": "packages/persistence/platform-audit-postgres",
+      "package_name": "@meridian/persistence-platform-audit-postgres",
+      "owner": "platform.audit",
+      "owner_package": "@meridian/platform-audit",
+      "tables": [
+        "platform_audit_record",
+        "platform_audit_privacy_overlay"
+      ],
+      "migration_directory": "packages/persistence/platform-audit-postgres/src/migrations"
     },
     {
       "id": "platform-events-postgres",

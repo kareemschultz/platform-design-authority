@@ -59,12 +59,15 @@ function context(input?: {
 			getOrganization: () => Promise.reject(new Error("not used")),
 			getParty: () => Promise.reject(new Error("not used")),
 			inviteUser: () => Promise.reject(new Error("not used")),
+			listAuditRecords: async () => ({ items: [], nextCursor: null }),
+			listCurrentUserSessions: async () => ({ items: [], nextCursor: null }),
 			listEntitlements: async () => ({ items: [], nextCursor: null }),
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
 			listParties: async () => ({ items: [], nextCursor: null }),
 			listRoles: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
+			revokeCurrentUserSession: () => Promise.resolve(),
 			setActiveContext: async ({ authUserId, body }) => ({
 				authUserId,
 				contextId: "context_unit_test_0001",
@@ -94,8 +97,9 @@ function context(input?: {
 }
 
 describe("appRouter contract surface", () => {
-	test("exposes the governed PR3 through PR6 procedure families", () => {
+	test("exposes the governed PR3 through PR7 procedure families", () => {
 		expect(Object.keys(appRouter).sort()).toEqual([
+			"audit",
 			"entitlements",
 			"healthCheck",
 			"identity",
@@ -103,9 +107,12 @@ describe("appRouter contract surface", () => {
 			"parties",
 			"privateData",
 			"roles",
+			"sessions",
 			"users",
 		]);
 		expect(Object.keys(appRouter.entitlements).sort()).toEqual(["list"]);
+		expect(Object.keys(appRouter.audit).sort()).toEqual(["list"]);
+		expect(Object.keys(appRouter.sessions).sort()).toEqual(["list", "revoke"]);
 		expect(Object.keys(appRouter.identity).sort()).toEqual([
 			"getCurrent",
 			"setActiveContext",
@@ -397,6 +404,124 @@ describe("appRouter contract surface", () => {
 					context: context({
 						application: {
 							createRoleAssignment: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		expect(dispatched).toBe(false);
+	});
+
+	test("lists only the authenticated account's safe session summaries", async () => {
+		let observedUserId = "";
+		const result = await call(
+			appRouter.sessions.list,
+			{ query: { limit: 50 } },
+			{
+				context: context({
+					application: {
+						listCurrentUserSessions: ({ authUserId }) => {
+							observedUserId = authUserId;
+							return Promise.resolve({
+								items: [
+									{
+										createdAt: "2026-07-13T12:00:00.000Z",
+										current: true,
+										deviceLabel: "Windows device",
+										expiresAt: "2026-07-13T13:00:00.000Z",
+										id: "session_unit_test_0001",
+										ipAddressMasked: "203.0.113.x",
+										updatedAt: "2026-07-13T12:00:00.000Z",
+										userAgentSummary: "Chrome on Windows device",
+									},
+								],
+								nextCursor: null,
+							});
+						},
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(observedUserId).toBe("user_unit_test_000001");
+		expect(result.items[0]?.current).toBe(true);
+	});
+
+	test("revokes an owned session through the idempotent account command", async () => {
+		let observedSessionId = "";
+		await call(
+			appRouter.sessions.revoke,
+			{
+				headers: { "idempotency-key": "idempotency-session-unit-0001" },
+				params: { sessionId: "session_unit_test_0001" },
+			},
+			{
+				context: context({
+					application: {
+						revokeCurrentUserSession: ({ sessionId }) => {
+							observedSessionId = sessionId;
+							return Promise.resolve();
+						},
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(observedSessionId).toBe("session_unit_test_0001");
+	});
+
+	test("denies unauthenticated session enumeration", async () => {
+		await expect(
+			call(
+				appRouter.sessions.list,
+				{ query: { limit: 50 } },
+				{ context: context() }
+			)
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+	});
+
+	test("derives Audit query tenant from revalidated active context", async () => {
+		let observedTenantId = "";
+		const result = await call(
+			appRouter.audit.list,
+			{
+				headers: { "x-active-context-id": "context_unit_test_0001" },
+				query: { limit: 50 },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						listAuditRecords: ({ page }) => {
+							observedTenantId = page.tenantId;
+							return Promise.resolve({ items: [], nextCursor: null });
+						},
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(observedTenantId).toBe("tenant_unit_test_0001");
+		expect(result).toEqual({ items: [], nextCursor: null });
+	});
+
+	test("denies Audit access before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		await expect(
+			call(
+				appRouter.audit.list,
+				{
+					headers: { "x-active-context-id": "context_unit_test_0001" },
+					query: { limit: 50 },
+				},
+				{
+					context: context({
+						application: {
+							listAuditRecords: () => {
 								dispatched = true;
 								return Promise.reject(new Error("must not dispatch"));
 							},

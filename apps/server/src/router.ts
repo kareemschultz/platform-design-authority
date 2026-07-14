@@ -8,12 +8,15 @@ import {
 	getCurrentIdentityContract,
 	getOrganizationContract,
 	getPartyContract,
+	listAuditRecordsContract,
+	listCurrentUserSessionsContract,
 	listEntitlementsContract,
 	listLocationsContract,
 	listOrganizationsContract,
 	listPartiesContract,
 	listRolesContract,
 	listUsersContract,
+	revokeCurrentUserSessionContract,
 	setActiveContextContract,
 	suspendTenantMembershipContract,
 	updateOrganizationContract,
@@ -662,7 +665,71 @@ const listEntitlements = implement(listEntitlementsContract)
 		}
 	});
 
+const listCurrentUserSessions = implement(listCurrentUserSessionsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const session = requireSession(context);
+		try {
+			return await context.application.listCurrentUserSessions({
+				authUserId: session.user.id,
+				currentSessionId: session.session.id,
+				page: input.query,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const revokeCurrentUserSession = implement(revokeCurrentUserSessionContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const session = requireSession(context);
+		try {
+			await context.application.revokeCurrentUserSession({
+				authUserId: session.user.id,
+				correlationId: context.correlationId,
+				currentSessionId: session.session.id,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: input.params.sessionId,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listAuditRecords = implement(listAuditRecordsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.audit.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			const { occurredAfter, occurredBefore, ...query } = input.query;
+			return await context.application.listAuditRecords({
+				actorUserId: session.user.id,
+				correlationId: context.correlationId,
+				page: {
+					...query,
+					...(occurredAfter ? { occurredAfter: new Date(occurredAfter) } : {}),
+					...(occurredBefore
+						? { occurredBefore: new Date(occurredBefore) }
+						: {}),
+					tenantId: activeContext.tenantId,
+				},
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 export const appRouter = {
+	audit: { list: listAuditRecords },
 	entitlements: { list: listEntitlements },
 	healthCheck: publicProcedure.handler(() => "OK"),
 	identity: {
@@ -690,6 +757,10 @@ export const appRouter = {
 	roles: {
 		assign: createRoleAssignment,
 		list: listRoles,
+	},
+	sessions: {
+		list: listCurrentUserSessions,
+		revoke: revokeCurrentUserSession,
 	},
 	users: {
 		invite: inviteUser,

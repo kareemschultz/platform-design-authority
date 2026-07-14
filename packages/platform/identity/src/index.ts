@@ -22,3 +22,12 @@ export type {
 	IdentityOrganizationProjection,
 } from "./directory";
 export { isBlockedNativeAuthHttpRoute } from "./security";
+export {
+	createIdentitySessionApplication,
+	type IdentitySessionCommandReceipt,
+	IdentitySessionError,
+	type IdentitySessionRecord,
+	type IdentitySessionRepository,
+	type IdentitySessionTransactionScope,
+	type IdentitySessionUnitOfWork,
+} from "./session";

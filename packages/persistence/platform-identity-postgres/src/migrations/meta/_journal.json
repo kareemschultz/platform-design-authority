@@ -15,6 +15,13 @@
       "when": 1783986785998,
       "tag": "0001_misty_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784008386958,
+      "tag": "0002_sweet_revanche",
+      "breakpoints": true
     }
   ]
 }

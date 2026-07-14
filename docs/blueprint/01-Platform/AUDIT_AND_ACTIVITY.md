@@ -1,11 +1,11 @@
 ---
 document_id: PDA-PLT-007
 title: Audit and Activity
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
-related_adrs: [ADR-0014]
+related_adrs: [ADR-0014, ADR-0028]
 ---
 
 # Audit and Activity
@@ -24,7 +24,8 @@ These may reference one another but must not be treated as interchangeable.
 
 ## Required Audit Context
 
-- Tenant and organizational scope
+- Explicit Tenant or Platform scope; Tenant scope requires tenant context, while Platform scope is restricted to registered platform-global security facts under ADR-0028
+- Organization and location scope only within a Tenant scope
 - Actor and original actor
 - Actor type: human, service, device, integration, automation, AI, or support
 - Action and target resource
@@ -49,6 +50,8 @@ These may reference one another but must not be treated as interchangeable.
 8. ADR-0014 permits a governed privacy transformation of identity attributes contained in audit evidence when no lawful retention basis remains. The transformation preserves the event, actor type, action, target class, time, outcome, and evidentiary meaning while replacing direct identifiers with irreversible pseudonyms.
 9. A privacy transformation creates a new audit entry and never silently rewrites the historical fact.
 10. Authentication factors, raw secrets, CVV, and unnecessary prompt content are prohibited from audit storage.
+11. Tenant audit queries return only the authorized tenant's evidence. Platform-scoped security evidence is excluded and requires a separately governed platform-security query surface.
+12. A platform-global fact must never be assigned to an active, arbitrary, or synthetic tenant merely to satisfy storage shape.
 
 ## Privacy-Safe Evidence
 

@@ -36,6 +36,7 @@ function toRecord<TData extends Record<string, unknown>>(
 		retentionClass: envelope.retentionClass,
 		schemaRef: envelope.schemaRef,
 		schemaVersion: envelope.schemaVersion,
+		scopeType: envelope.scopeType,
 		sourceChannel: envelope.sourceChannel,
 		tenantId: envelope.tenantId,
 		traceId: envelope.traceId,

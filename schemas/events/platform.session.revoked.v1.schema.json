@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/platform.session.revoked.v1.schema.json",
+  "title": "platform.session.revoked.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "required": ["scopeType"],
+      "properties": {
+        "name": {"const": "platform.session.revoked.v1"},
+        "scopeType": {"const": "Platform"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sessionId", "authUserId", "current", "revokedAt", "reasonCode"],
+          "properties": {
+            "sessionId": {"type": "string", "minLength": 12, "maxLength": 128},
+            "authUserId": {"type": "string", "minLength": 12, "maxLength": 128},
+            "current": {"type": "boolean"},
+            "revokedAt": {"type": "string", "format": "date-time"},
+            "reasonCode": {"type": "string", "enum": ["user_requested", "security_action", "membership_suspended", "account_suspended"]}
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
-related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027]
+related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027, ADR-0028]
 ---
 
 # Architecture Dependency Rules
@@ -73,9 +73,10 @@ The executable registry maps every concrete package, table, and migration stream
 
 | Persistence package | Logical owner | Published owner package | Owned tables | Migration directory |
 |---|---|---|---|---|
-| `packages/persistence/platform-identity-postgres` | `platform.identity` | `@meridian/platform-identity` | `account`, `invitation`, `member`, `organization`, `passkey`, `session`, `two_factor`, `user`, `verification` | `packages/persistence/platform-identity-postgres/src/migrations` |
+| `packages/persistence/platform-identity-postgres` | `platform.identity` | `@meridian/platform-identity` | `account`, `invitation`, `member`, `organization`, `passkey`, `session`, `two_factor`, `user`, `verification`, `platform_identity_session_command_receipt` | `packages/persistence/platform-identity-postgres/src/migrations` |
 | `packages/persistence/platform-tenancy-postgres` | `platform.tenancy` | `@meridian/platform-tenancy` | `platform_active_context`, `platform_delegation`, `platform_location`, `platform_membership`, `platform_membership_invitation`, `platform_organization`, `platform_role`, `platform_role_assignment`, `platform_tenant`, `platform_tenancy_command_receipt` | `packages/persistence/platform-tenancy-postgres/src/migrations` |
 | `packages/persistence/platform-entitlements-postgres` | `platform.entitlements` | `@meridian/platform-entitlements` | `platform_entitlement`, `platform_entitlement_change`, `platform_entitlement_command_receipt` | `packages/persistence/platform-entitlements-postgres/src/migrations` |
+| `packages/persistence/platform-audit-postgres` | `platform.audit` | `@meridian/platform-audit` | `platform_audit_record`, `platform_audit_privacy_overlay` | `packages/persistence/platform-audit-postgres/src/migrations` |
 | `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
 | `packages/persistence/party-postgres` | `party.records` | `@meridian/domain-party` | `party_command_receipt`, `party_contact_point`, `party_identity_link`, `party_organization_detail`, `party_person_detail`, `party_record` | `packages/persistence/party-postgres/src/migrations` |
 

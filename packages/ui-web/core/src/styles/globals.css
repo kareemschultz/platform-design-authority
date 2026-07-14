@@ -184,3 +184,10 @@
 		@apply font-sans;
 	}
 }
+
+@layer components {
+	[data-sonner-toast] [data-button] {
+		min-height: 2.5rem;
+		padding-inline: 0.75rem;
+	}
+}

@@ -1,15 +1,39 @@
 ---
 title: Prototype Administration
-description: Operate the local platform scaffold without implying production readiness
+description: Use the controlled WS1 administration shell without implying production readiness
 ---
 
 # Administer the local prototype
 
-This guide is for developers or reviewers responsible for a disposable local prototype environment. The scaffold does not implement a Platform Owner, tenant administrator, support operator, or delegated business-administration role.
+This guide is for developers or reviewers using a disposable local WS1 prototype. The application now provides a thin Administration shell for current identity, context, users, roles, entitlements, sessions, and audit evidence. It is not a production administration console.
 
 ## Authority boundary
 
-Access to Docker or the local machine is infrastructure access, not an application permission. Better Auth owns prototype users and sessions only. Do not use database access to create Party records, business roles, permissions, entitlements, tenant relationships, or authoritative domain facts.
+Access to Docker or the local machine is infrastructure access, not an application permission. Better Auth owns authentication and sessions, not Party identity, business roles, permissions, entitlements, or tenant hierarchy. Every protected operation is checked by the server even when its link is visible.
+
+## Use the Administration shell
+
+1. Open the web application and choose **Sign in**.
+2. After authentication, open **Administration**.
+3. The application establishes a server-validated active organization context for an active membership. The context is scoped to the browser tab.
+4. Use the visible organization and location selectors to change scope. A context change does not grant new authority.
+5. Use **Users**, **Roles**, **Entitlements**, **Sessions**, and **Audit** from the second-level navigation.
+
+Users and memberships, roles and permissions, and entitlements are separate concepts. A provisioned entitlement does not grant a person permission, and a permitted person cannot use an unprovisioned capability.
+
+The shell distinguishes **Permission denied**, **Capability unavailable**, **Additional verification required**, **Approval required**, **Sign in again**, and **Offline**. Do not treat those states as interchangeable.
+
+## Session safety
+
+The Sessions page lists the current user's active sessions. Revoking another session causes that device to fail its next protected request. Revoking the current session signs this browser out. Device labels and masked network evidence are informational and must not be used as authentication factors.
+
+## Current limitations
+
+- Factor enrollment, recovery, and production OTP delivery are not available in this shell.
+- Invitations, membership suspension, and role assignment are implemented as governed API capabilities but do not yet have shell forms.
+- Audit metadata is not expanded in the shell because it may contain classified evidence.
+- Offline mode does not authorize changes and does not replace current server authority.
+- Production support access, impersonation, secret operations, backup, failover, and incident controls remain blocked.
 
 ## Required configuration
 
@@ -24,6 +48,7 @@ The server validates these variables at startup:
 | `DATABASE_URL` | PostgreSQL connection string |
 | `NODE_ENV` | `development`, `production`, or `test` |
 | `NEXT_PUBLIC_SERVER_URL` | Browser-visible server URL |
+| `PLATFORM_API_INTERNAL_URL` | Optional server-only API origin for container or private-network rendering; Compose uses `http://server:3000` |
 
 Do not add paths, queries, fragments, or trailing slashes to trusted origins.
 
@@ -83,13 +108,4 @@ bun run docker:down
 
 Use `docker compose down -v --remove-orphans` only when a complete disposable reset is intended.
 
-## Not yet implemented
-
-- tenant and organization administration;
-- business roles, permissions, entitlements, and feature policy;
-- support access or impersonation;
-- user suspension, recovery, verification, MFA, and risk controls;
-- audit review and privacy-request administration;
-- production secrets, backups, failover, observability, and incident procedures.
-
-Those controls remain required by the Platform Constitution and first-slice specifications.
+These limits remain governed by the Platform Constitution, PDA-RDM-008, ADR-0005, ADR-0020, and the first-slice specifications. Implementation evidence is recorded in PDA-UX-038.

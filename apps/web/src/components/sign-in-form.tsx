@@ -9,13 +9,16 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
+import { safeReturnPath } from "@/lib/shell";
 
 import Loader from "./loader";
 
 export default function SignInForm({
 	onSwitchToSignUp,
+	returnTo,
 }: {
 	onSwitchToSignUp: () => void;
+	returnTo?: string | null;
 }) {
 	const router = useRouter();
 	const { isPending } = authClient.useSession();
@@ -36,7 +39,7 @@ export default function SignInForm({
 						toast.error(error.error.message || error.error.statusText);
 					},
 					onSuccess: () => {
-						router.push("/dashboard");
+						router.push(safeReturnPath(returnTo));
 						toast.success("Sign in successful");
 					},
 				}
@@ -144,7 +147,7 @@ export default function SignInForm({
 				>
 					{({ canSubmit, isSubmitting }) => (
 						<Button
-							className="w-full"
+							className="min-h-10 w-full"
 							disabled={!canSubmit || isSubmitting}
 							type="submit"
 						>
@@ -155,7 +158,7 @@ export default function SignInForm({
 			</form>
 
 			<div className="mt-4 text-center">
-				<Button onClick={onSwitchToSignUp} variant="link">
+				<Button className="min-h-10" onClick={onSwitchToSignUp} variant="link">
 					Need an account? Sign Up
 				</Button>
 			</div>

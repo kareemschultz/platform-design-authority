@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "../index.css";
 import Header from "@/components/header";
 import Providers from "@/components/providers";
+import { SkipLink } from "@/components/skip-link";
 
 const geistSans = Geist({
 	subsets: ["latin"],
@@ -39,15 +40,12 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
 			>
 				<Providers>
-					<a
-						className="sr-only z-50 rounded-md bg-background px-3 py-2 text-foreground ring-1 ring-ring focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
-						href="#main-content"
-					>
-						Skip to main content
-					</a>
+					<SkipLink />
 					<div className="grid h-svh grid-rows-[auto_1fr]">
 						<Header />
-						<main id="main-content">{children}</main>
+						<main id="main-content" tabIndex={-1}>
+							{children}
+						</main>
 					</div>
 				</Providers>
 			</body>

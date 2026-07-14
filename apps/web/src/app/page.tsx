@@ -1,5 +1,7 @@
 "use client";
+import { Button } from "@meridian/ui-web/components/button";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 import { orpc } from "@/utils/orpc";
 
@@ -21,8 +23,8 @@ export default function Home() {
 				Controlled Prototype
 			</h1>
 			<p className="mt-1 text-muted-foreground text-sm">
-				Internal scaffold surface. No tenant, business-role, or domain-workflow
-				behavior is implemented here.
+				Internal controlled prototype for the first identity, tenancy, Party,
+				authorization, entitlement, session, and audit slice.
 			</p>
 			<div className="mt-6 grid gap-6">
 				<section
@@ -42,6 +44,18 @@ export default function Home() {
 						</span>
 					</div>
 				</section>
+			</div>
+			<div className="mt-6 flex flex-wrap gap-3">
+				<Button className="min-h-10" render={<Link href="/administration" />}>
+					Open administration
+				</Button>
+				<Button
+					className="min-h-10"
+					render={<Link href="/login" />}
+					variant="outline"
+				>
+					Sign in
+				</Button>
 			</div>
 		</div>
 	);

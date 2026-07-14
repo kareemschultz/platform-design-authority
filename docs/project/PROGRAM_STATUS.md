@@ -4,7 +4,7 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at `1bda97d42293c1008412bc5cc346d781a2ab4e22` plus WS1 PR9 evidence commit `d26db34a9bbdce41bcc3d278fb8df20816e10905`; exact-head CI remains the merge gate
+**Evidence cutoff:** `main` at `1bda97d42293c1008412bc5cc346d781a2ab4e22` plus the complete WS1 PR9 change set in PR #54; GitHub's exact reviewed head, green checks, and resulting merge commit are the authoritative cutoff
 
 **Last updated:** 2026-07-14
 

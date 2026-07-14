@@ -64,11 +64,22 @@ def run_git(*args: str) -> subprocess.CompletedProcess:
 
 
 def check_evidence_cutoff(text: str) -> None:
-    match = re.search(r"\*\*Evidence cutoff:\*\*\s*`main` at `([0-9a-f]{7,40})`", text)
-    if not match:
-        fail("Could not find a parseable '**Evidence cutoff:** `main` at `<sha>`' line.")
+    line_match = re.search(r"\*\*Evidence cutoff:\*\*.*", text)
+    if not line_match:
+        fail("Could not find an 'Evidence cutoff' line.")
         return
-    sha = match.group(1)
+    line = line_match.group(0)
+    if "main" not in line:
+        fail("Evidence-cutoff line does not reference `main`.")
+        return
+    sha_match = re.search(r"`([0-9a-f]{7,40})`", line)
+    if not sha_match:
+        fail(
+            "Evidence-cutoff line does not contain a backtick-quoted commit SHA "
+            "(e.g. `main` at ... `<sha>` ...)."
+        )
+        return
+    sha = sha_match.group(1)
     result = run_git("cat-file", "-e", f"{sha}^{{commit}}")
     if result.returncode != 0:
         fail(f"Evidence-cutoff commit {sha} is not present in this checkout's history.")

@@ -40,6 +40,10 @@ TEST_DIMENSIONS = [
     "recovery_replay_and_reconciliation",
 ]
 
+FIRST_SLICE_EVIDENCE_SOURCES = sorted(
+    (ROOT / "evidence" / "first-slice").glob("*-capability-evidence.json")
+)
+
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -341,7 +345,79 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
     metadata = load_json(ROOT / "registry" / "capability-metadata.json")
     depth_defaults = metadata.get("test_dimension_defaults", {})
     allowed_statuses = {"required", "not-applicable", "deferred-by-depth"}
+    first_slice_ids = {str(item["id"]) for item in first_slice}
+    evidence_catalog: dict[str, dict[str, Any]] = {}
+    evidence_coverage: dict[tuple[str, str], list[str]] = {}
+    evidenced_capabilities: set[str] = set()
+    evidence_workstreams: set[str] = set()
+
+    for source_path in FIRST_SLICE_EVIDENCE_SOURCES:
+        source = load_json(source_path)
+        if source.get("schema_version") != "1.0.0":
+            raise ValueError(f"unsupported evidence schema version: {source_path}")
+        workstream_id = str(source.get("workstream_id", "")).strip()
+        if not workstream_id or workstream_id in evidence_workstreams:
+            raise ValueError(f"duplicate or empty evidence workstream: {workstream_id!r}")
+        evidence_workstreams.add(workstream_id)
+        declared_capabilities = source.get("capabilities", [])
+        if not isinstance(declared_capabilities, list):
+            raise ValueError(f"evidence capabilities must be an array: {source_path}")
+        for capability_id in declared_capabilities:
+            if capability_id not in first_slice_ids:
+                raise ValueError(
+                    f"evidence source references a non-first-slice capability: {capability_id}"
+                )
+            evidenced_capabilities.add(str(capability_id))
+
+        for evidence in source.get("evidence", []):
+            evidence_id = str(evidence.get("id", "")).strip()
+            if not evidence_id or evidence_id in evidence_catalog:
+                raise ValueError(f"duplicate or empty evidence id: {evidence_id!r}")
+            path_value = str(evidence.get("path", "")).strip()
+            evidence_path = ROOT / path_value
+            if not path_value or not evidence_path.is_file():
+                raise ValueError(f"evidence path does not exist: {path_value!r}")
+            content = evidence_path.read_text(encoding="utf-8")
+            markers = evidence.get("contains", [])
+            if not isinstance(markers, list) or not markers:
+                raise ValueError(f"evidence {evidence_id} requires contains markers")
+            for marker in markers:
+                if str(marker) not in content:
+                    raise ValueError(
+                        f"evidence marker {marker!r} is absent from {path_value}"
+                    )
+            evidence_capabilities = [str(value) for value in evidence.get("capabilities", [])]
+            evidence_dimensions = [str(value) for value in evidence.get("dimensions", [])]
+            if not evidence_capabilities or not evidence_dimensions:
+                raise ValueError(
+                    f"evidence {evidence_id} requires capabilities and dimensions"
+                )
+            for capability_id in evidence_capabilities:
+                if capability_id not in evidenced_capabilities:
+                    raise ValueError(
+                        f"evidence {evidence_id} uses undeclared capability {capability_id}"
+                    )
+            for dimension in evidence_dimensions:
+                if dimension not in TEST_DIMENSIONS:
+                    raise ValueError(
+                        f"evidence {evidence_id} uses unknown dimension {dimension}"
+                    )
+            evidence_catalog[evidence_id] = {
+                "id": evidence_id,
+                "path": path_value,
+                "kind": str(evidence.get("kind", "automated-test")),
+                "runtimes": [str(value) for value in evidence.get("runtimes", [])],
+                "command": str(evidence.get("command", "")),
+            }
+            for capability_id in evidence_capabilities:
+                for dimension in evidence_dimensions:
+                    evidence_coverage.setdefault((capability_id, dimension), []).append(
+                        evidence_id
+                    )
+
     records: list[dict[str, Any]] = []
+    required_cell_count = 0
+    evidenced_cell_count = 0
     for item in first_slice:
         depth = item["first_slice_depth"]
         dimensions = {dimension: "required" for dimension in TEST_DIMENSIONS}
@@ -358,23 +434,66 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
             dimensions[dimension] = status
             if reason:
                 dimension_reasons[dimension] = reason
+        required_dimensions = [
+            dimension for dimension, status in dimensions.items() if status == "required"
+        ]
+        required_cell_count += len(required_dimensions)
+        capability_id = str(item["id"])
+        dimension_evidence = {
+            dimension: evidence_coverage.get((capability_id, dimension), [])
+            for dimension in TEST_DIMENSIONS
+        }
+        if capability_id in evidenced_capabilities:
+            missing = [
+                dimension
+                for dimension in required_dimensions
+                if not dimension_evidence[dimension]
+            ]
+            if missing:
+                raise ValueError(
+                    f"evidenced capability {capability_id} lacks required cells: {', '.join(missing)}"
+                )
+            evidence_status = "Evidenced"
+            evidenced_cell_count += len(required_dimensions)
+        else:
+            evidence_status = "Planned"
+        evidence_ids = sorted(
+            {
+                evidence_id
+                for dimension in dimension_evidence.values()
+                for evidence_id in dimension
+            }
+        )
         records.append({
-            "capability_id": item["id"],
+            "capability_id": capability_id,
             "owner": item["owner"],
             "depth": depth,
             "fixture": "Demerara Retail Test Group",
             "dimensions": dimensions,
             "dimension_reasons": dimension_reasons,
-            "evidence_status": "Planned",
-            "evidence_paths": [],
+            "evidence_status": evidence_status,
+            "dimension_evidence": dimension_evidence,
+            "evidence_paths": sorted(
+                {evidence_catalog[evidence_id]["path"] for evidence_id in evidence_ids}
+            ),
             "blocking_defects": [],
         })
     records.sort(key=lambda item: item["capability_id"])
     return {
-        "schema_version": "1.0.0",
+        "schema_version": "1.1.0",
         "source_document": "docs/blueprint/16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
         "source_registry": "registry/first-slice.json",
+        "evidence_sources": [
+            path.relative_to(ROOT).as_posix() for path in FIRST_SLICE_EVIDENCE_SOURCES
+        ],
         "dimensions": TEST_DIMENSIONS,
+        "evidence_catalog": [evidence_catalog[key] for key in sorted(evidence_catalog)],
+        "coverage": {
+            "capabilities_evidenced": len(evidenced_capabilities),
+            "capabilities_total": len(first_slice),
+            "required_cells_evidenced": evidenced_cell_count,
+            "required_cells_total": required_cell_count,
+        },
         "tests": records,
     }
 

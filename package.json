@@ -56,7 +56,8 @@
     "fix": "ultracite fix apps packages",
     "contracts:generate": "python scripts/generate_contracts.py",
     "contracts:check": "python scripts/generate_contracts.py --check",
-    "architecture:check": "python scripts/check_architecture.py"
+    "architecture:check": "python scripts/check_architecture.py",
+    "ws1:evidence:check": "python scripts/check_ws1_evidence.py"
   },
   "dependencies": {
     "@meridian/tooling-env": "workspace:*",

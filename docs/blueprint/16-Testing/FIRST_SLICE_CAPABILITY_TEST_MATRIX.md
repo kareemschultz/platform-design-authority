@@ -1,7 +1,7 @@
 ---
 document_id: PDA-TST-013
 title: First Slice Capability Test Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -37,6 +37,12 @@ Every first-slice capability declares all thirteen dimensions:
 
 The generated registry currently supports only `required`. For a seam, `required` means contract, failure, and integration evidence at seam depth rather than full UI or load proof. Future overrides require an approved source, reason, owner, and generator support.
 
+## Evidence Sources
+
+Workstream evidence is declared under `evidence/first-slice/` and consumed by the registry generator. A declaration names reviewed capability IDs, dimensions, evidence identifiers, repository paths, marker text, commands, and runtimes. Generation fails when a capability or dimension is unknown, a referenced file is absent, marker text is stale, or a required cell for a declared evidenced capability has no evidence.
+
+An `Evidenced` row means every required cell at that capability's registered depth has one or more linked evidence identifiers and no blocking defect in the generated row. It does not promote the capability beyond its `full`, `prototype`, or `seam` first-slice depth, and it does not imply pilot or production readiness.
+
 ## Machine-Readable Shape
 
 Each generated record includes:
@@ -47,9 +53,12 @@ Each generated record includes:
 - Thirteen test dimensions
 - Reasons for every `not-applicable` dimension and explanatory reasons for depth deferrals
 - Required golden scenarios
-- Evidence status
+- Evidence status and per-dimension evidence identifiers
+- Deduplicated evidence paths
 - Responsible owner
 - Blocking defects
+
+The registry also includes a deduplicated evidence catalog plus capability and required-cell coverage totals. These are generated reporting facts, not architectural authority.
 
 Generated defaults are a skeleton, not proof that tests exist.
 

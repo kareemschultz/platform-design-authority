@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-14
 ---
 
 # Architecture Risk Register
@@ -193,7 +193,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 
 ## Currently Open Risks
 
-Consolidated list of every register entry not fully closed (status Partially closed, External evidence, Founder decision, or Open), plus the five code-audit governance flags raised on PR #8 (RR-001 through RR-005).
+Consolidated list of every register entry not fully closed (status Partially closed, External evidence, Founder decision, or Open), plus implementation risks that remain after WS1 controlled-prototype closeout.
 
 | ID | Title | Owner class | Blocking |
 |---|---|---|---|
@@ -215,6 +215,12 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | RR-003 | apps/native Biome lint exclusion | Implementation | Uniform lint enforcement across workspaces |
 | RR-004 | Design-token-to-CSS generation pipeline | Implementation | Token registry as the single styling source in code |
 | RR-005 | packages/ui catalog completion versus PDA-UX-028 | Implementation | Component catalog conformance |
+| RR-006 | Minimum outbox has no delivery worker, retry/dead-letter policy, delivery observability, or consumer idempotency | Implementation | Event publication/projection claims; WS2 PR4 |
+| RR-007 | Production PostgreSQL RLS role topology and evidence remain deferred | Security/Data | Pilot and production tenant-isolation defense in depth |
+| RR-008 | Production OTP delivery and provider evidence remain blocked by FDR-007 | Founder/External evidence | Production factor delivery and recovery |
+| RR-009 | Independent assistive-technology conformance, penetration testing, and production-content review remain open | External evidence | Pilot and production accessibility/security claims |
+| RR-010 | Party merge, rich identifiers/relationships, duplicate resolution, and privacy-request execution remain beyond WS1 prototype depth | Platform/Party | Any claim or workflow requiring full Party depth |
+| RR-011 | Consolidated independent Claude Code audit of the exact merged WS1 PR1-PR9 state is pending | PDA review | Start of broad WS2 implementation; findings require formal disposition |
 
 ## Technical Debt Register
 

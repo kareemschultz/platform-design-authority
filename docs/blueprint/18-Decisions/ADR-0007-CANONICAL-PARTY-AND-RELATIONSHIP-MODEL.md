@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0007
 title: Adopt a Canonical Party and Relationship Model
-version: 0.1.0
+version: 0.1.1
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-14
 supersedes: null
 superseded_by: null
 ---
@@ -144,3 +144,22 @@ The model is validated when one organization can simultaneously be:
 - A partner in the Partner Platform
 
 while sharing canonical identity and contact information but retaining independent domain lifecycle, permissions, and historical transaction snapshots.
+
+## WS1 Prototype Evidence
+
+PDA-IMPL-005 records tenant-scoped Person and Organization Party creation/read/list/update, optimistic concurrency, idempotency, privacy-safe events, `PlatformIdentityLink`, and composition-owned reconciliation from membership to Party. Better Auth users, memberships, Parties, and domain roles remain separate records and lifecycles.
+
+The broader relationship, cross-domain role, merge/deduplication, rich identifier/address, global/shared identity, and privacy-request validation above remains open. The ADR remains Proposed and the implemented `party.records` depth remains `prototype`.
+
+## Review Record
+
+| Reviewer | Perspective | Decision | Date | Notes |
+|---|---|---|---|---|
+| Codex | WS1 implementation consistency | Prototype evidence recorded | 2026-07-14 | PDA-IMPL-005 proves only the registered Party prototype subset. Consolidated independent Claude Code review remains pending under RR-011. |
+
+## Change Log
+
+| Version | Date | Author | Change |
+|---|---|---|---|
+| 0.1.1 | 2026-07-14 | Platform Design Authority | Linked bounded WS1 Party evidence; lifecycle and full-model validation remain open. |
+| 0.1.0 | 2026-07-10 | Platform Design Authority | Initial proposal. |

@@ -107,7 +107,9 @@ jobs:
           exit 1
 
       - name: Generated registry freshness
-        run: python scripts/generate_registries.py --check
+        run: |
+          python scripts/generate_registries.py --check
+          bun run ws1:evidence:check
 
       - name: Generated contract freshness
         run: python scripts/generate_contracts.py --check

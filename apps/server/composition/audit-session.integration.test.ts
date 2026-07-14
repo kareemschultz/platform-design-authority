@@ -2,11 +2,28 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { createHash, randomUUID } from "node:crypto";
 import { createAuditRepository } from "@meridian/persistence-platform-audit-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
-import { createIdentitySessionRepository } from "@meridian/persistence-platform-identity-postgres";
+import {
+	createIdentityPersistence,
+	createIdentitySessionRepository,
+} from "@meridian/persistence-platform-identity-postgres";
 import { createAuditApplication } from "@meridian/platform-audit";
-import { createIdentitySessionApplication } from "@meridian/platform-identity";
+import {
+	createIdentityAuth,
+	createIdentitySessionApplication,
+} from "@meridian/platform-identity";
 import { env } from "@meridian/tooling-env/server";
+import { OpenAPIHandler } from "@orpc/openapi/fetch";
+import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
+import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
+import { Hono } from "hono";
 import { Pool } from "pg";
+import type {
+	IdentitySessionService,
+	PermissionAuthorizer,
+	ServerApplication,
+} from "../src/context";
+import { createContext } from "../src/context";
+import { appRouter } from "../src/router";
 import { runMigrationStreams } from "./migrations";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
@@ -17,7 +34,14 @@ const databaseUrl = new URL(env.DATABASE_URL);
 databaseUrl.pathname = `/${databaseName}`;
 const adminPool = new Pool({ connectionString: adminUrl.toString() });
 const ERASED_ACTOR = /^erased_/u;
+const SESSION_COOKIE_PATTERN = /better-auth\.session_token=([^;]+)/u;
 let pool: Pool;
+
+const testAuthorizer = {
+	decide: () => Promise.resolve({ outcome: "deny", reason: "no_assignment" }),
+	requirePermission: () =>
+		Promise.resolve({ outcome: "deny", reason: "no_assignment" }),
+} as PermissionAuthorizer;
 
 function quoteIdentifier(value: string): string {
 	return `"${value.replaceAll('"', '""')}"`;
@@ -255,13 +279,134 @@ describe("PR7 session revocation and Audit persistence", () => {
 			return performance.now() - started;
 		};
 		const samples = await Promise.all(
-			Array.from({ length: 20 }, (_, index) => measureSample(index))
+			Array.from({ length: 40 }, (_, index) => measureSample(index))
 		);
 		samples.sort((left, right) => left - right);
+		const p50 =
+			samples[Math.ceil(samples.length * 0.5) - 1] ?? Number.POSITIVE_INFINITY;
 		const p95 =
 			samples[Math.ceil(samples.length * 0.95) - 1] ?? Number.POSITIVE_INFINITY;
+		const maximum = samples.at(-1) ?? Number.POSITIVE_INFINITY;
+		expect(samples).toHaveLength(40);
+		expect(p50).toBeLessThanOrEqual(p95);
+		expect(p95).toBeLessThanOrEqual(maximum);
 		expect(p95).toBeLessThanOrEqual(60_000);
 	});
+
+	test("measures independent protected-HTTP rejection after Better Auth session revocation", async () => {
+		const auth = createIdentityAuth({
+			authUrl: "http://localhost:3000",
+			corsOrigin: "http://localhost:3001",
+			displayName: "WS1 verification",
+			nodeEnv: "test",
+			persistence: createIdentityPersistence(pool),
+			secret: "ws1-verification-secret-at-least-32-characters",
+			sendTwoFactorOtp: () => Promise.reject(new Error("not configured")),
+			trustedOrigins: ["http://localhost:3001"],
+		});
+		const identity: IdentitySessionService = {
+			getSession: ({ headers }) => auth.api.getSession({ headers }),
+		};
+		const application = {
+			getCurrentIdentity: ({
+				authUserId,
+				sessionId,
+			}: {
+				authUserId: string;
+				sessionId: string;
+			}) =>
+				Promise.resolve({
+					activeContext: null,
+					assuranceLevel: "aal1" as const,
+					authUserId,
+					memberships: [],
+					partyId: null,
+					sessionId,
+				}),
+		} as unknown as ServerApplication;
+		const api = new OpenAPIHandler(appRouter, {
+			plugins: [
+				new OpenAPIReferencePlugin({
+					schemaConverters: [new ZodToJsonSchemaConverter()],
+				}),
+			],
+		});
+		const httpApp = new Hono();
+		httpApp.use("/api-reference/*", async (context, next) => {
+			const requestContext = await createContext({
+				application,
+				authorizer: testAuthorizer,
+				context,
+				identity,
+			});
+			const result = await api.handle(context.req.raw, {
+				context: requestContext,
+				prefix: "/api-reference",
+			});
+			if (result.matched) {
+				return context.newResponse(result.response.body, result.response);
+			}
+			await next();
+		});
+
+		const revocationApplication = sessionApplication();
+		const measureSample = async (index: number) => {
+			const suffix = String(index).padStart(4, "0");
+			const signUpResponse = await auth.handler(
+				new Request("http://localhost:3000/api/auth/sign-up/email", {
+					body: JSON.stringify({
+						email: `independent-client.pr9.${suffix}@example.com`,
+						name: `Independent Client ${suffix}`,
+						password: "WS1-verification-password-0001",
+					}),
+					headers: { "content-type": "application/json" },
+					method: "POST",
+				})
+			);
+			expect(signUpResponse.status).toBe(200);
+			const sessionCookie = signUpResponse.headers
+				.get("set-cookie")
+				?.match(SESSION_COOKIE_PATTERN)?.[1];
+			expect(sessionCookie).toBeDefined();
+			const cookieHeader = `better-auth.session_token=${sessionCookie}`;
+			const authenticatedSession = await identity.getSession({
+				headers: new Headers({ cookie: cookieHeader }),
+			});
+			expect(authenticatedSession).not.toBeNull();
+			const beforeRevocation = await httpApp.request("/api-reference/v1/me", {
+				headers: { cookie: cookieHeader },
+			});
+			expect(beforeRevocation.status).toBe(200);
+			await revocationApplication.revoke({
+				authUserId: authenticatedSession?.user.id ?? "",
+				correlationId: `correlation_pr9_http_revocation_${suffix}`,
+				currentSessionId: authenticatedSession?.session.id ?? "",
+				idempotencyKey: `idempotency_pr9_http_revocation_${suffix}`,
+				sessionId: authenticatedSession?.session.id ?? "",
+			});
+			const committedAt = performance.now();
+			const afterRevocation = await httpApp.request("/api-reference/v1/me", {
+				headers: { cookie: cookieHeader },
+			});
+			expect(afterRevocation.status).toBe(401);
+			return performance.now() - committedAt;
+		};
+		const samples: number[] = [];
+		for (let index = 0; index < 40; index += 1) {
+			// biome-ignore lint/performance/noAwaitInLoops: sequential clients keep each commit-to-rejection sample independent and avoid pool contention.
+			samples.push(await measureSample(index));
+		}
+		samples.sort((left, right) => left - right);
+		const p50 =
+			samples[Math.ceil(samples.length * 0.5) - 1] ?? Number.POSITIVE_INFINITY;
+		const p95 =
+			samples[Math.ceil(samples.length * 0.95) - 1] ?? Number.POSITIVE_INFINITY;
+		const maximum = samples.at(-1) ?? Number.POSITIVE_INFINITY;
+		expect(samples).toHaveLength(40);
+		expect(p50).toBeLessThanOrEqual(p95);
+		expect(p95).toBeLessThanOrEqual(maximum);
+		expect(p95).toBeLessThanOrEqual(60_000);
+	}, 30_000);
 
 	test("persists tenant-isolated audit-of-access, privacy overlays, and tamper evidence", async () => {
 		const application = auditApplication();

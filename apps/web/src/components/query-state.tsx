@@ -5,7 +5,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 } from "@meridian/ui-web/components/alert";
-import { Button } from "@meridian/ui-web/components/button";
+import { Button, buttonVariants } from "@meridian/ui-web/components/button";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import {
 	CircleAlert,
@@ -80,21 +80,26 @@ export function QueryFailure({
 				<p>{copy[kind].description}</p>
 				<div className="mt-3 flex flex-wrap gap-2">
 					{kind === "reauthenticate" ? (
-						<Button render={<Link href="/login?returnTo=/administration" />}>
+						<Link
+							className={buttonVariants()}
+							href="/login?returnTo=/administration"
+						>
 							Go to sign in
-						</Button>
+						</Link>
 					) : (
 						<Button className="min-h-10" onClick={onRetry} variant="outline">
 							Try again
 						</Button>
 					)}
-					<Button
-						className="min-h-10"
-						render={<Link href="/administration" />}
-						variant="ghost"
+					<Link
+						className={buttonVariants({
+							className: "min-h-10",
+							variant: "ghost",
+						})}
+						href="/administration"
 					>
 						Return to overview
-					</Button>
+					</Link>
 				</div>
 			</AlertDescription>
 		</Alert>

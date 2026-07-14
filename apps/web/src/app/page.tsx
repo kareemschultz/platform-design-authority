@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@meridian/ui-web/components/button";
+import { buttonVariants } from "@meridian/ui-web/components/button";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
@@ -46,16 +46,21 @@ export default function Home() {
 				</section>
 			</div>
 			<div className="mt-6 flex flex-wrap gap-3">
-				<Button className="min-h-10" render={<Link href="/administration" />}>
+				<Link
+					className={buttonVariants({ className: "min-h-10" })}
+					href="/administration"
+				>
 					Open administration
-				</Button>
-				<Button
-					className="min-h-10"
-					render={<Link href="/login" />}
-					variant="outline"
+				</Link>
+				<Link
+					className={buttonVariants({
+						className: "min-h-10",
+						variant: "outline",
+					})}
+					href="/login"
 				>
 					Sign in
-				</Button>
+				</Link>
 			</div>
 		</div>
 	);

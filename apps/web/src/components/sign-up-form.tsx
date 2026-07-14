@@ -10,15 +10,12 @@ import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
 
-import Loader from "./loader";
-
 export default function SignUpForm({
 	onSwitchToSignIn,
 }: {
 	onSwitchToSignIn: () => void;
 }) {
 	const router = useRouter();
-	const { isPending } = authClient.useSession();
 
 	const form = useForm({
 		defaultValues: {
@@ -44,6 +41,9 @@ export default function SignUpForm({
 				}
 			);
 		},
+		onSubmitInvalid: () => {
+			document.getElementById("name")?.focus();
+		},
 		validators: {
 			onSubmit: z.object({
 				email: z.email("Invalid email address"),
@@ -52,10 +52,6 @@ export default function SignUpForm({
 			}),
 		},
 	});
-
-	if (isPending) {
-		return <Loader />;
-	}
 
 	return (
 		<div className="mx-auto mt-10 w-full max-w-md p-6">

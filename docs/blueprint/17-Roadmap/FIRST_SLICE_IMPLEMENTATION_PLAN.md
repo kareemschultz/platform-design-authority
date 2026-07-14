@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.8.1
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-14
 related_adrs: [ADR-0002, ADR-0003, ADR-0013, ADR-0020, ADR-0025, ADR-0027]
 ---
 
@@ -37,9 +37,9 @@ The governed sequence is:
 
 WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone; WS1's Exit criteria below fold in the specific frontend proof points that make this posture verifiable rather than aspirational.
 
-## 2. Baseline: Verified Code Reality (2026-07-13)
+## 2. Baseline: Verified Code Reality (2026-07-14)
 
-**Merged baseline through WS1 PR2:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); Better Auth email/password behind the runtime-neutral Platform Identity factory; owner-specific Identity and Event Backbone PostgreSQL adapters; four initial Identity tables plus the minimum `platform_event_outbox`; deterministic serial migration orchestration; Hono + oRPC server with health probe and one protected procedure; Next.js web app with login and a dashboard stub; Expo native health shell with authentication explicitly deferred behind RR-001; Fumadocs portal; and the canonical contract/registry artifacts. PR2's green gates and live PostgreSQL evidence merged before PR3 implementation began; later branch evidence does not retroactively broaden that baseline.
+**Verified baseline through WS1 PR9:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); contract-first Hono/oRPC/OpenAPI boundary; Better Auth behind runtime-neutral Platform Identity; owner-specific PostgreSQL adapters and deterministic migrations; minimum transactional outbox; Tenancy, Organizations, Party linkage, current Authorization, Entitlements, Audit, and session revocation; and the real Next.js Administration shell. PDA-IMPL-005 and the generated first-slice test registry record the controlled-prototype evidence. Exact-head CI is required before merge and does not broaden this baseline into pilot or production authority.
 
 **WS0 package restructuring is complete as of 2026-07-13** (verified: fresh `bun install`, `check-types` 12/12, `test` 126/126, `check`, and `build` all green across the whole workspace). The workspace now matches `registry/architecture-rules.json`'s families:
 
@@ -51,9 +51,9 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 | `@meridian/env` | `packages/tooling/env` (`@meridian/tooling-env`) | `tooling` |
 | `@meridian/config` | `packages/tooling/config` (`@meridian/tooling-config`) | `tooling` |
 
-The contract-first oRPC/client exception closed in WS1 PR1. The temporary embedded Identity persistence exception closes in PR2 through ADR-0027's owner-specific adapter and composition-owned pool. No exception may be silently recreated for later WS1 owners.
+The contract-first oRPC/client exception closed in WS1 PR1. The temporary embedded Identity persistence exception closed in PR2 through ADR-0027's owner-specific adapters and composition-owned pool. No exception may be silently recreated for later owners.
 
-**Does not yet exist:** tenancy, Party, authorization, entitlements, catalog, inventory, POS, stored value, offline sync, payments, or recovery tooling. The Event Backbone currently stops at the minimum transactional outbox; delivery workers and consumers remain later work. This section is the honesty anchor: PR2 persistence is bounded infrastructure, not completion of WS1.
+**Still does not exist at first-slice implementation depth:** Catalog, Inventory, POS, stored value, offline sync, provider integration, or recovery tooling. The Event Backbone still stops at the minimum transactional outbox; delivery workers and consumers remain later work. Production RLS, OTP/provider evidence, formal accessibility/penetration evidence, operational exercises, and external/founder gates remain open. This section is the honesty anchor: WS1 completion is a controlled-prototype workstream exit, not overall first-slice or production completion.
 
 ## 3. Package Architecture Target
 
@@ -112,13 +112,13 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Exit:** families in place or exceptions-with-expiry recorded; contracts package consumed by `apps/server`; DoD §6. **Satisfied:** all six original packages now sit in their target families or a tracked, expiring exception (see §2); fresh install/typecheck/test/lint/build all pass (126 tests, 0 failures, 12/12 packages typecheck clean). Automated architecture-rules import-graph enforcement (the "architecture tests" bullet above) does not exist yet as a CI-enforced check — it is recorded as a gap for a follow-up workstream, not silently assumed done.
 - **Gates:** none external.
 
-### WS1 — Identity, Tenancy, Party, Authorization (P1)
+### WS1 — Identity, Tenancy, Party, Authorization (P1) — **complete at controlled-prototype depth (2026-07-14)**
 
 - **Why:** Every subsequent behavior is meaningless without enforceable tenant scope and separated authentication/Party/permission/entitlement concepts — retrofitting isolation is the most expensive failure in multi-tenant systems, and the audits' hardest rules (Better Auth owns sessions only; Party owns identity; domains own roles) must be encoded before any domain exists to violate them.
 - **Detailed plan:** `WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md` (PDA-RDM-008) — governance gates, package boundaries, canonical contract surface, PR sequence (PR1–PR9), fixtures, evidence matrix, and exit gate. This entry stays the authoritative summary; PDA-RDM-008 does not override it.
-- **Entry:** WS0 done. **First PR closes TD-007** (contract-first oRPC boundary for `platform-clients/api-client`, per its recorded exception's own expiry condition) before any domain package is built against the router-coupled client shape.
+- **Entry:** WS0 done. PR1 closed TD-007 before any domain package was built against the former router-coupled client shape.
 - **Proves:** PDA-RDM-004 §Prototype 1.
-- **Packages:** NEW `platform/tenancy`, `platform/authorization`, `platform/entitlements`, `platform/audit`, and the minimum `platform/events` transactional outbox; EXTEND the existing `platform/identity` Better Auth anti-corruption layer; NEW `domains/party` (ADR-0007); add owner-specific `packages/persistence/*` adapters under proposed ADR-0027. PR2 remains blocked until ADR-0027's named reviews and PDA-RDM-008 §3 G3 controls are complete.
+- **Packages:** Implemented `platform/tenancy`, `platform/authorization`, `platform/entitlements`, `platform/audit`, minimum `platform/events`, extended `platform/identity`, `domains/party`, and owner-specific `packages/persistence/*` adapters under ADR-0027's controlled-prototype evidence.
 - **Contracts:** identity/tenancy/user-admin operation group (`/me`, `/session/active-context`, `/organizations`, `/users*`, `/roles`, `/role-assignments`, `/entitlements`, `/parties*`, `/audit-records` — per `registry/endpoint-permissions.json`); `platform.*` and `party.*` event families.
 - **Tests:** dominant dimensions `tenant_isolation`, `permission_and_entitlement`, `audit_and_observability` for the in-scope `platform.*`/`party.records` capabilities; budgets: session/permission checks inside the 750ms p95 sale path allowance; credential revocation ≤60s p95; two-tenant isolation proof (acceptance scenario 1).
 - **Exit:** scenario 1 demonstrated; Better Auth tables invisible to domain code (architecture test); **the thin experience shell required by §1.1 is real and demonstrated, not stubbed** — specifically:
@@ -132,6 +132,7 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
   - Navigation in the shell honors `NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`'s depth and context-visibility rules even at this early stage (role-based primary navigation, visible tenant/organization context) — it does not need every workspace built yet, but the shell it does have must not violate the navigation contract it will keep growing under
   - The same critical contracts and shell behavior are verified under both Bun and the Node fallback (ADR-0020)
   - DoD §6.
+- **Exit disposition:** satisfied for the controlled prototype by PDA-IMPL-005, PDA-UX-038, `evidence/first-slice/ws1-capability-evidence.json`, and `registry/first-slice-tests.json` (11 capabilities, 143 required cells). The residual production/external gates remain explicit; no ADR or Draft specification is self-ratified by implementation.
 - **Gates:** Better Auth plugin matrix deny-by-default honored (no new plugins without matrix disposition).
 
 ### WS2 — Catalog and Inventory Ledger (P2)

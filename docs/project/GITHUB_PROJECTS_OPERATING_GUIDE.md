@@ -4,26 +4,31 @@ This directory's status is [`README.md`](./README.md): lightweight, non-authorit
 
 ## Current state (verified 2026-07-14)
 
-No GitHub Projects (v2) board was created by PR #58. The repository Projects page showed no linked project, but account-level enumeration remains unverified because the active GitHub CLI token lacks `read:project`. A user-owned project can contain repository items without being linked on the repository Projects page, so absence of a linked project is not proof that no owner project exists. Issue #59 tracks the external authorization and board-configuration closure criteria. Run `gh auth refresh -s read:project -s project`, then `gh project list --owner kareemschultz --format json`, before creating or declaring the absence of `Meridian Delivery Program`.
+The user granted the active GitHub CLI token `project` scope (`gh auth refresh -s read:project -s project`, an interactive device-flow approval that cannot be run from a non-interactive agent session). With that scope, `gh project list --owner kareemschultz` returned a real, empty result before this board existed — confirming, at the **owner level** (not just this repository), that no GitHub Projects (v2) board existed anywhere on the account prior to this change.
+
+**The `Meridian Delivery Program` board now exists**: [github.com/users/kareemschultz/projects/1](https://github.com/users/kareemschultz/projects/1) (project number 1, node id `PVT_kwHOBHlWiM4BdaDV`), linked to this repository.
 
 What **is** configured and live today:
 
 - Labels: 37 total, including 25 added by the tracking setup: workstream (`ws0`–`ws7`), work type (`backend`, `frontend`, `native`, `contracts`, `data`, `security`, `ux`, `infrastructure`, `testing`, `research`, `operations`), and attention/lifecycle (`blocked`, `risk`, `technical-debt`, `external-gate`, `production-readiness`, `controlled-prototype`). Existing labels include `documentation`, `risk-register`, `workstream`, and `founder-decision`.
-- Milestones: `Prototype 1 — Identity and Tenancy` through `Prototype 7 — Recovery and Operations`, plus `First Slice Closeout`. No due dates were invented. Prototype 1 is closed at controlled-prototype depth after PR #54 and RR-011 remediation PR #57; this does not imply production readiness.
+- Milestones: `Prototype 1 — Identity and Tenancy` (closed, all 10 WS1/RR-011 issues linked) through `Prototype 7 — Recovery and Operations`, plus `First Slice Closeout`. No due dates were invented.
 - Closing keywords (`Closes #N`) are already in active use and work today with zero additional configuration — GitHub auto-closes the linked issue when the PR merges.
 - GitHub's native sub-issue relationships are available on this repository (confirmed via the API) but unused; consider using them for future workstream/sub-task hierarchies instead of a text "Blocked By" field.
+- The five required-field issue forms under `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`, and `.github/workflows/program-status-freshness.yml` (merged in PR #58).
+- **The project's 11 custom fields plus the native Milestone field** — see the exact field/option table below, all created via `createProjectV2Field`/`updateProjectV2Field` and verified by reading them back.
+- **All 26 existing issues added to the project** with Status, Workstream, Work Type, Priority, Risk, Lifecycle, Evidence State, and Phase set where the mapping was unambiguous from existing labels/milestones/state (verified by reading every item back via `gh project item-list`, not assumed from the mutation responses alone).
 
-The following repository files are staged in draft PR #58 and become live only after that PR merges with green exact-head checks:
+What is **confirmed not possible via any current API or `gh` CLI command**, verified by GraphQL schema introspection against the live schema on 2026-07-14 — not merely undocumented:
 
-- five required-field issue forms under `.github/ISSUE_TEMPLATE/`;
-- `.github/PULL_REQUEST_TEMPLATE.md`;
-- `.github/workflows/program-status-freshness.yml` and its tested validator.
+- **Custom Views.** The `Mutation` type has no `createProjectV2View`/`updateProjectV2View` mutation at all. The project has exactly one view, GitHub's own auto-created `"View 1"` (table layout) — it cannot be renamed, re-grouped, or filtered via API. The 9 views below remain a target design a human must build by hand in the web UI ("+ New view" button); this guide is the spec to build them from.
+- **Insight charts.** No chart/insight mutation exists in the schema at all (searched for `insight`/`chart` in every mutation name). The 8 charts below are similarly a manual, human, web-UI-only task.
+- **Native built-in Workflows** (the project's own "Workflows" panel — auto-add on issue open, auto-set Status on PR ready/merged/closed). The schema exposes only `deleteProjectV2Workflow` — there is no create or update mutation. These must be configured by a human in the project's Workflows settings page; this guide's "Status transitions" table below is the exact spec to configure them from.
 
-What is **not yet verified or configured by this change**: an owner-level GitHub Projects inventory, the `Meridian Delivery Program` board, its fields/views/charts, or issue-to-project/PR-to-project automation. The target below is an implementation specification, not a description of deployed state.
+Because none of the above is achievable by any agent against the current GitHub API, do not attempt them again in a future session without first re-running the same schema-introspection check (`gh api graphql` against `Mutation` fields) in case GitHub has since added the capability.
 
-## Target board design (not yet created)
+## Board design
 
-Board name: **Meridian Delivery Program**.
+Board name: **Meridian Delivery Program** (live: [project #1](https://github.com/users/kareemschultz/projects/1)).
 
 ### Fields
 
@@ -42,7 +47,7 @@ Board name: **Meridian Delivery Program**.
 | Progress Weight | number | Used only by the governed progress formula in `PROGRESS_MEASUREMENT_STANDARD.md` — never a substitute for it |
 | Blocked By | text, or native issue dependency once available | Free text until GitHub's dependency feature is adopted here |
 
-### Views
+### Views (manual — no API/CLI exists to create these; see "Current state" above)
 
 1. **Program Board** — board grouped by Status; exclude Cancelled and Deferred by default; show Phase, Workstream, Prototype, Priority, Risk, Assignee.
 2. **Workstream Board** — board grouped by Workstream, sorted/grouped secondarily by Status.
@@ -54,13 +59,13 @@ Board name: **Meridian Delivery Program**.
 8. **Recently Completed** — Status=Done, updated within the recent reporting period.
 9. **By Domain or Capability** — table grouped by capability/domain, only where that metadata can be derived reliably from `registry/capabilities.json`. Do not hand-duplicate the capability registry into issues; link to the registry entry instead.
 
-### Charts
+### Charts (manual — no API/CLI exists to create these; see "Current state" above)
 
 Issues by Status, by Workstream, by Phase, by Work Type; Blocked items by Workstream; Completed items over time; Current work by Priority; First-slice issue completion by Workstream.
 
 **Issue-count charts measure throughput, not evidence or effort.** The authoritative first-slice implementation percentage is, and remains, the one computed by `PROGRESS_MEASUREMENT_STANDARD.md` — never a chart's issue-completion ratio.
 
-## Status transitions (for whoever builds the automation)
+## Status transitions (manual — the project Workflows panel has no create/update API; this is the exact spec to configure it from)
 
 | Trigger | Status |
 |---|---|
@@ -87,7 +92,8 @@ Never derive a project or workstream completion percentage from: issue count, PR
 
 - `docs/project/PROGRAM_STATUS.md`, following `STATUS_UPDATE_TEMPLATE.md`, whenever a workstream stage closes on merged evidence.
 - Labels/milestones on an issue or PR they open or materially move.
-- This guide, if the target board design changes before the board is actually created.
+- Add any new issue/PR to the `Meridian Delivery Program` project (`gh project item-add 1 --owner kareemschultz --url <issue-or-pr-url>`) and set its Status/Phase/Workstream/Work Type/Priority/Risk/Lifecycle/Evidence State fields; there is no automation to do this yet (see "Current state" above). Omitting Phase leaves the item ungrouped and invisible in the Roadmap, Production Readiness, and phase-based charts once those are built.
+- This guide, if the board's fields change, or once a human configures the Views/Charts/Workflows this guide currently only specifies.
 
 ## What agents must not update
 

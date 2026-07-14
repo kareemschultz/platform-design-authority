@@ -119,9 +119,9 @@ WS2 implementation may begin only under its own governed implementation-control 
 
 ## 9. RR-011 post-closeout audit
 
-Claude Code independently audited the exact PR1-PR9 merge at `8f9d93f5d5f80b9c11a8a5c30b956bdac638a284`. PDA-REV-011 registers 0 P0, 1 P1, 5 P2, and 4 P3 findings and concurs that WS1 may remain closed at controlled-prototype depth after explicit P1 disposition. PDA-REV-012 accepts every actionable finding and records issue #56's executable remediation: real revocation-outbox-to-Audit ingestion, standalone source-marker verification, Party-linked current identity, source-derived architecture allowances, a composed Node request, transport-layer entitlement authorization, touch-target and route-focus regressions, and document corrections.
+Claude Code independently audited the exact PR1-PR9 merge at `8f9d93f5d5f80b9c11a8a5c30b956bdac638a284`. PDA-REV-011 registers 0 P0, 1 P1, 5 P2, and 4 P3 findings and concurs that WS1 may remain closed at controlled-prototype depth after explicit P1 disposition. PDA-REV-012 accepts every actionable finding and records issue #56 / PR #57's executable remediation: real revocation-outbox-to-Audit ingestion, standalone source-marker verification, Party-linked current identity, source-derived architecture allowances, a composed Node request, transport-layer entitlement authorization, touch-target and route-focus regressions, and document corrections.
 
-The audit does not reopen WS1 as a whole. RR-011 closes only when the remediation PR is exact-head green and merged. RR-006 through RR-010 and every pilot/production/lifecycle gate in §7 remain open.
+The audit does not reopen WS1 as a whole. RR-011 closes only when PR #57 is exact-head green and merged. RR-006 through RR-010 and every pilot/production/lifecycle gate in §7 remain open.
 
 ## Change log
 

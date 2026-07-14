@@ -16,7 +16,7 @@ Disposition every finding in PDA-REV-011, preserve the independent report, close
 
 ## Executive position
 
-All ten actionable findings are accepted and remediated in issue #56. WS1 remains closed only at the registered controlled-prototype depth. This disposition closes RR-011 after exact-head CI and merge; it does not close RR-006 through RR-010, promote any Draft or Proposed authority, or authorize pilot, production, or broad WS2 code.
+All ten actionable findings are accepted and remediated in issue #56 / PR #57. WS1 remains closed only at the registered controlled-prototype depth. This disposition closes RR-011 only after PR #57's exact-head CI and merge; it does not close RR-006 through RR-010, promote any Draft or Proposed authority, or authorize pilot, production, or broad WS2 code.
 
 ## Finding dispositions
 

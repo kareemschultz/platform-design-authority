@@ -26,7 +26,7 @@ Register `docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_V1.md` as the reposito
 
 ## Disposition
 
-The maintainer disposition is `docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_DISPOSITION_V1.md` (PDA-REV-012), tracked by GitHub issue #56.
+The maintainer disposition is `docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_DISPOSITION_V1.md` (PDA-REV-012), tracked by GitHub issue #56 and PR #57.
 
 ## Evidence integrity
 

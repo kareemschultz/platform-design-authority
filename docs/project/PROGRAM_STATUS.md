@@ -4,7 +4,7 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at the exact WS1 PR9 merge commit `8f9d93f5d5f80b9c11a8a5c30b956bdac638a284`, plus the registered RR-011 audit (PDA-REV-011) and issue #56 remediation change set; the remediation PR's exact reviewed head, green checks, and resulting merge commit become authoritative when merged
+**Evidence cutoff:** `main` at the exact WS1 PR9 merge commit `8f9d93f5d5f80b9c11a8a5c30b956bdac638a284`, plus the registered RR-011 audit (PDA-REV-011) and issue #56 / PR #57 remediation change set; PR #57's exact reviewed head, green checks, and resulting merge are the closure evidence when merged
 
 **Last updated:** 2026-07-14
 
@@ -56,7 +56,7 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 | PR7 audit evidence and session revocation | complete | PR #47 |
 | PR8 thin experience shell | complete | PR #50; PDA-UX-038; authenticated administration shell with real context, Party, role, entitlement, session, and audit queries plus responsive and accessibility evidence. |
 | PR9 WS1 evidence and closeout | complete and merged | PR #54; merge `8f9d93f`; PDA-IMPL-005; 11 capabilities/143 required cells; 40-sample database and independent-HTTP revocation evidence; Bun/Node, architecture, accessibility, roadmap, ADR, risk, and lifecycle propagation. |
-| RR-011 independent audit disposition | remediation in progress | PDA-REV-011/012; issue #56; 0 P0, 1 P1, 5 P2, and 4 P3 accepted with executable remediation. |
+| RR-011 independent audit disposition | closes on PR #57 merge | PDA-REV-011/012; issue #56 / PR #57; 0 P0, 1 P1, 5 P2, and 4 P3 accepted and remediated. Closure is effective only after exact-head-green merge. |
 
 ## Current implementation assets
 
@@ -85,7 +85,7 @@ Not yet complete:
 
 ## Immediate priorities
 
-1. Merge the exact-head-green issue #56 remediation, then close RR-011 with PDA-REV-011/012 and the merge evidence.
+1. Merge exact-head-green PR #57, then treat RR-011 as closed under PDA-REV-011/012 and the GitHub merge evidence.
 2. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12; do not start broad WS2 code before RR-011 closes and the plan is governed.
 3. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
 

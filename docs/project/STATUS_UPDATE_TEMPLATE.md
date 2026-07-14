@@ -2,6 +2,8 @@
 
 Use this checklist in any PR that changes a workstream stage or material readiness gate.
 
+This is a non-authoritative program-control template. Evidence and lifecycle changes must still be recorded in their governing documents, registries, risks, issues, and pull requests.
+
 ## Evidence cutoff
 
 - Main or PR head SHA:

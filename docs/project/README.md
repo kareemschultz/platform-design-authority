@@ -2,10 +2,12 @@
 
 This directory contains lightweight program-control documents. It does not replace the blueprint, ADRs, registries, Architecture Risk Register, GitHub Issues, or pull requests.
 
+These documents are deliberately outside the governed document registry and are non-authoritative. Where a summary conflicts with a governed source, the source wins and the summary must be corrected.
+
 ## Documents
 
 - `PROGRAM_STATUS.md` — current executive view of blueprint completeness, first-slice implementation, capability evidence, and production readiness.
-- `PROGRESS_MEASUREMENT_STANDARD.md` — authoritative rules for calculating and advancing progress.
+- `PROGRESS_MEASUREMENT_STANDARD.md` — provisional reporting convention for calculating and advancing progress.
 - `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` — bounded evidence for declaring the implementation-start baseline complete.
 
 ## Authority

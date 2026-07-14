@@ -1,5 +1,7 @@
 # Program Progress Measurement Standard
 
+**Governance posture:** Draft, non-authoritative reporting convention. This document summarizes evidence under the repository authority order; it does not override blueprint documents, ADRs, approved specifications, registries, review dispositions, issues, or pull requests.
+
 ## Purpose
 
 This document defines how Meridian reports progress without confusing documentation coverage, implementation completion, prototype evidence, and production readiness.
@@ -27,7 +29,7 @@ Use only:
 
 ## Blueprint baseline completeness
 
-The blueprint baseline may be reported as **100% complete for implementation commencement** only when all of the following are true:
+The blueprint baseline may be reported as **100% complete for controlled-prototype implementation commencement** only when all of the following are true:
 
 - Constitution, principles, platform canon, architecture, UX, security, data, AI, commercial, testing, operations, roadmap, and strategy authorities required by the first slice exist.
 - Canonical capability, permission, event, endpoint-permission, first-slice, test, architecture-rule, document, and design-token registries are generated and fresh.
@@ -37,6 +39,8 @@ The blueprint baseline may be reported as **100% complete for implementation com
 - There is no known undisposed contradiction that would make implementation unsafe to continue.
 
 This does **not** mean the documentation can never change. New implementation evidence may amend, supersede, or add documents through normal governance. It means the baseline is sufficient and governed, not omniscient.
+
+It also does not close FA4-032 or promote Draft/Proposed material. Ratification, review evidence, founder decisions, and every pilot or production gate retain their governed status.
 
 ## Workstream progress
 

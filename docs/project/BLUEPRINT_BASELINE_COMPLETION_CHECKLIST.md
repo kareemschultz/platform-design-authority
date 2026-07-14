@@ -2,9 +2,11 @@
 
 ## Decision
 
-The Meridian blueprint baseline is **complete for first-slice implementation commencement** as of the evidence cutoff recorded in `PROGRAM_STATUS.md`.
+The Meridian blueprint baseline is **complete for controlled-prototype first-slice implementation commencement** as of the evidence cutoff recorded in `PROGRAM_STATUS.md`.
 
 This is a bounded governance decision. It does not claim that every future industry, jurisdiction, provider, customer workflow, implementation detail, or production-readiness question is already documented. New documentation should now be driven by implementation evidence, a changed external fact, an approved scope change, or a newly discovered material risk.
+
+The conclusion is a non-authoritative program-control assessment under PDA-RDM-007's named prototype exception. It does not promote Draft or Proposed documents, close FA4-032, ratify FDR-004, or authorize pilot or production use.
 
 ## Completion criteria
 

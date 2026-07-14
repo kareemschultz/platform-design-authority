@@ -148,6 +148,20 @@ export interface ActiveContextAuthorityPort {
 	}) => Promise<{ organizationId: string; tenantId: string }>;
 }
 
+/** Published permission port bound to Platform Authorization at composition. */
+export interface PartyPermissionAuthorityPort {
+	requirePermission: (input: {
+		assuranceLevel: string;
+		authUserId: string;
+		contextId: string;
+		permission:
+			| "party.record.create"
+			| "party.record.read"
+			| "party.record.update";
+		sessionId: string;
+	}) => Promise<unknown>;
+}
+
 export interface PartyIdFactory {
 	create: (
 		kind: "contact-point" | "event" | "identity-link" | "party"
@@ -641,6 +655,7 @@ export function createPartyService(options: PartyServiceOptions) {
 
 export interface PartyApplicationOptions {
 	activeContexts: ActiveContextAuthorityPort;
+	permissions: PartyPermissionAuthorityPort;
 	service: ReturnType<typeof createPartyService>;
 }
 
@@ -653,6 +668,20 @@ export function createPartyApplication(options: PartyApplicationOptions) {
 		return options.activeContexts.requireActiveContext(input);
 	}
 
+	async function authorize(
+		input: { authUserId: string; contextId: string; sessionId: string },
+		permission:
+			| "party.record.create"
+			| "party.record.read"
+			| "party.record.update"
+	) {
+		await options.permissions.requirePermission({
+			assuranceLevel: "aal1",
+			...input,
+			permission,
+		});
+	}
+
 	return {
 		async createIdentityLink(input: {
 			actorUserId: string;
@@ -662,6 +691,14 @@ export function createPartyApplication(options: PartyApplicationOptions) {
 			idempotencyKey: string;
 			sessionId: string;
 		}) {
+			await authorize(
+				{
+					authUserId: input.actorUserId,
+					contextId: input.contextId,
+					sessionId: input.sessionId,
+				},
+				"party.record.update"
+			);
 			const active = await scope({
 				authUserId: input.actorUserId,
 				contextId: input.contextId,
@@ -681,6 +718,14 @@ export function createPartyApplication(options: PartyApplicationOptions) {
 			idempotencyKey: string;
 			sessionId: string;
 		}) {
+			await authorize(
+				{
+					authUserId: input.actorUserId,
+					contextId: input.contextId,
+					sessionId: input.sessionId,
+				},
+				"party.record.create"
+			);
 			const active = await scope({
 				authUserId: input.actorUserId,
 				contextId: input.contextId,
@@ -700,6 +745,14 @@ export function createPartyApplication(options: PartyApplicationOptions) {
 			idempotencyKey: string;
 			sessionId: string;
 		}) {
+			await authorize(
+				{
+					authUserId: input.actorUserId,
+					contextId: input.contextId,
+					sessionId: input.sessionId,
+				},
+				"party.record.create"
+			);
 			const active = await scope({
 				authUserId: input.actorUserId,
 				contextId: input.contextId,
@@ -717,6 +770,7 @@ export function createPartyApplication(options: PartyApplicationOptions) {
 			partyId: string;
 			sessionId: string;
 		}) {
+			await authorize(input, "party.record.read");
 			const active = await scope(input);
 			return options.service.getParty(active.tenantId, input.partyId);
 		},
@@ -726,6 +780,7 @@ export function createPartyApplication(options: PartyApplicationOptions) {
 			page: PageRequest;
 			sessionId: string;
 		}) {
+			await authorize(input, "party.record.read");
 			const active = await scope(input);
 			return options.service.listParties(active.tenantId, input.page);
 		},
@@ -737,6 +792,14 @@ export function createPartyApplication(options: PartyApplicationOptions) {
 			partyId: string;
 			sessionId: string;
 		}) {
+			await authorize(
+				{
+					authUserId: input.actorUserId,
+					contextId: input.contextId,
+					sessionId: input.sessionId,
+				},
+				"party.record.update"
+			);
 			const active = await scope({
 				authUserId: input.actorUserId,
 				contextId: input.contextId,

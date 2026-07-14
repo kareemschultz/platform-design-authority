@@ -98,7 +98,12 @@ export const listOrganizationsContract = base
 		responseRef: "#/components/responses/PagedOrganizations",
 		successStatus: 200,
 	})
-	.input(z.object({ query: PageQuerySchema }))
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema,
+		})
+	)
 	.output(PagedOrganizationsSchema);
 
 export const getOrganizationContract = base

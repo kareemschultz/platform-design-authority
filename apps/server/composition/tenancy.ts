@@ -6,7 +6,6 @@ import {
 } from "@meridian/persistence-platform-identity-postgres";
 import { createTenancyRepository } from "@meridian/persistence-platform-tenancy-postgres";
 import {
-	createTenancyApplication,
 	createTenancyService,
 	type IdFactory,
 } from "@meridian/platform-tenancy";
@@ -35,9 +34,3 @@ export const tenancyService = createTenancyService({
 export const identityDirectory = createIdentityDirectory(databasePool);
 export const identityOrganizationProjection =
 	createIdentityOrganizationProjection(databasePool);
-
-export const tenancyApplication = createTenancyApplication({
-	directory: identityDirectory,
-	projection: identityOrganizationProjection,
-	service: tenancyService,
-});

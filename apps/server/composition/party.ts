@@ -7,7 +7,7 @@ import {
 import { createPartyRepository } from "@meridian/persistence-party-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import { createTenancyRepository } from "@meridian/persistence-platform-tenancy-postgres";
-
+import { permissionAuthorizer } from "./authorization";
 import { databasePool } from "./postgres";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 import { tenancyService } from "./tenancy";
@@ -68,6 +68,7 @@ export const partyApplication = createPartyApplication({
 			};
 		},
 	},
+	permissions: permissionAuthorizer,
 	service: partyService,
 });
 

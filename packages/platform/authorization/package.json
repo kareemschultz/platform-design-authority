@@ -1,5 +1,5 @@
 {
-  "name": "@meridian/platform-tenancy",
+  "name": "@meridian/platform-authorization",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,6 @@
     "test": "bun test src/*.test.ts"
   },
   "dependencies": {
-    "@meridian/contracts-events": "workspace:*",
     "@meridian/contracts-permissions": "workspace:*",
     "@meridian/contracts-platform-api": "workspace:*"
   },

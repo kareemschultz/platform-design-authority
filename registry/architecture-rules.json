@@ -277,10 +277,13 @@
       "owner_package": "@meridian/platform-tenancy",
       "tables": [
         "platform_active_context",
+        "platform_delegation",
         "platform_location",
         "platform_membership",
         "platform_membership_invitation",
         "platform_organization",
+        "platform_role",
+        "platform_role_assignment",
         "platform_tenant",
         "platform_tenancy_command_receipt"
       ],

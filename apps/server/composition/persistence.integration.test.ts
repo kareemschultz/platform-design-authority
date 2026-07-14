@@ -13,8 +13,10 @@ import {
 	createTenancyRepository,
 	migratePlatformTenancy,
 } from "@meridian/persistence-platform-tenancy-postgres";
+import { createAuthorizationService } from "@meridian/platform-authorization";
 import type { OutboxEvent } from "@meridian/platform-events";
 import {
+	createTenancyApplication,
 	createTenancyService,
 	type IdFactory,
 } from "@meridian/platform-tenancy";
@@ -110,11 +112,14 @@ describe.serial("WS1 persistence orchestration", () => {
 			"party_record",
 			"passkey",
 			"platform_active_context",
+			"platform_delegation",
 			"platform_event_outbox",
 			"platform_location",
 			"platform_membership",
 			"platform_membership_invitation",
 			"platform_organization",
+			"platform_role",
+			"platform_role_assignment",
 			"platform_tenancy_command_receipt",
 			"platform_tenant",
 			"session",
@@ -132,6 +137,248 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_identity_migrations",
 			"platform_tenancy_migrations",
 		]);
+	});
+
+	test("enforces current scoped authorization and atomic role assignment", async () => {
+		const repository = createTenancyRepository(testPool);
+		await repository.seed({
+			locations: [],
+			memberships: [
+				{
+					authUserId: "user_authorization_admin_a",
+					id: "membership_authorization_admin_a",
+					organizationId: "organization_authorization_a",
+					roleAssignmentIds: ["assignment_authorization_admin_a"],
+					state: "Active",
+					tenantId: "tenant_authorization_a",
+					version: 1,
+				},
+				{
+					authUserId: "user_authorization_target_a",
+					id: "membership_authorization_target_a",
+					organizationId: "organization_authorization_a",
+					roleAssignmentIds: [],
+					state: "Active",
+					tenantId: "tenant_authorization_a",
+					version: 1,
+				},
+			],
+			organizations: [
+				{
+					id: "organization_authorization_a",
+					name: "Demerara Authorization Test Organization",
+					state: "Active",
+					tenantId: "tenant_authorization_a",
+					timezone: "America/Guyana",
+					version: 1,
+				},
+			],
+			roleAssignments: [
+				{
+					id: "assignment_authorization_admin_a",
+					membershipId: "membership_authorization_admin_a",
+					roleId: "role_authorization_admin_a",
+					scopeType: "Tenant",
+					startsAt: new Date("2026-07-14T00:00:00.000Z"),
+					state: "Active",
+					tenantId: "tenant_authorization_a",
+					version: 1,
+				},
+			],
+			roles: [
+				{
+					description: "Authorization test administrator",
+					id: "role_authorization_admin_a",
+					name: "Tenant Administrator",
+					permissionIds: ["platform.role.assign", "platform.role.read"],
+					state: "Active",
+					tenantId: "tenant_authorization_a",
+					version: 1,
+				},
+				{
+					description: "Authorization test cashier",
+					id: "role_authorization_cashier_a",
+					name: "Cashier",
+					permissionIds: ["commerce.sale.create"],
+					state: "Active",
+					tenantId: "tenant_authorization_a",
+					version: 1,
+				},
+			],
+			tenant: {
+				id: "tenant_authorization_a",
+				name: "Demerara Authorization Test Tenant",
+				state: "Active",
+				version: 1,
+			},
+		});
+		await repository.seed({
+			locations: [],
+			memberships: [
+				{
+					authUserId: "user_authorization_admin_b",
+					id: "membership_authorization_admin_b",
+					organizationId: "organization_authorization_b",
+					roleAssignmentIds: [],
+					state: "Active",
+					tenantId: "tenant_authorization_b",
+					version: 1,
+				},
+			],
+			organizations: [
+				{
+					id: "organization_authorization_b",
+					name: "Essequibo Authorization Test Organization",
+					state: "Active",
+					tenantId: "tenant_authorization_b",
+					timezone: "America/Guyana",
+					version: 1,
+				},
+			],
+			roles: [
+				{
+					id: "role_authorization_admin_b",
+					name: "Tenant B Administrator",
+					permissionIds: ["platform.role.assign"],
+					state: "Active",
+					tenantId: "tenant_authorization_b",
+					version: 1,
+				},
+			],
+			tenant: {
+				id: "tenant_authorization_b",
+				name: "Essequibo Authorization Test Tenant",
+				state: "Active",
+				version: 1,
+			},
+		});
+
+		let sequence = 0;
+		const service = createTenancyService({
+			clock: () => new Date("2026-07-14T12:00:00.000Z"),
+			contextTtlMs: 60 * 60 * 1000,
+			ids: {
+				create(kind) {
+					sequence += 1;
+					return `${kind}_authorization_integration_${sequence}`;
+				},
+			},
+			unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+				events: createPostgresOutbox(client),
+				repository: createTenancyRepository(client),
+			})),
+		});
+		const context = await service.setActiveContext({
+			authUserId: "user_authorization_admin_a",
+			idempotencyKey: "idempotency_authorization_context_a",
+			organizationId: "organization_authorization_a",
+			sessionId: "session_authorization_admin_a",
+		});
+		const authorization = createAuthorizationService({
+			clock: () => new Date("2026-07-14T12:00:00.000Z"),
+			state: { load: (input) => service.resolveAuthorizationState(input) },
+		});
+		const application = createTenancyApplication({
+			directory: { findUsers: async () => [] },
+			permissions: authorization,
+			projection: {
+				projectInvitation: async () => undefined,
+				projectOrganization: async () => undefined,
+				removeMembership: async () => undefined,
+			},
+			service,
+		});
+
+		const roles = await application.listRoles({
+			authUserId: "user_authorization_admin_a",
+			contextId: context.contextId,
+			page: { limit: 20 },
+			sessionId: "session_authorization_admin_a",
+		});
+		expect(roles.items.map((role) => role.id)).toEqual([
+			"role_authorization_admin_a",
+			"role_authorization_cashier_a",
+		]);
+
+		const command = {
+			actorUserId: "user_authorization_admin_a",
+			body: {
+				membershipId: "membership_authorization_target_a",
+				roleId: "role_authorization_cashier_a",
+				scopeType: "Tenant" as const,
+				startsAt: "2026-07-14T12:00:00.000Z",
+			},
+			contextId: context.contextId,
+			correlationId: "correlation_authorization_assignment_a",
+			idempotencyKey: "idempotency_authorization_assignment_a",
+			sessionId: "session_authorization_admin_a",
+		};
+		let crossTenantError: unknown;
+		try {
+			await application.createRoleAssignment({
+				...command,
+				body: {
+					...command.body,
+					membershipId: "membership_authorization_admin_b",
+					roleId: "role_authorization_admin_b",
+				},
+				idempotencyKey: "idempotency_authorization_cross_tenant",
+			});
+		} catch (error) {
+			crossTenantError = error;
+		}
+		expect(crossTenantError).toMatchObject({ code: "membership_inactive" });
+
+		await service.suspendMembership({
+			actorUserId: "user_authorization_admin_a",
+			correlationId: "correlation_authorization_suspend_a",
+			idempotencyKey: "idempotency_authorization_suspend_a",
+			membershipId: "membership_authorization_admin_a",
+			reason: "current-authority invalidation proof",
+			revokeSessionsWhenNoActiveMembershipsRemain: true,
+			targetAuthUserId: "user_authorization_admin_a",
+			tenantId: "tenant_authorization_a",
+			version: 1,
+		});
+		expect(
+			await authorization.decide({
+				assuranceLevel: "aal1",
+				authUserId: "user_authorization_admin_a",
+				contextId: context.contextId,
+				permission: "platform.role.read",
+				sessionId: "session_authorization_admin_a",
+			})
+		).toEqual({ outcome: "deny", reason: "assignment_inactive" });
+
+		const serviceCommand = {
+			actorUserId: command.actorUserId,
+			body: {
+				...command.body,
+				startsAt: new Date(command.body.startsAt),
+			},
+			correlationId: command.correlationId,
+			idempotencyKey: command.idempotencyKey,
+			tenantId: "tenant_authorization_a",
+		};
+		const [first, replayed] = await Promise.all([
+			service.grantRoleAssignment(serviceCommand),
+			service.grantRoleAssignment(serviceCommand),
+		]);
+		expect(replayed.id).toBe(first.id);
+		const stored = await repository.listRoleAssignments(
+			"tenant_authorization_a",
+			"membership_authorization_target_a"
+		);
+		expect(stored).toHaveLength(1);
+		const authorizationEvents = await testPool.query<{
+			data: Record<string, unknown>;
+		}>(
+			"SELECT data FROM platform_event_outbox WHERE tenant_id = 'tenant_authorization_a' AND name = 'platform.role-assignment.granted.v1' AND idempotency_key = 'idempotency_authorization_assignment_a'"
+		);
+		expect(authorizationEvents.rows).toHaveLength(1);
+		expect(authorizationEvents.rows[0]?.data).not.toHaveProperty(
+			"permissionIds"
+		);
 	});
 
 	test("persists tenant-isolated Party onboarding, reconciliation, and atomic events", async () => {

@@ -97,12 +97,14 @@
       "name": "server",
       "dependencies": {
         "@hono/node-server": "2.0.8",
+        "@meridian/contracts-permissions": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
         "@meridian/domain-party": "workspace:*",
         "@meridian/persistence-party-postgres": "workspace:*",
         "@meridian/persistence-platform-events-postgres": "workspace:*",
         "@meridian/persistence-platform-identity-postgres": "workspace:*",
         "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
+        "@meridian/platform-authorization": "workspace:*",
         "@meridian/platform-events": "workspace:*",
         "@meridian/platform-identity": "workspace:*",
         "@meridian/platform-tenancy": "workspace:*",
@@ -298,6 +300,19 @@
         "typescript": "^6",
       },
     },
+    "packages/platform/authorization": {
+      "name": "@meridian/platform-authorization",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/contracts-permissions": "workspace:*",
+        "@meridian/contracts-platform-api": "workspace:*",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
     "packages/platform/events": {
       "name": "@meridian/platform-events",
       "version": "0.0.0",
@@ -328,6 +343,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@meridian/contracts-events": "workspace:*",
+        "@meridian/contracts-permissions": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
       },
       "devDependencies": {
@@ -876,6 +892,8 @@
     "@meridian/persistence-platform-identity-postgres": ["@meridian/persistence-platform-identity-postgres@workspace:packages/persistence/platform-identity-postgres"],
 
     "@meridian/persistence-platform-tenancy-postgres": ["@meridian/persistence-platform-tenancy-postgres@workspace:packages/persistence/platform-tenancy-postgres"],
+
+    "@meridian/platform-authorization": ["@meridian/platform-authorization@workspace:packages/platform/authorization"],
 
     "@meridian/platform-clients-api-client": ["@meridian/platform-clients-api-client@workspace:packages/platform-clients/api-client"],
 

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+	boolean,
 	foreignKey,
 	index,
 	integer,
@@ -122,6 +123,119 @@ export const memberships = pgTable(
 	]
 );
 
+export const roles = pgTable(
+	"platform_role",
+	{
+		...auditColumns,
+		description: text("description"),
+		id: text("id").primaryKey(),
+		name: text("name").notNull(),
+		permissionIds: jsonb("permission_ids")
+			.$type<string[]>()
+			.default(sql`'[]'::jsonb`)
+			.notNull(),
+		state: text("state").notNull(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => tenants.id, { onDelete: "restrict" }),
+		version: integer("version").default(1).notNull(),
+	},
+	(table) => [
+		unique("platform_role_tenant_id_id_key").on(table.tenantId, table.id),
+		uniqueIndex("platform_role_tenant_name_uidx").on(
+			table.tenantId,
+			table.name
+		),
+		index("platform_role_tenant_state_idx").on(table.tenantId, table.state),
+	]
+);
+
+export const roleAssignments = pgTable(
+	"platform_role_assignment",
+	{
+		...auditColumns,
+		endsAt: timestamp("ends_at", { withTimezone: true }),
+		id: text("id").primaryKey(),
+		membershipId: text("membership_id").notNull(),
+		roleId: text("role_id").notNull(),
+		scopeId: text("scope_id"),
+		scopeType: text("scope_type").notNull(),
+		startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+		state: text("state").notNull(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => tenants.id, { onDelete: "restrict" }),
+		version: integer("version").default(1).notNull(),
+	},
+	(table) => [
+		unique("platform_role_assignment_tenant_id_id_key").on(
+			table.tenantId,
+			table.id
+		),
+		foreignKey({
+			columns: [table.tenantId, table.membershipId],
+			foreignColumns: [memberships.tenantId, memberships.id],
+			name: "platform_role_assignment_tenant_membership_fk",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.tenantId, table.roleId],
+			foreignColumns: [roles.tenantId, roles.id],
+			name: "platform_role_assignment_tenant_role_fk",
+		}).onDelete("restrict"),
+		index("platform_role_assignment_tenant_member_idx").on(
+			table.tenantId,
+			table.membershipId,
+			table.state
+		),
+	]
+);
+
+export const delegations = pgTable(
+	"platform_delegation",
+	{
+		...auditColumns,
+		allowFurtherDelegation: boolean("allow_further_delegation")
+			.default(false)
+			.notNull(),
+		delegateMembershipId: text("delegate_membership_id").notNull(),
+		delegatorMembershipId: text("delegator_membership_id").notNull(),
+		endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+		id: text("id").primaryKey(),
+		permissionIds: jsonb("permission_ids")
+			.$type<string[]>()
+			.default(sql`'[]'::jsonb`)
+			.notNull(),
+		reason: text("reason").notNull(),
+		scopeId: text("scope_id"),
+		scopeType: text("scope_type").notNull(),
+		startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+		state: text("state").notNull(),
+		tenantId: text("tenant_id")
+			.notNull()
+			.references(() => tenants.id, { onDelete: "restrict" }),
+		version: integer("version").default(1).notNull(),
+	},
+	(table) => [
+		unique("platform_delegation_tenant_id_id_key").on(table.tenantId, table.id),
+		foreignKey({
+			columns: [table.tenantId, table.delegatorMembershipId],
+			foreignColumns: [memberships.tenantId, memberships.id],
+			name: "platform_delegation_tenant_delegator_fk",
+		}).onDelete("restrict"),
+		foreignKey({
+			columns: [table.tenantId, table.delegateMembershipId],
+			foreignColumns: [memberships.tenantId, memberships.id],
+			name: "platform_delegation_tenant_delegate_fk",
+		}).onDelete("restrict"),
+		index("platform_delegation_tenant_delegate_idx").on(
+			table.tenantId,
+			table.delegateMembershipId,
+			table.state,
+			table.endsAt
+		),
+	]
+);
+
 export const invitations = pgTable(
 	"platform_membership_invitation",
 	{
@@ -196,6 +310,11 @@ export const activeContexts = pgTable(
 			columns: [table.tenantId, table.locationId],
 			foreignColumns: [locations.tenantId, locations.id],
 			name: "platform_active_context_tenant_location_fk",
+		}),
+		foreignKey({
+			columns: [table.tenantId, table.delegationId],
+			foreignColumns: [delegations.tenantId, delegations.id],
+			name: "platform_active_context_tenant_delegation_fk",
 		}),
 		index("platform_active_context_session_idx").on(table.sessionId),
 		index("platform_active_context_tenant_user_idx").on(

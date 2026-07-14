@@ -6,6 +6,8 @@ import {
 	type InvitationRecord,
 	type MembershipRecord,
 	type PendingEvent,
+	type RoleAssignmentRecord,
+	type RoleRecord,
 	type TenancyRepository,
 } from "./index";
 
@@ -256,5 +258,89 @@ describe("Platform Tenancy application rules", () => {
 			})
 		).rejects.toMatchObject({ code: "wrong_tenant" });
 		expect(events).toHaveLength(0);
+	});
+
+	test("grants one tenant-scoped role assignment and publishes one safe event", async () => {
+		const membership: MembershipRecord = {
+			authUserId: "user_role_target_0001",
+			id: "membership_role_target_0001",
+			organizationId: "organization_unit_0001",
+			roleAssignmentIds: [],
+			state: "Active",
+			tenantId: "tenant_unit_test_0001",
+			version: 1,
+		};
+		const role: RoleRecord = {
+			description: "Tenant administration",
+			id: "role_tenant_admin_0001",
+			name: "Tenant Administrator",
+			permissionIds: ["platform.role.assign", "platform.role.read"],
+			state: "Active",
+			tenantId: membership.tenantId,
+			version: 1,
+		};
+		const receipts = new Map<
+			string,
+			Parameters<TenancyRepository["recordCommandReceipt"]>[0]
+		>();
+		const assignments: RoleAssignmentRecord[] = [];
+		const repository = {
+			completeCommandReceipt(
+				record: Parameters<TenancyRepository["completeCommandReceipt"]>[0]
+			) {
+				receipts.set(record.idempotencyKey, record);
+				return Promise.resolve(record);
+			},
+			createRoleAssignment(record: RoleAssignmentRecord) {
+				assignments.push(record);
+				return Promise.resolve(record);
+			},
+			getCommandReceipt: async (
+				_tenantId: string,
+				_operation: string,
+				idempotencyKey: string
+			) => receipts.get(idempotencyKey) ?? null,
+			getMembership: async () => membership,
+			getRole: async () => role,
+			recordCommandReceipt(
+				record: Parameters<TenancyRepository["recordCommandReceipt"]>[0]
+			) {
+				const existing = receipts.get(record.idempotencyKey);
+				if (existing) {
+					return Promise.resolve({ inserted: false, record: existing });
+				}
+				receipts.set(record.idempotencyKey, record);
+				return Promise.resolve({ inserted: true, record });
+			},
+		} as unknown as TenancyRepository;
+		const events: PendingEvent[] = [];
+		const service = serviceWith(repository, events);
+		const command = {
+			actorUserId: "user_tenant_admin_0001",
+			body: {
+				membershipId: membership.id,
+				roleId: role.id,
+				scopeType: "Tenant" as const,
+				startsAt: new Date("2026-07-13T12:00:00.000Z"),
+			},
+			correlationId: "correlation_role_assignment_0001",
+			idempotencyKey: "idempotency_role_assignment_0001",
+			tenantId: membership.tenantId,
+		};
+
+		const created = await service.grantRoleAssignment(command);
+		const replayed = await service.grantRoleAssignment(command);
+
+		expect(replayed.id).toBe(created.id);
+		expect(assignments).toHaveLength(1);
+		expect(events).toHaveLength(1);
+		expect(events[0]?.name).toBe("platform.role-assignment.granted.v1");
+		expect(events[0]?.data).not.toHaveProperty("permissionIds");
+		await expect(
+			service.grantRoleAssignment({
+				...command,
+				body: { ...command.body, roleId: "role_substituted_0001" },
+			})
+		).rejects.toMatchObject({ code: "idempotency_conflict" });
 	});
 });

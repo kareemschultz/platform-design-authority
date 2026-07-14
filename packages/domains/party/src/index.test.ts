@@ -268,6 +268,7 @@ describe("Party domain", () => {
 					);
 				},
 			},
+			permissions: { requirePermission: async () => undefined },
 			service,
 		});
 		await expect(
@@ -279,5 +280,40 @@ describe("Party domain", () => {
 			})
 		).rejects.toMatchObject({ code: "wrong_tenant" });
 		expect(checked).toBe(true);
+	});
+
+	test("denies direct application calls before Party repository dispatch", async () => {
+		const { repository, service } = fixture();
+		let listed = false;
+		repository.listParties = () => {
+			listed = true;
+			return Promise.resolve({ items: [], nextCursor: null });
+		};
+		const application = createPartyApplication({
+			activeContexts: {
+				requireActiveContext: async () => ({
+					organizationId: "organization_alpha_0001",
+					tenantId: "tenant_alpha_0001",
+				}),
+			},
+			permissions: {
+				requirePermission: () =>
+					Promise.reject(
+						Object.assign(new Error("denied"), {
+							code: "authorization_denied",
+						})
+					),
+			},
+			service,
+		});
+		await expect(
+			application.list({
+				authUserId: "auth_user_alpha_0001",
+				contextId: "context_alpha_0001",
+				page: { limit: 20 },
+				sessionId: "session_alpha_0001",
+			})
+		).rejects.toMatchObject({ code: "authorization_denied" });
+		expect(listed).toBe(false);
 	});
 });

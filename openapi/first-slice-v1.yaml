@@ -47,6 +47,7 @@ paths:
       operationId: listOrganizations
       x-permission: platform.organization.read
       parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/Cursor'
         - $ref: '#/components/parameters/Limit'
       responses:

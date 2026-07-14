@@ -16,8 +16,10 @@
   },
   "dependencies": {
     "@hono/node-server": "2.0.8",
+    "@meridian/contracts-permissions": "workspace:*",
     "@meridian/contracts-platform-api": "workspace:*",
     "@meridian/domain-party": "workspace:*",
+    "@meridian/platform-authorization": "workspace:*",
     "@meridian/platform-identity": "workspace:*",
     "@meridian/persistence-platform-events-postgres": "workspace:*",
     "@meridian/persistence-platform-identity-postgres": "workspace:*",

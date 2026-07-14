@@ -26,7 +26,11 @@ export default function UserMenu() {
 
 	if (!session) {
 		return (
-			<Button render={<Link href="/login" />} variant="outline">
+			<Button
+				className="min-h-10"
+				render={<Link href="/login" />}
+				variant="outline"
+			>
 				Sign In
 			</Button>
 		);
@@ -34,7 +38,9 @@ export default function UserMenu() {
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger render={<Button variant="outline" />}>
+			<DropdownMenuTrigger
+				render={<Button className="min-h-10" variant="outline" />}
+			>
 				{session.user.name}
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="bg-card">

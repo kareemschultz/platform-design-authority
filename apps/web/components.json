@@ -4,12 +4,6 @@
   "rsc": true,
   "tsx": true,
   "rtl": true,
-  "pointer": true,
-  "theme": "blue",
-  "chartColor": "blue",
-  "font": "inter",
-  "fontHeading": "geist",
-  "radius": "default",
   "tailwind": {
     "config": "",
     "css": "../../packages/ui-web/core/src/styles/globals.css",
@@ -27,11 +21,5 @@
   },
   "menuColor": "default",
   "menuAccent": "subtle",
-  "provenance": {
-    "lifecycle": "controlled prototype",
-    "shadcnCli": "4.13.0",
-    "base": "Base UI",
-    "decision": "PDA-UX-028 and ADR-0022"
-  },
   "registries": {}
 }

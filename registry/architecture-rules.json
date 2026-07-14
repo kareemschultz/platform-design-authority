@@ -256,8 +256,35 @@
       "package_name": "@meridian/persistence-platform-identity-postgres",
       "owner": "platform.identity",
       "owner_package": "@meridian/platform-identity",
-      "tables": ["account", "session", "user", "verification"],
+      "tables": [
+        "account",
+        "invitation",
+        "member",
+        "organization",
+        "passkey",
+        "session",
+        "two_factor",
+        "user",
+        "verification"
+      ],
       "migration_directory": "packages/persistence/platform-identity-postgres/src/migrations"
+    },
+    {
+      "id": "platform-tenancy-postgres",
+      "package": "packages/persistence/platform-tenancy-postgres",
+      "package_name": "@meridian/persistence-platform-tenancy-postgres",
+      "owner": "platform.tenancy",
+      "owner_package": "@meridian/platform-tenancy",
+      "tables": [
+        "platform_active_context",
+        "platform_location",
+        "platform_membership",
+        "platform_membership_invitation",
+        "platform_organization",
+        "platform_tenant",
+        "platform_tenancy_command_receipt"
+      ],
+      "migration_directory": "packages/persistence/platform-tenancy-postgres/src/migrations"
     },
     {
       "id": "platform-events-postgres",
@@ -265,7 +292,9 @@
       "package_name": "@meridian/persistence-platform-events-postgres",
       "owner": "platform.events",
       "owner_package": "@meridian/platform-events",
-      "tables": ["platform_event_outbox"],
+      "tables": [
+        "platform_event_outbox"
+      ],
       "migration_directory": "packages/persistence/platform-events-postgres/src/migrations"
     }
   ],

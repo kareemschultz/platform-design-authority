@@ -36,7 +36,7 @@ import {
 export * from "./generated";
 export * from "./schemas";
 
-interface PlatformContractMeta {
+export interface PlatformContractMeta {
 	authorization?: "authenticated_session" | "authenticated_membership";
 	operationId: string;
 	permission?: string;
@@ -56,6 +56,8 @@ const base = oc
 		CONFLICT: { data: ProblemSchema },
 		FORBIDDEN: { data: ProblemSchema },
 		INTERNAL_SERVER_ERROR: { data: ProblemSchema },
+		NOT_FOUND: { data: ProblemSchema },
+		SERVICE_UNAVAILABLE: { data: ProblemSchema },
 		TOO_MANY_REQUESTS: { data: ProblemSchema },
 		UNAUTHORIZED: { data: ProblemSchema },
 	});

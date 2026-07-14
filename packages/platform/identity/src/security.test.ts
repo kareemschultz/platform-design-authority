@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
+import { requirePasskeyUserVerification } from "./auth";
+
 import {
 	getCookieAttributes,
 	getTrustedOrigins,
@@ -9,6 +11,24 @@ import {
 } from "./security";
 
 describe("auth security helpers", () => {
+	test("requires verified user presence for passkey ceremonies", () => {
+		expect(() =>
+			requirePasskeyUserVerification({
+				registrationInfo: { userVerified: false },
+			})
+		).toThrow("user verification");
+		expect(() =>
+			requirePasskeyUserVerification({
+				authenticationInfo: { userVerified: false },
+			})
+		).toThrow("user verification");
+		expect(() =>
+			requirePasskeyUserVerification({
+				authenticationInfo: { userVerified: true },
+			})
+		).not.toThrow();
+	});
+
 	test("requires exact URL origins", () => {
 		expect(toExactOrigin("https://app.example.test")).toBe(
 			"https://app.example.test"

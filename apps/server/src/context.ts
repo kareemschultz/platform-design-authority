@@ -1,3 +1,15 @@
+import type {
+	ActiveContext,
+	ActiveContextRequest,
+	CreateUserInvitationRequest,
+	CurrentIdentity,
+	Location,
+	Organization,
+	SuspendTenantMembershipRequest,
+	UpdateOrganizationRequest,
+	UserInvitation,
+	UserSummary,
+} from "@meridian/contracts-platform-api";
 import type { Context as HonoContext } from "hono";
 
 export interface IdentitySessionService {
@@ -27,11 +39,89 @@ export interface IdentitySession {
 }
 
 export interface CreateContextOptions {
+	application: TenancyApplication;
+	authorizer: PermissionAuthorizer;
 	context: HonoContext;
 	identity: IdentitySessionService;
 }
 
+export interface Page<T> {
+	items: T[];
+	nextCursor: string | null;
+}
+
+export interface TenancyApplication {
+	getCurrentIdentity: (input: {
+		activeContextId?: string;
+		assuranceLevel: CurrentIdentity["assuranceLevel"];
+		authUserId: string;
+		sessionId: string;
+	}) => Promise<CurrentIdentity>;
+	getOrganization: (input: {
+		authUserId: string;
+		contextId: string;
+		organizationId: string;
+		sessionId: string;
+	}) => Promise<Organization>;
+	inviteUser: (input: {
+		actorUserId: string;
+		body: CreateUserInvitationRequest;
+		correlationId: string;
+		idempotencyKey: string;
+		tenantId: string;
+	}) => Promise<UserInvitation>;
+	listLocations: (input: {
+		authUserId: string;
+		contextId: string;
+		organizationId: string;
+		page: { cursor?: string; limit: number };
+		sessionId: string;
+	}) => Promise<Page<Location>>;
+	listOrganizations: (input: {
+		authUserId: string;
+		page: { cursor?: string; limit: number };
+	}) => Promise<Page<Organization>>;
+	listUsers: (input: {
+		authUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number };
+		sessionId: string;
+	}) => Promise<Page<UserSummary>>;
+	setActiveContext: (input: {
+		authUserId: string;
+		body: ActiveContextRequest;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<ActiveContext>;
+	suspendMembership: (input: {
+		actorUserId: string;
+		body: SuspendTenantMembershipRequest;
+		correlationId: string;
+		idempotencyKey: string;
+		targetAuthUserId: string;
+		tenantId: string;
+	}) => Promise<UserSummary>;
+	updateOrganization: (input: {
+		authUserId: string;
+		body: UpdateOrganizationRequest;
+		contextId: string;
+		idempotencyKey: string;
+		organizationId: string;
+		sessionId: string;
+	}) => Promise<Organization>;
+}
+
+export interface PermissionAuthorizer {
+	can: (input: {
+		authUserId: string;
+		permission: string;
+		tenantId?: string;
+	}) => Promise<boolean>;
+}
+
 export async function createContext({
+	application,
+	authorizer,
 	context,
 	identity,
 }: CreateContextOptions) {
@@ -39,6 +129,9 @@ export async function createContext({
 		headers: context.req.raw.headers,
 	});
 	return {
+		application,
+		authorizer,
+		correlationId: crypto.randomUUID(),
 		session,
 	};
 }

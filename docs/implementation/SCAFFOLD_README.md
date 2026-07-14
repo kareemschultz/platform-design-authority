@@ -70,6 +70,7 @@ This prototype uses loopback-only web and server ports plus a private PostgreSQL
 ```bash
 export POSTGRES_PASSWORD="$(openssl rand -hex 24)"
 export BETTER_AUTH_SECRET="$(openssl rand -hex 32)"
+export IDENTITY_DISPLAY_NAME="Business Operating Platform"
 ```
 
 2. Build and start the complete local stack:
@@ -126,7 +127,7 @@ If you want to add app-specific blocks instead of shared primitives, run the pin
 - Logs: bun run docker:logs
 - Stop: bun run docker:down
 
-`POSTGRES_PASSWORD` and `BETTER_AUTH_SECRET` are required. PostgreSQL is not published to the host. Backup, restore, and migration notes are in `ops/postgres/README.md`.
+`POSTGRES_PASSWORD`, `BETTER_AUTH_SECRET`, and the non-secret tenant-visible `IDENTITY_DISPLAY_NAME` are required. PostgreSQL is not published to the host. Backup, restore, and migration notes are in `ops/postgres/README.md`.
 
 For more details, see the guide on [Deploying with Docker Compose](https://www.better-t-stack.dev/docs/guides/docker).
 

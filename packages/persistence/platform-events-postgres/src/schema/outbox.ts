@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
 	index,
 	integer,
@@ -5,6 +6,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const eventOutbox = pgTable(
@@ -62,5 +64,8 @@ export const eventOutbox = pgTable(
 			table.tenantId,
 			table.occurredAt
 		),
+		uniqueIndex("platform_event_outbox_logical_idempotency_uidx")
+			.on(table.tenantId, table.name, table.idempotencyKey)
+			.where(sql`${table.idempotencyKey} is not null`),
 	]
 );

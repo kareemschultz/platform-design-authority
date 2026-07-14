@@ -7,6 +7,7 @@ const validEnv = {
 	BETTER_AUTH_URL: "http://localhost:3000",
 	CORS_ORIGIN: "http://localhost:3001",
 	DATABASE_URL: "postgresql://postgres:unit-test@localhost:5432/meridian",
+	IDENTITY_DISPLAY_NAME: "Business Operating Platform",
 };
 
 const loaderScript = [

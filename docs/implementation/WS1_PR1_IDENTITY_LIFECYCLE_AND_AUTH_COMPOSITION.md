@@ -1,7 +1,7 @@
 ---
 document_id: PDA-IMPL-001
 title: WS1 PR1 Identity Lifecycle and Better Auth Composition Manifest
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Identity
 last_reviewed: 2026-07-13
@@ -24,7 +24,7 @@ This manifest closes the design-evidence portion of PDA-RDM-008 G4 for a named c
 | Passkey | `@better-auth/passkey@1.6.23` | WebAuthn enrollment and authentication | package locked in PR1; plugin enabled in PR3 |
 | Admin | `better-auth@1.6.23` | server-side mechanics only behind platform policy wrappers | PR3; native HTTP authority routes intercepted |
 | Organization | `better-auth@1.6.23` | minimum authentication projection only; never tenancy authority | PR3; native mutation and `set-active` routes intercepted |
-| Test Utils | `better-auth@1.6.23` | deterministic test-only composition | test builds only; prohibited from production composition |
+| Test Utils | `better-auth@1.6.23` + `vitest@4.1.10` | deterministic test-only composition | Node/Vitest test build only under TECH-LESSON-035; prohibited from production composition |
 | Contract-first API | `@orpc/contract@1.14.7` | transport-neutral contract derived from canonical OpenAPI metadata | PR1 |
 
 No community, payment, billing, tracking, AI, managed-infrastructure, OAuth-provider, OIDC-provider, Agent Auth, MCP, SSO, SCIM, anonymous, username, phone-number, magic-link, or Expo plugin is enabled by this selection. Expo remains separately gated by PDA-PLT-028.
@@ -39,7 +39,7 @@ The inventories below were produced from the installed exact packages on 2026-07
 - Organization exposes twenty-two operations covering organization reads/mutations, active organization, membership, and invitation behavior. It adds organization, member, invitation, and `session.activeOrganizationId` storage. These records are authentication projections only; Platform Tenancy remains authoritative.
 - Test Utils exposes no public runtime endpoint and is composed only in tests.
 
-Every version or plugin change must repeat this inventory and review the diff under PDA-PLT-028 and TECH-LESSON-032.
+Every version or plugin change must repeat this inventory and review the diff under PDA-PLT-028 and TECH-LESSON-032. The exact Passkey implementation's user-verification caveat and compensating post-verification guard are recorded in TECH-LESSON-034.
 
 ## Native-route policy
 
@@ -61,7 +61,7 @@ The client requests an organization context without submitting tenant authority.
 
 ## Secrets, data flow, and rollback
 
-Only `@meridian/tooling-env` supplies `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BETTER_AUTH_TRUSTED_ORIGINS`, `CORS_ORIGIN`, and `DATABASE_URL`. This manifest records names, never values. Secrets have no development default and do not enter logs, errors, events, client bundles, or repository fixtures.
+Only `@meridian/tooling-env` supplies `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BETTER_AUTH_TRUSTED_ORIGINS`, `CORS_ORIGIN`, `DATABASE_URL`, and the non-secret `IDENTITY_DISPLAY_NAME`. This manifest records names, never secret values. Secrets have no development default and do not enter logs, errors, events, client bundles, or repository fixtures.
 
 The browser sends credentials/factor assertions to the composition-mounted identity handler. Platform Identity validates authentication and returns session state. `/v1` commands resolve the session, active context, Party link when required, current permissions, policy outcome, and entitlements independently. Owner commands persist only their own state and append canonical events/audit through published ports.
 
@@ -69,4 +69,4 @@ Rollback disables the newly selected plugin in composition, restores the prior r
 
 ## PR1 evidence and remaining gates
 
-PR1 evidence consists of canonical OpenAPI/endpoint parity, generated contract freshness, contract semantic-parity tests, native-route denial tests, path-aware architecture positive/negative tests, exact dependency locks, event-envelope/schema validation, full repository typecheck/test/lint/build, and Bun/Node health probes. PR3 supplies factor enrollment/recovery, invitation/suspension, two-tenant isolation, drift reconciliation, security abuse, and authentication integration evidence. PR7 supplies measured session-revocation propagation. ADR-0027 specialist review remains a hard prerequisite to PR2 merge.
+PR1 evidence consists of canonical OpenAPI/endpoint parity, generated contract freshness, contract semantic-parity tests, native-route denial tests, path-aware architecture positive/negative tests, exact dependency locks, event-envelope/schema validation, full repository typecheck/test/lint/build, and Bun/Node health probes. PR3 adds the selected schema and composition, a Node/Vitest Test Utils sign-up/session proof, Passkey user-verification denial guards, invitation/suspension atomicity, multi-tab active-context behavior, and two-tenant constraint/repository denial evidence. Complete factor enrollment, sign-in, recovery, abuse, assurance provenance, and cross-runtime evidence remains an explicit PR9 exit gate rather than being inferred from configuration. PR7 supplies measured session-revocation propagation.

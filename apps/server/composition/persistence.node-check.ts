@@ -39,10 +39,18 @@ try {
 	await runMigrationStreams(pool);
 	await runMigrationStreams(pool);
 
-	const outboxTable = await pool.query<{ value: string | null }>(
-		"SELECT to_regclass('public.platform_event_outbox')::text AS value"
+	const ownerTables = await pool.query<{
+		outbox: string | null;
+		tenancy: string | null;
+		tenancyReceipts: string | null;
+	}>(
+		"SELECT to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
 	);
-	assert.equal(outboxTable.rows[0]?.value, "platform_event_outbox");
+	assert.deepEqual(ownerTables.rows[0], {
+		outbox: "platform_event_outbox",
+		tenancy: "platform_tenant",
+		tenancyReceipts: "platform_tenancy_command_receipt",
+	});
 
 	const failingStream: MigrationStream = {
 		id: "test.node-failure",

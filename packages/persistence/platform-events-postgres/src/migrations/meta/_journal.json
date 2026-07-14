@@ -8,6 +8,13 @@
       "when": 1783982474894,
       "tag": "0000_clammy_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783989449461,
+      "tag": "0001_pink_valkyrie",
+      "breakpoints": true
     }
   ]
 }

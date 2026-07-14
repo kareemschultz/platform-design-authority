@@ -55,6 +55,7 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET to at least 32 characters for local Compose}
       BETTER_AUTH_TRUSTED_ORIGINS: http://localhost:3000,http://localhost:3001
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for local Compose}@postgres:5432/meridian
+      IDENTITY_DISPLAY_NAME: Business Operating Platform
     healthcheck:
       test:
         [

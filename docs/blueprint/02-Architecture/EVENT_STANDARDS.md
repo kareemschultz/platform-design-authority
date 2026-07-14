@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ARC-005
 title: Event Standards
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
-related_adrs: [ADR-0016]
+related_adrs: [ADR-0016, ADR-0028]
 ---
 
 # Event Standards
@@ -63,7 +63,8 @@ Every event contains:
 - Globally unique event identifier
 - Event name and major version
 - Occurred-at and published-at timestamps
-- Tenant and organization scope
+- An explicit `Tenant` or `Platform` scope discriminator
+- Tenant and organization scope for Tenant-scoped facts
 - Producer namespace and authoritative capability
 - Actor and source channel
 - Correlation, causation, idempotency, and trace identifiers where applicable
@@ -84,6 +85,8 @@ Every event contains:
 9. Internal events and externally delivered webhooks are distinct contracts even when a webhook is derived from an event.
 10. A cached event or replay never grants current authorization.
 11. Every event reference in governed documentation must resolve to one canonical definition in an owning specification.
+12. Tenant-scoped events require a real tenant identifier. Platform-scoped events prohibit tenant, organization, legal-entity, and location scope and are allowed only for explicitly registered platform-global facts under ADR-0028.
+13. A request's active tenant, a membership list, or a synthetic “system tenant” must not be used to attribute a platform-global identity or security fact.
 
 ## Schema Evolution
 

@@ -71,6 +71,7 @@ function event(id: string): OutboxEvent<{ change: string }> {
 		retentionClass: "platform-security-evidence",
 		schemaRef: "schemas/events/platform.membership.activated.v1.schema.json",
 		schemaVersion: "1.0.0",
+		scopeType: "Tenant",
 		sourceChannel: "test",
 		tenantId: "tenant_pr2",
 	};
@@ -93,6 +94,7 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform.identity",
 			"platform.tenancy",
 			"platform.entitlements",
+			"platform.audit",
 			"platform.events",
 			"party.records",
 		]);
@@ -118,11 +120,14 @@ describe.serial("WS1 persistence orchestration", () => {
 			"party_record",
 			"passkey",
 			"platform_active_context",
+			"platform_audit_privacy_overlay",
+			"platform_audit_record",
 			"platform_delegation",
 			"platform_entitlement",
 			"platform_entitlement_change",
 			"platform_entitlement_command_receipt",
 			"platform_event_outbox",
+			"platform_identity_session_command_receipt",
 			"platform_location",
 			"platform_membership",
 			"platform_membership_invitation",
@@ -142,6 +147,7 @@ describe.serial("WS1 persistence orchestration", () => {
 		);
 		expect(histories.rows.map((row) => row.table_name)).toEqual([
 			"party_migrations",
+			"platform_audit_migrations",
 			"platform_entitlements_migrations",
 			"platform_events_migrations",
 			"platform_identity_migrations",
@@ -1223,8 +1229,9 @@ describe.serial("WS1 persistence orchestration", () => {
 			ids,
 			unitOfWork: rollbackUnitOfWork,
 		});
-		await expect(
-			rollbackService.change({
+		let rollbackFailure: unknown;
+		try {
+			await rollbackService.change({
 				actorId: "user_entitlement_admin",
 				capabilityId: "platform.authorization",
 				correlationId: "correlation_entitlement_rollback",
@@ -1234,8 +1241,13 @@ describe.serial("WS1 persistence orchestration", () => {
 				startsAt: new Date("2026-07-14T00:00:00.000Z"),
 				state: "Active",
 				tenantId: "tenant_entitlement_a",
-			})
-		).rejects.toThrow("entitlement outbox rollback proof");
+			});
+		} catch (error) {
+			rollbackFailure = error;
+		}
+		expect((rollbackFailure as Error).message).toBe(
+			"entitlement outbox rollback proof"
+		);
 		expect(
 			await createEntitlementRepository(testPool).getByScope({
 				capabilityId: "platform.authorization",

@@ -102,10 +102,12 @@
         "@meridian/contracts-platform-api": "workspace:*",
         "@meridian/domain-party": "workspace:*",
         "@meridian/persistence-party-postgres": "workspace:*",
+        "@meridian/persistence-platform-audit-postgres": "workspace:*",
         "@meridian/persistence-platform-entitlements-postgres": "workspace:*",
         "@meridian/persistence-platform-events-postgres": "workspace:*",
         "@meridian/persistence-platform-identity-postgres": "workspace:*",
         "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
+        "@meridian/platform-audit": "workspace:*",
         "@meridian/platform-authorization": "workspace:*",
         "@meridian/platform-entitlements": "workspace:*",
         "@meridian/platform-events": "workspace:*",
@@ -250,6 +252,22 @@
         "typescript": "^6",
       },
     },
+    "packages/persistence/platform-audit-postgres": {
+      "name": "@meridian/persistence-platform-audit-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/platform-audit": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
+        "typescript": "^6",
+      },
+    },
     "packages/persistence/platform-entitlements-postgres": {
       "name": "@meridian/persistence-platform-entitlements-postgres",
       "version": "0.0.0",
@@ -327,6 +345,19 @@
         "typescript": "^6",
       },
     },
+    "packages/platform/audit": {
+      "name": "@meridian/platform-audit",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/contracts-events": "workspace:*",
+        "@meridian/contracts-platform-api": "workspace:*",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
     "packages/platform/authorization": {
       "name": "@meridian/platform-authorization",
       "version": "0.0.0",
@@ -371,6 +402,8 @@
       "name": "@meridian/platform-identity",
       "dependencies": {
         "@better-auth/passkey": "catalog:",
+        "@meridian/contracts-events": "workspace:*",
+        "@meridian/contracts-platform-api": "workspace:*",
         "better-auth": "catalog:",
         "zod": "catalog:",
       },
@@ -931,6 +964,8 @@
 
     "@meridian/persistence-party-postgres": ["@meridian/persistence-party-postgres@workspace:packages/persistence/party-postgres"],
 
+    "@meridian/persistence-platform-audit-postgres": ["@meridian/persistence-platform-audit-postgres@workspace:packages/persistence/platform-audit-postgres"],
+
     "@meridian/persistence-platform-entitlements-postgres": ["@meridian/persistence-platform-entitlements-postgres@workspace:packages/persistence/platform-entitlements-postgres"],
 
     "@meridian/persistence-platform-events-postgres": ["@meridian/persistence-platform-events-postgres@workspace:packages/persistence/platform-events-postgres"],
@@ -938,6 +973,8 @@
     "@meridian/persistence-platform-identity-postgres": ["@meridian/persistence-platform-identity-postgres@workspace:packages/persistence/platform-identity-postgres"],
 
     "@meridian/persistence-platform-tenancy-postgres": ["@meridian/persistence-platform-tenancy-postgres@workspace:packages/persistence/platform-tenancy-postgres"],
+
+    "@meridian/platform-audit": ["@meridian/platform-audit@workspace:packages/platform/audit"],
 
     "@meridian/platform-authorization": ["@meridian/platform-authorization@workspace:packages/platform/authorization"],
 

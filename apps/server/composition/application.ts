@@ -1,7 +1,9 @@
 import { createTenancyApplication } from "@meridian/platform-tenancy";
 
+import { auditTransportApplication } from "./audit";
 import { permissionAuthorizer } from "./authorization";
 import { entitlementTransportApplication } from "./entitlements";
+import { identitySessionTransportApplication } from "./identity";
 import { partyTransportApplication } from "./party";
 import {
 	identityDirectory,
@@ -17,7 +19,9 @@ const tenancyApplication = createTenancyApplication({
 });
 
 export const serverApplication = {
+	...auditTransportApplication,
 	...entitlementTransportApplication,
+	...identitySessionTransportApplication,
 	...tenancyApplication,
 	...partyTransportApplication,
 };

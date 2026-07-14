@@ -1,11 +1,11 @@
 ---
 document_id: PDA-RDM-008
 title: "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization"
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
-related_adrs: [ADR-0002, ADR-0003, ADR-0006, ADR-0007, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
+related_adrs: [ADR-0002, ADR-0003, ADR-0006, ADR-0007, ADR-0014, ADR-0016, ADR-0020, ADR-0027, ADR-0028]
 ---
 
 # WS1 Implementation Plan: Identity, Tenancy, Party, Authorization
@@ -193,7 +193,8 @@ type AuthorizationDecision =
 
 type AuditRecord = {
   id: Id<"AuditRecord">;
-  tenantId: Id<"Tenant">;
+  scopeType: "Tenant" | "Platform";
+  tenantId?: Id<"Tenant">;
   organizationId?: Id<"Organization">;
   locationId?: Id<"Location">;
   actorType: "human" | "service" | "device" | "integration" | "automation" | "ai" | "support";
@@ -219,6 +220,8 @@ type AuditRecord = {
   metadata: Readonly<Record<string, unknown>>;
 };
 ```
+
+ADR-0028 governs the narrow Platform-scoped case for account/session security evidence. Tenant APIs still require active context and return only Tenant-scoped Audit records; Platform-scoped records are not exposed through `GET /v1/audit-records`.
 
 Authentication may exist before a Party link is provisioned, matching `CurrentIdentity.partyId` nullability. Business commands that require a Party use a separate `requirePartyLink` guard. Active context is a server-verified reference, never authority merely because the client presents it. PR1 must choose a multi-tab-safe context design; a session-global organization mutation that silently changes another tab is prohibited by PDA-PLT-020.
 

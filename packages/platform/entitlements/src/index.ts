@@ -648,6 +648,7 @@ async function executeEntitlementChange(
 		retentionClass: "platform-security-evidence",
 		schemaRef: `schemas/events/${eventName}.schema.json`,
 		schemaVersion: "1.0.0",
+		scopeType: "Tenant",
 		sourceChannel: "internal-command",
 		tenantId: saved.tenantId,
 	});

@@ -15,6 +15,13 @@
       "when": 1783989449461,
       "tag": "0001_pink_valkyrie",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784008269923,
+      "tag": "0002_right_prism",
+      "breakpoints": true
     }
   ]
 }

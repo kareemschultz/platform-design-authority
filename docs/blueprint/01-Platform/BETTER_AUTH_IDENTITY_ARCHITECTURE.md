@@ -1,11 +1,11 @@
 ---
 document_id: PDA-PLT-020
 title: Better Auth Identity Architecture
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
-related_adrs: [ADR-0006, ADR-0007, ADR-0016]
+related_adrs: [ADR-0006, ADR-0007, ADR-0016, ADR-0028]
 ---
 
 # Better Auth Identity Architecture
@@ -218,6 +218,8 @@ Hono mounts the owned Better Auth handler for `GET` and `POST`; narrowly scoped 
 Next.js and Expo integrations are adapters only. Expo requires secure storage, deep-link and custom-scheme allowlists, app/universal links, cookie exchange, recovery, device-loss, and revocation evidence. Neither framework integration performs business authorization.
 
 ## Event Integration
+
+Authentication accounts and sessions are Platform Identity aggregates rather than tenant aggregates. ADR-0028 registers `platform.session.revoked.v1` as Platform-scoped unless a future event describes a separate tenant-membership fact. `platform.session.created.v1` remains a registered event name, but its payload and scope contract are deferred and no producer may emit it until that contract is governed. Session-event payloads must not contain tokens, cookies, raw IP addresses, user-agent strings, credentials, factors, or tenant-membership lists.
 
 - `platform.user.registered.v1`
 - `platform.session.created.v1`

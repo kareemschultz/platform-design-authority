@@ -2,6 +2,7 @@ import type { PermissionId } from "@meridian/contracts-permissions";
 import type {
 	ActiveContext,
 	ActiveContextRequest,
+	AuditRecord,
 	AuthorizationDecision,
 	CreateOrganizationParty,
 	CreatePartyIdentityLinkRequest,
@@ -16,6 +17,7 @@ import type {
 	PlatformIdentityLink,
 	Role,
 	RoleAssignment,
+	SessionSummary,
 	SuspendTenantMembershipRequest,
 	UpdateOrganizationRequest,
 	UpdatePartyRequest,
@@ -197,8 +199,41 @@ export interface EntitlementsApplication {
 	}) => Promise<Page<Entitlement>>;
 }
 
+export interface IdentitySessionsApplication {
+	listCurrentUserSessions: (input: {
+		authUserId: string;
+		currentSessionId: string;
+		page: { cursor?: string; limit: number };
+	}) => Promise<Page<SessionSummary>>;
+	revokeCurrentUserSession: (input: {
+		authUserId: string;
+		correlationId: string;
+		currentSessionId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<void>;
+}
+
+export interface AuditApplication {
+	listAuditRecords: (input: {
+		actorUserId: string;
+		correlationId: string;
+		page: {
+			action?: string;
+			actorUserId?: string;
+			cursor?: string;
+			limit: number;
+			occurredAfter?: Date;
+			occurredBefore?: Date;
+			tenantId: string;
+		};
+	}) => Promise<Page<AuditRecord>>;
+}
+
 export interface ServerApplication
-	extends EntitlementsApplication,
+	extends AuditApplication,
+		EntitlementsApplication,
+		IdentitySessionsApplication,
 		PartyApplication,
 		TenancyApplication {}
 

@@ -20,6 +20,7 @@ describe("OutboxAppendPort", () => {
 			retentionClass: "platform-security-evidence",
 			schemaRef: "schemas/events/platform.membership.activated.v1.schema.json",
 			schemaVersion: "1.0.0",
+			scopeType: "Tenant",
 			tenantId: "tenant_demo",
 		};
 

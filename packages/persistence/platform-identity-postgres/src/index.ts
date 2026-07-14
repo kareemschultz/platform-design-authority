@@ -5,9 +5,11 @@ import {
 	type IdentityDirectoryPort,
 	type IdentityOrganizationProjection,
 	type IdentityPersistence,
+	type IdentitySessionCommandReceipt,
+	type IdentitySessionRepository,
 } from "@meridian/platform-identity";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool, PoolClient } from "pg";
@@ -53,6 +55,120 @@ export function createIdentityDirectory(
 				displayName: row.name,
 				email: row.email,
 			}));
+		},
+	};
+}
+
+function sessionReceipt(
+	row: typeof schema.identitySessionCommandReceipt.$inferSelect
+): IdentitySessionCommandReceipt {
+	return {
+		authUserId: row.authUserId,
+		...(row.completedAt ? { completedAt: row.completedAt } : {}),
+		idempotencyKey: row.idempotencyKey,
+		operation: "session.revoke",
+		requestFingerprint: row.requestFingerprint,
+		sessionId: row.sessionId,
+	};
+}
+
+export function createIdentitySessionRepository(
+	connection: IdentityPostgresConnection
+): IdentitySessionRepository {
+	const database = drizzle(connection, { schema });
+	const findCommandReceipt: IdentitySessionRepository["findCommandReceipt"] =
+		async (input) => {
+			const rows = await database
+				.select()
+				.from(schema.identitySessionCommandReceipt)
+				.where(
+					and(
+						eq(
+							schema.identitySessionCommandReceipt.authUserId,
+							input.authUserId
+						),
+						eq(schema.identitySessionCommandReceipt.operation, input.operation),
+						eq(
+							schema.identitySessionCommandReceipt.idempotencyKey,
+							input.idempotencyKey
+						)
+					)
+				)
+				.limit(1);
+			return rows[0] ? sessionReceipt(rows[0]) : null;
+		};
+	return {
+		async claimCommandReceipt(receipt) {
+			const inserted = await database
+				.insert(schema.identitySessionCommandReceipt)
+				.values(receipt)
+				.onConflictDoNothing()
+				.returning();
+			if (inserted[0]) {
+				return { inserted: true, receipt: sessionReceipt(inserted[0]) };
+			}
+			const existing = await findCommandReceipt(receipt);
+			if (!existing) {
+				throw new Error("Session command receipt conflict was not readable");
+			}
+			return { inserted: false, receipt: existing };
+		},
+
+		async completeCommandReceipt(receipt) {
+			await database
+				.update(schema.identitySessionCommandReceipt)
+				.set({ completedAt: receipt.completedAt })
+				.where(
+					and(
+						eq(
+							schema.identitySessionCommandReceipt.authUserId,
+							receipt.authUserId
+						),
+						eq(
+							schema.identitySessionCommandReceipt.operation,
+							receipt.operation
+						),
+						eq(
+							schema.identitySessionCommandReceipt.idempotencyKey,
+							receipt.idempotencyKey
+						)
+					)
+				);
+		},
+
+		findCommandReceipt,
+
+		async findOwned(authUserId, sessionId) {
+			const rows = await database
+				.select()
+				.from(schema.session)
+				.where(
+					and(
+						eq(schema.session.userId, authUserId),
+						eq(schema.session.id, sessionId)
+					)
+				)
+				.limit(1);
+			return rows[0] ?? null;
+		},
+
+		listOwned: (authUserId) =>
+			database
+				.select()
+				.from(schema.session)
+				.where(eq(schema.session.userId, authUserId)),
+
+		async revokeOwned(authUserId, sessionId) {
+			const deleted = await database
+				.delete(schema.session)
+				.where(
+					and(
+						eq(schema.session.userId, authUserId),
+						eq(schema.session.id, sessionId)
+					)
+				)
+				.returning({ id: schema.session.id });
+			return deleted.length > 0;
 		},
 	};
 }

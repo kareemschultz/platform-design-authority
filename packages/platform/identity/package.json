@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@better-auth/passkey": "catalog:",
+    "@meridian/contracts-events": "workspace:*",
+    "@meridian/contracts-platform-api": "workspace:*",
     "better-auth": "catalog:",
     "zod": "catalog:"
   },

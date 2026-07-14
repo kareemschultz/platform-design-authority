@@ -360,6 +360,23 @@
       "review_evidence": null
     },
     {
+      "document_id": "ADR-0028",
+      "path": "docs/blueprint/18-Decisions/ADR-0028-EXPLICIT-SCOPE-FOR-PLATFORM-GLOBAL-SECURITY-FACTS.md",
+      "title": "Explicit Scope for Platform-Global Security Facts",
+      "version": "0.1.0",
+      "status": "Proposed",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-13",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0006",
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0027"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-AI-001",
       "path": "docs/blueprint/06-AI/README.md",
       "title": "AI Platform Section Index",
@@ -668,12 +685,13 @@
       "document_id": "PDA-ARC-005",
       "path": "docs/blueprint/02-Architecture/EVENT_STANDARDS.md",
       "title": "Event Standards",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [
-        "ADR-0016"
+        "ADR-0016",
+        "ADR-0028"
       ],
       "review_evidence": null
     },
@@ -1174,6 +1192,23 @@
         "ADR-0007",
         "ADR-0014",
         "ADR-0027"
+      ],
+      "review_evidence": []
+    },
+    {
+      "document_id": "PDA-DAT-018",
+      "path": "docs/blueprint/10-Data/AUDIT_AND_SESSION_REVOCATION_PROTOTYPE_SCHEMA_CLASSIFICATION_AND_ISOLATION.md",
+      "title": "Audit and Session Revocation Prototype Schema Classification and Isolation",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-13",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0006",
+        "ADR-0014",
+        "ADR-0027",
+        "ADR-0028"
       ],
       "review_evidence": []
     },
@@ -2030,7 +2065,7 @@
       "document_id": "PDA-ENGR-012",
       "path": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-14",
@@ -2038,7 +2073,8 @@
         "ADR-0002",
         "ADR-0003",
         "ADR-0020",
-        "ADR-0027"
+        "ADR-0027",
+        "ADR-0028"
       ],
       "review_evidence": null
     },
@@ -2817,12 +2853,13 @@
       "document_id": "PDA-PLT-007",
       "path": "docs/blueprint/01-Platform/AUDIT_AND_ACTIVITY.md",
       "title": "Audit and Activity",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-10",
       "related_adrs": [
-        "ADR-0014"
+        "ADR-0014",
+        "ADR-0028"
       ],
       "review_evidence": null
     },
@@ -2967,14 +3004,15 @@
       "document_id": "PDA-PLT-020",
       "path": "docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md",
       "title": "Better Auth Identity Architecture",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-12",
       "related_adrs": [
         "ADR-0006",
         "ADR-0007",
-        "ADR-0016"
+        "ADR-0016",
+        "ADR-0028"
       ],
       "review_evidence": null
     },
@@ -3185,7 +3223,7 @@
       "document_id": "PDA-RDM-008",
       "path": "docs/blueprint/17-Roadmap/WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md",
       "title": "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-13",
@@ -3197,7 +3235,8 @@
         "ADR-0014",
         "ADR-0016",
         "ADR-0020",
-        "ADR-0027"
+        "ADR-0027",
+        "ADR-0028"
       ],
       "review_evidence": null
     },

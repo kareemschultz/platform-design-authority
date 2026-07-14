@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -57,6 +57,17 @@ The baseline below was independently confirmed against `main` at `6b3dabae9e8871
 
 The current counts are evidence of the starting point, not immutable targets. The approved PR1 contract corrections will increase endpoint, permission, and event counts; generated registries become the new exact source after that propagation.
 
+### 2.1 Claude Code independent review disposition
+
+The independent review on PR #63 found four plan-precision defects. All are accepted at the submitted severity. Correcting the plan closes the review defect; it does not pre-close the architecture, registry, contract, or performance evidence assigned to PR1 and later implementation PRs.
+
+| Finding | Classification | Priority | Remediation in v0.1.1 | Remaining implementation closure |
+|---|---|---:|---|---|
+| "ADR-0027 applies without exception" ignored the proposed worker process/pool revisit trigger | Accepted | P1 | G4 now makes the worker topology an explicit ADR-0027 revisit and blocks worker implementation until reviewed | PR1 amends or supersedes ADR-0027, propagates architecture rules, and records Platform Architecture, Data Platform, and Security review at controlled-prototype scope |
+| Required Persistence owner registrations were implicit for Catalog, Inventory, and Numbering | Accepted | P2 | G4 and section 5 now name all three required owner registrations | PR1 updates PDA-ENGR-012 source ownership metadata, regenerates `registry/architecture-rules.json`, and passes positive/negative ownership tests |
+| Transfer dispatch lacked an exact proposed permission ID | Accepted | P3 | G2 now proposes `inventory.transfer.dispatch`, subject to canonical PR1 propagation | PR1 adds it to PDA-PLT-027, OpenAPI endpoint metadata, generated registries/contracts, and authorization tests |
+| WS5 budget wording conflated lease duration, synchronization performance, and queue capacity | Accepted | P3 | Section 9 separates each PDA-RDM-006 measure and assigns its correct meaning | WS5, not WS2, supplies end-to-end measurement for those transport/lease budgets |
+
 ## 3. Scope and Capability Depth
 
 WS2 owns exactly these 14 first-slice business capabilities.
@@ -104,7 +115,7 @@ PR1 updates owner specifications, OpenAPI, permissions, endpoint mappings, JSON 
 - a dedicated Product activation operation uses `catalog.product.activate` and produces `catalog.product.activated.v1`;
 - a dedicated Product archive operation uses `catalog.product.archive` and transitions to Archived through an explicit preconditioned command;
 - the Catalog owner specification adds a canonical past-tense archive event if PR1 confirms that the archive fact is externally meaningful; it must not misuse `catalog.product.discontinued.v1` because Discontinued and Archived are distinct PDA-ARC-013 states;
-- a dedicated Stock Transfer dispatch operation uses a new canonical dispatch permission and produces `inventory.stock-transfer.dispatched.v1`;
+- a dedicated Stock Transfer dispatch operation uses the proposed canonical permission `inventory.transfer.dispatch` and produces `inventory.stock-transfer.dispatched.v1`; the permission becomes authoritative only when PDA-PLT-027 and generated registries are updated in PR1;
 - PR1 adds minimum read permissions and list/detail operations for adjustments, counts, and transfers so PR6 can reload, link, and audit workflow state;
 - every consequential command declares idempotency, optimistic concurrency or locking, authorization, entitlement, audit, event, retry, reversal/compensation, and safe error semantics.
 
@@ -126,13 +137,15 @@ Drizzle remains selected only if the spike passes. A Kysely or SQL fallback requ
 
 ### G4 — Owner-specific persistence and composition
 
-ADR-0027 applies without exception:
+ADR-0027's owner-specific adapter, logical ownership, transaction-scope, and runtime-neutrality rules remain binding. The proposed separate worker application and process-local pool are an **ADR-0027 revisit trigger**, not an existing allowance:
 
 - runtime-neutral owner cores publish ports and never import Drizzle, `pg`, migrations, environment access, Hono, oRPC transports, or Bun globals;
 - concrete schemas, Drizzle adapters, and owner migration streams live in `packages/persistence/catalog-postgres`, `inventory-postgres`, `platform-numbering-postgres`, and any explicitly approved supporting Platform owner package;
 - logical table and migration ownership remains Catalog, Inventory, or the named Platform owner even though concrete artifacts live in the Persistence family;
-- the server composition root binds HTTP/application dependencies; the worker composition root binds outbox delivery and projection consumers;
-- one composition-owned pool and transaction coordinator are reused; no owner mutates another owner's private tables inside a shared transaction;
+- PR1 must amend or supersede ADR-0027 before `apps/worker` implementation, deciding whether delivery runs in a separate worker process with one process-local pool or remains bound through the existing server composition root; Platform Architecture, Data Platform, and Security review are required at controlled-prototype scope;
+- the selected topology must be represented in PDA-ENGR-012 and `registry/architecture-rules.json`, with exact composition-root and connection-lifecycle tests; until that propagation merges, `apps/worker/composition` and a second process pool are proposed rather than authorized;
+- each approved process owns at most one bounded pool and its transaction coordinator; pools are not shared through global service location, and no owner mutates another owner's private tables inside a shared transaction;
+- PR1 registers `catalog-postgres` to Catalog, `inventory-postgres` to Inventory, and `platform-numbering-postgres` to Platform Numbering in the authoritative Persistence ownership source, then regenerates `registry/architecture-rules.json` and adds negative ownership probes;
 - Inventory consumes published Catalog contracts and stable IDs, never Catalog repositories, tables, migrations, or implementation modules.
 
 ### G5 — Data, isolation, and classification before migration
@@ -156,10 +169,10 @@ The outbox remains storage, not publication, until PR4 proves section 8. No PR m
 | `packages/platform/events` | delivery policy, event envelope contract, retry/dead-letter/replay ports | owner event meaning or external webhooks |
 | `packages/persistence/platform-events-postgres` | outbox claim/lease state, attempts, dead-letter evidence, and consumer receipts owned by Event Backbone | business projections or external webhook delivery |
 | `apps/server/composition` | bind HTTP procedures and owner adapters to the existing pool and services | business rules or cross-owner table orchestration |
-| `apps/worker/composition` | construct the event publisher and registered consumers over injected adapters | domain ownership or unbounded arbitrary code execution |
+| proposed `apps/worker/composition` | after the G4 ADR revisit, construct the event publisher, registered consumers, and approved process-local connection lifecycle over injected adapters | implementation before ADR/ruleset closure, domain ownership, or unbounded arbitrary code execution |
 | `apps/web` and `@meridian/ui-web` | accessible Catalog/Inventory workflow UI over published clients | business authority, tenant trust, or direct database access |
 
-If bounded import orchestration requires a new `packages/platform/import-export` owner core and matching Persistence adapter, PR1 must register that package and owner explicitly. The server route must not become an unowned job database.
+PR1 must register the Catalog, Inventory, and Platform Numbering Persistence owners named in G4. If bounded import orchestration requires a new `packages/platform/import-export` owner core and matching Persistence adapter, PR1 must register that additional package and owner explicitly. The server route must not become an unowned job database.
 
 ## 6. Domain Model and Invariants
 
@@ -291,7 +304,7 @@ The first consumers are bounded, tenant-safe projections such as Catalog search 
 - encrypted local SQLite stores and local atomic workflow transactions;
 - signed batch upload/download transport, watermarks, resume, backpressure, and compatibility windows;
 - general cross-capability conflict orchestration, privacy tombstones, and device purge acknowledgement;
-- 24-hour disconnected and 1,000/10,000-operation synchronization budgets.
+- the separately governed PDA-RDM-006 transport and lease measures: a 24-hour default valid offline lease duration, first acknowledgement within 5 seconds p95 after reconnect, synchronization of 1,000 queued ordinary operations within 10 minutes p95, and a capacity envelope of up to 10,000 queued offline operations per device before mandatory intervention.
 
 WS2 tests the Inventory boundary with synthetic verified lease facts; it must not mint a lease, trust a client assertion, or claim end-to-end offline sync. WS5 later supplies the verified transport and authority context to the same command port.
 
@@ -326,10 +339,10 @@ PR6 supplies keyboard, focus, screen-reader, zoom/reflow, touch target, reduced-
 
 Every PR has one issue, branch, worktree, explicit owner, migration/API/security/privacy/accessibility/offline/operations disposition, validation evidence, and handoff under PDA-ENGR-014. Dependent work does not begin from an unmerged branch.
 
-1. **PR1 — Governance, contracts, schemas, and ledger spike.** Propagate G2 contract corrections; resolve lifecycle/archive and transfer-dispatch semantics; add missing read surfaces; classify all proposed tables; create/verify all event schemas; regenerate contracts/registries; register package ownership and migration streams; run Drizzle/ledger/query spikes; record exact locks and ADR/technology/risk consequences. No broad business migration.
+1. **PR1 — Governance, contracts, schemas, and ledger spike.** Propagate G2 contract corrections; resolve lifecycle/archive and transfer-dispatch semantics; add missing read surfaces; amend or supersede ADR-0027 for the selected worker/pool topology and obtain the named prototype-scope reviews; propagate exact composition-root/connection rules; classify all proposed tables; create/verify all event schemas; regenerate contracts/registries; register Catalog, Inventory, Platform Numbering, and any Import/Export Persistence ownership plus migration streams; run Drizzle/ledger/query spikes; record exact locks and ADR/technology/risk consequences. No broad business migration.
 2. **PR2 — Catalog core, persistence, API, and lifecycle.** Implement `catalog.products`, `catalog.variants`, `catalog.identifiers`, `catalog.barcodes`, and prototype `catalog.lifecycle`; add owner migrations, state-plus-outbox atomicity, version conflicts, tenant isolation, barcode/search budgets, Bun/Node tests, and Catalog command events.
 3. **PR3 — Inventory ledger, balances, adjustments, counts, transfers, and offline command boundary.** Implement the Inventory core and owner persistence; immutable posting/reversal; reservations prototype; transfer dispatch/receipt; count variance posting; balance/availability representations; command receipts; two-tenant, concurrency, conservation, rebuild, and offline-origin tests.
-4. **PR4 — Durable event delivery and projections.** Add `apps/worker`, claim/lease/retry/dead-letter/replay/observability, consumer receipts, Catalog search projection, Inventory availability/reconciliation consumers, rebuild tools, kill/recovery tests, and RR-006 disposition. Outbox-only evidence is insufficient.
+4. **PR4 — Durable event delivery and projections.** Implement the delivery topology authorized by PR1—`apps/worker` only if the ADR/ruleset review selected it—plus claim/lease/retry/dead-letter/replay/observability, consumer receipts, Catalog search projection, Inventory availability/reconciliation consumers, rebuild tools, kill/recovery tests, and RR-006 disposition. Outbox-only evidence is insufficient.
 5. **PR5 — Imports and supporting numbering foundation.** Implement bounded Product and opening-stock import through domain commands with malware/file controls, dry run, row findings, approval, idempotent waves, correction report, reconciliation, and audit. Add the PDA-RDM-007-assigned Numbering core/adapter and prove atomic/idempotent online allocation without claiming WS5 offline range leasing.
 6. **PR6 — Product and Inventory web experience.** Implement section 11 over generated clients and current authority. Include formal UI-pattern and accessibility reviews, responsive evidence, direct-API denial tests, projection freshness labels, and performance/bundle evidence.
 7. **PR7 — WS2 verification and controlled-prototype closeout.** Execute the complete section 14 matrix for all 14 capabilities; scenarios 2 and 8; Bun and approved Node paths; migration, delivery, recovery, performance, accessibility, security, and two-tenant evidence. Update PDA-RDM-007, PDA-RDM-004, the risk register, technology lessons, evidence sources, and program status without lifecycle overclaim.
@@ -419,6 +432,7 @@ Prototype measurements record environment, data size, warm/cold state, sample si
 - negative-stock default and override policy;
 - balance concurrency mechanism and Drizzle suitability result;
 - event retry horizon, claim lease, ordering key, dead-letter retention, and replay approval;
+- worker-process and pool topology through the ADR-0027 revisit, including process ownership, composition paths, connection limits, shutdown, migration execution, tenant context, and recovery;
 - CSV-first versus any bounded XLSX support based on server-side streaming and technology evidence.
 
 These are technical/domain contract choices within governed ownership. A business fact that architecture cannot infer is added to the Founder Decision Register instead of being guessed.
@@ -434,6 +448,7 @@ The following are not WS2 exit blockers unless implementation falsely claims the
 - the final OpenAPI, permission, event, schema, and generated contract counts agree exactly;
 - every emitted event has an owner schema, transactional outbox proof, delivery evidence, and idempotent consumer evidence where a consumer exists;
 - RR-006 is closed by real worker evidence, not by renaming outbox storage;
+- the selected delivery process/pool topology is authorized by the amended or superseding ADR and enforced by generated architecture rules;
 - Catalog and Inventory cores remain runtime-neutral and concrete persistence remains owner-specific and composition-bound;
 - no cross-owner repository/table/migration import exists;
 - all tenant-owned state, jobs, events, projections, imports, caches, and errors pass two-tenant denial tests;
@@ -451,8 +466,9 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 | Reviewer | Perspective | Decision | Date | Notes |
 |---|---|---|---|---|
 | Codex | Author and cross-document reconciliation | Drafted for independent review | 2026-07-14 | Reconciled ADR-0027 ownership, current registry counts, missing lifecycle/dispatch/read contracts, RR-006, and the WS2/WS5 offline boundary. |
-| Claude Code | Independent architecture and registry consistency | Pending | — | Must review the merged-authority relationships and exact planned deltas before WS2 code. |
+| Claude Code | Independent architecture and registry consistency | Changes required on v0.1.0 | 2026-07-14 | Submitted one P1, one P2, and two P3 findings on worker/pool authority, Persistence owner registration, dispatch permission naming, and offline-budget meaning; all accepted and remediated in v0.1.1, with implementation closure still assigned to PR1/WS5. |
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.1.1 | 2026-07-14 | Platform Design Authority | Dispositioned Claude Code's four PR #63 findings: gated worker/pool topology on an ADR-0027 revisit, named Persistence owner registrations, proposed the dispatch permission ID, and corrected offline budget meanings. |
 | 0.1.0 | 2026-07-14 | Platform Design Authority | Initial governed WS2 Catalog and Inventory implementation-control draft. |

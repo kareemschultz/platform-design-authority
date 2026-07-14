@@ -4,7 +4,7 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at `422746e16719574883fe071c5fa023e38dabffd8`
+**Evidence cutoff:** `main` at `1bda97d42293c1008412bc5cc346d781a2ab4e22` plus the complete WS1 PR9 change set in PR #54; GitHub's exact reviewed head, green checks, and resulting merge commit are the authoritative cutoff
 
 **Last updated:** 2026-07-14
 
@@ -15,9 +15,9 @@ This dashboard is a non-authoritative program-control summary. It is subordinate
 | Measure | Current result | Interpretation |
 |---|---:|---|
 | Blueprint baseline completeness | **100% for controlled-prototype implementation commencement** | The bounded documentation baseline needed to continue the named prototypes exists. FA4-032, ratification waves, and production gates remain open. |
-| First-slice implementation | **21% provisional weighted completion** | WS0 is complete; WS1 has merged through its real thin experience shell, while the full evidence matrix and closeout remain. WS2–WS7 have not begun implementation. |
-| WS1 progress | **75% stage-weighted** | Plan/contracts, core behavior, persistence/event foundations, and the thin experience shell are complete; full dimension/budget evidence and independent closeout remain. |
-| Capability evidence coverage | **Not yet centrally computed** | Evidence exists across PRs and tests, but a generated capability-by-dimension rollup is still required before a trustworthy percentage can be published. |
+| First-slice implementation | **25% provisional weighted completion** | WS0 and WS1 are complete at controlled-prototype depth. WS2–WS7 have not begun implementation. |
+| WS1 progress | **100% stage-weighted** | PR1–PR9 implement contracts, persistence, identity/tenancy/Party, authorization, entitlements, Audit/revocation, the real shell, and governed closeout evidence. This is not pilot or production readiness. |
+| Capability evidence coverage | **11/103 capabilities; 143/1,294 required cells** | The generated registry now computes evidence coverage. The 11 WS1 capabilities are evidenced at registered first-slice depth; remaining workstreams stay Planned. |
 | Production readiness | **Not claimed** | Founder, legal, customer, provider, security, accessibility, operational, pilot, and other external gates remain authoritative. |
 
 ## Blueprint baseline
@@ -33,14 +33,14 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 | Workstream | Weight | Status | Stage completion | Weighted contribution | Current evidence / next gate |
 |---|---:|---|---:|---:|---|
 | WS0 — Scaffold alignment and contracts | 8% | complete | 100% | 8.0% | Package families, foundation types, generated contracts, contract parity, and executable architecture gates are merged. |
-| WS1 — Identity, tenancy, Party, authorization | 17% | evidence-pending | 75% | 12.75% | PR1–PR8 merged through the real administration shell. Next: complete capability/dimension evidence and closeout. |
+| WS1 — Identity, tenancy, Party, authorization | 17% | complete | 100% | 17.0% | PR1–PR9 complete at controlled-prototype depth; PDA-IMPL-005 and the generated matrix record evidence and residual gates. |
 | WS2 — Catalog and inventory ledger | 17% | planned | 0% | 0% | Blocked on WS1 exit. A governed implementation plan may be prepared without starting code. |
 | WS3 — POS cash | 17% | planned | 0% | 0% | Blocked on WS2. |
 | WS4 — Stored value | 11% | planned | 0% | 0% | Blocked on WS3. |
 | WS5 — Offline sync | 12% | planned | 0% | 0% | Full workstream blocked on WS3; bounded client-engine research may begin after WS1 under the parallelism rule. |
 | WS6 — Provider adapter | 9% | planned | 0% | 0% | Engine work may follow WS1; provider sandbox and pilot path remain externally gated by founder/provider decisions. |
 | WS7 — Recovery and operations | 9% | planned | 0% | 0% | Starts after WS2 provides real ledgers/outbox; closes last. |
-| **Total** | **100%** |  |  | **20.75%** | Rounded executive display: **21%**. |
+| **Total** | **100%** |  |  | **25.0%** | Provisional weighted implementation completion: **25%**. |
 
 ## WS1 delivery detail
 
@@ -55,7 +55,7 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 | PR6 tenant entitlements and limits | complete | PR #45 |
 | PR7 audit evidence and session revocation | complete | PR #47 |
 | PR8 thin experience shell | complete | PR #50; PDA-UX-038; authenticated administration shell with real context, Party, role, entitlement, session, and audit queries plus responsive and accessibility evidence. |
-| WS1 evidence and closeout | pending | Must complete the capability-by-13-dimension matrix, numeric budgets, Bun/Node critical-path proof, risk/roadmap updates, and exact-head CI. |
+| PR9 WS1 evidence and closeout | complete pending merge gate | Issue #52; PDA-IMPL-005; 11 capabilities/143 required cells; 40-sample database and independent-HTTP revocation evidence; Bun/Node, architecture, accessibility, roadmap, ADR, risk, and lifecycle propagation. |
 
 ## Current implementation assets
 
@@ -76,7 +76,7 @@ Implemented and merged:
 
 Not yet complete:
 
-- WS1 capability-dimension evidence rollup and closeout;
+- consolidated independent Claude Code review of the exact merged WS1 PR1–PR9 state (RR-011);
 - durable outbox delivery worker, retries, dead-letter handling, consumers, and projections beyond the minimum outbox;
 - WS2–WS7 business-domain implementation;
 - production-grade RLS topology and evidence;
@@ -84,16 +84,16 @@ Not yet complete:
 
 ## Immediate priorities
 
-1. Run WS1 closeout: two-tenant proof, permission-versus-entitlement semantics, revocation budget, audit completeness, accessibility, responsive navigation, Bun/Node critical suites, and the 13-dimension capability evidence matrix.
-2. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12, without starting WS2 code before WS1 exits.
-3. Generate a machine-readable program-status input or evidence rollup so the dashboard can be freshness-checked rather than maintained only by prose.
+1. Merge exact-head-green WS1 PR9, then run the owner-requested consolidated Claude Code audit and formally disposition every accepted finding; RR-011 blocks broad WS2 implementation until this completes.
+2. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12, without starting broad WS2 code before RR-011 closes.
+3. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
 
 ## Open risk summary
 
 The Architecture Risk Register remains authoritative. The most important current categories are:
 
 - controlled-prototype database isolation versus future production RLS topology;
-- formal capability-by-dimension and independent closeout evidence for the now-implemented user-facing identity, context, authorization, entitlement, audit, and revocation workflows;
+- consolidated independent review of the exact merged WS1 evidence and implementation state;
 - outbox persistence existing without complete event delivery operations;
 - provider, legal, customer, founder, security, accessibility, operational, and pilot evidence still open;
 - risk of generated contracts, implementation, Fumadocs, and this dashboard drifting apart.

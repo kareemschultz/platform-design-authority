@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0028
 title: Explicit Scope for Platform-Global Security Facts
-version: 0.1.0
+version: 0.1.1
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-14
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0003, ADR-0006, ADR-0014, ADR-0016, ADR-0027]
@@ -136,6 +136,12 @@ Rollback restores the prior outbox only while no Platform-scoped event exists. A
 - `openapi/first-slice-v1.yaml`
 - `schemas/events/event-envelope-v1.schema.json`
 
+## WS1 Prototype Evidence
+
+PDA-IMPL-005 records explicit Tenant versus Platform discriminator constraints, account-owned session listing/revocation, atomic session deletion plus command receipt plus one Platform-scoped outbox fact, retry idempotency, cross-account denial, tenant Audit exclusion of Platform records, redaction, integrity-chain checks, legal hold/privacy overlays, and Bun/Node/PostgreSQL verification. The 40-sample independent HTTP run recorded a 7.779 ms commit-to-401 p95 against the 60-second prototype budget.
+
+Independent Claude Code review remains intentionally deferred to the exact merged WS1 PR1-PR9 audit under RR-011. Architecture, Security, and Privacy production acceptance therefore remain open and the ADR remains Proposed.
+
 ## Review Record
 
 | Reviewer | Perspective | Decision | Date | Notes |
@@ -146,4 +152,5 @@ Rollback restores the prior outbox only while no Platform-scoped event exists. A
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.1.1 | 2026-07-14 | Platform Design Authority | Linked WS1 scope, Audit, idempotency, and measured revocation evidence; lifecycle and independent/production review gates remain open. |
 | 0.1.0 | 2026-07-13 | Platform Design Authority | Initial proposal for explicit Tenant versus Platform scope and account-session revocation evidence. |

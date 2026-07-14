@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0020
 title: Prefer Bun Hono and oRPC for Backend Prototypes with a Node Fallback
-version: 0.1.0
+version: 0.1.1
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-14
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006]
@@ -127,6 +127,12 @@ Production candidacy requires exact environment records; Bun/Node portability su
 - `docs/blueprint/19-Appendices/BUN_HONO_ORPC_AND_BETTER_T_VERIFICATION-2026-07-12.md`
 - `docs/blueprint/17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md`
 
+## WS1 Prototype Evidence
+
+PDA-IMPL-005 records strict contract/OpenAPI parity, runtime-neutral core packages, Hono/oRPC transport composition, Bun 1.3.14 workspace and PostgreSQL integration suites, and a Node 24 persistence plus WS1 critical lane. The Next.js shell and built deployment evidence are recorded in PDA-UX-038. This satisfies the Technical Prototype 1 evidence assigned to WS1, not the production-candidacy list above.
+
+Production load/memory/shutdown/failover, broader operational/security review, and the remaining Technical Prototypes are open. Architecture, Security, and Operations review rows therefore remain pending and the ADR remains Proposed.
+
 ## Review Record
 
 | Reviewer | Perspective | Decision | Date | Notes |
@@ -140,4 +146,5 @@ Production candidacy requires exact environment records; Bun/Node portability su
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.1.1 | 2026-07-14 | Platform Design Authority | Linked bounded WS1 Bun/Node/Hono/oRPC/Next evidence without changing lifecycle or pending specialist reviews. |
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial proposal |

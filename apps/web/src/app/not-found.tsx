@@ -1,4 +1,4 @@
-import { Button } from "@meridian/ui-web/components/button";
+import { buttonVariants } from "@meridian/ui-web/components/button";
 import Link from "next/link";
 
 export default function NotFound() {
@@ -8,9 +8,9 @@ export default function NotFound() {
 			<p className="text-muted-foreground text-sm">
 				The page you requested does not exist in this prototype.
 			</p>
-			<Button render={<Link href="/" />} variant="outline">
+			<Link className={buttonVariants({ variant: "outline" })} href="/">
 				Back to home
-			</Button>
+			</Link>
 		</div>
 	);
 }

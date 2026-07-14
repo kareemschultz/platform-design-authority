@@ -9,7 +9,7 @@ import type {
 	UserSummary,
 } from "@meridian/contracts-platform-api";
 import { Badge } from "@meridian/ui-web/components/badge";
-import { Button } from "@meridian/ui-web/components/button";
+import { Button, buttonVariants } from "@meridian/ui-web/components/button";
 import {
 	Dialog,
 	DialogClose,
@@ -136,13 +136,15 @@ function CursorNext({ nextCursor }: { nextCursor: string | null }) {
 	}
 	return (
 		<div className="mt-4 flex justify-end">
-			<Button
-				className="min-h-10"
-				render={<Link href={`?cursor=${encodeURIComponent(nextCursor)}`} />}
-				variant="outline"
+			<Link
+				className={buttonVariants({
+					className: "min-h-10",
+					variant: "outline",
+				})}
+				href={`?cursor=${encodeURIComponent(nextCursor)}`}
 			>
 				Next page <ArrowRight />
-			</Button>
+			</Link>
 		</div>
 	);
 }

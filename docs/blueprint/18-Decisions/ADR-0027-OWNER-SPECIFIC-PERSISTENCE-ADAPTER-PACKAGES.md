@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.2.5
+version: 0.2.6
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-14
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0024, ADR-0025]
@@ -104,6 +104,12 @@ The `database-outside-persistence` forbidden pattern in `registry/architecture-r
 - `docs/blueprint/02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md` §Domain Transaction Boundaries
 - `registry/architecture-rules.json`
 
+## WS1 Prototype Evidence
+
+PDA-IMPL-005 extends the original PR2 evidence across Tenancy, Entitlements, Audit, Party, and the session-command stream: each owner has a distinct adapter/migration history, concrete binding remains in `apps/server/composition`, transactions bind owner state and outbox on one checked-out client, and architecture tests reject cross-owner persistence and connection lifecycle violations. PostgreSQL 18.4 clean/repeat/recovery and two-tenant composite-ownership tests pass under the controlled prototype.
+
+The prior Security caveat is partially exercised by tenant-scoped constraints, repositories, and tests; production RLS topology remains open as RR-007. The ADR remains Proposed and its prototype-scoped review decisions are not production acceptance.
+
 ## Review Record
 
 | Reviewer | Perspective | Decision | Date | Notes |
@@ -118,6 +124,7 @@ The `database-outside-persistence` forbidden pattern in `registry/architecture-r
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.6 | 2026-07-14 | Platform Design Authority | Linked complete WS1 owner-adapter prototype evidence and narrowed the earlier Security caveat to the still-open production RLS topology. |
 | 0.2.5 | 2026-07-13 | Platform Design Authority | Recorded the three required pre-PR2-merge architecture-consistency reviews (Platform Architecture, Data Platform, Security) as Approved at prototype scope against PR #37's CI-green implementation, by the owner-designated reviewer; Security row carries a forward tenant-isolation caveat. PR2 merge gate satisfied; production acceptance remains separate. |
 | 0.2.4 | 2026-07-13 | Platform Design Authority | Clarified how the composition root binds owner and outbox adapters over one transaction while keeping the concrete client out of application contracts; lifecycle and specialist review gates remain unchanged. |
 | 0.2.3 | 2026-07-13 | Platform Design Authority | Recorded the executable path-aware checker and the narrow, expiring `platform-identity-persistence-relocation` exception; specialist reviews and PR2 gate remain pending. |

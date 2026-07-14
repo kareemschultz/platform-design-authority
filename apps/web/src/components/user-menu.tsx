@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@meridian/ui-web/components/button";
+import { Button, buttonVariants } from "@meridian/ui-web/components/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -26,13 +26,15 @@ export default function UserMenu() {
 
 	if (!session) {
 		return (
-			<Button
-				className="min-h-10"
-				render={<Link href="/login" />}
-				variant="outline"
+			<Link
+				className={buttonVariants({
+					className: "min-h-10",
+					variant: "outline",
+				})}
+				href="/login"
 			>
 				Sign In
-			</Button>
+			</Link>
 		);
 	}
 

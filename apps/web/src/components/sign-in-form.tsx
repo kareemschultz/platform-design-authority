@@ -64,6 +64,7 @@ export default function SignInForm({
 			<form
 				className="space-y-4"
 				id="sign-in-form"
+				noValidate
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();

@@ -386,10 +386,14 @@ export const DecimalQuantitySchema = z
 	.string()
 	.regex(/^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
 
+export const PositiveDecimalQuantitySchema = z
+	.string()
+	.regex(/^(?!0(?:\.0{1,6})?$)(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+
 export const QuantityLineSchema = z.object({
 	conversionSourceId: NullableIdentifierSchema.optional(),
 	productId: IdentifierSchema,
-	quantity: DecimalQuantitySchema,
+	quantity: PositiveDecimalQuantitySchema,
 	unit: z.string().min(1).max(50),
 });
 

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Business Operating Platform First Slice API
-  version: 0.3.0
+  version: 0.3.1
   description: >-
     Draft implementation-review contract for the Guyana Retail Foundation Slice.
     This is not a GA public API and does not assert production provider or jurisdiction certification.
@@ -1875,6 +1875,10 @@ components:
       type: string
       pattern: '^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
       description: Exact decimal quantity with at most six fractional digits; exponent notation is prohibited.
+    PositiveDecimalQuantity:
+      type: string
+      pattern: '^(?!0(?:\.0{1,6})?$)(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
+      description: Exact decimal quantity greater than zero with at most six fractional digits; exponent and sign notation are prohibited.
     TransitionReason:
       type: object
       additionalProperties: false
@@ -1964,7 +1968,7 @@ components:
       required: [productId, quantity, unit]
       properties:
         productId: {$ref: '#/components/schemas/Identifier'}
-        quantity: {$ref: '#/components/schemas/DecimalQuantity'}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
         unit: {type: string}
         conversionSourceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
     OpenRegisterRequest:

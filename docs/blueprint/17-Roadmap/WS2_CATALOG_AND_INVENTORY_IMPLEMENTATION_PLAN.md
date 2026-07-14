@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -446,7 +446,7 @@ PR1 selects the following controlled-prototype answers, subject to exact-head in
 | Lifecycle | Archive is an externally meaningful fact with `catalog.product.archived.v1`; Discontinued remains distinct and its command producer is deferred. |
 | Read surface | Adjustment, count, and transfer list/detail operations use `inventory.adjustment.read`, `inventory.count.read`, and `inventory.transfer.read`; all Catalog/Inventory operations require a currently revalidated active context. |
 | Transfers | Draft, Dispatched, PartiallyReceived, Received, Exception, and Cancelled are the prototype states; dispatch uses the separate `inventory.transfer.dispatch` permission. |
-| Quantity and conversion | Contracts carry exact decimal strings with at most six fractional digits; persistence uses `numeric(38,6)`; conversion provenance uses an explicit `conversionSourceId`. |
+| Quantity and conversion | Contracts carry exact decimal strings with at most six fractional digits; directional Transfer/Return command lines must be greater than zero, while signed values remain available only for adjustment, variance, movement, and reversal facts; persistence uses `numeric(38,6)`; conversion provenance uses an explicit `conversionSourceId`. |
 | Stock policy | Negative stock is denied by default. No generic override is introduced; a future exception needs a named permission, reason, limit, audit, and domain decision. |
 | Concurrency | Same-key posting uses owner-adapter row locking and one transaction; PDA-APP-021 records exact-decimal, 20-way concurrency, reversal, rebuild, atomicity, and 250k query-shape evidence. |
 | Event delivery | PDA-PLT-008 v0.3.0 selects a 30-second renewable claim lease, bounded jittered retry for at most 20 attempts/24 hours, tenant/producer/aggregate ordering, a provisional 30-day dead-letter review window, and audited `platform.event.replay`. |
@@ -489,6 +489,7 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.1 | 2026-07-14 | Platform Design Authority | Preserve signed ledger facts while requiring strictly positive quantities for directional Transfer and Return command lines after PR #65 contract review. |
 | 0.2.0 | 2026-07-14 | Platform Design Authority | Record PR #63 concurrence and the exact PR1 controlled-prototype decisions for lifecycle, permissions, quantity, concurrency, event delivery, worker topology, and CSV-first import. |
 | 0.1.1 | 2026-07-14 | Platform Design Authority | Dispositioned Claude Code's four PR #63 findings: gated worker/pool topology on an ADR-0027 revisit, named Persistence owner registrations, proposed the dispatch permission ID, and corrected offline budget meanings. |
 | 0.1.0 | 2026-07-14 | Platform Design Authority | Initial governed WS2 Catalog and Inventory implementation-control draft. |

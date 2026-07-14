@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-021
 title: WS2 Ledger and Query Technology Verification
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-14
@@ -41,7 +41,7 @@ The disposable `apps/server/composition/ws2-ledger-spike.integration.test.ts` fi
 | Projection rebuild | Summing immutable movements rebuilt the materialized balance with zero divergence |
 | Query shape | Exact tenant-scoped barcode lookup and cursor/filter pagination used the intended indexes over 250,000 synthetic Products |
 | Migration ownership | Catalog, Inventory, and Platform Numbering each had an owner-qualified empty migration stream and distinct history table in deterministic server-owned order |
-| Full live suite | 22 passed, 0 failed, 351 expectations on PostgreSQL 18.4 |
+| Full live suite | 22 passed, 0 failed, 352 expectations on PostgreSQL 18.4 |
 
 The query probe is an index-shape check, not a latency service-level objective. It uses exact barcode and lexical cursor/filter behavior; it does not prove fuzzy search, locale relevance, multi-million-row ledger capacity, or production concurrency.
 

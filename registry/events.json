@@ -855,7 +855,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 61,
+      "source_line": 62,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.reservation.created.v1.schema.json"
     },
@@ -868,7 +868,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 62,
+      "source_line": 63,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.reservation.released.v1.schema.json"
     },
@@ -881,7 +881,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 57,
+      "source_line": 58,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.stock-count.posted.v1.schema.json"
     },
@@ -894,7 +894,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 63,
+      "source_line": 64,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.stock-movement.reversed.v1.schema.json"
     },
@@ -907,7 +907,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 58,
+      "source_line": 59,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.stock-transfer.created.v1.schema.json"
     },
@@ -920,7 +920,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 59,
+      "source_line": 60,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.stock-transfer.dispatched.v1.schema.json"
     },
@@ -933,7 +933,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 60,
+      "source_line": 61,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.stock-transfer.received.v1.schema.json"
     },
@@ -946,7 +946,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 56,
+      "source_line": 57,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.stock.adjusted.v1.schema.json"
     },

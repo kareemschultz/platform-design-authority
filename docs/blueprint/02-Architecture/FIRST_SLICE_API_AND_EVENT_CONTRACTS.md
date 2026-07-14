@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ARC-014
 title: First Slice API and Event Contracts
-version: 0.5.0
+version: 0.5.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -103,6 +103,8 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | `POST /v1/stock-transfers` | `inventory.transfer.create` |
 | `POST /v1/stock-transfers/{id}/dispatch` | `inventory.transfer.dispatch` |
 | `POST /v1/stock-transfers/{id}/receive` | `inventory.transfer.receive` |
+
+Transfer and Return request lines use exact decimal strings strictly greater than zero. Direction comes from source/destination or command semantics; signed decimal quantities are reserved for adjustment, variance, movement, and reversal facts.
 
 ### Commerce, Registers, Cash, and Deposits
 

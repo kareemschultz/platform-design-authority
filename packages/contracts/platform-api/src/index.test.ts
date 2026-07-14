@@ -4,6 +4,7 @@ import {
 	ActiveContextRequestSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
+	PositiveDecimalQuantitySchema,
 	platformApiContract,
 	WS1_OPENAPI_OPERATION_METADATA,
 	WS2_OPENAPI_OPERATION_METADATA,
@@ -111,5 +112,16 @@ describe("WS2 Catalog and Inventory API contract", () => {
 
 		expect(actual).toEqual(expected);
 		expect(actual).toHaveLength(24);
+	});
+
+	test("requires positive directional quantities while signed adjustment quantities remain separate", () => {
+		expect(PositiveDecimalQuantitySchema.safeParse("0.000001").success).toBe(
+			true
+		);
+		expect(PositiveDecimalQuantitySchema.safeParse("0").success).toBe(false);
+		expect(PositiveDecimalQuantitySchema.safeParse("0.000000").success).toBe(
+			false
+		);
+		expect(PositiveDecimalQuantitySchema.safeParse("-1").success).toBe(false);
 	});
 });

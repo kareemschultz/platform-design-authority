@@ -362,12 +362,13 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
         declared_capabilities = source.get("capabilities", [])
         if not isinstance(declared_capabilities, list):
             raise ValueError(f"evidence capabilities must be an array: {source_path}")
-        for capability_id in declared_capabilities:
+        declared_capability_ids = {str(value) for value in declared_capabilities}
+        for capability_id in declared_capability_ids:
             if capability_id not in first_slice_ids:
                 raise ValueError(
                     f"evidence source references a non-first-slice capability: {capability_id}"
                 )
-            evidenced_capabilities.add(str(capability_id))
+            evidenced_capabilities.add(capability_id)
 
         for evidence in source.get("evidence", []):
             evidence_id = str(evidence.get("id", "")).strip()
@@ -393,9 +394,9 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
                     f"evidence {evidence_id} requires capabilities and dimensions"
                 )
             for capability_id in evidence_capabilities:
-                if capability_id not in evidenced_capabilities:
+                if capability_id not in declared_capability_ids:
                     raise ValueError(
-                        f"evidence {evidence_id} uses undeclared capability {capability_id}"
+                        f"evidence {evidence_id} uses capability {capability_id} not declared by {source_path}"
                     )
             for dimension in evidence_dimensions:
                 if dimension not in TEST_DIMENSIONS:

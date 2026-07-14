@@ -43,7 +43,11 @@ export default function SignInForm({
 			);
 		},
 		onSubmitInvalid: () => {
-			document.getElementById("email")?.focus();
+			requestAnimationFrame(() => {
+				document
+					.querySelector<HTMLElement>('#sign-in-form [aria-invalid="true"]')
+					?.focus();
+			});
 		},
 		validators: {
 			onSubmit: z.object({
@@ -59,6 +63,7 @@ export default function SignInForm({
 
 			<form
 				className="space-y-4"
+				id="sign-in-form"
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();

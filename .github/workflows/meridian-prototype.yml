@@ -30,6 +30,7 @@ on:
       - "docs/blueprint/18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md"
       - "docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md"
       - "docs/blueprint/18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md"
+      - "evidence/first-slice/**"
       - "registry/**"
       - "scripts/**"
   workflow_dispatch:

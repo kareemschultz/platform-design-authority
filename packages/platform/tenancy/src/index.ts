@@ -1,9 +1,14 @@
 import type { EventEnvelope } from "@meridian/contracts-events";
+import type { PermissionId } from "@meridian/contracts-permissions";
 import type {
 	ActiveContext,
 	ActiveContextRequest,
+	AuthorizationDecision,
+	CreateRoleAssignmentRequest,
 	CreateUserInvitationRequest,
 	CurrentIdentity,
+	Role,
+	RoleAssignment,
 	SuspendTenantMembershipRequest,
 	UpdateOrganizationRequest,
 	UserSummary,
@@ -33,6 +38,15 @@ export type InvitationState =
 	| "Failed"
 	| "Cancelled"
 	| "Expired";
+export type RoleState = "Active" | "Inactive";
+export type RoleAssignmentState = "Active" | "Revoked" | "Expired";
+export type DelegationState = "Active" | "Revoked" | "Expired";
+export type AuthorizationScopeType =
+	| "Tenant"
+	| "Organization"
+	| "LegalEntity"
+	| "Branch"
+	| "Location";
 
 export interface TenantRecord {
 	id: string;
@@ -72,6 +86,43 @@ export interface MembershipRecord {
 	version: number;
 }
 
+export interface RoleRecord extends Omit<Role, "permissionIds"> {
+	permissionIds: PermissionId[];
+}
+
+export interface RoleAssignmentRecord
+	extends Omit<RoleAssignment, "endsAt" | "scopeId" | "startsAt"> {
+	endsAt?: Date;
+	scopeId?: string;
+	startsAt: Date;
+}
+
+export interface DelegationRecord {
+	allowFurtherDelegation: boolean;
+	delegateMembershipId: string;
+	delegatorMembershipId: string;
+	endsAt: Date;
+	id: string;
+	permissionIds: PermissionId[];
+	reason: string;
+	scopeId?: string;
+	scopeType: AuthorizationScopeType;
+	startsAt: Date;
+	state: DelegationState;
+	tenantId: string;
+	version: number;
+}
+
+export interface TenancyAuthorizationState {
+	assignments: {
+		assignment: RoleAssignmentRecord;
+		role: RoleRecord | null;
+	}[];
+	context: ActiveContextRecord;
+	delegation: DelegationRecord | null;
+	membership: MembershipRecord | null;
+}
+
 export interface InvitationRecord {
 	createdAt: Date;
 	email: string;
@@ -87,16 +138,33 @@ export interface InvitationRecord {
 }
 
 export interface ActiveContextRecord
-	extends Omit<ActiveContext, "expiresAt" | "issuedAt"> {
+	extends Omit<
+		ActiveContext,
+		| "branchId"
+		| "delegationId"
+		| "expiresAt"
+		| "issuedAt"
+		| "legalEntityId"
+		| "locationId"
+		| "partyId"
+	> {
+	branchId?: string;
+	delegationId?: string;
 	expiresAt: Date;
 	idempotencyKey: string;
 	issuedAt: Date;
+	legalEntityId?: string;
+	locationId?: string;
+	partyId?: string;
 	sessionId: string;
 }
 
 export interface CommandReceiptRecord {
 	idempotencyKey: string;
-	operation: "membership.suspend" | "organization.update";
+	operation:
+		| "membership.suspend"
+		| "organization.update"
+		| "role-assignment.grant";
 	requestFingerprint: string;
 	resourceId: string;
 	result: Record<string, unknown>;
@@ -114,18 +182,27 @@ export interface Page<T> {
 }
 
 export interface TenantSeed {
+	delegations?: DelegationRecord[];
 	locations: LocationRecord[];
 	memberships: MembershipRecord[];
 	organizations: OrganizationRecord[];
+	roleAssignments?: RoleAssignmentRecord[];
+	roles?: RoleRecord[];
 	tenant: TenantRecord;
 }
 
 export interface TenancyRepository {
 	activateMembership: (record: MembershipRecord) => Promise<MembershipRecord>;
+	completeCommandReceipt: (
+		record: CommandReceiptRecord
+	) => Promise<CommandReceiptRecord>;
 	createInvitation: (
 		record: InvitationRecord,
 		idempotencyKey: string
 	) => Promise<InvitationRecord>;
+	createRoleAssignment: (
+		record: RoleAssignmentRecord
+	) => Promise<RoleAssignmentRecord>;
 	getActiveContext: (
 		contextId: string,
 		sessionId: string
@@ -135,6 +212,10 @@ export interface TenancyRepository {
 		operation: CommandReceiptRecord["operation"],
 		idempotencyKey: string
 	) => Promise<CommandReceiptRecord | null>;
+	getDelegation: (
+		tenantId: string,
+		delegationId: string
+	) => Promise<DelegationRecord | null>;
 	getInvitationByIdempotency: (
 		tenantId: string,
 		idempotencyKey: string
@@ -155,6 +236,7 @@ export interface TenancyRepository {
 		tenantId: string,
 		organizationId: string
 	) => Promise<OrganizationRecord | null>;
+	getRole: (tenantId: string, roleId: string) => Promise<RoleRecord | null>;
 	getTenant: (tenantId: string) => Promise<TenantRecord | null>;
 	issueActiveContext: (
 		record: ActiveContextRecord
@@ -167,8 +249,14 @@ export interface TenancyRepository {
 	listMemberships: (authUserId: string) => Promise<MembershipRecord[]>;
 	listOrganizations: (
 		authUserId: string,
+		tenantId: string,
 		page: PageRequest
 	) => Promise<Page<OrganizationRecord>>;
+	listRoleAssignments: (
+		tenantId: string,
+		membershipId: string
+	) => Promise<RoleAssignmentRecord[]>;
+	listRoles: (tenantId: string, page: PageRequest) => Promise<Page<RoleRecord>>;
 	listTenantMemberships: (
 		tenantId: string,
 		page: PageRequest
@@ -215,12 +303,18 @@ export interface TenancyUnitOfWork {
 
 export interface IdFactory {
 	create: (
-		kind: "active-context" | "event" | "invitation" | "invitee-reference"
+		kind:
+			| "active-context"
+			| "event"
+			| "invitation"
+			| "invitee-reference"
+			| "role-assignment"
 	) => string;
 }
 
 export class TenancyError extends Error {
 	readonly code:
+		| "authorization_denied"
 		| "context_expired"
 		| "idempotency_conflict"
 		| "membership_inactive"
@@ -230,6 +324,7 @@ export class TenancyError extends Error {
 
 	constructor(
 		code:
+			| "authorization_denied"
 			| "context_expired"
 			| "idempotency_conflict"
 			| "membership_inactive"
@@ -242,6 +337,20 @@ export class TenancyError extends Error {
 		this.code = code;
 		this.name = "TenancyError";
 	}
+}
+
+export interface PermissionDecisionPort {
+	requirePermission: (input: {
+		assuranceLevel: string;
+		authUserId: string;
+		contextId: string;
+		permission: PermissionId;
+		resourceScope?: {
+			scopeId?: string;
+			scopeType: AuthorizationScopeType;
+		};
+		sessionId: string;
+	}) => Promise<AuthorizationDecision>;
 }
 
 function dependencyUnavailable(message: string, cause: unknown) {
@@ -462,7 +571,185 @@ function eventBase(input: {
 	};
 }
 
+export interface GrantRoleAssignmentInput {
+	actorUserId: string;
+	body: Omit<CreateRoleAssignmentRequest, "endsAt" | "scopeId" | "startsAt"> & {
+		endsAt?: Date;
+		scopeId?: string;
+		startsAt: Date;
+	};
+	correlationId: string;
+	idempotencyKey: string;
+	tenantId: string;
+}
+
+function roleAssignmentFingerprint(input: GrantRoleAssignmentInput): string {
+	if (input.body.endsAt && input.body.endsAt <= input.body.startsAt) {
+		throw new TenancyError(
+			"wrong_tenant",
+			"Role assignment expiry must be after its start"
+		);
+	}
+	return commandFingerprint({
+		endsAt: input.body.endsAt?.toISOString() ?? null,
+		membershipId: input.body.membershipId,
+		roleId: input.body.roleId,
+		scopeId: input.body.scopeId ?? null,
+		scopeType: input.body.scopeType,
+		startsAt: input.body.startsAt.toISOString(),
+	});
+}
+
+function replayRoleAssignment(
+	receipt: CommandReceiptRecord,
+	requestFingerprint: string
+): RoleAssignmentRecord {
+	if (receipt.requestFingerprint !== requestFingerprint) {
+		throw new TenancyError(
+			"idempotency_conflict",
+			"The idempotency key is already bound to another role assignment"
+		);
+	}
+	const result = receipt.result as unknown as Omit<
+		RoleAssignmentRecord,
+		"endsAt" | "startsAt"
+	> & {
+		endsAt?: Date | string | null;
+		startsAt: Date | string;
+	};
+	const { endsAt, startsAt, ...persisted } = result;
+	return {
+		...persisted,
+		...(endsAt ? { endsAt: new Date(endsAt) } : {}),
+		startsAt: new Date(startsAt),
+	};
+}
+
+async function validateAssignmentScope(
+	repository: TenancyRepository,
+	input: GrantRoleAssignmentInput,
+	membership: MembershipRecord
+): Promise<void> {
+	if (input.body.scopeType === "Tenant") {
+		if (input.body.scopeId) {
+			throw new TenancyError(
+				"wrong_tenant",
+				"Tenant scope cannot carry another scope identifier"
+			);
+		}
+		return;
+	}
+	if (input.body.scopeType === "Organization") {
+		if (input.body.scopeId !== membership.organizationId) {
+			throw new TenancyError(
+				"wrong_tenant",
+				"Organization scope is outside the target membership"
+			);
+		}
+		return;
+	}
+	if (input.body.scopeType === "Location") {
+		const location = input.body.scopeId
+			? await repository.getLocation(input.tenantId, input.body.scopeId)
+			: null;
+		if (location?.organizationId !== membership.organizationId) {
+			throw new TenancyError(
+				"wrong_tenant",
+				"Location scope is outside the target membership"
+			);
+		}
+		return;
+	}
+	throw new TenancyError(
+		"not_found",
+		"Legal-entity and branch assignment scopes remain seams"
+	);
+}
+
+async function executeRoleAssignmentGrant(
+	options: TenancyServiceOptions,
+	input: GrantRoleAssignmentInput,
+	requestFingerprint: string,
+	scope: TenancyTransactionScope
+): Promise<RoleAssignmentRecord> {
+	const { events, repository } = scope;
+	const existing = await repository.getCommandReceipt(
+		input.tenantId,
+		"role-assignment.grant",
+		input.idempotencyKey
+	);
+	if (existing) {
+		return replayRoleAssignment(existing, requestFingerprint);
+	}
+	const membership = activeMembership(
+		await repository.getMembership(input.tenantId, input.body.membershipId)
+	);
+	const role = await repository.getRole(input.tenantId, input.body.roleId);
+	if (role?.state !== "Active") {
+		throw new TenancyError("not_found", "Active role was not found");
+	}
+	await validateAssignmentScope(repository, input, membership);
+	const assignment: RoleAssignmentRecord = {
+		endsAt: input.body.endsAt,
+		id: options.ids.create("role-assignment"),
+		membershipId: membership.id,
+		roleId: role.id,
+		scopeId: input.body.scopeId,
+		scopeType: input.body.scopeType,
+		startsAt: input.body.startsAt,
+		state: "Active",
+		tenantId: input.tenantId,
+		version: 1,
+	};
+	const claimed = await repository.recordCommandReceipt({
+		idempotencyKey: input.idempotencyKey,
+		operation: "role-assignment.grant",
+		requestFingerprint,
+		resourceId: assignment.id,
+		result: { pending: true },
+		tenantId: input.tenantId,
+	});
+	if (!claimed.inserted) {
+		return replayRoleAssignment(claimed.record, requestFingerprint);
+	}
+	const created = await repository.createRoleAssignment(assignment);
+	await repository.completeCommandReceipt({
+		...claimed.record,
+		result: created as unknown as Record<string, unknown>,
+	});
+	const event = eventBase({
+		actorId: input.actorUserId,
+		aggregateId: created.id,
+		correlationId: input.correlationId,
+		eventId: options.ids.create("event"),
+		idempotencyKey: input.idempotencyKey,
+		name: "platform.role-assignment.granted.v1",
+		now: options.clock(),
+		organizationId: membership.organizationId,
+		schemaRef: "schemas/events/platform.role-assignment.granted.v1.schema.json",
+		tenantId: input.tenantId,
+	});
+	event.data = {
+		endsAt: created.endsAt?.toISOString() ?? null,
+		membershipId: created.membershipId,
+		roleAssignmentId: created.id,
+		roleId: created.roleId,
+		scopeId: created.scopeId ?? null,
+		scopeType: created.scopeType,
+		startsAt: created.startsAt.toISOString(),
+	};
+	await events.append(event);
+	return created;
+}
+
 export function createTenancyService(options: TenancyServiceOptions) {
+	const inFlightRoleAssignmentGrants = new Map<
+		string,
+		{
+			promise: Promise<RoleAssignmentRecord>;
+			requestFingerprint: string;
+		}
+	>();
 	return {
 		activateMembership(input: {
 			actorUserId: string;
@@ -604,6 +891,22 @@ export function createTenancyService(options: TenancyServiceOptions) {
 			});
 		},
 
+		getMembershipForAdministration(input: {
+			membershipId: string;
+			tenantId: string;
+		}): Promise<MembershipRecord> {
+			return options.unitOfWork.execute(async ({ repository }) => {
+				const membership = await repository.getMembership(
+					input.tenantId,
+					input.membershipId
+				);
+				if (!membership) {
+					throw new TenancyError("not_found", "Membership was not found");
+				}
+				return membership;
+			});
+		},
+
 		async getOrganization(input: {
 			authUserId: string;
 			contextId: string;
@@ -627,6 +930,44 @@ export function createTenancyService(options: TenancyServiceOptions) {
 				}
 				return organization;
 			});
+		},
+
+		grantRoleAssignment(
+			input: GrantRoleAssignmentInput
+		): Promise<RoleAssignmentRecord> {
+			const requestFingerprint = roleAssignmentFingerprint(input);
+			const inFlightKey = JSON.stringify([
+				input.tenantId,
+				input.idempotencyKey,
+			]);
+			const inFlight = inFlightRoleAssignmentGrants.get(inFlightKey);
+			if (inFlight) {
+				if (inFlight.requestFingerprint !== requestFingerprint) {
+					return Promise.reject(
+						new TenancyError(
+							"idempotency_conflict",
+							"The idempotency key is already bound to another role assignment"
+						)
+					);
+				}
+				return inFlight.promise;
+			}
+			const promise = options.unitOfWork
+				.execute((scope) =>
+					executeRoleAssignmentGrant(options, input, requestFingerprint, scope)
+				)
+				.finally(() => {
+					if (
+						inFlightRoleAssignmentGrants.get(inFlightKey)?.promise === promise
+					) {
+						inFlightRoleAssignmentGrants.delete(inFlightKey);
+					}
+				});
+			inFlightRoleAssignmentGrants.set(inFlightKey, {
+				promise,
+				requestFingerprint,
+			});
+			return promise;
 		},
 
 		async listLocations(input: {
@@ -655,9 +996,23 @@ export function createTenancyService(options: TenancyServiceOptions) {
 		listOrganizations(input: {
 			authUserId: string;
 			page: PageRequest;
+			tenantId: string;
 		}): Promise<Page<OrganizationRecord>> {
 			return options.unitOfWork.execute(({ repository }) =>
-				repository.listOrganizations(input.authUserId, input.page)
+				repository.listOrganizations(
+					input.authUserId,
+					input.tenantId,
+					input.page
+				)
+			);
+		},
+
+		listRoles(input: {
+			page: PageRequest;
+			tenantId: string;
+		}): Promise<Page<RoleRecord>> {
+			return options.unitOfWork.execute(({ repository }) =>
+				repository.listRoles(input.tenantId, input.page)
 			);
 		},
 
@@ -714,6 +1069,45 @@ export function createTenancyService(options: TenancyServiceOptions) {
 					context.locationId ?? undefined
 				);
 				return context;
+			});
+		},
+
+		resolveAuthorizationState(input: {
+			authUserId: string;
+			contextId: string;
+			sessionId: string;
+		}): Promise<TenancyAuthorizationState | null> {
+			return options.unitOfWork.execute(async ({ repository }) => {
+				const context = await repository.getActiveContext(
+					input.contextId,
+					input.sessionId
+				);
+				if (!context || context.authUserId !== input.authUserId) {
+					return null;
+				}
+				const membership = await repository.getMembershipForOrganization(
+					input.authUserId,
+					context.organizationId
+				);
+				const roleAssignments = membership
+					? await repository.listRoleAssignments(
+							context.tenantId,
+							membership.id
+						)
+					: [];
+				const assignments = await Promise.all(
+					roleAssignments.map(async (assignment) => ({
+						assignment,
+						role: await repository.getRole(context.tenantId, assignment.roleId),
+					}))
+				);
+				const delegation = context.delegationId
+					? await repository.getDelegation(
+							context.tenantId,
+							context.delegationId
+						)
+					: null;
+				return { assignments, context, delegation, membership };
 			});
 		},
 
@@ -973,12 +1367,73 @@ export interface IdentityProjectionPort {
 
 export interface TenancyApplicationOptions {
 	directory: IdentityDirectoryView;
+	permissions: PermissionDecisionPort;
 	projection: IdentityProjectionPort;
 	service: ReturnType<typeof createTenancyService>;
 }
 
 export function createTenancyApplication(options: TenancyApplicationOptions) {
 	return {
+		async createRoleAssignment(input: {
+			actorUserId: string;
+			body: CreateRoleAssignmentRequest;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			sessionId: string;
+		}) {
+			const context = await options.service.requireContext({
+				authUserId: input.actorUserId,
+				contextId: input.contextId,
+				sessionId: input.sessionId,
+			});
+			const targetMembership =
+				await options.service.getMembershipForAdministration({
+					membershipId: input.body.membershipId,
+					tenantId: context.tenantId,
+				});
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.actorUserId,
+				contextId: input.contextId,
+				permission: "platform.role.assign",
+				resourceScope: {
+					scopeId: targetMembership.organizationId,
+					scopeType: "Organization",
+				},
+				sessionId: input.sessionId,
+			});
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.actorUserId,
+				contextId: input.contextId,
+				permission: "platform.role.assign",
+				resourceScope: {
+					scopeId: input.body.scopeId ?? undefined,
+					scopeType: input.body.scopeType,
+				},
+				sessionId: input.sessionId,
+			});
+			const assignment = await options.service.grantRoleAssignment({
+				actorUserId: input.actorUserId,
+				body: {
+					endsAt: input.body.endsAt ? new Date(input.body.endsAt) : undefined,
+					membershipId: input.body.membershipId,
+					roleId: input.body.roleId,
+					scopeId: input.body.scopeId ?? undefined,
+					scopeType: input.body.scopeType,
+					startsAt: new Date(input.body.startsAt),
+				},
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				tenantId: context.tenantId,
+			});
+			return {
+				...assignment,
+				endsAt: assignment.endsAt?.toISOString() ?? null,
+				startsAt: assignment.startsAt.toISOString(),
+			};
+		},
 		getCurrentIdentity(input: {
 			activeContextId?: string;
 			assuranceLevel: CurrentIdentity["assuranceLevel"];
@@ -988,22 +1443,50 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 			return options.service.getCurrentIdentity(input);
 		},
 
-		getOrganization(input: {
+		async getOrganization(input: {
 			authUserId: string;
 			contextId: string;
 			organizationId: string;
 			sessionId: string;
 		}) {
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.authUserId,
+				contextId: input.contextId,
+				permission: "platform.organization.read",
+				resourceScope: {
+					scopeId: input.organizationId,
+					scopeType: "Organization",
+				},
+				sessionId: input.sessionId,
+			});
 			return options.service.getOrganization(input);
 		},
 
 		async inviteUser(input: {
 			actorUserId: string;
 			body: CreateUserInvitationRequest;
+			contextId: string;
 			correlationId: string;
 			idempotencyKey: string;
-			tenantId: string;
+			sessionId: string;
 		}) {
+			const context = await options.service.requireContext({
+				authUserId: input.actorUserId,
+				contextId: input.contextId,
+				sessionId: input.sessionId,
+			});
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.actorUserId,
+				contextId: input.contextId,
+				permission: "platform.user.invite",
+				resourceScope: {
+					scopeId: input.body.organizationId,
+					scopeType: "Organization",
+				},
+				sessionId: input.sessionId,
+			});
 			const invitation = await options.service.createInvitation({
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
@@ -1015,7 +1498,7 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 				organizationId: input.body.organizationId,
 				partyId: input.body.partyId ?? undefined,
 				roleIds: input.body.roleIds,
-				tenantId: input.tenantId,
+				tenantId: context.tenantId,
 			});
 			try {
 				await options.projection.projectInvitation({
@@ -1043,18 +1526,70 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 			};
 		},
 
-		listLocations(input: {
+		async listLocations(input: {
 			authUserId: string;
 			contextId: string;
 			organizationId: string;
 			page: PageRequest;
 			sessionId: string;
 		}) {
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.authUserId,
+				contextId: input.contextId,
+				permission: "platform.organization.read",
+				resourceScope: {
+					scopeId: input.organizationId,
+					scopeType: "Organization",
+				},
+				sessionId: input.sessionId,
+			});
 			return options.service.listLocations(input);
 		},
 
-		listOrganizations(input: { authUserId: string; page: PageRequest }) {
-			return options.service.listOrganizations(input);
+		async listOrganizations(input: {
+			authUserId: string;
+			contextId: string;
+			page: PageRequest;
+			sessionId: string;
+		}) {
+			const context = await options.service.requireContext(input);
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.authUserId,
+				contextId: input.contextId,
+				permission: "platform.organization.read",
+				resourceScope: {
+					scopeId: context.organizationId,
+					scopeType: "Organization",
+				},
+				sessionId: input.sessionId,
+			});
+			return options.service.listOrganizations({
+				authUserId: input.authUserId,
+				page: input.page,
+				tenantId: context.tenantId,
+			});
+		},
+
+		async listRoles(input: {
+			authUserId: string;
+			contextId: string;
+			page: PageRequest;
+			sessionId: string;
+		}) {
+			const context = await options.service.requireContext(input);
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.authUserId,
+				contextId: input.contextId,
+				permission: "platform.role.read",
+				sessionId: input.sessionId,
+			});
+			return options.service.listRoles({
+				page: input.page,
+				tenantId: context.tenantId,
+			});
 		},
 
 		async listUsers(input: {
@@ -1063,6 +1598,13 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 			page: PageRequest;
 			sessionId: string;
 		}): Promise<Page<UserSummary>> {
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.authUserId,
+				contextId: input.contextId,
+				permission: "platform.user.read",
+				sessionId: input.sessionId,
+			});
 			const memberships = await options.service.listTenantMemberships(input);
 			const users = await options.directory.findUsers(
 				memberships.items.map((membership) => membership.authUserId)
@@ -1111,11 +1653,33 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 		async suspendMembership(input: {
 			actorUserId: string;
 			body: SuspendTenantMembershipRequest;
+			contextId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			sessionId: string;
 			targetAuthUserId: string;
-			tenantId: string;
 		}) {
+			const context = await options.service.requireContext({
+				authUserId: input.actorUserId,
+				contextId: input.contextId,
+				sessionId: input.sessionId,
+			});
+			const targetMembership =
+				await options.service.getMembershipForAdministration({
+					membershipId: input.body.membershipId,
+					tenantId: context.tenantId,
+				});
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.actorUserId,
+				contextId: input.contextId,
+				permission: "platform.user.suspend",
+				resourceScope: {
+					scopeId: targetMembership.organizationId,
+					scopeType: "Organization",
+				},
+				sessionId: input.sessionId,
+			});
 			const membership = await options.service.suspendMembership({
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
@@ -1125,7 +1689,7 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 				revokeSessionsWhenNoActiveMembershipsRemain:
 					input.body.revokeSessionsWhenNoActiveMembershipsRemain,
 				targetAuthUserId: input.targetAuthUserId,
-				tenantId: input.tenantId,
+				tenantId: context.tenantId,
 				version: input.body.version,
 			});
 			let user:
@@ -1164,6 +1728,17 @@ export function createTenancyApplication(options: TenancyApplicationOptions) {
 			organizationId: string;
 			sessionId: string;
 		}) {
+			await options.permissions.requirePermission({
+				assuranceLevel: "aal1",
+				authUserId: input.authUserId,
+				contextId: input.contextId,
+				permission: "platform.organization.update",
+				resourceScope: {
+					scopeId: input.organizationId,
+					scopeType: "Organization",
+				},
+				sessionId: input.sessionId,
+			});
 			const organization = await options.service.updateOrganization({
 				authUserId: input.authUserId,
 				contextId: input.contextId,

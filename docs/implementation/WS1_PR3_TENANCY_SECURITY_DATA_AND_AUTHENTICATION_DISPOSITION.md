@@ -1,10 +1,10 @@
 ---
 document_id: PDA-IMPL-002
 title: WS1 PR3 Tenancy Security, Data, and Authentication Disposition
-version: 0.2.1
+version: 0.2.2
 status: Draft
 owner: Platform Tenancy
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-14
 related_adrs: [ADR-0002, ADR-0003, ADR-0006, ADR-0020, ADR-0027]
 review_evidence: []
 ---
@@ -55,7 +55,7 @@ The deferral is bounded by these mandatory controls:
 - active context is opaque, session-bound, expiring, and revalidates current active membership;
 - request bodies and ad hoc headers never establish tenant authority;
 - tests cover same-tenant behavior, cross-tenant read/write/list denial, organization/location substitution, mismatched user/membership identifiers, and atomic state-plus-outbox behavior; no unscoped count operation is exposed by the repository or PR3 API;
-- the application permission seam is fail-closed until PR5 binds canonical authorization; Better Auth Admin/Organization roles are never a fallback.
+- the application permission seam was fail-closed at PR3 merge; PR5 now binds the canonical evaluator recorded in PDA-IMPL-003, and Better Auth Admin/Organization roles remain prohibited as a fallback.
 
 RLS becomes a blocking production gate when application and migration roles, provider capabilities, operational break-glass access, pooling/session-variable behavior, backup/restore, and policy migration ownership are selected. At that point tests must run through the non-owner application role and prove policy behavior, not merely inspect policy text.
 
@@ -81,13 +81,13 @@ PR3 tests must cover credential enumeration-safe errors, native Admin/Organizati
 - `apps/server/src/router.test.ts` proves authentication, fail-closed authorization, active-context contract handling, and the complete PR3 procedure family.
 - `apps/server/composition/persistence.integration.test.ts` proves empty/upgrade/repeat/recovery migrations, canonical two-tenant fixtures without an unauthorized shared cross-tenant identity, same-tenant multi-tab contexts, cross-tenant read/write/list/context denial, tenant-preserving composite constraints, privacy-safe invitation events, and transaction-bound tenancy/outbox commit and rollback.
 
-Configuration and schema tests do not by themselves close full factor assurance. End-to-end TOTP/OTP enrollment, backup-code single use, Passkey ceremonies/inventory/revocation, recovery abuse, assurance provenance, performance, and the approved Node LTS critical matrix remain PR9 evidence. The live permissioned administration composition remains deliberately unusable until PR5 supplies canonical authorization, and authoritative audit records remain PR7 work; PR3 does not substitute an unregistered audit store or allow-all policy to make demos pass.
+Configuration and schema tests do not by themselves close full factor assurance. End-to-end TOTP/OTP enrollment, backup-code single use, Passkey ceremonies/inventory/revocation, recovery abuse, assurance provenance, performance, and the approved Node LTS critical matrix remain PR9 evidence. The PR3 merge deliberately left permissioned administration unusable. PR5 subsequently supplied canonical authorization under PDA-IMPL-003; authoritative audit records remain PR7 work. PR3 does not substitute an unregistered audit store or allow-all policy to make demos pass.
 
 ## Open gates
 
 - FDR-007: production email/SMS provider and delivery abuse controls.
 - PR4: Party link provisioning and privacy workflow.
-- PR5: canonical permission/role/delegation evaluator; until then permissioned administration is fail-closed in the live composition.
+- PR5: closed at controlled-prototype depth by PDA-IMPL-003; production authority and the named deferrals remain open.
 - PR7: authoritative audit storage, audit-of-access, and measured session-revocation propagation.
 - PR9: complete first-slice evidence matrix, performance/capacity, accessibility, recovery, and independent review.
 - Production: non-owner database role topology, RLS decision/implementation, penetration testing, provider/legal review, and operational exercises.

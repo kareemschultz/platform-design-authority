@@ -7,19 +7,17 @@ import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { serverApplication } from "../composition/application";
 import { permissionAuthorizer } from "../composition/authorization";
 import {
 	identityHttpHandler,
 	identitySessionService,
 } from "../composition/identity";
-import { partyTransportApplication } from "../composition/party";
 import { closeDatabaseComposition } from "../composition/postgres";
-import { tenancyApplication } from "../composition/tenancy";
 import { createContext } from "./context";
 import { appRouter } from "./router";
 
 const app = new Hono();
-const application = { ...tenancyApplication, ...partyTransportApplication };
 
 app.use(
 	"/*",
@@ -70,7 +68,7 @@ export const rpcHandler = new RPCHandler(appRouter, {
 // for health checks or unmatched routes.
 const handleRpc: MiddlewareHandler = async (c, next) => {
 	const context = await createContext({
-		application,
+		application: serverApplication,
 		authorizer: permissionAuthorizer,
 		context: c,
 		identity: identitySessionService,
@@ -89,7 +87,7 @@ app.use("/rpc/*", handleRpc);
 
 const handleApiReference: MiddlewareHandler = async (c, next) => {
 	const context = await createContext({
-		application,
+		application: serverApplication,
 		authorizer: permissionAuthorizer,
 		context: c,
 		identity: identitySessionService,

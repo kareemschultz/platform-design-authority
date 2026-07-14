@@ -1,7 +1,9 @@
+import type { PermissionId } from "@meridian/contracts-permissions";
 import {
 	createOrganizationPartyContract,
 	createPartyIdentityLinkContract,
 	createPersonPartyContract,
+	createRoleAssignmentContract,
 	createUserInvitationContract,
 	getCurrentIdentityContract,
 	getOrganizationContract,
@@ -9,6 +11,7 @@ import {
 	listLocationsContract,
 	listOrganizationsContract,
 	listPartiesContract,
+	listRolesContract,
 	listUsersContract,
 	setActiveContextContract,
 	suspendTenantMembershipContract,
@@ -76,21 +79,43 @@ function requireSession(context: Context) {
 
 async function requirePermission(
 	context: Context,
-	permission: string,
-	tenantId?: string
+	permission: PermissionId,
+	contextId: string,
+	resourceScope?: {
+		scopeId?: string;
+		scopeType:
+			| "Tenant"
+			| "Organization"
+			| "LegalEntity"
+			| "Branch"
+			| "Location";
+	}
 ) {
 	const session = requireSession(context);
-	const allowed = await context.authorizer.can({
+	const decision = await context.authorizer.decide({
+		assuranceLevel: "aal1",
 		authUserId: session.user.id,
+		contextId,
 		permission,
-		...(tenantId ? { tenantId } : {}),
+		...(resourceScope ? { resourceScope } : {}),
+		sessionId: session.session.id,
 	});
-	if (!allowed) {
+	if (decision.outcome !== "allow") {
+		let nextAction: "request_approval" | "step_up" | undefined;
+		let title = "Permission denied";
+		if (decision.outcome === "require_approval") {
+			nextAction = "request_approval";
+			title = "Approval required";
+		} else if (decision.outcome === "require_step_up") {
+			nextAction = "step_up";
+			title = "Stronger authentication required";
+		}
 		throw new ORPCError("FORBIDDEN", {
 			data: problem(context, {
 				code: "authorization",
+				...(nextAction ? { nextAction } : {}),
 				status: 403,
-				title: "Permission denied",
+				title,
 			}),
 		});
 	}
@@ -160,6 +185,7 @@ function mapApplicationError(context: Context, error: unknown): never {
 		});
 	}
 	if (
+		code === "authorization_denied" ||
 		code === "wrong_tenant" ||
 		code === "membership_inactive" ||
 		code === "context_expired"
@@ -218,14 +244,21 @@ const setActiveContext = implement(setActiveContextContract)
 const listOrganizations = implement(listOrganizationsContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const session = await requirePermission(
+		const { session } = await requireActiveIdentity(
 			context,
-			"platform.organization.read"
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.organization.read",
+			input.headers["x-active-context-id"]
 		);
 		try {
 			return await context.application.listOrganizations({
 				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
 				page: input.query,
+				sessionId: session.session.id,
 			});
 		} catch (error) {
 			return mapApplicationError(context, error);
@@ -235,14 +268,15 @@ const listOrganizations = implement(listOrganizationsContract)
 const getOrganization = implement(getOrganizationContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"platform.organization.read",
-			activeContext.tenantId
+			input.headers["x-active-context-id"],
+			{ scopeId: input.params.organizationId, scopeType: "Organization" }
 		);
 		try {
 			return await context.application.getOrganization({
@@ -259,14 +293,15 @@ const getOrganization = implement(getOrganizationContract)
 const updateOrganization = implement(updateOrganizationContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"platform.organization.update",
-			activeContext.tenantId
+			input.headers["x-active-context-id"],
+			{ scopeId: input.params.organizationId, scopeType: "Organization" }
 		);
 		try {
 			return await context.application.updateOrganization({
@@ -285,14 +320,15 @@ const updateOrganization = implement(updateOrganizationContract)
 const listLocations = implement(listLocationsContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"platform.organization.read",
-			activeContext.tenantId
+			input.headers["x-active-context-id"],
+			{ scopeId: input.query.organizationId, scopeType: "Organization" }
 		);
 		try {
 			return await context.application.listLocations({
@@ -310,14 +346,14 @@ const listLocations = implement(listLocationsContract)
 const listUsers = implement(listUsersContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"platform.user.read",
-			activeContext.tenantId
+			input.headers["x-active-context-id"]
 		);
 		try {
 			return await context.application.listUsers({
@@ -338,7 +374,6 @@ const inviteUser = implement(createUserInvitationContract)
 			context,
 			input.headers["x-active-context-id"]
 		);
-		const { tenantId } = activeContext;
 		if (input.body.organizationId !== activeContext.organizationId) {
 			throw new ORPCError("FORBIDDEN", {
 				data: problem(context, {
@@ -348,14 +383,20 @@ const inviteUser = implement(createUserInvitationContract)
 				}),
 			});
 		}
-		await requirePermission(context, "platform.user.invite", tenantId);
+		await requirePermission(
+			context,
+			"platform.user.invite",
+			input.headers["x-active-context-id"],
+			{ scopeId: input.body.organizationId, scopeType: "Organization" }
+		);
 		try {
 			return await context.application.inviteUser({
 				actorUserId: session.user.id,
 				body: input.body,
+				contextId: input.headers["x-active-context-id"],
 				correlationId: context.correlationId,
 				idempotencyKey: input.headers["idempotency-key"],
-				tenantId,
+				sessionId: session.session.id,
 			});
 		} catch (error) {
 			return mapApplicationError(context, error);
@@ -365,20 +406,74 @@ const inviteUser = implement(createUserInvitationContract)
 const suspendMembership = implement(suspendTenantMembershipContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
-		const { tenantId } = activeContext;
-		await requirePermission(context, "platform.user.suspend", tenantId);
+		await requirePermission(
+			context,
+			"platform.user.suspend",
+			input.headers["x-active-context-id"]
+		);
 		try {
 			return await context.application.suspendMembership({
 				actorUserId: session.user.id,
 				body: input.body,
+				contextId: input.headers["x-active-context-id"],
 				correlationId: context.correlationId,
 				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
 				targetAuthUserId: input.params.userId,
-				tenantId,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listRoles = implement(listRolesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.role.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listRoles({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createRoleAssignment = implement(createRoleAssignmentContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.role.assign",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createRoleAssignment({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
 			});
 		} catch (error) {
 			return mapApplicationError(context, error);
@@ -388,14 +483,14 @@ const suspendMembership = implement(suspendTenantMembershipContract)
 const listParties = implement(listPartiesContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"party.record.read",
-			activeContext.tenantId
+			input.headers["x-active-context-id"]
 		);
 		try {
 			return await context.application.listParties({
@@ -412,14 +507,14 @@ const listParties = implement(listPartiesContract)
 const getParty = implement(getPartyContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"party.record.read",
-			activeContext.tenantId
+			input.headers["x-active-context-id"]
 		);
 		try {
 			return await context.application.getParty({
@@ -436,14 +531,14 @@ const getParty = implement(getPartyContract)
 const createPersonParty = implement(createPersonPartyContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"party.record.create",
-			activeContext.tenantId
+			input.headers["x-active-context-id"]
 		);
 		try {
 			return await context.application.createPersonParty({
@@ -462,14 +557,14 @@ const createPersonParty = implement(createPersonPartyContract)
 const createOrganizationParty = implement(createOrganizationPartyContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"party.record.create",
-			activeContext.tenantId
+			input.headers["x-active-context-id"]
 		);
 		try {
 			return await context.application.createOrganizationParty({
@@ -488,14 +583,14 @@ const createOrganizationParty = implement(createOrganizationPartyContract)
 const updateParty = implement(updatePartyContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"party.record.update",
-			activeContext.tenantId
+			input.headers["x-active-context-id"]
 		);
 		try {
 			return await context.application.updateParty({
@@ -514,14 +609,14 @@ const updateParty = implement(updatePartyContract)
 const createPartyIdentityLink = implement(createPartyIdentityLinkContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
-		const { activeContext, session } = await requireActiveIdentity(
+		const { session } = await requireActiveIdentity(
 			context,
 			input.headers["x-active-context-id"]
 		);
 		await requirePermission(
 			context,
 			"party.record.update",
-			activeContext.tenantId
+			input.headers["x-active-context-id"]
 		);
 		try {
 			return await context.application.createIdentityLink({
@@ -561,6 +656,10 @@ export const appRouter = {
 		message: "This is private",
 		user: context.session.user,
 	})),
+	roles: {
+		assign: createRoleAssignment,
+		list: listRoles,
+	},
 	users: {
 		invite: inviteUser,
 		list: listUsers,

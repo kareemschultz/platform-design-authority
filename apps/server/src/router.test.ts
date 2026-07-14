@@ -34,6 +34,7 @@ function context(input?: {
 			createIdentityLink: () => Promise.reject(new Error("not used")),
 			createOrganizationParty: () => Promise.reject(new Error("not used")),
 			createPersonParty: () => Promise.reject(new Error("not used")),
+			createRoleAssignment: () => Promise.reject(new Error("not used")),
 			getCurrentIdentity: async ({
 				activeContextId,
 				authUserId,
@@ -61,6 +62,7 @@ function context(input?: {
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
 			listParties: async () => ({ items: [], nextCursor: null }),
+			listRoles: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
 			setActiveContext: async ({ authUserId, body }) => ({
 				authUserId,
@@ -75,20 +77,30 @@ function context(input?: {
 			updateParty: () => Promise.reject(new Error("not used")),
 			...input?.application,
 		},
-		authorizer: { can: async () => input?.allowed ?? false },
+		authorizer: {
+			decide: async ({ permission }) =>
+				input?.allowed
+					? { matchedAssignments: [], outcome: "allow" as const, permission }
+					: { outcome: "deny" as const, reason: "no_assignment" as const },
+			requirePermission: async ({ permission }) =>
+				input?.allowed
+					? { matchedAssignments: [], outcome: "allow" as const, permission }
+					: { outcome: "deny" as const, reason: "no_assignment" as const },
+		},
 		correlationId: "00000000-0000-4000-8000-000000000001",
 		session: input?.session ?? null,
 	};
 }
 
 describe("appRouter contract surface", () => {
-	test("exposes the governed PR3 and PR4 procedure families", () => {
+	test("exposes the governed PR3 through PR5 procedure families", () => {
 		expect(Object.keys(appRouter).sort()).toEqual([
 			"healthCheck",
 			"identity",
 			"organizations",
 			"parties",
 			"privateData",
+			"roles",
 			"users",
 		]);
 		expect(Object.keys(appRouter.identity).sort()).toEqual([
@@ -114,6 +126,7 @@ describe("appRouter contract surface", () => {
 			"list",
 			"update",
 		]);
+		expect(Object.keys(appRouter.roles).sort()).toEqual(["assign", "list"]);
 	});
 
 	test("healthCheck responds OK without a session", async () => {
@@ -159,7 +172,10 @@ describe("appRouter contract surface", () => {
 		try {
 			await call(
 				appRouter.organizations.list,
-				{ query: { limit: 50 } },
+				{
+					headers: { "x-active-context-id": "context_unit_test_0001" },
+					query: { limit: 50 },
+				},
 				{ context: context({ session: authenticatedSession }) }
 			);
 			throw new Error("expected organization listing to fail closed");
@@ -275,6 +291,71 @@ describe("appRouter contract surface", () => {
 					context: context({
 						application: {
 							createPersonParty: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		expect(dispatched).toBe(false);
+	});
+
+	test("lists roles through the governed current-context contract", async () => {
+		const result = await call(
+			appRouter.roles.list,
+			{
+				headers: { "x-active-context-id": "context_unit_test_0001" },
+				query: { limit: 50 },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						listRoles: async () => ({
+							items: [
+								{
+									id: "role_tenant_admin_0001",
+									name: "Tenant Administrator",
+									permissionIds: ["platform.role.read"],
+									state: "Active",
+									tenantId: "tenant_unit_test_0001",
+									version: 1,
+								},
+							],
+							nextCursor: null,
+						}),
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result.items[0]?.permissionIds).toEqual(["platform.role.read"]);
+	});
+
+	test("denies role assignment before application dispatch", async () => {
+		let dispatched = false;
+		await expect(
+			call(
+				appRouter.roles.assign,
+				{
+					body: {
+						membershipId: "membership_unit_0001",
+						roleId: "role_tenant_admin_0001",
+						scopeType: "Tenant",
+						startsAt: "2026-07-14T12:00:00.000Z",
+					},
+					headers: {
+						"idempotency-key": "idempotency-role-assignment-0001",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+				},
+				{
+					context: context({
+						application: {
+							createRoleAssignment: () => {
 								dispatched = true;
 								return Promise.reject(new Error("must not dispatch"));
 							},

@@ -3,11 +3,14 @@ import { fileURLToPath } from "node:url";
 import type {
 	ActiveContextRecord,
 	CommandReceiptRecord,
+	DelegationRecord,
 	InvitationRecord,
 	LocationRecord,
 	MembershipRecord,
 	OrganizationRecord,
 	Page,
+	RoleAssignmentRecord,
+	RoleRecord,
 	TenancyRepository,
 	TenantSeed,
 } from "@meridian/platform-tenancy";
@@ -19,10 +22,13 @@ import type { Pool, PoolClient } from "pg";
 import {
 	activeContexts,
 	commandReceipts,
+	delegations,
 	invitations,
 	locations,
 	memberships,
 	organizations,
+	roleAssignments,
+	roles,
 	tenants,
 } from "./schema";
 
@@ -71,6 +77,53 @@ function mapMembership(row: typeof memberships.$inferSelect): MembershipRecord {
 		organizationId: row.organizationId,
 		roleAssignmentIds: row.roleAssignmentIds,
 		state: row.state as MembershipRecord["state"],
+		tenantId: row.tenantId,
+		version: row.version,
+	};
+}
+
+function mapRole(row: typeof roles.$inferSelect): RoleRecord {
+	return {
+		description: row.description,
+		id: row.id,
+		name: row.name,
+		permissionIds: row.permissionIds as RoleRecord["permissionIds"],
+		state: row.state as RoleRecord["state"],
+		tenantId: row.tenantId,
+		version: row.version,
+	};
+}
+
+function mapRoleAssignment(
+	row: typeof roleAssignments.$inferSelect
+): RoleAssignmentRecord {
+	return {
+		...(row.endsAt ? { endsAt: row.endsAt } : {}),
+		id: row.id,
+		membershipId: row.membershipId,
+		roleId: row.roleId,
+		...(row.scopeId ? { scopeId: row.scopeId } : {}),
+		scopeType: row.scopeType as RoleAssignmentRecord["scopeType"],
+		startsAt: row.startsAt,
+		state: row.state as RoleAssignmentRecord["state"],
+		tenantId: row.tenantId,
+		version: row.version,
+	};
+}
+
+function mapDelegation(row: typeof delegations.$inferSelect): DelegationRecord {
+	return {
+		allowFurtherDelegation: row.allowFurtherDelegation,
+		delegateMembershipId: row.delegateMembershipId,
+		delegatorMembershipId: row.delegatorMembershipId,
+		endsAt: row.endsAt,
+		id: row.id,
+		permissionIds: row.permissionIds as DelegationRecord["permissionIds"],
+		reason: row.reason,
+		...(row.scopeId ? { scopeId: row.scopeId } : {}),
+		scopeType: row.scopeType as DelegationRecord["scopeType"],
+		startsAt: row.startsAt,
+		state: row.state as DelegationRecord["state"],
 		tenantId: row.tenantId,
 		version: row.version,
 	};
@@ -153,6 +206,26 @@ export function createTenancyRepository(
 			return mapMembership(row);
 		},
 
+		async completeCommandReceipt(record) {
+			const [row] = await database
+				.update(commandReceipts)
+				.set({ result: record.result })
+				.where(
+					and(
+						eq(commandReceipts.tenantId, record.tenantId),
+						eq(commandReceipts.operation, record.operation),
+						eq(commandReceipts.idempotencyKey, record.idempotencyKey),
+						eq(commandReceipts.requestFingerprint, record.requestFingerprint),
+						eq(commandReceipts.resourceId, record.resourceId)
+					)
+				)
+				.returning();
+			if (!row) {
+				throw new Error("Tenancy command receipt completion failed");
+			}
+			return mapCommandReceipt(row);
+		},
+
 		async createInvitation(record, idempotencyKey) {
 			const [inserted] = await database
 				.insert(invitations)
@@ -178,6 +251,38 @@ export function createTenancyRepository(
 				throw new Error("Invitation idempotency lookup failed");
 			}
 			return mapInvitation(existing);
+		},
+
+		async createRoleAssignment(record) {
+			const [row] = await database
+				.insert(roleAssignments)
+				.values(record)
+				.returning();
+			if (!row) {
+				throw new Error("Role assignment insert did not return a row");
+			}
+			const membership = await this.getMembership(
+				record.tenantId,
+				record.membershipId
+			);
+			if (!membership) {
+				throw new Error("Role assignment membership disappeared");
+			}
+			await database
+				.update(memberships)
+				.set({
+					roleAssignmentIds: Array.from(
+						new Set([...membership.roleAssignmentIds, record.id])
+					),
+					version: membership.version + 1,
+				})
+				.where(
+					and(
+						eq(memberships.tenantId, record.tenantId),
+						eq(memberships.id, record.membershipId)
+					)
+				);
+			return mapRoleAssignment(row);
 		},
 
 		async getActiveContext(contextId, sessionId) {
@@ -207,6 +312,20 @@ export function createTenancyRepository(
 				)
 				.limit(1);
 			return row ? mapCommandReceipt(row) : null;
+		},
+
+		async getDelegation(tenantId, delegationId) {
+			const [row] = await database
+				.select()
+				.from(delegations)
+				.where(
+					and(
+						eq(delegations.tenantId, tenantId),
+						eq(delegations.id, delegationId)
+					)
+				)
+				.limit(1);
+			return row ? mapDelegation(row) : null;
 		},
 
 		async getInvitationByIdempotency(tenantId, idempotencyKey) {
@@ -274,6 +393,15 @@ export function createTenancyRepository(
 				)
 				.limit(1);
 			return row ? mapOrganization(row) : null;
+		},
+
+		async getRole(tenantId, roleId) {
+			const [row] = await database
+				.select()
+				.from(roles)
+				.where(and(eq(roles.tenantId, tenantId), eq(roles.id, roleId)))
+				.limit(1);
+			return row ? mapRole(row) : null;
 		},
 
 		async getTenant(tenantId) {
@@ -344,7 +472,7 @@ export function createTenancyRepository(
 			return rows.map(mapMembership);
 		},
 
-		async listOrganizations(authUserId, page) {
+		async listOrganizations(authUserId, tenantId, page) {
 			const rows = await database
 				.select({ organization: organizations })
 				.from(memberships)
@@ -358,6 +486,7 @@ export function createTenancyRepository(
 				.where(
 					and(
 						eq(memberships.authUserId, authUserId),
+						eq(memberships.tenantId, tenantId),
 						eq(memberships.state, "Active"),
 						cursorCondition(page.cursor, organizations.id)
 					)
@@ -368,6 +497,35 @@ export function createTenancyRepository(
 				rows.map(({ organization }) => mapOrganization(organization)),
 				page.limit
 			);
+		},
+
+		async listRoleAssignments(tenantId, membershipId) {
+			const rows = await database
+				.select()
+				.from(roleAssignments)
+				.where(
+					and(
+						eq(roleAssignments.tenantId, tenantId),
+						eq(roleAssignments.membershipId, membershipId)
+					)
+				)
+				.orderBy(asc(roleAssignments.id));
+			return rows.map(mapRoleAssignment);
+		},
+
+		async listRoles(tenantId, page) {
+			const rows = await database
+				.select()
+				.from(roles)
+				.where(
+					and(
+						eq(roles.tenantId, tenantId),
+						cursorCondition(page.cursor, roles.id)
+					)
+				)
+				.orderBy(asc(roles.id))
+				.limit(page.limit + 1);
+			return pageRows(rows.map(mapRole), page.limit);
 		},
 
 		async listTenantMemberships(tenantId, page) {
@@ -429,6 +587,21 @@ export function createTenancyRepository(
 				await database
 					.insert(memberships)
 					.values(seed.memberships)
+					.onConflictDoNothing();
+			}
+			if (seed.roles && seed.roles.length > 0) {
+				await database.insert(roles).values(seed.roles).onConflictDoNothing();
+			}
+			if (seed.roleAssignments && seed.roleAssignments.length > 0) {
+				await database
+					.insert(roleAssignments)
+					.values(seed.roleAssignments)
+					.onConflictDoNothing();
+			}
+			if (seed.delegations && seed.delegations.length > 0) {
+				await database
+					.insert(delegations)
+					.values(seed.delegations)
 					.onConflictDoNothing();
 			}
 		},

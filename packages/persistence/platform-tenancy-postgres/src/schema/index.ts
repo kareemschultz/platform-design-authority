@@ -2,9 +2,12 @@
 export {
 	activeContexts,
 	commandReceipts,
+	delegations,
 	invitations,
 	locations,
 	memberships,
 	organizations,
+	roleAssignments,
+	roles,
 	tenants,
 } from "./tenancy";

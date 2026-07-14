@@ -373,6 +373,9 @@ export type ActiveContext = z.infer<typeof ActiveContextSchema>;
 export type ActiveContextRequest = z.infer<typeof ActiveContextRequestSchema>;
 export type AuditRecord = z.infer<typeof AuditRecordSchema>;
 export type AuthorizationDecision = z.infer<typeof AuthorizationDecisionSchema>;
+export type CreateRoleAssignmentRequest = z.infer<
+	typeof CreateRoleAssignmentRequestSchema
+>;
 export type CreateUserInvitationRequest = z.infer<
 	typeof CreateUserInvitationRequestSchema
 >;
@@ -390,6 +393,8 @@ export type CreatePartyIdentityLinkRequest = z.infer<
 	typeof CreatePartyIdentityLinkRequestSchema
 >;
 export type PlatformIdentityLink = z.infer<typeof PlatformIdentityLinkSchema>;
+export type Role = z.infer<typeof RoleSchema>;
+export type RoleAssignment = z.infer<typeof RoleAssignmentSchema>;
 export type UserInvitation = z.infer<typeof UserInvitationSchema>;
 export type UserSummary = z.infer<typeof UserSummarySchema>;
 export type SuspendTenantMembershipRequest = z.infer<

@@ -1,15 +1,20 @@
+import type { PermissionId } from "@meridian/contracts-permissions";
 import type {
 	ActiveContext,
 	ActiveContextRequest,
+	AuthorizationDecision,
 	CreateOrganizationParty,
 	CreatePartyIdentityLinkRequest,
 	CreatePersonParty,
+	CreateRoleAssignmentRequest,
 	CreateUserInvitationRequest,
 	CurrentIdentity,
 	Location,
 	Organization,
 	Party,
 	PlatformIdentityLink,
+	Role,
+	RoleAssignment,
 	SuspendTenantMembershipRequest,
 	UpdateOrganizationRequest,
 	UpdatePartyRequest,
@@ -57,6 +62,14 @@ export interface Page<T> {
 }
 
 export interface TenancyApplication {
+	createRoleAssignment: (input: {
+		actorUserId: string;
+		body: CreateRoleAssignmentRequest;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<RoleAssignment>;
 	getCurrentIdentity: (input: {
 		activeContextId?: string;
 		assuranceLevel: CurrentIdentity["assuranceLevel"];
@@ -72,9 +85,10 @@ export interface TenancyApplication {
 	inviteUser: (input: {
 		actorUserId: string;
 		body: CreateUserInvitationRequest;
+		contextId: string;
 		correlationId: string;
 		idempotencyKey: string;
-		tenantId: string;
+		sessionId: string;
 	}) => Promise<UserInvitation>;
 	listLocations: (input: {
 		authUserId: string;
@@ -85,8 +99,16 @@ export interface TenancyApplication {
 	}) => Promise<Page<Location>>;
 	listOrganizations: (input: {
 		authUserId: string;
+		contextId: string;
 		page: { cursor?: string; limit: number };
+		sessionId: string;
 	}) => Promise<Page<Organization>>;
+	listRoles: (input: {
+		authUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number };
+		sessionId: string;
+	}) => Promise<Page<Role>>;
 	listUsers: (input: {
 		authUserId: string;
 		contextId: string;
@@ -102,10 +124,11 @@ export interface TenancyApplication {
 	suspendMembership: (input: {
 		actorUserId: string;
 		body: SuspendTenantMembershipRequest;
+		contextId: string;
 		correlationId: string;
 		idempotencyKey: string;
+		sessionId: string;
 		targetAuthUserId: string;
-		tenantId: string;
 	}) => Promise<UserSummary>;
 	updateOrganization: (input: {
 		authUserId: string;
@@ -169,11 +192,23 @@ export interface ServerApplication
 		TenancyApplication {}
 
 export interface PermissionAuthorizer {
-	can: (input: {
+	decide: (input: {
+		assuranceLevel: string;
 		authUserId: string;
-		permission: string;
-		tenantId?: string;
-	}) => Promise<boolean>;
+		contextId: string;
+		permission: PermissionId;
+		resourceScope?: {
+			scopeId?: string;
+			scopeType:
+				| "Tenant"
+				| "Organization"
+				| "LegalEntity"
+				| "Branch"
+				| "Location";
+		};
+		sessionId: string;
+	}) => Promise<AuthorizationDecision>;
+	requirePermission: PermissionAuthorizer["decide"];
 }
 
 export async function createContext({

@@ -1,11 +1,14 @@
+import { createAuthorizationService } from "@meridian/platform-authorization";
 import type { PermissionAuthorizer } from "../src/context";
+import { tenancyService } from "./tenancy";
 
-/**
- * PR3 keeps permissioned administration fail-closed until PR5 binds the
- * canonical scoped authorization evaluator. Authenticated-session and
- * authenticated-membership operations remain available through their own
- * guards; no Better Auth role is treated as Platform authority.
- */
-export const permissionAuthorizer: PermissionAuthorizer = {
-	can: () => Promise.resolve(false),
-};
+export const authorizationService = createAuthorizationService({
+	clock: () => new Date(),
+	state: {
+		load: (input) => tenancyService.resolveAuthorizationState(input),
+	},
+});
+
+/** Every call re-loads Platform Tenancy's current context, membership, role,
+ * assignment, and selected delegation state. Better Auth roles are ignored. */
+export const permissionAuthorizer: PermissionAuthorizer = authorizationService;

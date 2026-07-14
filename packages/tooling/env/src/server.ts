@@ -79,6 +79,7 @@ export const env = createEnv({
 					value.startsWith("postgres://") || value.startsWith("postgresql://"),
 				{ message: "DATABASE_URL must be a PostgreSQL connection string" }
 			),
+		IDENTITY_DISPLAY_NAME: z.string().min(1).max(100),
 		NODE_ENV: z
 			.enum(["development", "production", "test"])
 			.default("development"),

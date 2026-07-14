@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.8.0
+version: 0.8.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -39,7 +39,7 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 
 ## 2. Baseline: Verified Code Reality (2026-07-13)
 
-**Exists on the WS1 PR2 implementation branch:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); Better Auth email/password behind the runtime-neutral Platform Identity factory; owner-specific Identity and Event Backbone PostgreSQL adapters; four Identity tables plus the minimum `platform_event_outbox`; deterministic serial migration orchestration; Hono + oRPC server with health probe and one protected procedure; Next.js web app with login and a dashboard stub; Expo native health shell with authentication explicitly deferred behind RR-001; Fumadocs portal; and the canonical contract/registry artifacts. Green-gate and live PostgreSQL evidence must be attached to PR2 before this branch state is treated as merged baseline.
+**Merged baseline through WS1 PR2:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); Better Auth email/password behind the runtime-neutral Platform Identity factory; owner-specific Identity and Event Backbone PostgreSQL adapters; four initial Identity tables plus the minimum `platform_event_outbox`; deterministic serial migration orchestration; Hono + oRPC server with health probe and one protected procedure; Next.js web app with login and a dashboard stub; Expo native health shell with authentication explicitly deferred behind RR-001; Fumadocs portal; and the canonical contract/registry artifacts. PR2's green gates and live PostgreSQL evidence merged before PR3 implementation began; later branch evidence does not retroactively broaden that baseline.
 
 **WS0 package restructuring is complete as of 2026-07-13** (verified: fresh `bun install`, `check-types` 12/12, `test` 126/126, `check`, and `build` all green across the whole workspace). The workspace now matches `registry/architecture-rules.json`'s families:
 

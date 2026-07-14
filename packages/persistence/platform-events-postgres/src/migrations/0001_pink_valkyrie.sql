@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "platform_event_outbox_logical_idempotency_uidx" ON "platform_event_outbox" USING btree ("tenant_id","name","idempotency_key") WHERE "platform_event_outbox"."idempotency_key" is not null;

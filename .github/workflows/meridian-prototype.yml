@@ -49,6 +49,7 @@ jobs:
       BETTER_AUTH_SECRET: "ci-only-32-character-secret-value"
       BETTER_AUTH_TRUSTED_ORIGINS: "http://localhost:3000,http://localhost:3001"
       BETTER_AUTH_URL: "http://localhost:3000"
+      IDENTITY_DISPLAY_NAME: "Business Operating Platform"
       CORS_ORIGIN: "http://localhost:3001"
       DATABASE_URL: "postgresql://postgres:ci-only-postgres-password@localhost:5432/meridian"
       NEXT_PUBLIC_SERVER_URL: "http://localhost:3000"
@@ -81,7 +82,7 @@ jobs:
       - name: Migration freshness
         run: |
           bun run db:generate
-          git diff --exit-code -- packages/persistence/platform-identity-postgres/src/migrations packages/persistence/platform-events-postgres/src/migrations
+          git diff --exit-code -- packages/persistence/platform-identity-postgres/src/migrations packages/persistence/platform-tenancy-postgres/src/migrations packages/persistence/platform-events-postgres/src/migrations
 
       - name: Tests
         run: bun run test

@@ -379,6 +379,51 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
     }
 
 
+def build_architecture_rules_registry() -> dict[str, Any]:
+    """Propagate the governed persistence-owner table into its executable registry."""
+    registry_path = ROOT / "registry" / "architecture-rules.json"
+    source_path = (
+        ROOT
+        / "docs"
+        / "blueprint"
+        / "14-Engineering"
+        / "ARCHITECTURE_DEPENDENCY_RULES.md"
+    )
+    data = load_json(registry_path)
+    records: list[dict[str, Any]] = []
+    in_owner_table = False
+    for line in source_path.read_text(encoding="utf-8").splitlines():
+        if line == "### Registered Persistence Owners":
+            in_owner_table = True
+            continue
+        if in_owner_table and line.startswith("### "):
+            break
+        if not in_owner_table or not line.startswith("| `packages/persistence/"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) != 5:
+            raise ValueError(f"invalid persistence-owner row: {line}")
+        package = cells[0].strip("`")
+        owner = cells[1].strip("`")
+        owner_package = cells[2].strip("`")
+        tables = re.findall(r"`([^`]+)`", cells[3])
+        migration_directory = cells[4].strip("`")
+        manifest = load_json(ROOT / package / "package.json")
+        records.append({
+            "id": Path(package).name,
+            "package": package,
+            "package_name": manifest.get("name"),
+            "owner": owner,
+            "owner_package": owner_package,
+            "tables": tables,
+            "migration_directory": migration_directory,
+        })
+    if not records:
+        raise ValueError("registered persistence-owner table is empty")
+    data["persistence_owners"] = records
+    return data
+
+
 def render(value: dict[str, Any]) -> str:
     return json.dumps(value, indent=2, ensure_ascii=False, sort_keys=False) + "\n"
 
@@ -406,12 +451,14 @@ def main() -> int:
         events = build_events_registry()
         permissions = build_permissions_registry()
         tests = build_first_slice_tests_registry(capabilities)
+        architecture_rules = build_architecture_rules_registry()
         outputs = {
             ROOT / "registry" / "documents.json": render(documents),
             ROOT / "registry" / "capabilities.json": render(capabilities),
             ROOT / "registry" / "events.json": render(events),
             ROOT / "registry" / "permissions.json": render(permissions),
             ROOT / "registry" / "first-slice-tests.json": render(tests),
+            ROOT / "registry" / "architecture-rules.json": render(architecture_rules),
         }
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"registry generation failed: {exc}", file=sys.stderr)

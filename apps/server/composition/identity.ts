@@ -11,9 +11,12 @@ import { databasePool } from "./postgres";
 const auth = createIdentityAuth({
 	authUrl: env.BETTER_AUTH_URL,
 	corsOrigin: env.CORS_ORIGIN,
+	displayName: env.IDENTITY_DISPLAY_NAME,
 	nodeEnv: env.NODE_ENV,
 	persistence: createIdentityPersistence(databasePool),
 	secret: env.BETTER_AUTH_SECRET,
+	sendTwoFactorOtp: () =>
+		Promise.reject(new Error("Two-factor OTP delivery is not configured")),
 	trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS,
 });
 

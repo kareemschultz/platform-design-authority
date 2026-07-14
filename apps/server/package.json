@@ -16,10 +16,13 @@
   },
   "dependencies": {
     "@hono/node-server": "2.0.8",
+    "@meridian/contracts-platform-api": "workspace:*",
     "@meridian/platform-identity": "workspace:*",
     "@meridian/persistence-platform-events-postgres": "workspace:*",
     "@meridian/persistence-platform-identity-postgres": "workspace:*",
+    "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
     "@meridian/platform-events": "workspace:*",
+    "@meridian/platform-tenancy": "workspace:*",
     "@meridian/tooling-env": "workspace:*",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",

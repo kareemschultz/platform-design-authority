@@ -14,5 +14,11 @@ export {
 	createIdentityAuth,
 	type IdentityAuth,
 	type IdentityPersistence,
+	requirePasskeyUserVerification,
 } from "./auth";
+export type {
+	IdentityAccountSummary,
+	IdentityDirectoryPort,
+	IdentityOrganizationProjection,
+} from "./directory";
 export { isBlockedNativeAuthHttpRoute } from "./security";

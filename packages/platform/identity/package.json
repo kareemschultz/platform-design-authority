@@ -8,7 +8,7 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit",
-    "test": "bun test src/*.test.ts"
+    "test": "bun test src/security.test.ts && vitest run --config vitest.config.ts"
   },
   "dependencies": {
     "@better-auth/passkey": "catalog:",
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@meridian/tooling-config": "workspace:*",
-    "typescript": "^6"
+    "typescript": "^6",
+    "vitest": "4.1.10"
   }
 }

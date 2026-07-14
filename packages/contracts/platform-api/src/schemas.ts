@@ -370,6 +370,21 @@ export const PagedPartiesSchema = pageOf(PartySchema);
 export const PagedAuditRecordsSchema = pageOf(AuditRecordSchema);
 
 export type ActiveContext = z.infer<typeof ActiveContextSchema>;
+export type ActiveContextRequest = z.infer<typeof ActiveContextRequestSchema>;
 export type AuditRecord = z.infer<typeof AuditRecordSchema>;
 export type AuthorizationDecision = z.infer<typeof AuthorizationDecisionSchema>;
+export type CreateUserInvitationRequest = z.infer<
+	typeof CreateUserInvitationRequestSchema
+>;
 export type CurrentIdentity = z.infer<typeof CurrentIdentitySchema>;
+export type Location = z.infer<typeof LocationSchema>;
+export type MembershipSummary = z.infer<typeof MembershipSummarySchema>;
+export type Organization = z.infer<typeof OrganizationSchema>;
+export type UserInvitation = z.infer<typeof UserInvitationSchema>;
+export type UserSummary = z.infer<typeof UserSummarySchema>;
+export type SuspendTenantMembershipRequest = z.infer<
+	typeof SuspendTenantMembershipRequestSchema
+>;
+export type UpdateOrganizationRequest = z.infer<
+	typeof UpdateOrganizationRequestSchema
+>;

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.5.0
+version: 0.5.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -73,7 +73,8 @@ The executable registry maps every concrete package, table, and migration stream
 
 | Persistence package | Logical owner | Published owner package | Owned tables | Migration directory |
 |---|---|---|---|---|
-| `packages/persistence/platform-identity-postgres` | `platform.identity` | `@meridian/platform-identity` | `user`, `session`, `account`, `verification` | `packages/persistence/platform-identity-postgres/src/migrations` |
+| `packages/persistence/platform-identity-postgres` | `platform.identity` | `@meridian/platform-identity` | `account`, `invitation`, `member`, `organization`, `passkey`, `session`, `two_factor`, `user`, `verification` | `packages/persistence/platform-identity-postgres/src/migrations` |
+| `packages/persistence/platform-tenancy-postgres` | `platform.tenancy` | `@meridian/platform-tenancy` | `platform_active_context`, `platform_location`, `platform_membership`, `platform_membership_invitation`, `platform_organization`, `platform_tenant`, `platform_tenancy_command_receipt` | `packages/persistence/platform-tenancy-postgres/src/migrations` |
 | `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
 
 ### UI Packages

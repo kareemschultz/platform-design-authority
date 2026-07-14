@@ -53,7 +53,7 @@ export function createPostgresOutbox(
 			const inserted = await database
 				.insert(eventOutbox)
 				.values(toRecord(envelope))
-				.onConflictDoNothing({ target: eventOutbox.id })
+				.onConflictDoNothing()
 				.returning({ id: eventOutbox.id });
 			return inserted.length === 0 ? "duplicate" : "inserted";
 		},

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-020
 title: Navigation Command Palette and Global Search
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-14
 ---
 
 # Navigation, Command Palette, and Global Search
@@ -48,7 +48,7 @@ Supporting elements at every layer:
 11. **URLs preserve filter, sort, page, selected tab, and record context wherever meaningful** — reloading, sharing, or returning via back-button must restore the same view, not reset it. This extends rule 5 with the specific state that must survive: filters, sort order, pagination position, active tab, and the selected/open record.
 12. **A destination reachable through search or the command palette must also have a discoverable non-search path** (primary nav, secondary nav, contextual nav, or an explicit link from a related screen). Search and the palette are accelerators for people who already know what they want; they are not permitted to be the sole route to a capability, since that makes the capability effectively undiscoverable to everyone else.
 13. Tabs are for peer views of the same object or workspace, never a way to reach unrelated capabilities; nested tabs are prohibited (see `ADVANCED_INTERFACE_PATTERNS.md`'s anti-pattern list — this document does not duplicate that rule, only cross-references it for navigation designers).
-14. **Mobile navigation preserves the task, not the desktop layout.** Do not compress a multi-level desktop sidebar onto a phone screen; redesign the flow around what the mobile user is actually trying to do (see `ADVANCED_INTERFACE_PATTERNS.md`'s responsive transformation guidance for tabs, drawers, and dense views).
+14. **Mobile navigation preserves the task, not the desktop layout.** Do not compress a multi-level desktop sidebar onto a phone screen; redesign the flow around what the mobile user is actually trying to do (see `ADVANCED_INTERFACE_PATTERNS.md`'s responsive transformation guidance for tabs, drawers, and dense views). Mobile primary bottom-tab navigation is capped at 4–5 destinations; additional destinations move to a secondary surface, not additional tabs (`docs/implementation/MOBBIN_UX_PATTERN_DISCOVERY_AUDIT.md` MOB-038).
 
 ## Command Palette
 

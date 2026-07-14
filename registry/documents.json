@@ -3888,10 +3888,10 @@
       "document_id": "PDA-UX-020",
       "path": "docs/blueprint/09-UX/NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md",
       "title": "Navigation Command Palette and Global Search",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-13",
+      "last_reviewed": "2026-07-14",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -4052,10 +4052,10 @@
       "document_id": "PDA-UX-033",
       "path": "docs/blueprint/09-UX/COMPONENT_SOURCE_MATRIX.md",
       "title": "Component Source Matrix",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-13",
+      "last_reviewed": "2026-07-14",
       "related_adrs": [
         "ADR-0005",
         "ADR-0022"
@@ -4130,6 +4130,20 @@
         "ADR-0005",
         "ADR-0020",
         "ADR-0026"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-UX-039",
+      "path": "docs/implementation/MOBBIN_UX_PATTERN_DISCOVERY_AUDIT.md",
+      "title": "Mobbin UX Pattern Discovery Audit",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-14",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
       ],
       "review_evidence": null
     }

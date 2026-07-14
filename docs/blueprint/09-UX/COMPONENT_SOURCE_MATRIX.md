@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-033
 title: Component Source Matrix
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-14
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -52,6 +52,7 @@ The official `shadcn` MCP server is configured in the Claude Code user-level con
 | Shadcn Studio | Composition and visual exploration | Metadata and documented capabilities | Copying licensed source, installing wholesale, or importing hidden business logic | Researching/Restricted |
 | AI-generated UI | Bounded prototype evidence | Task-specific exploration | Promotion without provenance and tests | Untrusted |
 | Custom Meridian composite | Domain-specific behavior | Requirement and contract design | Reimplementing accessible primitives unnecessarily | Custom Required |
+| Mobbin | Real-world UX pattern evidence and inspiration for requirement-driven research; non-executable, non-authoritative, no source-code trust | Screen/flow/section search via the connected, authenticated MCP for a named Meridian requirement | Copying layout, information architecture, or copy wholesale as if it were a Meridian contract; treating a screenshot as accessibility, security, or state evidence; treating popularity as approval | Restricted (research evidence only — never a component source, never promotable to Preferred Candidate or higher) |
 
 ## Complete official registry metadata inventory
 

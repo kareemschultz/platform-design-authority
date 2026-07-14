@@ -59,6 +59,7 @@ function context(input?: {
 			getOrganization: () => Promise.reject(new Error("not used")),
 			getParty: () => Promise.reject(new Error("not used")),
 			inviteUser: () => Promise.reject(new Error("not used")),
+			listEntitlements: async () => ({ items: [], nextCursor: null }),
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
 			listParties: async () => ({ items: [], nextCursor: null }),
@@ -93,8 +94,9 @@ function context(input?: {
 }
 
 describe("appRouter contract surface", () => {
-	test("exposes the governed PR3 through PR5 procedure families", () => {
+	test("exposes the governed PR3 through PR6 procedure families", () => {
 		expect(Object.keys(appRouter).sort()).toEqual([
+			"entitlements",
 			"healthCheck",
 			"identity",
 			"organizations",
@@ -103,6 +105,7 @@ describe("appRouter contract surface", () => {
 			"roles",
 			"users",
 		]);
+		expect(Object.keys(appRouter.entitlements).sort()).toEqual(["list"]);
 		expect(Object.keys(appRouter.identity).sort()).toEqual([
 			"getCurrent",
 			"setActiveContext",
@@ -333,6 +336,44 @@ describe("appRouter contract surface", () => {
 			}
 		);
 		expect(result.items[0]?.permissionIds).toEqual(["platform.role.read"]);
+	});
+
+	test("lists current-tenant entitlements through the governed contract", async () => {
+		const result = await call(
+			appRouter.entitlements.list,
+			{
+				headers: { "x-active-context-id": "context_unit_test_0001" },
+				query: { limit: 50 },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						listEntitlements: async () => ({
+							items: [
+								{
+									capabilityId: "platform.entitlements",
+									dependencies: [],
+									endsAt: null,
+									exclusions: [],
+									id: "entitlement_unit_0001",
+									limits: {},
+									organizationId: null,
+									source: "Migration",
+									startsAt: "2026-07-14T00:00:00.000Z",
+									state: "Active",
+									tenantId: "tenant_unit_test_0001",
+									version: 1,
+								},
+							],
+							nextCursor: null,
+						}),
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result.items[0]?.capabilityId).toBe("platform.entitlements");
 	});
 
 	test("denies role assignment before application dispatch", async () => {

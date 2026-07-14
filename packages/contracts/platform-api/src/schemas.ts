@@ -174,12 +174,38 @@ export const RoleAssignmentSchema = CreateRoleAssignmentRequestSchema.extend({
 
 export const EntitlementSchema = z.object({
 	capabilityId: z.string().regex(/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/),
+	dependencies: z
+		.array(z.string().regex(/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/))
+		.default([]),
 	endsAt: InstantSchema.nullable().optional(),
+	exclusions: z
+		.array(z.string().regex(/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/))
+		.default([]),
 	id: IdentifierSchema,
-	limits: z.record(z.string(), z.unknown()).default({}),
-	source: z.enum(["PlatformSubscription", "ManualGrant", "Trial", "Migration"]),
+	limits: z
+		.record(z.string().min(1).max(100), z.number().int().nonnegative())
+		.default({}),
+	organizationId: NullableIdentifierSchema.optional(),
+	source: z.enum([
+		"PlatformSubscription",
+		"ManualGrant",
+		"Trial",
+		"Migration",
+		"AddOn",
+		"Contract",
+		"PartnerPolicy",
+	]),
 	startsAt: InstantSchema,
-	state: z.enum(["Active", "Grace", "Suspended", "Expired"]),
+	state: z.enum([
+		"Pending",
+		"Trial",
+		"Active",
+		"Grace",
+		"Suspended",
+		"Expired",
+		"Revoked",
+		"Archived",
+	]),
 	tenantId: IdentifierSchema,
 	version: z.number().int().min(1),
 });
@@ -380,6 +406,7 @@ export type CreateUserInvitationRequest = z.infer<
 	typeof CreateUserInvitationRequestSchema
 >;
 export type CurrentIdentity = z.infer<typeof CurrentIdentitySchema>;
+export type Entitlement = z.infer<typeof EntitlementSchema>;
 export type Location = z.infer<typeof LocationSchema>;
 export type MembershipSummary = z.infer<typeof MembershipSummarySchema>;
 export type Organization = z.infer<typeof OrganizationSchema>;

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -75,6 +75,7 @@ The executable registry maps every concrete package, table, and migration stream
 |---|---|---|---|---|
 | `packages/persistence/platform-identity-postgres` | `platform.identity` | `@meridian/platform-identity` | `account`, `invitation`, `member`, `organization`, `passkey`, `session`, `two_factor`, `user`, `verification` | `packages/persistence/platform-identity-postgres/src/migrations` |
 | `packages/persistence/platform-tenancy-postgres` | `platform.tenancy` | `@meridian/platform-tenancy` | `platform_active_context`, `platform_delegation`, `platform_location`, `platform_membership`, `platform_membership_invitation`, `platform_organization`, `platform_role`, `platform_role_assignment`, `platform_tenant`, `platform_tenancy_command_receipt` | `packages/persistence/platform-tenancy-postgres/src/migrations` |
+| `packages/persistence/platform-entitlements-postgres` | `platform.entitlements` | `@meridian/platform-entitlements` | `platform_entitlement`, `platform_entitlement_change`, `platform_entitlement_command_receipt` | `packages/persistence/platform-entitlements-postgres/src/migrations` |
 | `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
 | `packages/persistence/party-postgres` | `party.records` | `@meridian/domain-party` | `party_command_receipt`, `party_contact_point`, `party_identity_link`, `party_organization_detail`, `party_person_detail`, `party_record` | `packages/persistence/party-postgres/src/migrations` |
 
@@ -180,6 +181,8 @@ The temporary `platform-identity-persistence-relocation` exception was removed b
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 2026-07-14 — v0.8.0 registered the Platform Entitlements owner package, its current-state, append-only change-history, and command-receipt tables, and its serial migration stream for WS1 PR6.
 
 - 2026-07-14 — v0.7.0 registered the three Platform Tenancy-owned authorization tables while preserving the persistence-free `platform.authorization` evaluator boundary for WS1 PR5.
 

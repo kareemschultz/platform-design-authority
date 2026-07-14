@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/platform.entitlement.activated.v1.schema.json",
+  "title": "platform.entitlement.activated.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "platform.entitlement.activated.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entitlementId", "capabilityId", "state", "startsAt", "version"],
+          "properties": {
+            "entitlementId": {"type": "string"},
+            "capabilityId": {"type": "string"},
+            "organizationId": {"type": ["string", "null"]},
+            "state": {"type": "string", "enum": ["Trial", "Active", "Grace"]},
+            "startsAt": {"type": "string", "format": "date-time"},
+            "endsAt": {"type": ["string", "null"], "format": "date-time"},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    }
+  ]
+}

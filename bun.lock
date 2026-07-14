@@ -97,14 +97,17 @@
       "name": "server",
       "dependencies": {
         "@hono/node-server": "2.0.8",
+        "@meridian/contracts-capabilities": "workspace:*",
         "@meridian/contracts-permissions": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
         "@meridian/domain-party": "workspace:*",
         "@meridian/persistence-party-postgres": "workspace:*",
+        "@meridian/persistence-platform-entitlements-postgres": "workspace:*",
         "@meridian/persistence-platform-events-postgres": "workspace:*",
         "@meridian/persistence-platform-identity-postgres": "workspace:*",
         "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
         "@meridian/platform-authorization": "workspace:*",
+        "@meridian/platform-entitlements": "workspace:*",
         "@meridian/platform-events": "workspace:*",
         "@meridian/platform-identity": "workspace:*",
         "@meridian/platform-tenancy": "workspace:*",
@@ -170,6 +173,14 @@
         "typescript": "^6",
       },
     },
+    "packages/contracts/capabilities": {
+      "name": "@meridian/contracts-capabilities",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "typescript": "^6",
+      },
+    },
     "packages/contracts/events": {
       "name": "@meridian/contracts-events",
       "version": "0.0.0",
@@ -228,6 +239,22 @@
       "version": "0.0.0",
       "dependencies": {
         "@meridian/domain-party": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
+        "typescript": "^6",
+      },
+    },
+    "packages/persistence/platform-entitlements-postgres": {
+      "name": "@meridian/persistence-platform-entitlements-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/platform-entitlements": "workspace:*",
         "drizzle-orm": "catalog:",
         "pg": "8.22.0",
       },
@@ -304,6 +331,21 @@
       "name": "@meridian/platform-authorization",
       "version": "0.0.0",
       "dependencies": {
+        "@meridian/contracts-permissions": "workspace:*",
+        "@meridian/contracts-platform-api": "workspace:*",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/platform/entitlements": {
+      "name": "@meridian/platform-entitlements",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/contracts-capabilities": "workspace:*",
+        "@meridian/contracts-events": "workspace:*",
         "@meridian/contracts-permissions": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
       },
@@ -875,6 +917,8 @@
 
     "@meridian/contracts-api": ["@meridian/contracts-api@workspace:packages/contracts/api"],
 
+    "@meridian/contracts-capabilities": ["@meridian/contracts-capabilities@workspace:packages/contracts/capabilities"],
+
     "@meridian/contracts-events": ["@meridian/contracts-events@workspace:packages/contracts/events"],
 
     "@meridian/contracts-permissions": ["@meridian/contracts-permissions@workspace:packages/contracts/permissions"],
@@ -887,6 +931,8 @@
 
     "@meridian/persistence-party-postgres": ["@meridian/persistence-party-postgres@workspace:packages/persistence/party-postgres"],
 
+    "@meridian/persistence-platform-entitlements-postgres": ["@meridian/persistence-platform-entitlements-postgres@workspace:packages/persistence/platform-entitlements-postgres"],
+
     "@meridian/persistence-platform-events-postgres": ["@meridian/persistence-platform-events-postgres@workspace:packages/persistence/platform-events-postgres"],
 
     "@meridian/persistence-platform-identity-postgres": ["@meridian/persistence-platform-identity-postgres@workspace:packages/persistence/platform-identity-postgres"],
@@ -896,6 +942,8 @@
     "@meridian/platform-authorization": ["@meridian/platform-authorization@workspace:packages/platform/authorization"],
 
     "@meridian/platform-clients-api-client": ["@meridian/platform-clients-api-client@workspace:packages/platform-clients/api-client"],
+
+    "@meridian/platform-entitlements": ["@meridian/platform-entitlements@workspace:packages/platform/entitlements"],
 
     "@meridian/platform-events": ["@meridian/platform-events@workspace:packages/platform/events"],
 

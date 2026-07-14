@@ -54,6 +54,32 @@ def ts_key(key: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Capabilities
+# ---------------------------------------------------------------------------
+
+
+def load_capability_ids() -> list[str]:
+    data = load_json(ROOT / "registry" / "capabilities.json")
+    return sorted(str(item["id"]) for item in data["capabilities"])
+
+
+def render_capabilities_index(capability_ids: list[str]) -> str:
+    lines: list[str] = [
+        GENERATED_HEADER,
+        "// Source: registry/capabilities.json",
+        "",
+        "export const CAPABILITY_IDS = [",
+    ]
+    for capability_id in capability_ids:
+        lines.append(f"\t{ts_string(capability_id)},")
+    lines.append("] as const;")
+    lines.append("")
+    lines.append("export type CapabilityId = (typeof CAPABILITY_IDS)[number];")
+    lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------------------
 # Permissions
 # ---------------------------------------------------------------------------
 
@@ -452,6 +478,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        capability_ids = load_capability_ids()
         permission_ids = load_permission_ids()
         permissions_by_namespace = load_permissions_by_namespace()
         event_names, event_owners = load_events()
@@ -463,11 +490,15 @@ def main() -> int:
     print(
         f"joined {len(endpoint_rows)} endpoints "
         f"(manifest {manifest_count} / openapi {openapi_count}); "
-        f"{len(permission_ids)} permissions; {len(event_names)} events",
+        f"{len(capability_ids)} capabilities; {len(permission_ids)} permissions; "
+        f"{len(event_names)} events",
         file=sys.stderr,
     )
 
     outputs = {
+        ROOT / "packages" / "contracts" / "capabilities" / "src" / "index.ts": render_capabilities_index(
+            capability_ids
+        ),
         ROOT / "packages" / "contracts" / "permissions" / "src" / "index.ts": render_permissions_index(
             permission_ids, permissions_by_namespace
         ),

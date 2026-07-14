@@ -1,7 +1,7 @@
 ---
 document_id: PDA-IMPL-003
 title: WS1 PR5 Authorization Security, Data, and Policy Disposition
-version: 0.1.1
+version: 0.1.2
 status: Draft
 owner: Platform Tenancy and Platform Authorization
 last_reviewed: 2026-07-14
@@ -70,7 +70,7 @@ Pilot and production remain blocked until Security and Data Platform approve sep
 - `apps/server/composition/persistence.integration.test.ts` proves migration/repeat behavior, two-tenant role isolation, current-state re-evaluation, concurrent assignment idempotency, owner-state/outbox atomicity, and cross-tenant identifier denial on PostgreSQL 18.4.
 - The approved Node fallback verifies the expanded owner migration stream. Registry, contract, architecture, secret, dependency, image, and live-stack gates remain mandatory in CI.
 
-PR6 implements entitlements independently; permission allow never implies entitlement. PR7 implements authoritative audit storage, audit-of-access, assignment/delegation administrative audit, and measured session revocation. PR8 renders conditional/denial states. PR9 owns performance, capacity, recovery, full Bun/Node critical coverage, and consolidated evidence closeout. Role definition mutation, assignment revocation API, delegation commands, segregation-of-duties workflow, stored policy administration, and database RLS remain explicit future work rather than hidden grants.
+PR6 is now implemented at controlled-prototype depth under PDA-IMPL-004; permission allow never implies entitlement. PR7 implements authoritative audit storage, audit-of-access, assignment/delegation administrative audit, entitlement change projection, and measured session revocation. PR8 renders conditional/denial states. PR9 owns performance, capacity, recovery, full Bun/Node critical coverage, and consolidated evidence closeout. Role definition mutation, assignment revocation API, delegation commands, segregation-of-duties workflow, stored policy administration, and database RLS remain explicit future work rather than hidden grants.
 
 ## Governing sources
 
@@ -78,5 +78,5 @@ PR6 implements entitlements independently; permission allow never implies entitl
 - PDA-RDM-008
 - ADR-0002, ADR-0003, ADR-0016, ADR-0020, ADR-0027
 - PDA-ENGR-012, PDA-ENGR-014
-- PDA-IMPL-002, PDA-DAT-017
+- PDA-IMPL-002, PDA-IMPL-004, PDA-DAT-017
 - `registry/permissions.json`, `registry/endpoint-permissions.json`, `registry/events.json`, `registry/capabilities.json`, `registry/architecture-rules.json`

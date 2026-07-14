@@ -1,7 +1,7 @@
 ---
 document_id: PDA-PLT-005
 title: Entitlements and Licensing
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -31,7 +31,7 @@ An entitlement defines:
 - Tenant or organization scope
 - Source: plan, add-on, trial, contract, grant, or partner policy
 - Effective and expiry dates
-- State: Pending, Active, Grace, Suspended, Expired, or Revoked
+- State: Pending, Trial, Active, Grace, Suspended, Expired, Revoked, or Archived
 - Quantitative limits
 - Usage meters
 - Dependencies and exclusions
@@ -87,3 +87,7 @@ Administrators need effective-entitlement inspection, source and dependency expl
 - `platform.usage.limit-reached.v1`
 
 Platform Subscription lifecycle events remain defined by the Commercial Control Plane rather than this platform service.
+
+## Change Log
+
+- 2026-07-14 — v0.2.1 aligned the entitlement state list with PDA-COM-003 and PDA-RDM-008 by making Trial and Archived explicit.

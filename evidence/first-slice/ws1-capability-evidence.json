@@ -1,0 +1,524 @@
+{
+  "schema_version": "1.0.0",
+  "workstream_id": "WS1",
+  "status": "controlled-prototype-evidence",
+  "verified_on": "2026-07-14",
+  "capabilities": [
+    "party.records",
+    "platform.administration",
+    "platform.audit",
+    "platform.authentication",
+    "platform.authorization",
+    "platform.entitlements",
+    "platform.events",
+    "platform.identity",
+    "platform.organizations",
+    "platform.tenancy",
+    "security.tenant-isolation"
+  ],
+  "evidence": [
+    {
+      "id": "ws1-contract-parity",
+      "kind": "automated-test",
+      "path": "packages/contracts/platform-api/src/index.test.ts",
+      "contains": [
+        "is semantically aligned with generated canonical OpenAPI metadata",
+        "never accepts tenant authority in the active-context request body"
+      ],
+      "command": "bun test packages/contracts/platform-api/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": ["happy_path", "validation_and_denial"]
+    },
+    {
+      "id": "ws1-event-contracts",
+      "kind": "automated-test",
+      "path": "packages/contracts/events/src/index.test.ts",
+      "contains": [
+        "every event name matches the canonical <namespace>.<entity>.<fact>.v<major> shape",
+        "represents a registered platform-global fact without fabricated tenant scope"
+      ],
+      "command": "bun test packages/contracts/events/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "party.records",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy"
+      ],
+      "dimensions": [
+        "idempotency_and_duplicate",
+        "events_jobs_and_projections",
+        "privacy_and_classification"
+      ]
+    },
+    {
+      "id": "ws1-identity-security",
+      "kind": "automated-test",
+      "path": "packages/platform/identity/src/security.test.ts",
+      "contains": [
+        "requires verified user presence for passkey ceremonies",
+        "blocks native admin and organization authority mutation routes"
+      ],
+      "command": "bun test packages/platform/identity/src/security.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "platform.administration",
+        "platform.authentication",
+        "platform.identity",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "permission_and_entitlement",
+        "privacy_and_classification",
+        "offline_and_degraded"
+      ]
+    },
+    {
+      "id": "ws1-identity-session",
+      "kind": "automated-test",
+      "path": "packages/platform/identity/src/session.test.ts",
+      "contains": [
+        "returns only owned, non-expired safe summaries",
+        "revokes once and emits one platform-scoped durable fact under retry"
+      ],
+      "command": "bun run --cwd packages/platform/identity test",
+      "runtimes": ["Node 24", "Vitest 4.1.10"],
+      "capabilities": [
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.events",
+        "platform.identity",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-tenancy-core",
+      "kind": "automated-test",
+      "path": "packages/platform/tenancy/src/index.test.ts",
+      "contains": [
+        "supports separate tab contexts and validates selected locations",
+        "binds administrative permission checks to target and requested scopes"
+      ],
+      "command": "bun test packages/platform/tenancy/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "platform.administration",
+        "platform.authorization",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-authorization-core",
+      "kind": "automated-test",
+      "path": "packages/platform/authorization/src/index.test.ts",
+      "contains": [
+        "allows only a current canonical assignment in the active scope",
+        "re-evaluates current assignment state on every decision"
+      ],
+      "command": "bun test packages/platform/authorization/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "platform.administration",
+        "platform.authorization",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "concurrency_and_conflict",
+        "offline_and_degraded",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-entitlements-core",
+      "kind": "automated-test",
+      "path": "packages/platform/entitlements/src/index.test.ts",
+      "contains": [
+        "reloads current state, honors organization overrides, and denies stale grants",
+        "keeps entitlement inspection permission separate from runtime access"
+      ],
+      "command": "bun test packages/platform/entitlements/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "platform.administration",
+        "platform.authorization",
+        "platform.entitlements",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "concurrency_and_conflict",
+        "offline_and_degraded",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-audit-core",
+      "kind": "automated-test",
+      "path": "packages/platform/audit/src/index.test.ts",
+      "contains": [
+        "redacts prohibited content at write and maintains a valid chain",
+        "audits audit access and cannot cross tenant or include platform evidence"
+      ],
+      "command": "bun test packages/platform/audit/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "platform.administration",
+        "platform.audit",
+        "platform.events",
+        "platform.identity",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-party-core",
+      "kind": "automated-test",
+      "path": "packages/domains/party/src/index.test.ts",
+      "contains": [
+        "creates a Confidential Party without leaking contact data into its event",
+        "isolates tenant reads and enforces optimistic concurrency",
+        "revalidates active context on direct application calls"
+      ],
+      "command": "bun test packages/domains/party/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "party.records",
+        "platform.identity",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-router-boundaries",
+      "kind": "automated-test",
+      "path": "apps/server/src/router.test.ts",
+      "contains": [
+        "fails closed when canonical authorization is not bound",
+        "derives Party list scope from the revalidated active context",
+        "denies Audit access before application dispatch when permission fails"
+      ],
+      "command": "bun test apps/server/src/router.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "offline_and_degraded"
+      ]
+    },
+    {
+      "id": "ws1-postgres-integration",
+      "kind": "automated-integration-test",
+      "path": "apps/server/composition/persistence.integration.test.ts",
+      "contains": [
+        "enforces current scoped authorization and atomic role assignment",
+        "enforces two-tenant isolation, context binding, and composite ownership",
+        "commits and rolls back owner state with its outbox record"
+      ],
+      "command": "bun run db:test",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-revocation-audit-integration",
+      "kind": "automated-integration-test",
+      "path": "apps/server/composition/audit-session.integration.test.ts",
+      "contains": [
+        "measures database-current revocation propagation below the 60 second p95 budget",
+		"measures independent protected-HTTP rejection after Better Auth session revocation",
+        "persists tenant-isolated audit-of-access, privacy overlays, and tamper evidence"
+      ],
+      "command": "bun run db:test",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
+      "capabilities": [
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.events",
+        "platform.identity",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-shell-unit",
+      "kind": "automated-test",
+      "path": "apps/web/src/lib/shell.test.ts",
+      "contains": [
+        "keeps administration at two persistent navigation levels",
+        "distinguishes authority and availability failures"
+      ],
+      "command": "bun test apps/web/src",
+      "runtimes": ["Bun 1.3.14", "Next.js 16.2.1"],
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "permission_and_entitlement",
+        "offline_and_degraded",
+        "accessibility_and_responsive"
+      ]
+    },
+    {
+      "id": "ws1-browser-accessibility",
+      "kind": "manual-browser-review",
+      "path": "docs/blueprint/09-UX/WS1_THIN_APPLICATION_SHELL_IMPLEMENTATION_EVIDENCE.md",
+      "contains": [
+        "Responsive and accessibility implementation",
+        "Browser inspection evidence",
+        "Explicit deferrals"
+      ],
+      "command": "Chromium desktop, 390x844 mobile, keyboard and accessibility-tree inspection",
+      "runtimes": ["Chromium", "Next.js 16.2.10"],
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity"
+      ]
+    },
+    {
+      "id": "ws1-node-critical",
+      "kind": "automated-runtime-check",
+      "path": "apps/server/composition/ws1-critical.node-check.ts",
+      "contains": [
+        "WS1_OPENAPI_OPERATION_METADATA",
+        "authorizationState.membership.state = \"Suspended\"",
+        "retentionDisposition"
+      ],
+      "command": "bun run --cwd apps/server db:test:node",
+      "runtimes": ["Node 24", "PostgreSQL 18.4"],
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "offline_and_degraded",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-architecture-boundaries",
+      "kind": "automated-architecture-test",
+      "path": "scripts/test_architecture_checker.py",
+      "contains": [
+        "concrete application binding belongs in a registered composition root",
+        "persistence-cross-owner-import",
+        "connection-lifecycle-outside-composition"
+      ],
+      "command": "bun run architecture:check && python scripts/test_architecture_checker.py",
+      "runtimes": ["Python 3.12"],
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": [
+        "validation_and_denial",
+        "tenant_isolation",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws1-ai-independent-gate",
+      "kind": "automated-source-scan",
+      "path": "scripts/check_ws1_evidence.py",
+      "contains": ["AI_RUNTIME_MARKERS", "no AI runtime dependency"],
+      "command": "bun run ws1:evidence:check",
+      "runtimes": ["Python 3.12", "GitHub Actions"],
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "dimensions": ["offline_and_degraded"]
+    }
+  ]
+}

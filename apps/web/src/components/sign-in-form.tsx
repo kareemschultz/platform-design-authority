@@ -11,8 +11,6 @@ import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { safeReturnPath } from "@/lib/shell";
 
-import Loader from "./loader";
-
 export default function SignInForm({
 	onSwitchToSignUp,
 	returnTo,
@@ -21,7 +19,6 @@ export default function SignInForm({
 	returnTo?: string | null;
 }) {
 	const router = useRouter();
-	const { isPending } = authClient.useSession();
 
 	const form = useForm({
 		defaultValues: {
@@ -45,6 +42,13 @@ export default function SignInForm({
 				}
 			);
 		},
+		onSubmitInvalid: () => {
+			requestAnimationFrame(() => {
+				document
+					.querySelector<HTMLElement>('#sign-in-form [aria-invalid="true"]')
+					?.focus();
+			});
+		},
 		validators: {
 			onSubmit: z.object({
 				email: z.email("Invalid email address"),
@@ -53,16 +57,14 @@ export default function SignInForm({
 		},
 	});
 
-	if (isPending) {
-		return <Loader />;
-	}
-
 	return (
 		<div className="mx-auto mt-10 w-full max-w-md p-6">
 			<h1 className="mb-6 text-center font-bold text-3xl">Welcome Back</h1>
 
 			<form
 				className="space-y-4"
+				id="sign-in-form"
+				noValidate
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();

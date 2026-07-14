@@ -10,15 +10,12 @@ import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
 
-import Loader from "./loader";
-
 export default function SignUpForm({
 	onSwitchToSignIn,
 }: {
 	onSwitchToSignIn: () => void;
 }) {
 	const router = useRouter();
-	const { isPending } = authClient.useSession();
 
 	const form = useForm({
 		defaultValues: {
@@ -44,6 +41,13 @@ export default function SignUpForm({
 				}
 			);
 		},
+		onSubmitInvalid: () => {
+			requestAnimationFrame(() => {
+				document
+					.querySelector<HTMLElement>('#sign-up-form [aria-invalid="true"]')
+					?.focus();
+			});
+		},
 		validators: {
 			onSubmit: z.object({
 				email: z.email("Invalid email address"),
@@ -53,16 +57,14 @@ export default function SignUpForm({
 		},
 	});
 
-	if (isPending) {
-		return <Loader />;
-	}
-
 	return (
 		<div className="mx-auto mt-10 w-full max-w-md p-6">
 			<h1 className="mb-6 text-center font-bold text-3xl">Create Account</h1>
 
 			<form
 				className="space-y-4"
+				id="sign-up-form"
+				noValidate
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();

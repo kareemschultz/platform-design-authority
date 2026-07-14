@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-038
 title: WS1 Thin Application Shell Implementation Evidence
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Frontend Platform
 last_reviewed: 2026-07-14
@@ -66,7 +66,7 @@ Cached information may remain visible while offline, but the UI states that chan
 - Status is never communicated by color alone; text and icons accompany state badges and alerts.
 - Motion comes from owned shadcn source and remains compatible with the global reduced-motion token policy.
 
-Formal WCAG 2.2 AA conformance still requires PR9 browser evidence for keyboard traversal, focus restoration, screen-reader announcements, 200%/400% zoom, contrast, reflow, and mobile viewport operation.
+PR9 completed the controlled-prototype browser review recorded in PDA-IMPL-005. Formal product WCAG 2.2 AA conformance still requires independent assistive-technology, text-only zoom, production-content, native, and qualified accessibility evidence before pilot or production.
 
 ## Component provenance and technology evidence
 
@@ -96,6 +96,14 @@ The production Next build was inspected on 2026-07-14 in a Chromium browser at d
 
 This is implementation inspection, not a formal assistive-technology conformance report. PR9 retains the remaining conformance and integrated-authenticated workflow evidence.
 
+## PR9 accessibility and responsive closeout
+
+The 2026-07-14 PR9 review exercised the login and authenticated Administration shell at desktop, 390-pixel mobile, and 320-pixel reflow widths. It verified the accessibility tree, native link/button semantics, landmarks/headings, labelled inputs, error announcements, skip-focus transfer, mobile-dialog focus and restoration, 48-pixel mobile navigation targets, light/dark muted-text contrast, reduced-motion policy, and a clean browser console.
+
+The review found and corrected four High defects and one Medium defect: Base UI button semantics on navigation links, client-session hydration replacement on the login form, root-grid document overflow at 320 pixels, invalid-form focus loss, and a missing executable reduced-motion override. PDA-IMPL-005 retains the finding-level disposition and exact verification result. At 320 pixels the document no longer overflows; only the labelled Administration subnavigation scrolls. Invalid submission focuses the first invalid field with `aria-invalid`, `aria-describedby`, and alert text.
+
+This closes the WS1 prototype accessibility evidence cell. It does not replace the independent pilot/production conformance gates named above.
+
 ## Standalone runtime evidence
 
 A fresh Docker Compose stack was built twice on 2026-07-14. The first run exposed and reproduced the build-time public URL defect recorded in TECH-LESSON-040. After the server-only internal API origin was added, a fresh image and database volume proved:
@@ -114,5 +122,5 @@ The synthetic stack and volume were removed after verification. This remains con
 - Factor enrollment and recovery screens are not implemented; the Better Auth factor baseline remains a server capability.
 - User invitation, membership suspension, and role-assignment write forms remain contract/API capabilities rather than shell workflows.
 - Audit metadata expansion is deliberately absent to avoid exposing unclassified or restricted fields.
-- Storybook visual baselines and automated browser accessibility tooling remain platform-wide work; PR9 must retain truthful manual evidence and unresolved gaps.
+- Storybook visual baselines and automated browser accessibility tooling remain platform-wide work; PDA-IMPL-005 retains truthful manual evidence and unresolved conformance gaps.
 - Production OTP delivery remains blocked by FDR-007.

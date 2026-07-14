@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0006
 title: Adopt Better Auth as the Authentication and Session Foundation
-version: 0.2.0
+version: 0.2.1
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-10
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-14
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0004, ADR-0020]
@@ -137,6 +137,13 @@ The decision is validated when a production-like vertical slice demonstrates:
 
 The dated release, documentation, security, adapter, plugin, and pricing evidence is `PDA-APP-017`. Lifecycle approval remains Proposed until the validation evidence above exists.
 
+## WS1 Prototype Evidence
+
+PDA-IMPL-005 records the bounded WS1 result: database-backed sessions, email/password, Two-Factor and Passkey composition/security guards, constrained Admin/Organization routes, current session listing/revocation, Next.js/Hono integration, Party separation, current tenant context, independent Authorization/Entitlements, privacy-safe Audit evidence, and Bun/Node checks. Forty independent protected-HTTP samples rejected the revoked Better Auth session after commit with a 7.779 ms p95 in the recorded local run.
+
+Social sign-in, production OTP delivery, production factor enrollment/recovery UX, Expo authentication, enterprise SSO/SCIM, API credentials/device flows, provider evidence, and production security/operations review remain open. The ADR remains Proposed.
+
 ## Change Log
 
+- 2026-07-14 — v0.2.1 linked bounded WS1 controlled-prototype evidence and retained all unproved validation and lifecycle gates.
 - 2026-07-12 — v0.2.0 narrowed the first-slice plugin baseline, made non-baseline plugins deny-by-default, and added runtime/security evidence under ADR-0020.

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-008
 title: "WS1 Implementation Plan: Identity, Tenancy, Party, Authorization"
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -46,7 +46,9 @@ This is a **Draft plan for a controlled prototype**, not production authority. I
 | `platform.entitlements` | full | effective capability evaluation independent of permissions |
 | `platform.audit` | full | tamper-resistant, privacy-safe access and identity evidence |
 | `platform.events` | full | minimum transactional outbox required by WS1 state changes |
+| `platform.administration` | full | real tenant-administration contract and thin-shell proof across WS1 owners |
 | `party.records` | prototype | Person/Organization Party and authentication identity-link proof |
+| `security.tenant-isolation` | full | cross-tenant denial across current context, persistence, events, Audit, and UI state |
 
 All thirteen test dimensions remain required at the depth recorded in `registry/first-slice-tests.json`. A pull request may prove only part of a capability, but WS1 may not claim that capability's depth is complete until all required evidence is linked.
 
@@ -297,6 +299,8 @@ Each pull request uses one issue, branch, worktree, owner, migration/API/securit
 8. **PR8 — Thin experience shell.** Implement §8 with canonical states, responsive/accessibility evidence, authorized context switching, and real API enforcement.
 9. **PR9 — WS1 evidence closeout.** Run the complete §11 matrix, Bun/Node critical suites, OpenAPI parity, migration/outbox recovery, performance and accessibility checks; link evidence; update risks, technology lessons, registry evidence, and PDA-RDM-007 without overstating lifecycle.
 
+Completion record (2026-07-14): PR1-PR8 are merged and PR9 is implemented under issue #52. PDA-IMPL-005 records the generated 11-capability/143-cell evidence result, 40-sample database and independent-HTTP revocation measurements, formal prototype accessibility disposition, runtime checks, explicit deferrals, and lifecycle boundary. Exact-head CI remains the merge gate; a failed gate reopens this completion record.
+
 ## 10. Canonical Synthetic Fixtures and Scenarios
 
 Use the fixture defined by PDA-TST-013 rather than replacing it.
@@ -367,3 +371,5 @@ WS1 closes only when:
 - documentation, generated contracts, registries, migrations, tests, and all repository gates are green.
 
 Only after those criteria are met may PDA-RDM-007 record WS1 as complete. Pilot and production readiness remain blocked by their separately named founder, customer, jurisdiction, security, accessibility, provider, and operational gates.
+
+**PR9 disposition:** the criteria above are satisfied for the controlled prototype by PDA-IMPL-005, `evidence/first-slice/ws1-capability-evidence.json`, and the generated `registry/first-slice-tests.json`. This is a prototype workstream exit, not lifecycle promotion. The durable-delivery worker, production RLS topology, production OTP/provider path, deeper Party behavior, formal assistive-technology conformance, penetration testing, operational exercises, external evidence, and founder/ratification gates remain open exactly as recorded in PDA-IMPL-005 and the Architecture Risk Register.

@@ -41,9 +41,9 @@ export default function RootLayout({
 			>
 				<Providers>
 					<SkipLink />
-					<div className="grid h-svh grid-rows-[auto_1fr]">
+					<div className="grid h-svh min-w-0 grid-rows-[auto_1fr]">
 						<Header />
-						<main id="main-content" tabIndex={-1}>
+						<main className="min-w-0" id="main-content" tabIndex={-1}>
 							{children}
 						</main>
 					</div>

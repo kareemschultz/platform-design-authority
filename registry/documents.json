@@ -3279,6 +3279,24 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-RDM-009",
+      "path": "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md",
+      "title": "WS2 Implementation Plan: Catalog and Inventory Ledger",
+      "version": "0.1.1",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-14",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0020",
+        "ADR-0027"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-REV-002",
       "path": "docs/reviews/FABLE5_AUDIT_DISPOSITION_V1.md",
       "title": "Fable 5 Audit Disposition V1",

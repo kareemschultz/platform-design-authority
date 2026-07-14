@@ -4,7 +4,7 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at the RR-011 remediation merge commit `fce9c338511579a6a1097f505c1af532556ff01d` (PR #57, merged), which closes issue #56 on top of the WS1 PR9 merge commit `8f9d93f5d5f80b9c11a8a5c30b956bdac638a284`; PR #57's exact reviewed head and green checks are the closure evidence
+**Evidence cutoff:** `main` at `6b3dabae9e8871c23a31d35582e35a51036db3aa`, which includes the RR-011 remediation and re-verification, WS1 closeout, and project-tracking records; PR #57's exact reviewed head and green checks remain the RR-011 closure evidence
 
 **Last updated:** 2026-07-14
 
@@ -34,7 +34,7 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 |---|---:|---|---:|---:|---|
 | WS0 — Scaffold alignment and contracts | 8% | complete | 100% | 8.0% | PR #23, #31, #32; package families, foundation types, generated contracts, contract parity, and executable architecture gates are merged. |
 | WS1 — Identity, tenancy, Party, authorization | 17% | complete | 100% | 17.0% | PR #54 merged the PR1–PR9 controlled-prototype closeout; PDA-IMPL-005 and the generated matrix record evidence and residual gates. |
-| WS2 — Catalog and inventory ledger | 17% | planned | 0% | 0% | WS1 implementation and RR-011 remediation are complete; broad code waits on a governed WS2 implementation-control plan (issue #12). |
+| WS2 — Catalog and inventory ledger | 17% | planned | 0% | 0% | WS1 and RR-011 are complete; the PDA-RDM-009 draft under issue #62 awaits independent review before issue #12 implementation begins. |
 | WS3 — POS cash | 17% | planned | 0% | 0% | Blocked on WS2. |
 | WS4 — Stored value | 11% | planned | 0% | 0% | Blocked on WS3. |
 | WS5 — Offline sync | 12% | planned | 0% | 0% | Full workstream blocked on WS3; bounded client-engine research may begin after WS1 under the parallelism rule. |
@@ -84,7 +84,7 @@ Not yet complete:
 
 ## Immediate priorities
 
-1. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12, now that RR-011 has closed.
+1. Complete independent review and disposition of PDA-RDM-009 under issue #62, then execute the issue #12 WS2 sequence one issue/branch/worktree/PR at a time.
 2. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
 
 ## Open risk summary

@@ -1,0 +1,65 @@
+name: Architecture or governance change
+description: Propose a change to an authoritative decision, ADR, or governed specification.
+labels: ["contracts"]
+body:
+  - type: textarea
+    id: authority
+    attributes:
+      label: Authority being changed
+      description: Exact document (e.g. ADR-0020, PDA-RDM-007) and its current status.
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: true
+  - type: textarea
+    id: affected-adrs
+    attributes:
+      label: Affected ADRs
+      description: List affected ADRs, or enter "None" with a rationale.
+    validations:
+      required: true
+  - type: textarea
+    id: affected-contracts
+    attributes:
+      label: Affected contracts
+      description: OpenAPI operations, permissions, events, or capability registrations affected.
+    validations:
+      required: true
+  - type: textarea
+    id: migration-impact
+    attributes:
+      label: Migration impact
+      description: Describe migration impact, or enter "None" with a rationale.
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility-impact
+    attributes:
+      label: Compatibility impact
+      description: Describe compatibility impact, or enter "None" with a rationale.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: What proves this change is correct — current official sources, test results, prior audit findings.
+    validations:
+      required: true
+  - type: textarea
+    id: lifecycle-implications
+    attributes:
+      label: Lifecycle implications
+      description: Does this promote, demote, or leave unchanged the affected document's status (Draft/Proposed/Accepted/Ratified)?
+    validations:
+      required: true

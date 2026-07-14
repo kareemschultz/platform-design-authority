@@ -499,6 +499,19 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
     }
 
 
+def apply_rule_allowances(
+    data: dict[str, Any], rule_allowances: dict[str, list[str]]
+) -> None:
+    """Replace generated allowance lists with the current authoritative source."""
+    patterns = {str(item["id"]): item for item in data["forbidden_patterns"]}
+    for pattern in patterns.values():
+        pattern.pop("except", None)
+    for rule, allowed_paths in rule_allowances.items():
+        if rule not in patterns:
+            raise ValueError(f"architecture-rule allowance uses unknown rule: {rule}")
+        patterns[rule]["except"] = allowed_paths
+
+
 def build_architecture_rules_registry() -> dict[str, Any]:
     """Propagate the governed persistence-owner table into its executable registry."""
     registry_path = ROOT / "registry" / "architecture-rules.json"
@@ -557,11 +570,7 @@ def build_architecture_rules_registry() -> dict[str, Any]:
         raise ValueError("registered persistence-owner table is empty")
     if not rule_allowances:
         raise ValueError("registered architecture-rule allowance table is empty")
-    patterns = {str(item["id"]): item for item in data["forbidden_patterns"]}
-    for rule, allowed_paths in rule_allowances.items():
-        if rule not in patterns:
-            raise ValueError(f"architecture-rule allowance uses unknown rule: {rule}")
-        patterns[rule]["except"] = allowed_paths
+    apply_rule_allowances(data, rule_allowances)
     data["persistence_owners"] = records
     return data
 

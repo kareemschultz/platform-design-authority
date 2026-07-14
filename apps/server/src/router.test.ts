@@ -27,6 +27,7 @@ const authenticatedSession = {
 function context(input?: {
 	allowed?: boolean;
 	application?: Partial<Context["application"]>;
+	onDecide?: (request: Parameters<Context["authorizer"]["decide"]>[0]) => void;
 	session?: Context["session"];
 }): Context {
 	return {
@@ -82,10 +83,18 @@ function context(input?: {
 			...input?.application,
 		},
 		authorizer: {
-			decide: async ({ permission }) =>
-				input?.allowed
-					? { matchedAssignments: [], outcome: "allow" as const, permission }
-					: { outcome: "deny" as const, reason: "no_assignment" as const },
+			decide: (request) => {
+				input?.onDecide?.(request);
+				return Promise.resolve(
+					input?.allowed
+						? {
+								matchedAssignments: [],
+								outcome: "allow" as const,
+								permission: request.permission,
+							}
+						: { outcome: "deny" as const, reason: "no_assignment" as const }
+				);
+			},
 			requirePermission: async ({ permission }) =>
 				input?.allowed
 					? { matchedAssignments: [], outcome: "allow" as const, permission }
@@ -346,6 +355,9 @@ describe("appRouter contract surface", () => {
 	});
 
 	test("lists current-tenant entitlements through the governed contract", async () => {
+		let authorizationRequest:
+			| Parameters<Context["authorizer"]["decide"]>[0]
+			| undefined;
 		const result = await call(
 			appRouter.entitlements.list,
 			{
@@ -376,11 +388,17 @@ describe("appRouter contract surface", () => {
 							nextCursor: null,
 						}),
 					},
+					onDecide: (request) => {
+						authorizationRequest = request;
+					},
 					session: authenticatedSession,
 				}),
 			}
 		);
 		expect(result.items[0]?.capabilityId).toBe("platform.entitlements");
+		expect(authorizationRequest?.resourceScope).toEqual({
+			scopeType: "Tenant",
+		});
 	});
 
 	test("denies entitlement inspection at the transport boundary before dispatch", async () => {

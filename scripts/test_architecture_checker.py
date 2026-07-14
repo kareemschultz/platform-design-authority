@@ -4,10 +4,14 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKER = ROOT / "scripts" / "check_architecture.py"
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from generate_registries import apply_rule_allowances  # noqa: E402
 
 
 def run_checker() -> subprocess.CompletedProcess[str]:
@@ -42,6 +46,19 @@ def probe(
 
 
 def main() -> int:
+    generated_rules = {
+        "forbidden_patterns": [
+            {"id": "current-rule", "except": ["stale/path"]},
+            {"id": "removed-rule", "except": ["removed/path"]},
+        ]
+    }
+    apply_rule_allowances(generated_rules, {"current-rule": ["current/path"]})
+    current_rule, removed_rule = generated_rules["forbidden_patterns"]
+    if current_rule.get("except") != ["current/path"]:
+        raise AssertionError("registry generation did not replace the sourced allowance")
+    if "except" in removed_rule:
+        raise AssertionError("registry generation preserved an unsourced rule allowance")
+
     baseline = run_checker()
     if baseline.returncode != 0:
         raise AssertionError(baseline.stdout + baseline.stderr)

@@ -27,6 +27,11 @@ export const queryClient = createQueryClient();
 
 function getServerUrl(url: string) {
 	const normalized = url.endsWith("/") ? url.slice(0, -1) : url;
+	if (typeof window === "undefined" && env.PLATFORM_API_INTERNAL_URL) {
+		return env.PLATFORM_API_INTERNAL_URL.endsWith("/")
+			? env.PLATFORM_API_INTERNAL_URL.slice(0, -1)
+			: env.PLATFORM_API_INTERNAL_URL;
+	}
 
 	if (!normalized.startsWith("/")) {
 		return normalized;

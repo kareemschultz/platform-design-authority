@@ -38,7 +38,7 @@ export default function SignUpForm({
 						toast.error(error.error.message || error.error.statusText);
 					},
 					onSuccess: () => {
-						router.push("/dashboard");
+						router.push("/administration");
 						toast.success("Sign up successful");
 					},
 				}
@@ -181,7 +181,7 @@ export default function SignUpForm({
 				>
 					{({ canSubmit, isSubmitting }) => (
 						<Button
-							className="w-full"
+							className="min-h-10 w-full"
 							disabled={!canSubmit || isSubmitting}
 							type="submit"
 						>
@@ -192,7 +192,7 @@ export default function SignUpForm({
 			</form>
 
 			<div className="mt-4 text-center">
-				<Button onClick={onSwitchToSignIn} variant="link">
+				<Button className="min-h-10" onClick={onSwitchToSignIn} variant="link">
 					Already have an account? Sign In
 				</Button>
 			</div>

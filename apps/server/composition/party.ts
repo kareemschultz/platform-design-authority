@@ -72,6 +72,23 @@ export const partyApplication = createPartyApplication({
 	service: partyService,
 });
 
+const partyRepository = createPartyRepository(databasePool);
+
+export const partyIdentityLinkDirectory = {
+	async findActivePartyId(input: {
+		authUserId: string;
+		organizationId: string;
+		tenantId: string;
+	}) {
+		const link = await partyRepository.getIdentityLinkForUserContext(
+			input.tenantId,
+			input.organizationId,
+			input.authUserId
+		);
+		return link?.partyId ?? null;
+	},
+};
+
 export const partyTransportApplication = {
 	createIdentityLink: partyApplication.createIdentityLink,
 	createOrganizationParty: partyApplication.createOrganization,

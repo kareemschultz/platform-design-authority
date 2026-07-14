@@ -4,7 +4,7 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at `1bda97d42293c1008412bc5cc346d781a2ab4e22` plus the complete WS1 PR9 change set in PR #54; GitHub's exact reviewed head, green checks, and resulting merge commit are the authoritative cutoff
+**Evidence cutoff:** `main` at the exact WS1 PR9 merge commit `8f9d93f5d5f80b9c11a8a5c30b956bdac638a284`, plus the registered RR-011 audit (PDA-REV-011) and issue #56 / PR #57 remediation change set; PR #57's exact reviewed head, green checks, and resulting merge are the closure evidence when merged
 
 **Last updated:** 2026-07-14
 
@@ -34,7 +34,7 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 |---|---:|---|---:|---:|---|
 | WS0 — Scaffold alignment and contracts | 8% | complete | 100% | 8.0% | Package families, foundation types, generated contracts, contract parity, and executable architecture gates are merged. |
 | WS1 — Identity, tenancy, Party, authorization | 17% | complete | 100% | 17.0% | PR1–PR9 complete at controlled-prototype depth; PDA-IMPL-005 and the generated matrix record evidence and residual gates. |
-| WS2 — Catalog and inventory ledger | 17% | planned | 0% | 0% | Blocked on WS1 exit. A governed implementation plan may be prepared without starting code. |
+| WS2 — Catalog and inventory ledger | 17% | planned | 0% | 0% | WS1 implementation is complete; broad code waits for RR-011 remediation merge and a governed WS2 implementation-control plan. |
 | WS3 — POS cash | 17% | planned | 0% | 0% | Blocked on WS2. |
 | WS4 — Stored value | 11% | planned | 0% | 0% | Blocked on WS3. |
 | WS5 — Offline sync | 12% | planned | 0% | 0% | Full workstream blocked on WS3; bounded client-engine research may begin after WS1 under the parallelism rule. |
@@ -55,7 +55,8 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 | PR6 tenant entitlements and limits | complete | PR #45 |
 | PR7 audit evidence and session revocation | complete | PR #47 |
 | PR8 thin experience shell | complete | PR #50; PDA-UX-038; authenticated administration shell with real context, Party, role, entitlement, session, and audit queries plus responsive and accessibility evidence. |
-| PR9 WS1 evidence and closeout | complete pending merge gate | Issue #52; PDA-IMPL-005; 11 capabilities/143 required cells; 40-sample database and independent-HTTP revocation evidence; Bun/Node, architecture, accessibility, roadmap, ADR, risk, and lifecycle propagation. |
+| PR9 WS1 evidence and closeout | complete and merged | PR #54; merge `8f9d93f`; PDA-IMPL-005; 11 capabilities/143 required cells; 40-sample database and independent-HTTP revocation evidence; Bun/Node, architecture, accessibility, roadmap, ADR, risk, and lifecycle propagation. |
+| RR-011 independent audit disposition | closes on PR #57 merge | PDA-REV-011/012; issue #56 / PR #57; 0 P0, 1 P1, 5 P2, and 4 P3 accepted and remediated. Closure is effective only after exact-head-green merge. |
 
 ## Current implementation assets
 
@@ -76,7 +77,7 @@ Implemented and merged:
 
 Not yet complete:
 
-- consolidated independent Claude Code review of the exact merged WS1 PR1–PR9 state (RR-011);
+- exact-head merge of the accepted RR-011 remediation and closure evidence;
 - durable outbox delivery worker, retries, dead-letter handling, consumers, and projections beyond the minimum outbox;
 - WS2–WS7 business-domain implementation;
 - production-grade RLS topology and evidence;
@@ -84,8 +85,8 @@ Not yet complete:
 
 ## Immediate priorities
 
-1. Merge exact-head-green WS1 PR9, then run the owner-requested consolidated Claude Code audit and formally disposition every accepted finding; RR-011 blocks broad WS2 implementation until this completes.
-2. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12, without starting broad WS2 code before RR-011 closes.
+1. Merge exact-head-green PR #57, then treat RR-011 as closed under PDA-REV-011/012 and the GitHub merge evidence.
+2. Prepare and review the WS2 Catalog and Inventory implementation plan under `docs/blueprint/17-Roadmap/`, tracked by issue #12; do not start broad WS2 code before RR-011 closes and the plan is governed.
 3. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
 
 ## Open risk summary
@@ -93,7 +94,7 @@ Not yet complete:
 The Architecture Risk Register remains authoritative. The most important current categories are:
 
 - controlled-prototype database isolation versus future production RLS topology;
-- consolidated independent review of the exact merged WS1 evidence and implementation state;
+- completion/merge of the consolidated audit's accepted remediation;
 - outbox persistence existing without complete event delivery operations;
 - provider, legal, customer, founder, security, accessibility, operational, and pilot evidence still open;
 - risk of generated contracts, implementation, Fumadocs, and this dashboard drifting apart.

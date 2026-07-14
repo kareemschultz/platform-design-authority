@@ -499,6 +499,19 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
     }
 
 
+def apply_rule_allowances(
+    data: dict[str, Any], rule_allowances: dict[str, list[str]]
+) -> None:
+    """Replace generated allowance lists with the current authoritative source."""
+    patterns = {str(item["id"]): item for item in data["forbidden_patterns"]}
+    for pattern in patterns.values():
+        pattern.pop("except", None)
+    for rule, allowed_paths in rule_allowances.items():
+        if rule not in patterns:
+            raise ValueError(f"architecture-rule allowance uses unknown rule: {rule}")
+        patterns[rule]["except"] = allowed_paths
+
+
 def build_architecture_rules_registry() -> dict[str, Any]:
     """Propagate the governed persistence-owner table into its executable registry."""
     registry_path = ROOT / "registry" / "architecture-rules.json"
@@ -511,13 +524,28 @@ def build_architecture_rules_registry() -> dict[str, Any]:
     )
     data = load_json(registry_path)
     records: list[dict[str, Any]] = []
+    rule_allowances: dict[str, list[str]] = {}
     in_owner_table = False
+    in_allowance_table = False
     for line in source_path.read_text(encoding="utf-8").splitlines():
         if line == "### Registered Persistence Owners":
             in_owner_table = True
             continue
+        if line == "### Registered Rule Allowances":
+            in_allowance_table = True
+            continue
         if in_owner_table and line.startswith("### "):
-            break
+            in_owner_table = False
+        if in_allowance_table and line.startswith("### "):
+            in_allowance_table = False
+        if in_allowance_table and line.startswith("| `"):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if len(cells) != 3:
+                raise ValueError(f"invalid architecture-rule allowance row: {line}")
+            rule = cells[0].strip("`")
+            allowed_path = cells[1].strip("`")
+            rule_allowances.setdefault(rule, []).append(allowed_path)
+            continue
         if not in_owner_table or not line.startswith("| `packages/persistence/"):
             continue
         cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
@@ -540,6 +568,9 @@ def build_architecture_rules_registry() -> dict[str, Any]:
         })
     if not records:
         raise ValueError("registered persistence-owner table is empty")
+    if not rule_allowances:
+        raise ValueError("registered architecture-rule allowance table is empty")
+    apply_rule_allowances(data, rule_allowances)
     data["persistence_owners"] = records
     return data
 

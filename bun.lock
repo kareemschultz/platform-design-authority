@@ -124,6 +124,7 @@
         "zod": "catalog:",
       },
       "devDependencies": {
+        "@meridian/contracts-events": "workspace:*",
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/pg": "catalog:",

@@ -4,6 +4,7 @@ import {
 	WS1_OPENAPI_OPERATION_METADATA,
 	WS1_OPERATION_IDS,
 } from "@meridian/contracts-platform-api";
+import { createTenancyRepository } from "@meridian/persistence-platform-tenancy-postgres";
 import { retentionDisposition } from "@meridian/platform-audit";
 import {
 	type AuthorizationState,
@@ -20,6 +21,11 @@ import {
 	type MembershipRecord,
 	type TenancyRepository,
 } from "@meridian/platform-tenancy";
+import app from "../src/index";
+import { identitySessionService } from "./identity";
+import { runMigrationStreams } from "./migrations";
+import { partyService } from "./party";
+import { closeDatabaseComposition, databasePool } from "./postgres";
 
 assert.deepEqual(
 	WS1_OPENAPI_OPERATION_METADATA.map(
@@ -227,3 +233,104 @@ assert.equal(
 	),
 	"legal_hold"
 );
+
+try {
+	await runMigrationStreams(databasePool);
+	const suffix = crypto.randomUUID().replaceAll("-", "");
+	const tenantId = `tenant_node_${suffix}`;
+	const organizationId = `organization_node_${suffix}`;
+	const membershipId = `membership_node_${suffix}`;
+	const signUpResponse = await app.request("/api/auth/sign-up/email", {
+		body: JSON.stringify({
+			email: `node-http-${suffix}@example.test`,
+			name: "Node HTTP Verification",
+			password: "Node-HTTP-verification-password-0001",
+		}),
+		headers: { "content-type": "application/json" },
+		method: "POST",
+	});
+	assert.equal(signUpResponse.status, 200);
+	const sessionToken = signUpResponse.headers
+		.get("set-cookie")
+		?.match(/better-auth\.session_token=([^;]+)/u)?.[1];
+	assert.ok(sessionToken);
+	const cookie = `better-auth.session_token=${sessionToken}`;
+	const authenticatedSession = await identitySessionService.getSession({
+		headers: new Headers({ cookie }),
+	});
+	assert.ok(authenticatedSession);
+	const authUserId = authenticatedSession.user.id;
+
+	await createTenancyRepository(databasePool).seed({
+		locations: [],
+		memberships: [
+			{
+				authUserId,
+				id: membershipId,
+				organizationId,
+				roleAssignmentIds: [],
+				state: "Active",
+				tenantId,
+				version: 1,
+			},
+		],
+		organizations: [
+			{
+				id: organizationId,
+				name: "Node HTTP Organization",
+				state: "Active",
+				tenantId,
+				version: 1,
+			},
+		],
+		tenant: {
+			id: tenantId,
+			name: "Node HTTP Tenant",
+			state: "Active",
+			version: 1,
+		},
+	});
+	const linkedParty = await partyService.createPerson({
+		actorUserId: authUserId,
+		body: { displayName: "Node HTTP Person" },
+		correlationId: `correlation_node_${suffix}`,
+		idempotencyKey: `idempotency_party_node_${suffix}`,
+		organizationId,
+		tenantId,
+	});
+	await partyService.createIdentityLink({
+		actorUserId: authUserId,
+		body: { authUserId, membershipId, partyId: linkedParty.id },
+		correlationId: `correlation_link_node_${suffix}`,
+		idempotencyKey: `idempotency_link_node_${suffix}`,
+		organizationId,
+		tenantId,
+	});
+	const contextResponse = await app.request(
+		"/api-reference/v1/session/active-context",
+		{
+			body: JSON.stringify({ organizationId }),
+			headers: {
+				"content-type": "application/json",
+				cookie,
+				"idempotency-key": `idempotency_context_node_${suffix}`,
+			},
+			method: "POST",
+		}
+	);
+	assert.equal(contextResponse.status, 201);
+	const activeContext = (await contextResponse.json()) as { contextId: string };
+	const nodeHttpResponse = await app.request("/api-reference/v1/me", {
+		headers: {
+			cookie,
+			"x-active-context-id": activeContext.contextId,
+		},
+	});
+	assert.equal(nodeHttpResponse.status, 200);
+	const nodeHttpIdentity = (await nodeHttpResponse.json()) as {
+		partyId: string | null;
+	};
+	assert.equal(nodeHttpIdentity.partyId, linkedParty.id);
+} finally {
+	await closeDatabaseComposition();
+}

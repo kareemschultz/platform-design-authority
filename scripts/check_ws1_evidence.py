@@ -32,12 +32,68 @@ IMPLEMENTATION_ROOTS = [
     ROOT / "packages" / "platform" / "tenancy",
 ]
 AI_RUNTIME_MARKERS = ("@ai-sdk", "openai", "anthropic", "openrouter")
+EVIDENCE_SOURCE = ROOT / "evidence" / "first-slice" / "ws1-capability-evidence.json"
+
+
+def validate_source_claims(registry: dict[str, object]) -> int:
+    source = json.loads(EVIDENCE_SOURCE.read_text(encoding="utf-8"))
+    if source.get("schema_version") != "1.0.0" or source.get("workstream_id") != "WS1":
+        raise AssertionError("WS1 evidence source has an unsupported identity or schema")
+    declared_capabilities = {str(value) for value in source.get("capabilities", [])}
+    if declared_capabilities != EXPECTED_CAPABILITIES:
+        raise AssertionError(
+            f"WS1 source capability drift: {sorted(declared_capabilities ^ EXPECTED_CAPABILITIES)}"
+        )
+    known_dimensions = {str(value) for value in registry.get("dimensions", [])}
+    evidence_ids: set[str] = set()
+    marker_count = 0
+    for evidence in source.get("evidence", []):
+        evidence_id = str(evidence.get("id", "")).strip()
+        if not evidence_id or evidence_id in evidence_ids:
+            raise AssertionError(f"duplicate or empty WS1 evidence id: {evidence_id!r}")
+        evidence_ids.add(evidence_id)
+        path_value = str(evidence.get("path", "")).strip()
+        evidence_path = ROOT / path_value
+        if not path_value or not evidence_path.is_file():
+            raise AssertionError(f"{evidence_id} references missing source {path_value!r}")
+        markers = evidence.get("contains", [])
+        if not isinstance(markers, list) or not markers:
+            raise AssertionError(f"{evidence_id} has no source markers")
+        content = evidence_path.read_text(encoding="utf-8")
+        for marker in markers:
+            marker_value = str(marker)
+            if marker_value not in content:
+                raise AssertionError(
+                    f"{evidence_id} marker {marker_value!r} is absent from {path_value}"
+                )
+            marker_count += 1
+        capabilities = {str(value) for value in evidence.get("capabilities", [])}
+        dimensions = {str(value) for value in evidence.get("dimensions", [])}
+        if not capabilities or not dimensions:
+            raise AssertionError(f"{evidence_id} requires capabilities and dimensions")
+        if not capabilities <= declared_capabilities:
+            raise AssertionError(
+                f"{evidence_id} uses undeclared capabilities: {sorted(capabilities - declared_capabilities)}"
+            )
+        if not dimensions <= known_dimensions:
+            raise AssertionError(
+                f"{evidence_id} uses unknown dimensions: {sorted(dimensions - known_dimensions)}"
+            )
+    catalog_ids = {
+        str(item.get("id")) for item in registry.get("evidence_catalog", [])
+    }
+    if not evidence_ids <= catalog_ids:
+        raise AssertionError(
+            f"generated registry omits WS1 evidence: {sorted(evidence_ids - catalog_ids)}"
+        )
+    return marker_count
 
 
 def main() -> int:
     registry = json.loads(
         (ROOT / "registry" / "first-slice-tests.json").read_text(encoding="utf-8")
     )
+    marker_count = validate_source_claims(registry)
     rows = {
         str(row["capability_id"]): row
         for row in registry.get("tests", [])
@@ -87,7 +143,7 @@ def main() -> int:
         )
 
     print(
-        f"WS1 evidence verified: {len(rows)} capabilities, {required_cells} required cells, no AI runtime dependency"
+        f"WS1 evidence verified: {len(rows)} capabilities, {required_cells} required cells, {marker_count} source markers, no AI runtime dependency"
     )
     return 0
 

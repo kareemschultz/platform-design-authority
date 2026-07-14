@@ -52,6 +52,10 @@ const copy: Record<ShellFailure, { description: string; title: string }> = {
 	},
 };
 
+export const reauthenticateLinkClassName = buttonVariants({
+	className: "min-h-10",
+});
+
 export function QueryFailure({
 	error,
 	isOnline,
@@ -81,7 +85,7 @@ export function QueryFailure({
 				<div className="mt-3 flex flex-wrap gap-2">
 					{kind === "reauthenticate" ? (
 						<Link
-							className={buttonVariants()}
+							className={reauthenticateLinkClassName}
 							href="/login?returnTo=/administration"
 						>
 							Go to sign in

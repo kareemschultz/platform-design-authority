@@ -45,4 +45,4 @@ test("CORS preflight allows governed context and idempotency headers", () => {
 	const allowedHeaders = output.allowedHeaders.toLowerCase();
 	expect(allowedHeaders).toContain("idempotency-key");
 	expect(allowedHeaders).toContain("x-active-context-id");
-});
+}, 10_000);

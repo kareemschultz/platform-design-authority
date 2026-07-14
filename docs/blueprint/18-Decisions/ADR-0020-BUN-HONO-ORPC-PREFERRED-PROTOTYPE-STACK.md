@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0020
 title: Prefer Bun Hono and oRPC for Backend Prototypes with a Node Fallback
-version: 0.1.1
+version: 0.1.2
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
@@ -129,7 +129,7 @@ Production candidacy requires exact environment records; Bun/Node portability su
 
 ## WS1 Prototype Evidence
 
-PDA-IMPL-005 records strict contract/OpenAPI parity, runtime-neutral core packages, Hono/oRPC transport composition, Bun 1.3.14 workspace and PostgreSQL integration suites, and a Node 24 persistence plus WS1 critical lane. The Next.js shell and built deployment evidence are recorded in PDA-UX-038. This satisfies the Technical Prototype 1 evidence assigned to WS1, not the production-candidacy list above.
+PDA-IMPL-005 records strict contract/OpenAPI parity, runtime-neutral core packages, Hono/oRPC transport composition, Bun 1.3.14 workspace and PostgreSQL integration suites, and a Node 24 persistence plus WS1 critical lane. PDA-REV-012 strengthens the Node lane with one authenticated Hono/oRPC `GET /v1/me` request through the production app using a real Better Auth database session, PostgreSQL tenant/membership/active context, Party record, identity link, and current-identity composition. The Next.js shell and built deployment evidence are recorded in PDA-UX-038. This satisfies the Technical Prototype 1 evidence assigned to WS1, not the production-candidacy list above.
 
 Production load/memory/shutdown/failover, broader operational/security review, and the remaining Technical Prototypes are open. Architecture, Security, and Operations review rows therefore remain pending and the ADR remains Proposed.
 
@@ -141,10 +141,12 @@ Production load/memory/shutdown/failover, broader operational/security review, a
 | Architecture | Boundaries and portability | Pending | | Prototype evidence required |
 | Security | Runtime and supply chain | Pending | | |
 | Operations | Diagnostics and fallback | Pending | | |
+| Claude Code | Consolidated WS1 runtime audit | Concurred after remediation — prototype scope | 2026-07-14 | PDA-REV-011 identified piecewise rather than composed Node WS1 evidence; PDA-REV-012 adds the composed authenticated request. Production Architecture, Security, and Operations rows remain pending. |
 
 ## Change Log
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.1.2 | 2026-07-14 | Platform Design Authority | Recorded the RR-011 Node composition finding and authenticated Hono/oRPC remediation without changing production status. |
 | 0.1.1 | 2026-07-14 | Platform Design Authority | Linked bounded WS1 Bun/Node/Hono/oRPC/Next evidence without changing lifecycle or pending specialist reviews. |
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial proposal |

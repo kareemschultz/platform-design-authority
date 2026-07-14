@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { createHash, randomUUID } from "node:crypto";
+import type { EventEnvelope } from "@meridian/contracts-events";
 import { createAuditRepository } from "@meridian/persistence-platform-audit-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import {
@@ -75,11 +76,8 @@ afterAll(async () => {
 });
 
 function sessionApplication(options?: { failOutbox?: boolean }) {
-	let id = 0;
-	const createEventId = () => {
-		id += 1;
-		return `event_session_pr7_${String(id).padStart(8, "0")}`;
-	};
+	const createEventId = () =>
+		`event_session_pr7_${randomUUID().replaceAll("-", "")}`;
 	return createIdentitySessionApplication({
 		clock: () => new Date(),
 		fingerprint: sha256,
@@ -96,6 +94,56 @@ function sessionApplication(options?: { failOutbox?: boolean }) {
 			repository: createIdentitySessionRepository(client),
 		})),
 	});
+}
+
+async function readPublishedOutboxEvent(
+	idempotencyKey: string
+): Promise<EventEnvelope> {
+	const result = await pool.query<{
+		actorId: string | null;
+		aggregateId: string | null;
+		capabilityId: string | null;
+		causationId: string | null;
+		classification: string;
+		correlationId: string | null;
+		data: Record<string, unknown>;
+		id: string;
+		legalEntityId: null;
+		locationId: null;
+		name: string;
+		occurredAt: Date;
+		organizationId: null;
+		producerNamespace: string;
+		purpose: string | null;
+		retentionClass: string;
+		schemaRef: string;
+		schemaVersion: string;
+		scopeType: "Platform";
+		sourceChannel: string | null;
+		traceId: string | null;
+	}>(
+		`SELECT actor_id AS "actorId", aggregate_id AS "aggregateId",
+		 capability_id AS "capabilityId", causation_id AS "causationId",
+		 classification, correlation_id AS "correlationId", data, id,
+		 legal_entity_id AS "legalEntityId", location_id AS "locationId", name,
+		 occurred_at AS "occurredAt", organization_id AS "organizationId",
+		 producer_namespace AS "producerNamespace", purpose,
+		 retention_class AS "retentionClass", schema_ref AS "schemaRef",
+		 schema_version AS "schemaVersion", scope_type AS "scopeType",
+		 source_channel AS "sourceChannel", trace_id AS "traceId"
+		 FROM platform_event_outbox WHERE idempotency_key = $1`,
+		[idempotencyKey]
+	);
+	const [row] = result.rows;
+	if (!row) {
+		throw new Error("Expected the committed outbox event");
+	}
+	return {
+		...row,
+		occurredAt: row.occurredAt.toISOString(),
+		publishedAt: new Date().toISOString(),
+		scopeType: "Platform",
+	};
 }
 
 function auditApplication() {
@@ -406,8 +454,25 @@ describe("PR7 session revocation and Audit persistence", () => {
 		expect(p95).toBeLessThanOrEqual(60_000);
 	}, 90_000);
 
-	test("persists tenant-isolated audit-of-access, privacy overlays, and tamper evidence", async () => {
+	test("ingests the committed revocation outbox fact before tenant-isolated audit, privacy, and tamper checks", async () => {
 		const application = auditApplication();
+		await insertSession({
+			id: "session_pr7_audit_chain_0001",
+			token: "token-pr7-audit-chain-0001",
+		});
+		await sessionApplication().revoke({
+			authUserId: "auth_user_pr7_owner_0001",
+			correlationId: "correlation_pr7_audit_chain_0001",
+			currentSessionId: "session_pr7_safe_0001",
+			idempotencyKey: "idempotency_pr7_audit_chain_0001",
+			sessionId: "session_pr7_audit_chain_0001",
+		});
+		const emittedRevocation = await readPublishedOutboxEvent(
+			"idempotency_pr7_audit_chain_0001"
+		);
+		const ingestedRevocation = await application.ingestEvent(emittedRevocation);
+		expect(ingestedRevocation.sourceEventId).toBe(emittedRevocation.id);
+		expect(ingestedRevocation.changeSummary).toEqual(emittedRevocation.data);
 		await application.append({
 			action: "platform.role-assignment.granted.v1",
 			actorType: "human",
@@ -438,20 +503,6 @@ describe("PR7 session revocation and Audit persistence", () => {
 			sourceChannel: "test",
 			targetType: "Test",
 			tenantId: "tenant_pr7_b",
-		});
-		await application.ingestEvent({
-			actorId: "auth_user_pr7_owner_0001",
-			classification: "Confidential",
-			data: { sessionId: "session_pr7_revoke_0001" },
-			id: "event_pr7_audit_global_0001",
-			name: "platform.session.revoked.v1",
-			occurredAt: new Date().toISOString(),
-			producerNamespace: "platform",
-			publishedAt: new Date().toISOString(),
-			retentionClass: "platform-security-evidence",
-			schemaRef: "schemas/events/platform.session.revoked.v1.schema.json",
-			schemaVersion: "1.0.0",
-			scopeType: "Platform",
 		});
 		await application.applyPrivacyTransformation({
 			actorUserId: "auth_user_pr7_owner_0001",

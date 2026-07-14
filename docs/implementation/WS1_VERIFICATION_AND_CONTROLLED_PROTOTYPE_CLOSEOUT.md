@@ -1,7 +1,7 @@
 ---
 document_id: PDA-IMPL-005
 title: WS1 Verification and Controlled-Prototype Closeout
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -12,7 +12,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0006, ADR-0007, ADR-0014, ADR-0016, ADR-0
 
 ## 1. Decision and authority
 
-WS1 is complete at the controlled-prototype depth governed by PDA-RDM-007 and PDA-RDM-008. This conclusion is limited to the implementation and evidence recorded here. It does not accept a Proposed ADR, approve a Draft specification, close FA4-032, ratify FDR-004, or claim pilot or production readiness. The authority order in `AGENTS.md`, the Constitution (PDA-FND-001), and the recorded ADR lifecycle remain unchanged.
+WS1 is complete at the controlled-prototype depth governed by PDA-RDM-007 and PDA-RDM-008. This conclusion is limited to the implementation and evidence recorded here. It does not accept a Proposed ADR, approve a Draft specification, close FA4-032, ratify FDR-004, or claim pilot or production readiness. The authority order in `AGENTS.md`, the Constitution (PDA-FND-002), and the recorded ADR lifecycle remain unchanged.
 
 The closeout covers the following first-slice capabilities: `party.records`, `platform.administration`, `platform.audit`, `platform.authentication`, `platform.authorization`, `platform.entitlements`, `platform.events`, `platform.identity`, `platform.organizations`, `platform.tenancy`, and `security.tenant-isolation`. `platform.administration` and `security.tenant-isolation` are included because WS1 implements and exercises them; this is not a scope expansion because both were already registered in PDA-RDM-003 and `registry/first-slice.json`.
 
@@ -26,7 +26,7 @@ The closeout covers the following first-slice capabilities: `party.records`, `pl
 - no blocking defect on an evidenced WS1 row; and
 - exact evidence identifiers, paths, commands, and runtimes rather than prose-only completion claims.
 
-`scripts/check_ws1_evidence.py` fails if the WS1 capability set drifts, a required cell lacks evidence, an evidence path disappears, a blocking defect is introduced, or an AI runtime dependency appears in an essential WS1 application/platform/domain path. The generator also fails when a declared evidence marker does not exist in its referenced file. Generated registries remain derived indexes and do not outrank their sources.
+`scripts/check_ws1_evidence.py` independently opens the WS1 evidence source and cited files. It fails if the capability set drifts, a declared source marker is absent, a capability/dimension declaration is invalid, a required cell lacks evidence, an evidence path disappears, a blocking defect is introduced, generated catalog propagation drifts, or an AI runtime dependency appears in an essential WS1 application/platform/domain path. Registry generation applies the same marker discipline as part of full first-slice propagation. Generated registries remain derived indexes and do not outrank their sources.
 
 ## 3. Verification by dimension
 
@@ -38,7 +38,7 @@ The closeout covers the following first-slice capabilities: `party.records`, `pl
 | Permission and entitlement | authorization/entitlement core, router, PostgreSQL, and shell tests | Permission and provisioning decisions remain separate; UI visibility is not authority. |
 | Idempotency and duplicates | tenancy, Party, session, audit, event, and PostgreSQL tests | Command receipts and transactional state-plus-outbox behavior prevent duplicate authoritative effects. |
 | Concurrency and conflict | Party optimistic concurrency, current-state authorization, session and PostgreSQL tests | Stale version, assignment, membership, entitlement, and session facts do not silently authorize or overwrite current state. |
-| Events, jobs, projections | event schemas, outbox atomicity, replay and audit ingestion tests | WS1 proves canonical event schemas and the minimum transactional outbox; delivery infrastructure is explicitly deferred. |
+| Events, jobs, projections | event schemas, outbox atomicity, replay and real-outbox Audit ingestion tests | WS1 proves canonical event schemas, the minimum transactional outbox, and consumption of the exact committed session-revocation fact into Audit; delivery infrastructure is explicitly deferred. |
 | Audit and observability | Audit core and PostgreSQL integration | Consequential access/security facts are append-oriented, tenant-scoped where required, correlated, redacted, chained, and query-audited. |
 | Privacy and classification | event, Party, Audit, architecture, and persistence tests | Restricted values are allowlisted/redacted and tenant/global scope is explicit. |
 | Offline and degraded | core fail-closed behavior, router/shell states, and AI-independent gate | Current authority requires connectivity; cached display cannot become authority; essential WS1 workflows do not depend on AI. |
@@ -79,6 +79,7 @@ Target: WCAG 2.2 AA-aligned controlled prototype under PDA-UX-001, PDA-UX-038, a
 
 - one banner and one main landmark, labelled primary/Administration navigation, one level-one heading, and labelled status regions;
 - the skip control transfers focus to `main-content`;
+- client-side pathname changes transfer focus to `main-content` without disturbing initial page load;
 - the mobile Sheet is a labelled dialog, focuses its first navigation link, exposes 48-pixel navigation targets, and restores focus to its trigger when closed;
 - desktop and mobile navigation use native links and expose current-state semantics where applicable;
 - labelled email/password fields use the correct autocomplete semantics and announce validation errors;
@@ -92,7 +93,7 @@ This review is not a declaration of full product WCAG conformance. Formal screen
 ## 6. Runtime, architecture, and contract evidence
 
 - Bun 1.3.14 runs the complete workspace suites and PostgreSQL integrations.
-- Node 24 runs persistence plus a runtime-neutral WS1 critical check covering contract metadata, native Better Auth route blocking, authorization current-state denial, entitlement scope, tenancy invalidation, and Audit disposition behavior.
+- Node 24 runs persistence plus a WS1 critical check covering contract metadata, native Better Auth route blocking, authorization current-state denial, entitlement scope, tenancy invalidation, Audit disposition behavior, and one authenticated Hono/oRPC `GET /v1/me` request through the production app with a real Better Auth/PostgreSQL session, tenant context, Party record, and resolved identity link.
 - PostgreSQL 18.4 applies each owner migration stream in deterministic order and proves clean/repeat/recovery and state-plus-outbox atomicity.
 - OpenAPI operation/authority metadata, permission mappings, generated contracts, event schemas, and architecture boundaries are freshness-checked.
 - Concrete binding remains in `apps/server/composition`; Party consumes injected published contracts and does not import Tenancy implementation or another owner's persistence.
@@ -114,4 +115,15 @@ WS1 closeout does not conceal or close the following:
 
 PDA-RDM-008 G1-G7 and the PR1-PR9 implementation sequence are complete for the named controlled prototype. Canonical contracts, owner separation, current authority, permission/entitlement independence, revocation, privacy-safe Audit evidence, minimum outbox atomicity, real shell behavior, Bun/Node critical paths, generated evidence links, and repository gates are executable.
 
-WS2 implementation may begin only under its own governed implementation-control document and the still-applicable authority/dependency gates. A consolidated independent Claude Code audit is scheduled against the exact merged PR1-PR9 state; any accepted finding will receive a new disposition and remediation change rather than silently rewriting this evidence.
+WS2 implementation may begin only under its own governed implementation-control document and the still-applicable authority/dependency gates.
+
+## 9. RR-011 post-closeout audit
+
+Claude Code independently audited the exact PR1-PR9 merge at `8f9d93f5d5f80b9c11a8a5c30b956bdac638a284`. PDA-REV-011 registers 0 P0, 1 P1, 5 P2, and 4 P3 findings and concurs that WS1 may remain closed at controlled-prototype depth after explicit P1 disposition. PDA-REV-012 accepts every actionable finding and records issue #56 / PR #57's executable remediation: real revocation-outbox-to-Audit ingestion, standalone source-marker verification, Party-linked current identity, source-derived architecture allowances, a composed Node request, transport-layer entitlement authorization, touch-target and route-focus regressions, and document corrections.
+
+The audit does not reopen WS1 as a whole. RR-011 closes only when PR #57 is exact-head green and merged. RR-006 through RR-010 and every pilot/production/lifecycle gate in §7 remain open.
+
+## Change log
+
+- 2026-07-14 — v0.2.0 registered and dispositioned the consolidated RR-011 audit, corrected the Constitution ID, and linked the accepted remediation evidence without promoting lifecycle.
+- 2026-07-14 — v0.1.0 recorded the original PR9 controlled-prototype closeout.

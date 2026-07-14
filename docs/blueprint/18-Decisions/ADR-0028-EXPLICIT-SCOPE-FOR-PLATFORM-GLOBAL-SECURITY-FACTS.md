@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0028
 title: Explicit Scope for Platform-Global Security Facts
-version: 0.1.1
+version: 0.1.2
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
@@ -140,17 +140,19 @@ Rollback restores the prior outbox only while no Platform-scoped event exists. A
 
 PDA-IMPL-005 records explicit Tenant versus Platform discriminator constraints, account-owned session listing/revocation, atomic session deletion plus command receipt plus one Platform-scoped outbox fact, retry idempotency, cross-account denial, tenant Audit exclusion of Platform records, redaction, integrity-chain checks, legal hold/privacy overlays, and Bun/Node/PostgreSQL verification. The 40-sample independent HTTP run recorded a 7.779 ms commit-to-401 p95 against the 60-second prototype budget.
 
-Independent Claude Code review remains intentionally deferred to the exact merged WS1 PR1-PR9 audit under RR-011. Architecture, Security, and Privacy production acceptance therefore remain open and the ADR remains Proposed.
+PDA-REV-011 completed the named consolidated review and found that the prior Audit integration test used a fabricated event rather than the exact committed session-revocation outbox fact. PDA-REV-012 closes that evidence gap by selecting the emitted Platform-scoped row, ingesting that exact event into Audit, and asserting source ID and payload identity. Architecture, Security, and Privacy production acceptance remain open and the ADR remains Proposed.
 
 ## Review Record
 
 | Reviewer | Perspective | Decision | Date | Notes |
 |---|---|---|---|---|
-| Codex | Architecture, security, privacy consistency | Proposed for controlled prototype | 2026-07-13 | Identified the forced-tenant contradiction while implementing WS1 PR7 and selected explicit discriminated scope after repository-wide audit. Independent Claude Code review is deferred to the consolidated WS1 review requested by the repository owner. |
+| Codex | Architecture, security, privacy consistency | Proposed for controlled prototype | 2026-07-13 | Identified the forced-tenant contradiction while implementing WS1 PR7 and selected explicit discriminated scope after repository-wide audit. The subsequently completed consolidated review is registered by PDA-REV-011/012. |
+| Claude Code | Consolidated WS1 architecture/security/privacy audit | Concurred after remediation — prototype scope | 2026-07-14 | PDA-REV-011 identified the disconnected revocation/Audit proof. PDA-REV-012 consumes the exact committed Platform-scoped outbox fact. Production specialist acceptance remains pending. |
 
 ## Change Log
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.1.2 | 2026-07-14 | Platform Design Authority | Recorded RR-011 completion and the real revocation-outbox-to-Audit remediation without changing Proposed lifecycle. |
 | 0.1.1 | 2026-07-14 | Platform Design Authority | Linked WS1 scope, Audit, idempotency, and measured revocation evidence; lifecycle and independent/production review gates remain open. |
 | 0.1.0 | 2026-07-13 | Platform Design Authority | Initial proposal for explicit Tenant versus Platform scope and account-session revocation evidence. |

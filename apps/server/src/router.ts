@@ -653,6 +653,12 @@ const listEntitlements = implement(listEntitlementsContract)
 			context,
 			input.headers["x-active-context-id"]
 		);
+		await requirePermission(
+			context,
+			"platform.entitlement.read",
+			input.headers["x-active-context-id"],
+			{ scopeType: "Tenant" }
+		);
 		try {
 			return await context.application.listEntitlements({
 				authUserId: session.user.id,

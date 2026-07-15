@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-027
 title: First Slice Permission Catalog
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-15
 related_adrs: [ADR-0016, ADR-0017]
 ---
 
@@ -73,6 +73,7 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 - `inventory.adjustment.read`
 - `inventory.adjustment.create`
 - `inventory.adjustment.approve`
+- `inventory.adjustment.reverse`
 - `inventory.count.read`
 - `inventory.count.create`
 - `inventory.count.submit`
@@ -83,7 +84,7 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 - `inventory.transfer.receive`
 - `inventory.import.create`
 
-The read permissions are deliberately resource-specific so an assignment that may inspect balances does not silently gain access to adjustment reasons, count evidence, or transfer exceptions. Dispatch is distinct from create and receive, preserving transfer custody and segregation of duties.
+The read permissions are deliberately resource-specific so an assignment that may inspect balances does not silently gain access to adjustment reasons, count evidence, or transfer exceptions. Adjustment reversal is distinct from approval and always appends a linked inverse movement. Dispatch is distinct from create and receive, preserving transfer custody and segregation of duties.
 
 ## Commerce and Registers
 

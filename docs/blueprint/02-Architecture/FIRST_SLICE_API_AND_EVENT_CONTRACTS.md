@@ -93,6 +93,7 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | `GET /v1/inventory-adjustments/{id}` | `inventory.adjustment.read` |
 | `POST /v1/inventory-adjustments` | `inventory.adjustment.create` |
 | `POST /v1/inventory-adjustments/{id}/approve` | `inventory.adjustment.approve` |
+| `POST /v1/inventory-adjustments/{id}/reverse` | `inventory.adjustment.reverse` |
 | `GET /v1/stock-counts` | `inventory.count.read` |
 | `GET /v1/stock-counts/{id}` | `inventory.count.read` |
 | `POST /v1/stock-counts` | `inventory.count.create` |
@@ -105,6 +106,8 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | `POST /v1/stock-transfers/{id}/receive` | `inventory.transfer.receive` |
 
 Transfer and Return request lines use exact decimal strings strictly greater than zero. Direction comes from source/destination or command semantics; signed decimal quantities are reserved for adjustment, variance, movement, and reversal facts.
+
+Inventory adjustment approval approves and posts the adjustment atomically under `inventory.adjustment.approve`; there is no separate post permission in the controlled prototype. Stock-count approval likewise approves and posts all accepted non-zero variance lines atomically. Reversal requires `inventory.adjustment.reverse`, a reason, and a linked inverse movement; the original movement remains immutable.
 
 ### Commerce, Registers, Cash, and Deposits
 

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DOM-003
 title: Inventory Domain
-version: 0.3.1
+version: 0.3.2
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-15
 related_adrs: [ADR-0016]
 ---
 
@@ -50,6 +50,9 @@ Warehouse owns execution tasks and bin operations. Procurement owns purchase com
 - Adjustment, Count, and Transfer expose tenant-scoped list and detail queries under distinct read permissions. Mutation permission never implies read permission and balance read does not reveal workflow evidence.
 - Transfer states are Draft, Dispatched, PartiallyReceived, Received, Exception, and Cancelled. Dispatch is an explicit command. Partial receipt records received quantities and remaining quantities; over-receipt is denied and a variance requires an explicit exception outcome.
 - Count posting emits one variance movement per accepted line through the same ledger boundary. Reservations never alter physical on-hand quantity.
+- Adjustment approval is the controlled-prototype posting command: it atomically records approval, appends the adjustment movement, updates the balance projection, and appends `inventory.stock.adjusted.v1` under `inventory.adjustment.approve`. The creator may not self-approve. There is no separate post permission or externally observable Approved-only state.
+- Count approval atomically approves and posts accepted non-zero variance lines under `inventory.count.approve`; the submitted observations never contain an authoritative expected quantity supplied by the client. There is no separate count-post permission.
+- Adjustment reversal requires `inventory.adjustment.reverse`, a reason, and an expected version. It appends a linked inverse movement and `inventory.stock-movement.reversed.v1`; it never updates or deletes the original movement.
 - Commands require current context, permission, entitlement, idempotency, locking/state preconditions, audit evidence, and state-plus-outbox atomicity.
 
 ## Events

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.3.0
+version: 0.3.2
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-15
 related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
 ---
 
@@ -16,15 +16,16 @@ This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section
 
 This is a **Draft plan for a controlled prototype**. It may guide only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, close FDR-004, establish a contractual service level, or claim the first slice is complete. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and WS2 stops for disposition.
 
-Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, and issue #66 owns PR2 Catalog execution. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began and concurred on PR1 at PR #65 before merge. Every implementation PR still requires exact-head independent review before merge.
+Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, issue #66 owns merged PR2 Catalog execution, and issue #68 owns active PR3 Inventory execution. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began, on PR1 at PR #65 before merge, and on PR2 at PR #67 before merge. Every implementation PR still requires exact-head independent review before merge.
 
 ### 1.1 Implementation progress
 
 | Pull request phase | Current state | Closure rule |
 |---|---|---|
 | PR1 — governance, contracts, schemas, and spike | Merged after exact-head Claude Code concurrence | Retain as the contract/governance baseline; it does not prove later business behavior or delivery |
-| PR2 — Catalog core, persistence, API, and lifecycle | Implemented on issue #66 branch; exact-head review and merge pending | Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence must remain green on reviewed head |
-| PR3–PR7 | Not started | Execute in order; no later phase may be pre-closed by PR1 or PR2 evidence |
+| PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
+| PR3 — Inventory ledger and workflows | Implementation and local evidence complete on issue #68; exact-head independent review required before merge | PDA-APP-022 records the controlled-prototype core, owner persistence, API, live PostgreSQL, rebuild, concurrency, offline-boundary, and runtime evidence; no PR4 delivery claim |
+| PR4–PR7 | Not started | Execute in order; no later phase may be pre-closed by earlier evidence |
 
 ### 1.2 Governing sources
 
@@ -230,6 +231,7 @@ PR1 adds the activation and archive commands in G2 and assigns their canonical O
 | `GET /v1/stock-balances` | `inventory.balance.read` | PR3 |
 | `POST /v1/inventory-adjustments` | `inventory.adjustment.create` | PR3 |
 | `POST /v1/inventory-adjustments/{id}/approve` | `inventory.adjustment.approve` | PR3 |
+| `POST /v1/inventory-adjustments/{id}/reverse` | `inventory.adjustment.reverse` | PR3 |
 | `POST /v1/stock-counts` | `inventory.count.create` | PR3 |
 | `POST /v1/stock-counts/{id}/submit` | `inventory.count.submit` | PR3 |
 | `POST /v1/stock-counts/{id}/approve` | `inventory.count.approve` | PR3 |
@@ -454,6 +456,7 @@ PR1 selects the following controlled-prototype answers, subject to exact-head in
 | Barcode | Exact tenant-scoped identifier lookup is canonical; format and check-digit validation are identifier-scheme policy, and tenant aliases may not replace a canonical identifier or cross tenant scope. |
 | Lifecycle | Archive is an externally meaningful fact with `catalog.product.archived.v1`; Discontinued remains distinct and its command producer is deferred. |
 | Read surface | Adjustment, count, and transfer list/detail operations use `inventory.adjustment.read`, `inventory.count.read`, and `inventory.transfer.read`; all Catalog/Inventory operations require a currently revalidated active context. |
+| Workflow posting | Adjustment approval atomically approves and posts under `inventory.adjustment.approve`; count approval atomically approves and posts under `inventory.count.approve`. No separate post permission or externally observable approved-only state is introduced. Adjustment correction uses `inventory.adjustment.reverse` and a linked inverse movement. |
 | Transfers | Draft, Dispatched, PartiallyReceived, Received, Exception, and Cancelled are the prototype states; dispatch uses the separate `inventory.transfer.dispatch` permission. |
 | Quantity and conversion | Contracts carry exact decimal strings with at most six fractional digits; directional Transfer/Return command lines must be greater than zero, while signed values remain available only for adjustment, variance, movement, and reversal facts; persistence uses `numeric(38,6)`; conversion provenance uses an explicit `conversionSourceId`. |
 | Stock policy | Negative stock is denied by default. No generic override is introduced; a future exception needs a named permission, reason, limit, audit, and domain decision. |
@@ -498,6 +501,8 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.2 | 2026-07-15 | Platform Design Authority | Recorded PR3 implementation/evidence completion pending exact-head independent review, linked PDA-APP-022, and retained RR-006/RR-007 plus WS5 offline transport deferrals. |
+| 0.3.1 | 2026-07-15 | Platform Design Authority | Recorded PR2 merge/concurrence and active issue #68; selected atomic adjustment/count approve-and-post semantics and the explicit `inventory.adjustment.reverse` correction contract before PR3 persistence generation. |
 | 0.3.0 | 2026-07-14 | Platform Design Authority | Recorded merged PR1 concurrence and issue #66 PR2 execution status; clarified that PR2 preserves validated Variant/Identifier identities and remains pending exact-head independent review and merge. |
 | 0.2.2 | 2026-07-14 | Platform Design Authority | Made the worker gate executable by leaving its candidate composition root unregistered until PR4 records the three ADR reviews; required literal worker and unknown-app denial probes. |
 | 0.2.1 | 2026-07-14 | Platform Design Authority | Preserve signed ledger facts while requiring strictly positive quantities for directional Transfer and Return command lines after PR #65 contract review. |

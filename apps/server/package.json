@@ -20,6 +20,7 @@
     "@meridian/contracts-permissions": "workspace:*",
     "@meridian/contracts-platform-api": "workspace:*",
     "@meridian/domain-catalog": "workspace:*",
+    "@meridian/domain-inventory": "workspace:*",
     "@meridian/domain-party": "workspace:*",
     "@meridian/persistence-catalog-postgres": "workspace:*",
     "@meridian/persistence-inventory-postgres": "workspace:*",

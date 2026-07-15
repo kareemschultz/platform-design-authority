@@ -3,7 +3,12 @@ import {
 	type CatalogIdFactory,
 	createCatalogService,
 } from "@meridian/domain-catalog";
+import {
+	createInventoryService,
+	type InventoryIdFactory,
+} from "@meridian/domain-inventory";
 import { createCatalogRepository } from "@meridian/persistence-catalog-postgres";
+import { createInventoryRepository } from "@meridian/persistence-inventory-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import type { OutboxEvent } from "@meridian/platform-events";
 import { env } from "@meridian/tooling-env/server";
@@ -50,17 +55,19 @@ try {
 		catalog: string | null;
 		outbox: string | null;
 		entitlements: string | null;
+		inventory: string | null;
 		party: string | null;
 		role: string | null;
 		tenancy: string | null;
 		tenancyReceipts: string | null;
 	}>(
-		"SELECT to_regclass('public.platform_audit_record')::text AS audit, to_regclass('public.catalog_product')::text AS catalog, to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_entitlement')::text AS entitlements, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_role')::text AS role, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
+		"SELECT to_regclass('public.platform_audit_record')::text AS audit, to_regclass('public.catalog_product')::text AS catalog, to_regclass('public.inventory_stock_movement')::text AS inventory, to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_entitlement')::text AS entitlements, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_role')::text AS role, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
 	);
 	assert.deepEqual(ownerTables.rows[0], {
 		audit: "platform_audit_record",
 		catalog: "catalog_product",
 		entitlements: "platform_entitlement",
+		inventory: "inventory_stock_movement",
 		outbox: "platform_event_outbox",
 		party: "party_record",
 		role: "platform_role",
@@ -173,6 +180,66 @@ try {
 	);
 	await assert.rejects(
 		catalog.getProduct("tenant_catalog_node_other", product.id),
+		(error) =>
+			typeof error === "object" &&
+			error !== null &&
+			"code" in error &&
+			error.code === "not_found"
+	);
+
+	let inventorySequence = 0;
+	const inventoryIds: InventoryIdFactory = {
+		create(kind) {
+			inventorySequence += 1;
+			return `${kind}_node_${inventorySequence}`;
+		},
+	};
+	const inventory = createInventoryService({
+		clock: () => new Date("2026-07-15T12:00:00.000Z"),
+		ids: inventoryIds,
+		references: {
+			requireLocation: async () => undefined,
+			requireProduct: async () => undefined,
+		},
+		unitOfWork: createPostgresUnitOfWork(pool, (client) => ({
+			events: createPostgresOutbox(client),
+			repository: createInventoryRepository(client),
+		})),
+	});
+	const adjustment = await inventory.createAdjustment({
+		actorUserId: "user_inventory_node_creator",
+		body: {
+			locationId: "location_inventory_node",
+			productId: product.id,
+			quantity: "3.000001",
+			reason: "Node fallback proof",
+			unit: "each",
+		},
+		correlationId: "correlation_inventory_node",
+		idempotencyKey: "idempotency_inventory_node_create",
+		organizationId: "organization_catalog_node",
+		tenantId: "tenant_catalog_node",
+	});
+	const posted = await inventory.approveAdjustment({
+		actorUserId: "user_inventory_node_approver",
+		adjustmentId: adjustment.id,
+		correlationId: "correlation_inventory_node",
+		idempotencyKey: "idempotency_inventory_node_approve",
+		tenantId: "tenant_catalog_node",
+		version: 1,
+	});
+	assert.equal(posted.state, "Posted");
+	assert.equal(
+		(
+			await inventory.listBalances({
+				page: { limit: 50 },
+				tenantId: "tenant_catalog_node",
+			})
+		).items[0]?.onHand,
+		"3.000001"
+	);
+	await assert.rejects(
+		inventory.getAdjustment("tenant_catalog_node_other", adjustment.id),
 		(error) =>
 			typeof error === "object" &&
 			error !== null &&

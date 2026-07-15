@@ -33,12 +33,18 @@ function context(input?: {
 	return {
 		application: {
 			activateProduct: () => Promise.reject(new Error("not used")),
+			approveInventoryAdjustment: () => Promise.reject(new Error("not used")),
+			approveStockCount: () => Promise.reject(new Error("not used")),
 			archiveProduct: () => Promise.reject(new Error("not used")),
 			createIdentityLink: () => Promise.reject(new Error("not used")),
+			createInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			createOrganizationParty: () => Promise.reject(new Error("not used")),
 			createPersonParty: () => Promise.reject(new Error("not used")),
 			createProduct: () => Promise.reject(new Error("not used")),
 			createRoleAssignment: () => Promise.reject(new Error("not used")),
+			createStockCount: () => Promise.reject(new Error("not used")),
+			createStockTransfer: () => Promise.reject(new Error("not used")),
+			dispatchStockTransfer: () => Promise.reject(new Error("not used")),
 			getCurrentIdentity: async ({
 				activeContextId,
 				authUserId,
@@ -60,19 +66,28 @@ function context(input?: {
 				partyId: null,
 				sessionId,
 			}),
+			getInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			getOrganization: () => Promise.reject(new Error("not used")),
 			getParty: () => Promise.reject(new Error("not used")),
 			getProduct: () => Promise.reject(new Error("not used")),
+			getStockCount: () => Promise.reject(new Error("not used")),
+			getStockTransfer: () => Promise.reject(new Error("not used")),
 			inviteUser: () => Promise.reject(new Error("not used")),
 			listAuditRecords: async () => ({ items: [], nextCursor: null }),
 			listCurrentUserSessions: async () => ({ items: [], nextCursor: null }),
 			listEntitlements: async () => ({ items: [], nextCursor: null }),
+			listInventoryAdjustments: async () => ({ items: [], nextCursor: null }),
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
 			listParties: async () => ({ items: [], nextCursor: null }),
 			listProducts: async () => ({ items: [], nextCursor: null }),
 			listRoles: async () => ({ items: [], nextCursor: null }),
+			listStockBalances: async () => [],
+			listStockCounts: async () => ({ items: [], nextCursor: null }),
+			listStockTransfers: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
+			receiveStockTransfer: () => Promise.reject(new Error("not used")),
+			reverseInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			revokeCurrentUserSession: () => Promise.resolve(),
 			setActiveContext: async ({ authUserId, body }) => ({
 				authUserId,
@@ -82,6 +97,7 @@ function context(input?: {
 				organizationId: body.organizationId,
 				tenantId: "tenant_unit_test_0001",
 			}),
+			submitStockCount: () => Promise.reject(new Error("not used")),
 			suspendMembership: () => Promise.reject(new Error("not used")),
 			updateOrganization: () => Promise.reject(new Error("not used")),
 			updateParty: () => Promise.reject(new Error("not used")),
@@ -119,6 +135,7 @@ describe("appRouter contract surface", () => {
 			"entitlements",
 			"healthCheck",
 			"identity",
+			"inventory",
 			"organizations",
 			"parties",
 			"privateData",
@@ -136,6 +153,12 @@ describe("appRouter contract surface", () => {
 			"update",
 		]);
 		expect(Object.keys(appRouter.entitlements).sort()).toEqual(["list"]);
+		expect(Object.keys(appRouter.inventory).sort()).toEqual([
+			"adjustments",
+			"balances",
+			"counts",
+			"transfers",
+		]);
 		expect(Object.keys(appRouter.audit).sort()).toEqual(["list"]);
 		expect(Object.keys(appRouter.sessions).sort()).toEqual(["list", "revoke"]);
 		expect(Object.keys(appRouter.identity).sort()).toEqual([
@@ -273,6 +296,63 @@ describe("appRouter contract surface", () => {
 			actorUserId: "user_unit_test_000001",
 			contextId: "context_unit_test_0001",
 			idempotencyKey: "idempotency-catalog-unit-0001",
+			sessionId: "session_unit_test_0001",
+		});
+	});
+
+	test("dispatches Inventory Adjustment only after current-context permission enforcement", async () => {
+		let received:
+			| Parameters<Context["application"]["createInventoryAdjustment"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.inventory.adjustments.create,
+			{
+				body: {
+					locationId: "location_unit_0001",
+					productId: "product_unit_0001",
+					quantity: "2.500001",
+					reason: "controlled correction",
+					unit: "each",
+				},
+				headers: {
+					"idempotency-key": "idempotency-inventory-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						createInventoryAdjustment(input) {
+							received = input;
+							return Promise.resolve({
+								...input.body,
+								id: "adjustment_unit_0001",
+								movementId: null,
+								reversalMovementId: null,
+								state: "PendingApproval",
+								version: 1,
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			id: "adjustment_unit_0001",
+			quantity: "2.500001",
+			state: "PendingApproval",
+		});
+		expect(permission).toBe("inventory.adjustment.create");
+		expect(received).toMatchObject({
+			actorUserId: "user_unit_test_000001",
+			contextId: "context_unit_test_0001",
+			idempotencyKey: "idempotency-inventory-unit-0001",
 			sessionId: "session_unit_test_0001",
 		});
 	});

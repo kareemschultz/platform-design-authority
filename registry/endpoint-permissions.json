@@ -43,6 +43,7 @@
     {"method":"GET","path":"/v1/inventory-adjustments/{id}","permission":"inventory.adjustment.read"},
     {"method":"POST","path":"/v1/inventory-adjustments","permission":"inventory.adjustment.create"},
     {"method":"POST","path":"/v1/inventory-adjustments/{id}/approve","permission":"inventory.adjustment.approve"},
+    {"method":"POST","path":"/v1/inventory-adjustments/{id}/reverse","permission":"inventory.adjustment.reverse"},
     {"method":"GET","path":"/v1/stock-counts","permission":"inventory.count.read"},
     {"method":"GET","path":"/v1/stock-counts/{id}","permission":"inventory.count.read"},
     {"method":"POST","path":"/v1/stock-counts","permission":"inventory.count.create"},

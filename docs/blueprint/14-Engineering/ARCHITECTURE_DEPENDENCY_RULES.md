@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.1.0
+version: 1.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-15
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027, ADR-0028]
 ---
 
@@ -91,7 +91,7 @@ The executable registry maps every concrete package, table, and migration stream
 | `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
 | `packages/persistence/party-postgres` | `party.records` | `@meridian/domain-party` | `party_command_receipt`, `party_contact_point`, `party_identity_link`, `party_organization_detail`, `party_person_detail`, `party_record` | `packages/persistence/party-postgres/src/migrations` |
 | `packages/persistence/catalog-postgres` | `catalog` | `@meridian/domain-catalog` | `catalog_product`, `catalog_variant`, `catalog_identifier`, `catalog_product_command_receipt` | `packages/persistence/catalog-postgres/src/migrations` |
-| `packages/persistence/inventory-postgres` | `inventory` | `@meridian/domain-inventory` | None in PR1; PDA-DAT-019 classifies the proposed PR3 table set | `packages/persistence/inventory-postgres/src/migrations` |
+| `packages/persistence/inventory-postgres` | `inventory` | `@meridian/domain-inventory` | `inventory_stock_movement`, `inventory_stock_balance`, `inventory_reservation`, `inventory_adjustment`, `inventory_count`, `inventory_count_line`, `inventory_transfer`, `inventory_transfer_line`, `inventory_command_receipt` | `packages/persistence/inventory-postgres/src/migrations` |
 | `packages/persistence/platform-numbering-postgres` | `platform.numbering` | `@meridian/platform-numbering` | None in PR1; PDA-DAT-019 classifies the proposed PR5 table set | `packages/persistence/platform-numbering-postgres/src/migrations` |
 
 ### UI Packages
@@ -210,6 +210,8 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 2026-07-15 — v1.2.0 registered the nine concrete Inventory-owned PR3 tables while preserving the owner-isolated migration stream and cross-owner persistence prohibition.
 
 - 2026-07-14 — v1.1.0 registered the four concrete Catalog-owned PR2 tables and retained their isolated migration stream.
 

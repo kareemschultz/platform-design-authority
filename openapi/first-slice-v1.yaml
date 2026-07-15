@@ -1012,7 +1012,28 @@ paths:
         - $ref: '#/components/parameters/ExpectedVersion'
       responses:
         '200':
-          description: Adjustment approved at the expected version
+          description: Adjustment approved and posted atomically at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InventoryAdjustment'}
+  /inventory-adjustments/{id}/reverse:
+    post:
+      tags: [Inventory]
+      operationId: reverseInventoryAdjustment
+      x-permission: inventory.adjustment.reverse
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/TransitionReason'}
+      responses:
+        '200':
+          description: Posted adjustment reversed through a linked inverse movement
           content:
             application/json:
               schema: {$ref: '#/components/schemas/InventoryAdjustment'}
@@ -1042,6 +1063,11 @@ paths:
         - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/ExpectedVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubmitStockCount'}
       responses:
         '200':
           description: Count submitted at the expected version
@@ -1090,6 +1116,11 @@ paths:
         - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/ExpectedVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReceiveStockTransfer'}
       responses:
         '200':
           description: Transfer receipt applied at the expected version
@@ -1948,6 +1979,10 @@ components:
       type: string
       pattern: '^(?!0(?:\.0{1,6})?$)(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
       description: Exact decimal quantity greater than zero with at most six fractional digits; exponent and sign notation are prohibited.
+    NonNegativeDecimalQuantity:
+      type: string
+      pattern: '^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
+      description: Exact decimal quantity greater than or equal to zero with at most six fractional digits; exponent and sign notation are prohibited.
     TransitionReason:
       type: object
       additionalProperties: false
@@ -1966,10 +2001,12 @@ components:
         version: {type: integer, minimum: 1}
     CreateInventoryAdjustment:
       type: object
+      additionalProperties: false
       required: [locationId, productId, quantity, unit, reason]
       properties:
         locationId: {$ref: '#/components/schemas/Identifier'}
         productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         quantity: {$ref: '#/components/schemas/DecimalQuantity'}
         unit: {type: string}
         reason: {type: string, maxLength: 500}
@@ -1983,6 +2020,8 @@ components:
             id: {$ref: '#/components/schemas/Identifier'}
             state: {type: string, enum: [Draft, PendingApproval, Approved, Posted, Reversed, Rejected]}
             version: {type: integer, minimum: 1}
+            movementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+            reversalMovementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
     PagedInventoryAdjustments:
       type: object
       required: [items, nextCursor]
@@ -1991,17 +2030,50 @@ components:
         nextCursor: {type: [string, 'null']}
     CreateStockCount:
       type: object
+      additionalProperties: false
       required: [locationId]
       properties:
         locationId: {$ref: '#/components/schemas/Identifier'}
         blind: {type: boolean, default: true}
+    SubmitStockCountLine:
+      type: object
+      additionalProperties: false
+      required: [productId, unit, observedQuantity]
+      properties:
+        productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        unit: {type: string, minLength: 1, maxLength: 50}
+        observedQuantity: {$ref: '#/components/schemas/NonNegativeDecimalQuantity'}
+        conversionSourceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    SubmitStockCount:
+      type: object
+      additionalProperties: false
+      required: [lines]
+      properties:
+        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/SubmitStockCountLine'}}
+    StockCountLine:
+      type: object
+      additionalProperties: false
+      required: [id, productId, unit, observedQuantity]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        unit: {type: string, minLength: 1, maxLength: 50}
+        observedQuantity: {$ref: '#/components/schemas/NonNegativeDecimalQuantity'}
+        expectedQuantity: {oneOf: [{$ref: '#/components/schemas/DecimalQuantity'}, {type: 'null'}]}
+        varianceQuantity: {oneOf: [{$ref: '#/components/schemas/DecimalQuantity'}, {type: 'null'}]}
+        conversionSourceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        movementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
     StockCount:
       type: object
-      required: [id, locationId, blind, state, version]
+      additionalProperties: false
+      required: [id, locationId, blind, lines, state, version]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         locationId: {$ref: '#/components/schemas/Identifier'}
         blind: {type: boolean}
+        lines: {type: array, items: {$ref: '#/components/schemas/StockCountLine'}}
         state: {type: string, enum: [Draft, InProgress, Submitted, Approved, Posted, Rejected]}
         version: {type: integer, minimum: 1}
     PagedStockCounts:
@@ -2012,20 +2084,54 @@ components:
         nextCursor: {type: [string, 'null']}
     CreateStockTransfer:
       type: object
+      additionalProperties: false
       required: [sourceLocationId, destinationLocationId, lines]
       properties:
         sourceLocationId: {$ref: '#/components/schemas/Identifier'}
         destinationLocationId: {$ref: '#/components/schemas/Identifier'}
         lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/QuantityLine'}}
+    StockTransferLine:
+      type: object
+      additionalProperties: false
+      required: [id, productId, unit, requestedQuantity, dispatchedQuantity, receivedQuantity, remainingQuantity]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        unit: {type: string, minLength: 1, maxLength: 50}
+        conversionSourceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        requestedQuantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        dispatchedQuantity: {$ref: '#/components/schemas/NonNegativeDecimalQuantity'}
+        receivedQuantity: {$ref: '#/components/schemas/NonNegativeDecimalQuantity'}
+        remainingQuantity: {$ref: '#/components/schemas/NonNegativeDecimalQuantity'}
+        exceptionQuantity: {$ref: '#/components/schemas/NonNegativeDecimalQuantity'}
+    ReceiveStockTransferLine:
+      type: object
+      additionalProperties: false
+      required: [lineId, receivedQuantity]
+      properties:
+        lineId: {$ref: '#/components/schemas/Identifier'}
+        receivedQuantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+    ReceiveStockTransfer:
+      type: object
+      additionalProperties: false
+      required: [lines, outcome]
+      properties:
+        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/ReceiveStockTransferLine'}}
+        outcome: {type: string, enum: [Accepted, Exception]}
+        exceptionReason: {type: [string, 'null'], minLength: 1, maxLength: 500}
     StockTransfer:
-      allOf:
-        - $ref: '#/components/schemas/CreateStockTransfer'
-        - type: object
-          required: [id, state, version]
-          properties:
-            id: {$ref: '#/components/schemas/Identifier'}
-            state: {type: string, enum: [Draft, Dispatched, PartiallyReceived, Received, Exception, Cancelled]}
-            version: {type: integer, minimum: 1}
+      type: object
+      additionalProperties: false
+      required: [id, sourceLocationId, destinationLocationId, lines, state, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        sourceLocationId: {$ref: '#/components/schemas/Identifier'}
+        destinationLocationId: {$ref: '#/components/schemas/Identifier'}
+        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/StockTransferLine'}}
+        state: {type: string, enum: [Draft, Dispatched, PartiallyReceived, Received, Exception, Cancelled]}
+        version: {type: integer, minimum: 1}
+        exceptionReason: {type: [string, 'null'], maxLength: 500}
     PagedStockTransfers:
       type: object
       required: [items, nextCursor]
@@ -2034,9 +2140,11 @@ components:
         nextCursor: {type: [string, 'null']}
     QuantityLine:
       type: object
+      additionalProperties: false
       required: [productId, quantity, unit]
       properties:
         productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
         unit: {type: string}
         conversionSourceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}

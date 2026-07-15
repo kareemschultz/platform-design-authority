@@ -11,6 +11,8 @@
     "test": "bun test src/*.test.ts"
   },
   "devDependencies": {
+    "@meridian/contracts-events": "workspace:*",
+    "@meridian/contracts-platform-api": "workspace:*",
     "@meridian/tooling-config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "^6"

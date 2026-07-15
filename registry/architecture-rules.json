@@ -365,7 +365,17 @@
       "package_name": "@meridian/persistence-inventory-postgres",
       "owner": "inventory",
       "owner_package": "@meridian/domain-inventory",
-      "tables": [],
+      "tables": [
+        "inventory_stock_movement",
+        "inventory_stock_balance",
+        "inventory_reservation",
+        "inventory_adjustment",
+        "inventory_count",
+        "inventory_count_line",
+        "inventory_transfer",
+        "inventory_transfer_line",
+        "inventory_command_receipt"
+      ],
       "migration_directory": "packages/persistence/inventory-postgres/src/migrations"
     },
     {

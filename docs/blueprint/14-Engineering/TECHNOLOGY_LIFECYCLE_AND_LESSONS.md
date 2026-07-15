@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-013
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.17.0
+version: 0.18.0
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-14
@@ -62,7 +62,7 @@ These stable releases were observed from official sources on 2026-07-12 and rech
 | Nextra | 4.6.1 | Documentation fallback | Weaker verified first-party OpenAPI path | Docs build/search/i18n/API comparison | Fumadocs | If Fumadocs gates fail |
 | Astro Starlight | 0.41.3 | Static docs fallback | Introduces Astro | Static build, integration and authoring comparison | Fumadocs/Nextra | If independent static portal required |
 | Docusaurus | 3.10.2 | Multi-version docs fallback | Version copies and second framework increase maintenance | Multi-supported-release need and build budget | Fumadocs current docs + migrations | When multiple release lines coexist |
-| Changesets CLI | 2.31.0 | Proposed implementation release metadata | Requires PR/release discipline; not user docs or architecture authority | Release PR, package dependency, changelog, rollback tests | Manual reviewed release process | Before implementation repository release setup |
+| Changesets CLI | 2.31.0 exact controlled-prototype lock | Selected implementation release metadata | Private workspace packages are versioned for change accounting without package tags; Changesets does not replace governed docs, issues, PR evidence, or curated release notes | Changeset status, package dependency, generated version/changelog dry run before release automation, rollback review | Manual reviewed release process | Every release workflow or Changesets upgrade |
 | OpenTofu | 1.12.3 | Selected infrastructure-as-code engine | CLI, providers, modules, state backends, and Terraform-compatibility claims require independent pinning and review | Plan/apply/destroy, drift, state recovery, provider upgrade, policy and self-hosted installation tests | Reviewed Terraform-compatible workflow or provider-native templates after ADR amendment | Every CLI/provider/module lock |
 | pg_durable | 0.2.3 | Platform Labs only | Pre-1.0, evaluation images, preload/extension, AMD64, database failure-domain coupling | Isolation, HA/PITR, load, upgrade, security, compensation/versioning comparison | Application worker, pg_cron, Temporal | Each release and prototype |
 

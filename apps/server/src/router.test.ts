@@ -32,9 +32,12 @@ function context(input?: {
 }): Context {
 	return {
 		application: {
+			activateProduct: () => Promise.reject(new Error("not used")),
+			archiveProduct: () => Promise.reject(new Error("not used")),
 			createIdentityLink: () => Promise.reject(new Error("not used")),
 			createOrganizationParty: () => Promise.reject(new Error("not used")),
 			createPersonParty: () => Promise.reject(new Error("not used")),
+			createProduct: () => Promise.reject(new Error("not used")),
 			createRoleAssignment: () => Promise.reject(new Error("not used")),
 			getCurrentIdentity: async ({
 				activeContextId,
@@ -59,6 +62,7 @@ function context(input?: {
 			}),
 			getOrganization: () => Promise.reject(new Error("not used")),
 			getParty: () => Promise.reject(new Error("not used")),
+			getProduct: () => Promise.reject(new Error("not used")),
 			inviteUser: () => Promise.reject(new Error("not used")),
 			listAuditRecords: async () => ({ items: [], nextCursor: null }),
 			listCurrentUserSessions: async () => ({ items: [], nextCursor: null }),
@@ -66,6 +70,7 @@ function context(input?: {
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
 			listParties: async () => ({ items: [], nextCursor: null }),
+			listProducts: async () => ({ items: [], nextCursor: null }),
 			listRoles: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
 			revokeCurrentUserSession: () => Promise.resolve(),
@@ -80,6 +85,7 @@ function context(input?: {
 			suspendMembership: () => Promise.reject(new Error("not used")),
 			updateOrganization: () => Promise.reject(new Error("not used")),
 			updateParty: () => Promise.reject(new Error("not used")),
+			updateProduct: () => Promise.reject(new Error("not used")),
 			...input?.application,
 		},
 		authorizer: {
@@ -109,6 +115,7 @@ describe("appRouter contract surface", () => {
 	test("exposes the governed PR3 through PR7 procedure families", () => {
 		expect(Object.keys(appRouter).sort()).toEqual([
 			"audit",
+			"catalog",
 			"entitlements",
 			"healthCheck",
 			"identity",
@@ -118,6 +125,15 @@ describe("appRouter contract surface", () => {
 			"roles",
 			"sessions",
 			"users",
+		]);
+		expect(Object.keys(appRouter.catalog).sort()).toEqual(["products"]);
+		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
+			"activate",
+			"archive",
+			"create",
+			"get",
+			"list",
+			"update",
 		]);
 		expect(Object.keys(appRouter.entitlements).sort()).toEqual(["list"]);
 		expect(Object.keys(appRouter.audit).sort()).toEqual(["list"]);
@@ -185,6 +201,80 @@ describe("appRouter contract surface", () => {
 		);
 		expect(result.contextId).toBe("context_unit_test_0001");
 		expect(result.authUserId).toBe("user_unit_test_000001");
+	});
+
+	test("dispatches a validated Catalog Product command with current context and permission", async () => {
+		let received:
+			| Parameters<Context["application"]["createProduct"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.catalog.products.create,
+			{
+				body: {
+					name: "Ground Coffee",
+					variants: [
+						{
+							identifiers: [
+								{
+									scheme: "Tenant",
+									type: "SKU",
+									value: "COFFEE-500",
+								},
+							],
+							name: "500g",
+						},
+					],
+				},
+				headers: {
+					"idempotency-key": "idempotency-catalog-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						createProduct(input) {
+							received = input;
+							return Promise.resolve({
+								id: "product_unit_test_0001",
+								name: input.body.name,
+								state: "Draft",
+								variants: [
+									{
+										id: "variant_unit_test_0001",
+										identifiers: [
+											{
+												id: "identifier_unit_test_0001",
+												scheme: "Tenant",
+												type: "SKU",
+												value: "COFFEE-500",
+											},
+										],
+										name: "500g",
+									},
+								],
+								version: 1,
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+
+		expect(result.id).toBe("product_unit_test_0001");
+		expect(permission).toBe("catalog.product.create");
+		expect(received).toMatchObject({
+			actorUserId: "user_unit_test_000001",
+			contextId: "context_unit_test_0001",
+			idempotencyKey: "idempotency-catalog-unit-0001",
+			sessionId: "session_unit_test_0001",
+		});
 	});
 
 	test("fails closed when canonical authorization is not bound", async () => {

@@ -1,4 +1,9 @@
 import assert from "node:assert/strict";
+import {
+	type CatalogIdFactory,
+	createCatalogService,
+} from "@meridian/domain-catalog";
+import { createCatalogRepository } from "@meridian/persistence-catalog-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import type { OutboxEvent } from "@meridian/platform-events";
 import { env } from "@meridian/tooling-env/server";
@@ -42,6 +47,7 @@ try {
 
 	const ownerTables = await pool.query<{
 		audit: string | null;
+		catalog: string | null;
 		outbox: string | null;
 		entitlements: string | null;
 		party: string | null;
@@ -49,10 +55,11 @@ try {
 		tenancy: string | null;
 		tenancyReceipts: string | null;
 	}>(
-		"SELECT to_regclass('public.platform_audit_record')::text AS audit, to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_entitlement')::text AS entitlements, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_role')::text AS role, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
+		"SELECT to_regclass('public.platform_audit_record')::text AS audit, to_regclass('public.catalog_product')::text AS catalog, to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_entitlement')::text AS entitlements, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_role')::text AS role, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
 	);
 	assert.deepEqual(ownerTables.rows[0], {
 		audit: "platform_audit_record",
+		catalog: "catalog_product",
 		entitlements: "platform_entitlement",
 		outbox: "platform_event_outbox",
 		party: "party_record",
@@ -126,6 +133,51 @@ try {
 	assert.deepEqual(
 		records.rows.map((row) => row.id),
 		["evt_pr2_node_commit"]
+	);
+
+	let catalogSequence = 0;
+	const catalogIds: CatalogIdFactory = {
+		create(kind) {
+			catalogSequence += 1;
+			return `${kind}_node_${catalogSequence}`;
+		},
+	};
+	const catalog = createCatalogService({
+		clock: () => new Date("2026-07-14T12:00:00.000Z"),
+		ids: catalogIds,
+		unitOfWork: createPostgresUnitOfWork(pool, (client) => ({
+			events: createPostgresOutbox(client),
+			repository: createCatalogRepository(client),
+		})),
+	});
+	const product = await catalog.createProduct({
+		actorUserId: "user_catalog_node",
+		body: {
+			name: "Node Catalog Product",
+			variants: [
+				{
+					identifiers: [{ scheme: "Tenant", type: "SKU", value: "NODE-SKU-1" }],
+					name: "Default",
+				},
+			],
+		},
+		correlationId: "correlation_catalog_node",
+		idempotencyKey: "idempotency_catalog_node_create",
+		organizationId: "organization_catalog_node",
+		tenantId: "tenant_catalog_node",
+	});
+	assert.equal(product.state, "Draft");
+	assert.equal(
+		(await catalog.getProduct("tenant_catalog_node", product.id)).name,
+		"Node Catalog Product"
+	);
+	await assert.rejects(
+		catalog.getProduct("tenant_catalog_node_other", product.id),
+		(error) =>
+			typeof error === "object" &&
+			error !== null &&
+			"code" in error &&
+			error.code === "not_found"
 	);
 } finally {
 	await pool.end();

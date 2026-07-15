@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.2.2
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -16,9 +16,17 @@ This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section
 
 This is a **Draft plan for a controlled prototype**. It may guide only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, close FDR-004, establish a contractual service level, or claim the first slice is complete. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and WS2 stops for disposition.
 
-Issue #62 owns the merged plan and issue #64 owns PR1 execution. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began. Every implementation PR still requires exact-head independent review before merge.
+Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, and issue #66 owns PR2 Catalog execution. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began and concurred on PR1 at PR #65 before merge. Every implementation PR still requires exact-head independent review before merge.
 
-### 1.1 Governing sources
+### 1.1 Implementation progress
+
+| Pull request phase | Current state | Closure rule |
+|---|---|---|
+| PR1 — governance, contracts, schemas, and spike | Merged after exact-head Claude Code concurrence | Retain as the contract/governance baseline; it does not prove later business behavior or delivery |
+| PR2 — Catalog core, persistence, API, and lifecycle | Implemented on issue #66 branch; exact-head review and merge pending | Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence must remain green on reviewed head |
+| PR3–PR7 | Not started | Execute in order; no later phase may be pre-closed by PR1 or PR2 evidence |
+
+### 1.2 Governing sources
 
 | Concern | Governing source |
 |---|---|
@@ -490,6 +498,7 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.0 | 2026-07-14 | Platform Design Authority | Recorded merged PR1 concurrence and issue #66 PR2 execution status; clarified that PR2 preserves validated Variant/Identifier identities and remains pending exact-head independent review and merge. |
 | 0.2.2 | 2026-07-14 | Platform Design Authority | Made the worker gate executable by leaving its candidate composition root unregistered until PR4 records the three ADR reviews; required literal worker and unknown-app denial probes. |
 | 0.2.1 | 2026-07-14 | Platform Design Authority | Preserve signed ledger facts while requiring strictly positive quantities for directional Transfer and Return command lines after PR #65 contract review. |
 | 0.2.0 | 2026-07-14 | Platform Design Authority | Record PR #63 concurrence and the exact PR1 controlled-prototype decisions for lifecycle, permissions, quantity, concurrency, event delivery, worker topology, and CSV-first import. |

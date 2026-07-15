@@ -358,25 +358,74 @@ export const ProductStateSchema = z.enum([
 	"Archived",
 ]);
 
+export const ProductIdentifierTypeSchema = z.enum([
+	"SKU",
+	"GTIN",
+	"UPC",
+	"EAN",
+	"Alias",
+	"External",
+]);
+
+export const ProductIdentifierSchemeSchema = z.enum([
+	"Tenant",
+	"GTIN-8",
+	"GTIN-12",
+	"GTIN-13",
+	"GTIN-14",
+]);
+
+export const ProductIdentifierInputSchema = z.object({
+	scheme: ProductIdentifierSchemeSchema,
+	type: ProductIdentifierTypeSchema,
+	value: z.string().min(1).max(128),
+});
+
+export const ProductIdentifierSchema = ProductIdentifierInputSchema.extend({
+	id: IdentifierSchema,
+});
+
+export const CreateProductVariantSchema = z.object({
+	identifiers: z.array(ProductIdentifierInputSchema).min(1).max(20),
+	name: z.string().min(1).max(300),
+});
+
+export const UpdateProductIdentifierSchema =
+	ProductIdentifierInputSchema.extend({ id: IdentifierSchema.optional() });
+
+export const UpdateProductVariantSchema = z.object({
+	id: IdentifierSchema.optional(),
+	identifiers: z.array(UpdateProductIdentifierSchema).min(1).max(20),
+	name: z.string().min(1).max(300),
+});
+
+export const ProductVariantSchema = z.object({
+	id: IdentifierSchema,
+	identifiers: z.array(ProductIdentifierSchema).min(1).max(20),
+	name: z.string().min(1).max(300),
+});
+
 export const ProductSchema = z.object({
-	barcode: z.string().max(64).optional(),
 	id: IdentifierSchema,
 	name: z.string().min(1).max(300),
-	sku: z.string().max(100).optional(),
 	state: ProductStateSchema,
+	variants: z.array(ProductVariantSchema).min(1).max(50),
 	version: z.number().int().min(1),
 });
 
 export const CreateProductSchema = z.object({
-	barcode: z.string().max(64).optional(),
 	name: z.string().min(1).max(300),
-	sku: z.string().max(100).optional(),
+	variants: z.array(CreateProductVariantSchema).min(1).max(50),
 });
 
-export const UpdateProductSchema = CreateProductSchema.partial().refine(
-	(value) => Object.keys(value).length > 0,
-	{ message: "At least one mutable Product field is required" }
-);
+export const UpdateProductSchema = z
+	.object({
+		name: z.string().min(1).max(300).optional(),
+		variants: z.array(UpdateProductVariantSchema).min(1).max(50).optional(),
+	})
+	.refine((value) => Object.keys(value).length > 0, {
+		message: "At least one mutable Product field is required",
+	});
 
 export const TransitionReasonSchema = z.object({
 	reason: z.string().min(1).max(500),
@@ -589,7 +638,20 @@ export type SuspendTenantMembershipRequest = z.infer<
 export type UpdateOrganizationRequest = z.infer<
 	typeof UpdateOrganizationRequestSchema
 >;
+export type CreateProduct = z.infer<typeof CreateProductSchema>;
+export type CreateProductVariant = z.infer<typeof CreateProductVariantSchema>;
 export type Product = z.infer<typeof ProductSchema>;
+export type ProductIdentifier = z.infer<typeof ProductIdentifierSchema>;
+export type ProductIdentifierInput = z.infer<
+	typeof ProductIdentifierInputSchema
+>;
+export type ProductVariant = z.infer<typeof ProductVariantSchema>;
+export type TransitionReason = z.infer<typeof TransitionReasonSchema>;
+export type UpdateProduct = z.infer<typeof UpdateProductSchema>;
+export type UpdateProductIdentifier = z.infer<
+	typeof UpdateProductIdentifierSchema
+>;
+export type UpdateProductVariant = z.infer<typeof UpdateProductVariantSchema>;
 export type InventoryAdjustment = z.infer<typeof InventoryAdjustmentSchema>;
 export type StockBalance = z.infer<typeof StockBalanceSchema>;
 export type StockCount = z.infer<typeof StockCountSchema>;

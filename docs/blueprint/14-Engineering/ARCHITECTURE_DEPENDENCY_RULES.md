@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.0.0
+version: 1.0.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -69,13 +69,14 @@ Family-level entries in `registry/architecture-rules.json` are a conservative gr
 
 ### Registered Composition Roots
 
-Composition authority is exact, not a wildcard grant to every application. Each application process owns at most one bounded pool. The server alone executes migrations; the worker path is reserved by ADR-0027 v0.3.0 and implementation remains gated on the three named controlled-prototype review rows.
+Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027 selects `apps/worker/composition` as the candidate Event Backbone root, but it is deliberately absent from this registered table and therefore rejected by the executable checker until all three named controlled-prototype review rows are recorded.
 
 | Composition root | Process owner | Allowed process resources | Prohibited responsibility |
 |---|---|---|---|
 | `apps/server/composition` | API server | one bounded process-local PostgreSQL pool; HTTP adapters; deterministic migration runner | background event-delivery loop or another process's pool |
-| `apps/worker/composition` | Event Backbone worker | after ADR review, one bounded process-local PostgreSQL pool; event publisher and registered consumers | migrations, HTTP business authority, global service location, or external webhooks |
 | `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | application business processing or an unregistered long-running service |
+
+PR4 may add `apps/worker/composition` to this table and regenerate the rules only after ADR-0027's Platform Architecture, Data Platform, and Security rows are dated and record concurrence. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; PR1 grants no executable exception in advance.
 
 ### Registered Persistence Owners
 
@@ -142,7 +143,7 @@ Circular synchronous dependencies are prohibited. A cycle requires workflow rede
 
 ## Composition Root
 
-Dependency injection and concrete adapter binding occur only in the exact registered composition roots above or approved module bootstrap packages. Composition roots may create process resources and bind adapters, but application commands and workflows own business transaction boundaries. Domain code receives interfaces and does not locate services globally. Adding a third application root, pool, or worker-side migration path requires an ADR revisit and registry propagation.
+Dependency injection and concrete adapter binding occur only in the exact registered composition roots above or approved module bootstrap packages. Composition roots may create process resources and bind adapters, but application commands and workflows own business transaction boundaries. Domain code receives interfaces and does not locate services globally. Registering the selected worker candidate, adding a third application root or pool, or proposing a worker-side migration path requires the applicable ADR review and registry propagation.
 
 ## Architecture Tests
 
@@ -156,7 +157,7 @@ The implementation must include tests that:
 - Fail owner-specific Persistence packages that import another owner's private schema, repository, table, or migration
 - Fail pool creation, shutdown, or connection-configuration reads outside registered composition roots
 - Fail an unregistered `apps/*/composition` path even when its directory name is `composition`
-- Prove the worker composition root may construct only its process-local pool and may not invoke migration streams
+- Fail pool construction in the unregistered `apps/worker/composition` candidate until ADR-0027's three review rows are recorded; after registration, prove the worker may construct only its process-local pool and may not invoke migration streams
 - Fail provider SDK leakage into domain contracts
 - Fail unregistered capability, event, and permission constants
 - Fail application packages that contain migrations
@@ -194,7 +195,6 @@ These paths are part of the rule definition, not temporary risk exceptions. They
 | Rule | Allowed path | Reason |
 |---|---|---|
 | `database-outside-persistence` | `apps/server/composition` | The API server composition root may construct and inject its single process-local connection. |
-| `database-outside-persistence` | `apps/worker/composition` | After ADR-0027's named review gate, the Event Backbone worker composition root may construct and inject its single process-local connection. |
 | `database-outside-persistence` | `packages/tooling/composition/*` | Approved Tooling composition packages may construct a governed infrastructure connection. |
 | `connection-lifecycle-outside-composition` | `packages/tooling/env/src/server.ts` | The validated environment schema must declare `DATABASE_URL`; it exports validated configuration and may not import a database client, construct a pool, or close a connection. |
 
@@ -210,6 +210,8 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 2026-07-14 — v1.0.1 withheld the selected worker candidate from executable composition authority until ADR-0027's three named review rows are recorded; added literal denial requirements for the candidate and an unknown application root.
 
 - 2026-07-14 — v1.0.0 narrowed application composition authority to exact server and worker roots, registered the ADR-0027 WS2 worker topology, and registered Catalog, Inventory, and Platform Numbering persistence owners and proposed tables.
 

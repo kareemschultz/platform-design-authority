@@ -182,6 +182,12 @@ def main() -> int:
             table_owner[table_name] = str(record.get("owner", ""))
 
     roots = package_roots()
+    for source in source_files(ROOT / "apps"):
+        if not any(root in source.parents for root in roots):
+            errors.append(
+                f"{posix(source)}: unregistered-application-source: "
+                "application source must belong to an app package"
+            )
     package_by_name: dict[str, Path] = {}
     family_by_root: dict[Path, str] = {}
     manifest_dependencies: dict[Path, set[str]] = defaultdict(set)

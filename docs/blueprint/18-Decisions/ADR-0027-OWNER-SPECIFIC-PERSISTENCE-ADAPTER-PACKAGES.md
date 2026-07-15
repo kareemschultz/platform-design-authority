@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.3.0
+version: 0.3.1
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
@@ -17,7 +17,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0024, ADR-0025]
 
 Proposed. This decision may guide the named controlled prototypes in PDA-RDM-008 and PDA-RDM-009, but it is not production authority. The three architecture-consistency review rows required before WS1 PR2 merged — Platform Architecture, Data Platform, and Security — are **recorded as Approved at prototype scope (2026-07-13)** against PR #37's CI-green implementation; that merge gate is satisfied. These were performed by Claude Code as the reviewer designated by the repository owner (one reviewer covering all three lenses, transparently attributed), not by three independent human specialists, and they do not constitute production acceptance. The Security row carries a forward caveat: DB-level tenant-isolation controls (RLS disposition, tenant-scoped constraints per PDA-SEC-011) remain an open gate for the PRs that introduce tenancy/domain tables.
 
-WS2 introduces a second process only for the Event Backbone delivery runtime. The topology amendment below requires independent Platform Architecture, Data Platform, and Security concurrence at controlled-prototype scope before `apps/worker` implementation begins. Until those review rows are recorded, the source and executable rules reserve the exact composition path but do not authorize PR4 implementation or a production deployment.
+WS2 selects a second process only for the Event Backbone delivery runtime. The topology amendment below requires independent Platform Architecture, Data Platform, and Security concurrence at controlled-prototype scope before `apps/worker` implementation begins. The path is reserved by this decision as a candidate name only: until those review rows are recorded, PDA-ENGR-012 and the generated executable rules do not register `apps/worker/composition`, and the checker rejects database imports or pool lifecycle there.
 
 ## Context
 
@@ -64,12 +64,12 @@ Adopt option C for owner-specific persistence and option F for the WS2 delivery 
 
 ## Required Rules Propagation
 
-PDA-ENGR-012 and `registry/architecture-rules.json` register the `persistence` family and exact composition roots. Architecture tests must enforce:
+PDA-ENGR-012 and `registry/architecture-rules.json` register the `persistence` family and currently authorized exact composition roots. The selected worker candidate is added only after the three pending review rows are recorded. Architecture tests must enforce:
 
 - ordinary application paths cannot import Persistence, Platform, Engine, or Domain implementations;
 - registered composition roots may import owner-specific persistence adapters only for construction and binding;
 - a persistence adapter imports only its owner's published ports/schemas and approved dependencies;
-- only the explicitly registered server, worker, and Tooling composition roots create or close a pool or read connection configuration;
+- only the explicitly registered server and Tooling composition roots create or close a pool or read connection configuration before the worker gate; the unregistered worker candidate and an unknown application root must fail;
 - no runtime-neutral package imports a database client or adapter;
 - every table and migration resolves to one authoritative module owner.
 
@@ -96,7 +96,8 @@ The `database-outside-persistence` forbidden pattern in `registry/architecture-r
 
 ## Required Prototype Controls
 
-- Prove only `apps/server/composition/**` and `apps/worker/composition/**` create/close application pools, each process creates at most one pool, the worker cannot run migrations, and an unknown `apps/*/composition` path is rejected.
+- Before the three WS2 review rows are recorded, prove `apps/worker/composition/**` and an unknown `apps/*/composition` path are rejected while only the registered server and Tooling roots receive their narrow allowances.
+- When PR4 records those reviews and registers the worker root, prove only `apps/server/composition/**` and `apps/worker/composition/**` create/close application pools, each process creates at most one pool, and the worker cannot invoke migrations.
 - Prove database imports exist only in registered owner-specific persistence packages and the composition pool factory.
 - Prove a module state change and its outbox record commit or roll back together without another module's business-table mutation.
 - Prove cross-domain completion does not share an unrestricted transaction.
@@ -146,6 +147,7 @@ PDA-REV-011 found that the validated Tooling environment schema's necessary `DAT
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.1 | 2026-07-14 | Platform Design Authority | Made the pre-worker review gate executable: the selected worker path remains unregistered and denied until the three pending review rows are recorded; added literal worker-candidate and unknown-app denial requirements. |
 | 0.3.0 | 2026-07-14 | Platform Design Authority | Selected an explicit Event Backbone worker with one process-local bounded pool for the WS2 controlled prototype; narrowed composition roots to exact paths, kept migrations server-only, and added required pre-worker review gates. |
 | 0.2.7 | 2026-07-14 | Platform Design Authority | Replaced the hidden Tooling connection-rule bypass with a source-derived exact-path allowance under the RR-011 disposition. |
 | 0.2.6 | 2026-07-14 | Platform Design Authority | Linked complete WS1 owner-adapter prototype evidence and narrowed the earlier Security caveat to the still-open production RLS topology. |

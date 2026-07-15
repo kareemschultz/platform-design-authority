@@ -92,7 +92,18 @@ def main() -> int:
         / "worker"
         / "composition"
         / "__architecture_worker_pool_fixture.ts",
-        expected_success=True,
+        expected_success=False,
+        expected_text="unregistered-application-source",
+        source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "random-app"
+        / "composition"
+        / "__architecture_unknown_app_pool_fixture.ts",
+        expected_success=False,
+        expected_text="unregistered-application-source",
         source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
     )
     probe(

@@ -220,6 +220,140 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		).toBe("3.000003");
 	});
 
+	test("serializes duplicate command identities before creating owner facts", async () => {
+		const inventory = service();
+		const input = {
+			...base,
+			body: {
+				locationId: "idempotency_location",
+				productId: "idempotency_product",
+				quantity: "1",
+				reason: "concurrent duplicate proof",
+				unit: "each",
+			},
+			idempotencyKey: "concurrent-duplicate-create",
+			tenantId: "tenant_inventory_idempotency",
+		};
+		const [first, second] = await Promise.all([
+			inventory.createAdjustment(input),
+			inventory.createAdjustment(input),
+		]);
+		expect(second).toEqual(first);
+
+		const facts = await testPool.query<{
+			adjustments: string;
+			receipts: string;
+		}>(
+			"SELECT (SELECT count(*) FROM inventory_adjustment WHERE tenant_id = $1)::text AS adjustments, (SELECT count(*) FROM inventory_command_receipt WHERE tenant_id = $1 AND operation = 'inventory.adjustment.create' AND idempotency_key = $2)::text AS receipts",
+			[input.tenantId, input.idempotencyKey]
+		);
+		expect(facts.rows[0]).toEqual({ adjustments: "1", receipts: "1" });
+	});
+
+	test("applies workflow filters before cursor pagination", async () => {
+		const inventory = service();
+		const tenantId = "tenant_inventory_filtered_lists";
+		for (const [index, locationId] of [
+			"other_location",
+			"target_location",
+			"other_location",
+			"target_location",
+		].entries()) {
+			// biome-ignore lint/performance/noAwaitInLoops: deterministic fixture creation exercises committed command receipts.
+			await inventory.createAdjustment({
+				...base,
+				body: {
+					locationId,
+					productId: `filtered_product_${index}`,
+					quantity: "1",
+					reason: `filtered adjustment ${index}`,
+					unit: "each",
+				},
+				idempotencyKey: `filtered-adjustment-${index}`,
+				tenantId,
+			});
+		}
+		const firstAdjustments = await inventory.listAdjustments({
+			filters: { locationId: "target_location", state: "PendingApproval" },
+			page: { limit: 1 },
+			tenantId,
+		});
+		expect(firstAdjustments.items).toHaveLength(1);
+		expect(firstAdjustments.items[0]?.locationId).toBe("target_location");
+		expect(firstAdjustments.nextCursor).not.toBeNull();
+		const secondAdjustments = await inventory.listAdjustments({
+			filters: { locationId: "target_location", state: "PendingApproval" },
+			page: { cursor: firstAdjustments.nextCursor ?? undefined, limit: 1 },
+			tenantId,
+		});
+		expect(secondAdjustments.items).toHaveLength(1);
+		expect(secondAdjustments.items[0]?.locationId).toBe("target_location");
+		expect(secondAdjustments.items[0]?.id).not.toBe(
+			firstAdjustments.items[0]?.id
+		);
+		expect(secondAdjustments.nextCursor).toBeNull();
+
+		for (const [index, locationId] of [
+			"other_location",
+			"target_location",
+			"target_location",
+		].entries()) {
+			// biome-ignore lint/performance/noAwaitInLoops: deterministic fixture creation exercises committed command receipts.
+			await inventory.createCount({
+				...base,
+				body: { blind: true, locationId },
+				idempotencyKey: `filtered-count-${index}`,
+				tenantId,
+			});
+		}
+		const counts = await inventory.listCounts({
+			filters: { locationId: "target_location", state: "Draft" },
+			page: { limit: 10 },
+			tenantId,
+		});
+		expect(counts.items).toHaveLength(2);
+		expect(
+			counts.items.every((record) => record.locationId === "target_location")
+		).toBe(true);
+
+		for (const [index, locations] of [
+			["other_location", "another_location"],
+			["target_location", "another_location"],
+			["another_location", "target_location"],
+		].entries()) {
+			// biome-ignore lint/performance/noAwaitInLoops: deterministic fixture creation exercises committed command receipts and outbox writes.
+			await inventory.createTransfer({
+				...base,
+				body: {
+					destinationLocationId: locations[1] ?? "another_location",
+					lines: [
+						{
+							productId: `filtered_transfer_product_${index}`,
+							quantity: "1",
+							unit: "each",
+						},
+					],
+					sourceLocationId: locations[0] ?? "other_location",
+				},
+				idempotencyKey: `filtered-transfer-${index}`,
+				tenantId,
+			});
+		}
+		const transfers = await inventory.listTransfers({
+			filters: { locationId: "target_location", state: "Draft" },
+			page: { limit: 10 },
+			tenantId,
+		});
+		expect(transfers.items).toHaveLength(2);
+		expect(
+			transfers.items.every(
+				(record) =>
+					record.sourceLocationId === "target_location" ||
+					record.destinationLocationId === "target_location"
+			)
+		).toBe(true);
+	});
+
 	test("denies negative source stock and does not persist a partial Transfer dispatch", async () => {
 		const inventory = service();
 		const transfer = await inventory.createTransfer({
@@ -455,7 +589,10 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 	test("enforces tenant non-disclosure and database CHECK constraints", async () => {
 		const inventory = service();
 		const [own] = (
-			await inventory.listAdjustments(base.tenantId, { limit: 50 })
+			await inventory.listAdjustments({
+				page: { limit: 50 },
+				tenantId: base.tenantId,
+			})
 		).items;
 		expect(own).toBeDefined();
 		expect(

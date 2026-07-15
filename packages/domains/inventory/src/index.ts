@@ -279,12 +279,33 @@ export interface InventoryBalanceFilters {
 	productId?: string;
 }
 
+export interface InventoryAdjustmentFilters {
+	locationId?: string;
+	state?: InventoryAdjustmentRecord["state"];
+}
+
+export interface InventoryCountFilters {
+	locationId?: string;
+	state?: InventoryCountRecord["state"];
+}
+
+export interface InventoryTransferFilters {
+	locationId?: string;
+	state?: InventoryTransferRecord["state"];
+}
+
 export interface ApplyMovementResult {
 	balance: InventoryBalanceRecord;
 	movement: InventoryMovementRecord;
 }
 
 export interface InventoryRepository {
+	/** Serialize one command identity for the enclosing transaction. */
+	acquireCommandLock: (
+		tenantId: string,
+		operation: InventoryCommandOperation,
+		idempotencyKey: string
+	) => Promise<void>;
 	applyMovement: (
 		movement: InventoryMovementRecord
 	) => Promise<ApplyMovementResult | "negative_stock">;
@@ -323,7 +344,8 @@ export interface InventoryRepository {
 	) => Promise<InventoryTransferRecord | null>;
 	listAdjustments: (
 		tenantId: string,
-		page: InventoryPageRequest
+		page: InventoryPageRequest,
+		filters?: InventoryAdjustmentFilters
 	) => Promise<InventoryPage<InventoryAdjustmentRecord>>;
 	listBalances: (
 		tenantId: string,
@@ -332,11 +354,13 @@ export interface InventoryRepository {
 	) => Promise<InventoryPage<InventoryBalanceRecord>>;
 	listCounts: (
 		tenantId: string,
-		page: InventoryPageRequest
+		page: InventoryPageRequest,
+		filters?: InventoryCountFilters
 	) => Promise<InventoryPage<InventoryCountRecord>>;
 	listTransfers: (
 		tenantId: string,
-		page: InventoryPageRequest
+		page: InventoryPageRequest,
+		filters?: InventoryTransferFilters
 	) => Promise<InventoryPage<InventoryTransferRecord>>;
 	rebuildBalances: (tenantId: string, rebuiltAt: Date) => Promise<number>;
 	recordCommandReceipt: (
@@ -557,6 +581,11 @@ async function replay<T>(
 		tenantId: string;
 	}
 ): Promise<T | null> {
+	await repository.acquireCommandLock(
+		input.tenantId,
+		input.operation,
+		input.idempotencyKey
+	);
 	const receipt = await repository.getCommandReceipt(
 		input.tenantId,
 		input.operation,
@@ -605,6 +634,11 @@ async function recordResult<T>(
 		throw new InventoryError(
 			"idempotency_conflict",
 			"Idempotency key is bound to another Inventory command"
+		);
+	}
+	if (!claim.inserted) {
+		throw new Error(
+			"Inventory command identity was claimed after command side effects began"
 		);
 	}
 	return claim.record.result as T;
@@ -713,6 +747,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				variantId: input.variantId ?? null,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {
+				await repository.acquireCommandLock(
+					input.tenantId,
+					"inventory.offline.apply",
+					input.facts.commandId
+				);
 				const prior = await repository.getCommandReceipt(
 					input.tenantId,
 					"inventory.offline.apply",
@@ -1555,12 +1594,13 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			}
 			return transferView(record);
 		},
-		async listAdjustments(
-			tenantId: string,
-			page: InventoryPageRequest
-		): Promise<InventoryPage<InventoryAdjustment>> {
+		async listAdjustments(input: {
+			filters?: InventoryAdjustmentFilters;
+			page: InventoryPageRequest;
+			tenantId: string;
+		}): Promise<InventoryPage<InventoryAdjustment>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listAdjustments(tenantId, page)
+				repository.listAdjustments(input.tenantId, input.page, input.filters)
 			);
 			return {
 				items: result.items.map(adjustmentView),
@@ -1607,24 +1647,26 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				};
 			});
 		},
-		async listCounts(
-			tenantId: string,
-			page: InventoryPageRequest
-		): Promise<InventoryPage<StockCount>> {
+		async listCounts(input: {
+			filters?: InventoryCountFilters;
+			page: InventoryPageRequest;
+			tenantId: string;
+		}): Promise<InventoryPage<StockCount>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listCounts(tenantId, page)
+				repository.listCounts(input.tenantId, input.page, input.filters)
 			);
 			return {
 				items: result.items.map(countView),
 				nextCursor: result.nextCursor,
 			};
 		},
-		async listTransfers(
-			tenantId: string,
-			page: InventoryPageRequest
-		): Promise<InventoryPage<StockTransfer>> {
+		async listTransfers(input: {
+			filters?: InventoryTransferFilters;
+			page: InventoryPageRequest;
+			tenantId: string;
+		}): Promise<InventoryPage<StockTransfer>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listTransfers(tenantId, page)
+				repository.listTransfers(input.tenantId, input.page, input.filters)
 			);
 			return {
 				items: result.items.map(transferView),
@@ -2419,6 +2461,7 @@ export function createInventoryApplication(options: {
 		async listAdjustments(input: {
 			authUserId: string;
 			contextId: string;
+			filters?: InventoryAdjustmentFilters;
 			page: InventoryPageRequest;
 			sessionId: string;
 		}) {
@@ -2430,7 +2473,11 @@ export function createInventoryApplication(options: {
 				permission: "inventory.adjustment.read",
 				sessionId: input.sessionId,
 			});
-			return options.service.listAdjustments(context.tenantId, input.page);
+			return options.service.listAdjustments({
+				filters: input.filters,
+				page: input.page,
+				tenantId: context.tenantId,
+			});
 		},
 		async listBalances(input: {
 			authUserId: string;
@@ -2456,6 +2503,7 @@ export function createInventoryApplication(options: {
 		async listCounts(input: {
 			authUserId: string;
 			contextId: string;
+			filters?: InventoryCountFilters;
 			page: InventoryPageRequest;
 			sessionId: string;
 		}) {
@@ -2467,11 +2515,16 @@ export function createInventoryApplication(options: {
 				permission: "inventory.count.read",
 				sessionId: input.sessionId,
 			});
-			return options.service.listCounts(context.tenantId, input.page);
+			return options.service.listCounts({
+				filters: input.filters,
+				page: input.page,
+				tenantId: context.tenantId,
+			});
 		},
 		async listTransfers(input: {
 			authUserId: string;
 			contextId: string;
+			filters?: InventoryTransferFilters;
 			page: InventoryPageRequest;
 			sessionId: string;
 		}) {
@@ -2483,7 +2536,11 @@ export function createInventoryApplication(options: {
 				permission: "inventory.transfer.read",
 				sessionId: input.sessionId,
 			});
-			return options.service.listTransfers(context.tenantId, input.page);
+			return options.service.listTransfers({
+				filters: input.filters,
+				page: input.page,
+				tenantId: context.tenantId,
+			});
 		},
 		async receiveTransfer(input: {
 			actorUserId: string;

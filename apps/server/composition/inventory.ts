@@ -32,12 +32,11 @@ export const inventoryService = createInventoryService({
 	ids,
 	references: {
 		async requireLocation(input) {
-			const page = await createTenancyRepository(databasePool).listLocations(
+			const location = await createTenancyRepository(databasePool).getLocation(
 				input.tenantId,
-				input.organizationId,
-				{ limit: 500 }
+				input.locationId
 			);
-			if (!page.items.some((location) => location.id === input.locationId)) {
+			if (!location || location.organizationId !== input.organizationId) {
 				throw new InventoryError(
 					"invalid_reference",
 					"Location is outside the active tenant and organization"
@@ -88,7 +87,7 @@ export const inventoryTransportApplication = {
 	getInventoryAdjustment: inventoryApplication.getAdjustment,
 	getStockCount: inventoryApplication.getCount,
 	getStockTransfer: inventoryApplication.getTransfer,
-	listInventoryAdjustments: async (
+	listInventoryAdjustments: (
 		input: Parameters<typeof inventoryApplication.listAdjustments>[0] & {
 			page: {
 				cursor?: string;
@@ -105,18 +104,11 @@ export const inventoryTransportApplication = {
 		}
 	) => {
 		const { locationId, state, ...page } = input.page;
-		const result = await inventoryApplication.listAdjustments({
+		return inventoryApplication.listAdjustments({
 			...input,
+			filters: { locationId, state },
 			page,
 		});
-		return {
-			...result,
-			items: result.items.filter(
-				(record) =>
-					(!locationId || record.locationId === locationId) &&
-					(!state || record.state === state)
-			),
-		};
 	},
 	listStockBalances: async (input: {
 		authUserId: string;
@@ -136,7 +128,7 @@ export const inventoryTransportApplication = {
 		});
 		return page.items;
 	},
-	listStockCounts: async (
+	listStockCounts: (
 		input: Parameters<typeof inventoryApplication.listCounts>[0] & {
 			page: {
 				cursor?: string;
@@ -153,17 +145,13 @@ export const inventoryTransportApplication = {
 		}
 	) => {
 		const { locationId, state, ...page } = input.page;
-		const result = await inventoryApplication.listCounts({ ...input, page });
-		return {
-			...result,
-			items: result.items.filter(
-				(record) =>
-					(!locationId || record.locationId === locationId) &&
-					(!state || record.state === state)
-			),
-		};
+		return inventoryApplication.listCounts({
+			...input,
+			filters: { locationId, state },
+			page,
+		});
 	},
-	listStockTransfers: async (
+	listStockTransfers: (
 		input: Parameters<typeof inventoryApplication.listTransfers>[0] & {
 			page: {
 				cursor?: string;
@@ -180,17 +168,11 @@ export const inventoryTransportApplication = {
 		}
 	) => {
 		const { locationId, state, ...page } = input.page;
-		const result = await inventoryApplication.listTransfers({ ...input, page });
-		return {
-			...result,
-			items: result.items.filter(
-				(record) =>
-					(!locationId ||
-						record.sourceLocationId === locationId ||
-						record.destinationLocationId === locationId) &&
-					(!state || record.state === state)
-			),
-		};
+		return inventoryApplication.listTransfers({
+			...input,
+			filters: { locationId, state },
+			page,
+		});
 	},
 	receiveStockTransfer: inventoryApplication.receiveTransfer,
 	reverseInventoryAdjustment: inventoryApplication.reverseAdjustment,

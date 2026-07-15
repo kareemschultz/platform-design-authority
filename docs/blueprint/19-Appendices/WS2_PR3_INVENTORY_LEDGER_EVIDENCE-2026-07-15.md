@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-022
 title: WS2 PR3 Inventory Ledger Controlled-Prototype Evidence
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Engineering
 last_reviewed: 2026-07-15
@@ -36,9 +36,11 @@ Record the executable evidence for PDA-RDM-009 PR3 and issue #68. This evidence 
 |---|---|
 | Exact quantity | Six-decimal fixed-scale arithmetic is tested beyond `Number.MAX_SAFE_INTEGER`; PostgreSQL uses `numeric(38,6)` |
 | Default negative-stock denial | Domain tests and a live PostgreSQL insert-path regression prove an unseen or existing balance cannot cross below zero |
-| Idempotency | API and offline command receipts bind tenant, operation, key, fingerprint, result, and offline source identity; replay does not duplicate movements or events |
+| Idempotency | API and offline command receipts bind tenant, operation, key, fingerprint, result, and offline source identity; a transaction-scoped command-identity lock is acquired before replay lookup or owner side effects, and an unexpected late receipt conflict forces rollback |
 | Tenant isolation | Repository predicates include tenant scope, keys include tenant ID, and foreign-tenant detail lookup returns the same not-found result as an absent record |
-| Concurrent posting | Parallel same-key Adjustment approvals serialize through the PostgreSQL guarded update/upsert boundary and preserve the exact sum |
+| Concurrent posting | Parallel movements on one balance serialize through the PostgreSQL guarded update/upsert boundary and preserve the exact sum; a separate parallel same-command test proves only one Adjustment fact and one receipt are committed |
+| Filtered pagination | Adjustment, Count, and Transfer location/state predicates execute in the owner query before the cursor limit; live two-page evidence proves matching rows are neither hidden by unrelated rows nor assigned an unrelated cursor |
+| Reference lookup | Location validation uses direct tenant-scoped identity lookup plus organization comparison, so valid references are not bounded by an arbitrary list page |
 | Conservation | Dispatch subtracts source stock, receipt adds only actual destination stock, and exception quantity explains the terminal in-transit remainder |
 | Reversal | The original movement remains immutable and a unique linked inverse returns its balance contribution to zero |
 | Atomic outbox | Injected outbox failure rolls back the movement, balance, aggregate version, and command receipt together |
@@ -68,7 +70,7 @@ python scripts/generate_registries.py --check
 python scripts/generate_contracts.py --check
 python scripts/check_architecture.py
 python scripts/test_architecture_checker.py
-bun --filter @meridian/persistence-inventory-postgres db:generate
+bun run db:generate
 docker compose exec -T server bun test composition/inventory.integration.test.ts
 docker compose exec -T server bun run db:test:node
 ```
@@ -85,4 +87,5 @@ Drizzle migration freshness must report `No schema changes, nothing to migrate`.
 
 ## Change Log
 
+- 2026-07-15 — v0.1.1 added executable evidence for pre-side-effect command serialization, owner-query filtering before cursor pagination, direct Location lookup, and Inventory inclusion in the root migration-freshness gate.
 - 2026-07-15 — v0.1.0 recorded WS2 PR3 Inventory ledger, workflow, persistence, API, offline-boundary, and verification evidence without advancing production readiness.

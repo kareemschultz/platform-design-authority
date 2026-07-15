@@ -52,6 +52,9 @@ class MemoryInventoryRepository implements InventoryRepository {
 	): string {
 		return `${tenantId}:${operation}:${idempotencyKey}`;
 	}
+	async acquireCommandLock() {
+		// Single-threaded memory tests do not need a transaction lock.
+	}
 
 	async applyMovement(movement: InventoryMovementRecord) {
 		const key = this.balanceKey(
@@ -144,10 +147,17 @@ class MemoryInventoryRepository implements InventoryRepository {
 	async getTransfer(tenantId: string, id: string) {
 		return structuredClone(this.transfers.get(this.key(tenantId, id)) ?? null);
 	}
-	async listAdjustments(tenantId: string, page: InventoryPageRequest) {
+	async listAdjustments(
+		tenantId: string,
+		page: InventoryPageRequest,
+		filters?: Parameters<InventoryRepository["listAdjustments"]>[2]
+	) {
 		return this.page(
 			[...this.adjustments.values()].filter(
-				(record) => record.tenantId === tenantId
+				(record) =>
+					record.tenantId === tenantId &&
+					(!filters?.locationId || record.locationId === filters.locationId) &&
+					(!filters?.state || record.state === filters.state)
 			),
 			page,
 			(record) => record.id
@@ -169,19 +179,35 @@ class MemoryInventoryRepository implements InventoryRepository {
 			(record) => `${record.locationId}:${record.itemKey}:${record.unit}`
 		);
 	}
-	async listCounts(tenantId: string, page: InventoryPageRequest) {
+	async listCounts(
+		tenantId: string,
+		page: InventoryPageRequest,
+		filters?: Parameters<InventoryRepository["listCounts"]>[2]
+	) {
 		return this.page(
 			[...this.counts.values()].filter(
-				(record) => record.tenantId === tenantId
+				(record) =>
+					record.tenantId === tenantId &&
+					(!filters?.locationId || record.locationId === filters.locationId) &&
+					(!filters?.state || record.state === filters.state)
 			),
 			page,
 			(record) => record.id
 		);
 	}
-	async listTransfers(tenantId: string, page: InventoryPageRequest) {
+	async listTransfers(
+		tenantId: string,
+		page: InventoryPageRequest,
+		filters?: Parameters<InventoryRepository["listTransfers"]>[2]
+	) {
 		return this.page(
 			[...this.transfers.values()].filter(
-				(record) => record.tenantId === tenantId
+				(record) =>
+					record.tenantId === tenantId &&
+					(!filters?.locationId ||
+						record.sourceLocationId === filters.locationId ||
+						record.destinationLocationId === filters.locationId) &&
+					(!filters?.state || record.state === filters.state)
 			),
 			page,
 			(record) => record.id

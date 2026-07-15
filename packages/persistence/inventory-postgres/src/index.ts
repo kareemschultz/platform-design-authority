@@ -1,11 +1,13 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
+	InventoryAdjustmentFilters,
 	InventoryAdjustmentRecord,
 	InventoryBalanceFilters,
 	InventoryBalanceRecord,
 	InventoryCommandOperation,
 	InventoryCommandReceipt,
+	InventoryCountFilters,
 	InventoryCountLineRecord,
 	InventoryCountRecord,
 	InventoryMovementRecord,
@@ -13,6 +15,7 @@ import type {
 	InventoryPageRequest,
 	InventoryRepository,
 	InventoryReservationRecord,
+	InventoryTransferFilters,
 	InventoryTransferLineRecord,
 	InventoryTransferRecord,
 } from "@meridian/domain-inventory";
@@ -313,6 +316,12 @@ export function createInventoryRepository(
 	}
 
 	return {
+		async acquireCommandLock(tenantId, operation, idempotencyKey) {
+			const lockIdentity = `${tenantId}\u001f${operation}\u001f${idempotencyKey}`;
+			await database.execute(
+				sql`SELECT pg_advisory_xact_lock(hashtextextended(${lockIdentity}, 0))`
+			);
+		},
 		async applyMovement(movement) {
 			let rows: (typeof inventoryStockBalances.$inferSelect)[];
 			try {
@@ -518,7 +527,8 @@ export function createInventoryRepository(
 
 		async listAdjustments(
 			tenantId: string,
-			page: InventoryPageRequest
+			page: InventoryPageRequest,
+			filters?: InventoryAdjustmentFilters
 		): Promise<InventoryPage<InventoryAdjustmentRecord>> {
 			const rows = await database
 				.select()
@@ -526,6 +536,12 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryAdjustments.tenantId, tenantId),
+						filters?.locationId
+							? eq(inventoryAdjustments.locationId, filters.locationId)
+							: undefined,
+						filters?.state
+							? eq(inventoryAdjustments.state, filters.state)
+							: undefined,
 						page.cursor ? gt(inventoryAdjustments.id, page.cursor) : undefined
 					)
 				)
@@ -593,7 +609,8 @@ export function createInventoryRepository(
 		},
 		async listCounts(
 			tenantId: string,
-			page: InventoryPageRequest
+			page: InventoryPageRequest,
+			filters?: InventoryCountFilters
 		): Promise<InventoryPage<InventoryCountRecord>> {
 			const rows = await database
 				.select()
@@ -601,6 +618,12 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryCounts.tenantId, tenantId),
+						filters?.locationId
+							? eq(inventoryCounts.locationId, filters.locationId)
+							: undefined,
+						filters?.state
+							? eq(inventoryCounts.state, filters.state)
+							: undefined,
 						page.cursor ? gt(inventoryCounts.id, page.cursor) : undefined
 					)
 				)
@@ -615,7 +638,8 @@ export function createInventoryRepository(
 		},
 		async listTransfers(
 			tenantId: string,
-			page: InventoryPageRequest
+			page: InventoryPageRequest,
+			filters?: InventoryTransferFilters
 		): Promise<InventoryPage<InventoryTransferRecord>> {
 			const rows = await database
 				.select()
@@ -623,6 +647,18 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryTransfers.tenantId, tenantId),
+						filters?.locationId
+							? or(
+									eq(inventoryTransfers.sourceLocationId, filters.locationId),
+									eq(
+										inventoryTransfers.destinationLocationId,
+										filters.locationId
+									)
+								)
+							: undefined,
+						filters?.state
+							? eq(inventoryTransfers.state, filters.state)
+							: undefined,
 						page.cursor ? gt(inventoryTransfers.id, page.cursor) : undefined
 					)
 				)

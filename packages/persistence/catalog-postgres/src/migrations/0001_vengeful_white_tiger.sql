@@ -1,0 +1,3 @@
+ALTER TABLE "catalog_identifier" ADD CONSTRAINT "catalog_identifier_scheme_check" CHECK ("catalog_identifier"."scheme" in ('Tenant', 'GTIN-8', 'GTIN-12', 'GTIN-13', 'GTIN-14'));--> statement-breakpoint
+ALTER TABLE "catalog_identifier" ADD CONSTRAINT "catalog_identifier_type_check" CHECK ("catalog_identifier"."type" in ('SKU', 'GTIN', 'UPC', 'EAN', 'Alias', 'External'));--> statement-breakpoint
+ALTER TABLE "catalog_product" ADD CONSTRAINT "catalog_product_state_check" CHECK ("catalog_product"."state" in ('Draft', 'Active', 'Suspended', 'Discontinued', 'Archived'));

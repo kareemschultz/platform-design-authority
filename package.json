@@ -40,7 +40,7 @@
     "dev:native": "turbo run dev -F native",
     "dev:web": "turbo run dev -F web",
     "dev:server": "turbo run dev -F server",
-    "db:generate": "bun run --cwd packages/persistence/platform-identity-postgres db:generate && bun run --cwd packages/persistence/platform-tenancy-postgres db:generate && bun run --cwd packages/persistence/platform-entitlements-postgres db:generate && bun run --cwd packages/persistence/platform-audit-postgres db:generate && bun run --cwd packages/persistence/platform-events-postgres db:generate && bun run --cwd packages/persistence/party-postgres db:generate",
+    "db:generate": "bun run --cwd packages/persistence/platform-identity-postgres db:generate && bun run --cwd packages/persistence/platform-tenancy-postgres db:generate && bun run --cwd packages/persistence/platform-entitlements-postgres db:generate && bun run --cwd packages/persistence/platform-audit-postgres db:generate && bun run --cwd packages/persistence/platform-events-postgres db:generate && bun run --cwd packages/persistence/party-postgres db:generate && bun run --cwd packages/persistence/catalog-postgres db:generate",
     "db:migrate": "bun run --cwd apps/server db:migrate",
     "db:test": "bun run --cwd apps/server db:test",
     "db:start": "docker compose up -d postgres",
@@ -57,7 +57,9 @@
     "contracts:generate": "python scripts/generate_contracts.py",
     "contracts:check": "python scripts/generate_contracts.py --check",
     "architecture:check": "python scripts/check_architecture.py",
-    "ws1:evidence:check": "python scripts/check_ws1_evidence.py"
+    "ws1:evidence:check": "python scripts/check_ws1_evidence.py",
+    "changeset": "changeset",
+    "changeset:status": "changeset status"
   },
   "dependencies": {
     "@meridian/tooling-env": "workspace:*",
@@ -71,6 +73,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.2",
+    "@changesets/cli": "2.31.0",
     "@meridian/tooling-config": "workspace:*",
     "@types/bun": "catalog:",
     "turbo": "^2.10.2",

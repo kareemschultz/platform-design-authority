@@ -1,19 +1,24 @@
 import type { PermissionId } from "@meridian/contracts-permissions";
 import {
+	activateProductContract,
+	archiveProductContract,
 	createOrganizationPartyContract,
 	createPartyIdentityLinkContract,
 	createPersonPartyContract,
+	createProductContract,
 	createRoleAssignmentContract,
 	createUserInvitationContract,
 	getCurrentIdentityContract,
 	getOrganizationContract,
 	getPartyContract,
+	getProductContract,
 	listAuditRecordsContract,
 	listCurrentUserSessionsContract,
 	listEntitlementsContract,
 	listLocationsContract,
 	listOrganizationsContract,
 	listPartiesContract,
+	listProductsContract,
 	listRolesContract,
 	listUsersContract,
 	revokeCurrentUserSessionContract,
@@ -21,6 +26,7 @@ import {
 	suspendTenantMembershipContract,
 	updateOrganizationContract,
 	updatePartyContract,
+	updateProductContract,
 } from "@meridian/contracts-platform-api";
 import type { RouterClient } from "@orpc/server";
 import { implement, ORPCError } from "@orpc/server";
@@ -167,7 +173,8 @@ function mapApplicationError(context: Context, error: unknown): never {
 	if (
 		code === "version_conflict" ||
 		code === "idempotency_conflict" ||
-		code === "identity_link_conflict"
+		code === "identity_link_conflict" ||
+		code === "identifier_conflict"
 	) {
 		throw new ORPCError("CONFLICT", {
 			data: problem(context, {
@@ -175,6 +182,27 @@ function mapApplicationError(context: Context, error: unknown): never {
 				retryable: code === "version_conflict",
 				status: 409,
 				title: "Request conflicts with current state",
+			}),
+		});
+	}
+	if (code === "invalid_identifier" || code === "invalid_reference") {
+		throw new ORPCError("BAD_REQUEST", {
+			data: problem(context, {
+				code: "validation",
+				status: 400,
+				title:
+					code === "invalid_reference"
+						? "Catalog child reference is invalid"
+						: "Identifier is invalid",
+			}),
+		});
+	}
+	if (code === "invalid_state") {
+		throw new ORPCError("CONFLICT", {
+			data: problem(context, {
+				code: "state_transition",
+				status: 409,
+				title: "State transition is not allowed",
 			}),
 		});
 	}
@@ -646,6 +674,163 @@ const createPartyIdentityLink = implement(createPartyIdentityLinkContract)
 		}
 	});
 
+const listProducts = implement(listProductsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.product.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listProducts({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getProduct = implement(getProductContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.product.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getProduct({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				productId: input.params.productId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createProduct = implement(createProductContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.product.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createProduct({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const updateProduct = implement(updateProductContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.product.update",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.updateProduct({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				productId: input.params.productId,
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const activateProduct = implement(activateProductContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.product.activate",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.activateProduct({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				productId: input.params.productId,
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const archiveProduct = implement(archiveProductContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.product.archive",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.archiveProduct({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				productId: input.params.productId,
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const listEntitlements = implement(listEntitlementsContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -736,6 +921,16 @@ const listAuditRecords = implement(listAuditRecordsContract)
 
 export const appRouter = {
 	audit: { list: listAuditRecords },
+	catalog: {
+		products: {
+			activate: activateProduct,
+			archive: archiveProduct,
+			create: createProduct,
+			get: getProduct,
+			list: listProducts,
+			update: updateProduct,
+		},
+	},
 	entitlements: { list: listEntitlements },
 	healthCheck: publicProcedure.handler(() => "OK"),
 	identity: {

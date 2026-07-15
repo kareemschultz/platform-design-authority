@@ -120,6 +120,10 @@ describe.serial("WS1 persistence orchestration", () => {
 		);
 		expect(tables.rows.map((row) => row.table_name)).toEqual([
 			"account",
+			"catalog_identifier",
+			"catalog_product",
+			"catalog_product_command_receipt",
+			"catalog_variant",
 			"invitation",
 			"member",
 			"organization",

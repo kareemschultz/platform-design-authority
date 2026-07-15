@@ -127,7 +127,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 62,
+      "source_line": 64,
       "document_status": "Draft",
       "schema_path": "schemas/events/catalog.identifier.assigned.v1.schema.json"
     },
@@ -140,7 +140,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 58,
+      "source_line": 60,
       "document_status": "Draft",
       "schema_path": "schemas/events/catalog.product.activated.v1.schema.json"
     },
@@ -153,7 +153,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 59,
+      "source_line": 61,
       "document_status": "Draft",
       "schema_path": "schemas/events/catalog.product.archived.v1.schema.json"
     },
@@ -166,7 +166,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 57,
+      "source_line": 59,
       "document_status": "Draft",
       "schema_path": "schemas/events/catalog.product.changed.v1.schema.json"
     },
@@ -179,7 +179,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 56,
+      "source_line": 58,
       "document_status": "Draft",
       "schema_path": "schemas/events/catalog.product.created.v1.schema.json"
     },
@@ -192,7 +192,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 60,
+      "source_line": 62,
       "document_status": "Draft",
       "schema_path": "schemas/events/catalog.product.discontinued.v1.schema.json"
     },
@@ -205,7 +205,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 63,
+      "source_line": 65,
       "document_status": "Draft",
       "schema_path": "schemas/events/catalog.publication.changed.v1.schema.json"
     },
@@ -218,7 +218,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 61,
+      "source_line": 63,
       "document_status": "Draft",
       "schema_path": "schemas/events/catalog.variant.created.v1.schema.json"
     },

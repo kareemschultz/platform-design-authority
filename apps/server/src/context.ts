@@ -7,6 +7,7 @@ import type {
 	CreateOrganizationParty,
 	CreatePartyIdentityLinkRequest,
 	CreatePersonParty,
+	CreateProduct,
 	CreateRoleAssignmentRequest,
 	CreateUserInvitationRequest,
 	CurrentIdentity,
@@ -15,12 +16,15 @@ import type {
 	Organization,
 	Party,
 	PlatformIdentityLink,
+	Product,
 	Role,
 	RoleAssignment,
 	SessionSummary,
 	SuspendTenantMembershipRequest,
+	TransitionReason,
 	UpdateOrganizationRequest,
 	UpdatePartyRequest,
+	UpdateProduct,
 	UserInvitation,
 	UserSummary,
 } from "@meridian/contracts-platform-api";
@@ -230,8 +234,66 @@ export interface AuditApplication {
 	}) => Promise<Page<AuditRecord>>;
 }
 
+export interface CatalogApplication {
+	activateProduct: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		productId: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<Product>;
+	archiveProduct: (input: {
+		actorUserId: string;
+		body: TransitionReason;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		productId: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<Product>;
+	createProduct: (input: {
+		actorUserId: string;
+		body: CreateProduct;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<Product>;
+	getProduct: (input: {
+		authUserId: string;
+		contextId: string;
+		productId: string;
+		sessionId: string;
+	}) => Promise<Product>;
+	listProducts: (input: {
+		authUserId: string;
+		contextId: string;
+		page: {
+			barcode?: string;
+			cursor?: string;
+			limit: number;
+			query?: string;
+		};
+		sessionId: string;
+	}) => Promise<Page<Product>>;
+	updateProduct: (input: {
+		actorUserId: string;
+		body: UpdateProduct;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		productId: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<Product>;
+}
+
 export interface ServerApplication
 	extends AuditApplication,
+		CatalogApplication,
 		EntitlementsApplication,
 		IdentitySessionsApplication,
 		PartyApplication,

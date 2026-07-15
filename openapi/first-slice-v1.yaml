@@ -1829,31 +1829,100 @@ components:
       properties:
         items: {type: array, items: {$ref: '#/components/schemas/Party'}}
         nextCursor: {type: [string, 'null']}
-    Product:
+    ProductIdentifierType:
+      type: string
+      enum: [SKU, GTIN, UPC, EAN, Alias, External]
+    ProductIdentifierScheme:
+      type: string
+      enum: [Tenant, GTIN-8, GTIN-12, GTIN-13, GTIN-14]
+    ProductIdentifierInput:
       type: object
-      required: [id, name, state, version]
+      additionalProperties: false
+      required: [type, scheme, value]
+      properties:
+        type: {$ref: '#/components/schemas/ProductIdentifierType'}
+        scheme: {$ref: '#/components/schemas/ProductIdentifierScheme'}
+        value: {type: string, minLength: 1, maxLength: 128}
+    ProductIdentifier:
+      allOf:
+        - {$ref: '#/components/schemas/ProductIdentifierInput'}
+        - type: object
+          required: [id]
+          properties:
+            id: {$ref: '#/components/schemas/Identifier'}
+    CreateProductVariant:
+      type: object
+      additionalProperties: false
+      required: [name, identifiers]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 300}
+        identifiers:
+          type: array
+          maxItems: 20
+          items: {$ref: '#/components/schemas/ProductIdentifierInput'}
+    UpdateProductIdentifier:
+      allOf:
+        - {$ref: '#/components/schemas/ProductIdentifierInput'}
+        - type: object
+          properties:
+            id: {$ref: '#/components/schemas/Identifier'}
+    UpdateProductVariant:
+      type: object
+      additionalProperties: false
+      required: [name, identifiers]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
-        name: {type: string, maxLength: 300}
-        sku: {type: string, maxLength: 100}
-        barcode: {type: string, maxLength: 64}
+        name: {type: string, minLength: 1, maxLength: 300}
+        identifiers:
+          type: array
+          maxItems: 20
+          items: {$ref: '#/components/schemas/UpdateProductIdentifier'}
+    ProductVariant:
+      type: object
+      additionalProperties: false
+      required: [id, name, identifiers]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        name: {type: string, minLength: 1, maxLength: 300}
+        identifiers:
+          type: array
+          maxItems: 20
+          items: {$ref: '#/components/schemas/ProductIdentifier'}
+    Product:
+      type: object
+      required: [id, name, state, variants, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        name: {type: string, minLength: 1, maxLength: 300}
         state: {type: string, enum: [Draft, Active, Suspended, Discontinued, Archived]}
+        variants:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items: {$ref: '#/components/schemas/ProductVariant'}
         version: {type: integer, minimum: 1}
     CreateProduct:
       type: object
-      required: [name]
+      additionalProperties: false
+      required: [name, variants]
       properties:
         name: {type: string, minLength: 1, maxLength: 300}
-        sku: {type: string, maxLength: 100}
-        barcode: {type: string, maxLength: 64}
+        variants:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items: {$ref: '#/components/schemas/CreateProductVariant'}
     UpdateProduct:
       type: object
       additionalProperties: false
       minProperties: 1
       properties:
         name: {type: string, minLength: 1, maxLength: 300}
-        sku: {type: string, maxLength: 100}
-        barcode: {type: string, maxLength: 64}
+        variants:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items: {$ref: '#/components/schemas/UpdateProductVariant'}
     PagedProducts:
       type: object
       required: [items]

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DAT-019
 title: WS2 Catalog Inventory and Numbering Schema Classification
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -40,6 +40,35 @@ Catalog owns Product definitions. Inventory owns ledger facts and stock workflow
 
 Unknown fields inherit Confidential under PDA-DAT-010. Credentials, tokens, cookies, passkey/OTP material, unrestricted request objects, raw import files, and unclassified Party PII are prohibited from every table above.
 
+## PR2 Catalog Field Classification
+
+The following field record is the concrete pre-migration classification for the four PR2 Catalog tables. Unless a row states otherwise, the owner is Catalog, classification is Confidential, values remain tenant-scoped, retention follows the owning Product aggregate, and erasure means governed minimization or archive rather than destructive removal of referenced operational facts.
+
+| Table and fields | Scope and authority | Retention and erasure | Search/export/offline | Audit and integrity controls |
+|---|---|---|---|---|
+| `catalog_product.tenant_id` | Tenant scope; authoritative partition key | Retain with Product; never erased independently | Required predicate in reads, exports, projections, and future offline envelopes | Non-null member of every primary/foreign access path; never accepted from an untrusted session body |
+| `catalog_product.id` | Opaque Product identity | Retain while any operational reference exists | Exact administrative lookup/export; future offline stable ID | Tenant-composite primary key; not a human reference |
+| `catalog_product.organization_id` | Opaque organization context inside the tenant | Retain with Product; reassignment is not a PR2 command | Permissioned export/projection only | Server-derived active context; no cross-owner database foreign key |
+| `catalog_product.name` | Authoritative user-authored Product label | Minimize only under governed Product/privacy policy | Catalog-local lexical search, projection, permissioned export, bounded future offline projection | Validated at contract boundary; changed-field event contains the field name, not unrestricted text |
+| `catalog_product.state` | Authoritative lifecycle state | Retain as operational history; archive is terminal in PR2 | Filter/export/projection eligible | Draft default; only explicit activation/archive commands transition it |
+| `catalog_product.version` | Authoritative optimistic-concurrency counter | Retain with Product | Export/projection carries source version | Positive integer; every mutation checks and increments the expected version |
+| `catalog_product.archive_reason`, `archived_at` | Authoritative archive evidence; reason is user-authored operational text | Retain with archived Product; minimize under approved policy without erasing the archive fact | Permissioned administrative export; excluded from ordinary search/offline payloads | Reason required by archive contract; timestamp server-generated; audit/event evidence uses allowlisted fields |
+| `catalog_product.classification` | Data-handling label | Retain with Product | May accompany controlled export/projection metadata | Fixed to `Confidential` for PR2; does not grant access |
+| `catalog_product.created_at`, `updated_at` | Server-generated temporal provenance | Retain with Product | Export/projection metadata eligible | Timezone-aware; never caller-authoritative |
+| `catalog_variant.tenant_id`, `product_id`, `id` | Tenant-preserving Product-child identity | Retain with Product and downstream references | Exact Product assembly/export; future bounded offline projection | Composite tenant/Product foreign key and tenant-composite primary key; replacement occurs only through an expected-version Product command |
+| `catalog_variant.name`, `position` | Authoritative variant label and deterministic ordering | Retain with Product; label minimization follows Product policy | Lexical Product retrieval may include name; permissioned export/projection | Contract validation; position is server-derived from command order |
+| `catalog_variant.created_at`, `updated_at` | Server-generated temporal provenance | Retain with variant | Export/projection metadata eligible | Timezone-aware; never caller-authoritative |
+| `catalog_identifier.tenant_id`, `product_id`, `variant_id`, `id` | Tenant-preserving identifier assignment identity | Retain while assignment or a referenced operational fact exists | Exact Catalog lookup and permissioned export; future bounded offline lookup | Tenant-preserving foreign key to Variant; opaque IDs are distinct from business identifier values |
+| `catalog_identifier.type`, `scheme` | Authoritative identifier semantics | Retain with assignment | Filter/export/projection eligible | Enumerated and boundary-validated; provider names are not contract types |
+| `catalog_identifier.value` | Caller-supplied display value | Retain with assignment; minimize under governed policy when no reference remains | Exact lookup is performed through normalized value; permissioned export/offline projection allowed | Raw scan/request data is not retained beyond the validated assigned value |
+| `catalog_identifier.normalized_value`, `normalization_version`, `uniqueness_scope` | Authoritative derived uniqueness key, reproducibility version, and collision family | Retain with assignment and collision evidence | Exact tenant-local lookup only; not returned as a public display field | Server-derived; unique by tenant/collision-family/normalized value; GTIN, UPC, and EAN share the `Barcode` family so one physical code cannot be assigned twice under different labels; GTIN schemes require check-digit validation |
+| `catalog_identifier.created_at` | Server-generated assignment time | Retain with assignment | Export/projection metadata eligible | Timezone-aware; never caller-authoritative |
+| `catalog_product_command_receipt.tenant_id`, `operation`, `idempotency_key` | Tenant-scoped deduplication identity | Bounded operational retention; schedule remains a pilot gate | No search/offline/general export | Composite primary key; key is not an authentication credential |
+| `catalog_product_command_receipt.request_fingerprint` | Derived SHA-256 digest of the allowlisted command shape | Bounded with receipt; irreversible digest removed with receipt | No search/export/offline | Detects idempotency-key reuse without persisting unrestricted request bodies |
+| `catalog_product_command_receipt.resource_id` | Opaque Product result reference | Bounded with receipt | Diagnostic exact lookup only | Tenant-scoped index; never used as current authority |
+| `catalog_product_command_receipt.result` | Safe Product command result snapshot | Bounded with receipt; purged under receipt schedule | No search/offline/ordinary export | JSON shape is restricted to the published Product result; secrets, headers, unrestricted input, and unclassified PII are prohibited |
+| `catalog_product_command_receipt.created_at` | Server-generated receipt time | Bounded with receipt | Diagnostic metadata only | Timezone-aware; supports retention enforcement evidence |
+
 ## Isolation and Integrity Controls
 
 - Every proposed table carries non-null `tenant_id`; child and unique keys preserve tenant scope.
@@ -63,3 +92,8 @@ PR2, PR3, and PR5 must not generate a business migration until the owning table 
 ## Explicit Deferrals
 
 Production retention periods, RLS, partitioning, lots/serials/expiry/quarantine depth, supplier/cost fields, global Search, production import staging, offline range leasing, financial valuation, and warehouse execution remain deferred to their named owners and gates.
+
+## Change Log
+
+- 2026-07-14 — v0.2.0 added field-level owner, scope, classification, retention, erasure, search/export/offline, audit, and integrity declarations for every PR2 Catalog migration field before generation.
+- 2026-07-14 — v0.1.0 recorded the WS2 pre-migration table declarations and controlled-prototype RLS disposition.

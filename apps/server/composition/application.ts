@@ -2,6 +2,7 @@ import { createTenancyApplication } from "@meridian/platform-tenancy";
 
 import { auditTransportApplication } from "./audit";
 import { permissionAuthorizer } from "./authorization";
+import { catalogTransportApplication } from "./catalog";
 import { createCurrentIdentityResolver } from "./current-identity";
 import { entitlementTransportApplication } from "./entitlements";
 import { identitySessionTransportApplication } from "./identity";
@@ -26,6 +27,7 @@ const getCurrentIdentity = createCurrentIdentityResolver({
 
 export const serverApplication = {
 	...auditTransportApplication,
+	...catalogTransportApplication,
 	...entitlementTransportApplication,
 	...identitySessionTransportApplication,
 	...tenancyApplication,

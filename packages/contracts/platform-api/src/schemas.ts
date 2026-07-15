@@ -732,6 +732,11 @@ export type UpdateProductIdentifier = z.infer<
 >;
 export type UpdateProductVariant = z.infer<typeof UpdateProductVariantSchema>;
 export type InventoryAdjustment = z.infer<typeof InventoryAdjustmentSchema>;
+export type CreateInventoryAdjustment = z.infer<
+	typeof CreateInventoryAdjustmentSchema
+>;
+export type CreateStockCount = z.infer<typeof CreateStockCountSchema>;
+export type CreateStockTransfer = z.infer<typeof CreateStockTransferSchema>;
 export type StockBalance = z.infer<typeof StockBalanceSchema>;
 export type StockCount = z.infer<typeof StockCountSchema>;
 export type StockTransfer = z.infer<typeof StockTransferSchema>;

@@ -28,9 +28,11 @@ import {
 import { env } from "@meridian/tooling-env/server";
 import { Pool, type PoolClient } from "pg";
 import {
+	ALL_MIGRATION_STREAMS,
 	type MigrationStream,
 	runMigrationStreams,
 	WS1_MIGRATION_STREAMS,
+	WS2_MIGRATION_STREAMS,
 } from "./migrations";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
@@ -98,6 +100,15 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform.events",
 			"party.records",
 		]);
+		expect(WS2_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual([
+			"platform.numbering",
+			"catalog",
+			"inventory",
+		]);
+		expect(ALL_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual([
+			...WS1_MIGRATION_STREAMS.map((stream) => stream.id),
+			...WS2_MIGRATION_STREAMS.map((stream) => stream.id),
+		]);
 	});
 
 	test("migrates an empty database and repeats without schema drift", async () => {
@@ -146,11 +157,14 @@ describe.serial("WS1 persistence orchestration", () => {
 			"SELECT table_name FROM information_schema.tables WHERE table_schema = 'drizzle' ORDER BY table_name"
 		);
 		expect(histories.rows.map((row) => row.table_name)).toEqual([
+			"catalog_migrations",
+			"inventory_migrations",
 			"party_migrations",
 			"platform_audit_migrations",
 			"platform_entitlements_migrations",
 			"platform_events_migrations",
 			"platform_identity_migrations",
+			"platform_numbering_migrations",
 			"platform_tenancy_migrations",
 		]);
 	});

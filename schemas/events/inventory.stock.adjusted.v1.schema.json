@@ -19,8 +19,9 @@
             "locationId": {"type": "string"},
             "lotId": {"type": ["string", "null"]},
             "serialId": {"type": ["string", "null"]},
-            "quantity": {"type": "number"},
+            "quantity": {"type": "string", "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,6})?$"},
             "unit": {"type": "string"},
+            "conversionSourceId": {"type": ["string", "null"]},
             "reason": {"type": "string"},
             "approvalId": {"type": ["string", "null"]},
             "sourceOperationId": {"type": ["string", "null"]}

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-001
 title: Appendices Section Index
-version: 0.9.0
+version: 0.10.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-12
@@ -22,6 +22,8 @@ last_reviewed: 2026-07-12
 - `POSTGRESQL_18_AND_EXTENSION_VERIFICATION-2026-07-12.md`
 - `BETTER_AUTH_COMPLETE_VERIFICATION-2026-07-12.md`
 - `SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`
+- `WS1_PERSISTENCE_TECHNOLOGY_VERIFICATION-2026-07-13.md`
+- `WS2_LEDGER_AND_QUERY_TECHNOLOGY_VERIFICATION-2026-07-14.md`
 
 ## Machine-Readable Evidence and Contracts
 

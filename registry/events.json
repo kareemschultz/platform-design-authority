@@ -127,9 +127,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 52,
+      "source_line": 62,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/catalog.identifier.assigned.v1.schema.json"
     },
     {
       "name": "catalog.product.activated.v1",
@@ -140,9 +140,22 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 49,
+      "source_line": 58,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/catalog.product.activated.v1.schema.json"
+    },
+    {
+      "name": "catalog.product.archived.v1",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "entity": "product",
+      "fact": "archived",
+      "major_version": 1,
+      "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
+      "source_heading": "Events",
+      "source_line": 59,
+      "document_status": "Draft",
+      "schema_path": "schemas/events/catalog.product.archived.v1.schema.json"
     },
     {
       "name": "catalog.product.changed.v1",
@@ -153,9 +166,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 48,
+      "source_line": 57,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/catalog.product.changed.v1.schema.json"
     },
     {
       "name": "catalog.product.created.v1",
@@ -166,9 +179,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 47,
+      "source_line": 56,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/catalog.product.created.v1.schema.json"
     },
     {
       "name": "catalog.product.discontinued.v1",
@@ -179,9 +192,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 50,
+      "source_line": 60,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/catalog.product.discontinued.v1.schema.json"
     },
     {
       "name": "catalog.publication.changed.v1",
@@ -192,9 +205,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 53,
+      "source_line": 63,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/catalog.publication.changed.v1.schema.json"
     },
     {
       "name": "catalog.variant.created.v1",
@@ -205,9 +218,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 51,
+      "source_line": 61,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/catalog.variant.created.v1.schema.json"
     },
     {
       "name": "commerce.cash-movement.posted.v1",
@@ -842,9 +855,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 51,
+      "source_line": 62,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/inventory.reservation.created.v1.schema.json"
     },
     {
       "name": "inventory.reservation.released.v1",
@@ -855,9 +868,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 52,
+      "source_line": 63,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/inventory.reservation.released.v1.schema.json"
     },
     {
       "name": "inventory.stock-count.posted.v1",
@@ -868,9 +881,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 47,
+      "source_line": 58,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/inventory.stock-count.posted.v1.schema.json"
     },
     {
       "name": "inventory.stock-movement.reversed.v1",
@@ -881,9 +894,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 53,
+      "source_line": 64,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/inventory.stock-movement.reversed.v1.schema.json"
     },
     {
       "name": "inventory.stock-transfer.created.v1",
@@ -894,9 +907,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 48,
+      "source_line": 59,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/inventory.stock-transfer.created.v1.schema.json"
     },
     {
       "name": "inventory.stock-transfer.dispatched.v1",
@@ -907,9 +920,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 49,
+      "source_line": 60,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/inventory.stock-transfer.dispatched.v1.schema.json"
     },
     {
       "name": "inventory.stock-transfer.received.v1",
@@ -920,9 +933,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 50,
+      "source_line": 61,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/inventory.stock-transfer.received.v1.schema.json"
     },
     {
       "name": "inventory.stock.adjusted.v1",
@@ -933,7 +946,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "source_heading": "Events",
-      "source_line": 46,
+      "source_line": 57,
       "document_status": "Draft",
       "schema_path": "schemas/events/inventory.stock.adjusted.v1.schema.json"
     },

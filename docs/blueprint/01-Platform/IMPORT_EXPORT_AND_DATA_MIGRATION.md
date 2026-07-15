@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-024
 title: Import Export and Data Migration
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-14
 ---
 
 # Import, Export, and Data Migration
@@ -42,6 +42,12 @@ The migration service must never bypass domain application services by writing a
 - Database export adapters approved for implementation services
 - Industry and competitor-specific templates
 - Attachments and media manifests
+
+### WS2 first-slice format decision
+
+WS2 Product and opening-inventory import is CSV-first. Parsing, validation, staging, correction reports, and commit waves run in the authoritative server-side job boundary; browsers do not parse or retain the authoritative import dataset. UTF-8 CSV with an explicit header, delimiter, quoting, newline, locale, decimal, unit, and timezone manifest is the only committed WS2 input format.
+
+XLSX remains deferred. It may be added only after a governed technology-evidence update proves bounded server-side streaming, formula and external-link rejection, decompression and worksheet limits, malware controls, deterministic type/date handling, resource budgets, and CSV-equivalent dry-run/replay behavior. This deferral does not narrow the platform-wide list of candidate formats above.
 
 ## Import Lifecycle
 
@@ -121,3 +127,7 @@ Offline clients may import bounded operational packages only through signed mani
 - Opening inventory import with reconciliation
 - Export of products, parties, sales, and inventory balances
 - Dry run, correction file, idempotent replay, and acceptance report
+
+## Change Log
+
+- 0.2.0 (2026-07-14): Select UTF-8 CSV-first server-side imports for WS2 and defer XLSX pending bounded streaming and security evidence.

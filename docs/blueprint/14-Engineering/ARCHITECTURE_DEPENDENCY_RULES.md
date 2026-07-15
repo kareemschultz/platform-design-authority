@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 0.9.1
+version: 1.0.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-14
@@ -67,6 +67,17 @@ Family-level entries in `registry/architecture-rules.json` are a conservative gr
 
 `packages/persistence/*` contains owner-specific database adapters and migrations selected under ADR-0027. Each package maps to one authoritative Platform, Engine, or Domain owner and may import only that owner's published ports and schemas. Persistence packages do not read environment configuration, create pools, expose database types through contracts, or import another owner's repositories, tables, or migrations.
 
+### Registered Composition Roots
+
+Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027 selects `apps/worker/composition` as the candidate Event Backbone root, but it is deliberately absent from this registered table and therefore rejected by the executable checker until all three named controlled-prototype review rows are recorded.
+
+| Composition root | Process owner | Allowed process resources | Prohibited responsibility |
+|---|---|---|---|
+| `apps/server/composition` | API server | one bounded process-local PostgreSQL pool; HTTP adapters; deterministic migration runner | background event-delivery loop or another process's pool |
+| `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | application business processing or an unregistered long-running service |
+
+PR4 may add `apps/worker/composition` to this table and regenerate the rules only after ADR-0027's Platform Architecture, Data Platform, and Security rows are dated and record concurrence. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; PR1 grants no executable exception in advance.
+
 ### Registered Persistence Owners
 
 The executable registry maps every concrete package, table, and migration stream to exactly one logical owner. Package location does not transfer accountability.
@@ -79,6 +90,9 @@ The executable registry maps every concrete package, table, and migration stream
 | `packages/persistence/platform-audit-postgres` | `platform.audit` | `@meridian/platform-audit` | `platform_audit_record`, `platform_audit_privacy_overlay` | `packages/persistence/platform-audit-postgres/src/migrations` |
 | `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
 | `packages/persistence/party-postgres` | `party.records` | `@meridian/domain-party` | `party_command_receipt`, `party_contact_point`, `party_identity_link`, `party_organization_detail`, `party_person_detail`, `party_record` | `packages/persistence/party-postgres/src/migrations` |
+| `packages/persistence/catalog-postgres` | `catalog` | `@meridian/domain-catalog` | None in PR1; PDA-DAT-019 classifies the proposed PR2 table set | `packages/persistence/catalog-postgres/src/migrations` |
+| `packages/persistence/inventory-postgres` | `inventory` | `@meridian/domain-inventory` | None in PR1; PDA-DAT-019 classifies the proposed PR3 table set | `packages/persistence/inventory-postgres/src/migrations` |
+| `packages/persistence/platform-numbering-postgres` | `platform.numbering` | `@meridian/platform-numbering` | None in PR1; PDA-DAT-019 classifies the proposed PR5 table set | `packages/persistence/platform-numbering-postgres/src/migrations` |
 
 ### UI Packages
 
@@ -129,7 +143,7 @@ Circular synchronous dependencies are prohibited. A cycle requires workflow rede
 
 ## Composition Root
 
-Dependency injection and concrete adapter binding occur only in registered application composition roots or approved module bootstrap packages. Composition roots may create process resources and bind adapters, but application commands and workflows own business transaction boundaries. Domain code receives interfaces and does not locate services globally.
+Dependency injection and concrete adapter binding occur only in the exact registered composition roots above or approved module bootstrap packages. Composition roots may create process resources and bind adapters, but application commands and workflows own business transaction boundaries. Domain code receives interfaces and does not locate services globally. Registering the selected worker candidate, adding a third application root or pool, or proposing a worker-side migration path requires the applicable ADR review and registry propagation.
 
 ## Architecture Tests
 
@@ -142,6 +156,8 @@ The implementation must include tests that:
 - Fail direct database imports outside approved persistence packages
 - Fail owner-specific Persistence packages that import another owner's private schema, repository, table, or migration
 - Fail pool creation, shutdown, or connection-configuration reads outside registered composition roots
+- Fail an unregistered `apps/*/composition` path even when its directory name is `composition`
+- Fail pool construction in the unregistered `apps/worker/composition` candidate until ADR-0027's three review rows are recorded; after registration, prove the worker may construct only its process-local pool and may not invoke migration streams
 - Fail provider SDK leakage into domain contracts
 - Fail unregistered capability, event, and permission constants
 - Fail application packages that contain migrations
@@ -178,7 +194,7 @@ These paths are part of the rule definition, not temporary risk exceptions. They
 
 | Rule | Allowed path | Reason |
 |---|---|---|
-| `database-outside-persistence` | `apps/*/composition` | Application composition roots may construct and inject the single process connection. |
+| `database-outside-persistence` | `apps/server/composition` | The API server composition root may construct and inject its single process-local connection. |
 | `database-outside-persistence` | `packages/tooling/composition/*` | Approved Tooling composition packages may construct a governed infrastructure connection. |
 | `connection-lifecycle-outside-composition` | `packages/tooling/env/src/server.ts` | The validated environment schema must declare `DATABASE_URL`; it exports validated configuration and may not import a database client, construct a pool, or close a connection. |
 
@@ -194,6 +210,10 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 2026-07-14 — v1.0.1 withheld the selected worker candidate from executable composition authority until ADR-0027's three named review rows are recorded; added literal denial requirements for the candidate and an unknown application root.
+
+- 2026-07-14 — v1.0.0 narrowed application composition authority to exact server and worker roots, registered the ADR-0027 WS2 worker topology, and registered Catalog, Inventory, and Platform Numbering persistence owners and proposed tables.
 
 - 2026-07-14 — v0.9.1 registered the validated Tooling environment-schema allowance in the authoritative source and removed the checker's hidden family-level carve-out.
 

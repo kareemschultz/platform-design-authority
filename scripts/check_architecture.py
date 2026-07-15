@@ -182,6 +182,12 @@ def main() -> int:
             table_owner[table_name] = str(record.get("owner", ""))
 
     roots = package_roots()
+    for source in source_files(ROOT / "apps"):
+        if not any(root in source.parents for root in roots):
+            errors.append(
+                f"{posix(source)}: unregistered-application-source: "
+                "application source must belong to an app package"
+            )
     package_by_name: dict[str, Path] = {}
     family_by_root: dict[Path, str] = {}
     manifest_dependencies: dict[Path, set[str]] = defaultdict(set)
@@ -366,9 +372,13 @@ def main() -> int:
             )
 
         migration_directory = ROOT / str(record.get("migration_directory", ""))
-        if not migration_directory.is_dir() or not list(migration_directory.glob("*.sql")):
+        if not migration_directory.is_dir():
             errors.append(
-                f"{posix(root)}: registered migration directory has no SQL migrations"
+                f"{posix(root)}: registered migration directory does not exist"
+            )
+        elif registered_tables and not list(migration_directory.glob("*.sql")):
+            errors.append(
+                f"{posix(root)}: registered tables require at least one SQL migration"
             )
         for migration in root.rglob("*.sql"):
             if migration_directory not in migration.parents:

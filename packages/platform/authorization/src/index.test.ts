@@ -89,6 +89,20 @@ describe("Platform Authorization current policy", () => {
 		});
 	});
 
+	test("keeps transfer dispatch separate from create and receive authority", async () => {
+		const state = currentState(["inventory.transfer.dispatch"]);
+		const service = serviceWith(async () => state);
+		await expect(
+			service.decide({ ...request, permission: "inventory.transfer.dispatch" })
+		).resolves.toMatchObject({
+			outcome: "allow",
+			permission: "inventory.transfer.dispatch",
+		});
+		await expect(
+			service.decide({ ...request, permission: "inventory.transfer.receive" })
+		).resolves.toEqual({ outcome: "deny", reason: "no_assignment" });
+	});
+
 	test("distinguishes absent, inactive, and cross-session authority", async () => {
 		await expect(
 			serviceWith(async () => currentState([])).decide(request)

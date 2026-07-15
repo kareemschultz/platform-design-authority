@@ -1,8 +1,11 @@
+import { migrateCatalog } from "@meridian/persistence-catalog-postgres";
+import { migrateInventory } from "@meridian/persistence-inventory-postgres";
 import { migrateParty } from "@meridian/persistence-party-postgres";
 import { migratePlatformAudit } from "@meridian/persistence-platform-audit-postgres";
 import { migratePlatformEntitlements } from "@meridian/persistence-platform-entitlements-postgres";
 import { migratePlatformEvents } from "@meridian/persistence-platform-events-postgres";
 import { migratePlatformIdentity } from "@meridian/persistence-platform-identity-postgres";
+import { migratePlatformNumbering } from "@meridian/persistence-platform-numbering-postgres";
 import { migratePlatformTenancy } from "@meridian/persistence-platform-tenancy-postgres";
 import type { Pool } from "pg";
 
@@ -20,9 +23,25 @@ export const WS1_MIGRATION_STREAMS: readonly MigrationStream[] = [
 	{ id: "party.records", migrate: migrateParty },
 ];
 
+/**
+ * WS2 owner streams are registered before their first business migrations so
+ * history ownership and ordering are executable. Catalog precedes Inventory;
+ * Numbering remains a separate Platform owner. The worker never runs them.
+ */
+export const WS2_MIGRATION_STREAMS: readonly MigrationStream[] = [
+	{ id: "platform.numbering", migrate: migratePlatformNumbering },
+	{ id: "catalog", migrate: migrateCatalog },
+	{ id: "inventory", migrate: migrateInventory },
+];
+
+export const ALL_MIGRATION_STREAMS: readonly MigrationStream[] = [
+	...WS1_MIGRATION_STREAMS,
+	...WS2_MIGRATION_STREAMS,
+];
+
 export async function runMigrationStreams(
 	pool: Pool,
-	streams: readonly MigrationStream[] = WS1_MIGRATION_STREAMS
+	streams: readonly MigrationStream[] = ALL_MIGRATION_STREAMS
 ): Promise<void> {
 	for (const stream of streams) {
 		try {

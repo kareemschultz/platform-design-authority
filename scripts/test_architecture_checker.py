@@ -88,6 +88,37 @@ def main() -> int:
     )
     probe(
         ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_pool_fixture.ts",
+        expected_success=False,
+        expected_text="unregistered-application-source",
+        source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "random-app"
+        / "composition"
+        / "__architecture_unknown_app_pool_fixture.ts",
+        expected_success=False,
+        expected_text="unregistered-application-source",
+        source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "server"
+        / "src"
+        / "composition"
+        / "__architecture_unregistered_composition_fixture.ts",
+        expected_success=False,
+        expected_text="connection-lifecycle-outside-composition",
+        source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
+    )
+    probe(
+        ROOT
         / "packages"
         / "persistence"
         / "platform-events-postgres"
@@ -109,6 +140,17 @@ def main() -> int:
             'import { pgTable, text } from "drizzle-orm/pg-core";\n'
             'export const fixture = pgTable("unregistered_fixture", { id: text("id") });\n'
         ),
+    )
+    probe(
+        ROOT
+        / "packages"
+        / "persistence"
+        / "inventory-postgres"
+        / "src"
+        / "__architecture_catalog_owner_fixture.ts",
+        expected_success=False,
+        expected_text="persistence-cross-owner-import",
+        source='import type { CatalogPersistencePort } from "@meridian/domain-catalog";\nexport type Fixture = CatalogPersistencePort;\n',
     )
     probe(
         ROOT / "apps" / "server" / "src" / "__architecture_pool_fixture.ts",

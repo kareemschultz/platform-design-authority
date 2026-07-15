@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/catalog.identifier.assigned.v1.schema.json",
+  "title": "catalog.identifier.assigned.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "catalog.identifier.assigned.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["productId", "identifierId", "identifierType", "normalizedValue", "normalizationVersion"],
+          "properties": {
+            "productId": {"type": "string"},
+            "variantId": {"type": ["string", "null"]},
+            "identifierId": {"type": "string"},
+            "identifierType": {"type": "string", "enum": ["SKU", "GTIN", "UPC", "EAN", "Alias", "External"]},
+            "normalizedValue": {"type": "string", "minLength": 1, "maxLength": 128},
+            "normalizationVersion": {"type": "string", "minLength": 1, "maxLength": 50}
+          }
+        }
+      }
+    }
+  ]
+}

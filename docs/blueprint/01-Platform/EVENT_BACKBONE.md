@@ -1,11 +1,11 @@
 ---
 document_id: PDA-PLT-008
 title: Event Backbone
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
-related_adrs: [ADR-0014, ADR-0016]
+last_reviewed: 2026-07-14
+related_adrs: [ADR-0014, ADR-0016, ADR-0027]
 ---
 
 # Event Backbone
@@ -52,6 +52,19 @@ The outbox record is not automatically the long-term event store. Retention and 
 ## Delivery Semantics
 
 At-least-once delivery is the default. Consumers deduplicate by event identifier and make side effects idempotent. Ordering guarantees are declared narrowly per resource or stream rather than assumed globally.
+
+### WS2 controlled-prototype delivery policy
+
+The following parameters are the implementation contract for WS2 PR4. They authorize a bounded prototype; production values remain subject to capacity, recovery, privacy, and operational evidence.
+
+- The Event Backbone worker claims committed outbox rows with `FOR UPDATE SKIP LOCKED` and a 30-second renewable lease. A worker that cannot renew before expiry abandons the claim; another worker may redeliver it.
+- Retry begins at one second, doubles per attempt, uses full jitter, and is capped at five minutes between attempts. Delivery stops at the earlier of 20 failed attempts or 24 hours after the first claim and then moves to dead-letter review.
+- Ordering is narrow: events sharing `(tenant_id, producer_namespace, aggregate_id)` are delivered in outbox sequence. No ordering is promised across tenants, aggregates, or independent producer namespaces.
+- A dead-letter record retains the minimized event envelope, schema reference, failure classification, attempt summary, and encrypted payload only when the event retention class permits it. The prototype review window is 30 days; a shorter governing privacy or domain retention rule wins. This value is not a production records schedule.
+- Replay is a new authorized delivery attempt, never a mutation of the original event. It requires `platform.event.replay`, an authenticated tenant scope, a recorded purpose and approver, compatible producer and consumer schema versions, an allowlisted event range, and append-only audit evidence. Cross-tenant, unbounded, or unaudited replay is prohibited.
+- Consumer receipts are unique by `(consumer_id, event_id)`. A replay or expired lease may repeat transport but must not repeat a business effect.
+
+PR4 must measure claim recovery, retry timing, poison-message isolation, tenant-scoped pause/recovery, and zero duplicate consumer effects before RR-006 can close. These parameters do not claim that the present outbox is already a delivery system.
 
 ## Failure Handling
 
@@ -101,3 +114,7 @@ The authoritative prefix registry is `registry/domains.json`. This list is descr
 ## Observability
 
 Measure publish failures, throughput, queue delay, consumer lag, retries, dead letters, replay activity, schema violations, privacy-purge failures, tenant-scoped incidents, and end-to-end processing latency.
+
+## Change Log
+
+- 0.3.0 (2026-07-14): Select the bounded WS2 claim lease, retry horizon, ordering key, dead-letter review window, replay authority, and consumer-idempotency contract.

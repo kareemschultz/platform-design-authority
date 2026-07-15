@@ -209,8 +209,17 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 			version: current.version,
 		});
 		expect(updated.variants[0]?.id).toBe(variant.id);
-		expect(updated.variants[0]?.identifiers[0]?.id).toBe(identifier.id);
 		expect(updated.variants[0]?.identifiers).toHaveLength(2);
+		expect(
+			updated.variants[0]?.identifiers.find(
+				(candidate) => candidate.id === identifier.id
+			)
+		).toMatchObject({
+			id: identifier.id,
+			scheme: identifier.scheme,
+			type: identifier.type,
+			value: identifier.value,
+		});
 		expect(updated.version).toBe(current.version + 1);
 
 		expect(

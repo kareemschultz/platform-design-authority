@@ -2,10 +2,13 @@ import { describe, expect, test } from "bun:test";
 
 import {
 	ActiveContextRequestSchema,
+	CreateProductSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
 	PositiveDecimalQuantitySchema,
+	ProductSchema,
 	platformApiContract,
+	UpdateProductSchema,
 	WS1_OPENAPI_OPERATION_METADATA,
 	WS2_OPENAPI_OPERATION_METADATA,
 	ws2CatalogInventoryApiContract,
@@ -123,5 +126,39 @@ describe("WS2 Catalog and Inventory API contract", () => {
 			false
 		);
 		expect(PositiveDecimalQuantitySchema.safeParse("-1").success).toBe(false);
+	});
+
+	test("represents governed Variants with zero identifiers", () => {
+		const create = {
+			name: "Unidentified Product",
+			variants: [{ identifiers: [], name: "Default" }],
+		};
+		expect(CreateProductSchema.safeParse(create).success).toBe(true);
+		expect(
+			UpdateProductSchema.safeParse({
+				variants: [
+					{
+						id: "variant_catalog_01",
+						identifiers: [],
+						name: "Default",
+					},
+				],
+			}).success
+		).toBe(true);
+		expect(
+			ProductSchema.safeParse({
+				id: "product_catalog_01",
+				name: create.name,
+				state: "Draft",
+				variants: [
+					{
+						id: "variant_catalog_01",
+						identifiers: [],
+						name: "Default",
+					},
+				],
+				version: 1,
+			}).success
+		).toBe(true);
 	});
 });

@@ -14,7 +14,7 @@
           "required": ["productId", "previousState", "reason", "version"],
           "properties": {
             "productId": {"type": "string"},
-            "previousState": {"type": "string", "enum": ["Draft", "Suspended", "Discontinued"]},
+            "previousState": {"type": "string", "enum": ["Draft", "Active", "Suspended", "Discontinued"]},
             "reason": {"type": "string", "minLength": 1, "maxLength": 500},
             "version": {"type": "integer", "minimum": 1}
           }

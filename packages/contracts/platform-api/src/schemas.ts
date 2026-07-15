@@ -386,7 +386,7 @@ export const ProductIdentifierSchema = ProductIdentifierInputSchema.extend({
 });
 
 export const CreateProductVariantSchema = z.object({
-	identifiers: z.array(ProductIdentifierInputSchema).min(1).max(20),
+	identifiers: z.array(ProductIdentifierInputSchema).max(20),
 	name: z.string().min(1).max(300),
 });
 
@@ -395,13 +395,13 @@ export const UpdateProductIdentifierSchema =
 
 export const UpdateProductVariantSchema = z.object({
 	id: IdentifierSchema.optional(),
-	identifiers: z.array(UpdateProductIdentifierSchema).min(1).max(20),
+	identifiers: z.array(UpdateProductIdentifierSchema).max(20),
 	name: z.string().min(1).max(300),
 });
 
 export const ProductVariantSchema = z.object({
 	id: IdentifierSchema,
-	identifiers: z.array(ProductIdentifierSchema).min(1).max(20),
+	identifiers: z.array(ProductIdentifierSchema).max(20),
 	name: z.string().min(1).max(300),
 });
 

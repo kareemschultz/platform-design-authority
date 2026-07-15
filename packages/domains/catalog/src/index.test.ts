@@ -289,6 +289,24 @@ describe("Catalog service", () => {
 		]);
 	});
 
+	test("creates a Variant without identifiers without fabricating an assignment", async () => {
+		const harness = createMemoryHarness();
+		const created = await harness.service.createProduct({
+			...createInput,
+			body: {
+				name: "Unidentified Product",
+				variants: [{ identifiers: [], name: "Default" }],
+			},
+			idempotencyKey: "idempotency_catalog_identifierless",
+		});
+
+		expect(created.variants[0]?.identifiers).toEqual([]);
+		expect(harness.events.map((event) => event.name)).toEqual([
+			"catalog.product.created.v1",
+			"catalog.variant.created.v1",
+		]);
+	});
+
 	test("keeps normalized identifiers unique inside a tenant but isolated across tenants", async () => {
 		const harness = createMemoryHarness();
 		await harness.service.createProduct(createInput);
@@ -409,6 +427,10 @@ describe("Catalog service", () => {
 			version: active.version,
 		});
 		expect(archived.state).toBe("Archived");
+		expect(harness.events.at(-1)).toMatchObject({
+			data: { previousState: "Active" },
+			name: "catalog.product.archived.v1",
+		});
 		await expect(
 			harness.service.updateProduct({
 				...createInput,

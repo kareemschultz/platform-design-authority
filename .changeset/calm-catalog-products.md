@@ -1,5 +1,6 @@
 ---
 "@meridian/contracts-platform-api": patch
+"@meridian/contracts-events": patch
 "@meridian/domain-catalog": patch
 "@meridian/persistence-catalog-postgres": patch
 ---

@@ -73,6 +73,11 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Prepare Changesets base ref
+        run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          git show-ref --verify --quiet refs/heads/main || git branch main refs/remotes/origin/main
+
       - name: Changeset metadata
         run: bun run changeset:status
 

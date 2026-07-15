@@ -1,28 +1,44 @@
 import type { PermissionId } from "@meridian/contracts-permissions";
 import {
 	activateProductContract,
+	approveInventoryAdjustmentContract,
+	approveStockCountContract,
 	archiveProductContract,
+	createInventoryAdjustmentContract,
 	createOrganizationPartyContract,
 	createPartyIdentityLinkContract,
 	createPersonPartyContract,
 	createProductContract,
 	createRoleAssignmentContract,
+	createStockCountContract,
+	createStockTransferContract,
 	createUserInvitationContract,
+	dispatchStockTransferContract,
 	getCurrentIdentityContract,
+	getInventoryAdjustmentContract,
 	getOrganizationContract,
 	getPartyContract,
 	getProductContract,
+	getStockCountContract,
+	getStockTransferContract,
 	listAuditRecordsContract,
 	listCurrentUserSessionsContract,
 	listEntitlementsContract,
+	listInventoryAdjustmentsContract,
 	listLocationsContract,
 	listOrganizationsContract,
 	listPartiesContract,
 	listProductsContract,
 	listRolesContract,
+	listStockBalancesContract,
+	listStockCountsContract,
+	listStockTransfersContract,
 	listUsersContract,
+	receiveStockTransferContract,
+	reverseInventoryAdjustmentContract,
 	revokeCurrentUserSessionContract,
 	setActiveContextContract,
+	submitStockCountContract,
 	suspendTenantMembershipContract,
 	updateOrganizationContract,
 	updatePartyContract,
@@ -185,19 +201,31 @@ function mapApplicationError(context: Context, error: unknown): never {
 			}),
 		});
 	}
-	if (code === "invalid_identifier" || code === "invalid_reference") {
+	if (
+		code === "invalid_identifier" ||
+		code === "invalid_quantity" ||
+		code === "invalid_reference"
+	) {
+		let validationTitle = "Identifier is invalid";
+		if (code === "invalid_reference") {
+			validationTitle = "Resource reference is invalid";
+		}
+		if (code === "invalid_quantity") {
+			validationTitle = "Quantity is invalid";
+		}
 		throw new ORPCError("BAD_REQUEST", {
 			data: problem(context, {
 				code: "validation",
 				status: 400,
-				title:
-					code === "invalid_reference"
-						? "Catalog child reference is invalid"
-						: "Identifier is invalid",
+				title: validationTitle,
 			}),
 		});
 	}
-	if (code === "invalid_state") {
+	if (
+		code === "approval_separation" ||
+		code === "invalid_state" ||
+		code === "negative_stock"
+	) {
 		throw new ORPCError("CONFLICT", {
 			data: problem(context, {
 				code: "state_transition",
@@ -831,6 +859,415 @@ const archiveProduct = implement(archiveProductContract)
 		}
 	});
 
+const listStockBalances = implement(listStockBalancesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.balance.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listStockBalances({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				query: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listInventoryAdjustments = implement(listInventoryAdjustmentsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.adjustment.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listInventoryAdjustments({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getInventoryAdjustment = implement(getInventoryAdjustmentContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.adjustment.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getInventoryAdjustment({
+				adjustmentId: input.params.id,
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createInventoryAdjustment = implement(createInventoryAdjustmentContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.adjustment.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createInventoryAdjustment({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveInventoryAdjustment = implement(approveInventoryAdjustmentContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.adjustment.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveInventoryAdjustment({
+				actorUserId: session.user.id,
+				adjustmentId: input.params.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const reverseInventoryAdjustment = implement(reverseInventoryAdjustmentContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.adjustment.reverse",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.reverseInventoryAdjustment({
+				actorUserId: session.user.id,
+				adjustmentId: input.params.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listStockCounts = implement(listStockCountsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.count.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listStockCounts({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getStockCount = implement(getStockCountContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.count.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getStockCount({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				countId: input.params.id,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createStockCount = implement(createStockCountContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.count.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createStockCount({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const submitStockCount = implement(submitStockCountContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.count.submit",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.submitStockCount({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				countId: input.params.id,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveStockCount = implement(approveStockCountContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.count.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveStockCount({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				countId: input.params.id,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listStockTransfers = implement(listStockTransfersContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.transfer.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listStockTransfers({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getStockTransfer = implement(getStockTransferContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.transfer.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getStockTransfer({
+				authUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				sessionId: session.session.id,
+				transferId: input.params.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createStockTransfer = implement(createStockTransferContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.transfer.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createStockTransfer({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const dispatchStockTransfer = implement(dispatchStockTransferContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.transfer.dispatch",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.dispatchStockTransfer({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				transferId: input.params.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const receiveStockTransfer = implement(receiveStockTransferContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.transfer.receive",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.receiveStockTransfer({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				transferId: input.params.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const listEntitlements = implement(listEntitlementsContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -936,6 +1373,30 @@ export const appRouter = {
 	identity: {
 		getCurrent: currentIdentity,
 		setActiveContext,
+	},
+	inventory: {
+		adjustments: {
+			approve: approveInventoryAdjustment,
+			create: createInventoryAdjustment,
+			get: getInventoryAdjustment,
+			list: listInventoryAdjustments,
+			reverse: reverseInventoryAdjustment,
+		},
+		balances: { list: listStockBalances },
+		counts: {
+			approve: approveStockCount,
+			create: createStockCount,
+			get: getStockCount,
+			list: listStockCounts,
+			submit: submitStockCount,
+		},
+		transfers: {
+			create: createStockTransfer,
+			dispatch: dispatchStockTransfer,
+			get: getStockTransfer,
+			list: listStockTransfers,
+			receive: receiveStockTransfer,
+		},
 	},
 	organizations: {
 		get: getOrganization,

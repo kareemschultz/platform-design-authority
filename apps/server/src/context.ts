@@ -4,22 +4,31 @@ import type {
 	ActiveContextRequest,
 	AuditRecord,
 	AuthorizationDecision,
+	CreateInventoryAdjustment,
 	CreateOrganizationParty,
 	CreatePartyIdentityLinkRequest,
 	CreatePersonParty,
 	CreateProduct,
 	CreateRoleAssignmentRequest,
+	CreateStockCount,
+	CreateStockTransfer,
 	CreateUserInvitationRequest,
 	CurrentIdentity,
 	Entitlement,
+	InventoryAdjustment,
 	Location,
 	Organization,
 	Party,
 	PlatformIdentityLink,
 	Product,
+	ReceiveStockTransfer,
 	Role,
 	RoleAssignment,
 	SessionSummary,
+	StockBalance,
+	StockCount,
+	StockTransfer,
+	SubmitStockCount,
 	SuspendTenantMembershipRequest,
 	TransitionReason,
 	UpdateOrganizationRequest,
@@ -291,11 +300,151 @@ export interface CatalogApplication {
 	}) => Promise<Product>;
 }
 
+export interface InventoryApplication {
+	approveInventoryAdjustment: (input: {
+		actorUserId: string;
+		adjustmentId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<InventoryAdjustment>;
+	approveStockCount: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		countId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<StockCount>;
+	createInventoryAdjustment: (input: {
+		actorUserId: string;
+		body: CreateInventoryAdjustment;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<InventoryAdjustment>;
+	createStockCount: (input: {
+		actorUserId: string;
+		body: CreateStockCount;
+		contextId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<StockCount>;
+	createStockTransfer: (input: {
+		actorUserId: string;
+		body: CreateStockTransfer;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<StockTransfer>;
+	dispatchStockTransfer: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		transferId: string;
+		version: number;
+	}) => Promise<StockTransfer>;
+	getInventoryAdjustment: (input: {
+		authUserId: string;
+		adjustmentId: string;
+		contextId: string;
+		sessionId: string;
+	}) => Promise<InventoryAdjustment>;
+	getStockCount: (input: {
+		authUserId: string;
+		contextId: string;
+		countId: string;
+		sessionId: string;
+	}) => Promise<StockCount>;
+	getStockTransfer: (input: {
+		authUserId: string;
+		contextId: string;
+		sessionId: string;
+		transferId: string;
+	}) => Promise<StockTransfer>;
+	listInventoryAdjustments: (input: {
+		authUserId: string;
+		contextId: string;
+		page: {
+			cursor?: string;
+			limit: number;
+			locationId?: string;
+			state?: InventoryAdjustment["state"];
+		};
+		sessionId: string;
+	}) => Promise<Page<InventoryAdjustment>>;
+	listStockBalances: (input: {
+		authUserId: string;
+		contextId: string;
+		query: { locationId: string; productId?: string };
+		sessionId: string;
+	}) => Promise<StockBalance[]>;
+	listStockCounts: (input: {
+		authUserId: string;
+		contextId: string;
+		page: {
+			cursor?: string;
+			limit: number;
+			locationId?: string;
+			state?: StockCount["state"];
+		};
+		sessionId: string;
+	}) => Promise<Page<StockCount>>;
+	listStockTransfers: (input: {
+		authUserId: string;
+		contextId: string;
+		page: {
+			cursor?: string;
+			limit: number;
+			locationId?: string;
+			state?: StockTransfer["state"];
+		};
+		sessionId: string;
+	}) => Promise<Page<StockTransfer>>;
+	receiveStockTransfer: (input: {
+		actorUserId: string;
+		body: ReceiveStockTransfer;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		transferId: string;
+		version: number;
+	}) => Promise<StockTransfer>;
+	reverseInventoryAdjustment: (input: {
+		actorUserId: string;
+		adjustmentId: string;
+		body: TransitionReason;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<InventoryAdjustment>;
+	submitStockCount: (input: {
+		actorUserId: string;
+		body: SubmitStockCount;
+		contextId: string;
+		countId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<StockCount>;
+}
+
 export interface ServerApplication
 	extends AuditApplication,
 		CatalogApplication,
 		EntitlementsApplication,
 		IdentitySessionsApplication,
+		InventoryApplication,
 		PartyApplication,
 		TenancyApplication {}
 

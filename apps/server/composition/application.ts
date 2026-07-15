@@ -6,6 +6,7 @@ import { catalogTransportApplication } from "./catalog";
 import { createCurrentIdentityResolver } from "./current-identity";
 import { entitlementTransportApplication } from "./entitlements";
 import { identitySessionTransportApplication } from "./identity";
+import { inventoryTransportApplication } from "./inventory";
 import { partyIdentityLinkDirectory, partyTransportApplication } from "./party";
 import {
 	identityDirectory,
@@ -30,6 +31,7 @@ export const serverApplication = {
 	...catalogTransportApplication,
 	...entitlementTransportApplication,
 	...identitySessionTransportApplication,
+	...inventoryTransportApplication,
 	...tenancyApplication,
 	...partyTransportApplication,
 	getCurrentIdentity,

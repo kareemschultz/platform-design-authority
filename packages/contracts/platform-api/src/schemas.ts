@@ -439,11 +439,16 @@ export const PositiveDecimalQuantitySchema = z
 	.string()
 	.regex(/^(?!0(?:\.0{1,6})?$)(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
 
+export const NonNegativeDecimalQuantitySchema = z
+	.string()
+	.regex(/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+
 export const QuantityLineSchema = z.object({
 	conversionSourceId: NullableIdentifierSchema.optional(),
 	productId: IdentifierSchema,
 	quantity: PositiveDecimalQuantitySchema,
 	unit: z.string().min(1).max(50),
+	variantId: NullableIdentifierSchema.optional(),
 });
 
 export const StockBalanceSchema = z.object({
@@ -453,7 +458,9 @@ export const StockBalanceSchema = z.object({
 	onHand: DecimalQuantitySchema,
 	productId: IdentifierSchema,
 	reconciled: z.boolean().optional(),
+	reserved: NonNegativeDecimalQuantitySchema,
 	unit: z.string().min(1).max(50),
+	variantId: NullableIdentifierSchema.optional(),
 });
 
 export const CreateInventoryAdjustmentSchema = z.object({
@@ -463,11 +470,14 @@ export const CreateInventoryAdjustmentSchema = z.object({
 	quantity: DecimalQuantitySchema,
 	reason: z.string().min(1).max(500),
 	unit: z.string().min(1).max(50),
+	variantId: NullableIdentifierSchema.optional(),
 });
 
 export const InventoryAdjustmentSchema = CreateInventoryAdjustmentSchema.extend(
 	{
 		id: IdentifierSchema,
+		movementId: NullableIdentifierSchema,
+		reversalMovementId: NullableIdentifierSchema,
 		state: z.enum([
 			"Draft",
 			"PendingApproval",
@@ -485,8 +495,32 @@ export const CreateStockCountSchema = z.object({
 	locationId: IdentifierSchema,
 });
 
+export const SubmitStockCountLineSchema = z
+	.object({
+		conversionSourceId: NullableIdentifierSchema.optional(),
+		observedQuantity: NonNegativeDecimalQuantitySchema,
+		productId: IdentifierSchema,
+		unit: z.string().min(1).max(50),
+		variantId: NullableIdentifierSchema.optional(),
+	})
+	.strict();
+
+export const SubmitStockCountSchema = z
+	.object({
+		lines: z.array(SubmitStockCountLineSchema).min(1).max(5000),
+	})
+	.strict();
+
+export const StockCountLineSchema = SubmitStockCountLineSchema.extend({
+	expectedQuantity: DecimalQuantitySchema.nullable(),
+	id: IdentifierSchema,
+	movementId: NullableIdentifierSchema,
+	varianceQuantity: DecimalQuantitySchema.nullable(),
+});
+
 export const StockCountSchema = CreateStockCountSchema.extend({
 	id: IdentifierSchema,
+	lines: z.array(StockCountLineSchema),
 	state: z.enum([
 		"Draft",
 		"InProgress",
@@ -508,10 +542,55 @@ export const CreateStockTransferSchema = z
 		message: "Transfer source and destination must differ",
 	});
 
+export const StockTransferLineSchema = z.object({
+	conversionSourceId: NullableIdentifierSchema.optional(),
+	dispatchedQuantity: NonNegativeDecimalQuantitySchema,
+	exceptionQuantity: NonNegativeDecimalQuantitySchema,
+	id: IdentifierSchema,
+	productId: IdentifierSchema,
+	receivedQuantity: NonNegativeDecimalQuantitySchema,
+	remainingQuantity: NonNegativeDecimalQuantitySchema,
+	requestedQuantity: PositiveDecimalQuantitySchema,
+	unit: z.string().min(1).max(50),
+	variantId: NullableIdentifierSchema.optional(),
+});
+
+export const ReceiveStockTransferLineSchema = z
+	.object({
+		lineId: IdentifierSchema,
+		receivedQuantity: PositiveDecimalQuantitySchema,
+	})
+	.strict();
+
+export const ReceiveStockTransferSchema = z
+	.object({
+		exceptionReason: z.string().min(1).max(500).nullable().optional(),
+		lines: z.array(ReceiveStockTransferLineSchema).min(1).max(500),
+		outcome: z.enum(["Accepted", "Exception"]),
+	})
+	.strict()
+	.superRefine((value, context) => {
+		if (value.outcome === "Exception" && !value.exceptionReason) {
+			context.addIssue({
+				code: "custom",
+				message: "Exception receipts require an exception reason",
+				path: ["exceptionReason"],
+			});
+		}
+		if (value.outcome === "Accepted" && value.exceptionReason) {
+			context.addIssue({
+				code: "custom",
+				message: "Accepted receipts cannot carry an exception reason",
+				path: ["exceptionReason"],
+			});
+		}
+	});
+
 export const StockTransferSchema = z.object({
 	destinationLocationId: IdentifierSchema,
+	exceptionReason: z.string().max(500).nullable(),
 	id: IdentifierSchema,
-	lines: z.array(QuantityLineSchema).min(1),
+	lines: z.array(StockTransferLineSchema).min(1),
 	sourceLocationId: IdentifierSchema,
 	state: z.enum([
 		"Draft",
@@ -656,3 +735,5 @@ export type InventoryAdjustment = z.infer<typeof InventoryAdjustmentSchema>;
 export type StockBalance = z.infer<typeof StockBalanceSchema>;
 export type StockCount = z.infer<typeof StockCountSchema>;
 export type StockTransfer = z.infer<typeof StockTransferSchema>;
+export type ReceiveStockTransfer = z.infer<typeof ReceiveStockTransferSchema>;
+export type SubmitStockCount = z.infer<typeof SubmitStockCountSchema>;

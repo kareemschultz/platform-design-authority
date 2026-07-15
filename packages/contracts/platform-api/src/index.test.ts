@@ -8,6 +8,9 @@ import {
 	PositiveDecimalQuantitySchema,
 	ProductSchema,
 	platformApiContract,
+	ReceiveStockTransferSchema,
+	StockTransferSchema,
+	SubmitStockCountSchema,
 	UpdateProductSchema,
 	WS1_OPENAPI_OPERATION_METADATA,
 	WS2_OPENAPI_OPERATION_METADATA,
@@ -114,7 +117,7 @@ describe("WS2 Catalog and Inventory API contract", () => {
 		);
 
 		expect(actual).toEqual(expected);
-		expect(actual).toHaveLength(24);
+		expect(actual).toHaveLength(25);
 	});
 
 	test("requires positive directional quantities while signed adjustment quantities remain separate", () => {
@@ -158,6 +161,65 @@ describe("WS2 Catalog and Inventory API contract", () => {
 					},
 				],
 				version: 1,
+			}).success
+		).toBe(true);
+	});
+
+	test("accepts blind-count observations without accepting expected authority", () => {
+		const parsed = SubmitStockCountSchema.safeParse({
+			lines: [
+				{
+					expectedQuantity: "99",
+					observedQuantity: "0",
+					productId: "product_inventory_01",
+					unit: "EA",
+				},
+			],
+		});
+		expect(parsed.success).toBe(false);
+	});
+
+	test("requires an explicit reason for transfer exception receipts", () => {
+		const line = {
+			lineId: "transfer_line_inventory_01",
+			receivedQuantity: "1.5",
+		};
+		expect(
+			ReceiveStockTransferSchema.safeParse({
+				lines: [line],
+				outcome: "Exception",
+			}).success
+		).toBe(false);
+		expect(
+			ReceiveStockTransferSchema.safeParse({
+				exceptionReason: "One unit damaged in transit",
+				lines: [line],
+				outcome: "Exception",
+			}).success
+		).toBe(true);
+	});
+
+	test("represents stable transfer lines and cumulative custody quantities", () => {
+		expect(
+			StockTransferSchema.safeParse({
+				destinationLocationId: "location_inventory_destination_01",
+				exceptionReason: null,
+				id: "transfer_inventory_01",
+				lines: [
+					{
+						dispatchedQuantity: "5",
+						exceptionQuantity: "0",
+						id: "transfer_line_inventory_01",
+						productId: "product_inventory_01",
+						receivedQuantity: "2",
+						remainingQuantity: "3",
+						requestedQuantity: "5",
+						unit: "EA",
+					},
+				],
+				sourceLocationId: "location_inventory_source_01",
+				state: "PartiallyReceived",
+				version: 3,
 			}).success
 		).toBe(true);
 	});

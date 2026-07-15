@@ -56,6 +56,7 @@ export const KNOWN_PERMISSION_IDS = [
 	"inventory.adjustment.approve",
 	"inventory.adjustment.create",
 	"inventory.adjustment.read",
+	"inventory.adjustment.reverse",
 	"inventory.balance.read",
 	"inventory.count.approve",
 	"inventory.count.create",
@@ -246,6 +247,12 @@ export const ENDPOINTS = [
 		operationId: "postInventoryAdjustmentsByIdApprove",
 		path: "/v1/inventory-adjustments/{id}/approve",
 		permission: "inventory.adjustment.approve",
+	},
+	{
+		method: "POST",
+		operationId: "reverseInventoryAdjustment",
+		path: "/v1/inventory-adjustments/{id}/reverse",
+		permission: "inventory.adjustment.reverse",
 	},
 	{
 		method: "GET",

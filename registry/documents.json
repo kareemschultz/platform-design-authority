@@ -1231,10 +1231,10 @@
       "document_id": "PDA-DAT-019",
       "path": "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
       "title": "WS2 Catalog Inventory and Numbering Schema Classification",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-14",
+      "last_reviewed": "2026-07-15",
       "related_adrs": [
         "ADR-0003",
         "ADR-0014",
@@ -1487,10 +1487,10 @@
       "document_id": "PDA-DOM-003",
       "path": "docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md",
       "title": "Inventory Domain",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-15",
       "related_adrs": [
         "ADR-0016"
       ],
@@ -3163,10 +3163,10 @@
       "document_id": "PDA-PLT-027",
       "path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "title": "First Slice Permission Catalog",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-15",
       "related_adrs": [
         "ADR-0016",
         "ADR-0017"
@@ -3313,10 +3313,10 @@
       "document_id": "PDA-RDM-009",
       "path": "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md",
       "title": "WS2 Implementation Plan: Catalog and Inventory Ledger",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-14",
+      "last_reviewed": "2026-07-15",
       "related_adrs": [
         "ADR-0002",
         "ADR-0003",

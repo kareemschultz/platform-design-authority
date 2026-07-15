@@ -35,10 +35,12 @@ import {
 	PlatformIdentityLinkSchema,
 	ProblemSchema,
 	ProductSchema,
+	ReceiveStockTransferSchema,
 	RoleAssignmentSchema,
 	StockBalanceSchema,
 	StockCountSchema,
 	StockTransferSchema,
+	SubmitStockCountSchema,
 	SuspendTenantMembershipRequestSchema,
 	TransitionReasonSchema,
 	UpdateOrganizationRequestSchema,
@@ -722,6 +724,28 @@ export const approveInventoryAdjustmentContract = base
 	)
 	.output(InventoryAdjustmentSchema);
 
+export const reverseInventoryAdjustmentContract = base
+	.route({
+		method: "POST",
+		path: "/v1/inventory-adjustments/{id}/reverse",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "reverseInventoryAdjustment",
+		permission: "inventory.adjustment.reverse",
+		requestRef: "#/components/schemas/TransitionReason",
+		responseRef: "#/components/schemas/InventoryAdjustment",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: TransitionReasonSchema,
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
+		})
+	)
+	.output(InventoryAdjustmentSchema);
+
 export const createOpeningStockImportContract = base
 	.route({
 		method: "POST",
@@ -789,37 +813,47 @@ export const getStockCountContract = base
 	)
 	.output(StockCountSchema);
 
-const stockCountTransitionContract = (
-	operationId: "postStockCountsByIdSubmit" | "postStockCountsByIdApprove",
-	path: "/v1/stock-counts/{id}/submit" | "/v1/stock-counts/{id}/approve",
-	permission: "inventory.count.submit" | "inventory.count.approve"
-) =>
-	base
-		.route({ method: "POST", path, successStatus: 200 })
-		.meta({
-			operationId,
-			permission,
-			responseRef: "#/components/schemas/StockCount",
-			successStatus: 200,
+export const submitStockCountContract = base
+	.route({
+		method: "POST",
+		path: "/v1/stock-counts/{id}/submit",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postStockCountsByIdSubmit",
+		permission: "inventory.count.submit",
+		requestRef: "#/components/schemas/SubmitStockCount",
+		responseRef: "#/components/schemas/StockCount",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: SubmitStockCountSchema,
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
 		})
-		.input(
-			z.object({
-				headers: VersionedTenantCommandHeadersSchema,
-				params: z.object({ id: IdentifierSchema }),
-			})
-		)
-		.output(StockCountSchema);
+	)
+	.output(StockCountSchema);
 
-export const submitStockCountContract = stockCountTransitionContract(
-	"postStockCountsByIdSubmit",
-	"/v1/stock-counts/{id}/submit",
-	"inventory.count.submit"
-);
-export const approveStockCountContract = stockCountTransitionContract(
-	"postStockCountsByIdApprove",
-	"/v1/stock-counts/{id}/approve",
-	"inventory.count.approve"
-);
+export const approveStockCountContract = base
+	.route({
+		method: "POST",
+		path: "/v1/stock-counts/{id}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postStockCountsByIdApprove",
+		permission: "inventory.count.approve",
+		responseRef: "#/components/schemas/StockCount",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
+		})
+	)
+	.output(StockCountSchema);
 
 export const listStockTransfersContract = base
 	.route({ method: "GET", path: "/v1/stock-transfers", successStatus: 200 })
@@ -877,44 +911,47 @@ export const getStockTransferContract = base
 	)
 	.output(StockTransferSchema);
 
-const stockTransferTransitionContract = (
-	operationId: "dispatchStockTransfer" | "postStockTransfersByIdReceive",
-	path:
-		| "/v1/stock-transfers/{id}/dispatch"
-		| "/v1/stock-transfers/{id}/receive",
-	permission: "inventory.transfer.dispatch" | "inventory.transfer.receive",
-	withResponseRef: boolean
-) =>
-	base
-		.route({ method: "POST", path, successStatus: 200 })
-		.meta({
-			operationId,
-			permission,
-			...(withResponseRef
-				? { responseRef: "#/components/schemas/StockTransfer" }
-				: {}),
-			successStatus: 200,
+export const dispatchStockTransferContract = base
+	.route({
+		method: "POST",
+		path: "/v1/stock-transfers/{id}/dispatch",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "dispatchStockTransfer",
+		permission: "inventory.transfer.dispatch",
+		responseRef: "#/components/schemas/StockTransfer",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
 		})
-		.input(
-			z.object({
-				headers: VersionedTenantCommandHeadersSchema,
-				params: z.object({ id: IdentifierSchema }),
-			})
-		)
-		.output(StockTransferSchema);
+	)
+	.output(StockTransferSchema);
 
-export const dispatchStockTransferContract = stockTransferTransitionContract(
-	"dispatchStockTransfer",
-	"/v1/stock-transfers/{id}/dispatch",
-	"inventory.transfer.dispatch",
-	true
-);
-export const receiveStockTransferContract = stockTransferTransitionContract(
-	"postStockTransfersByIdReceive",
-	"/v1/stock-transfers/{id}/receive",
-	"inventory.transfer.receive",
-	true
-);
+export const receiveStockTransferContract = base
+	.route({
+		method: "POST",
+		path: "/v1/stock-transfers/{id}/receive",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postStockTransfersByIdReceive",
+		permission: "inventory.transfer.receive",
+		requestRef: "#/components/schemas/ReceiveStockTransfer",
+		responseRef: "#/components/schemas/StockTransfer",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: ReceiveStockTransferSchema,
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
+		})
+	)
+	.output(StockTransferSchema);
 
 export const ws2CatalogInventoryApiContract = {
 	catalog: {
@@ -937,6 +974,7 @@ export const ws2CatalogInventoryApiContract = {
 			create: createInventoryAdjustmentContract,
 			get: getInventoryAdjustmentContract,
 			list: listInventoryAdjustmentsContract,
+			reverse: reverseInventoryAdjustmentContract,
 		},
 		balances: { list: listStockBalancesContract },
 		counts: {

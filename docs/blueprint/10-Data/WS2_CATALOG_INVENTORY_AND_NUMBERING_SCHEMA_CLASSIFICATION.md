@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DAT-019
 title: WS2 Catalog Inventory and Numbering Schema Classification
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-15
 related_adrs: [ADR-0003, ADR-0014, ADR-0027]
 review_evidence: []
 ---
@@ -69,6 +69,45 @@ The following field record is the concrete pre-migration classification for the 
 | `catalog_product_command_receipt.result` | Safe Product command result snapshot | Bounded with receipt; purged under receipt schedule | No search/offline/ordinary export | JSON shape is restricted to the published Product result; secrets, headers, unrestricted input, and unclassified PII are prohibited |
 | `catalog_product_command_receipt.created_at` | Server-generated receipt time | Bounded with receipt | Diagnostic metadata only | Timezone-aware; supports retention enforcement evidence |
 
+## PR3 Inventory Field Classification
+
+The following record is the concrete pre-migration classification for all nine PR3 Inventory tables. Unless stated otherwise, the owner is Inventory, the classification is Confidential, every value is tenant-scoped, operational text is minimized under approved privacy policy without erasing ledger integrity, and timestamps are server-generated timezone-aware instants. Product, Variant, Organization, and Location values are opaque published-contract references; no cross-owner database foreign key is authorized.
+
+| Table and fields | Scope and authority | Retention and erasure | Search/export/offline | Audit and integrity controls |
+|---|---|---|---|---|
+| `inventory_stock_movement.tenant_id`, `id` | Tenant partition and opaque authoritative movement identity | Long integrity retention; identity never erased independently | Exact audit/export lookup; included in bounded ledger projections | Tenant-composite primary key; immutable after insert |
+| `inventory_stock_movement.organization_id`, `location_id`, `product_id`, `variant_id`, `item_key` | Server-validated current-context and published-contract references; `item_key` is a derived Product-or-Variant balance key | Retained with movement; optional actor/reference minimization cannot break conservation | Permissioned export and bounded offline/read projections | Non-null tenant-scoped location/Product reference; nullable Variant is validated through Catalog; no cross-owner FK |
+| `inventory_stock_movement.unit`, `quantity`, `conversion_source_id` | Authoritative exact signed movement quantity and unit/conversion provenance | Retained with movement | Permissioned export and bounded reconciliation payloads | `numeric(38,6)`; zero prohibited; binary floating point prohibited |
+| `inventory_stock_movement.movement_type`, `source_type`, `source_id`, `reversal_of` | Authoritative fact type, owning workflow reference, and optional original movement link | Retained for full integrity history | Filtered audit/export; not global search | Enumerated type; reversal points to same-tenant movement and carries the exact inverse quantity |
+| `inventory_stock_movement.actor_user_id`, `decision_id`, `correlation_id`, `causation_id` | Evidence references, not business authority | Actor may be pseudonymized; decision/correlation evidence retained with fact | Audit/export only; excluded from ordinary offline projection | Allowlisted identifiers only; no tokens, headers, or unrestricted request objects |
+| `inventory_stock_movement.occurred_at`, `created_at`, `classification` | Server fact/provenance time and handling label | Retained with movement | Export/projection metadata | Classification fixed to `Confidential`; timestamps never caller-authoritative |
+| `inventory_stock_balance.tenant_id`, `location_id`, `item_key`, `unit` | Tenant-scoped rebuildable balance key | Retained while source movements exist; purge/rebuild permitted | Bounded online/offline read and permissioned export | Composite primary key; every read and update uses the full key |
+| `inventory_stock_balance.product_id`, `variant_id`, `on_hand`, `version` | Non-authoritative Product/Variant reference, exact projection quantity, and lock version | Rebuilt from movements; never privacy-erased independently | Balance/availability read only; never authorizes posting | `numeric(38,6)`; row locked for same-key posting; must equal ledger rebuild |
+| `inventory_stock_balance.as_of`, `reconciliation_state`, `classification`, `updated_at` | Projection freshness, reconciliation status, and provenance | Replaceable with projection | Returned with every balance/availability representation | State is `Reconciled` or `Unreconciled`; stale state never outranks the ledger |
+| `inventory_reservation.tenant_id`, `id`, `organization_id`, `location_id`, `product_id`, `variant_id`, `item_key`, `unit` | Tenant-scoped authoritative reservation identity and published-contract references | Bounded expiry plus diagnostic window | Bounded offline read and permissioned operational export | Tenant-composite primary key; no physical movement or cross-owner FK |
+| `inventory_reservation.quantity`, `state`, `expires_at`, `released_at`, `release_reason`, `source_id` | Exact reserved quantity and authoritative reservation lifecycle | Released/expired record retained for bounded diagnostic evidence | Availability projection input; no global search | Positive `numeric(38,6)`; state/reason enumerated; release is idempotent |
+| `inventory_reservation.created_by`, `version`, `classification`, `created_at`, `updated_at` | Actor/provenance and optimistic-concurrency evidence | Actor may be pseudonymized; record follows reservation retention | Audit/export metadata only | Version positive; no credential or unrestricted source payload |
+| `inventory_adjustment.tenant_id`, `id`, `organization_id`, `location_id`, `product_id`, `variant_id`, `item_key`, `unit` | Tenant-scoped authoritative adjustment workflow and published-contract references | Retained with posted/reversed ledger evidence | Permissioned workflow read/export; offline draft seam only | Tenant-composite primary key; all references server-validated |
+| `inventory_adjustment.quantity`, `conversion_source_id`, `reason`, `state` | Exact signed requested correction, provenance, bounded operational reason, and lifecycle | Retained with adjustment; reason may be minimized without erasing fact | Read/export under adjustment permission; no general search | Non-zero `numeric(38,6)`; state enumerated; approval atomically posts |
+| `inventory_adjustment.created_by`, `approved_by`, `posted_movement_id`, `reversal_movement_id` | Segregation-of-duties and linked ledger evidence | Actor references may be pseudonymized; movement links retained | Audit/export only | Creator cannot approve; reversal appends inverse and never mutates original |
+| `inventory_adjustment.version`, `classification`, `created_at`, `updated_at` | Optimistic-concurrency and provenance metadata | Retained with adjustment | Workflow metadata | Expected version mandatory for approve/reverse |
+| `inventory_count.tenant_id`, `id`, `organization_id`, `location_id` | Tenant-scoped authoritative blind-count header | Retained with variance evidence | Offline capture eligible under WS5 transport; permissioned export | Tenant-composite primary key; location validated through published Tenancy contract |
+| `inventory_count.blind`, `state`, `created_by`, `submitted_by`, `approved_by` | Blind-mode flag, lifecycle, and segregation evidence | Actor references may be pseudonymized; state retained | Workflow read/export; expected quantities never accepted from submitter | Approval atomically posts accepted non-zero variances; creator/submitter cannot self-approve |
+| `inventory_count.version`, `classification`, `created_at`, `submitted_at`, `posted_at`, `updated_at` | Optimistic-concurrency and lifecycle provenance | Retained with Count | Workflow metadata | Expected version mandatory for submit/approve |
+| `inventory_count_line.tenant_id`, `count_id`, `id`, `product_id`, `variant_id`, `item_key`, `unit` | Tenant-preserving Count child and observed item identity | Follows Count retention | Offline capture and permissioned export; no global search | Same-tenant Count FK; stable line ID; published Catalog references only |
+| `inventory_count_line.observed_quantity`, `expected_quantity`, `variance_quantity`, `conversion_source_id` | Exact observation and server-resolved expected/variance values | Retained with Count | Offline submit carries observation only; expected/variance are server-derived | Non-negative observation; `numeric(38,6)`; client cannot submit expected quantity |
+| `inventory_count_line.movement_id`, `classification`, `created_at`, `updated_at` | Optional resulting variance-movement link and provenance | Retained with Count | Audit/export metadata | Exactly one movement for each accepted non-zero variance line; none for zero variance |
+| `inventory_transfer.tenant_id`, `id`, `organization_id`, `source_location_id`, `destination_location_id` | Tenant-scoped authoritative transfer header and published Location references | Retained with dispatch/receipt evidence | Offline draft only; permissioned workflow export | Tenant-composite primary key; source and destination differ and remain in tenant |
+| `inventory_transfer.state`, `created_by`, `dispatched_by`, `received_by`, `exception_reason` | Custody lifecycle, actors, and bounded exception evidence | Actor references may be pseudonymized; transfer facts retained | Workflow read/export; dispatch/receive require current online authority | States enumerated; creator, dispatcher, and receiver evidence retained; exception reason required for exception outcome |
+| `inventory_transfer.version`, `classification`, `created_at`, `dispatched_at`, `received_at`, `updated_at` | Optimistic-concurrency and custody provenance | Retained with Transfer | Workflow metadata | Expected version mandatory for dispatch/receive |
+| `inventory_transfer_line.tenant_id`, `transfer_id`, `id`, `product_id`, `variant_id`, `item_key`, `unit`, `conversion_source_id` | Tenant-preserving stable Transfer line and item/unit provenance | Follows Transfer retention | Offline draft line and permissioned export | Same-tenant Transfer FK; stable line ID; no cross-owner FK |
+| `inventory_transfer_line.requested_quantity`, `dispatched_quantity`, `received_quantity`, `exception_quantity` | Exact cumulative custody quantities | Retained with Transfer | Returned in workflow read/export | Positive request; cumulative values are non-negative `numeric(38,6)`; received plus exception may not exceed dispatched |
+| `inventory_transfer_line.source_movement_id`, `classification`, `created_at`, `updated_at` | Dispatch movement link and provenance | Retained with Transfer | Audit/export metadata | Destination receipts resolve through immutable ledger source references; over-receipt denied |
+| `inventory_command_receipt.tenant_id`, `operation`, `idempotency_key` | Tenant-scoped command deduplication identity | Bounded operational retention; final schedule remains a pilot gate | Offline reconciliation only; no general search/export | Composite primary key; key is not an authentication credential |
+| `inventory_command_receipt.request_fingerprint`, `resource_id`, `outcome`, `result` | Derived request digest, safe resource reference, stable outcome, and allowlisted result snapshot | Purged with receipt retention | Diagnostic/offline reconciliation only | Detects key reuse; result excludes unrestricted requests, secrets, headers, and unclassified PII |
+| `inventory_command_receipt.source_channel`, `source_command_id`, `source_sequence` | Online/offline origin and transport-neutral ordering evidence | Bounded with receipt | Offline reconciliation only | Offline facts must come from a verified lease context; Inventory never mints or trusts a client lease assertion |
+| `inventory_command_receipt.classification`, `created_at` | Handling and server provenance metadata | Bounded with receipt | Diagnostic metadata only | Classification fixed to `Confidential` |
+
 ## Isolation and Integrity Controls
 
 - Every proposed table carries non-null `tenant_id`; child and unique keys preserve tenant scope.
@@ -95,5 +134,6 @@ Production retention periods, RLS, partitioning, lots/serials/expiry/quarantine 
 
 ## Change Log
 
+- 2026-07-15 — v0.3.0 added field-level classification, scope, retention, erasure, offline/export/search, audit, and integrity declarations for every PR3 Inventory migration field before generation.
 - 2026-07-14 — v0.2.0 added field-level owner, scope, classification, retention, erasure, search/export/offline, audit, and integrity declarations for every PR2 Catalog migration field before generation.
 - 2026-07-14 — v0.1.0 recorded the WS2 pre-migration table declarations and controlled-prototype RLS disposition.

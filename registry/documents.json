@@ -651,6 +651,23 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-APP-022",
+      "path": "docs/blueprint/19-Appendices/WS2_PR3_INVENTORY_LEDGER_EVIDENCE-2026-07-15.md",
+      "title": "WS2 PR3 Inventory Ledger Controlled-Prototype Evidence",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Engineering",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016",
+        "ADR-0020",
+        "ADR-0027"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-ARC-001",
       "path": "docs/blueprint/02-Architecture/SYSTEM_CONTEXT.md",
       "title": "System Context",
@@ -2095,10 +2112,10 @@
       "document_id": "PDA-ENGR-012",
       "path": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-14",
+      "last_reviewed": "2026-07-15",
       "related_adrs": [
         "ADR-0002",
         "ADR-0003",
@@ -3313,7 +3330,7 @@
       "document_id": "PDA-RDM-009",
       "path": "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md",
       "title": "WS2 Implementation Plan: Catalog and Inventory Ledger",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-15",

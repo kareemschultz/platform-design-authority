@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.3.1
+version: 0.3.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-15
@@ -24,7 +24,7 @@ Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, is
 |---|---|---|
 | PR1 — governance, contracts, schemas, and spike | Merged after exact-head Claude Code concurrence | Retain as the contract/governance baseline; it does not prove later business behavior or delivery |
 | PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
-| PR3 — Inventory ledger and workflows | In progress on issue #68 from merged PR2 head | Contract corrections, field classification, owner persistence, behavior, and evidence must pass exact-head independent review before merge |
+| PR3 — Inventory ledger and workflows | Implementation and local evidence complete on issue #68; exact-head independent review required before merge | PDA-APP-022 records the controlled-prototype core, owner persistence, API, live PostgreSQL, rebuild, concurrency, offline-boundary, and runtime evidence; no PR4 delivery claim |
 | PR4–PR7 | Not started | Execute in order; no later phase may be pre-closed by earlier evidence |
 
 ### 1.2 Governing sources
@@ -501,6 +501,7 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.2 | 2026-07-15 | Platform Design Authority | Recorded PR3 implementation/evidence completion pending exact-head independent review, linked PDA-APP-022, and retained RR-006/RR-007 plus WS5 offline transport deferrals. |
 | 0.3.1 | 2026-07-15 | Platform Design Authority | Recorded PR2 merge/concurrence and active issue #68; selected atomic adjustment/count approve-and-post semantics and the explicit `inventory.adjustment.reverse` correction contract before PR3 persistence generation. |
 | 0.3.0 | 2026-07-14 | Platform Design Authority | Recorded merged PR1 concurrence and issue #66 PR2 execution status; clarified that PR2 preserves validated Variant/Identifier identities and remains pending exact-head independent review and merge. |
 | 0.2.2 | 2026-07-14 | Platform Design Authority | Made the worker gate executable by leaving its candidate composition root unregistered until PR4 records the three ADR reviews; required literal worker and unknown-app denial probes. |

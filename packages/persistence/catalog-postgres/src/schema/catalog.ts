@@ -1,4 +1,6 @@
+import { sql } from "drizzle-orm";
 import {
+	check,
 	foreignKey,
 	index,
 	integer,
@@ -35,6 +37,10 @@ export const catalogProducts = pgTable(
 		version: integer("version").default(1).notNull(),
 	},
 	(table) => [
+		check(
+			"catalog_product_state_check",
+			sql`${table.state} in ('Draft', 'Active', 'Suspended', 'Discontinued', 'Archived')`
+		),
 		primaryKey({
 			columns: [table.tenantId, table.id],
 			name: "catalog_product_pk",
@@ -103,6 +109,14 @@ export const catalogIdentifiers = pgTable(
 		variantId: text("variant_id").notNull(),
 	},
 	(table) => [
+		check(
+			"catalog_identifier_scheme_check",
+			sql`${table.scheme} in ('Tenant', 'GTIN-8', 'GTIN-12', 'GTIN-13', 'GTIN-14')`
+		),
+		check(
+			"catalog_identifier_type_check",
+			sql`${table.type} in ('SKU', 'GTIN', 'UPC', 'EAN', 'Alias', 'External')`
+		),
 		primaryKey({
 			columns: [table.tenantId, table.id],
 			name: "catalog_identifier_pk",

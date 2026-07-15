@@ -235,6 +235,151 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 		).toMatchObject({ code: "version_conflict" });
 	});
 
+	test("rejects invalid lifecycle transitions through preconditioned commands", async () => {
+		const catalog = service();
+		const created = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "Lifecycle Product",
+				variants: [
+					{
+						identifiers: [
+							{
+								scheme: "Tenant",
+								type: "SKU",
+								value: "LIFECYCLE-SKU",
+							},
+						],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_lifecycle_create",
+		});
+		const active = await catalog.activateProduct({
+			...productInput,
+			idempotencyKey: "idempotency_catalog_lifecycle_activate",
+			productId: created.id,
+			version: created.version,
+		});
+
+		expect(
+			await captureError(
+				catalog.activateProduct({
+					...productInput,
+					idempotencyKey: "idempotency_catalog_lifecycle_reactivate",
+					productId: active.id,
+					version: active.version,
+				})
+			)
+		).toMatchObject({
+			code: "invalid_state",
+			message: "Only Draft or Suspended Products may be activated",
+		});
+
+		const archived = await catalog.archiveProduct({
+			...productInput,
+			body: { reason: "Lifecycle evidence" },
+			idempotencyKey: "idempotency_catalog_lifecycle_archive",
+			productId: active.id,
+			version: active.version,
+		});
+		expect(
+			await captureError(
+				catalog.archiveProduct({
+					...productInput,
+					body: { reason: "Duplicate archive" },
+					idempotencyKey: "idempotency_catalog_lifecycle_rearchive",
+					productId: archived.id,
+					version: archived.version,
+				})
+			)
+		).toMatchObject({
+			code: "invalid_state",
+			message: "The Product is already archived",
+		});
+	});
+
+	test("enforces Catalog enum invariants at the database boundary", async () => {
+		const invalidState = await captureError(
+			testPool.query(
+				"UPDATE catalog_product SET state = 'Unknown' WHERE tenant_id = $1",
+				[productInput.tenantId]
+			)
+		);
+		expect(invalidState).toMatchObject({
+			code: "23514",
+			constraint: "catalog_product_state_check",
+		});
+
+		const invalidType = await captureError(
+			testPool.query(
+				"UPDATE catalog_identifier SET type = 'Unknown' WHERE tenant_id = $1",
+				[productInput.tenantId]
+			)
+		);
+		expect(invalidType).toMatchObject({
+			code: "23514",
+			constraint: "catalog_identifier_type_check",
+		});
+
+		const invalidScheme = await captureError(
+			testPool.query(
+				"UPDATE catalog_identifier SET scheme = 'Unknown' WHERE tenant_id = $1",
+				[productInput.tenantId]
+			)
+		);
+		expect(invalidScheme).toMatchObject({
+			code: "23514",
+			constraint: "catalog_identifier_scheme_check",
+		});
+	});
+
+	test("does not disclose another tenant's barcode through lookup", async () => {
+		const catalog = service();
+		const tenantB = "tenant_catalog_integration_b";
+		const tenantBOnlyBarcode = "4006381333931";
+		await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "Tenant B Barcode Product",
+				variants: [
+					{
+						identifiers: [
+							{
+								scheme: "GTIN-13",
+								type: "EAN",
+								value: tenantBOnlyBarcode,
+							},
+						],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_tenant_b_barcode",
+			tenantId: tenantB,
+		});
+
+		expect(
+			await catalog.listProducts(tenantB, {
+				barcode: tenantBOnlyBarcode,
+				limit: 50,
+			})
+		).toHaveProperty("items.length", 1);
+		expect(
+			await catalog.listProducts(productInput.tenantId, {
+				barcode: tenantBOnlyBarcode,
+				limit: 50,
+			})
+		).toEqual({ items: [], nextCursor: null });
+		expect(
+			await catalog.listProducts(productInput.tenantId, {
+				barcode: "9999999999999",
+				limit: 50,
+			})
+		).toEqual({ items: [], nextCursor: null });
+	});
+
 	test("rolls Product, receipt, and outbox state back together on append failure", async () => {
 		const before = await testPool.query<{ count: string }>(
 			"SELECT count(*)::text AS count FROM catalog_product"

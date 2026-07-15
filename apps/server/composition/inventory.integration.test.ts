@@ -306,15 +306,23 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 				tenantId,
 			});
 		}
-		const counts = await inventory.listCounts({
+		const firstCounts = await inventory.listCounts({
 			filters: { locationId: "target_location", state: "Draft" },
-			page: { limit: 10 },
+			page: { limit: 1 },
 			tenantId,
 		});
-		expect(counts.items).toHaveLength(2);
-		expect(
-			counts.items.every((record) => record.locationId === "target_location")
-		).toBe(true);
+		expect(firstCounts.items).toHaveLength(1);
+		expect(firstCounts.items[0]?.locationId).toBe("target_location");
+		expect(firstCounts.nextCursor).not.toBeNull();
+		const secondCounts = await inventory.listCounts({
+			filters: { locationId: "target_location", state: "Draft" },
+			page: { cursor: firstCounts.nextCursor ?? undefined, limit: 1 },
+			tenantId,
+		});
+		expect(secondCounts.items).toHaveLength(1);
+		expect(secondCounts.items[0]?.locationId).toBe("target_location");
+		expect(secondCounts.items[0]?.id).not.toBe(firstCounts.items[0]?.id);
+		expect(secondCounts.nextCursor).toBeNull();
 
 		for (const [index, locations] of [
 			["other_location", "another_location"],
@@ -339,19 +347,28 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 				tenantId,
 			});
 		}
-		const transfers = await inventory.listTransfers({
+		const firstTransfers = await inventory.listTransfers({
 			filters: { locationId: "target_location", state: "Draft" },
-			page: { limit: 10 },
+			page: { limit: 1 },
 			tenantId,
 		});
-		expect(transfers.items).toHaveLength(2);
+		expect(firstTransfers.items).toHaveLength(1);
+		expect(firstTransfers.nextCursor).not.toBeNull();
+		const secondTransfers = await inventory.listTransfers({
+			filters: { locationId: "target_location", state: "Draft" },
+			page: { cursor: firstTransfers.nextCursor ?? undefined, limit: 1 },
+			tenantId,
+		});
+		expect(secondTransfers.items).toHaveLength(1);
+		expect(secondTransfers.nextCursor).toBeNull();
 		expect(
-			transfers.items.every(
+			[firstTransfers.items[0], secondTransfers.items[0]].every(
 				(record) =>
-					record.sourceLocationId === "target_location" ||
-					record.destinationLocationId === "target_location"
+					record?.sourceLocationId === "target_location" ||
+					record?.destinationLocationId === "target_location"
 			)
 		).toBe(true);
+		expect(secondTransfers.items[0]?.id).not.toBe(firstTransfers.items[0]?.id);
 	});
 
 	test("denies negative source stock and does not persist a partial Transfer dispatch", async () => {
@@ -415,6 +432,79 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(posted.lines[0]).toMatchObject({
 			expectedQuantity: "0.000000",
 			varianceQuantity: "5.000000",
+		});
+	});
+
+	test("enforces maker/checker separation in the live owner transaction", async () => {
+		const inventory = service();
+		const adjustment = await inventory.createAdjustment({
+			actorUserId: "live_adjustment_maker",
+			body: {
+				locationId: "separation_location",
+				productId: "separation_product",
+				quantity: "1",
+				reason: "maker checker integration proof",
+				unit: "each",
+			},
+			correlationId: base.correlationId,
+			idempotencyKey: "separation-adjustment-create",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		expect(
+			await captureError(
+				inventory.approveAdjustment({
+					actorUserId: "live_adjustment_maker",
+					adjustmentId: adjustment.id,
+					correlationId: base.correlationId,
+					idempotencyKey: "separation-adjustment-self-approve",
+					tenantId: base.tenantId,
+					version: 1,
+				})
+			)
+		).toMatchObject({ code: "approval_separation" });
+		expect(
+			await inventory.getAdjustment(base.tenantId, adjustment.id)
+		).toMatchObject({ state: "PendingApproval", version: 1 });
+
+		const count = await inventory.createCount({
+			actorUserId: "live_count_maker",
+			body: { blind: true, locationId: "separation_location" },
+			idempotencyKey: "separation-count-create",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		const submitted = await inventory.submitCount({
+			actorUserId: "live_count_maker",
+			body: {
+				lines: [
+					{
+						observedQuantity: "1",
+						productId: "separation_product",
+						unit: "each",
+					},
+				],
+			},
+			countId: count.id,
+			idempotencyKey: "separation-count-submit",
+			tenantId: base.tenantId,
+			version: 1,
+		});
+		expect(
+			await captureError(
+				inventory.approveCount({
+					actorUserId: "live_count_maker",
+					correlationId: base.correlationId,
+					countId: count.id,
+					idempotencyKey: "separation-count-self-approve",
+					tenantId: base.tenantId,
+					version: submitted.version,
+				})
+			)
+		).toMatchObject({ code: "approval_separation" });
+		expect(await inventory.getCount(base.tenantId, count.id)).toMatchObject({
+			state: "Submitted",
+			version: submitted.version,
 		});
 	});
 
@@ -570,12 +660,15 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			tenantId: base.tenantId,
 			unit: "each",
 		};
-		const accepted = await inventory.applyOfflineMovement(input);
-		expect(accepted).toMatchObject({ outcome: "accepted" });
-		expect(await inventory.applyOfflineMovement(input)).toMatchObject({
-			movementId: accepted.movementId,
-			outcome: "duplicate",
-		});
+		const results = await Promise.all([
+			inventory.applyOfflineMovement(input),
+			inventory.applyOfflineMovement(input),
+		]);
+		expect(results.map((result) => result.outcome).sort()).toEqual([
+			"accepted",
+			"duplicate",
+		]);
+		expect(results[0]?.movementId).toBe(results[1]?.movementId);
 		const persisted = await testPool.query<{
 			movements: string;
 			receipts: string;

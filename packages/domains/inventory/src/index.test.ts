@@ -830,6 +830,32 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 		expect(repository.balances.get(key)?.onHand).toBe("4.000001");
 	});
 
+	test("rejects an offline movement that would create negative stock without appending a fact", async () => {
+		const { repository, service } = harness();
+		const result = await service.applyOfflineMovement({
+			actorUserId: "offline_actor",
+			correlationId: "offline_negative_stock",
+			expectedNextSequence: 9,
+			facts: {
+				commandId: "offline-negative-9",
+				expiresAt: new Date("2026-07-15T13:00:00Z"),
+				sequence: 9,
+				startsAt: new Date("2026-07-15T11:00:00Z"),
+				tenantId: "tenant_a",
+				verified: true,
+			},
+			locationId: "loc_offline_negative",
+			organizationId: "org_a",
+			productId: "prod_offline_negative",
+			quantity: "-1",
+			tenantId: "tenant_a",
+			unit: "each",
+		});
+		expect(result).toEqual({ outcome: "rejected" });
+		expect(repository.movements).toHaveLength(0);
+		expect(repository.balances.size).toBe(0);
+	});
+
 	test("exposes stable domain error codes", () => {
 		expect(new InventoryError("invalid_state", "bad")).toMatchObject({
 			code: "invalid_state",

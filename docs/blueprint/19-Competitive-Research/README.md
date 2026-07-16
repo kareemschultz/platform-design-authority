@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-001
 title: Competitive Intelligence and Product Research
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-15
@@ -51,6 +51,8 @@ The program produces six kinds of durable knowledge:
 - `RESEARCH_STANDARDS.md`
 - `SOURCE_TRUST_MODEL.md`
 - `PRODUCT_TEARDOWN_STANDARD.md`
+- `IMPLEMENTATION_PLAYBOOK_STANDARD.md`
+- `RESEARCH_REFRESH_SCHEDULE.md`
 - `WORLD_CLASS_CRITERIA.md`
 
 ### 4.2 Living registers
@@ -183,14 +185,13 @@ Research should run ahead of implementation, but it must not indefinitely block 
 
 ## 10. Review Cadence
 
-Research is refreshed:
+Research is refreshed according to `RESEARCH_REFRESH_SCHEDULE.md` and additionally:
 
 - before beginning a new major domain;
 - when a competitor materially changes the relevant workflow;
 - when regulation, platform behavior, or customer expectations change;
 - when implementation evidence contradicts a research conclusion;
-- when a production incident or support pattern reveals a missing assumption;
-- at least annually for active strategic domains.
+- when a production incident or support pattern reveals a missing assumption.
 
 ## 11. Definition of Done for a Research Wave
 
@@ -205,6 +206,8 @@ A wave is complete only when:
 - required blueprint changes are identified;
 - prohibited copying and unsupported inference have been checked;
 - implementation implications and validation criteria are stated;
+- discoveries and pattern decisions are transferred or intentionally retained;
+- implementation evidence requirements are registered where applicable;
 - documentation validation and registry freshness pass;
 - independent review has occurred.
 

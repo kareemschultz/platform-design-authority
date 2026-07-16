@@ -80,8 +80,8 @@ None of these artifacts proves production readiness. Generated reference pages m
 This table is generated from the canonical Draft OpenAPI source. Inclusion proves contract registration, not runtime binding, release support, pilot readiness, provider capability, or production availability.
 
 - Source: `openapi/first-slice-v1.yaml`
-- Contract version: `0.3.1`
-- Operations: `99`
+- Contract version: `0.4.0`
+- Operations: `100`
 - Authority join: `x-permission` or explicit `x-authorization` on every operation
 
 | Method | Path | `operationId` | Authority | Success |
@@ -98,6 +98,7 @@ This table is generated from the canonical Draft OpenAPI source. Inclusion prove
 | `POST` | `/devices/enroll` | `enrollDevice` | permission `platform.device.enroll` | `201` |
 | `POST` | `/devices/{deviceId}/revoke` | `postDevicesByDeviceIdRevoke` | permission `platform.device.revoke` | `200` |
 | `GET` | `/entitlements` | `getEntitlements` | permission `platform.entitlement.read` | `200` |
+| `POST` | `/event-replays` | `createEventReplay` | permission `platform.event.replay` | `202` |
 | `POST` | `/exports/accountant-handoff` | `createAccountantHandoffExport` | permission `platform.export.create` | `202` |
 | `GET` | `/exports/{exportId}` | `getExportsByExportId` | permission `platform.export.read` | `200` |
 | `GET` | `/finance-handoff/posting-batches` | `getFinanceHandoffPostingBatches` | permission `finance.posting-batch.read` | `200` |

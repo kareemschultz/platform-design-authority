@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-019
 title: Controlled-Prototype Service Runbooks
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Operations
 last_reviewed: 2026-07-16
@@ -150,13 +150,13 @@ Outbox row accumulation is expected before the PR4 worker merges. Do not page on
 - Use the ordinary Catalog command with the current expected version for a valid correction. Archived records remain governed by lifecycle rules.
 - Inventory facts are never updated or deleted. Use `inventory.adjustment.reverse` for an authorized linked inverse; a different correction requires a domain-approved compensating command that exists in the contract.
 - The owner adapter has a balance-rebuild function, but merged `main` exposes no operator CLI. Do not invoke internal code or write SQL as an ad hoc repair. Escalate for a reviewed, tenant-scoped repair tool and evidence plan.
-- Do not delete, retry, or mark outbox rows delivered. Durable delivery/replay authority remains open PR #74 and `platform.event.replay` is not an operator shortcut.
+- Do not delete, retry, release, or mark outbox rows delivered through SQL. Use PDA-OPS-018 for the merged controlled-prototype Event Backbone. Replay is allowed only through the authenticated `POST /v1/event-replays` application contract with `platform.event.replay`, current tenant scope, bounded range, purpose, approval, compatibility checks, Audit evidence, and the runbook's reconciliation steps; a repository call or operator script is not an authority boundary.
 
 ### Verification, Escalation, and Closure
 
 Verify the original business invariant, idempotent repeat outcome, exact quantity conservation, linked reversal where used, tenant non-disclosure, command receipt, outbox atomicity, and Audit evidence. Run the relevant domain, contract, architecture, and PostgreSQL integration suites against a clean test database. Escalate to Catalog or Inventory owner, Data Platform, Security, Audit/Privacy, and Finance when classification or accounting consequences require them.
 
-Close only when zero unexplained divergence remains, the correction used a governed command, affected projections/consumers are either absent or reconciled, the tenant impact window is known, and a regression test or explicit residual-risk item exists. This runbook cannot close missing PR4 delivery, PR6 UI/accessibility, PR7 exercise, or production recovery gates.
+Close only when zero unexplained divergence remains, the correction used a governed command, affected projections/consumers are reconciled through PDA-OPS-018 where applicable, the tenant impact window is known, and a regression test or explicit residual-risk item exists. This runbook cannot close PR6 UI/accessibility, PR7 exercise, production capacity/SLO, or production recovery gates.
 
 ## Known Missing Operational Evidence
 
@@ -165,7 +165,7 @@ The following are deliberate blockers in `registry/operational-readiness.json`:
 - production telemetry backend, dashboards, alert routes, tested alert evidence, and named on-call escalation;
 - authentication-provider and customer communication procedures;
 - PostgreSQL backup, PITR, restore, failover, capacity, RPO, and RTO exercises;
-- Event Backbone worker delivery, retry, dead-letter, replay, projections, and its PR #74 runbook until merged;
+- production Event Backbone SLO/capacity, multi-replica behavior, dashboards, tested alerts, dead-letter/replay exercises, backup/restore interaction, and on-call evidence beyond the merged controlled prototype;
 - Catalog/Inventory UI, import, numbering, operator repair tooling, and formal accessibility evidence;
 - penetration, privacy, security incident, tenant exit, offline continuity, and disaster-recovery exercises.
 

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.10.0
+version: 0.11.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -39,7 +39,7 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 
 ## 2. Baseline: Verified Code Reality (2026-07-16)
 
-**Verified merged baseline through WS2 PR3 at `main` `40454740838bba4426b9ca48b2e82811bc7b466d`:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); contract-first Hono/oRPC/OpenAPI boundary; Better Auth behind runtime-neutral Platform Identity; owner-specific PostgreSQL adapters and deterministic migrations; minimum transactional outbox; Tenancy, Organizations, Party linkage, current Authorization, Entitlements, Audit, and session revocation; the real Next.js Administration shell; governed Catalog and Inventory contracts; Catalog Product/Variant/Identifier behavior; and Inventory adjustment, count, transfer, reservation, and linked-reversal ledger workflows. PDA-IMPL-005 records complete WS1 evidence. `evidence/first-slice/ws2-interim-capability-evidence.json` registers only merged PR2/PR3 cells: 13 WS2 capabilities are `Partially Evidenced`, while unimplemented `catalog.bulk-import` remains `Planned`; independent review and PR7 closeout are still pending. Exact-head CI is required before merge and does not broaden this baseline into pilot or production authority.
+**Verified merged baseline through WS2 PR4 at `main` `7202fc819b70982c013e1ca11a4fcc136e01e2de`:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); contract-first Hono/oRPC/OpenAPI boundary; Better Auth behind runtime-neutral Platform Identity; owner-specific PostgreSQL adapters and deterministic migrations; Tenancy, Organizations, Party linkage, current Authorization, Entitlements, Audit, and session revocation; the real Next.js Administration shell; governed Catalog and Inventory contracts; Catalog Product/Variant/Identifier behavior; Inventory adjustment, count, transfer, reservation, and linked-reversal ledger workflows; and the controlled-prototype Event Backbone worker with bounded delivery, replay, consumer receipts, Catalog/Inventory projections, safe health telemetry, and runbook. PDA-IMPL-005 records complete WS1 evidence and PDA-APP-023 records the bounded PR4 evidence. `evidence/first-slice/ws2-interim-capability-evidence.json` still registers only merged PR2/PR3 capability cells: 13 WS2 capabilities are `Partially Evidenced`, while unimplemented `catalog.bulk-import` remains `Planned`; PR4's evidence record does not replace PR7 capability-dimension reconciliation. Exact-head CI and independent concurrence were obtained before merge and do not broaden this baseline into WS2 exit, pilot, or production authority.
 
 **WS0 package restructuring is complete as of 2026-07-13** (verified: fresh `bun install`, `check-types` 12/12, `test` 126/126, `check`, and `build` all green across the whole workspace). The workspace now matches `registry/architecture-rules.json`'s families:
 
@@ -53,9 +53,9 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 
 The contract-first oRPC/client exception closed in WS1 PR1. The temporary embedded Identity persistence exception closed in PR2 through ADR-0027's owner-specific adapters and composition-owned pool. No exception may be silently recreated for later owners.
 
-**Now exists at partial WS2 controlled-prototype depth:** PR #65 materialized Catalog/Inventory contracts; PR #67 implemented the Catalog Product aggregate and owner persistence; PR #69 implemented Inventory ledger workflows, exact quantity, concurrency, conservation, API, Audit, and transactional-outbox behavior. This is merged implementation evidence, not WS2 exit evidence.
+**Now exists at partial WS2 controlled-prototype depth:** PR #65 materialized Catalog/Inventory contracts; PR #67 implemented the Catalog Product aggregate and owner persistence; PR #69 implemented Inventory ledger workflows, exact quantity, concurrency, conservation, API, Audit, and transactional-outbox behavior; PR #74 implemented durable internal delivery/projections and closed RR-006 at controlled-prototype depth after exact-head independent concurrence. This is merged implementation evidence, not WS2 exit evidence.
 
-**Still does not exist at completed first-slice depth:** durable event delivery/projections until open PR #74 merges; bounded imports and online numbering; the Product/Inventory web experience and its formal UI/accessibility evidence; complete WS2 capability-dimension evidence and whole-workstream audit; POS, stored value, offline sync, provider integration, and recovery tooling. Production RLS, OTP/provider evidence, penetration evidence, operational exercises, and external/founder gates remain open. Interim cell registration does not equal WS2 completion, overall first-slice completion, pilot readiness, or production authority.
+**Still does not exist at completed first-slice depth:** bounded imports and online numbering; the Product/Inventory web experience and its formal UI/accessibility evidence; complete WS2 capability-dimension evidence and whole-workstream audit; POS, stored value, offline sync, provider integration, and recovery tooling. Production Event Backbone capacity/SLO and multi-replica evidence, production RLS, OTP/provider evidence, penetration evidence, operational exercises, and external/founder gates remain open. Interim cell registration and PDA-APP-023 do not equal WS2 completion, overall first-slice completion, pilot readiness, or production authority.
 
 ## 3. Package Architecture Target
 
@@ -141,7 +141,7 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 
 - **Why:** Inventory is the first append-only business ledger — it proves the platform's correction-by-reversal doctrine, outbox eventing, and domain data ownership on the least regulated ledger before money is at stake.
 - **Entry:** WS1 done.
-- **Current state:** active. PR #63 plan, PR #65 contracts, PR #67 Catalog Product, and PR #69 Inventory ledger/workflows are merged. PR #74 implements durable delivery/projections and is open/green but not merged; issues #71–#73 retain the sequential PR5–PR7 gates.
+- **Current state:** active. PR #63 plan, PR #65 contracts, PR #67 Catalog Product, PR #69 Inventory ledger/workflows, and PR #74 durable delivery/projections are merged. Issues #71–#73 retain the sequential PR5–PR7 gates; no workstream-exit credit is claimed before PR7.
 - **Proves:** PDA-RDM-004 §Prototype 2.
 - **Detailed plan:** `WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md` (PDA-RDM-009) — exact 14-capability depth, ADR-0027 package ownership, contract/schema closure, durable event delivery, WS2/WS5 offline boundary, PR sequence, evidence, and exit gates. This entry stays the authoritative summary; PDA-RDM-009 does not override it.
 - **Packages:** NEW runtime-neutral `domains/catalog` and `domains/inventory` cores with ports; NEW owner-specific `persistence/catalog-postgres` and `persistence/inventory-postgres` concrete schemas/migrations under ADR-0027; EXTEND the minimum `platform/events` transactional outbox introduced by WS1 into publication/consumer infrastructure; NEW `platform/numbering` core plus owner-specific Persistence adapter (sequence service consumed later by receipts).

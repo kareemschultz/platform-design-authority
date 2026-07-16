@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.3.4
+version: 1.3.5
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -77,7 +77,7 @@ Composition authority is exact, not a wildcard grant to every application. Each 
 | `apps/worker/composition` | Event Backbone worker | one bounded process-local PostgreSQL pool; internal delivery, replay, and owner-projection adapter binding | Prohibited | migrations, HTTP business routes, another process's pool, or direct cross-owner repository/table access |
 | `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | Prohibited unless a later governed row explicitly grants it | application business processing or an unregistered long-running service |
 
-PR4 adds this exact root after the required concurrence. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; registration does not authorize a wildcard, another application root, production topology, or closure of RR-006/RR-007.
+PR4 added this exact root after the required pre-worker concurrence. The registration change, worker implementation, and executable proof that the worker cannot run migrations received superseding exact-head concurrence before PR #74 merged; PDA-REV-009 closes RR-006 only at controlled-prototype depth. Registration does not authorize a wildcard, another application root, production topology, or closure of RR-007.
 
 ### Registered Persistence Owners
 
@@ -214,6 +214,8 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 1.3.5 (2026-07-16): Reconciled the worker-root and migration-invocation rules with exact-head concurrence, merged PR #74, and RR-006 controlled-prototype closure without broadening production topology or RR-007 authority.
 
 - 1.3.4 (2026-07-16): Made migration invocation authority executable: only `apps/server/composition` may call registered `migrate*` runners; added worker and server regression probes plus explicit source-derived registry propagation.
 

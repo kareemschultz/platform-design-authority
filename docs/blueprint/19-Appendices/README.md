@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-001
 title: Appendices Section Index
-version: 0.12.0
+version: 0.13.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -26,6 +26,7 @@ last_reviewed: 2026-07-16
 - [WS1 Persistence Technology Verification 2026-07-13](WS1_PERSISTENCE_TECHNOLOGY_VERIFICATION-2026-07-13.md) — `PDA-APP-020` · Draft
 - [WS2 Ledger and Query Technology Verification](WS2_LEDGER_AND_QUERY_TECHNOLOGY_VERIFICATION-2026-07-14.md) — `PDA-APP-021` · Draft
 - [WS2 PR3 Inventory Ledger Controlled-Prototype Evidence](WS2_PR3_INVENTORY_LEDGER_EVIDENCE-2026-07-15.md) — `PDA-APP-022` · Draft
+- [WS2 PR4 Event Delivery Controlled-Prototype Evidence](WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md) — `PDA-APP-023` · Draft
 - [Documentation Depth and Readiness Assessment 2026-07-16](DOCUMENTATION_DEPTH_ASSESSMENT-2026-07-16.md) — `PDA-APP-024` · Draft
 
 ## Machine-Readable Evidence and Contracts

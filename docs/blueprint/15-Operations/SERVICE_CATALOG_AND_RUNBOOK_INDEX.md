@@ -97,7 +97,7 @@ Implemented controlled-prototype runbook: [Event Backbone Delivery Runbook](./EV
 
 | Version | Date | Author | Change |
 |---|---|---|---|
-| 0.1.1 | 2026-07-15 | Platform Design Authority | Linked the WS2 controlled-prototype Event Backbone delivery runbook without claiming production operations readiness. |
+| 0.2.1 | 2026-07-16 | Platform Design Authority | Linked the merged WS2 controlled-prototype Event Backbone delivery runbook without claiming production operations readiness. |
 
 ## Runbook Contract
 

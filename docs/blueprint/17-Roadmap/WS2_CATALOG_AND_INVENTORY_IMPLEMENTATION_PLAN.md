@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.4.1
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -25,7 +25,7 @@ Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, is
 | PR1 — governance, contracts, schemas, and spike | Merged after exact-head Claude Code concurrence | Retain as the contract/governance baseline; it does not prove later business behavior or delivery |
 | PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
 | PR3 — Inventory ledger and workflows | Merged as PR #69 after exact-head Claude Code concurrence | Retain Inventory core/persistence/API, immutable ledger/reversal, workflow, rebuild, concurrency, tenant-isolation, offline-boundary, Bun/Node, and PostgreSQL evidence; no PR4 delivery claim |
-| PR4 — durable delivery and projections | Merged as PR #74 at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26`; issue #70 closed | PDA-APP-023 and the merged remediation record controlled-prototype delivery/worker/projection evidence. This does not close WS2, production capacity, RR-006/RR-007, or later-phase evidence. |
+| PR4 — durable delivery and projections | Merged as PR #74 at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26`; issue #70 closed | PDA-APP-023 plus exact-head independent concurrence and green CI close RR-006 at controlled-prototype depth. This does not close WS2, production capacity, RR-007, or later-phase evidence. |
 | PR5–PR7 | Not started; issues #71–#73 own the remaining phases | Execute in order; no later phase may be pre-closed by earlier evidence |
 
 ### 1.2 Interim capability evidence checkpoint
@@ -513,6 +513,7 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.5.0 | 2026-07-16 | Platform Design Authority | Recorded exact-head PR4 concurrence and merge, closed RR-006 at controlled-prototype depth through PDA-REV-009, and retained RR-007, production, capability-evidence, and WS2 exit gates. |
 | 0.4.1 | 2026-07-16 | Platform Design Authority | Reconciled current main after PR #74 merged, retained the PR4 audit/remediation history, and preserved the 80-cell interim PR2/PR3 evidence checkpoint without claiming WS2 closeout. |
 | 0.4.0 | 2026-07-16 | Platform Design Authority | Reconciled merged PR #69 and then-open PR #74 from live GitHub state; registered 80 interim PR2/PR3 evidence cells across 13 partial rows while leaving bulk import planned and WS2 closeout unchanged. |
 | 0.3.6 | 2026-07-16 | Platform Design Authority | Dispositioned the implementation audit and recorded replay-scoped receipts, same-row contention proof, executable worker-migration denial, literal optional coverage, and reproducible evidence commands; retained RR-006/RR-007. |

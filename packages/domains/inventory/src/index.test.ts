@@ -805,6 +805,65 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 		]);
 	});
 
+	test("fails closed at the application boundary for permission and entitlement denial", async () => {
+		await Promise.all(
+			(["permission", "entitlement"] as const).map(async (deniedAt) => {
+				const { repository, service } = harness();
+				const calls: string[] = [];
+				const application = createInventoryApplication({
+					activeContexts: {
+						async requireActiveContext() {
+							calls.push("context");
+							return { organizationId: "org_a", tenantId: "tenant_a" };
+						},
+					},
+					entitlements: {
+						async requireEntitlement() {
+							calls.push("entitlement");
+							if (deniedAt === "entitlement") {
+								throw Object.assign(new Error("commercial plan secret"), {
+									code: "entitlement_denied",
+								});
+							}
+						},
+					},
+					permissions: {
+						async requirePermission() {
+							calls.push("permission");
+							if (deniedAt === "permission") {
+								throw Object.assign(new Error("role assignment secret"), {
+									code: "authorization_denied",
+								});
+							}
+						},
+					},
+					service,
+				});
+				await expect(
+					application.createAdjustment({
+						actorUserId: "direct_api_actor",
+						body: adjustment,
+						contextId: "context",
+						correlationId: "direct_api_denial",
+						idempotencyKey: `direct-api-${deniedAt}`,
+						sessionId: "session",
+					})
+				).rejects.toMatchObject({
+					code:
+						deniedAt === "permission"
+							? "authorization_denied"
+							: "entitlement_denied",
+				});
+				expect(repository.adjustments.size).toBe(0);
+				expect(calls).toEqual(
+					deniedAt === "permission"
+						? ["context", "permission"]
+						: ["context", "permission", "entitlement"]
+				);
+			})
+		);
+	});
+
 	test("authorizes draft-line persistence with count create authority", async () => {
 		const { service } = harness();
 		const count = await service.createCount({

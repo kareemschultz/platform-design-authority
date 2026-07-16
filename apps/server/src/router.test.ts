@@ -138,6 +138,20 @@ function context(input?: {
 	};
 }
 
+async function captureOrpcError(
+	operation: Promise<unknown>
+): Promise<ORPCError<string, unknown>> {
+	try {
+		await operation;
+		throw new Error("Expected an oRPC error");
+	} catch (error) {
+		if (error instanceof ORPCError) {
+			return error as ORPCError<string, unknown>;
+		}
+		throw error;
+	}
+}
+
 describe("appRouter contract surface", () => {
 	test("exposes the governed PR3 through PR7 procedure families", () => {
 		expect(Object.keys(appRouter).sort()).toEqual([
@@ -445,6 +459,155 @@ describe("appRouter contract surface", () => {
 			idempotencyKey: "idempotency-inventory-unit-0001",
 			sessionId: "session_unit_test_0001",
 		});
+	});
+
+	test("denies a UI-hidden direct Adjustment approval before application dispatch", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.inventory.adjustments.approve,
+				{
+					headers: {
+						"idempotency-key": "hidden-adjustment-approval-denied",
+						"if-match": "1",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { id: "adjustment_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							approveInventoryAdjustment: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({
+			code: "FORBIDDEN",
+			data: {
+				code: "authorization",
+				detail: null,
+				safeMessageKey: "problem.authorization",
+				status: 403,
+				title: "Permission denied",
+			},
+		});
+		expect(JSON.stringify(error.data)).not.toContain(
+			"inventory.adjustment.approve"
+		);
+	});
+
+	test("maps a direct Adjustment entitlement denial without disclosing provisioning facts", async () => {
+		const error = await captureOrpcError(
+			call(
+				appRouter.inventory.adjustments.approve,
+				{
+					headers: {
+						"idempotency-key": "hidden-adjustment-entitlement-denied",
+						"if-match": "1",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { id: "adjustment_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						allowed: true,
+						application: {
+							approveInventoryAdjustment: () =>
+								Promise.reject({
+									code: "entitlement_denied",
+									message:
+										"tenant_secret_42 lacks inventory.adjustments under commercial plan premium-secret",
+								}),
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(error).toMatchObject({
+			code: "FORBIDDEN",
+			data: {
+				code: "entitlement",
+				detail: null,
+				safeMessageKey: "problem.entitlement",
+				status: 403,
+				title: "Capability entitlement denied",
+			},
+		});
+		const serialized = JSON.stringify(error.data);
+		expect(serialized).not.toContain("tenant_secret_42");
+		expect(serialized).not.toContain("premium-secret");
+		expect(serialized).not.toContain("inventory.adjustments");
+	});
+
+	test("maps Import boundary failures to stable non-disclosing HTTP semantics", async () => {
+		const body = {
+			content:
+				"source_key,name,variant_name,sku,barcode,barcode_scheme\nrow-1,Tea,Default,SKU-1,,",
+			contentType: "text/csv" as const,
+			fileName: "sensitive-tenant-file.csv",
+			manifest: {
+				decimalSeparator: "." as const,
+				delimiter: "," as const,
+				encoding: "UTF-8" as const,
+				locale: "en-GY",
+				newline: "LF" as const,
+				quote: '"' as const,
+				timezone: "America/Guyana",
+			},
+			sha256: "a".repeat(64),
+		};
+		await Promise.all(
+			(["invalid_csv", "blocked_content"] as const).map(async (code) => {
+				const error = await captureOrpcError(
+					call(
+						appRouter.catalog.imports.create,
+						{
+							body,
+							headers: {
+								"idempotency-key": `safe-import-${code}`,
+								"x-active-context-id": "context_unit_test_0001",
+							},
+						},
+						{
+							context: context({
+								allowed: true,
+								application: {
+									createImport: () =>
+										Promise.reject({
+											code,
+											message:
+												"scanner-vendor-secret found EICAR-STANDARD-ANTIVIRUS-TEST-FILE in sensitive-tenant-file.csv",
+										}),
+								},
+								session: authenticatedSession,
+							}),
+						}
+					)
+				);
+				expect(error).toMatchObject({
+					code: "BAD_REQUEST",
+					data: {
+						code: "validation",
+						detail: null,
+						safeMessageKey: "problem.validation",
+						status: 400,
+						title: "Request is invalid",
+					},
+				});
+				const serialized = JSON.stringify(error.data);
+				expect(serialized).not.toContain("scanner-vendor-secret");
+				expect(serialized).not.toContain("EICAR");
+				expect(serialized).not.toContain(body.fileName);
+			})
+		);
 	});
 
 	test("returns paged stock balances without exposing repository cursors", async () => {

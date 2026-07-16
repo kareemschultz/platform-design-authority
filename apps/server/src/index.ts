@@ -28,7 +28,7 @@ app.use(
 			"Idempotency-Key",
 			"X-Active-Context-Id",
 		],
-		allowMethods: ["DELETE", "GET", "PATCH", "POST", "OPTIONS"],
+		allowMethods: ["DELETE", "GET", "PATCH", "POST", "PUT", "OPTIONS"],
 		credentials: true,
 		maxAge: 600,
 		origin: env.CORS_ORIGIN,

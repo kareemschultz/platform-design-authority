@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/platform.import.completed.v1.schema.json",
+  "title": "platform.import.completed.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "platform.import.completed.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["importId", "target", "appliedRows", "skippedRows", "failedRows", "lastCompletedRow", "version"],
+          "properties": {
+            "importId": {"type": "string"},
+            "target": {"type": "string", "enum": ["Product", "OpeningStock"]},
+            "appliedRows": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "skippedRows": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "failedRows": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "lastCompletedRow": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    }
+  ]
+}

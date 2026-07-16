@@ -1,4 +1,11 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import {
+	afterAll,
+	beforeAll,
+	describe,
+	expect,
+	setDefaultTimeout,
+	test,
+} from "bun:test";
 import {
 	createPartyService,
 	type PartyIdFactory,
@@ -10,6 +17,7 @@ import {
 	migratePlatformEvents,
 } from "@meridian/persistence-platform-events-postgres";
 import { migratePlatformIdentity } from "@meridian/persistence-platform-identity-postgres";
+import { createNumberingRepository } from "@meridian/persistence-platform-numbering-postgres";
 import {
 	createTenancyRepository,
 	migratePlatformTenancy,
@@ -20,6 +28,7 @@ import {
 	createEntitlementService,
 } from "@meridian/platform-entitlements";
 import type { OutboxEvent } from "@meridian/platform-events";
+import { createNumberingService } from "@meridian/platform-numbering";
 import {
 	createTenancyApplication,
 	createTenancyService,
@@ -35,6 +44,8 @@ import {
 	WS2_MIGRATION_STREAMS,
 } from "./migrations";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
+
+setDefaultTimeout(20_000);
 
 const databaseName = `meridian_pr2_${crypto.randomUUID().replaceAll("-", "")}`;
 const adminUrl = new URL(env.DATABASE_URL);
@@ -101,6 +112,7 @@ describe.serial("WS1 persistence orchestration", () => {
 			"party.records",
 		]);
 		expect(WS2_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual([
+			"platform.import-export",
 			"platform.numbering",
 			"catalog",
 			"inventory",
@@ -157,9 +169,16 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_event_outbox",
 			"platform_event_replay_request",
 			"platform_identity_session_command_receipt",
+			"platform_import_command_receipt",
+			"platform_import_finding",
+			"platform_import_job",
+			"platform_import_row",
+			"platform_import_wave",
 			"platform_location",
 			"platform_membership",
 			"platform_membership_invitation",
+			"platform_number_allocation",
+			"platform_number_sequence",
 			"platform_organization",
 			"platform_role",
 			"platform_role_assignment",
@@ -182,9 +201,170 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_entitlements_migrations",
 			"platform_events_migrations",
 			"platform_identity_migrations",
+			"platform_import_export_migrations",
 			"platform_numbering_migrations",
 			"platform_tenancy_migrations",
 		]);
+	});
+
+	test("allocates online numbers atomically under concurrency and replays idempotently", async () => {
+		await testPool.query(
+			"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, owner_namespace, record_type, sequence_key, prefix, padding, current_value, next_value, state, version, classification, created_at, updated_at) VALUES ('tenant_numbering_a', 'sequence_invoice_a', 'organization_numbering_a', 'test', 'invoice', 'invoice', 'INV-', 6, 0, 1, 'Active', 1, 'Confidential', now(), now())"
+		);
+		let serial = 0;
+		const service = createNumberingService({
+			clock: () => new Date(),
+			ids: {
+				create(kind) {
+					serial += 1;
+					return `numbering_${kind}_${serial}`;
+				},
+			},
+			unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+				events: createPostgresOutbox(client),
+				repository: createNumberingRepository(client),
+			})),
+		});
+		const allocations = await Promise.all(
+			Array.from({ length: 20 }, (_, index) =>
+				service.allocate({
+					actorUserId: "user_numbering_a",
+					businessRecordId: `business_record_${index}`,
+					correlationId: `correlation_numbering_${index}`,
+					idempotencyKey: `allocation_${index}`,
+					organizationId: "organization_numbering_a",
+					sequenceId: "sequence_invoice_a",
+					sourceCommandId: `invoice.issue:allocation_${index}`,
+					tenantId: "tenant_numbering_a",
+				})
+			)
+		);
+		expect(
+			new Set(allocations.map((allocation) => allocation.value)).size
+		).toBe(20);
+		expect(
+			allocations
+				.map((allocation) => allocation.counterValue)
+				.sort((left, right) => {
+					if (left < right) {
+						return -1;
+					}
+					if (left > right) {
+						return 1;
+					}
+					return 0;
+				})
+		).toEqual(Array.from({ length: 20 }, (_, index) => BigInt(index + 1)));
+		const replay = await service.allocate({
+			actorUserId: "user_numbering_a",
+			businessRecordId: "business_record_0",
+			correlationId: "correlation_numbering_replay",
+			idempotencyKey: "allocation_0",
+			organizationId: "organization_numbering_a",
+			sequenceId: "sequence_invoice_a",
+			sourceCommandId: "invoice.issue:allocation_0",
+			tenantId: "tenant_numbering_a",
+		});
+		const [firstAllocation] = allocations;
+		if (!firstAllocation) {
+			throw new Error(
+				"Concurrent numbering proof returned no first allocation"
+			);
+		}
+		expect(replay).toEqual(firstAllocation);
+		const issuedEvent = await testPool.query<{
+			data: Record<string, unknown>;
+		}>(
+			"SELECT data FROM platform_event_outbox WHERE tenant_id = 'tenant_numbering_a' AND aggregate_id = $1 AND name = 'platform.sequence.number-issued.v1'",
+			[firstAllocation.id]
+		);
+		expect(issuedEvent.rows[0]?.data).toEqual({
+			allocationId: firstAllocation.id,
+			businessRecordId: "business_record_0",
+			sequenceId: "sequence_invoice_a",
+			sequenceKey: "invoice",
+			sourceCommandId: "invoice.issue:allocation_0",
+			value: firstAllocation.value,
+		});
+		const state = await testPool.query<{
+			current_value: string;
+			next_value: string;
+		}>(
+			"SELECT current_value::text, next_value::text FROM platform_number_sequence WHERE tenant_id = 'tenant_numbering_a' AND id = 'sequence_invoice_a'"
+		);
+		expect(state.rows[0]).toEqual({ current_value: "20", next_value: "21" });
+	});
+
+	test("rolls back a number allocation when its outbox append fails", async () => {
+		await testPool.query(
+			"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, owner_namespace, record_type, sequence_key, prefix, padding, current_value, next_value, state, version, classification, created_at, updated_at) VALUES ('tenant_numbering_rollback', 'sequence_invoice_rollback', 'organization_numbering_rollback', 'test', 'invoice', 'invoice', 'R-', 4, 0, 1, 'Active', 1, 'Confidential', now(), now())"
+		);
+		const service = createNumberingService({
+			clock: () => new Date(),
+			ids: { create: (kind) => `numbering_rollback_${kind}` },
+			unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+				events: {
+					append: () =>
+						Promise.reject(new Error("injected numbering outbox failure")),
+				},
+				repository: createNumberingRepository(client),
+			})),
+		});
+		let failure: unknown;
+		try {
+			await service.allocate({
+				actorUserId: "user_numbering_rollback",
+				businessRecordId: null,
+				correlationId: "correlation_numbering_rollback",
+				idempotencyKey: "allocation_rollback",
+				organizationId: "organization_numbering_rollback",
+				sequenceId: "sequence_invoice_rollback",
+				sourceCommandId: "invoice.issue:allocation_rollback",
+				tenantId: "tenant_numbering_rollback",
+			});
+		} catch (error) {
+			failure = error;
+		}
+		expect((failure as Error).message).toBe(
+			"injected numbering outbox failure"
+		);
+		const state = await testPool.query<{
+			allocations: number;
+			current_value: string;
+		}>(
+			"SELECT (SELECT count(*)::int FROM platform_number_allocation WHERE tenant_id = 'tenant_numbering_rollback') AS allocations, current_value::text FROM platform_number_sequence WHERE tenant_id = 'tenant_numbering_rollback' AND id = 'sequence_invoice_rollback'"
+		);
+		expect(state.rows[0]).toEqual({ allocations: 0, current_value: "0" });
+	});
+
+	test("enforces Numbering policy and provenance at the database boundary", async () => {
+		let policyFailure: unknown;
+		try {
+			await testPool.query(
+				"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, owner_namespace, record_type, sequence_key, prefix, padding, current_value, next_value, increment, reset_policy, state, version, classification, created_at, updated_at) VALUES ('tenant_numbering_constraints', 'sequence_invalid_policy', 'organization_numbering_constraints', 'test', 'invoice', 'invoice-invalid', 'INV-', 6, 0, 1, 2, 'None', 'Active', 1, 'Confidential', now(), now())"
+			);
+		} catch (error) {
+			policyFailure = error;
+		}
+		expect(policyFailure).toMatchObject({
+			code: "23514",
+			constraint: "platform_number_sequence_prototype_policy_ck",
+		});
+		await testPool.query(
+			"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, owner_namespace, record_type, sequence_key, prefix, padding, current_value, next_value, state, version, classification, created_at, updated_at) VALUES ('tenant_numbering_constraints', 'sequence_valid_policy', 'organization_numbering_constraints', 'test', 'invoice', 'invoice-valid', 'INV-', 6, 0, 1, 'Active', 1, 'Confidential', now(), now())"
+		);
+		let provenanceFailure: unknown;
+		try {
+			await testPool.query(
+				"INSERT INTO platform_number_allocation (tenant_id, id, organization_id, sequence_id, sequence_key, sequence_version, counter_value, value, allocated_by_user_id, source_command_id, business_record_id, state, idempotency_key, request_fingerprint, issued_at, classification) VALUES ('tenant_numbering_constraints', 'allocation_invalid_source', 'organization_numbering_constraints', 'sequence_valid_policy', 'invoice-valid', 1, 1, 'INV-000001', 'user_numbering_constraints', '', null, 'Issued', 'allocation-invalid-source', 'fingerprint', now(), 'Confidential')"
+			);
+		} catch (error) {
+			provenanceFailure = error;
+		}
+		expect(provenanceFailure).toMatchObject({
+			code: "23514",
+			constraint: "platform_number_allocation_source_ck",
+		});
 	});
 
 	test("enforces current scoped authorization and atomic role assignment", async () => {

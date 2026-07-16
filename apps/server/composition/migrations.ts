@@ -5,6 +5,7 @@ import { migratePlatformAudit } from "@meridian/persistence-platform-audit-postg
 import { migratePlatformEntitlements } from "@meridian/persistence-platform-entitlements-postgres";
 import { migratePlatformEvents } from "@meridian/persistence-platform-events-postgres";
 import { migratePlatformIdentity } from "@meridian/persistence-platform-identity-postgres";
+import { migratePlatformImportExport } from "@meridian/persistence-platform-import-export-postgres";
 import { migratePlatformNumbering } from "@meridian/persistence-platform-numbering-postgres";
 import { migratePlatformTenancy } from "@meridian/persistence-platform-tenancy-postgres";
 import type { Pool } from "pg";
@@ -29,6 +30,7 @@ export const WS1_MIGRATION_STREAMS: readonly MigrationStream[] = [
  * Numbering remains a separate Platform owner. The worker never runs them.
  */
 export const WS2_MIGRATION_STREAMS: readonly MigrationStream[] = [
+	{ id: "platform.import-export", migrate: migratePlatformImportExport },
 	{ id: "platform.numbering", migrate: migratePlatformNumbering },
 	{ id: "catalog", migrate: migrateCatalog },
 	{ id: "inventory", migrate: migrateInventory },

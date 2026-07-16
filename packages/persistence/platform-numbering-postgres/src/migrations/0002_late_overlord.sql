@@ -1,0 +1,3 @@
+ALTER TABLE "platform_number_allocation" DROP CONSTRAINT "platform_number_allocation_counter_ck";--> statement-breakpoint
+ALTER TABLE "platform_number_allocation" ADD COLUMN "sequence_version" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "platform_number_allocation" ADD CONSTRAINT "platform_number_allocation_counter_ck" CHECK ("platform_number_allocation"."counter_value" > 0 AND "platform_number_allocation"."sequence_version" > 0);

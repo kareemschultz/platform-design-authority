@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ENGR-013
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.20.0
+version: 0.21.0
 status: Draft
 owner: Platform Engineering
-last_reviewed: 2026-07-15
-verified_as_of: 2026-07-15
+last_reviewed: 2026-07-16
+verified_as_of: 2026-07-16
 related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0018, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024, ADR-0025, ADR-0027]
 ---
 
@@ -146,6 +146,7 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 | TECH-LESSON-042 | 2026-07-14 | Active | At the exact WS2 lock, PostgreSQL `numeric(38,6)`, a checked-out node-postgres client, Drizzle transactions, and same-key `FOR UPDATE` locking preserved exact quantities and serialized 20 concurrent postings; linked reversal and projection rebuild both conserved the ledger | Keep exact decimal strings at contracts, `numeric(38,6)` in persistence, immutable linked reversals, and owner-adapter transactions; retain reviewed SQL for lock-sensitive statements without leaking database types into the domain | PDA-APP-021: 22 live PostgreSQL tests passed, including `2.000000` final balance, zero-sum reversal, zero rebuild divergence, and 250k indexed Product probe | Data Platform | Every Drizzle/pg/PostgreSQL lock, PR3 ledger schema, or scale target change |
 | TECH-LESSON-043 | 2026-07-15 | Active — controlled-prototype runtime proved; production capacity open | Adding a separately deployed Event Backbone worker makes PostgreSQL connection demand multiplicative by pool maximum and replica count; an unspecified driver default cannot be treated as capacity evidence | For the named WS2 controlled prototype bind server max `10`, worker max `5`, one replica each, and reserve `10`; enforce `(server_max × server_replicas) + (worker_max × worker_replicas) + reserve ≤ configured max_connections` at composition/startup evidence, never share pools across processes, and require renewed Data Platform review for any topology or provider change | PDA-APP-023: validated worker pool maximum, separate process pool, no worker migrations, graceful drain path, lease recovery, PostgreSQL 18 live suite, and Bun/Node build/check; exact-head PR review remains required | Data Platform | Every replica/provider/connection-limit change and before production capacity claims |
 | TECH-LESSON-044 | 2026-07-15 | Active | In Bun 1.3.14 on Windows, chaining Bun Test's `.rejects.toMatchObject()` to a node-postgres projection-adapter rejection left the test promise pending after PostgreSQL had completed the query; explicit awaited error capture completed immediately. This extends TECH-LESSON-036 beyond transaction rollback assertions | Use explicit awaited `try/catch` or the test suite's `captureError` helper for node-postgres failure assertions in Bun; preserve ordinary promise rejection matchers for non-PG unit tests and keep the separate Node lane | WS2 PR4 Catalog projection foreign-tenant negative test reproduced the pending state repeatedly, then passed in the 9-test PostgreSQL suite with explicit capture and the same application behavior | Platform Engineering | Re-test on every Bun release; remove only after both WS1 transaction and WS2 adapter negative suites pass unchanged with native rejection matchers |
+| TECH-LESSON-045 | 2026-07-16 | Active | A generic import owner cannot make a Catalog/Inventory command effect and its own progress checkpoint one atomic cross-owner transaction without violating owner boundaries | Preserve owner transactions; give every row a stable owner-command idempotency key; checkpoint immediately after the owner result; on recovery replay the same command before advancing the import wave | PDA-APP-024 Product replay and opening-stock movement evidence; durable row/job/wave checkpoints; owner receipts and outbox evidence | Platform Engineering | Every import target, workflow engine adoption, or cross-owner transaction proposal |
 
 ## Entry Templates
 

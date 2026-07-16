@@ -1,0 +1,924 @@
+{
+  "id": "59ae5e8f-e70f-4f2c-a83f-7eac2b38c110",
+  "prevId": "1cbc9e85-9d72-4ed5-a57f-7666630ae582",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.platform_import_command_receipt": {
+      "name": "platform_import_command_receipt",
+      "schema": "",
+      "columns": {
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "operation": {
+          "name": "operation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "request_fingerprint": {
+          "name": "request_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "result": {
+          "name": "result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "platform_import_command_receipt_job_fk": {
+          "name": "platform_import_command_receipt_job_fk",
+          "tableFrom": "platform_import_command_receipt",
+          "tableTo": "platform_import_job",
+          "columnsFrom": ["tenant_id", "import_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "platform_import_command_receipt_pk": {
+          "name": "platform_import_command_receipt_pk",
+          "columns": ["tenant_id", "operation", "idempotency_key"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "platform_import_command_receipt_operation_ck": {
+          "name": "platform_import_command_receipt_operation_ck",
+          "value": "\"platform_import_command_receipt\".\"operation\" IN ('create:Product','create:OpeningStock','approve:Product','approve:OpeningStock','commit:Product','commit:OpeningStock','accept:Product','accept:OpeningStock','cancel:Product','cancel:OpeningStock')"
+        },
+        "platform_import_command_receipt_classification_ck": {
+          "name": "platform_import_command_receipt_classification_ck",
+          "value": "\"platform_import_command_receipt\".\"classification\" = 'Confidential'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.platform_import_finding": {
+      "name": "platform_import_finding",
+      "schema": "",
+      "columns": {
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "field": {
+          "name": "field",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "row_id": {
+          "name": "row_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "row_number": {
+          "name": "row_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "severity": {
+          "name": "severity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_key": {
+          "name": "source_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "platform_import_finding_list_idx": {
+          "name": "platform_import_finding_list_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "import_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "row_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "platform_import_finding_job_fk": {
+          "name": "platform_import_finding_job_fk",
+          "tableFrom": "platform_import_finding",
+          "tableTo": "platform_import_job",
+          "columnsFrom": ["tenant_id", "import_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "platform_import_finding_row_fk": {
+          "name": "platform_import_finding_row_fk",
+          "tableFrom": "platform_import_finding",
+          "tableTo": "platform_import_row",
+          "columnsFrom": ["tenant_id", "row_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "platform_import_finding_pk": {
+          "name": "platform_import_finding_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "platform_import_finding_severity_ck": {
+          "name": "platform_import_finding_severity_ck",
+          "value": "\"platform_import_finding\".\"severity\" IN ('Info','Warning','Error')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.platform_import_job": {
+      "name": "platform_import_job",
+      "schema": "",
+      "columns": {
+        "accepted_at": {
+          "name": "accepted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "accepted_by_user_id": {
+          "name": "accepted_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "applied_rows": {
+          "name": "applied_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "approved_at": {
+          "name": "approved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_by_user_id": {
+          "name": "approved_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelled_at": {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelled_by_user_id": {
+          "name": "cancelled_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "audit_record_id": {
+          "name": "audit_record_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "create_idempotency_key": {
+          "name": "create_idempotency_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "failed_rows": {
+          "name": "failed_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "failure_code": {
+          "name": "failure_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "human_reference": {
+          "name": "human_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_completed_row": {
+          "name": "last_completed_row",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "manifest": {
+          "name": "manifest",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number_allocation_id": {
+          "name": "number_allocation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number_sequence_version": {
+          "name": "number_sequence_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rejected_rows": {
+          "name": "rejected_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "request_fingerprint": {
+          "name": "request_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reconciliation_state": {
+          "name": "reconciliation_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Pending'"
+        },
+        "scanner_result": {
+          "name": "scanner_result",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "skipped_rows": {
+          "name": "skipped_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "source_content_type": {
+          "name": "source_content_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_file_name": {
+          "name": "source_file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_sha256": {
+          "name": "source_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "staging_purged_at": {
+          "name": "staging_purged_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_capability": {
+          "name": "target_capability",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_type": {
+          "name": "target_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_rows": {
+          "name": "total_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valid_rows": {
+          "name": "valid_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "warning_rows": {
+          "name": "warning_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "platform_import_job_create_uidx": {
+          "name": "platform_import_job_create_uidx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "target_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "create_idempotency_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "platform_import_job_reference_uidx": {
+          "name": "platform_import_job_reference_uidx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "organization_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "human_reference",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "platform_import_job_status_idx": {
+          "name": "platform_import_job_status_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "target_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "platform_import_job_pk": {
+          "name": "platform_import_job_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "platform_import_job_target_ck": {
+          "name": "platform_import_job_target_ck",
+          "value": "\"platform_import_job\".\"target_type\" IN ('Product','OpeningStock')"
+        },
+        "platform_import_job_scanner_ck": {
+          "name": "platform_import_job_scanner_ck",
+          "value": "\"platform_import_job\".\"scanner_result\" IN ('Clean','Blocked','Unavailable')"
+        },
+        "platform_import_job_state_ck": {
+          "name": "platform_import_job_state_ck",
+          "value": "\"platform_import_job\".\"state\" IN ('Uploaded','Validating','ReadyForApproval','Approved','Committing','Completed','Failed','Cancelled')"
+        },
+        "platform_import_job_reconciliation_state_ck": {
+          "name": "platform_import_job_reconciliation_state_ck",
+          "value": "\"platform_import_job\".\"reconciliation_state\" IN ('Pending','Reconciled','Mismatch','Accepted')"
+        },
+        "platform_import_job_acceptance_ck": {
+          "name": "platform_import_job_acceptance_ck",
+          "value": "(\"platform_import_job\".\"reconciliation_state\" = 'Accepted' AND \"platform_import_job\".\"accepted_at\" IS NOT NULL AND \"platform_import_job\".\"accepted_by_user_id\" IS NOT NULL) OR (\"platform_import_job\".\"reconciliation_state\" <> 'Accepted' AND \"platform_import_job\".\"accepted_at\" IS NULL AND \"platform_import_job\".\"accepted_by_user_id\" IS NULL)"
+        },
+        "platform_import_job_cancellation_ck": {
+          "name": "platform_import_job_cancellation_ck",
+          "value": "(\"platform_import_job\".\"state\" = 'Cancelled' AND \"platform_import_job\".\"cancelled_at\" IS NOT NULL AND \"platform_import_job\".\"cancelled_by_user_id\" IS NOT NULL) OR (\"platform_import_job\".\"state\" <> 'Cancelled' AND \"platform_import_job\".\"cancelled_at\" IS NULL AND \"platform_import_job\".\"cancelled_by_user_id\" IS NULL)"
+        },
+        "platform_import_job_counts_ck": {
+          "name": "platform_import_job_counts_ck",
+          "value": "\"platform_import_job\".\"total_rows\" >= 0 AND \"platform_import_job\".\"valid_rows\" >= 0 AND \"platform_import_job\".\"warning_rows\" >= 0 AND \"platform_import_job\".\"rejected_rows\" >= 0 AND \"platform_import_job\".\"applied_rows\" >= 0 AND \"platform_import_job\".\"skipped_rows\" >= 0 AND \"platform_import_job\".\"failed_rows\" >= 0 AND \"platform_import_job\".\"last_completed_row\" >= 0"
+        },
+        "platform_import_job_purge_state_ck": {
+          "name": "platform_import_job_purge_state_ck",
+          "value": "\"platform_import_job\".\"staging_purged_at\" IS NULL OR \"platform_import_job\".\"state\" IN ('Completed','Failed','Cancelled')"
+        },
+        "platform_import_job_version_ck": {
+          "name": "platform_import_job_version_ck",
+          "value": "\"platform_import_job\".\"version\" > 0 AND \"platform_import_job\".\"number_sequence_version\" > 0"
+        },
+        "platform_import_job_reference_ck": {
+          "name": "platform_import_job_reference_ck",
+          "value": "length(\"platform_import_job\".\"human_reference\") BETWEEN 1 AND 100 AND length(\"platform_import_job\".\"number_allocation_id\") BETWEEN 1 AND 128"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.platform_import_row": {
+      "name": "platform_import_row",
+      "schema": "",
+      "columns": {
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "normalized_data": {
+          "name": "normalized_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "row_fingerprint": {
+          "name": "row_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "row_number": {
+          "name": "row_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_key": {
+          "name": "source_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_id": {
+          "name": "target_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "platform_import_row_number_uidx": {
+          "name": "platform_import_row_number_uidx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "import_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "row_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "platform_import_row_job_fk": {
+          "name": "platform_import_row_job_fk",
+          "tableFrom": "platform_import_row",
+          "tableTo": "platform_import_job",
+          "columnsFrom": ["tenant_id", "import_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "platform_import_row_pk": {
+          "name": "platform_import_row_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "platform_import_row_number_ck": {
+          "name": "platform_import_row_number_ck",
+          "value": "\"platform_import_row\".\"row_number\" > 0"
+        },
+        "platform_import_row_state_ck": {
+          "name": "platform_import_row_state_ck",
+          "value": "\"platform_import_row\".\"state\" IN ('Valid','Warning','Rejected','Applied','Skipped','Failed')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.platform_import_wave": {
+      "name": "platform_import_wave",
+      "schema": "",
+      "columns": {
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_rows": {
+          "name": "completed_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "failure_code": {
+          "name": "failure_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "first_row_number": {
+          "name": "first_row_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "import_id": {
+          "name": "import_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_completed_row": {
+          "name": "last_completed_row",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "last_row_number": {
+          "name": "last_row_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "wave_number": {
+          "name": "wave_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "platform_import_wave_number_uidx": {
+          "name": "platform_import_wave_number_uidx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "import_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "wave_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "platform_import_wave_job_fk": {
+          "name": "platform_import_wave_job_fk",
+          "tableFrom": "platform_import_wave",
+          "tableTo": "platform_import_job",
+          "columnsFrom": ["tenant_id", "import_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "platform_import_wave_pk": {
+          "name": "platform_import_wave_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "platform_import_wave_range_ck": {
+          "name": "platform_import_wave_range_ck",
+          "value": "\"platform_import_wave\".\"wave_number\" > 0 AND \"platform_import_wave\".\"first_row_number\" > 0 AND \"platform_import_wave\".\"last_row_number\" >= \"platform_import_wave\".\"first_row_number\" AND \"platform_import_wave\".\"completed_rows\" >= 0 AND \"platform_import_wave\".\"last_completed_row\" >= 0"
+        },
+        "platform_import_wave_state_ck": {
+          "name": "platform_import_wave_state_ck",
+          "value": "\"platform_import_wave\".\"state\" IN ('Pending','Running','Completed','Failed')"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

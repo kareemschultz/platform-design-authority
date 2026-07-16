@@ -49,7 +49,7 @@ The implemented UI is deterministic with AI disabled. It never treats navigation
 - A failed latest context activation refetches the cancelled active queries for the still-current workspace; a stale failed request cannot revive queries after a newer activation starts.
 - Create and receipt idempotency keys are bound to canonical command intent plus current context. They survive double-submit and uncertain response loss, rotate when material intent changes, and clear only after authoritative success.
 - Product exact-SKU lookup, Product state filtering, balance pagination, activity metadata, and durable Count draft-line save are published through OpenAPI, oRPC, generated TypeScript contracts, router bindings, and permission parity.
-- Exact SKU lookup uses the same tenant-identifier normalization as creation, so valid separators are preserved. Stock-balance cursors use a versioned structural owner cursor inside the opaque public token, including for contract-valid units containing control delimiters.
+- Exact SKU lookup trims surrounding whitespace, rejects an empty exact filter, and uses the same tenant-identifier normalization as creation, so valid separators are preserved without degrading into an unfiltered list. Stock-balance cursors use a closed, versioned structural owner cursor inside the opaque public token, including for contract-valid units containing control delimiters; malformed, future-version, or extra-field envelopes fail with the same non-disclosing reference error.
 - The HTTP shell allows the governed `PUT` and `If-Match` precondition required by durable Count draft-line saves. CORS tests prove the method/header are allowed without widening origins or the header allowlist.
 - Count draft editing intentionally reuses `inventory.count.create`; the internal receipt operation is `inventory.count.draft.save`. This does not introduce a second permission ID.
 - Transfer receiver metadata represents the latest receiving action. The current model does not fabricate a full receipt-history actor list. Count has no separate `submittedAt`, so the UI does not invent one.
@@ -122,8 +122,8 @@ These are uncompressed build-artifact totals, not per-route transferred bytes or
 
 | Lane | Reproduced result |
 |---|---|
-| Generated contract/API closure | Targeted contract, domain, router, and application tests: 65 passed; OpenAPI, permission, and generated-client parity clean |
-| Live Catalog/Inventory PostgreSQL | 37 tests / 209 expectations: 27 Catalog/Inventory cases plus 10 Import/Numbering cases, covering delimiter-safe paged balances, Count draft persistence/idempotency, separator-preserving exact SKU/state filtering, tenant non-disclosure, activity metadata, and dedicated Numbering tenant isolation |
+| Generated contract/API closure | `bun test packages/contracts/platform-api/src/index.test.ts packages/domains/catalog/src/index.test.ts packages/domains/inventory/src/index.test.ts apps/server/src/router.test.ts`: 72 tests / 210 expectations; OpenAPI, permission, and generated-client parity clean |
+| Live Catalog/Inventory PostgreSQL | 37 tests / 215 expectations: 27 Catalog/Inventory cases (173 expectations) plus 10 Import/Numbering cases (42 expectations), covering delimiter-safe paged balances, Count draft persistence/idempotency, separator-preserving and empty-safe exact SKU/state filtering, tenant non-disclosure, activity metadata, and dedicated Numbering tenant isolation |
 | Web unit/type/format | 38 tests / 107 expectations after consequential-UX, same-origin proxy, review remediation, and browser-found fixes; TypeScript and scoped Biome checks clean |
 | Product documentation | `check-content`, Fumadocs generation, TypeScript, and Biome clean; one stable documentation ID |
 | Browser and real-authority workflow | 6/6 desktop/mobile Chromium tests in the exact Compose topology: login keyboard/skip-link/reflow/axe, protected redirect, and authenticated Product create/read/list through same-origin Better Auth and oRPC, tenant membership, tenant-scoped role, entitlements, active context, and Catalog persistence |
@@ -147,7 +147,7 @@ Each authenticated browser lane attaches bounded Navigation Timing/resource-coun
 
 | Version | Date | Author | Change |
 |---|---|---|---|
-| 0.5.0 | 2026-07-16 | Frontend Platform | Dispositioned the seven automated exact-head findings through intent-bound idempotency, filter-trail reset, outstanding Transfer-line selection, failed-context query recovery, exact `If-Match` CORS proof, separator-preserving SKU lookup, and versioned structural balance cursors. |
+| 0.5.0 | 2026-07-16 | Frontend Platform | Dispositioned the seven automated exact-head findings and follow-up edge audit through intent-bound idempotency, filter-trail reset, outstanding Transfer-line selection, failed-context query recovery, exact `If-Match` CORS proof, separator-preserving/empty-safe SKU lookup, closed versioned structural balance cursors, and reproducible evidence commands. |
 | 0.4.0 | 2026-07-16 | Frontend Platform | Added the same-origin auth/oRPC proxy remediation, exact Compose 6/6 browser result, corrected integrated PostgreSQL and web-unit counts, and bounded browser-performance-artifact disposition. |
 | 0.3.0 | 2026-07-16 | Frontend Platform | Added direct transport/application denial, import-security, canonical scanner, CORS, dedicated Numbering tenant-isolation, and Node evidence. |
 | 0.2.0 | 2026-07-16 | Frontend Platform | Added reproduced authenticated desktop/mobile browser, real-authority fixture, CI orchestration, production-build, bundle-delta, and consequential-UX remediation evidence. |

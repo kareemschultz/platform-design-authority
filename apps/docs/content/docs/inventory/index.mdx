@@ -21,7 +21,7 @@ When a page says **projection**, its quantities and timestamp are evidence for r
 Required permissions depend on the action: `catalog.product.read`, `catalog.product.create`, `catalog.product.update`, `catalog.product.activate`, or `catalog.product.archive`. The tenant also needs the related Catalog entitlements.
 
 1. Open **Operations → Products**.
-2. Search by permitted text, exact tenant SKU, or exact barcode. Filters and cursor position remain in the URL so browser Back returns to the same result set.
+2. Search by permitted text, exact tenant SKU, or exact barcode. Exact SKU preserves meaningful tenant separators, trims surrounding spaces, and rejects an empty filter. Filters and cursor position remain in the URL so browser Back returns to the same result set.
 3. Choose **Create Product**. Enter a Product name and at least one Variant. A Variant may intentionally have no identifier; otherwise enter a tenant SKU or valid GTIN.
 4. Save the draft, review the stable Variant and Identifier records, and activate it only when ready.
 5. To archive, enter a reason and confirm the consequence. Archive is a lifecycle transition, not deletion. Existing Inventory facts remain intact.

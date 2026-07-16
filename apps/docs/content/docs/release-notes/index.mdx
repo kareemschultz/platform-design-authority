@@ -13,6 +13,7 @@ This is an implementation-evidence checkpoint, not a customer release or product
 - Added location-scoped balance projections with source, timestamp, reconciliation, and cursor evidence.
 - Added governed Inventory adjustment, blind-count, transfer, and bounded Product/opening-stock import workflows.
 - Added keyboard/mobile browser checks and stable Product/Inventory help ID `PDA-DOC-001`; formal assistive-technology and production accessibility conformance remain open.
+- Kept browser authentication and oRPC requests on same-origin `/api/auth` and `/rpc` paths while using the private `PLATFORM_API_INTERNAL_URL` only for server-side proxying and rendering.
 - Permission, entitlement, active context, version, idempotency, owner state, and tenant scope remain server-authoritative. This checkpoint does not close WS2, RR-007, RR-009, pilot, or production gates.
 
 ## Included
@@ -21,11 +22,13 @@ This is an implementation-evidence checkpoint, not a customer release or product
 - Next.js web application with API connectivity status, email/password sign-up and sign-in, protected dashboard, theme selection, and sign-out.
 - Hono server with public health, Better Auth routing, oRPC transport, OpenAPI handler, and Node fallback entry.
 - Better Auth backed by Drizzle and PostgreSQL for authentication and sessions only.
+- Tenant, organization, membership, Party linkage, business roles, permissions, entitlements, active context, session revocation, and allowlisted Audit evidence at the bounded WS1 controlled-prototype depth.
+- Catalog, Inventory ledger/workflows, durable internal event delivery/projections, bounded import, and Strict Online Numbering at the separately evidenced WS2 controlled-prototype depth.
 - Expo native scaffold with production native-auth exchange deferred.
 - Shared platform-owned shadcn-derived UI source using the governed Base UI/Rhea configuration.
 - Fumadocs portal with local search, LLM-readable routes, and repository-owned content.
 - PostgreSQL 18.4 Compose baseline with `pg_stat_statements` as the only preloaded optional extension.
-- Frozen install, formatting, typecheck, six tests, production builds, Node health, registry freshness, prohibited-surface scan, dependency audit, PostgreSQL smoke test, and Docker image checks in CI.
+- Frozen install, formatting, typecheck, workspace and browser tests, production builds, Node health, registry freshness, prohibited-surface scan, dependency audit, PostgreSQL verification, and Docker image checks in CI.
 
 ## Documentation closeout
 
@@ -36,10 +39,10 @@ This is an implementation-evidence checkpoint, not a customer release or product
 
 ## Deliberately not included
 
-- tenant, organization, Party, business role, permission, entitlement, or feature-policy implementation;
 - retail/POS, register, payment, stored-value, tax, fiscalization, Finance, broad offline-sync, or reporting workflows beyond the separately documented controlled seams;
+- production tenant-isolation roles/RLS, support access, accessibility conformance, penetration testing, backup/restore exercises, capacity/SLO evidence, or operational certification;
 - production native authentication exchange;
-- production secrets, deployment, backup/restore, observability, incident response, security, privacy, accessibility, or provider certification evidence;
+- production secrets, deployment, incident-response exercises, privacy-request execution, or provider certification evidence;
 - AI chat, interactive API proxy, payment facilitation, custody, marketplace code execution, or production business automation.
 
 ## Compatibility notes

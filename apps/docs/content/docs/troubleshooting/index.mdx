@@ -61,7 +61,9 @@ Check that `POSTGRES_PASSWORD` is set and matches `DATABASE_URL`. Do not publish
 ## Authentication fails
 
 - Confirm PostgreSQL is healthy and the auth schema was applied.
-- Confirm browser and server origins match the configured exact origins.
+- Confirm the browser uses the web origin for `/api/auth/*`; do not point browser authentication at the private API host or a different loopback hostname.
+- In Compose, confirm the web proxy can resolve `PLATFORM_API_INTERNAL_URL=http://server:3000`. For local development, the configured server URL may supply the server-side rewrite fallback.
+- Confirm the public web and API origins that reach Better Auth are present in the exact trusted-origin list. Do not use wildcards or disable origin/CSRF checks.
 - Confirm the email is valid and the password has at least eight characters.
 - Clear only the local prototype site's cookies when testing a suspected stale session.
 - Inspect sanitized server output; never publish cookie or credential values.
@@ -74,7 +76,7 @@ Account recovery, email verification, MFA, native secure exchange, and productio
 curl --fail http://localhost:3000/
 ```
 
-If the root succeeds but the web page is disconnected, verify `NEXT_PUBLIC_SERVER_URL=http://localhost:3000`, restart the web build after changing a public environment variable, and confirm CORS uses `http://localhost:3001`.
+If the root succeeds but the web page is disconnected, verify the web server can reach its rewrite destination. Compose uses the private `PLATFORM_API_INTERNAL_URL=http://server:3000`; local development may fall back to `NEXT_PUBLIC_SERVER_URL=http://localhost:3000` as the Next server's destination. Restart the web build after changing either value. In browser developer tools, application calls should remain on the web origin under `/api/auth/*` or `/rpc/*`, never expose `server:3000`, and never switch between `localhost` and `127.0.0.1`. CORS remains exact for approved direct-origin requests but is not a substitute for the same-origin browser proxy.
 
 ## Dashboard redirects to sign-in
 

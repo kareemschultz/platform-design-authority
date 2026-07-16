@@ -6,6 +6,8 @@ import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { resolveApiBase } from "@/lib/api-base";
+
 export function createQueryClient() {
 	return new QueryClient({
 		queryCache: new QueryCache({
@@ -25,40 +27,6 @@ export function createQueryClient() {
 
 export const queryClient = createQueryClient();
 
-function getServerUrl(url: string) {
-	const normalized = url.endsWith("/") ? url.slice(0, -1) : url;
-	if (typeof window === "undefined" && env.PLATFORM_API_INTERNAL_URL) {
-		return env.PLATFORM_API_INTERNAL_URL.endsWith("/")
-			? env.PLATFORM_API_INTERNAL_URL.slice(0, -1)
-			: env.PLATFORM_API_INTERNAL_URL;
-	}
-
-	if (!normalized.startsWith("/")) {
-		return normalized;
-	}
-
-	if (typeof window !== "undefined") {
-		return `${window.location.origin}${normalized}`;
-	}
-
-	const processEnv = (
-		globalThis as {
-			process?: { env?: Record<string, string | undefined> };
-		}
-	).process?.env;
-	const vercelUrl =
-		processEnv?.VERCEL_ENV === "production"
-			? (processEnv?.VERCEL_PROJECT_PRODUCTION_URL ?? processEnv?.VERCEL_URL)
-			: (processEnv?.VERCEL_URL ?? processEnv?.VERCEL_PROJECT_PRODUCTION_URL);
-	if (vercelUrl) {
-		const origin = vercelUrl.startsWith("http")
-			? vercelUrl
-			: `https://${vercelUrl}`;
-		return `${origin}${normalized}`;
-	}
-
-	return `http://localhost:3000${normalized}`;
-}
 export const link = new RPCLink({
 	fetch(url, options) {
 		return globalThis.fetch(url, {
@@ -74,7 +42,13 @@ export const link = new RPCLink({
 		const { headers } = await import("next/headers");
 		return Object.fromEntries(await headers());
 	},
-	url: `${getServerUrl(env.NEXT_PUBLIC_SERVER_URL)}/rpc`,
+	url: `${resolveApiBase({
+		browserOrigin:
+			typeof window === "undefined" ? undefined : window.location.origin,
+		configuredUrl: env.NEXT_PUBLIC_SERVER_URL,
+		internalUrl:
+			typeof window === "undefined" ? env.PLATFORM_API_INTERNAL_URL : undefined,
+	})}/rpc`,
 });
 
 export const client: AppRouterClient = createORPCClient(link);

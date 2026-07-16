@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-025
 title: WS2 PR6 Product and Inventory Web Experience Evidence
-version: 0.2.0
+version: 0.4.0
 status: Draft
 owner: Frontend Platform
 last_reviewed: 2026-07-16
@@ -43,9 +43,11 @@ The implemented UI is deterministic with AI disabled. It never treats navigation
 ## Frontend and contract architecture proof
 
 - `PlatformApiClient` is derived from the composed published contract, including the WS2 Catalog and Inventory surface. The web application imports the generated client type and never imports the server router.
+- Browser authentication and oRPC calls use same-origin `/api/auth` and `/rpc` paths. Next rewrites those paths to the private API address; only server execution reads `PLATFORM_API_INTERNAL_URL`. This prevents cross-host cookie loss without exposing the Compose service name to the browser bundle.
 - Every protected request supplies the current server-issued active-context ID. Mutations additionally carry idempotency and version preconditions where the command requires them.
 - Context changes cancel and remove incompatible Catalog/Inventory queries and remount context-bound interactive state. They do not mint or broaden authority.
 - Product exact-SKU lookup, Product state filtering, balance pagination, activity metadata, and durable Count draft-line save are published through OpenAPI, oRPC, generated TypeScript contracts, router bindings, and permission parity.
+- The HTTP shell allows the governed `PUT` method required by durable Count draft-line saves. CORS tests prove the method is allowed without widening origins or headers.
 - Count draft editing intentionally reuses `inventory.count.create`; the internal receipt operation is `inventory.count.draft.save`. This does not introduce a second permission ID.
 - Transfer receiver metadata represents the latest receiving action. The current model does not fabricate a full receipt-history actor list. Count has no separate `submittedAt`, so the UI does not invent one.
 - Repository and application tenant predicates remain mandatory after transport authorization. Foreign and nonexistent identifiers retain the same non-disclosing response behavior.
@@ -102,7 +104,7 @@ The target is WCAG 2.2 AA; no conformance claim is made. Automated checks can de
 
 ## Production-build and bundle evidence
 
-An optimized Next.js 16.2.10 build succeeds with all 13 new Operations route patterns. The emitted `.next/static` comparison uses a clean detached `main` worktree at `9e66939a901fe664b2d2655dc258fddf88ffd3a8` and the PR6 branch after consequential-UX remediation, both with `NEXT_PUBLIC_SERVER_URL=http://localhost:3000`.
+An optimized Next.js 16.2.10 build succeeds with all 13 new Operations route patterns. The emitted `.next/static` comparison uses a clean detached `main` worktree at `9e66939a901fe664b2d2655dc258fddf88ffd3a8` and the PR6 branch after consequential-UX and same-origin-proxy remediation, both with `NEXT_PUBLIC_SERVER_URL=http://localhost:3000`; the PR build additionally supplies the private server-only API address required by its rewrite topology.
 
 | Measure | Merged-main baseline | PR6 measured state | Change |
 |---|---:|---:|---:|
@@ -118,12 +120,16 @@ These are uncompressed build-artifact totals, not per-route transferred bytes or
 | Lane | Reproduced result |
 |---|---|
 | Generated contract/API closure | Targeted contract, domain, router, and application tests: 65 passed; OpenAPI, permission, and generated-client parity clean |
-| Live Catalog/Inventory PostgreSQL | 25 passed with paged balances, Count draft persistence/idempotency, exact SKU/state filtering, tenant non-disclosure, and activity metadata |
-| Web unit/type/format | 31 tests / 93 expectations after consequential-UX and browser-found remediation; TypeScript and 75-file Biome checks clean |
+| Live Catalog/Inventory PostgreSQL | 35 tests / 200 expectations: 25 Catalog/Inventory cases plus 10 Import/Numbering cases, covering paged balances, Count draft persistence/idempotency, exact SKU/state filtering, tenant non-disclosure, activity metadata, and dedicated Numbering tenant isolation |
+| Web unit/type/format | 33 tests / 95 expectations after consequential-UX, same-origin proxy, and browser-found remediation; TypeScript and scoped Biome checks clean |
 | Product documentation | `check-content`, Fumadocs generation, TypeScript, and Biome clean; one stable documentation ID |
-| Browser and real-authority workflow | 6/6 desktop/mobile Chromium tests: login keyboard/skip-link/reflow/axe, protected redirect, and authenticated Product create/read/list through Better Auth, tenant membership, tenant-scoped role, entitlements, active context, real oRPC, and Catalog persistence |
+| Browser and real-authority workflow | 6/6 desktop/mobile Chromium tests in the exact Compose topology: login keyboard/skip-link/reflow/axe, protected redirect, and authenticated Product create/read/list through same-origin Better Auth and oRPC, tenant membership, tenant-scoped role, entitlements, active context, and Catalog persistence |
+| Direct API and import-security proof | 62 tests / 190 expectations prove transport and application-boundary permission and entitlement denial, stable non-disclosure, exact-byte CSV bounds, malformed UTF-8 replacement rejection, canonical EICAR scanner wiring, and safe HTTP validation titles |
+| Residual live persistence proof | Imports plus dedicated Numbering tenant-isolation: 10 tests / 42 expectations; direct Node persistence fallback passes |
 
-Final exact-head repository checks, authenticated browser counts, bundle/build measures, direct-API denial tests, CI links, and independent-review disposition are added only after they are reproduced on the review head.
+The browser lane was reproduced against freshly built `web` and `server` images plus PostgreSQL 18 in one isolated Compose project. The sequence applied committed migrations, ran the server-owned `e2e:seed` fixture, and then executed `bun run --cwd apps/web test:e2e`; all six desktop/mobile tests passed in 11.4 seconds. The fixture creates only synthetic controlled-prototype identities and authority records and does not bypass authentication, current-context, permission, entitlement, oRPC, or owner persistence boundaries.
+
+Each authenticated browser lane attaches bounded Navigation Timing/resource-count JSON to its Playwright report. CI retains the report and failure evidence; these measurements are diagnostic artifacts, not an SLA. Final exact-head repository checks, CI links, and independent-review disposition are added only after they are reproduced on the review head.
 
 ## Residual risks and PR7 handoff
 
@@ -138,5 +144,7 @@ Final exact-head repository checks, authenticated browser counts, bundle/build m
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.4.0 | 2026-07-16 | Frontend Platform | Added the same-origin auth/oRPC proxy remediation, exact Compose 6/6 browser result, corrected integrated PostgreSQL and web-unit counts, and bounded browser-performance-artifact disposition. |
+| 0.3.0 | 2026-07-16 | Frontend Platform | Added direct transport/application denial, import-security, canonical scanner, CORS, dedicated Numbering tenant-isolation, and Node evidence. |
 | 0.2.0 | 2026-07-16 | Frontend Platform | Added reproduced authenticated desktop/mobile browser, real-authority fixture, CI orchestration, production-build, bundle-delta, and consequential-UX remediation evidence. |
 | 0.1.0 | 2026-07-16 | Frontend Platform | Recorded the initial PR6 controlled-prototype route, architecture, workflow, UI-pattern, accessibility-target, responsive, help, executable-evidence, and residual-risk disposition. |

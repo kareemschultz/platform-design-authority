@@ -85,7 +85,7 @@ Import permissions are target-specific: `catalog.import.*` for Products and `inv
 4. An authorized approver starts commit. Reload the job to follow current progress and reconciliation.
 5. Accept only a completed, reconciled job. For failed or rejected rows, download the correction report. The browser creates a temporary download and immediately revokes it.
 
-Cancellation applies only before commit. Staging purge is a separate operator action and remains server-gated until at least 30 days after completion plus the applicable hold and deletion-journal checks. The prototype does not automate legal-hold decisions or establish a production retention program.
+Cancellation applies only before commit. Staging purge is a separate operator action and remains server-gated until at least 30 days after an eligible Completed, Failed, or Cancelled terminal-state timestamp plus the applicable hold and deletion-journal checks. The prototype does not automate legal-hold decisions or establish a production retention program.
 
 ## Understand failure and offline states
 

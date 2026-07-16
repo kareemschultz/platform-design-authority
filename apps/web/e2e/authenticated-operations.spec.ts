@@ -19,9 +19,21 @@ test("an authenticated operator creates and reads a tenant-scoped Product", asyn
 	await page.getByRole("button", { name: "Sign In" }).click();
 	const signInResponse = await signInResponsePromise;
 	expect(signInResponse.ok()).toBe(true);
+	const authOrigin = new URL(signInResponse.url()).origin;
+	await expect
+		.poll(async () => {
+			const sessionResponse = await page.request.get(
+				`${authOrigin}/api/auth/get-session`
+			);
+			const session = (await sessionResponse.json().catch(() => null)) as {
+				user?: { email?: string };
+			} | null;
+			return session?.user?.email;
+		})
+		.toBe(FIXTURE_EMAIL);
 
-	// Navigate explicitly after the auth response so the server-rendered layout
-	// verifies the newly issued cookie instead of relying on client cache timing.
+	// The response event precedes browser cookie-jar settlement on some runners.
+	// Poll the real session endpoint above before the server-rendered layout reads it.
 	await page.goto("/operations/products");
 	await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
 	await page.getByRole("link", { name: "Create Product" }).click();

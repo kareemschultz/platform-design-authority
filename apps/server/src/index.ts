@@ -26,6 +26,7 @@ app.use(
 			"Authorization",
 			"Content-Type",
 			"Idempotency-Key",
+			"If-Match",
 			"X-Active-Context-Id",
 		],
 		allowMethods: ["DELETE", "GET", "PATCH", "POST", "PUT", "OPTIONS"],

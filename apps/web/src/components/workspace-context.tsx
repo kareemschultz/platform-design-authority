@@ -22,7 +22,12 @@ import {
 } from "@meridian/ui-web/components/dialog";
 import { Label } from "@meridian/ui-web/components/label";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	type QueryClient,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { CircleAlert, CloudOff } from "lucide-react";
 import {
 	createContext,
@@ -57,6 +62,31 @@ interface WorkspaceValue {
 }
 
 const WorkspaceContext = createContext<WorkspaceValue | null>(null);
+
+export async function recoverCancelledWorkspaceQueries(
+	queryClient: QueryClient,
+	requestSequence: number,
+	currentRequestSequence: number
+): Promise<boolean> {
+	if (!isLatestWorkspaceRequest(requestSequence, currentRequestSequence)) {
+		return false;
+	}
+
+	// Cancellation reverts an initial active query to pending/idle. If context
+	// activation then fails, explicitly restart those observers against the
+	// still-current workspace so the page cannot remain stranded indefinitely.
+	await Promise.allSettled([
+		queryClient.refetchQueries({
+			queryKey: orpc.catalog.key(),
+			type: "active",
+		}),
+		queryClient.refetchQueries({
+			queryKey: orpc.inventory.key(),
+			type: "active",
+		}),
+	]);
+	return true;
+}
 
 export function useWorkspace(): WorkspaceValue {
 	const value = useContext(WorkspaceContext);
@@ -144,13 +174,22 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 				queryClient.cancelQueries({ queryKey: orpc.catalog.key() }),
 				queryClient.cancelQueries({ queryKey: orpc.inventory.key() }),
 			]);
-			const result = await setContext.mutateAsync({
-				body: {
-					locationId: locationId ?? null,
-					organizationId: nextOrganizationId,
-				},
-				headers: { "idempotency-key": crypto.randomUUID() },
-			});
+			const result = await setContext
+				.mutateAsync({
+					body: {
+						locationId: locationId ?? null,
+						organizationId: nextOrganizationId,
+					},
+					headers: { "idempotency-key": crypto.randomUUID() },
+				})
+				.catch(async (error: unknown) => {
+					await recoverCancelledWorkspaceQueries(
+						queryClient,
+						requestSequence,
+						contextRequestSequence.current
+					);
+					throw error;
+				});
 			if (
 				!isLatestWorkspaceRequest(
 					requestSequence,

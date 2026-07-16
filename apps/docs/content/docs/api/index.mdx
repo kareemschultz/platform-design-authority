@@ -7,11 +7,11 @@ content_class: api-reference
 audience: [developer, integrator]
 publication_state: internal-prototype
 applicable_version: 0.0.4-controlled-prototype
-evidence_revision: 40454740838bba4426b9ca48b2e82811bc7b466d
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
 last_verified: 2026-07-16
 implementation_evidence: [apps/server/src/router.ts, apps/server/src/router.test.ts, packages/contracts/platform-api/src/generated.ts]
-related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit, catalog.products, inventory.adjustments, inventory.counts, inventory.stock-balances, inventory.transfers]
-permission_refs: [platform.organization.read, platform.organization.update, platform.user.read, platform.user.invite, platform.user.suspend, party.record.read, party.record.create, party.record.update, platform.role.read, platform.role.assign, platform.entitlement.read, platform.audit.read, catalog.product.read, catalog.product.create, catalog.product.update, catalog.product.activate, catalog.product.archive, inventory.adjustment.read, inventory.adjustment.create, inventory.adjustment.approve, inventory.adjustment.reverse, inventory.balance.read, inventory.count.read, inventory.count.create, inventory.count.submit, inventory.count.approve, inventory.transfer.read, inventory.transfer.create, inventory.transfer.dispatch, inventory.transfer.receive]
+related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit, platform.events, catalog.products, inventory.adjustments, inventory.counts, inventory.stock-balances, inventory.transfers]
+permission_refs: [platform.organization.read, platform.organization.update, platform.user.read, platform.user.invite, platform.user.suspend, party.record.read, party.record.create, party.record.update, platform.role.read, platform.role.assign, platform.entitlement.read, platform.audit.read, platform.event.replay, catalog.product.read, catalog.product.create, catalog.product.update, catalog.product.activate, catalog.product.archive, inventory.adjustment.read, inventory.adjustment.create, inventory.adjustment.approve, inventory.adjustment.reverse, inventory.balance.read, inventory.count.read, inventory.count.create, inventory.count.submit, inventory.count.approve, inventory.transfer.read, inventory.transfer.create, inventory.transfer.dispatch, inventory.transfer.receive]
 contract_refs: [openapi/first-slice-v1.yaml, registry/endpoint-permissions.json]
 api_reference_mode: generated-canonical
 generated_reference_source: openapi/first-slice-v1.yaml
@@ -57,6 +57,7 @@ The server allows `GET`, `POST`, and `OPTIONS` from the exact configured `CORS_O
 | `inventory.counts` | Create, get, list, submit, and approve blind counts | Inventory count permissions and current version |
 | `inventory.balances` | List derived stock balances | `inventory.balance.read`; projection is not the ledger authority |
 | `inventory.transfers` | Create, get, list, dispatch, and receive transfers | Transfer permissions, conservation, partial-receipt, and version rules |
+| `events` | Submit a bounded replay request for a registered consumer | `platform.event.replay`, current tenant context, idempotency, compatibility, retention, and Audit controls |
 
 The exact runtime composition is `apps/server/src/router.ts`. Its tests prove selected transport mappings and denial behavior. The generated contract package contains the broader Draft first-slice operation catalog and must not be mistaken for evidence that every operation is bound to an application implementation.
 

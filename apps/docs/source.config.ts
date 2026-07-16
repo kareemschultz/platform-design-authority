@@ -28,6 +28,7 @@ const productDocumentationSchema = pageSchema.extend({
 		"getting-started",
 		"landing",
 		"migration-guide",
+		"operator-guide",
 		"release-note",
 		"troubleshooting",
 		"user-guide",

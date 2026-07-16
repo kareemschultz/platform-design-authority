@@ -7,17 +7,17 @@ content_class: release-note
 audience: [administrator, developer, evaluator, operator, support, user]
 publication_state: internal-prototype
 applicable_version: 0.0.4-controlled-prototype
-evidence_revision: 40454740838bba4426b9ca48b2e82811bc7b466d
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
 last_verified: 2026-07-16
-implementation_evidence: [docs/project/PROGRAM_STATUS.md, docs/implementation/WS1_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md, docs/blueprint/19-Appendices/WS2_PR3_INVENTORY_LEDGER_EVIDENCE-2026-07-15.md]
-related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit, catalog.products, inventory.stock-ledger]
+implementation_evidence: [docs/project/PROGRAM_STATUS.md, docs/implementation/WS1_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md, docs/blueprint/19-Appendices/WS2_PR3_INVENTORY_LEDGER_EVIDENCE-2026-07-15.md, docs/blueprint/19-Appendices/WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md]
+related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit, platform.events, catalog.products, inventory.stock-ledger]
 permission_refs: []
 contract_refs: [docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md]
 ---
 
 # Controlled platform prototype — evidence refresh 2026-07-16
 
-This is an internal implementation-evidence checkpoint for product prototype `0.0.4`, evaluated at `main` commit `40454740838bba4426b9ca48b2e82811bc7b466d`. It is not a customer release, production-readiness declaration, compatibility promise, or support window.
+This is an internal implementation-evidence checkpoint for product prototype `0.0.4`, evaluated at `main` commit `7202fc819b70982c013e1ca11a4fcc136e01e2de`. It is not a customer release, production-readiness declaration, compatibility promise, or support window.
 
 ## Included at the evidence revision
 
@@ -26,6 +26,7 @@ This is an internal implementation-evidence checkpoint for product prototype `0.
 - Better Auth for authentication and sessions, kept separate from Party, tenant membership, business roles, permissions, and entitlements.
 - WS1 Tenancy, Party linkage, authorization, entitlements, Audit, session revocation, and a responsive Administration shell with real read/query behavior.
 - WS2 Catalog Product/Variant/Identifier behavior and Inventory adjustment, count, transfer, reservation, balance, and linked-reversal ledger behavior through merged PR #69.
+- The merged PR #74 Event Backbone controlled prototype: transactional delivery, bounded retry/dead-letter behavior, registered Catalog search and Inventory reconciliation consumers, permissioned bounded replay, and `OPS-SVC-005` procedure-draft operations guidance.
 - Deterministic owner-specific PostgreSQL migration streams for Platform, Party, Catalog, and Inventory packages.
 - A PostgreSQL 18.4 Compose baseline with `pg_stat_statements` as the only preloaded optional extension.
 - A repository-owned Fumadocs portal with local search and LLM-readable routes.
@@ -36,14 +37,14 @@ This is an internal implementation-evidence checkpoint for product prototype `0.
 - Every MDX page has a stable `PDOC-NNNN` identifier, audience, content class, publication state, applicable version, evidence revision, and implementation/contract references.
 - `registry/product-documentation.json` is the page inventory and evidence manifest; it remains separate from architecture authority in `registry/documents.json`.
 - The product-doc validator rejects missing pages, duplicate IDs/routes, metadata drift, stale or non-ancestor evidence revisions, unknown capabilities/permissions, missing evidence/contracts, broken internal routes, and false generated-API parity.
-- This API page is explicitly a boundary overview. A complete generated canonical reference remains open work.
+- The API page separates the implemented runtime boundary from a generated canonical 100-operation Draft reference; generator freshness and exact OpenAPI operation parity are enforced.
 
 ## Deliberately not included or not closed
 
-- A Catalog or Inventory web experience, WS2 evidence closeout, or WS2 workstream completion credit.
+- A Catalog or Inventory web experience, RR-007 implementation, WS2 evidence closeout, or WS2 workstream completion credit.
 - POS, register, cash, stored value, payment-provider, tax, fiscalization, Finance, offline transaction, or reporting user workflows.
 - Production native authentication exchange, email/OTP provider delivery, broad recovery, or customer-support operation.
-- Production RLS topology, secrets/deployment approval, backup/restore exercises, observability and incident evidence, penetration testing, WCAG conformance evidence, or provider certification.
+- Production RLS topology, Event Backbone capacity/SLOs/dashboards/alerts, multi-replica evidence, secrets/deployment approval, backup/restore exercises, observability and incident evidence, penetration testing, WCAG conformance evidence, or provider certification.
 - AI chat, interactive API proxy, payment facilitation, custody, marketplace code execution, or production business automation.
 - Founder, customer, Guyana professional, legal, regulatory, banking, payment, or commercial decisions still named by the blueprint.
 

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "product_version": "0.0.4-controlled-prototype",
-  "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+  "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
   "publication_scope": "internal-prototype",
   "pages": [
     {
@@ -14,7 +14,7 @@
       "owner": "Developer Platform",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         "apps/docs/package.json",
@@ -36,7 +36,7 @@
       "owner": "Developer Platform",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         "docker-compose.yml",
@@ -62,7 +62,7 @@
       "owner": "Platform Experience",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         "apps/web/src/components/administration-pages.tsx",
@@ -99,7 +99,7 @@
       "owner": "Platform Administration",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         "apps/web/src/components/administration-pages.tsx",
@@ -136,7 +136,7 @@
       "owner": "Developer Platform",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         "apps/server/src/router.ts",
@@ -150,6 +150,7 @@
         "platform.authorization",
         "platform.entitlements",
         "platform.audit",
+        "platform.events",
         "catalog.products",
         "inventory.adjustments",
         "inventory.counts",
@@ -169,6 +170,7 @@
         "platform.role.assign",
         "platform.entitlement.read",
         "platform.audit.read",
+        "platform.event.replay",
         "catalog.product.read",
         "catalog.product.create",
         "catalog.product.update",
@@ -205,7 +207,7 @@
       "owner": "Engineering",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         "AGENTS.md",
@@ -229,7 +231,7 @@
       "owner": "Engineering",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         "apps/server/composition/migrate.ts",
@@ -244,6 +246,36 @@
       ]
     },
     {
+      "documentation_id": "PDOC-0010",
+      "path": "apps/docs/content/docs/operations/index.mdx",
+      "route": "/docs/operations",
+      "title": "Event Backbone Operations",
+      "content_class": "operator-guide",
+      "audience": ["developer", "operator", "support"],
+      "owner": "Platform Operations",
+      "publication_state": "internal-prototype",
+      "applicable_version": "0.0.4-controlled-prototype",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
+      "last_verified": "2026-07-16",
+      "implementation_evidence": [
+        "apps/worker/composition/delivery.ts",
+        "apps/server/composition/events.ts",
+        "docs/blueprint/19-Appendices/WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md"
+      ],
+      "related_capabilities": [
+        "platform.events",
+        "catalog.products",
+        "inventory.stock-ledger"
+      ],
+      "permission_refs": ["platform.event.replay"],
+      "contract_refs": [
+        "openapi/first-slice-v1.yaml",
+        "registry/events.json",
+        "registry/operational-readiness.json",
+        "docs/blueprint/15-Operations/EVENT_BACKBONE_DELIVERY_RUNBOOK.md"
+      ]
+    },
+    {
       "documentation_id": "PDOC-0008",
       "path": "apps/docs/content/docs/troubleshooting/index.mdx",
       "route": "/docs/troubleshooting",
@@ -253,7 +285,7 @@
       "owner": "Support and Engineering",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         ".github/workflows/meridian-prototype.yml",
@@ -276,12 +308,13 @@
       "owner": "Release Management",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
-      "evidence_revision": "40454740838bba4426b9ca48b2e82811bc7b466d",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
       "last_verified": "2026-07-16",
       "implementation_evidence": [
         "docs/project/PROGRAM_STATUS.md",
         "docs/implementation/WS1_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md",
-        "docs/blueprint/19-Appendices/WS2_PR3_INVENTORY_LEDGER_EVIDENCE-2026-07-15.md"
+        "docs/blueprint/19-Appendices/WS2_PR3_INVENTORY_LEDGER_EVIDENCE-2026-07-15.md",
+        "docs/blueprint/19-Appendices/WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md"
       ],
       "related_capabilities": [
         "platform.authentication",
@@ -290,6 +323,7 @@
         "platform.authorization",
         "platform.entitlements",
         "platform.audit",
+        "platform.events",
         "catalog.products",
         "inventory.stock-ledger"
       ],

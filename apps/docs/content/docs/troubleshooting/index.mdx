@@ -7,7 +7,7 @@ content_class: troubleshooting
 audience: [developer, operator, support]
 publication_state: internal-prototype
 applicable_version: 0.0.4-controlled-prototype
-evidence_revision: 40454740838bba4426b9ca48b2e82811bc7b466d
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
 last_verified: 2026-07-16
 implementation_evidence: [.github/workflows/meridian-prototype.yml, packages/tooling/env/src/server.test.ts, docker-compose.yml]
 related_capabilities: [platform.authentication]
@@ -139,4 +139,4 @@ Include:
 - whether the failure reproduces from a fresh disposable environment;
 - relevant test or CI link.
 
-Classify missing implementation separately from a defect. WS1 tenant context, Party, permission, entitlement, session, and Audit behavior is present; Catalog and Inventory APIs are present through merged WS2 PR3. Their absence or denial in a particular account may be provisioning or authority state, not a missing platform feature. POS, payment-provider, stored-value, offline transaction, reporting, and other later first-slice workflows remain unimplemented at this evidence revision.
+Classify missing implementation separately from a defect. WS1 tenant context, Party, permission, entitlement, session, and Audit behavior is present; Catalog and Inventory APIs are present through merged WS2 PR3, and the bounded Event Backbone worker, replay seam, and two projections are present through merged WS2 PR4. Their absence or denial in a particular account may be provisioning or authority state, not a missing platform feature. Use [Event Backbone Operations](/docs/operations) for delivery, replay, and projection diagnosis. POS, payment-provider, stored-value, offline transaction, reporting, production event telemetry, and other later first-slice workflows remain unimplemented or unevidenced at this revision.

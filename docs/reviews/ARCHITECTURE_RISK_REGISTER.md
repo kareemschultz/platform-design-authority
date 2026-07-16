@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.10.0
+version: 0.11.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -193,7 +193,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 
 ## Documentation Completion Audit (DCA) — checkpoint `c9faa31` plus continuation
 
-The immutable audit defines DCA-001 through DCA-019. PDA-REV-014 is the living disposition. DCA-020 through DCA-022 are continuation findings discovered after the fixed cutoff and therefore do not alter the audit evidence.
+The immutable audit defines DCA-001 through DCA-019. PDA-REV-014 is the living disposition. DCA-020 through DCA-023 are continuation findings discovered after the fixed cutoff and therefore do not alter the audit evidence.
 
 | ID | Title | Status | Evidence | Re-open trigger |
 |---|---|---|---|---|
@@ -219,6 +219,7 @@ The immutable audit defines DCA-001 through DCA-019. PDA-REV-014 is the living d
 | DCA-020 | Required commercial-brand decision and codename boundary absent | Repository control implemented in Draft; FDR-011/external/independent evidence open | PDA-REV-014 §Finding Matrix | Codename leaks, private-package gate fails, or FDR-011 closes |
 | DCA-021 | Required PR documentation/release dispositions unenforced and active PR evidence stale | Repository control and PR-body reconciliation implemented; independent review open | PDA-REV-014 §Finding Matrix | Event validator regresses, disposition mismatches paths, or body evidence drifts |
 | DCA-022 | Operational readiness register omitted merged Event Backbone and retained a false PR #74 deferral | Merged cutoff, `OPS-SVC-005`, evidence/runbook links and validator mutations implemented; independent review open | PDA-REV-014 §Finding Matrix | An implemented service is absent, a merged PR remains deferred/excluded, or readiness exceeds evidence |
+| DCA-023 | Product portal evidence, release notes, and operator tasks lagged merged Event Backbone behavior | Ten-page `7202fc8` manifest, replay/runtime and release reconciliation, and PDOC-0010 operator guide implemented; independent review open | PDA-REV-014 §Finding Matrix | Product evidence baseline unintentionally lags merged behavior, or runtime/release/task content contradicts registered implementation and readiness |
 
 ## Currently Open Risks
 
@@ -239,6 +240,7 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | DCA-020 | Commercial product brand and publishing identity (FDR-011) | Founder, qualified trademark advisers, Platform Design Authority | Public product/package/domain/app/documentation identity and pilot/production claims |
 | DCA-021 | Pull-request documentation/release disposition and evidence freshness | Platform Engineering, Developer Platform, Release Management | Any PR merge or release claim without validated current dispositions |
 | DCA-022 | Operational service registration and merged-evidence cutoff consistency | Platform Operations, Platform Kernel, Data Platform | Any operational-readiness claim based on a stale cutoff or omitted implemented service |
+| DCA-023 | Product-documentation evidence and operator-task completeness | Developer Platform, Platform Operations, Release Management, UX | Any product/release claim that omits merged user/operator-visible behavior or exceeds its evidence/readiness baseline |
 | FA4-014 | Marketplace payout gating (FDR-008 plus legal/tax/provider review) | Founder | Paid marketplace phase |
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
 | FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |

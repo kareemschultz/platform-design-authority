@@ -8,6 +8,7 @@
     "api",
     "developer",
     "migrations",
+    "operations",
     "troubleshooting",
     "release-notes"
   ]

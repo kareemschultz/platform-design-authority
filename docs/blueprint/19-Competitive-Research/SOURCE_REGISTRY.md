@@ -221,7 +221,7 @@ The page-level citations remain in their research documents. These stable record
 | SRC-031 | Stripe/GitHub/Vercel/Linear/shadcn changelogs | official changelogs | https://github.blog/changelog/ | 2026-07-16 | documented | current snapshots are volatile |
 | SRC-032 | Rental/booking products | official product/documentation | https://www.odoo.com/documentation/19.0/applications/sales/rental.html | 2026-07-16 | documented | authenticated operations and legal terms unavailable |
 
-All SRC-001 through SRC-032 are primary evidence. Secondary evidence was used only to discover questions and is not load-bearing in the completed waves.
+SRC-001 through SRC-032 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in the initial waves.
 
 ## 12. Review and Maintenance
 

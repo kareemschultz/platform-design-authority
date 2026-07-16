@@ -1,6 +1,6 @@
 ---
 document_id: PDA-CIR-086
-title: Competitive Research Program Closeout
+title: Initial Competitive Research Program Closeout
 version: 0.1.0
 status: Draft
 owner: Platform Design Authority
@@ -8,7 +8,7 @@ last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0010, ADR-0014, ADR-0017, ADR-0019]
 ---
 
-# Competitive Research Program Closeout
+# Initial Competitive Research Program Closeout
 
 ## Scope completed
 
@@ -16,7 +16,7 @@ The initial program contains the framework, accounting/bookkeeping, ERP administ
 
 ## Completion meaning
 
-“Closeout” means the planned initial documentation set and transfer analysis are complete and mechanically reviewable. It does not mean products were fully tested, all jurisdictions/providers were accessible, authorities were amended, components were selected, or implementation evidence exists. Every document remains Draft because repository lifecycle authorities remain Proposed/Draft and review evidence is pending.
+“Initial closeout” means the nine planned wave headings and their transfer analysis are present and mechanically reviewable. It does not mean the user's requested comparator catalogue is exhausted, every relevant enterprise-system family has been studied, products were fully tested, all jurisdictions/providers were accessible, authorities were amended, components were selected, or implementation evidence exists. Every document remains Draft because repository lifecycle authorities remain Proposed/Draft and review evidence is pending.
 
 ## Strong findings
 
@@ -29,7 +29,7 @@ The initial program contains the framework, accounting/bookkeeping, ERP administ
 
 ## Limitations and inaccessible evidence
 
-No normalized paid-tier comparison, production tenant, terminal certification, Guyana provider/payroll/legal/tax/fiscal review, enterprise implementation study, statistically valid customer study, accessibility audit of competitor products, source-code architecture inspection, or private support data was available. Sage/Infor/Acumatica depth, several field-service/rental flows, enterprise HR/payroll configuration, pricing/packaging and regional availability are less complete. Secondary anecdotes were not used as load-bearing evidence.
+No normalized paid-tier comparison, production tenant, terminal certification, Guyana provider/payroll/legal/tax/fiscal review, enterprise implementation study, statistically valid customer study, accessibility audit of competitor products, source-code architecture inspection, or private support data was available. Sage/Infor/Acumatica depth, several field-service/rental flows, enterprise HR/payroll configuration, pricing/packaging and regional availability are less complete. Dedicated MSP/RMM, IAM, DCIM/IPAM, network-operations, direct device/offline, and named-product lineage studies were not completed. Secondary anecdotes were not used as load-bearing evidence.
 
 ## Governed transfer status
 
@@ -40,12 +40,13 @@ Implementation-findings documents list proposed authority changes; none are sile
 - Independent PDA review and disposition of every proposed governed follow-up.
 - Prototype and implementation evidence tracked in IMPLEMENTATION_EVIDENCE_REGISTER.md.
 - Qualified jurisdiction/provider research at scope admission.
+- CIR-BACK-021 through CIR-BACK-025 for ITSM/MSP/RMM, IAM, infrastructure/DCIM/IPAM, named-product reconciliation, and direct device/offline evidence.
 - Quarterly volatile-source refresh and contradiction handling.
 - Customer/pilot validation before external differentiation claims.
 
 ## Closeout confidence and revalidation
 
-Program coverage confidence is medium: breadth is complete, evidence depth varies by domain. Reopen a wave when authority changes, implementation evidence contradicts it, a material product release occurs, a source becomes stale, a domain enters delivery, or qualified regional evidence becomes available.
+Initial-wave structural coverage confidence is medium: all planned wave headings are represented, but requested market breadth and evidence depth remain incomplete. Reopen a wave when authority changes, implementation evidence contradicts it, a material product release occurs, a source becomes stale, a domain enters delivery, a missing comparator family becomes relevant, or qualified regional evidence becomes available.
 
 ## Source register
 

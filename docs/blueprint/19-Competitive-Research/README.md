@@ -231,4 +231,4 @@ The initial research program was authored through 2026-07-16. All artifacts rema
 | Platform services | PDA-CIR-070 through PDA-CIR-079 | AI, automation, analytics, search, inbox, collaboration, docs, teardown and findings |
 | Cross-domain synthesis | PDA-CIR-080 through PDA-CIR-086 | differentiation, advantage, dispositions, shared workflows/recovery/review and closeout |
 
-The section contains 86 uniquely identified Markdown documents. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md records access limits and continuing external evidence gates.
+The initial section contains 86 uniquely identified Markdown documents. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial nine-wave writing set and records access limits, omitted comparator families, continuing research backlog, and external evidence gates.

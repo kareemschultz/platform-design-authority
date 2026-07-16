@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { getTableColumns, getTableName } from "drizzle-orm";
-import { eventOutbox } from "./schema";
+import {
+	eventConsumerReceipt,
+	eventDeadLetter,
+	eventDeliveryAttempt,
+	eventOutbox,
+	eventReplayRequest,
+} from "./schema";
 
 describe("Platform Event Backbone PostgreSQL ownership", () => {
 	test("declares the canonical outbox identity and discriminated scope columns", () => {
@@ -13,5 +19,26 @@ describe("Platform Event Backbone PostgreSQL ownership", () => {
 		expect(columns.data.notNull).toBe(true);
 		expect(columns.publishedAt.notNull).toBe(false);
 		expect(columns.status.notNull).toBe(true);
+		expect(columns.deliverySequence.notNull).toBe(true);
+		expect(columns.claimTokenDigest.notNull).toBe(false);
+		expect(columns.nextAttemptAt.notNull).toBe(true);
+	});
+
+	test("declares every classified PR4 delivery-state table", () => {
+		expect(
+			[
+				eventOutbox,
+				eventDeliveryAttempt,
+				eventDeadLetter,
+				eventReplayRequest,
+				eventConsumerReceipt,
+			].map(getTableName)
+		).toEqual([
+			"platform_event_outbox",
+			"platform_event_delivery_attempt",
+			"platform_event_dead_letter",
+			"platform_event_replay_request",
+			"platform_event_consumer_receipt",
+		]);
 	});
 });

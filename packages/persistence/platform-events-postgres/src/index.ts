@@ -11,6 +11,9 @@ import type { Pool, PoolClient } from "pg";
 
 import { eventOutbox } from "./schema";
 
+// biome-ignore lint/performance/noBarrelFile: the owner adapter package exposes one governed public entry point.
+export { createPostgresDeliveryStore } from "./delivery-store";
+
 export type EventsPostgresConnection = Pool | PoolClient;
 
 function toRecord<TData extends Record<string, unknown>>(

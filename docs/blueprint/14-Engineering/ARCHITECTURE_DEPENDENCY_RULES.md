@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.3.0
+version: 1.3.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-15
@@ -89,7 +89,7 @@ The executable registry maps every concrete package, table, and migration stream
 | `packages/persistence/platform-tenancy-postgres` | `platform.tenancy` | `@meridian/platform-tenancy` | `platform_active_context`, `platform_delegation`, `platform_location`, `platform_membership`, `platform_membership_invitation`, `platform_organization`, `platform_role`, `platform_role_assignment`, `platform_tenant`, `platform_tenancy_command_receipt` | `packages/persistence/platform-tenancy-postgres/src/migrations` |
 | `packages/persistence/platform-entitlements-postgres` | `platform.entitlements` | `@meridian/platform-entitlements` | `platform_entitlement`, `platform_entitlement_change`, `platform_entitlement_command_receipt` | `packages/persistence/platform-entitlements-postgres/src/migrations` |
 | `packages/persistence/platform-audit-postgres` | `platform.audit` | `@meridian/platform-audit` | `platform_audit_record`, `platform_audit_privacy_overlay` | `packages/persistence/platform-audit-postgres/src/migrations` |
-| `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
+| `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox`, `platform_event_delivery_attempt`, `platform_event_dead_letter`, `platform_event_replay_request`, `platform_event_consumer_receipt` | `packages/persistence/platform-events-postgres/src/migrations` |
 | `packages/persistence/party-postgres` | `party.records` | `@meridian/domain-party` | `party_command_receipt`, `party_contact_point`, `party_identity_link`, `party_organization_detail`, `party_person_detail`, `party_record` | `packages/persistence/party-postgres/src/migrations` |
 | `packages/persistence/catalog-postgres` | `catalog` | `@meridian/domain-catalog` | `catalog_product`, `catalog_variant`, `catalog_identifier`, `catalog_product_command_receipt` | `packages/persistence/catalog-postgres/src/migrations` |
 | `packages/persistence/inventory-postgres` | `inventory` | `@meridian/domain-inventory` | `inventory_stock_movement`, `inventory_stock_balance`, `inventory_reservation`, `inventory_adjustment`, `inventory_count`, `inventory_count_line`, `inventory_transfer`, `inventory_transfer_line`, `inventory_command_receipt` | `packages/persistence/inventory-postgres/src/migrations` |
@@ -199,6 +199,7 @@ These paths are part of the rule definition, not temporary risk exceptions. They
 | `database-outside-persistence` | `apps/worker/composition` | The Event Backbone worker composition root may construct and inject its single bounded process-local connection after ADR-0027 exact-head concurrence. |
 | `database-outside-persistence` | `packages/tooling/composition/*` | Approved Tooling composition packages may construct a governed infrastructure connection. |
 | `connection-lifecycle-outside-composition` | `packages/tooling/env/src/server.ts` | The validated environment schema must declare `DATABASE_URL`; it exports validated configuration and may not import a database client, construct a pool, or close a connection. |
+| `connection-lifecycle-outside-composition` | `packages/tooling/env/src/worker.ts` | The validated worker environment schema declares `DATABASE_URL` and enforces the reviewed pool maximum of `5`; it may not import a database client, construct a pool, or close a connection. |
 
 The generator derives each executable pattern's `except` list from this table. A broader allowance, an expiring waiver, or permission to construct/use a connection requires a governed source change and the normal ADR/risk process.
 
@@ -212,6 +213,10 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 2026-07-15 — v1.3.2 registered the exact worker environment declaration path while keeping connection construction and shutdown confined to `apps/worker/composition`.
+
+- 2026-07-15 — v1.3.1 registered the five classified Event Backbone storage families to the existing `platform.events` owner before migration generation.
 
 - 2026-07-15 — v1.3.0 recorded the three exact-head ADR-0027 concurrence rows and registered only literal `apps/worker/composition`; adjacent roots, worker-owned migrations, and ordinary worker-source imports of owner implementations remain executable denials.
 

@@ -1,19 +1,29 @@
 {
   "name": "worker",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "composition/main.ts",
   "scripts": {
     "build": "tsdown",
     "check-types": "tsc -b",
-    "dev": "bun run --hot src/index.ts",
-    "start": "bun run dist/index.mjs",
-    "start:node": "node dist/index.mjs",
-    "test": "bun test src/*.test.ts"
+    "db:test": "bun test composition/*.integration.test.ts",
+    "dev": "bun run --hot composition/main.ts",
+    "start": "bun run dist/main.mjs",
+    "start:node": "node dist/main.mjs",
+    "test": "bun test src/*.test.ts",
+    "test:node": "node node_modules/tsx/dist/cli.mjs composition/delivery.node-check.ts"
+  },
+  "dependencies": {
+    "@meridian/persistence-platform-events-postgres": "workspace:*",
+    "@meridian/platform-events": "workspace:*",
+    "@meridian/tooling-env": "workspace:*",
+    "pg": "8.22.0"
   },
   "devDependencies": {
     "@meridian/tooling-config": "workspace:*",
     "@types/bun": "catalog:",
+    "@types/pg": "catalog:",
     "tsdown": "^0.22.3",
+    "tsx": "4.21.0",
     "typescript": "^6"
   }
 }

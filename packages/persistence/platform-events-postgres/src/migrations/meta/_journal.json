@@ -22,6 +22,20 @@
       "when": 1784008269923,
       "tag": "0002_right_prism",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784170352200,
+      "tag": "0003_flat_bulldozer",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784170373791,
+      "tag": "0004_flat_human_robot",
+      "breakpoints": true
     }
   ]
 }

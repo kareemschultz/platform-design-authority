@@ -173,14 +173,14 @@ jobs:
             "SHOW shared_preload_libraries;" | grep -qx pg_stat_statements
 
       - name: Docker image build validation
-        run: docker compose build web server
+        run: docker compose build web server worker
 
       - name: Docker stack runtime validation
         shell: bash
         run: |
           set -euo pipefail
           trap 'docker compose down -v --remove-orphans' EXIT
-          docker compose up -d postgres server web
+          docker compose up -d postgres server web worker
           for attempt in {1..30}; do
             if docker compose ps --format json | grep -q '"Health":"unhealthy"'; then
               docker compose logs
@@ -195,8 +195,12 @@ jobs:
           done
           [ "$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q server)")" = healthy ]
           [ "$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q web)")" = healthy ]
+          [ "$(docker inspect --format '{{.State.Running}}' "$(docker compose ps -q worker)")" = true ]
           docker compose exec -T server bun run db:migrate
           docker compose exec -T server bun run db:test
           docker compose exec -T server bun run db:test:node
+          docker compose stop worker
+          docker compose run --rm worker bun run db:test
+          docker compose run --rm worker bun run test:node
           curl --fail --silent --show-error http://127.0.0.1:3000/ | grep -qx OK
           curl --fail --silent --show-error http://127.0.0.1:3001/ >/dev/null

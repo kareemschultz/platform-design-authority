@@ -178,10 +178,18 @@
     },
     "apps/worker": {
       "name": "worker",
+      "dependencies": {
+        "@meridian/persistence-platform-events-postgres": "workspace:*",
+        "@meridian/platform-events": "workspace:*",
+        "@meridian/tooling-env": "workspace:*",
+        "pg": "8.22.0",
+      },
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
         "tsdown": "^0.22.3",
+        "tsx": "4.21.0",
         "typescript": "^6",
       },
     },

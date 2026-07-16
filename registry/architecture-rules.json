@@ -224,7 +224,8 @@
       "description": "Pool creation, shutdown, and connection-bearing environment reads belong to registered composition roots.",
       "pattern": "**/!(composition)/** -> (pool-construction|pool-shutdown|connection-environment)",
       "except": [
-        "packages/tooling/env/src/server.ts"
+        "packages/tooling/env/src/server.ts",
+        "packages/tooling/env/src/worker.ts"
       ]
     }
   ],
@@ -327,7 +328,11 @@
       "owner": "platform.events",
       "owner_package": "@meridian/platform-events",
       "tables": [
-        "platform_event_outbox"
+        "platform_event_outbox",
+        "platform_event_delivery_attempt",
+        "platform_event_dead_letter",
+        "platform_event_replay_request",
+        "platform_event_consumer_receipt"
       ],
       "migration_directory": "packages/persistence/platform-events-postgres/src/migrations"
     },

@@ -49,7 +49,8 @@ docs/blueprint/15-Operations/          SLOs, incidents, runbooks, exercises, sta
 docs/blueprint/16-Testing/             Quality strategy, specialist standards, first-slice matrix
 docs/blueprint/17-Roadmap/             First slice, prototypes, budgets, ratification
 docs/blueprint/18-Decisions/           Architecture Decision Records
-docs/blueprint/19-Appendices/          Dated evidence and completeness records
+docs/blueprint/19-Appendices/          Dated verification, evidence, and readiness assessments
+docs/blueprint/19-Competitive-Research/ Governed comparator research, findings, sources, and backlog
 docs/blueprint/20-Strategy/            Founder decisions, market strategy, handbooks, company operations
 openapi/                Draft API contracts
 schemas/                Draft JSON Schemas for events, AI, offline, providers, exports
@@ -70,6 +71,7 @@ package.json             Bun/Turborepo workspace root
 
 - `docs/blueprint/PLATFORM_MANIFEST.md`
 - `docs/blueprint/00-Foundation/CONSTITUTION.md`
+- `docs/blueprint/00-Foundation/DOCUMENT_DEPTH_AND_READINESS_STANDARD.md`
 - `docs/blueprint/00-Foundation/GLOSSARY.md`
 - `docs/blueprint/01-Platform/PLATFORM_KERNEL_OVERVIEW.md`
 - `docs/blueprint/04-Business-Domains/BUSINESS_CAPABILITY_MAP.md`
@@ -93,7 +95,10 @@ package.json             Bun/Turborepo workspace root
 - `docs/blueprint/18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md`
 - `docs/blueprint/18-Decisions/ADR-0025-NORMALIZE-MONOREPO-AND-DOCUMENTATION-LAYOUT.md`
 - `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
-- `docs/blueprint/19-Appendices/DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md`
+- `docs/blueprint/19-Appendices/DOCUMENTATION_DEPTH_ASSESSMENT-2026-07-16.md`
+- `docs/blueprint/19-Competitive-Research/README.md`
+- `docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_V1.md`
+- `docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_DISPOSITION_V1.md`
 - `docs/reviews/FABLE5_THIRD_AUDIT_V1.md`
 - `docs/reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
 - `CLAUDE.md`
@@ -119,7 +124,7 @@ bun run db:migrate              # apply reviewed Drizzle migrations
 bun run docker:up               # build and start the full Compose stack
 ```
 
-Environment variables are validated by `packages/env`; see `apps/docs/content/docs/getting-started/index.mdx` for the local `.env` shapes. "Meridian" is an internal codename and must not appear in tenant-visible product strings (ADR-0026).
+Environment variables are validated by `packages/tooling/env`; see `apps/docs/content/docs/getting-started/index.mdx` for the local `.env` shapes. "Meridian" is an internal codename and must not appear in tenant-visible product strings (ADR-0026).
 
 ## UI Foundation
 
@@ -156,11 +161,11 @@ Approved or Ratified status requires review evidence. Production implementation 
 
 ## Current Status
 
-The repository is in **complete blueprint remediation and constrained technical-prototype readiness**.
+The repository is in **controlled-prototype delivery and documentation-depth remediation**.
 
-Four independent Fable 5 audits have been completed. The fourth audit is registered by `docs/reviews/FABLE5_FOURTH_AUDIT_REGISTRATION.md` and fully dispositioned by `docs/reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md`. Its remediation closes registry/prose drift, runtime portability propagation, AI schema mismatch, test-depth semantics, documentation governance gaps, and prior closure overclaims without altering the independent evidence.
+The documentation-completion audit is registered by `docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_REGISTRATION.md` and dispositioned by `docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_DISPOSITION_V1.md`. It preserves the existing controlled-prototype exception while rejecting enterprise-depth, ratification, comprehensive-research, first-slice-completion, and pilot/production readiness claims at its cutoff.
 
-The intended readiness decision remains: **one constrained vertical-slice implementation after named blockers; Technical Prototypes 1–3 may start after final verification**. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
+WS1 is complete at controlled-prototype depth. WS2 is active: plan, contracts, Catalog Product, and Inventory ledger/workflows are merged through PR #69; durable event delivery/projections are on open PR #74, and later WS2 increments remain sequenced. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
 
 Pilot and production readiness still require FDR-001 through FDR-010, qualified Guyana review, provider certification, customer evidence, executable tests, accessibility and security evidence, and operational exercises.
 

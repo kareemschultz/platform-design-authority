@@ -22,6 +22,10 @@ Start with:
 
 - `docs/blueprint/PLATFORM_MANIFEST.md`
 - `docs/blueprint/00-Foundation/CONSTITUTION.md`
+- `docs/blueprint/00-Foundation/DOCUMENT_DEPTH_AND_READINESS_STANDARD.md`
+- `docs/blueprint/19-Appendices/DOCUMENTATION_DEPTH_ASSESSMENT-2026-07-16.md`
+- `docs/blueprint/19-Competitive-Research/README.md`
+- `docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_REGISTRATION.md`
 - `docs/blueprint/18-Decisions/ADR-0025-NORMALIZE-MONOREPO-AND-DOCUMENTATION-LAYOUT.md`
 - `docs/implementation/ROOT_DOCUMENT_MIGRATION_PROPOSAL.md`
 

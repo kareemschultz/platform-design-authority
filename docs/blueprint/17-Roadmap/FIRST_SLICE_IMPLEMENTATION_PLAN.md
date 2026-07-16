@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.9.0
+version: 0.10.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0013, ADR-0020, ADR-0025, ADR-0027]
 ---
 
@@ -37,9 +37,9 @@ The governed sequence is:
 
 WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone; WS1's Exit criteria below fold in the specific frontend proof points that make this posture verifiable rather than aspirational.
 
-## 2. Baseline: Verified Code Reality (2026-07-14)
+## 2. Baseline: Verified Code Reality (2026-07-16)
 
-**Verified baseline through WS1 PR9:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); contract-first Hono/oRPC/OpenAPI boundary; Better Auth behind runtime-neutral Platform Identity; owner-specific PostgreSQL adapters and deterministic migrations; minimum transactional outbox; Tenancy, Organizations, Party linkage, current Authorization, Entitlements, Audit, and session revocation; and the real Next.js Administration shell. PDA-IMPL-005 and the generated first-slice test registry record the controlled-prototype evidence. Exact-head CI is required before merge and does not broaden this baseline into pilot or production authority.
+**Verified merged baseline through WS2 PR3 at `main` `40454740838bba4426b9ca48b2e82811bc7b466d`:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); contract-first Hono/oRPC/OpenAPI boundary; Better Auth behind runtime-neutral Platform Identity; owner-specific PostgreSQL adapters and deterministic migrations; minimum transactional outbox; Tenancy, Organizations, Party linkage, current Authorization, Entitlements, Audit, and session revocation; the real Next.js Administration shell; governed Catalog and Inventory contracts; Catalog Product/Variant/Identifier behavior; and Inventory adjustment, count, transfer, reservation, and linked-reversal ledger workflows. PDA-IMPL-005 and the generated first-slice test registry record WS1 evidence. WS2 evidence remains pending its PR7 closeout. Exact-head CI is required before merge and does not broaden this baseline into pilot or production authority.
 
 **WS0 package restructuring is complete as of 2026-07-13** (verified: fresh `bun install`, `check-types` 12/12, `test` 126/126, `check`, and `build` all green across the whole workspace). The workspace now matches `registry/architecture-rules.json`'s families:
 
@@ -53,7 +53,9 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 
 The contract-first oRPC/client exception closed in WS1 PR1. The temporary embedded Identity persistence exception closed in PR2 through ADR-0027's owner-specific adapters and composition-owned pool. No exception may be silently recreated for later owners.
 
-**Still does not exist at first-slice implementation depth:** Catalog, Inventory, POS, stored value, offline sync, provider integration, or recovery tooling. The Event Backbone still stops at the minimum transactional outbox; delivery workers and consumers remain later work. Production RLS, OTP/provider evidence, formal accessibility/penetration evidence, operational exercises, and external/founder gates remain open. This section is the honesty anchor: WS1 completion is a controlled-prototype workstream exit, not overall first-slice or production completion.
+**Now exists at partial WS2 controlled-prototype depth:** PR #65 materialized Catalog/Inventory contracts; PR #67 implemented the Catalog Product aggregate and owner persistence; PR #69 implemented Inventory ledger workflows, exact quantity, concurrency, conservation, API, Audit, and transactional-outbox behavior. This is merged implementation evidence, not WS2 exit evidence.
+
+**Still does not exist at completed first-slice depth:** durable event delivery/projections until open PR #74 merges; bounded imports and online numbering; the Product/Inventory web experience and its formal UI/accessibility evidence; WS2 capability-dimension evidence and whole-workstream audit; POS, stored value, offline sync, provider integration, and recovery tooling. Production RLS, OTP/provider evidence, penetration evidence, operational exercises, and external/founder gates remain open. This section is the honesty anchor: partial implementation does not equal WS2 completion, overall first-slice completion, pilot readiness, or production authority.
 
 ## 3. Package Architecture Target
 
@@ -139,6 +141,7 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 
 - **Why:** Inventory is the first append-only business ledger — it proves the platform's correction-by-reversal doctrine, outbox eventing, and domain data ownership on the least regulated ledger before money is at stake.
 - **Entry:** WS1 done.
+- **Current state:** active. PR #63 plan, PR #65 contracts, PR #67 Catalog Product, and PR #69 Inventory ledger/workflows are merged. PR #74 implements durable delivery/projections and is open/green but not merged; issues #71–#73 retain the sequential PR5–PR7 gates.
 - **Proves:** PDA-RDM-004 §Prototype 2.
 - **Detailed plan:** `WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md` (PDA-RDM-009) — exact 14-capability depth, ADR-0027 package ownership, contract/schema closure, durable event delivery, WS2/WS5 offline boundary, PR sequence, evidence, and exit gates. This entry stays the authoritative summary; PDA-RDM-009 does not override it.
 - **Packages:** NEW runtime-neutral `domains/catalog` and `domains/inventory` cores with ports; NEW owner-specific `persistence/catalog-postgres` and `persistence/inventory-postgres` concrete schemas/migrations under ADR-0027; EXTEND the minimum `platform/events` transactional outbox introduced by WS1 into publication/consumer infrastructure; NEW `platform/numbering` core plus owner-specific Persistence adapter (sequence service consumed later by receipts).

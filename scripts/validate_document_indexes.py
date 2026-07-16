@@ -15,7 +15,12 @@ from urllib.parse import unquote
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCUMENT_REGISTRY = REPO_ROOT / "registry" / "documents.json"
+GOVERNANCE_EXEMPTIONS = REPO_ROOT / "registry" / "governance-exemptions.json"
+PRODUCT_DOCUMENTATION = REPO_ROOT / "registry" / "product-documentation.json"
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+PUBLIC_ROOT_FILES = ("AGENTS.md", "CLAUDE.md", "README.md")
+PUBLIC_DOCUMENT_ROOTS = ("docs", "apps/docs", "ops")
+IGNORED_DIRECTORY_NAMES = {".next", ".source", "dist", "node_modules"}
 
 
 def link_targets(index_path: Path) -> list[tuple[Path, int, str]]:
@@ -46,6 +51,73 @@ def parent_index_for(index_path: Path, repo_root: Path) -> Path | None:
     if index_path.parent in {docs_root / "implementation", docs_root / "reviews"}:
         return docs_root / "README.md"
     return None
+
+
+def discover_public_artifacts(repo_root: Path) -> set[Path]:
+    """Return repository prose that must have exactly one accounting route."""
+
+    artifacts = {
+        (repo_root / filename).resolve()
+        for filename in PUBLIC_ROOT_FILES
+        if (repo_root / filename).is_file()
+    }
+    for relative_root in PUBLIC_DOCUMENT_ROOTS:
+        root = repo_root / relative_root
+        if not root.exists():
+            continue
+        for candidate in root.rglob("*"):
+            if not candidate.is_file() or candidate.suffix.lower() not in {".md", ".mdx"}:
+                continue
+            relative_parts = candidate.relative_to(root).parts
+            if any(part in IGNORED_DIRECTORY_NAMES for part in relative_parts):
+                continue
+            artifacts.add(candidate.resolve())
+    return artifacts
+
+
+def validate_artifact_accounting(
+    documents: list[dict[str, str]],
+    exemptions: list[dict[str, str]],
+    product_pages: list[dict[str, str]],
+    repo_root: Path,
+) -> list[str]:
+    """Require one and only one inventory route for every public prose artifact."""
+
+    errors: list[str] = []
+    categories = {
+        "governed registry": [document["path"] for document in documents],
+        "governance exemption": [exemption["path"] for exemption in exemptions],
+        "product-documentation manifest": [page["path"] for page in product_pages],
+    }
+    category_paths: dict[str, set[Path]] = {}
+    for category, paths in categories.items():
+        duplicates = sorted({path for path in paths if paths.count(path) > 1})
+        for path in duplicates:
+            errors.append(f"{path}: duplicate entry in {category}")
+        resolved = {(repo_root / path).resolve() for path in paths}
+        category_paths[category] = resolved
+        for path in sorted(resolved):
+            if not path.is_file():
+                errors.append(
+                    f"{path.relative_to(repo_root).as_posix()}: {category} path does not exist"
+                )
+
+    category_names = list(category_paths)
+    for index, left_name in enumerate(category_names):
+        for right_name in category_names[index + 1 :]:
+            for path in sorted(category_paths[left_name] & category_paths[right_name]):
+                errors.append(
+                    f"{path.relative_to(repo_root).as_posix()}: accounted by both "
+                    f"{left_name} and {right_name}"
+                )
+
+    accounted = set().union(*category_paths.values())
+    for path in sorted(discover_public_artifacts(repo_root) - accounted):
+        errors.append(
+            f"{path.relative_to(repo_root).as_posix()}: public Markdown/MDX artifact "
+            "is neither governed, explicitly exempt, nor product-manifested"
+        )
+    return errors
 
 
 def validate_index_coverage(
@@ -131,12 +203,32 @@ def validate_index_coverage(
 
 
 def main() -> int:
-    if not DOCUMENT_REGISTRY.exists():
-        print(f"ERROR: document registry is missing: {DOCUMENT_REGISTRY}")
+    required_registries = (
+        DOCUMENT_REGISTRY,
+        GOVERNANCE_EXEMPTIONS,
+        PRODUCT_DOCUMENTATION,
+    )
+    missing = [path for path in required_registries if not path.exists()]
+    if missing:
+        for path in missing:
+            print(f"ERROR: required document inventory is missing: {path}")
         return 1
 
     payload = json.loads(DOCUMENT_REGISTRY.read_text(encoding="utf-8"))
-    errors = validate_index_coverage(payload.get("documents", []), REPO_ROOT)
+    exemption_payload = json.loads(GOVERNANCE_EXEMPTIONS.read_text(encoding="utf-8"))
+    product_payload = json.loads(PRODUCT_DOCUMENTATION.read_text(encoding="utf-8"))
+    documents = payload.get("documents", [])
+    exemptions = exemption_payload.get("exemptions", [])
+    product_pages = product_payload.get("pages", [])
+    errors = validate_index_coverage(documents, REPO_ROOT)
+    errors.extend(
+        validate_artifact_accounting(
+            documents,
+            exemptions,
+            product_pages,
+            REPO_ROOT,
+        )
+    )
     for error in errors:
         print(f"ERROR: {error}")
     if errors:
@@ -144,7 +236,8 @@ def main() -> int:
         return 1
     print(
         "Document-index validation passed: every governed artifact has one "
-        "canonical linked index entry."
+        "canonical linked index entry and every public Markdown/MDX artifact "
+        "has exactly one inventory route."
     )
     return 0
 

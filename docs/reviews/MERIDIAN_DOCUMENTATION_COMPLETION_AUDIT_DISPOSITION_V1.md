@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.18.0
+version: 0.19.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -35,7 +35,7 @@ PR #75 exact-head evidence checkpoint `e815a57` passed both `validate-docs` jobs
 
 The live Meridian Delivery Program still has 35 items. Issue #59 remains In Progress and still asks to authorize/create that already-existing project. Issue #71 remains Open with project status Blocked and body text that blocks PR5 on PR4/#70, although PR #74 merged PR4 and closed #70; PDA-PROJ-003 and PDA-RDM-007 identify #71 as the next governed WS2 increment. Issues #72 and #73 remain correctly blocked on their sequential predecessors. DCA-015 therefore covers both the stale project-creation task and the uncleared PR5 dependency state; documentation records the contradiction but does not silently mutate owner-controlled GitHub state.
 
-The navigation checkpoint adds canonical linked catalogs for every governed document, parent navigation for every governed index, and `scripts/validate_document_indexes.py` with seeded regression cases for removed, bare-filename, metadata-incomplete, and duplicate entries. Local index validation reports zero unexplained governed documents. Independent review is still required before DCA-009 is marked Closed.
+The navigation checkpoint adds canonical linked catalogs for every governed document, parent navigation for every governed index, and `scripts/validate_document_indexes.py` with seeded regression cases for removed, bare-filename, metadata-incomplete, duplicate, unaccounted, and overlapping inventory entries. The public prose inventory now resolves exactly: 456 governed Markdown documents, 28 explicit non-authoritative/template/evidence exemptions, and nine product-manifested MDX pages account once each for all 493 public Markdown/MDX artifacts. Eight stale exemptions for indexes that later became governed were removed; the root docs index, five templates, and six project-control artifacts now have explicit ownership, rationale, and review dates. Independent review is still required before DCA-009 is marked Closed.
 
 The product-documentation checkpoint adds a separate nine-page `PDOC-*` manifest, MDX build-time metadata schema, implementation/version/evidence binding, internal-route and registry-reference validation, and seeded failure cases. Stale pre-WS1 claims were corrected to the `4045474` implementation baseline. The API page keeps a separately labeled implemented-runtime view and generates a 100-operation Draft-contract table from canonical OpenAPI 0.4.0, including the governed Event Replay operation. Generator freshness and content-derived operation parity are CI-enforced without duplicating the operation list in metadata. This implements DCA-010's repository controls; independent closure review and broader release/task content remain open.
 
@@ -75,7 +75,7 @@ The document-class checkpoint defines nine canonical classes over thirteen reusa
 | DCA-006 | High | Accepted | Implemented in Draft; nine-class sample self-review passes, independent review open | Governed artifact-class standard, templates, validator behavior, and sample review evidence agree |
 | DCA-007 | High | Accepted | Initial waves registered; 23 questions are Transferred, two are Deferred, and independent review plus transferred evidence obligations remain | Every research wave has a ledger record; affected backlog entries have honest states and exact output/source links |
 | DCA-008 | High | Partially Accepted | Requested research families now have durable documented outputs, including named-product and device/offline continuations; owner/provider decisions, configured/direct observation, accessibility/protocol/security/operational trials, customer evidence, volatile refresh, and independent review remain | Reviewed matrices/workflows/findings and dated source ledger plus directly observed or explicitly blocked evidence for each admitted research family |
-| DCA-009 | High | Accepted | Implemented; independent closure review pending | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |
+| DCA-009 | High | Accepted | Implemented; 493 public prose artifacts have exactly one inventory route; independent closure review pending | Root and section indexes match generated inventory; governed, exempt, and product-manifested sets are complete and non-overlapping |
 | DCA-010 | High | Accepted | Implemented; generated 100-operation Draft reference and all MDX controls pass, independent closure review pending | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
 | DCA-011 | High | Accepted | Four service groups have registered draft procedures and merged PR #74 adds the Event Backbone runbook; review, production telemetry, tested alerts, escalation, capacity/recovery, and exercises remain open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |
 | DCA-012 | High | Accepted | Implemented; independent closure review pending | Capability source model consolidated or explicitly ratified as multi-source with provenance and zero identifier drift |

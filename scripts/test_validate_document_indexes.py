@@ -4,7 +4,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.validate_document_indexes import validate_index_coverage
+from scripts.validate_document_indexes import (
+    validate_artifact_accounting,
+    validate_index_coverage,
+)
 
 
 class DocumentIndexValidatorTests(unittest.TestCase):
@@ -65,6 +68,29 @@ class DocumentIndexValidatorTests(unittest.TestCase):
         index.write_text(entry + entry, encoding="utf-8")
         errors = validate_index_coverage(self.documents, self.root)
         self.assertTrue(any("found 2" in error for error in errors))
+
+    def test_unaccounted_public_artifact_fails(self) -> None:
+        (self.root / "docs" / "UNACCOUNTED.md").write_text("# Missing\n", encoding="utf-8")
+        errors = validate_artifact_accounting(self.documents, [], [], self.root)
+        self.assertTrue(any("neither governed" in error for error in errors))
+
+    def test_explicit_exemption_accounts_for_non_authoritative_artifact(self) -> None:
+        (self.root / "docs" / "STATUS.md").write_text("# Status\n", encoding="utf-8")
+        exemptions = [
+            {"path": "docs/STATUS.md"},
+            {"path": "docs/blueprint/README.md"},
+        ]
+        errors = validate_artifact_accounting(
+            self.documents, exemptions, [], self.root
+        )
+        self.assertEqual(errors, [])
+
+    def test_overlapping_accounting_routes_fail(self) -> None:
+        exemptions = [{"path": "docs/blueprint/01-Test/TEST_SPEC.md"}]
+        errors = validate_artifact_accounting(
+            self.documents, exemptions, [], self.root
+        )
+        self.assertTrue(any("accounted by both" in error for error in errors))
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-FND-017
 title: Document Depth and Readiness Standard
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -146,6 +146,7 @@ Prohibited claims include:
 ## Discoverability and Cross-Reference Rules
 
 - Every governed document appears in `registry/documents.json` and one canonical section index.
+- Every public repository Markdown/MDX artifact has exactly one inventory route: governed document registry, explicit `registry/governance-exemptions.json` record, or product-documentation manifest. Templates, conventional indexes, immutable evidence, and non-authoritative project controls are exemptions only when their path, reason, owner, and review date are recorded; an artifact may not be both registered and exempt.
 - Every material specification links its owner, relevant ADRs, capability families, permissions/events/contracts where they exist, first-slice depth or deferral, and implementation/evidence plan.
 - Indexes use clickable paths and explain entry routes; filename dumps are insufficient at repository scale.
 - Orphan exemptions are explicit for templates, immutable evidence, or generated artifacts.
@@ -153,7 +154,7 @@ Prohibited claims include:
 
 ## Validation and Review
 
-Machine checks should verify metadata, identifiers, indexes, links, generated freshness, MDX build/manifest, class-required section dispositions, status cutoffs, and research registration. They must not force filler or pretend keyword presence proves semantics.
+Machine checks should verify metadata, identifiers, indexes, links, generated freshness, one-route artifact accounting, MDX build/manifest, class-required section dispositions, status cutoffs, and research registration. They must not force filler or pretend keyword presence proves semantics.
 
 Human review remains required for ownership, contradiction, correctness, evidence quality, accessibility, security, privacy, commercial, legal, regulatory, and operational judgments.
 
@@ -179,5 +180,5 @@ No ADR is triggered by this initial clarification because it does not change lif
 
 - Product MDX remains in the separate `registry/product-documentation.json` publication manifest and may participate in the class-adoption register without becoming a blueprint authority document.
 - Class validation is blocking only for explicitly adopted artifacts. Repository-wide mandatory adoption requires Wave 0 review and a measured migration plan.
-- Index/orphan exemptions remain governed by the canonical index validator; class adoption does not create a second exemption mechanism.
+- Index/orphan exemptions remain governed by the canonical index validator. It rejects unaccounted public Markdown/MDX, missing exemption/manifest paths, duplicate inventory entries, and overlap between governed, exempt, and product-manifested routes; class adoption does not create a second exemption mechanism.
 - The initial sample review is author self-assessment, not independent approval. DCA-006 cannot be independently closed until a reviewer dispositions the sample and the Wave 0 candidate.

@@ -146,6 +146,14 @@
       "registration_document": "docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_REGISTRATION.md"
     },
     {
+      "path": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_V1.md",
+      "rule": "document_front_matter",
+      "reason": "Immutable independent documentation-completion audit evidence registered through PDA-REV-013 rather than edited after delivery.",
+      "owner": "Platform Design Authority",
+      "review_date": "2027-07-16",
+      "registration_document": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_REGISTRATION.md"
+    },
+    {
       "path": "docs/reviews/FABLE5_MASTER_REPOSITORY_AUDIT_PROMPT.md",
       "rule": "document_front_matter",
       "reason": "Historical independent-audit prompt retained as evidence, not an authoritative specification.",

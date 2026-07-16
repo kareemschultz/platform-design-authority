@@ -179,7 +179,7 @@ The repository is in **controlled-prototype delivery and documentation-depth rem
 
 The documentation-completion audit is registered by `docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_REGISTRATION.md` and dispositioned by `docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_DISPOSITION_V1.md`. It preserves the existing controlled-prototype exception while rejecting enterprise-depth, ratification, comprehensive-research, first-slice-completion, and pilot/production readiness claims at its cutoff.
 
-WS1 is complete at controlled-prototype depth. WS2 is active: plan, contracts, Catalog Product, and Inventory ledger/workflows are merged through PR #69; durable event delivery/projections are on open PR #74, and later WS2 increments remain sequenced. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
+WS1 is complete at controlled-prototype depth. WS2 is active: PR1–PR4 are merged through PR #74, including Catalog Product, Inventory ledger/workflows, and bounded durable event delivery/projections. PR5–PR7 remain sequenced under issues #71–#73, and no WS2 exit credit is claimed. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
 
 Pilot and production readiness still require FDR-001 through FDR-010, qualified Guyana review, provider certification, customer evidence, executable tests, accessibility and security evidence, and operational exercises.
 

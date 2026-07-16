@@ -1,6 +1,18 @@
 ---
 title: Prototype Administration
 description: Use the controlled WS1 administration shell without implying production readiness
+owner: Platform Administration
+documentation_id: PDOC-0004
+content_class: administrator-guide
+audience: [administrator, developer, operator, support]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 40454740838bba4426b9ca48b2e82811bc7b466d
+last_verified: 2026-07-16
+implementation_evidence: [apps/web/src/components/administration-pages.tsx, apps/server/src/router.test.ts, docs/implementation/WS1_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md]
+related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit]
+permission_refs: [platform.organization.read, party.record.read, platform.role.read, platform.entitlement.read, platform.audit.read]
+contract_refs: [openapi/first-slice-v1.yaml, registry/endpoint-permissions.json]
 ---
 
 # Administer the local prototype

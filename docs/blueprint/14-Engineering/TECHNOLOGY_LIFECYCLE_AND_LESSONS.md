@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ENGR-013
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.18.0
+version: 0.19.0
 status: Draft
 owner: Platform Engineering
-last_reviewed: 2026-07-14
-verified_as_of: 2026-07-14
+last_reviewed: 2026-07-16
+verified_as_of: 2026-07-16
 related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0018, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024, ADR-0025]
 ---
 
@@ -76,7 +76,7 @@ These stable releases were observed from official sources on 2026-07-12 and rech
 | Better-T-Stack | `https://www.better-t-stack.dev/new`; `https://better-t-stack.dev/docs`; `https://github.com/AmanVarshney01/create-better-t-stack/releases/tag/v3.36.3` | 2026-07-12 |
 | Better Auth | `https://better-auth.com/docs`; `https://better-auth.com/docs/reference/security`; `https://better-auth.com/docs/concepts/session-management`; official Two-Factor, Passkey, Admin, Organization, and Test Utils plugin documentation; `https://github.com/better-auth/better-auth/releases/tag/v1.6.23`; installed `better-auth@1.6.23` and `@better-auth/passkey@1.6.23` runtime endpoint/schema inspection recorded in PDA-IMPL-001 | 2026-07-13 |
 | Vitest | npm registry metadata for `vitest@4.1.10`; installed package and the Better Auth 1.6.23 Test Utils import/runtime path | 2026-07-13 |
-| Fumadocs | `https://www.fumadocs.dev/docs`; `https://www.fumadocs.dev/docs/integrations/openapi`; `https://www.fumadocs.dev/docs/ui/component-library` | 2026-07-12 |
+| Fumadocs | `https://www.fumadocs.dev/docs`; `https://www.fumadocs.dev/docs/mdx/collections`; `https://www.fumadocs.dev/docs/integrations/openapi`; `https://www.fumadocs.dev/docs/ui/component-library` | 2026-07-16 |
 | Next.js bundlers | `https://nextjs.org/docs/app/api-reference/turbopack`; `https://nextjs.org/docs/app/api-reference/cli/next` | 2026-07-13 |
 | Next.js environment and self-hosting | `https://nextjs.org/docs/app/guides/environment-variables`; `https://nextjs.org/docs/app/guides/self-hosting` | 2026-07-14 |
 | Base UI and shadcn/ui | `https://base-ui.com/react/overview/releases`; `https://ui.shadcn.com/docs/changelog/2026-07-base-ui-default` | 2026-07-12 |
@@ -144,6 +144,7 @@ Lessons are append-only by ID. Supersede rather than erase history. Never store 
 | TECH-LESSON-040 | 2026-07-14 | Active | The WS1 standalone Next image inlined `NEXT_PUBLIC_SERVER_URL=http://localhost:3000` during build; using that public value for server-rendered authentication made the web container call its own loopback instead of the API service despite a different runtime public variable | Validate and use server-only `PLATFORM_API_INTERNAL_URL` for Next server execution while retaining the build-time `NEXT_PUBLIC_SERVER_URL` for browser calls; never expose the internal service name to the client bundle | The first Docker probe reproduced `ECONNREFUSED 127.0.0.1:3000` on `/administration`; a fresh corrected image passed API/web health, PostgreSQL 18.4 migrations, unauthenticated reauthentication redirect, and authenticated server-rendered Administration access with a disposable synthetic user and no web/server runtime errors | Frontend Platform | Every Next release or deployment-topology change; remove only if all server calls are same-origin proxied under an accepted architecture decision |
 | TECH-LESSON-041 | 2026-07-14 | Active | Base UI 1.3.0's Button primitive treats a non-button `render` target as button behavior: leaving `nativeButton` true emits an accessibility warning, while setting it false still gives a rendered anchor `role="button"` | For navigation styled as a button, render a native Next `Link` and apply the owned `buttonVariants`; reserve the Base UI Button primitive for actions. Browser verification must inspect the accessibility tree and element role, not only tag name or visual appearance | PR9 Chromium review reproduced the warning and the anchor role; all seven WS1 navigation compositions were normalized, then exposed native link semantics with a clean console | Frontend Platform | Every Base UI or shadcn Button change; add a semantic regression test when the component test harness lands |
 | TECH-LESSON-042 | 2026-07-14 | Active | At the exact WS2 lock, PostgreSQL `numeric(38,6)`, a checked-out node-postgres client, Drizzle transactions, and same-key `FOR UPDATE` locking preserved exact quantities and serialized 20 concurrent postings; linked reversal and projection rebuild both conserved the ledger | Keep exact decimal strings at contracts, `numeric(38,6)` in persistence, immutable linked reversals, and owner-adapter transactions; retain reviewed SQL for lock-sensitive statements without leaking database types into the domain | PDA-APP-021: 22 live PostgreSQL tests passed, including `2.000000` final balance, zero-sum reversal, zero rebuild divergence, and 250k indexed Product probe | Data Platform | Every Drizzle/pg/PostgreSQL lock, PR3 ledger schema, or scale target change |
+| TECH-LESSON-043 | 2026-07-16 | Active | Fumadocs validates custom MDX front matter at build time by extending its default Zod 4 `pageSchema`; build success alone does not compare that metadata with implementation evidence, permissions, canonical routes, or OpenAPI scope | Extend `pageSchema` for author feedback and keep a repository validator plus separate `registry/product-documentation.json` evidence manifest; distinguish `boundary-overview` from `generated-canonical` API reference mode | Official Collections documentation, seven seeded validator cases, Fumadocs MDX generation, TypeScript check, and 33-page production build | Developer Platform | Every Fumadocs MDX/Core, Zod, manifest-schema, or API-reference generator change |
 
 ## Entry Templates
 

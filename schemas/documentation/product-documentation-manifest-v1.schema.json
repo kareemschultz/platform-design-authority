@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/documentation/product-documentation-manifest-v1.schema.json",
+  "title": "Product Documentation Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "product_version",
+    "evidence_revision",
+    "publication_scope",
+    "pages"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "product_version": { "type": "string", "minLength": 1 },
+    "evidence_revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "publication_scope": { "const": "internal-prototype" },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/page" }
+    }
+  },
+  "$defs": {
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "documentation_id",
+        "path",
+        "route",
+        "title",
+        "content_class",
+        "audience",
+        "owner",
+        "publication_state",
+        "applicable_version",
+        "evidence_revision",
+        "last_verified",
+        "implementation_evidence",
+        "related_capabilities",
+        "permission_refs",
+        "contract_refs"
+      ],
+      "properties": {
+        "documentation_id": { "type": "string", "pattern": "^PDOC-[0-9]{4}$" },
+        "path": { "type": "string", "pattern": "^apps/docs/content/docs/.+\\.mdx$" },
+        "route": { "type": "string", "pattern": "^/docs(?:/[a-z0-9-]+)*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "content_class": {
+          "enum": [
+            "administrator-guide",
+            "api-reference",
+            "developer-guide",
+            "getting-started",
+            "landing",
+            "migration-guide",
+            "release-note",
+            "troubleshooting",
+            "user-guide"
+          ]
+        },
+        "audience": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "administrator",
+              "developer",
+              "evaluator",
+              "integrator",
+              "operator",
+              "support",
+              "user"
+            ]
+          }
+        },
+        "owner": { "type": "string", "minLength": 1 },
+        "publication_state": {
+          "enum": ["internal-prototype", "release-preview", "published", "retired"]
+        },
+        "applicable_version": { "type": "string", "minLength": 1 },
+        "evidence_revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "last_verified": { "type": "string", "format": "date" },
+        "implementation_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "related_capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$" }
+        },
+        "permission_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$" }
+        },
+        "contract_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "api_reference_mode": { "enum": ["boundary-overview", "generated-canonical"] },
+        "openapi_operation_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "content_class": { "const": "api-reference" } } },
+          "then": { "required": ["api_reference_mode", "openapi_operation_ids"] }
+        }
+      ]
+    }
+  }
+}

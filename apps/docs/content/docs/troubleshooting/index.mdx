@@ -1,6 +1,18 @@
 ---
 title: Troubleshooting
 description: Diagnose the controlled platform prototype safely
+owner: Support and Engineering
+documentation_id: PDOC-0008
+content_class: troubleshooting
+audience: [developer, operator, support]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 40454740838bba4426b9ca48b2e82811bc7b466d
+last_verified: 2026-07-16
+implementation_evidence: [.github/workflows/meridian-prototype.yml, packages/tooling/env/src/server.test.ts, docker-compose.yml]
+related_capabilities: [platform.authentication]
+permission_refs: []
+contract_refs: [docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md]
 ---
 
 # Troubleshoot the local prototype
@@ -127,4 +139,4 @@ Include:
 - whether the failure reproduces from a fresh disposable environment;
 - relevant test or CI link.
 
-Classify missing implementation separately from a defect. Retail, tenant, permission, entitlement, offline-sync, payment, reporting, and other first-slice workflows are not present in this scaffold.
+Classify missing implementation separately from a defect. WS1 tenant context, Party, permission, entitlement, session, and Audit behavior is present; Catalog and Inventory APIs are present through merged WS2 PR3. Their absence or denial in a particular account may be provisioning or authority state, not a missing platform feature. POS, payment-provider, stored-value, offline transaction, reporting, and other later first-slice workflows remain unimplemented at this evidence revision.

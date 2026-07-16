@@ -1,11 +1,25 @@
 ---
 title: Prototype API Reference
 description: Implemented Hono, oRPC, OpenAPI, and Better Auth surfaces
+owner: Developer Platform
+documentation_id: PDOC-0005
+content_class: api-reference
+audience: [developer, integrator]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 40454740838bba4426b9ca48b2e82811bc7b466d
+last_verified: 2026-07-16
+implementation_evidence: [apps/server/src/router.ts, apps/server/src/router.test.ts, packages/contracts/platform-api/src/generated.ts]
+related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit, catalog.products, inventory.adjustments, inventory.counts, inventory.stock-balances, inventory.transfers]
+permission_refs: [platform.organization.read, platform.organization.update, platform.user.read, platform.user.invite, platform.user.suspend, party.record.read, party.record.create, party.record.update, platform.role.read, platform.role.assign, platform.entitlement.read, platform.audit.read, catalog.product.read, catalog.product.create, catalog.product.update, catalog.product.activate, catalog.product.archive, inventory.adjustment.read, inventory.adjustment.create, inventory.adjustment.approve, inventory.adjustment.reverse, inventory.balance.read, inventory.count.read, inventory.count.create, inventory.count.submit, inventory.count.approve, inventory.transfer.read, inventory.transfer.create, inventory.transfer.dispatch, inventory.transfer.receive]
+contract_refs: [openapi/first-slice-v1.yaml, registry/endpoint-permissions.json]
+api_reference_mode: boundary-overview
+openapi_operation_ids: []
 ---
 
 # Prototype API surfaces
 
-This page documents only the implemented scaffold. The canonical first-slice contract remains `openapi/first-slice-v1.yaml`; the prototype does not claim to implement that business API.
+This page is a **boundary overview**, not a generated canonical operation reference. The canonical Draft contract remains `openapi/first-slice-v1.yaml`, with endpoint authority in `registry/endpoint-permissions.json`. The runtime implements the reviewed WS1 surface and the merged WS2 Catalog Product and Inventory ledger/workflow subset at the evidence revision. It does not implement every operation in the first-slice OpenAPI contract.
 
 ## Base URL
 
@@ -16,29 +30,31 @@ The local server listens at `http://localhost:3000` by default.
 | Process health | `GET /` | None | Returns plain-text `OK` |
 | Better Auth | `GET|POST /api/auth/*` | Endpoint-dependent | Email/password and session endpoints |
 | oRPC transport | `/rpc/*` | Procedure-dependent | Type-safe application procedures |
-| oRPC OpenAPI handler | `/api-reference/*` | Procedure-dependent | Generated prototype schema/reference surface |
+| oRPC OpenAPI handler | `/api-reference/*` | Procedure-dependent | Runtime-derived reference for composed procedures; not the canonical first-slice contract |
 
 The server allows `GET`, `POST`, and `OPTIONS` from the exact configured `CORS_ORIGIN`. Credentials are enabled for the approved browser origin.
 
-## Implemented procedures
+## Implemented procedure families
 
-### `healthCheck`
+| Family | Implemented scope | Authority boundary |
+|---|---|---|
+| `healthCheck` | Public process-health response | No business authority |
+| `privateData` | Authenticated scaffold response | Authentication only; returned user is not Party, membership, role, permission, or entitlement |
+| `identity` | Current identity and active-context selection | Current session and active membership are revalidated |
+| `organizations` | List/get/update organizations and list locations | `platform.organization.read` or `platform.organization.update` |
+| `users` | List, invite, and suspend memberships | `platform.user.read`, `.invite`, or `.suspend` |
+| `parties` | List/get/create/update Party records and create identity links | Party permissions; Better Auth identity remains separate |
+| `roles` | List roles and assign a role | `platform.role.read` or `platform.role.assign` |
+| `entitlements` | List tenant entitlements | `platform.entitlement.read`; entitlement is not actor permission |
+| `sessions` | List and revoke the current account's sessions | Authenticated account ownership, with idempotency on revocation |
+| `audit` | List tenant audit evidence | `platform.audit.read` and active tenant context |
+| `catalog.products` | Create, get, list, update, activate, and archive Product aggregates | Catalog Product permissions, version preconditions, idempotency for commands |
+| `inventory.adjustments` | Create, get, list, approve, and reverse adjustments | Inventory permissions; maker-checker and linked reversal rules |
+| `inventory.counts` | Create, get, list, submit, and approve blind counts | Inventory count permissions and current version |
+| `inventory.balances` | List derived stock balances | `inventory.balance.read`; projection is not the ledger authority |
+| `inventory.transfers` | Create, get, list, dispatch, and receive transfers | Transfer permissions, conservation, partial-receipt, and version rules |
 
-- Classification: public prototype procedure
-- Input: none
-- Result: string `OK`
-- Used by: the web home-page connection indicator
-- Business authority: none
-
-### `privateData`
-
-- Classification: authenticated prototype procedure
-- Input: none
-- Result: a prototype message and current Better Auth user
-- Denial: unauthenticated requests are rejected by the protected procedure
-- Business authority: none
-
-The returned user is an authentication identity. It is not a Party, employee, customer, tenant membership, business role, permission set, or entitlement.
+The exact runtime composition is `apps/server/src/router.ts`. Its tests prove selected transport mappings and denial behavior. The generated contract package contains the broader Draft first-slice operation catalog and must not be mistaken for evidence that every operation is bound to an application implementation.
 
 ## Typed client use
 
@@ -46,19 +62,21 @@ Web clients consume the generated `AppRouterClient` through the repository oRPC/
 
 ## OpenAPI authority
 
-There are two distinct artifacts:
+There are three distinct artifacts:
 
-1. The scaffold-generated oRPC reference reflects only currently implemented prototype procedures.
-2. Root `openapi/first-slice-v1.yaml` is the governed draft contract for the planned vertical slice.
+1. The runtime-derived oRPC reference reflects the procedures composed at the evidence revision.
+2. Root `openapi/first-slice-v1.yaml` is the governed Draft contract for the planned vertical slice.
+3. `packages/contracts/platform-api/src/generated.ts` is generated from governed endpoint metadata and supplies typed contract definitions; generation does not prove runtime binding.
 
-Neither artifact proves production implementation. Generated reference pages must identify their source revision and must not become a separately edited contract.
+None of these artifacts proves production readiness. Generated reference pages must identify their source revision and must not become a separately edited contract.
 
 ## Error and security behavior
 
-- Server errors pass through the oRPC error boundary and are logged in the prototype process.
+- Runtime application failures map to typed problem details with a safe code, correlation ID, retryability, next action, and uncertainty marker where applicable.
 - Authentication cookies use hardened attributes according to environment.
 - Trusted origins must be exact URL origins.
-- The prototype does not yet implement tenant context, business permissions, entitlements, rate limits, audit records, idempotency, or production error redaction for domain procedures.
+- Protected WS1/WS2 procedures revalidate active context and permissions at the server boundary; commands use idempotency keys and version preconditions where their contract requires them.
+- Production rate limits, full RLS topology, public support guarantees, and complete production error/telemetry evidence remain unresolved.
 
 Do not expose the prototype server to the public internet or use real tenant data.
 

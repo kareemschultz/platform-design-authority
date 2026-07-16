@@ -1,46 +1,59 @@
 ---
 title: Prototype Release Notes
 description: Verified contents and limitations of the initial platform scaffold
+owner: Release Management
+documentation_id: PDOC-0009
+content_class: release-note
+audience: [administrator, developer, evaluator, operator, support, user]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 40454740838bba4426b9ca48b2e82811bc7b466d
+last_verified: 2026-07-16
+implementation_evidence: [docs/project/PROGRAM_STATUS.md, docs/implementation/WS1_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md, docs/blueprint/19-Appendices/WS2_PR3_INVENTORY_LEDGER_EVIDENCE-2026-07-15.md]
+related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit, catalog.products, inventory.stock-ledger]
+permission_refs: []
+contract_refs: [docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md]
 ---
 
-# Controlled platform prototype — 2026-07-12
+# Controlled platform prototype — evidence refresh 2026-07-16
 
-This is an implementation-evidence checkpoint, not a customer release or production-readiness declaration.
+This is an internal implementation-evidence checkpoint for product prototype `0.0.4`, evaluated at `main` commit `40454740838bba4426b9ca48b2e82811bc7b466d`. It is not a customer release, production-readiness declaration, compatibility promise, or support window.
 
-## Included
+## Included at the evidence revision
 
-- Better-T-Stack-derived Bun monorepo with governed deviations recorded in `docs/implementation/SCAFFOLD_README.md`.
-- Next.js web application with API connectivity status, email/password sign-up and sign-in, protected dashboard, theme selection, and sign-out.
-- Hono server with public health, Better Auth routing, oRPC transport, OpenAPI handler, and Node fallback entry.
-- Better Auth backed by Drizzle and PostgreSQL for authentication and sessions only.
-- Expo native scaffold with production native-auth exchange deferred.
-- Shared platform-owned shadcn-derived UI source using the governed Base UI/Rhea configuration.
-- Fumadocs portal with local search, LLM-readable routes, and repository-owned content.
-- PostgreSQL 18.4 Compose baseline with `pg_stat_statements` as the only preloaded optional extension.
-- Frozen install, formatting, typecheck, six tests, production builds, Node health, registry freshness, prohibited-surface scan, dependency audit, PostgreSQL smoke test, and Docker image checks in CI.
+- A Bun/Turborepo modular-monolith workspace with runtime-neutral foundation, contract, Platform, Domain, and owner-specific persistence packages.
+- Hono and oRPC composition with a governed Node fallback, typed errors, active-context enforcement, permission checks, idempotency, and version preconditions where declared.
+- Better Auth for authentication and sessions, kept separate from Party, tenant membership, business roles, permissions, and entitlements.
+- WS1 Tenancy, Party linkage, authorization, entitlements, Audit, session revocation, and a responsive Administration shell with real read/query behavior.
+- WS2 Catalog Product/Variant/Identifier behavior and Inventory adjustment, count, transfer, reservation, balance, and linked-reversal ledger behavior through merged PR #69.
+- Deterministic owner-specific PostgreSQL migration streams for Platform, Party, Catalog, and Inventory packages.
+- A PostgreSQL 18.4 Compose baseline with `pg_stat_statements` as the only preloaded optional extension.
+- A repository-owned Fumadocs portal with local search and LLM-readable routes.
+- CI gates for frozen install, formatting, typecheck, tests, builds, Node fallback health, architecture rules, registry freshness, dependency/security checks, PostgreSQL migration/smoke evidence, and Docker images.
 
-## Documentation closeout
+## Documentation evidence controls
 
-- Replaced taxonomy-only pages with evidence-bounded getting-started, user, administration, API, developer, migration, troubleshooting, and release documentation.
-- Corrected moved implementation-document governance paths.
-- Added validation that rejects missing or duplicate governance-exemption targets.
-- Updated documentation source links to the merged `main` branch.
+- Every MDX page has a stable `PDOC-NNNN` identifier, audience, content class, publication state, applicable version, evidence revision, and implementation/contract references.
+- `registry/product-documentation.json` is the page inventory and evidence manifest; it remains separate from architecture authority in `registry/documents.json`.
+- The product-doc validator rejects missing pages, duplicate IDs/routes, metadata drift, stale or non-ancestor evidence revisions, unknown capabilities/permissions, missing evidence/contracts, broken internal routes, and false generated-API parity.
+- This API page is explicitly a boundary overview. A complete generated canonical reference remains open work.
 
-## Deliberately not included
+## Deliberately not included or not closed
 
-- tenant, organization, Party, business role, permission, entitlement, or feature-policy implementation;
-- retail, register, catalog, inventory, payment, stored-value, tax, fiscalization, Finance, offline-sync, or reporting workflows;
-- production native authentication exchange;
-- production secrets, deployment, backup/restore, observability, incident response, security, privacy, accessibility, or provider certification evidence;
+- A Catalog or Inventory web experience, WS2 evidence closeout, or WS2 workstream completion credit.
+- POS, register, cash, stored value, payment-provider, tax, fiscalization, Finance, offline transaction, or reporting user workflows.
+- Production native authentication exchange, email/OTP provider delivery, broad recovery, or customer-support operation.
+- Production RLS topology, secrets/deployment approval, backup/restore exercises, observability and incident evidence, penetration testing, WCAG conformance evidence, or provider certification.
 - AI chat, interactive API proxy, payment facilitation, custody, marketplace code execution, or production business automation.
+- Founder, customer, Guyana professional, legal, regulatory, banking, payment, or commercial decisions still named by the blueprint.
 
 ## Compatibility notes
 
-- Bun is the preferred prototype runtime; the Hono server retains a Node 24 fallback.
-- oRPC remains pinned to the verified published package set recorded in the implementation conflict log.
-- Deep Windows checkout paths can exceed Turbopack's path limit during the Fumadocs build; use a shorter local path or the Linux CI result.
-- PostgreSQL extensions remain governed by ADR-0024 and are absent unless specifically allowed.
+- Bun 1.3.14 is the preferred prototype runtime; the Hono server retains a Node 24 fallback.
+- Dependency pins and available upstream versions are distinguished in the technology lifecycle ledger; an available patch is not automatically adopted.
+- Deep Windows checkout paths can exceed build-tool path limits; use a shorter local path or the evaluated Linux CI result.
+- PostgreSQL extensions remain governed by ADR-0024 and are absent unless explicitly allowed.
 
 ## Upgrade and support status
 
-No compatibility or support window is promised for this prototype checkpoint. Dependency changes require current technology evidence, a reviewed diff, frozen-lock validation, runtime/build tests, and updated lessons. Customer-facing release notes begin only after an approved product release exists.
+No compatibility or support window is promised for this prototype checkpoint. Dependency changes require current technology evidence, a reviewed diff, frozen-lock validation, runtime/build tests, and updated lessons. Customer-facing release notes begin only after an approved product release and release record exist.

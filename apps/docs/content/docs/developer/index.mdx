@@ -1,6 +1,18 @@
 ---
 title: Developer Guide
 description: Work safely in the governed platform prototype monorepo
+owner: Engineering
+documentation_id: PDOC-0006
+content_class: developer-guide
+audience: [developer, integrator]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 40454740838bba4426b9ca48b2e82811bc7b466d
+last_verified: 2026-07-16
+implementation_evidence: [AGENTS.md, registry/architecture-rules.json, scripts/check_architecture.py]
+related_capabilities: []
+permission_refs: []
+contract_refs: [docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md, docs/blueprint/14-Engineering/ENGINEERING_HANDBOOK.md]
 ---
 
 # Develop the platform prototype
@@ -16,11 +28,14 @@ apps/
     server/     Hono server with Bun and Node entries
     web/        Next.js web prototype on port 3001
 packages/
-    api/        oRPC procedures and context
-    auth/       Better Auth configuration and security helpers
-    db/         Drizzle schema, client, and migrations
-    env/        runtime environment validation
-    ui/         platform-owned shadcn-derived UI source
+    contracts/          generated and hand-owned API, capability, event, and permission contracts
+    domains/            runtime-neutral Catalog, Inventory, and Party behavior
+    foundation/         money, quantity, time, identifier, and result primitives
+    persistence/        owner-specific PostgreSQL adapters, schemas, and migration histories
+    platform/           identity, tenancy, authorization, entitlements, audit, events, and numbering
+    platform-clients/   typed client adapters
+    tooling/            shared configuration and validated environment schemas
+    ui-web/             platform-owned shadcn-derived web source
 ops/postgres/ local PostgreSQL prototype controls
 ```
 
@@ -48,7 +63,7 @@ bun run dev:native
 bun run --filter docs dev
 ```
 
-Use `bun run dev` to start the Turbo development graph. Environment variables are validated by `packages/env`; do not bypass validation except in a narrowly controlled build step that cannot access runtime data.
+Use `bun run dev` to start the Turbo development graph. Environment variables are validated by `packages/tooling/env`; do not bypass validation except in a narrowly controlled build step that cannot access runtime data.
 
 ## Add an API procedure
 
@@ -60,7 +75,7 @@ Before implementation:
 4. Define tenant, actor, permission, entitlement, idempotency, audit, privacy, offline, and failure behavior.
 5. Use an application contract; never import another domain's private persistence.
 
-Prototype procedures belong in `packages/api`. The Hono application supplies request context and exposes the oRPC transport. Provider SDKs and UI components must not become business abstractions.
+Application contracts belong in `packages/contracts/platform-api`; runtime-neutral behavior belongs to its owning Platform or Domain package. `apps/server` is the composition root that binds persistence, application implementations, request context, and oRPC/Hono transport. Provider SDKs and UI components must not become business abstractions.
 
 ## Add database state
 
@@ -82,10 +97,10 @@ See [Migrations](/docs/migrations) for rollback and evidence requirements.
 
 ## Add UI source
 
-Shared web primitives live in `packages/ui`. New shadcn source must use the pinned CLI, preserve Base UI/Rhea configuration, record provenance, and be normalized to platform tokens and state conventions.
+Shared web primitives live in `packages/ui-web/core`. New shadcn source must use the pinned CLI, preserve Base UI/Rhea configuration, record provenance, and be normalized to platform tokens and state conventions.
 
 ```bash
-bunx shadcn@4.13.0 add dialog popover -c packages/ui
+bunx shadcn@4.13.0 add dialog popover -c packages/ui-web/core
 ```
 
 Review generated code before keeping it. Cover loading, empty, error, denied, offline, conflict, and success states plus keyboard, focus, screen-reader, zoom, contrast, touch, responsive, motion, and white-label behavior.
@@ -99,6 +114,8 @@ Run from the repository root:
 ```bash
 python scripts/validate_docs.py
 python scripts/generate_registries.py --check
+python -m unittest scripts/test_validate_product_docs.py
+python scripts/validate_product_docs.py
 bun run --filter docs types:check
 bun run --filter docs build
 ```

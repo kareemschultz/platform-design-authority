@@ -15,7 +15,7 @@ Machine-consumed artifacts remain intentionally separate:
 
 - `openapi/` — canonical API contracts;
 - `schemas/` — canonical message and record schemas;
-- `registry/` — generated and curated governance registries;
+- `registry/` — generated and curated governance registries, including the separate product-documentation evidence manifest;
 - `scripts/` — deterministic registry and validation tooling.
 
 Start with:

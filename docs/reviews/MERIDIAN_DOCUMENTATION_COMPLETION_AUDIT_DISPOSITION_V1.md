@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -35,6 +35,8 @@ PR #75 at `f98b1e2` has passing `meridian` and both `validate-docs` checks. Loca
 
 The navigation checkpoint adds canonical linked catalogs for every governed document, parent navigation for every governed index, and `scripts/validate_document_indexes.py` with seeded regression cases for removed, bare-filename, metadata-incomplete, and duplicate entries. Local index validation reports zero unexplained governed documents. Independent review is still required before DCA-009 is marked Closed.
 
+The product-documentation checkpoint adds a separate nine-page `PDOC-*` manifest, MDX build-time metadata schema, implementation/version/evidence binding, internal-route and registry-reference validation, and seeded failure cases. Stale pre-WS1 claims were corrected to the `4045474` implementation baseline. The API page is honestly classified as `boundary-overview`; complete generated canonical OpenAPI reference parity remains open, so DCA-010 is only partially implemented.
+
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
@@ -48,13 +50,13 @@ The navigation checkpoint adds canonical linked catalogs for every governed docu
 | DCA-007 | High | Accepted | Initial waves registered; independent review and continuing backlog remain | Every research wave has a ledger record; affected backlog entries have honest states and exact output/source links |
 | DCA-008 | High | Partially Accepted | Workforce and platform-service gaps reduced after cutoff; ITSM/MSP/RMM, IAM, infrastructure/IPAM/DCIM, mobile/offline, and named-product depth remain | Reviewed matrices/workflows/findings and dated source ledger for each remaining research family |
 | DCA-009 | High | Accepted | Implemented; independent closure review pending | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |
-| DCA-010 | High | Accepted | Open | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
+| DCA-010 | High | Accepted | Partially implemented: manifest, MDX build/metadata/link/release evidence checks exist; generated canonical API reference remains | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
 | DCA-011 | High | Accepted | Open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |
 | DCA-012 | High | Accepted | Open | Capability source model consolidated or explicitly ratified as multi-source with provenance and zero identifier drift |
 | DCA-013 | High | Accepted | Open | Ratification wave manifests record exact versions, reviewers, dissent, dispositions, authority, and promotion evidence |
 | DCA-014 | Medium | Accepted | Open monitoring obligation | Technology ledger separates available, assessed, pinned, and proven versions with dated evidence and compatibility results |
 | DCA-015 | Medium | Accepted | Open | GitHub issue #59 and the existing project are dispositioned into one consistent state |
-| DCA-016 | High | Accepted | Partially implemented: status and index/orphan seeded checks exist; MDX and research checks remain | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |
+| DCA-016 | High | Accepted | Partially implemented: status, index/orphan, and MDX seeded checks exist; research registration remains | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |
 | DCA-017 | Medium | Accepted | Open | Active OpenAPI filler removed; unresolved cost inputs carry owner, evidence need, and decision trigger |
 | DCA-018 | High | Accepted | Open | WS2 evidence source resolves applicable capability-dimension cells to reviewed test evidence or explicit depth deferral |
 | DCA-019 | Blocker | Needs Founder/External Decision | Open; documentation may prepare but not close | Actual founder decisions, professional opinions, provider evidence, customer evidence, and security/accessibility/operations results linked at their gates |

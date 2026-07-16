@@ -1,7 +1,7 @@
 ---
 document_id: PDA-FND-010
 title: Naming Standards
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
@@ -188,6 +188,8 @@ Reference formats support tenant configuration, collision prevention, fiscal per
 - Avoid dates in filenames unless the document is inherently periodic evidence.
 - Periodic evidence uses `DESCRIPTIVE_NAME-YYYY-MM-DD.md`.
 - Version and status belong in front matter, not filenames.
+
+Governed architecture documents use their registered `PDA-*` or `ADR-*` identifier. Product, administrator, developer, migration, troubleshooting, and release pages under `apps/docs/content/docs/` use a route-independent `PDOC-NNNN` identifier. A `PDOC-*` identifier supports contextual help, redirects, version binding, and publication controls; it does not place product content in the architecture authority plane or grant permission to a reader.
 
 ## Prohibited Patterns
 

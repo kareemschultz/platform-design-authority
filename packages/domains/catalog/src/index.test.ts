@@ -412,6 +412,15 @@ describe("Catalog service", () => {
 				sku: "1234",
 			})
 		).toEqual({ items: [], nextCursor: null });
+		await expect(
+			harness.service.listProducts(createInput.tenantId, {
+				limit: 50,
+				sku: "   ",
+			})
+		).rejects.toMatchObject({
+			code: "invalid_identifier",
+			message: "SKU lookup is empty",
+		});
 	});
 
 	test("preserves Variant and Identifier identity on a name-only update", async () => {
@@ -621,5 +630,14 @@ describe("Catalog service", () => {
 				page: { limit: 50, sku: "1234" },
 			})
 		).toEqual({ items: [], nextCursor: null });
+		await expect(
+			application.list({
+				...request,
+				page: { limit: 50, sku: "   " },
+			})
+		).rejects.toMatchObject({
+			code: "invalid_identifier",
+			message: "SKU lookup is empty",
+		});
 	});
 });

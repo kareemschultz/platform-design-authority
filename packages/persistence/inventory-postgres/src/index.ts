@@ -61,6 +61,10 @@ export function parseInventoryStockBalanceCursor(
 		if (
 			typeof value !== "object" ||
 			value === null ||
+			Object.keys(value).length !== 4 ||
+			!Object.keys(value).every((key) =>
+				["itemKey", "locationId", "unit", "version"].includes(key)
+			) ||
 			!("version" in value) ||
 			value.version !== 1 ||
 			!("itemKey" in value) ||

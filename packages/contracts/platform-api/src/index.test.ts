@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
 	ActiveContextRequestSchema,
 	appApiContract,
+	CatalogSkuLookupSchema,
 	CreateProductSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
@@ -104,6 +105,14 @@ describe("WS1 platform API contract", () => {
 });
 
 describe("WS2 Catalog and Inventory API contract", () => {
+	test("rejects empty exact SKU filters and canonicalizes surrounding whitespace", () => {
+		expect(CatalogSkuLookupSchema.safeParse("   ").success).toBe(false);
+		expect(CatalogSkuLookupSchema.safeParse(`${" ".repeat(64)}A`).success).toBe(
+			false
+		);
+		expect(CatalogSkuLookupSchema.parse(" 12-34 ")).toBe("12-34");
+	});
+
 	test("is exposed through the transport-neutral application client contract", () => {
 		expect(appApiContract.catalog).toBe(ws2CatalogInventoryApiContract.catalog);
 		expect(appApiContract.inventory).toBe(

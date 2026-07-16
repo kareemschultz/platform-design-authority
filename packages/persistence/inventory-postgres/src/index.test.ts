@@ -27,5 +27,22 @@ describe("Inventory persistence registration", () => {
 		expect(
 			parseInventoryStockBalanceCursor(JSON.stringify({ ...value, version: 2 }))
 		).toBeNull();
+		expect(
+			parseInventoryStockBalanceCursor(
+				JSON.stringify({ ...value, tenantId: "tenant_smuggled", version: 1 })
+			)
+		).toBeNull();
+		expect(
+			parseInventoryStockBalanceCursor(
+				JSON.stringify(
+					Object.fromEntries([
+						["unit", value.unit],
+						["locationId", value.locationId],
+						["itemKey", value.itemKey],
+						["version", 1],
+					])
+				)
+			)
+		).toEqual({ ...value, version: 1 });
 	});
 });

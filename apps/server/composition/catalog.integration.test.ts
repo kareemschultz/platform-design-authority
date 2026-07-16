@@ -496,6 +496,20 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 		expect(
 			await catalog.listProducts(tenantId, { limit: 50, sku: "1234" })
 		).toEqual({ items: [], nextCursor: null });
+		expect(
+			await captureError(
+				catalog.listProducts(tenantId, { limit: 50, sku: "   " })
+			)
+		).toMatchObject({
+			code: "invalid_identifier",
+			message: "SKU lookup is empty",
+		});
+		expect(
+			await createCatalogRepository(testPool).listProducts(tenantId, {
+				limit: 50,
+				sku: "",
+			})
+		).toEqual({ items: [], nextCursor: null });
 	});
 
 	test("rolls Product, receipt, and outbox state back together on append failure", async () => {

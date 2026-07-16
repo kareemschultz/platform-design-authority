@@ -226,9 +226,14 @@ export function createCatalogRepository(
 		tenantId: string,
 		page: CatalogPageRequest
 	): Promise<CatalogPage<CatalogProductRecord> | null> {
+		const exactIdentifierRequested =
+			page.barcode !== undefined || page.sku !== undefined;
+		if (!exactIdentifierRequested) {
+			return null;
+		}
 		const normalizedValue = page.barcode ?? page.sku;
 		if (!normalizedValue) {
-			return null;
+			return { items: [], nextCursor: null };
 		}
 		const [identifier] = await database
 			.select({ productId: catalogIdentifiers.productId })

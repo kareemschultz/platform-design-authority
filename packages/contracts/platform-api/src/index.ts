@@ -93,6 +93,7 @@ const PageQuerySchema = z.object({
 	cursor: z.string().optional(),
 	limit: z.coerce.number().int().min(1).max(200).default(50),
 });
+export const CatalogSkuLookupSchema = z.string().max(64).trim().min(1);
 const IdempotencyHeadersSchema = z.object({
 	"idempotency-key": z.string().min(16).max(128),
 });
@@ -510,7 +511,7 @@ export const listProductsContract = base
 			query: PageQuerySchema.extend({
 				barcode: z.string().max(64).optional(),
 				query: z.string().max(200).optional(),
-				sku: z.string().max(64).optional(),
+				sku: CatalogSkuLookupSchema.optional(),
 				state: ProductStateSchema.optional(),
 			}),
 		})

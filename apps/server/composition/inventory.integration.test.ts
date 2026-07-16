@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { Buffer } from "node:buffer";
 import {
 	createInventoryService,
 	type InventoryIdFactory,
@@ -92,6 +93,8 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			locationId: "location_a",
 			unit: "case\u001feach",
 		});
+		const publicToken = (payload: string) =>
+			`sb1_${Buffer.from(payload, "utf8").toString("base64url")}`;
 		const encoded = encodeStockBalanceCursor(raw);
 		expect(encoded).toStartWith("sb1_");
 		expect(encoded).not.toContain("product_a");
@@ -102,6 +105,48 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(() =>
 			decodeStockBalanceCursor("sb1_bm90LWEtcHJvamVjdGlvbi1rZXk")
 		).toThrow("Stock balance cursor is invalid");
+		expect(() => decodeStockBalanceCursor(publicToken("{"))).toThrow(
+			"Stock balance cursor is invalid"
+		);
+		expect(() =>
+			decodeStockBalanceCursor(
+				publicToken(
+					JSON.stringify({
+						itemKey: "product_a",
+						locationId: "location_a",
+						unit: "each",
+						version: 2,
+					})
+				)
+			)
+		).toThrow("Stock balance cursor is invalid");
+		expect(() =>
+			decodeStockBalanceCursor(
+				publicToken(
+					JSON.stringify({
+						itemKey: "product_a",
+						locationId: "location_a",
+						tenantId: "tenant_smuggled",
+						unit: "each",
+						version: 1,
+					})
+				)
+			)
+		).toThrow("Stock balance cursor is invalid");
+		expect(
+			decodeStockBalanceCursor(
+				publicToken(
+					JSON.stringify(
+						Object.fromEntries([
+							["unit", "case\u001feach"],
+							["locationId", "location_a"],
+							["itemKey", "product_a"],
+							["version", 1],
+						])
+					)
+				)
+			)
+		).toBe(raw);
 	});
 	test("migrates idempotently through its isolated history and creates only nine owner tables", async () => {
 		await migrateInventory(testPool);

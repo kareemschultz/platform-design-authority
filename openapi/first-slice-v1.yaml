@@ -222,7 +222,7 @@ paths:
           schema: {type: string, maxLength: 64}
         - name: sku
           in: query
-          schema: {type: string, maxLength: 64}
+          schema: {type: string, minLength: 1, maxLength: 64, pattern: '.*\S.*'}
         - name: state
           in: query
           schema: {type: string, enum: [Draft, Active, Suspended, Discontinued, Archived]}

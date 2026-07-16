@@ -299,6 +299,14 @@ function normalizeLookup(value: string): string {
 		: normalizeTenantIdentifier(value);
 }
 
+function normalizeSkuLookup(value: string): string {
+	const normalized = normalizeTenantIdentifier(value);
+	if (!normalized) {
+		throw new CatalogError("invalid_identifier", "SKU lookup is empty");
+	}
+	return normalized;
+}
+
 async function fingerprint(value: Record<string, unknown>): Promise<string> {
 	const bytes = new TextEncoder().encode(JSON.stringify(value));
 	const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -1085,7 +1093,9 @@ export function createCatalogService(options: CatalogServiceOptions) {
 				const result = await repository.listProducts(tenantId, {
 					...page,
 					...(page.barcode ? { barcode: normalizeLookup(page.barcode) } : {}),
-					...(page.sku ? { sku: normalizeTenantIdentifier(page.sku) } : {}),
+					...(page.sku === undefined
+						? {}
+						: { sku: normalizeSkuLookup(page.sku) }),
 				});
 				return { ...result, items: result.items.map(productView) };
 			});

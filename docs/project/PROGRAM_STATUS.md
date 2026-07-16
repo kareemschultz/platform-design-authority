@@ -4,7 +4,7 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at `7202fc819b70982c013e1ca11a4fcc136e01e2de`, which includes the RR-011 remediation and re-verification, WS1 closeout, project-tracking records, and WS2 PR1-PR4 (governance/contracts, Catalog core, Inventory ledger, durable event delivery), each independently audited before merge
+**Evidence cutoff:** `main` at `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`, which includes the RR-011 remediation and re-verification, WS1 closeout, project-tracking records, and WS2 PR1-PR5 (governance/contracts, Catalog core, Inventory ledger, durable event delivery, bounded imports and online numbering), each independently audited across one or more remediation rounds before merge
 
 **Last updated:** 2026-07-16
 
@@ -15,7 +15,7 @@ This dashboard is a non-authoritative program-control summary. It is subordinate
 | Measure | Current result | Interpretation |
 |---|---:|---|
 | Blueprint baseline completeness | **100% for controlled-prototype implementation commencement** | The bounded documentation baseline needed to continue the named prototypes exists. FA4-032, ratification waves, and production gates remain open. |
-| First-slice implementation | **26.7% provisional weighted completion** | WS0 and WS1 are complete at controlled-prototype depth. WS2 is in progress: its governed plan/contracts stage is closed and Catalog, Inventory, and event-delivery cores are merged, but Numbering/Import, UX, and closeout remain (see WS2 delivery detail). WS3–WS7 have not begun implementation. |
+| First-slice implementation | **35.2% provisional weighted completion** | WS0 and WS1 are complete at controlled-prototype depth. WS2 is in progress: governed plan/contracts, Core/domain implementation, and Persistence/events/migrations/integrations are all stage-complete now that Catalog, Inventory, and Import/Numbering cores plus event delivery are merged, but User experience, Automated test dimensions, and Independent closeout remain (see WS2 delivery detail). WS3–WS7 have not begun implementation. |
 | WS1 progress | **100% stage-weighted** | PR1–PR9 implement contracts, persistence, identity/tenancy/Party, authorization, entitlements, Audit/revocation, the real shell, and governed closeout evidence. This is not pilot or production readiness. |
 | Capability evidence coverage | **11/103 capabilities; 143/1,294 required cells** | The generated registry now computes evidence coverage. The 11 WS1 capabilities are evidenced at registered first-slice depth; remaining workstreams stay Planned. |
 | Production readiness | **Not claimed** | Founder, legal, customer, provider, security, accessibility, operational, pilot, and other external gates remain authoritative. |
@@ -34,13 +34,13 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 |---|---:|---|---:|---:|---|
 | WS0 — Scaffold alignment and contracts | 8% | complete | 100% | 8.0% | PR #23, #31, #32; package families, foundation types, generated contracts, contract parity, and executable architecture gates are merged. |
 | WS1 — Identity, tenancy, Party, authorization | 17% | complete | 100% | 17.0% | PR #54 merged the PR1–PR9 controlled-prototype closeout; PDA-IMPL-005 and the generated matrix record evidence and residual gates. |
-| WS2 — Catalog and inventory ledger | 17% | in-progress | 10% | 1.7% | PR #63 (plan), #65 (PR1 governance/contracts), #67 (PR2 Catalog core), #69 (PR3 Inventory ledger), #74 (PR4 durable event delivery) are merged and independently audited. Only the governed-plan-and-contracts stage is counted closed; Core/domain and Persistence/events stages are substantially but not fully evidenced pending PR5 (issue #71). See WS2 delivery detail. |
+| WS2 — Catalog and inventory ledger | 17% | in-progress | 60% | 10.2% | PR #63 (plan), #65 (PR1), #67 (PR2 Catalog core), #69 (PR3 Inventory ledger), #74 (PR4 durable event delivery), #76 (PR5 bounded imports and online numbering) are merged and independently audited. Governed-plan-and-contracts, Core/domain implementation, and Persistence/events/migrations/integrations stages are now all counted closed — every WS2 domain (Catalog, Inventory, Import/Export, Numbering) has a merged, audited core, persistence adapter, and event integration. User experience (PR6, issue #72) and Automated test dimensions / Independent closeout (PR7, issue #73) remain. See WS2 delivery detail. |
 | WS3 — POS cash | 17% | planned | 0% | 0% | Blocked on WS2. |
 | WS4 — Stored value | 11% | planned | 0% | 0% | Blocked on WS3. |
 | WS5 — Offline sync | 12% | planned | 0% | 0% | Full workstream blocked on WS3; bounded client-engine research may begin after WS1 under the parallelism rule. |
 | WS6 — Provider adapter | 9% | planned | 0% | 0% | Engine work may follow WS1; provider sandbox and pilot path remain externally gated by founder/provider decisions. |
 | WS7 — Recovery and operations | 9% | planned | 0% | 0% | Starts after WS2 provides real ledgers/outbox; closes last. |
-| **Total** | **100%** |  |  | **26.7%** | Provisional weighted implementation completion: **26.7%**. |
+| **Total** | **100%** |  |  | **35.2%** | Provisional weighted implementation completion: **35.2%**. |
 
 ## WS1 delivery detail
 
@@ -67,7 +67,7 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 | PR2 Catalog core, persistence, API, and lifecycle | complete | issue #66 (closed); PR #67 merged; independently audited across two remediation rounds |
 | PR3 Inventory ledger, balances, workflows, and offline boundary | complete | issue #68 (closed); PR #69 merged; independently audited at remediated head `48a72cd` |
 | PR4 durable event delivery, worker topology, and projections | complete | issue #70 (closed pre-worker governance review) / PR #74 merged at `7202fc8`; independently audited across two rounds; addresses RR-006's delivery-worker/retry/dead-letter/consumer gap, disposition deferred to PR7 closeout below |
-| PR5 bounded imports and online numbering foundation | not-started | issue #71 (open) |
+| PR5 bounded imports and online numbering foundation | complete | issue #71 (closed) / PR #76 merged at `f7d2a6b`; independently audited across two rounds (round 1 withheld concurrence on 4 P1 findings including numbering never reaching a production code path; round 2 recorded concurrence after all 4 were independently reproduced fixed, including a 10-way live concurrency test proving no duplicate effects under retry) |
 | PR6 Product and Inventory web experience | not-started | issue #72 (open) |
 | PR7 verification and controlled-prototype closeout | not-started | issue #73 (open); expected to close RR-006 and extend capability-evidence-coverage generation to WS2 |
 
@@ -90,18 +90,19 @@ Implemented and merged:
 - WS2 governed Catalog and Inventory contracts, event schemas, and ledger spike (PR #65);
 - Catalog domain core, persistence, and product lifecycle API (PR #67);
 - Inventory ledger, balances, and workflow domain core with an offline boundary (PR #69);
-- a durable event delivery worker, retries, dead-letter handling, consumers, and replay/projections beyond the minimum outbox (PR #74).
+- a durable event delivery worker, retries, dead-letter handling, consumers, and replay/projections beyond the minimum outbox (PR #74);
+- bounded CSV product/opening-stock import with owner-command-mapped domain effects, a tenant-scoped reloadable API (list, findings, cancel, reconciliation, accept, audited purge), and an online Numbering service atomically wired into import creation (PR #76).
 
 Not yet complete:
 
-- WS2 bounded imports, online numbering foundation, product/inventory web experience, and controlled-prototype closeout (PR5-PR7, issues #71-#73);
+- WS2 product/inventory web experience and controlled-prototype closeout (PR6-PR7, issues #72-#73);
 - WS3–WS7 business-domain implementation;
 - production-grade RLS topology and evidence;
 - production OTP/provider path and other external readiness gates.
 
 ## Immediate priorities
 
-1. Continue the issue #12 WS2 sequence one issue/branch/worktree/PR at a time: issue #71 (PR5 bounded imports and online numbering foundation) is next, followed by issue #72 (PR6 web experience) and issue #73 (PR7 closeout, which should also disposition RR-006 and extend capability-evidence-coverage generation to WS2).
+1. Continue the issue #12 WS2 sequence one issue/branch/worktree/PR at a time: issue #72 (PR6 Product and Inventory web experience) is next, followed by issue #73 (PR7 closeout, which should also disposition RR-006 and extend capability-evidence-coverage generation to WS2).
 2. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
 
 ## Open risk summary
@@ -110,6 +111,7 @@ The Architecture Risk Register remains authoritative. The most important current
 
 - controlled-prototype database isolation versus future production RLS topology;
 - RR-006 (minimum outbox lacked a delivery worker, retry/dead-letter policy, and consumer idempotency) has merged, independently audited evidence against it from WS2 PR4 (PR #74), but remains open in the register pending a closure disposition — expected at WS2 PR7 closeout (issue #73), not asserted here;
+- WS2 PR5 (PR #76) merged with disclosed, non-blocking residuals worth tracking into PR6/PR7: a composition-lane test-suite count that doesn't reproduce locally (root-caused to a missing test timeout override on a file outside PR5's own diff; CI itself is green), Numbering's cross-tenant test coverage is thinner than initially claimed (no dedicated Postgres-backed test), and several security/resource-proof tests (oversized-file bytes, malformed UTF-8, real EICAR-detection wiring, HTTP-layer error leakage) remain untested;
 - provider, legal, customer, founder, security, accessibility, operational, and pilot evidence still open;
 - risk of generated contracts, implementation, Fumadocs, and this dashboard drifting apart.
 

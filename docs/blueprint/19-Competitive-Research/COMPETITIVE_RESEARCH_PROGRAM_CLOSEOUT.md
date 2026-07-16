@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-086
 title: Initial Competitive Research Program Closeout
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -29,7 +29,7 @@ The initial program contains the framework, accounting/bookkeeping, ERP administ
 
 ## Limitations and inaccessible evidence
 
-No normalized paid-tier comparison, production tenant, terminal certification, Guyana provider/payroll/legal/tax/fiscal review, enterprise implementation study, statistically valid customer study, accessibility audit of competitor products, source-code architecture inspection, or private support data was available. Sage/Infor/Acumatica depth, several field-service/rental flows, enterprise HR/payroll configuration, pricing/packaging and regional availability are less complete. Documented ITSM/MSP/RMM and IAM/identity-administration continuations now exist in PDA-CIR-087 through PDA-CIR-092, but configured-tenant/provider observation, protocol/security evaluation and independent review remain open. Dedicated DCIM/IPAM, network-operations, direct device/offline, and named-product lineage studies were not completed. Secondary anecdotes were not used as load-bearing evidence.
+No normalized paid-tier comparison, production tenant, terminal certification, Guyana provider/payroll/legal/tax/fiscal review, enterprise implementation study, statistically valid customer study, accessibility audit of competitor products, source-code architecture inspection, or private support data was available. Sage/Infor/Acumatica depth, several field-service/rental flows, enterprise HR/payroll configuration, pricing/packaging and regional availability are less complete. Documented ITSM/MSP/RMM, IAM/identity-administration, and infrastructure/DCIM/IPAM continuations now exist in PDA-CIR-087 through PDA-CIR-095, but configured/direct observation, protocol/security/operational evaluation, owner/provider decisions and independent review remain open. Dedicated direct device/offline and named-product lineage studies were not completed. Secondary anecdotes were not used as load-bearing evidence.
 
 ## Governed transfer status
 
@@ -40,7 +40,7 @@ Implementation-findings documents list proposed authority changes; none are sile
 - Independent PDA review and disposition of every proposed governed follow-up.
 - Prototype and implementation evidence tracked in IMPLEMENTATION_EVIDENCE_REGISTER.md.
 - Qualified jurisdiction/provider research at scope admission.
-- CIR-BACK-023 through CIR-BACK-025 for infrastructure/DCIM/IPAM, named-product reconciliation, and direct device/offline evidence; CIR-BACK-021 and CIR-BACK-022 are transferred but still await independent and direct/configured-observation evidence.
+- CIR-BACK-024 and CIR-BACK-025 for named-product reconciliation and direct device/offline evidence; CIR-BACK-021 through CIR-BACK-023 are transferred but still await independent, direct/configured-observation, owner/provider and implementation evidence.
 - Quarterly volatile-source refresh and contradiction handling.
 - Customer/pilot validation before external differentiation claims.
 

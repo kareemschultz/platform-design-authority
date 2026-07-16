@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-007
 title: Competitive Research Ledger
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -279,6 +279,28 @@ Confidence is not approval. A high-confidence observation may still be unsuitabl
 - Follow-up: independent Platform Identity/Security review, customer requirement evidence, configured-provider trials, protocol/security/tenant-isolation testing, operational exercises and roadmap authority.
 - Revalidate when: enterprise federation, SCIM, delegated identity administration, workload identity or authentication-owner change is proposed; a cited product behavior changes materially; or 2027-07-16, whichever occurs first.
 
+### CIR-LED-0013 — Infrastructure inventory, DCIM, IPAM, and network-operations documented research transferred
+
+- Status: In Review
+- Completed: 2026-07-16
+- Researcher: Codex with Assets/Maintenance, Service, Developer Platform, Security, Operations, and independent review pending
+- Wave: Continuing study — infrastructure inventory / DCIM / IPAM / network operations
+- Question: Which desired-state, asset, IPAM, discovery, reconciliation, credential, configuration-change, API, plugin, backup and migration patterns transfer without making a scanner/controller a universal owner?
+- Products: NetBox, phpIPAM, Snipe-IT, UniFi, FortiManager, and Nautobot Golden Configuration as an adjacent intended-state reference
+- Sources: SRC-057 through SRC-061; page-level first-party citations in PDA-CIR-093
+- Evidence mode: documented public project, product, administration, API, backup and change-control evidence; internal architectural synthesis
+- Access limitations: no configured deployment, real scan, device adoption, controller change, API call, plugin, upgrade, restore, scale/accessibility test, licensing/support assessment, Guyana availability review or network outage exercise
+- Finding: distinguish declared intent, observed evidence and reconciled authoritative state; preserve Assets, Platform Device, Service, Secrets and Developer Platform ownership; require an explicit owner/ADR decision before general infrastructure-network/IPAM facts are admitted.
+- Contradictions: network tools market or describe themselves as a source of truth while NetBox itself defines desired rather than live state and emphasizes human validation; controllers combine observation and mutation for efficiency while Meridian must keep provider control separate from tenant, Asset and domain authority.
+- Confidence: Medium for documented models/control patterns; Low for safe defaults, operational effectiveness, version/edition parity, integration effort and recovery quality
+- Meridian impact:
+  - outputs: PDA-CIR-093 through PDA-CIR-095;
+  - capabilities: research input for `assets.*`, `maintenance.*`, `service.*`, `platform.devices`, `platform.secrets`, `platform.audit`, `engine.workflow`, `engine.automation`, `engine.approvals`, and `developer.*`;
+  - contracts: no identifier, endpoint, provider, owner or first-slice change introduced; ADR/capability registration remains required for infrastructure-network/IPAM authority;
+  - implementation: no scanner/controller/plugin admission or remote change authorization.
+- Follow-up: independent owner/Security review, customer requirements, lawful configured-product and device/controller trials, owner/roadmap/ADR decision, provider/deployment evaluation, accessibility and operational exercises.
+- Revalidate when: infrastructure inventory, DCIM, IPAM, discovery, controller or network-change scope is proposed; cited product behavior changes materially; or 2027-07-16, whichever occurs first.
+
 ## 6.1 Stable Research Result Index
 
 This index is the machine-checked registration boundary between backlog questions, durable outputs, ledger evidence, and stable source records. `Transferred` means the outputs are registered; it does not mean the Draft findings are approved or implementation-ready.
@@ -295,6 +317,7 @@ This index is the machine-checked registration boundary between backlog question
 | RES-008 | Cross-domain synthesis | Transferred | CIR-LED-0009 | CIR-BACK-020 | PDA-CIR-080 through PDA-CIR-086 | SRC-001 through SRC-040 | Independent review; direct mobile/offline study remains CIR-BACK-025 |
 | RES-009 | ITSM/MSP/RMM | Transferred | CIR-LED-0011 | CIR-BACK-021 | PDA-CIR-087 through PDA-CIR-089 | SRC-041 through SRC-048 | Independent review, direct tenant/agent observation, provider evaluation and roadmap admission pending |
 | RES-010 | IAM/identity administration | Transferred | CIR-LED-0012 | CIR-BACK-022 | PDA-CIR-090 through PDA-CIR-092 | SRC-049 through SRC-056 | Independent review, configured-provider observation, protocol/security evaluation and roadmap admission pending |
+| RES-011 | Infrastructure/DCIM/IPAM | Transferred | CIR-LED-0013 | CIR-BACK-023 | PDA-CIR-093 through PDA-CIR-095 | SRC-057 through SRC-061 | Independent review, direct discovery/controller observation, owner/provider decision and operational/security evaluation pending |
 
 ## 6.2 Registration Invariants
 

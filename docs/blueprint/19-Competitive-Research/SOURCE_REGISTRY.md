@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-006
 title: Competitive Research Source Registry
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -244,8 +244,13 @@ The page-level citations remain in their research documents. These stable record
 | SRC-054 | Better Auth SCIM and Organization | official plugin documentation | https://better-auth.com/docs/plugins/scim | 2026-07-16 | documented | representative locator; organization-scoped token/admin behavior and directory convergence untested |
 | SRC-055 | Microsoft Entra SCIM | official product documentation | https://learn.microsoft.com/en-us/entra/identity/app-provisioning/scim-support-in-entra-id | 2026-07-16 | documented | provider configuration, edition/licensing, regional behavior and end-to-end provisioning untested |
 | SRC-056 | Microsoft Entra workload identity and certificate rotation | official architecture documentation | https://learn.microsoft.com/en-us/entra/architecture/service-accounts-managed-identities | 2026-07-16 | documented | Azure-specific managed-identity availability; workload and overlapping-certificate rotation not exercised |
+| SRC-057 | NetBox | official project documentation | https://netbox.readthedocs.io/en/stable/integrations/rest-api/ | 2026-07-16 | documented/public source | no configured instance, plugin, webhook receiver, concurrent-write, restore, upgrade, security or scale test |
+| SRC-058 | phpIPAM | official project documentation | https://phpipam.net/documents/ | 2026-07-16 | documented/public source | 1.8.1 documentation/changelog; no discovery, agent, API, authentication, restore, upgrade or scale test |
+| SRC-059 | Snipe-IT | official product/API documentation | https://snipe-it.readme.io/docs/managing-assets | 2026-07-16 | documented/public source | no asset import, audit, label/device, API, permission, backup or restore test |
+| SRC-060 | UniFi | official support/developer documentation | https://help.ui.com/hc/en-us/articles/30076656117655-Getting-Started-with-the-Official-UniFi-API | 2026-07-16 | documented | no console, site, gateway, supported-device, role, API, backup, migration or outage test |
+| SRC-061 | FortiGate | official administration documentation | https://docs.fortinet.com/document/fortigate/7.6.3/administration-guide/108345/system-actions | 2026-07-16 | documented | cited 7.4/7.6 automation/action pages; no appliance, FortiManager, fabric, CLI, privilege or action test |
 
-SRC-001 through SRC-056 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in these waves.
+SRC-001 through SRC-061 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in these waves.
 
 ## 12. Review and Maintenance
 

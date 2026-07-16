@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-001
 title: Competitive Intelligence and Product Research
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -234,8 +234,9 @@ The initial research program was authored through 2026-07-16. All artifacts rema
 | Cross-domain synthesis | PDA-CIR-080 through PDA-CIR-086 | differentiation, advantage, dispositions, shared workflows/recovery/review and closeout |
 | Continuing ITSM/MSP/RMM study | PDA-CIR-087 through PDA-CIR-089 | capability comparison, escalation/remote-action workflow, threat boundary and implementation findings |
 | Continuing IAM/identity-administration study | PDA-CIR-090 through PDA-CIR-092 | terminology/capability comparison, administration/provisioning/recovery controls, and retain/extend/replace findings |
+| Continuing infrastructure/DCIM/IPAM study | PDA-CIR-093 through PDA-CIR-095 | capability/authority matrix, discovery/reconciliation workflow and network-operations findings |
 
-The section contains 92 uniquely identified Markdown documents, including two continuing studies after the initial nine-wave set. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial writing set and records access limits, omitted comparator families, continuing research backlog, and external evidence gates.
+The section contains 95 uniquely identified Markdown documents, including three continuing studies after the initial nine-wave set. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial writing set and records access limits, omitted comparator families, continuing research backlog, and external evidence gates.
 
 ## 14. Artifact Catalog
 
@@ -361,3 +362,6 @@ This catalog is the canonical navigation surface for the research artifacts. Ide
 - [IAM and Identity Administration Capability Matrix](IAM_AND_IDENTITY_ADMINISTRATION_CAPABILITY_MATRIX.md) — `PDA-CIR-090` · Draft
 - [Identity Administration, Provisioning, and Recovery Reference](IDENTITY_ADMINISTRATION_PROVISIONING_AND_RECOVERY_REFERENCE.md) — `PDA-CIR-091` · Draft
 - [IAM Retain, Extend, and Replace Implementation Findings](IAM_RETAIN_EXTEND_REPLACE_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-092` · Draft
+- [Infrastructure, DCIM, IPAM, and Network Operations Competitive Capability Matrix](INFRASTRUCTURE_DCIM_IPAM_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-093` · Draft
+- [Infrastructure Discovery and Reconciliation Workflow Reference](INFRASTRUCTURE_DISCOVERY_RECONCILIATION_WORKFLOW_REFERENCE.md) — `PDA-CIR-094` · Draft
+- [Infrastructure Operations Implementation Findings](INFRASTRUCTURE_OPERATIONS_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-095` · Draft

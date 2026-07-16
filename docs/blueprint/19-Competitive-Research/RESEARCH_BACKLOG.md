@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-008
 title: Competitive Research Backlog
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -286,7 +286,7 @@ Each entry records:
 ### CIR-BACK-023 — Infrastructure inventory, DCIM, IPAM, and network operations
 
 - Priority: P2
-- Status: Planned
+- Status: Transferred
 - Domain: Assets / Service / Developer Platform / Operations
 - Trigger: before infrastructure inventory, IP address management, network-controller, or configuration-source-of-truth scope is admitted
 - Question: What should Meridian learn from NetBox, phpIPAM, Snipe-IT, UniFi, Fortinet, and adjacent platforms about source-of-truth boundaries, discovery, reconciliation, credentials, topology, tenancy, change control, and automation?
@@ -295,6 +295,7 @@ Each entry records:
 - Dependencies: Assets and Service ownership, Developer Platform integration rules, ADR-0019, secrets governance, and roadmap admission.
 - Owner: Platform Design Authority with Assets, Service, Developer Platform, Security, and Operations owners
 - Completion: reviewed findings that distinguish authoritative inventory from discovered projections and do not treat a network controller as a business-domain owner.
+- Transfer evidence: CIR-LED-0013, RES-011, PDA-CIR-093 through PDA-CIR-095, and SRC-057 through SRC-061. Independent review, direct discovery/controller observation, owner/roadmap decision, provider evaluation, and operational/security testing remain open.
 
 ### CIR-BACK-024 — Named-product gap and historical-product reconciliation
 

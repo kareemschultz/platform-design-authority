@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -50,7 +50,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 | Deployment and operations | Architecture and requirements catalogues exist; four merged prototype service groups have machine-registered draft procedures; Event Backbone runbook remains on open PR #74 | Independent procedure review, live dashboards, tested alerts, on-call escalation, capacity, backup/restore, incident, migration, rollback, and recovery exercises |
 | Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled | Founder decisions, legal entity, pricing, contracts, provider, tax, custody/payout gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
-| Competitive research | Initial nine-wave writing set plus documented ITSM/MSP/RMM and IAM/identity-administration continuations are In Review with source/ledger/backlog reconciliation; CIR-BACK-021 and CIR-BACK-022 are transferred | CIR-BACK-023–025, direct tenant/agent/provider/device observation, protocol/security trials, omitted products/families, independent review and governed transfer |
+| Competitive research | Initial nine-wave writing set plus documented ITSM/MSP/RMM, IAM/identity-administration and infrastructure/DCIM/IPAM continuations are In Review with source/ledger/backlog reconciliation; CIR-BACK-021 through CIR-BACK-023 are transferred | CIR-BACK-024–025, direct tenant/agent/provider/scanner/controller/device observation, owner/provider decisions, protocol/security/operational trials, omitted products, independent review and governed transfer |
 | Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; the API page preserves an implemented-runtime view and a generated 99-operation canonical Draft contract table | Full task/admin/migration/troubleshooting depth, later-workstream release evidence, editorial/accessibility review |
 | Testing and evidence | Thirteen-dimension matrix supports planned, partial, evidenced, not-applicable, and depth-deferred states; 223 cells have evidence | Complete remaining WS2 cells, WS3–WS7 sources, scale/security/accessibility/operations results, external evidence |
 | Roadmap and program control | Workstreams and project exist; current status is non-authoritative | Continuous evidence-cutoff updates, generated status feasibility, founder/customer sequencing decisions |
@@ -107,7 +107,7 @@ It may not claim:
 2. Adopt and operationalize PDA-FND-017 through reviewed templates and validators.
 3. Complete Wave 0/1 review packets without self-ratification.
 4. Close WS2 vertically with UI, operations, product docs, and registered evidence.
-5. Continue CIR-BACK-023–025 by roadmap proximity and obtain independent/direct evidence for transferred CIR-BACK-021 and CIR-BACK-022.
+5. Continue CIR-BACK-024–025 by roadmap proximity and obtain independent/direct/configured evidence for transferred CIR-BACK-021 through CIR-BACK-023.
 6. Produce real operational, security, accessibility, migration, and external evidence.
 7. Reassess at a fixed merged `main` SHA.
 

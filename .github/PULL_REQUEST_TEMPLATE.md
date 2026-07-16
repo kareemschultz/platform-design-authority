@@ -56,6 +56,7 @@ Closes #
 - [ ] `python -m unittest scripts/test_validate_product_docs.py` and `python scripts/validate_product_docs.py` pass when product documentation, contracts, permissions, or evidence changes
 - [ ] `python -m unittest scripts/test_validate_research_registration.py` and `python scripts/validate_research_registration.py` pass when competitive-research outputs, backlog states, ledger entries, or source records change
 - [ ] `python -m unittest scripts/test_validate_capability_readiness.py` and `python scripts/validate_capability_readiness.py` pass when capabilities, namespaces, first-slice scope, contracts, evidence, or admission states change
+- [ ] `python -m unittest scripts/test_validate_ratification_waves.py` and `python scripts/validate_ratification_waves.py` pass when review, approval, ratification, or lifecycle-promotion evidence changes
 - [ ] `python scripts/generate_contracts.py --check` passes (when contracts changed)
 - [ ] `python -m unittest scripts/test_validate_program_status.py` and `python scripts/validate_program_status.py` pass (when project-status tracking changed)
 

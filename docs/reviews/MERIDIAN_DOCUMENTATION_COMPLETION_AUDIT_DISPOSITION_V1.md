@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -43,6 +43,8 @@ The capability-source consolidation checkpoint folds Party, Payment, Business DN
 
 The capability-readiness checkpoint registers all 32 namespaces with their authoritative owner, honest readiness state, admission trigger, blockers, and evidence paths. The validator reconciles 497 capabilities, 103 first-slice entries, and 11 evidenced capabilities, and seven seeded tests reject missing families, owner drift, false deferral, unsupported evidence claims, and broken evidence paths. DCA-005 remains partially implemented because registration does not supply the missing contracts and evidence for admitted families.
 
+The ratification-preparation checkpoint defines immutable candidate manifests, reviewer-role coverage, finding dispositions, approval records, and document-level promotion evidence. RW-00 is `preparation`; RW-01 through RW-08 are `not-started`; every candidate/review/approval/promotion field is empty. Seven seeded tests reject lifecycle advancement without evidence. DCA-013 remains open because no actual independent, founder, specialist, or approval-authority review has occurred.
+
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
@@ -59,7 +61,7 @@ The capability-readiness checkpoint registers all 32 namespaces with their autho
 | DCA-010 | High | Accepted | Partially implemented: manifest, MDX build/metadata/link/release evidence checks exist; generated canonical API reference remains | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
 | DCA-011 | High | Accepted | Open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |
 | DCA-012 | High | Accepted | Implemented; independent closure review pending | Capability source model consolidated or explicitly ratified as multi-source with provenance and zero identifier drift |
-| DCA-013 | High | Accepted | Open | Ratification wave manifests record exact versions, reviewers, dissent, dispositions, authority, and promotion evidence |
+| DCA-013 | High | Accepted | Preparation implemented; all reviews and promotions remain open | Ratification wave manifests record exact versions, reviewers, dissent, dispositions, authority, and promotion evidence |
 | DCA-014 | Medium | Accepted | Open monitoring obligation | Technology ledger separates available, assessed, pinned, and proven versions with dated evidence and compatibility results |
 | DCA-015 | Medium | Accepted | Open | GitHub issue #59 and the existing project are dispositioned into one consistent state |
 | DCA-016 | High | Accepted | Implemented; independent closure review pending | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |

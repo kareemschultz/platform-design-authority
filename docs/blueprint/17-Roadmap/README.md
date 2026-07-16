@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-005
 title: Roadmap Section Index
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -19,11 +19,13 @@ last_reviewed: 2026-07-16
 - [Meridian First-Slice Implementation Plan](FIRST_SLICE_IMPLEMENTATION_PLAN.md) — `PDA-RDM-007` · Draft
 - [WS1 Implementation Plan: Identity, Tenancy, Party, Authorization](WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md) — `PDA-RDM-008` · Draft
 - [WS2 Implementation Plan: Catalog and Inventory Ledger](WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md) — `PDA-RDM-009` · Draft
+- [Ratification Wave Manifest and Review Standard](RATIFICATION_WAVE_MANIFEST_AND_REVIEW_STANDARD.md) — `PDA-RDM-010` · Draft
 
 ## Related Authority and Contracts
 
 - `registry/first-slice.json`
 - `registry/first-slice-tests.json`
+- `registry/ratification-waves.json`
 - `docs/blueprint/02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md`
 - `docs/blueprint/02-Architecture/FIRST_SLICE_ENTITY_AND_STATE_MODEL.md`
 - `docs/blueprint/02-Architecture/FIRST_SLICE_SEQUENCE_DIAGRAMS.md`

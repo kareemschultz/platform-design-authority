@@ -52,7 +52,9 @@ jobs:
         run: exit 1
 
       - name: Verify generated registries are current
-        run: python scripts/generate_registries.py --check
+        run: |
+          python -m unittest scripts/test_generate_registries.py
+          python scripts/generate_registries.py --check
 
       - name: Test and validate canonical document indexes
         run: |

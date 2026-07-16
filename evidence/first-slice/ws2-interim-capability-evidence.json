@@ -1,0 +1,311 @@
+{
+  "schema_version": "1.0.0",
+  "workstream_id": "WS2-INTERIM",
+  "status": "merged-pr2-pr3-interim-evidence",
+  "verified_on": "2026-07-16",
+  "merged_pr_heads": {
+    "67": "1d99fffa5c59a9c90b821e3a9e07511a5d12c63a",
+    "69": "48a72cd5c75af5aa8c13bc68c7c72a55a0390ae7"
+  },
+  "boundary": "Registers committed PR2 Catalog and PR3 Inventory evidence only. PR4 delivery/projections, PR5 imports/numbering, PR6 UI/accessibility, and PR7 closeout remain unproven.",
+  "capabilities": [
+    "catalog.products",
+    "catalog.variants",
+    "catalog.identifiers",
+    "catalog.barcodes",
+    "catalog.lifecycle",
+    "catalog.bulk-import",
+    "inventory.stock-ledger",
+    "inventory.stock-balances",
+    "inventory.availability",
+    "inventory.reservations",
+    "inventory.adjustments",
+    "inventory.transfers",
+    "inventory.counts",
+    "inventory.offline-movements"
+  ],
+  "evidence": [
+    {
+      "id": "ws2-contract-boundary",
+      "kind": "automated-test",
+      "path": "packages/contracts/platform-api/src/index.test.ts",
+      "contains": [
+        "is semantically aligned with every generated Catalog and Inventory operation",
+        "requires positive directional quantities while signed adjustment quantities remain separate",
+        "accepts blind-count observations without accepting expected authority"
+      ],
+      "command": "bun test packages/contracts/platform-api/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "catalog.products",
+        "catalog.variants",
+        "catalog.identifiers",
+        "catalog.barcodes",
+        "catalog.lifecycle",
+        "inventory.stock-ledger",
+        "inventory.stock-balances",
+        "inventory.availability",
+        "inventory.reservations",
+        "inventory.adjustments",
+        "inventory.transfers",
+        "inventory.counts",
+        "inventory.offline-movements"
+      ],
+      "dimensions": ["validation_and_denial"]
+    },
+    {
+      "id": "ws2-catalog-domain",
+      "kind": "automated-test",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "contains": [
+        "creates an aggregate atomically and replays an idempotent command",
+        "keeps normalized identifiers unique inside a tenant but isolated across tenants",
+        "enforces optimistic concurrency and explicit lifecycle commands"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "catalog.products",
+        "catalog.variants",
+        "catalog.identifiers",
+        "catalog.barcodes",
+        "catalog.lifecycle"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections"
+      ]
+    },
+    {
+      "id": "ws2-catalog-authority",
+      "kind": "automated-test",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "contains": [
+        "enforces permissions and entitlements at the direct application boundary",
+        "entitlement:catalog.barcodes"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "catalog.products",
+        "catalog.variants",
+        "catalog.identifiers",
+        "catalog.barcodes"
+      ],
+      "dimensions": ["permission_and_entitlement"]
+    },
+    {
+      "id": "ws2-catalog-postgres",
+      "kind": "automated-integration-test",
+      "path": "apps/server/composition/catalog.integration.test.ts",
+      "contains": [
+        "persists a Product plus outbox events and replays without duplicate effects",
+        "rolls Product, receipt, and outbox state back together on append failure",
+        "meets provisional warm barcode and text-query budgets on representative data"
+      ],
+      "command": "docker compose exec -T server bun test composition/catalog.integration.test.ts",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
+      "capabilities": [
+        "catalog.products",
+        "catalog.variants",
+        "catalog.identifiers",
+        "catalog.barcodes",
+        "catalog.lifecycle"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws2-catalog-capacity",
+      "kind": "automated-integration-test",
+      "path": "apps/server/composition/ws2-ledger-spike.integration.test.ts",
+      "contains": [
+        "uses tenant-scoped exact barcode and cursor/filter indexes at 250k products"
+      ],
+      "command": "docker compose exec -T server bun test composition/ws2-ledger-spike.integration.test.ts",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
+      "capabilities": [
+        "catalog.products",
+        "catalog.identifiers",
+        "catalog.barcodes"
+      ],
+      "dimensions": ["performance_and_capacity"]
+    },
+    {
+      "id": "ws2-inventory-domain",
+      "kind": "automated-test",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "contains": [
+        "enforces maker-checker, posts once, replays idempotently, and reverses by linked inverse",
+        "captures observations without expected stock and derives exact variances only at independent approval",
+        "applies an accepted verified offline command once and rebuilds balance from its immutable movement"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "inventory.stock-ledger",
+        "inventory.stock-balances",
+        "inventory.availability",
+        "inventory.reservations",
+        "inventory.adjustments",
+        "inventory.transfers",
+        "inventory.counts",
+        "inventory.offline-movements"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial"
+      ]
+    },
+    {
+      "id": "ws2-inventory-authority",
+      "kind": "automated-test",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "contains": [
+        "does not disclose another tenant's aggregate",
+        "evaluates active context, permission, and entitlement separately",
+        "maps only verified lease facts to deterministic transport-neutral outcomes"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "inventory.adjustments",
+        "inventory.offline-movements"
+      ],
+      "dimensions": ["tenant_isolation"]
+    },
+    {
+      "id": "ws2-inventory-permission",
+      "kind": "automated-test",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "contains": [
+        "evaluates active context, permission, and entitlement separately",
+        "permission:inventory.adjustment.create"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["inventory.adjustments"],
+      "dimensions": ["permission_and_entitlement"]
+    },
+    {
+      "id": "ws2-inventory-events",
+      "kind": "automated-test",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "contains": [
+        "inventory.stock.adjusted.v1",
+        "inventory.stock-movement.reversed.v1"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["inventory.stock-ledger", "inventory.adjustments"],
+      "dimensions": ["events_jobs_and_projections"]
+    },
+    {
+      "id": "ws2-inventory-ledger-correctness",
+      "kind": "automated-integration-test",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "contains": [
+        "serializes concurrent postings and rebuilds balances exactly from immutable movements",
+        "conserves a Transfer across partial receipt and explained exception",
+        "rolls owner state, movement, receipt, and outbox back together on append failure"
+      ],
+      "command": "docker compose exec -T server bun test composition/inventory.integration.test.ts",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
+      "capabilities": [
+        "inventory.stock-ledger",
+        "inventory.stock-balances",
+        "inventory.adjustments",
+        "inventory.offline-movements"
+      ],
+      "dimensions": [
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws2-inventory-workflows-postgres",
+      "kind": "automated-integration-test",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "contains": [
+        "posts blind Count variance only after independent approval",
+        "conserves a Transfer across partial receipt and explained exception",
+        "keeps Reservations out of physical stock while reducing current availability"
+      ],
+      "command": "docker compose exec -T server bun test composition/inventory.integration.test.ts",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
+      "capabilities": [
+        "inventory.availability",
+        "inventory.reservations",
+        "inventory.transfers",
+        "inventory.counts"
+      ],
+      "dimensions": ["happy_path", "validation_and_denial"]
+    },
+    {
+      "id": "ws2-inventory-offline-boundary",
+      "kind": "automated-integration-test",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "contains": [
+        "applies an offline-origin command exactly once from pre-verified lease facts"
+      ],
+      "command": "docker compose exec -T server bun test composition/inventory.integration.test.ts",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
+      "capabilities": [
+        "inventory.stock-ledger",
+        "inventory.stock-balances",
+        "inventory.offline-movements"
+      ],
+      "dimensions": ["offline_and_degraded"]
+    },
+    {
+      "id": "ws2-ledger-spike",
+      "kind": "automated-integration-test",
+      "path": "apps/server/composition/ws2-ledger-spike.integration.test.ts",
+      "contains": [
+        "serializes concurrent posting without lost or double effects",
+        "rebuilds the balance from immutable movements with zero divergence"
+      ],
+      "command": "docker compose exec -T server bun test composition/ws2-ledger-spike.integration.test.ts",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18.4"],
+      "capabilities": ["inventory.stock-ledger", "inventory.stock-balances"],
+      "dimensions": [
+        "concurrency_and_conflict",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws2-node-runtime",
+      "kind": "automated-runtime-check",
+      "path": "apps/server/composition/persistence.node-check.ts",
+      "contains": [
+        "Node Catalog Product",
+        "idempotency_inventory_node_approve",
+        "tenant_catalog_node_other"
+      ],
+      "command": "bun run --cwd apps/server db:test:node",
+      "runtimes": ["Node 24", "PostgreSQL 18.4"],
+      "capabilities": [
+        "catalog.products",
+        "catalog.variants",
+        "catalog.identifiers",
+        "catalog.barcodes",
+        "inventory.stock-ledger",
+        "inventory.stock-balances",
+        "inventory.adjustments"
+      ],
+      "dimensions": ["happy_path", "tenant_isolation"]
+    }
+  ]
+}

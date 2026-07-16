@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.3.2
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
 ---
 
@@ -16,7 +16,7 @@ This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section
 
 This is a **Draft plan for a controlled prototype**. It may guide only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, close FDR-004, establish a contractual service level, or claim the first slice is complete. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and WS2 stops for disposition.
 
-Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, issue #66 owns merged PR2 Catalog execution, and issue #68 owns active PR3 Inventory execution. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began, on PR1 at PR #65 before merge, and on PR2 at PR #67 before merge. Every implementation PR still requires exact-head independent review before merge.
+Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, issue #66 owns merged PR2 Catalog execution, and closed issue #68 owns merged PR3 Inventory execution through PR #69. Open PR #74 and issue #70 own PR4; issues #71–#73 own PR5–PR7. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began, on PR1 at PR #65 before merge, and on PR2 at PR #67 before merge. Every remaining implementation PR still requires exact-head independent review before merge.
 
 ### 1.1 Implementation progress
 
@@ -24,10 +24,17 @@ Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, is
 |---|---|---|
 | PR1 — governance, contracts, schemas, and spike | Merged after exact-head Claude Code concurrence | Retain as the contract/governance baseline; it does not prove later business behavior or delivery |
 | PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
-| PR3 — Inventory ledger and workflows | Implementation and local evidence complete on issue #68; exact-head independent review required before merge | PDA-APP-022 records the controlled-prototype core, owner persistence, API, live PostgreSQL, rebuild, concurrency, offline-boundary, and runtime evidence; no PR4 delivery claim |
-| PR4–PR7 | Not started | Execute in order; no later phase may be pre-closed by earlier evidence |
+| PR3 — Inventory ledger and workflows | Merged as PR #69; issue #68 closed | PDA-APP-022 records the controlled-prototype core, owner persistence, API, live PostgreSQL, rebuild, concurrency, offline-boundary, and runtime evidence; no PR4 delivery claim |
+| PR4 — durable event delivery and projections | Open as PR #74; not counted as merged evidence | Merge only from an exact reviewed green head; outbox persistence alone does not prove delivery |
+| PR5–PR7 | Not started; issues #71–#73 open | Execute in order; no later phase may be pre-closed by earlier evidence |
 
-### 1.2 Governing sources
+### 1.2 Interim capability evidence checkpoint
+
+`evidence/first-slice/ws2-interim-capability-evidence.json` registers the merged PR2 head `1d99fffa5c59a9c90b821e3a9e07511a5d12c63a` and PR3 head `48a72cd5c75af5aa8c13bc68c7c72a55a0390ae7`. The generated matrix records 80 evidenced required cells: 13 WS2 capabilities are `Partially Evidenced`, unimplemented `catalog.bulk-import` remains `Planned`, and no WS2 capability satisfies all thirteen required dimensions.
+
+The source deliberately leaves PR4 delivery/projection behavior, PR5 import/numbering behavior, PR6 UI/accessibility behavior, and PR7 audit/closeout evidence as `planned`. Empty cells are not waived, and the interim registration does not advance the phase ledger or satisfy section 16.3.
+
+### 1.3 Governing sources
 
 | Concern | Governing source |
 |---|---|
@@ -501,6 +508,7 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.4.0 | 2026-07-16 | Platform Design Authority | Reconciled merged PR #69 and open PR #74 from live GitHub state; registered 80 interim PR2/PR3 evidence cells across 13 partial rows while leaving bulk import planned and WS2 closeout unchanged. |
 | 0.3.2 | 2026-07-15 | Platform Design Authority | Recorded PR3 implementation/evidence completion pending exact-head independent review, linked PDA-APP-022, and retained RR-006/RR-007 plus WS5 offline transport deferrals. |
 | 0.3.1 | 2026-07-15 | Platform Design Authority | Recorded PR2 merge/concurrence and active issue #68; selected atomic adjustment/count approve-and-post semantics and the explicit `inventory.adjustment.reverse` correction contract before PR3 persistence generation. |
 | 0.3.0 | 2026-07-14 | Platform Design Authority | Recorded merged PR1 concurrence and issue #66 PR2 execution status; clarified that PR2 preserves validated Variant/Identifier identities and remains pending exact-head independent review and merge. |

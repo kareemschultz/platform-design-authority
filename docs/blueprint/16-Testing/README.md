@@ -31,11 +31,13 @@ last_reviewed: 2026-07-16
 
 Every first-slice capability declares thirteen mandatory dimensions covering happy paths, denial, isolation, permissions, entitlements, idempotency, concurrency, events, audit, privacy, offline behavior, accessibility, performance, recovery, replay, and reconciliation.
 
+The generated matrix currently records 11 fully evidenced WS1 capabilities, 13 partially evidenced WS2 capabilities, and 223 of 1,294 required cells; WS2 bulk import remains wholly planned. A partial row is progress evidence only; every unproven required cell remains `planned` and blocks capability/workstream closeout.
+
 The synthetic Demerara Retail Test Group fixture defines representative tenants, locations, roles, products, inventory, Commerce, stored value, privacy, security, devices, and provider-failure scenarios.
 
 ## Remaining Implementation Evidence
 
-- Executable test harnesses
+- Executable harnesses for WS3–WS7 and remaining WS2 cells
 - Provider simulators
 - Tenant-isolation property tests
 - Ledger model-based tests

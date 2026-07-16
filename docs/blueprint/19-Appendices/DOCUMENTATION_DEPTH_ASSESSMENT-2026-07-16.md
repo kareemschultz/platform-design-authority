@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -36,10 +36,10 @@ Where an area contains mixed depths, the result names the proven subset and does
 
 | Area | Current depth/evidence | Material gaps before the next claim |
 |---|---|---|
-| Foundation and governance | Architecture-specified; all material remains Draft | Constitution/standards review, class/depth adoption, validator migration, ratification evidence |
+| Foundation and governance | Architecture-specified; class/depth standard and ratification evidence gates exist; all material remains Draft | Independent class/depth review, actual ratification reviews/approvals, Constitution promotion evidence |
 | ADR estate | Architecture decisions are Proposed and generally coherent | Zero Accepted ADRs; complete review records and ratification waves |
 | Platform Kernel / WS1 | Prototype-ready and verified at controlled-prototype depth for 11 first-slice capabilities | Production RLS/topology, external auth/provider evidence, security/accessibility/operations gates |
-| Catalog and Inventory / WS2 | Contract-specified and partially implemented through merged PR3; PR4 open/green | PR4 merge, imports/numbering, web UX, registered capability evidence, final audit and closeout |
+| Catalog and Inventory / WS2 | Contract-specified and partially implemented through merged PR3; 13 partial rows/80 cells carry interim evidence while bulk import stays planned; PR4 open/green | PR4 merge, imports/numbering, web UX/accessibility, remaining planned cells, final audit and closeout |
 | Remaining first slice | Contract/plan depth varies across 103 included and 13 deferred capabilities | WS3–WS7 implementation, vertical documentation, test evidence, operations, external gates |
 | Non-first-slice domains | Broadly indexed or ownership-defined; selected areas architecture-specified | Roadmap admission, customer evidence, full behavior/data/API/event/permission/UI/offline/migration/test depth |
 | Shared engines and cross-cutting platform services | Ownership and architecture are broad; first-slice seams vary | Implementation contracts/evidence by admitted use case; no generic engine-complete claim |
@@ -51,8 +51,8 @@ Where an area contains mixed depths, the result names the proven subset and does
 | Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled | Founder decisions, legal entity, pricing, contracts, provider, tax, custody/payout gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
 | Competitive research | Initial nine-wave writing set In Review with source/ledger/backlog reconciliation | CIR-BACK-021–025, direct observation, omitted products/families, independent review and governed transfer |
-| Product and developer documentation | Nine MDX guides describe current scaffold behavior; OpenAPI is canonical | MDX manifest/governance, generated API reference, release applicability, full task/admin/migration/troubleshooting docs |
-| Testing and evidence | Thirteen-dimension matrix is contract-specified; WS1 has 143 verified cells | WS2–WS7 evidence sources, scale/security/accessibility/operations results, external evidence |
+| Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; OpenAPI is canonical | Generated canonical API reference, full task/admin/migration/troubleshooting depth, later-workstream release evidence |
+| Testing and evidence | Thirteen-dimension matrix supports planned, partial, evidenced, not-applicable, and depth-deferred states; 223 cells have evidence | Complete remaining WS2 cells, WS3–WS7 sources, scale/security/accessibility/operations results, external evidence |
 | Roadmap and program control | Workstreams and project exist; current status is non-authoritative | Continuous evidence-cutoff updates, generated status feasibility, founder/customer sequencing decisions |
 
 ## Lifecycle Assessment
@@ -76,8 +76,8 @@ These counts demonstrate inventory and internal parity, not enterprise implement
 
 ## Evidence Assessment
 
-- WS1: 11 capabilities and 143 of 1,294 currently required first-slice evidence cells are registered.
-- WS2: implementation exists through PR3, but capability-dimension evidence is reserved for coherent workstream closeout.
+- WS1: 11 capabilities and 143 of 1,294 currently required first-slice evidence cells are fully registered.
+- WS2: 13 capabilities have interim PR2/PR3 registration covering 80 cells; bulk import and all other unproven PR4–PR7 cells remain planned.
 - Operations: most runbooks and exercises are planned rather than verified.
 - Product documentation: build/type checks exist, but architecture governance does not yet validate MDX metadata and behavioral/release parity.
 - External: founder decisions, customer evidence, qualified Guyana review, providers, penetration testing, accessibility evidence, and operational exercises remain open.
@@ -90,6 +90,7 @@ The repository may claim:
 - machine-readable first-slice scope, permissions, events, and draft API contracts;
 - completed WS1 controlled-prototype evidence;
 - active partial WS2 implementation through PR3;
+- honest interim WS2 capability evidence without a workstream-exit claim;
 - an In Review initial competitive-research writing set with explicit follow-up backlog.
 
 It may not claim:

@@ -19,6 +19,7 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parent.parent
 STATUS_FILE = REPO_ROOT / "docs" / "project" / "PROGRAM_STATUS.md"
 STANDARD_FILE = REPO_ROOT / "docs" / "project" / "PROGRESS_MEASUREMENT_STANDARD.md"
+FIRST_SLICE_TESTS_FILE = REPO_ROOT / "registry" / "first-slice-tests.json"
 DEFAULT_REPOSITORY = "kareemschultz/platform-design-authority"
 EXPECTED_WORKSTREAMS = tuple(f"WS{index}" for index in range(8))
 STALE_QUALIFIERS = ("pending merge gate", "pending merge", "awaiting merge")
@@ -220,6 +221,32 @@ def check_production_readiness(text: str) -> None:
         fail("Production readiness must explicitly read 'Not claimed'.")
 
 
+def check_evidence_coverage(text: str, registry: dict[str, Any]) -> None:
+    match = re.search(
+        r"\|\s*Capability evidence coverage\s*\|\s*\*\*"
+        r"(\d+) fully evidenced \+ (\d+) partially evidenced / (\d+) capabilities; "
+        r"([\d,]+)/([\d,]+) required cells\*\*",
+        text,
+    )
+    if not match:
+        fail("Could not parse the machine-bound Capability evidence coverage row.")
+        return
+    declared = tuple(int(value.replace(",", "")) for value in match.groups())
+    coverage = registry.get("coverage", {})
+    generated = (
+        int(coverage.get("capabilities_evidenced", -1)),
+        int(coverage.get("capabilities_partially_evidenced", -1)),
+        int(coverage.get("capabilities_total", -1)),
+        int(coverage.get("required_cells_evidenced", -1)),
+        int(coverage.get("required_cells_total", -1)),
+    )
+    if declared != generated:
+        fail(
+            "Capability evidence coverage row does not match "
+            f"registry/first-slice-tests.json: declared={declared}, generated={generated}."
+        )
+
+
 def gh_authenticated() -> bool:
     try:
         result = subprocess.run(
@@ -328,6 +355,9 @@ def main() -> int:
     if not STANDARD_FILE.exists():
         fail(f"{STANDARD_FILE} does not exist.")
         return print_result()
+    if not FIRST_SLICE_TESTS_FILE.exists():
+        fail(f"{FIRST_SLICE_TESTS_FILE} does not exist.")
+        return print_result()
 
     text = STATUS_FILE.read_text(encoding="utf-8")
     standard_text = STANDARD_FILE.read_text(encoding="utf-8")
@@ -339,6 +369,10 @@ def main() -> int:
     check_evidence_cutoff(text)
     rows = parse_workstream_rows(text)
     check_workstream_rows(rows, text, allowed_statuses, standard_weights)
+    check_evidence_coverage(
+        text,
+        json.loads(FIRST_SLICE_TESTS_FILE.read_text(encoding="utf-8")),
+    )
     check_production_readiness(text)
     check_github_state(text, rows)
     return print_result()

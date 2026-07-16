@@ -34,8 +34,8 @@
       "owner": "Product Catalog",
       "readiness_state": "workstream-active",
       "admission_trigger": "Complete WS2 evidence registration and independent workstream review before any claim beyond the admitted Product subset.",
-      "blockers": ["WS2 capability-dimension evidence is incomplete", "Product and Inventory web/accessibility evidence is absent"],
-      "evidence_refs": ["docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md", "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md", "openapi/first-slice-v1.yaml"]
+      "blockers": ["Required WS2 capability-dimension cells remain planned", "Product and Inventory web/accessibility evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md", "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md", "evidence/first-slice/ws2-interim-capability-evidence.json", "registry/first-slice-tests.json", "openapi/first-slice-v1.yaml"]
     },
     {
       "namespace": "commerce",
@@ -114,8 +114,8 @@
       "owner": "Inventory",
       "readiness_state": "workstream-active",
       "admission_trigger": "Complete WS2 durable delivery, capability evidence, UI/accessibility evidence, and independent review before claiming the admitted subset complete.",
-      "blockers": ["WS2 capability-dimension evidence is incomplete", "Product and Inventory web/accessibility evidence is absent"],
-      "evidence_refs": ["docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md", "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md", "openapi/first-slice-v1.yaml"]
+      "blockers": ["Required WS2 capability-dimension cells remain planned", "Product and Inventory web/accessibility evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md", "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md", "evidence/first-slice/ws2-interim-capability-evidence.json", "registry/first-slice-tests.json", "openapi/first-slice-v1.yaml"]
     },
     {
       "namespace": "knowledge",

@@ -44,6 +44,21 @@ class ProgramStatusValidatorTests(unittest.TestCase):
         rows = validator.parse_workstream_rows(self.status_text)
         self.assertEqual([row["key"] for row in rows], list(validator.EXPECTED_WORKSTREAMS))
 
+    def test_evidence_coverage_matches_generated_registry(self) -> None:
+        registry = validator.json.loads(
+            validator.FIRST_SLICE_TESTS_FILE.read_text(encoding="utf-8")
+        )
+        validator.check_evidence_coverage(self.status_text, registry)
+        self.assertEqual(validator.errors, [])
+
+    def test_evidence_coverage_drift_is_an_error(self) -> None:
+        registry = validator.json.loads(
+            validator.FIRST_SLICE_TESTS_FILE.read_text(encoding="utf-8")
+        )
+        registry["coverage"]["required_cells_evidenced"] += 1
+        validator.check_evidence_coverage(self.status_text, registry)
+        self.assertTrue(any("does not match" in error for error in validator.errors))
+
     def test_complete_workstream_requires_explicit_pr_reference(self) -> None:
         rows = validator.parse_workstream_rows(self.status_text)
         rows[0]["evidence"] = "PDA-IMPL-005 only"

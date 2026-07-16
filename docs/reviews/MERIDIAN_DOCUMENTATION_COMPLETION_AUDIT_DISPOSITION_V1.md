@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -47,6 +47,8 @@ The ratification-preparation checkpoint defines immutable candidate manifests, r
 
 The active-placeholder checkpoint replaces the fictitious OpenAPI host with the bounded local controlled-prototype server and makes every unresolved infrastructure-cost category carry an accountable owner, required evidence, and decision trigger. The documentation validator rejects recurrence of the former OpenAPI filler or an unqualified cost `TBD`. This closes the repository defect while leaving all provider, topology, workload, and price decisions explicitly unresolved.
 
+The WS2 interim-evidence checkpoint corrects the binary evidence model: required cells can now remain `planned`, become `evidenced`, or retain governed depth/non-applicability states while the capability row reports `Planned`, `Partially Evidenced`, or `Evidenced`. The merged PR2/PR3 heads contribute 80 bounded cells across 13 partial WS2 capabilities; unimplemented bulk import remains wholly planned and none is marked complete. Live GitHub reconciliation also corrects PDA-RDM-009 from active issue #68 to merged PR #69 and keeps open PR #74 outside the merged baseline. This implements DCA-018's registration defect without claiming the PR7 workstream exit.
+
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
@@ -68,7 +70,7 @@ The active-placeholder checkpoint replaces the fictitious OpenAPI host with the 
 | DCA-015 | Medium | Accepted | Open | GitHub issue #59 and the existing project are dispositioned into one consistent state |
 | DCA-016 | High | Accepted | Implemented; independent closure review pending | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |
 | DCA-017 | Medium | Accepted | Implemented; independent closure review pending | Active OpenAPI filler removed; unresolved cost inputs carry owner, evidence need, and decision trigger |
-| DCA-018 | High | Accepted | Open | WS2 evidence source resolves applicable capability-dimension cells to reviewed test evidence or explicit depth deferral |
+| DCA-018 | High | Accepted | Interim registration implemented; PR7 closeout and independent review remain open | WS2 evidence source resolves applicable capability-dimension cells to reviewed test evidence or explicit depth deferral |
 | DCA-019 | Blocker | Needs Founder/External Decision | Open; documentation may prepare but not close | Actual founder decisions, professional opinions, provider evidence, customer evidence, and security/accessibility/operations results linked at their gates |
 
 No finding is Rejected with Evidence, Superseded, or Closed at this checkpoint. Implemented findings remain reviewable until their exact closure evidence passes on the final branch state and an independent reviewer dispositions the result.

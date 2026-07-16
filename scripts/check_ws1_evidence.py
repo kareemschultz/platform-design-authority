@@ -94,10 +94,15 @@ def main() -> int:
         (ROOT / "registry" / "first-slice-tests.json").read_text(encoding="utf-8")
     )
     marker_count = validate_source_claims(registry)
-    rows = {
+    all_rows = {
         str(row["capability_id"]): row
         for row in registry.get("tests", [])
-        if row.get("evidence_status") == "Evidenced"
+    }
+    rows = {
+        capability_id: all_rows[capability_id]
+        for capability_id in EXPECTED_CAPABILITIES
+        if capability_id in all_rows
+        and all_rows[capability_id].get("evidence_status") == "Evidenced"
     }
     if set(rows) != EXPECTED_CAPABILITIES:
         raise AssertionError(
@@ -123,8 +128,8 @@ def main() -> int:
                 )
 
     coverage = registry.get("coverage", {})
-    if coverage.get("required_cells_evidenced") != required_cells:
-        raise AssertionError("generated WS1 evidence-cell total is inconsistent")
+    if int(coverage.get("required_cells_evidenced", 0)) < required_cells:
+        raise AssertionError("generated evidence-cell total omits WS1 evidence")
 
     violations: list[str] = []
     for root in IMPLEMENTATION_ROOTS:

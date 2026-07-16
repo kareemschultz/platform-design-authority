@@ -1,5 +1,10 @@
 "use client";
 
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+} from "@meridian/ui-web/components/alert";
 import { Badge } from "@meridian/ui-web/components/badge";
 import { buttonVariants } from "@meridian/ui-web/components/button";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
@@ -16,7 +21,14 @@ import { ArrowLeft, ArrowRight, Clock3, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { freshnessState, operationsHref } from "@/lib/operations";
+import {
+	appendCursorTrail,
+	freshnessState,
+	mutationFailurePresentation,
+	operationsHref,
+	parseCursorTrail,
+	previousCursorState,
+} from "@/lib/operations";
 
 import { EmptyState, QueryFailure } from "./query-state";
 
@@ -115,19 +127,20 @@ export function CursorControls({ nextCursor }: { nextCursor: string | null }) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const currentCursor = searchParams.get("cursor");
-	if (!(currentCursor || nextCursor)) {
+	const cursorTrail = parseCursorTrail(searchParams.get("cursorTrail"));
+	const previous = previousCursorState(cursorTrail);
+	if (!(previous || nextCursor)) {
 		return null;
 	}
 	return (
 		<nav aria-label="Result pages" className="mt-4 flex justify-between gap-3">
-			{currentCursor ? (
-				<button
+			{previous ? (
+				<Link
 					className={buttonVariants({ variant: "outline" })}
-					onClick={() => history.back()}
-					type="button"
+					href={operationsHref(pathname, searchParams, previous)}
 				>
 					<ArrowLeft /> Previous page
-				</button>
+				</Link>
 			) : (
 				<span />
 			)}
@@ -136,6 +149,7 @@ export function CursorControls({ nextCursor }: { nextCursor: string | null }) {
 					className={buttonVariants({ variant: "outline" })}
 					href={operationsHref(pathname, searchParams, {
 						cursor: nextCursor,
+						cursorTrail: appendCursorTrail(cursorTrail, currentCursor),
 					})}
 				>
 					Next page <ArrowRight />
@@ -189,6 +203,10 @@ export function CollectionState<T>({
 	}
 	return (
 		<>
+			<p aria-live="polite" className="sr-only" role="status">
+				Result page loaded with {items.length} item
+				{items.length === 1 ? "" : "s"}.
+			</p>
 			{isFetching ? (
 				<p
 					className="mb-3 flex items-center gap-2 text-muted-foreground text-sm"
@@ -246,14 +264,35 @@ export function FreshnessBadge({
 	);
 }
 
-export function MutationError({ error }: { error: unknown }) {
-	if (!error) {
+export function MutationError({
+	error,
+	isOnline = true,
+}: {
+	error: unknown;
+	isOnline?: boolean;
+}) {
+	const presentation = mutationFailurePresentation(error, isOnline);
+	if (!presentation) {
 		return null;
 	}
 	return (
-		<p className="text-destructive text-sm" role="alert">
-			The change was not applied. Current server authority may have changed;
-			refresh the record and try again.
-		</p>
+		<Alert
+			role="alert"
+			variant={
+				presentation.kind === "permission" || presentation.kind === "validation"
+					? "destructive"
+					: "default"
+			}
+		>
+			<AlertTitle>{presentation.title}</AlertTitle>
+			<AlertDescription>
+				<p>{presentation.description}</p>
+				{presentation.correlationId ? (
+					<p className="mt-2 break-all font-mono text-xs">
+						Reference: {presentation.correlationId}
+					</p>
+				) : null}
+			</AlertDescription>
+		</Alert>
 	);
 }

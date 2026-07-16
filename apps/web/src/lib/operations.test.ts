@@ -1,12 +1,17 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	appendCursorTrail,
 	freshnessState,
 	isVersionConflict,
+	mutationFailurePresentation,
 	operationsHref,
 	operationsScopeKey,
+	parseCursorTrail,
+	previousCursorState,
 	safeDownloadName,
 	safeOperationsReturn,
+	stableIntentKey,
 } from "./operations";
 
 describe("operations client state", () => {
@@ -74,6 +79,69 @@ describe("operations client state", () => {
 		expect(isVersionConflict({ code: "CONFLICT" })).toBe(true);
 		expect(isVersionConflict({ data: { code: "conflict" } })).toBe(true);
 		expect(isVersionConflict({ code: "FORBIDDEN" })).toBe(false);
+	});
+
+	test("keeps a bounded cursor trail in the URL for cold previous navigation", () => {
+		const firstTrail = appendCursorTrail([], null);
+		expect(parseCursorTrail(firstTrail)).toEqual([""]);
+		const secondTrail = appendCursorTrail(
+			parseCursorTrail(firstTrail),
+			"cursor-a"
+		);
+		expect(previousCursorState(parseCursorTrail(secondTrail))).toEqual({
+			cursor: "cursor-a",
+			cursorTrail: '[""]',
+		});
+		expect(previousCursorState([""])).toEqual({
+			cursor: null,
+			cursorTrail: null,
+		});
+		expect(parseCursorTrail('{"not":"a trail"}')).toEqual([]);
+	});
+
+	test("retains one idempotency key across double-submit and uncertain retry", () => {
+		let generated = 0;
+		const create = () => {
+			generated += 1;
+			return `intent-${generated}`;
+		};
+		const first = stableIntentKey(null, create);
+		expect(stableIntentKey(first, create)).toBe(first);
+		expect(generated).toBe(1);
+		expect(stableIntentKey(null, create)).toBe("intent-2");
+	});
+
+	test("classifies mutation authority and recovery states with a safe reference", () => {
+		expect(
+			mutationFailurePresentation({
+				code: "FORBIDDEN",
+				data: {
+					code: "authorization",
+					correlationId: "correlation_123456",
+				},
+			})
+		).toMatchObject({
+			correlationId: "correlation_123456",
+			kind: "permission",
+		});
+		expect(
+			mutationFailurePresentation({
+				code: "FORBIDDEN",
+				data: { code: "entitlement" },
+			})?.kind
+		).toBe("entitlement");
+		expect(
+			mutationFailurePresentation({ data: { nextAction: "step_up" } })?.kind
+		).toBe("step-up");
+		expect(
+			mutationFailurePresentation({
+				code: "CONFLICT",
+				data: { code: "state_transition", status: 409 },
+			})?.kind
+		).toBe("domain");
+		expect(mutationFailurePresentation(new TypeError("fetch"))?.kind).toBe(
+			"network"
+		);
 	});
 
 	test("normalizes download names before creating a browser download", () => {

@@ -46,6 +46,7 @@ import { z } from "zod";
 import {
 	adjustmentCanApprove,
 	adjustmentCanReverse,
+	adjustmentCorrectionPrefill,
 	adjustmentStateFromSearch,
 	formatAdjustmentQuantity,
 	INVENTORY_ADJUSTMENT_STATES,
@@ -55,6 +56,7 @@ import {
 	operationsHref,
 	safeOperationsReturn,
 } from "@/lib/operations";
+import { workspaceWorkState } from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
 
 import {
@@ -65,7 +67,7 @@ import {
 	StateBadge,
 } from "./operations-shared";
 import { QueryFailure } from "./query-state";
-import { useWorkspace } from "./workspace-context";
+import { useWorkspace, useWorkspaceWorkGuard } from "./workspace-context";
 
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9_-]{12,64}$/u;
 const QUANTITY_PATTERN = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/u;
@@ -378,19 +380,35 @@ export function InventoryAdjustmentsPage() {
 function InventoryAdjustmentCreateForm() {
 	const workspace = useWorkspace();
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const create = useMutation(
 		orpc.inventory.adjustments.create.mutationOptions()
 	);
 	const activeLocationId = workspace.identity?.activeContext?.locationId ?? "";
+	const initialPrefill = adjustmentCorrectionPrefill(
+		searchParams,
+		workspace.locations.map((location) => location.id),
+		activeLocationId
+	);
+	const [isDirty, setIsDirty] = useState(
+		Boolean(
+			searchParams.get("locationId") ||
+				searchParams.get("productId") ||
+				searchParams.get("variantId") ||
+				searchParams.get("reason")
+		)
+	);
+	const [locationTouched, setLocationTouched] = useState(false);
+	useWorkspaceWorkGuard(workspaceWorkState(create.isPending, isDirty));
 	const form = useForm({
 		defaultValues: {
 			conversionSourceId: "",
-			locationId: activeLocationId,
-			productId: "",
+			locationId: initialPrefill.locationId,
+			productId: initialPrefill.productId,
 			quantity: "",
-			reason: "",
+			reason: initialPrefill.reason,
 			unit: "each",
-			variantId: "",
+			variantId: initialPrefill.variantId,
 		},
 		onSubmit: async ({ value }) => {
 			const result = await create.mutateAsync({
@@ -426,21 +444,43 @@ function InventoryAdjustmentCreateForm() {
 	});
 
 	useEffect(() => {
-		if (activeLocationId && !form.getFieldValue("locationId")) {
-			form.setFieldValue("locationId", activeLocationId);
+		const prefill = adjustmentCorrectionPrefill(
+			searchParams,
+			workspace.locations.map((location) => location.id),
+			activeLocationId
+		);
+		if (prefill.locationId && !locationTouched) {
+			form.setFieldValue("locationId", prefill.locationId);
 		}
-	}, [activeLocationId, form]);
+	}, [
+		activeLocationId,
+		form,
+		locationTouched,
+		searchParams,
+		workspace.locations,
+	]);
 
 	return (
 		<form
 			className="grid max-w-3xl gap-5"
 			id="inventory-adjustment-create-form"
 			noValidate
+			onChangeCapture={() => setIsDirty(true)}
 			onSubmit={(event) => {
 				event.preventDefault();
 				form.handleSubmit();
 			}}
 		>
+			{initialPrefill.ignored.length ? (
+				<Alert role="status">
+					<CircleAlert />
+					<AlertTitle>Some correction details need review</AlertTitle>
+					<AlertDescription>
+						The linked {initialPrefill.ignored.join(", ")} value was not
+						accepted. Enter it manually in the current workspace.
+					</AlertDescription>
+				</Alert>
+			) : null}
 			<form.Field name="locationId">
 				{(field) => (
 					<div className="grid gap-1">
@@ -455,7 +495,10 @@ function InventoryAdjustmentCreateForm() {
 							className="min-h-10 rounded-xl border bg-background px-3 text-sm"
 							id={field.name}
 							onBlur={field.handleBlur}
-							onChange={(event) => field.handleChange(event.target.value)}
+							onChange={(event) => {
+								setLocationTouched(true);
+								field.handleChange(event.target.value);
+							}}
 							value={field.state.value}
 						>
 							<option value="">Choose a location</option>
@@ -549,7 +592,7 @@ function InventoryAdjustmentCreateForm() {
 				</AlertDescription>
 			</Alert>
 			{workspace.isOnline ? null : <OfflineMutationAlert />}
-			<MutationError error={create.error} />
+			<MutationError error={create.error} isOnline={workspace.isOnline} />
 			<form.Subscribe
 				selector={(state) => ({
 					canSubmit: state.canSubmit,
@@ -632,6 +675,12 @@ function AdjustmentActions({
 		orpc.inventory.adjustments.reverse.mutationOptions()
 	);
 	const [reversalReason, setReversalReason] = useState("");
+	useWorkspaceWorkGuard(
+		workspaceWorkState(
+			approve.isPending || reverse.isPending,
+			Boolean(reversalReason)
+		)
+	);
 	const refresh = async () =>
 		queryClient.invalidateQueries({
 			queryKey: orpc.inventory.adjustments.key(),
@@ -657,7 +706,10 @@ function AdjustmentActions({
 						{isVersionConflict(approve.error) ? (
 							<VersionConflictMessage adjustment={adjustment} />
 						) : (
-							<MutationError error={approve.error} />
+							<MutationError
+								error={approve.error}
+								isOnline={workspace.isOnline}
+							/>
 						)}
 						<DialogFooter>
 							<DialogClose render={<Button variant="outline" />}>
@@ -717,7 +769,10 @@ function AdjustmentActions({
 								preservedReason={reversalReason}
 							/>
 						) : (
-							<MutationError error={reverse.error} />
+							<MutationError
+								error={reverse.error}
+								isOnline={workspace.isOnline}
+							/>
 						)}
 						<DialogFooter>
 							<DialogClose render={<Button variant="outline" />}>

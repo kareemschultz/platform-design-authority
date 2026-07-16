@@ -50,10 +50,14 @@ import {
 	readCsvUpload,
 } from "@/lib/imports";
 import {
+	appendCursorTrail,
 	isVersionConflict,
 	operationsHref,
+	parseCursorTrail,
+	previousCursorState,
 	safeOperationsReturn,
 } from "@/lib/operations";
+import { workspaceWorkState } from "@/lib/workspace-change";
 import { client, orpc } from "@/utils/orpc";
 
 import {
@@ -65,7 +69,7 @@ import {
 	StateBadge,
 } from "./operations-shared";
 import { EmptyState, QueryFailure } from "./query-state";
-import { useWorkspace } from "./workspace-context";
+import { useWorkspace, useWorkspaceWorkGuard } from "./workspace-context";
 
 const formatDateTime = (value: string | null) =>
 	value
@@ -252,10 +256,16 @@ export function ImportCreatePage() {
 		useState<ImportManifestValues>(DEFAULT_MANIFEST);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<unknown>(null);
+	const [fileError, setFileError] = useState<string | null>(null);
+	const [isDirty, setIsDirty] = useState(false);
+	useWorkspaceWorkGuard(workspaceWorkState(isSubmitting, isDirty));
 	const updateManifest = <K extends keyof ImportManifestValues>(
 		key: K,
 		value: ImportManifestValues[K]
-	) => setManifest((current) => ({ ...current, [key]: value }));
+	) => {
+		setIsDirty(true);
+		setManifest((current) => ({ ...current, [key]: value }));
+	};
 	return (
 		<OperationsPageFrame
 			actions={
@@ -278,9 +288,20 @@ export function ImportCreatePage() {
 						return;
 					}
 					setError(null);
+					setFileError(null);
 					setIsSubmitting(true);
 					try {
-						const upload = await readCsvUpload(file, file.name);
+						let upload: Awaited<ReturnType<typeof readCsvUpload>>;
+						try {
+							upload = await readCsvUpload(file, file.name);
+						} catch (caught) {
+							setFileError(
+								caught instanceof Error
+									? caught.message
+									: "The selected file could not be read. Choose another UTF-8 CSV."
+							);
+							return;
+						}
 						const input = {
 							body: {
 								content: upload.content,
@@ -310,6 +331,7 @@ export function ImportCreatePage() {
 								? await client.catalog.imports.create(input)
 								: await client.inventory.imports.createOpeningStock(input);
 						setFile(null);
+						setIsDirty(false);
 						toast.success(`${importTargetLabel(target)} import uploaded`);
 						router.push(importDetailHref(target, job.id));
 					} catch (caught) {
@@ -328,9 +350,10 @@ export function ImportCreatePage() {
 						<select
 							className="min-h-10 rounded-xl border bg-background px-3 text-sm"
 							id="create-import-target"
-							onChange={(event) =>
-								setTarget(parseImportTarget(event.target.value))
-							}
+							onChange={(event) => {
+								setIsDirty(true);
+								setTarget(parseImportTarget(event.target.value));
+							}}
 							value={target}
 						>
 							<option value="product">Product records</option>
@@ -346,9 +369,15 @@ export function ImportCreatePage() {
 						<Label htmlFor="import-file">UTF-8 CSV file</Label>
 						<Input
 							accept=".csv,text/csv"
-							aria-describedby="import-file-help"
+							aria-describedby={`import-file-help${fileError ? " import-file-error" : ""}`}
+							aria-invalid={Boolean(fileError)}
 							id="import-file"
-							onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+							onChange={(event) => {
+								setFileError(null);
+								setError(null);
+								setIsDirty(true);
+								setFile(event.target.files?.[0] ?? null);
+							}}
 							required
 							type="file"
 						/>
@@ -356,6 +385,15 @@ export function ImportCreatePage() {
 							Maximum {IMPORT_MAX_BYTES / 1024 / 1024} MiB. The browser does not
 							parse the file or persist its contents.
 						</p>
+						{fileError ? (
+							<p
+								className="text-destructive text-sm"
+								id="import-file-error"
+								role="alert"
+							>
+								{fileError}
+							</p>
+						) : null}
 					</div>
 				</fieldset>
 
@@ -460,11 +498,7 @@ export function ImportCreatePage() {
 					</div>
 				)}
 				{error ? (
-					<QueryFailure
-						error={error}
-						isOnline={workspace.isOnline}
-						onRetry={() => setError(null)}
-					/>
+					<MutationError error={error} isOnline={workspace.isOnline} />
 				) : null}
 				<Button
 					className="min-h-10 w-fit"
@@ -521,7 +555,9 @@ function FindingsPager({ nextCursor }: { nextCursor: string | null }) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const currentCursor = searchParams.get("findingsCursor");
-	if (!(currentCursor || nextCursor)) {
+	const cursorTrail = parseCursorTrail(searchParams.get("cursorTrail"));
+	const previous = previousCursorState(cursorTrail);
+	if (!(previous || nextCursor)) {
 		return null;
 	}
 	return (
@@ -529,14 +565,16 @@ function FindingsPager({ nextCursor }: { nextCursor: string | null }) {
 			aria-label="Import finding pages"
 			className="mt-4 flex justify-between gap-3"
 		>
-			{currentCursor ? (
-				<button
+			{previous ? (
+				<Link
 					className={buttonVariants({ variant: "outline" })}
-					onClick={() => history.back()}
-					type="button"
+					href={operationsHref(pathname, searchParams, {
+						cursorTrail: previous.cursorTrail,
+						findingsCursor: previous.cursor,
+					})}
 				>
 					<ArrowLeft /> Previous findings
-				</button>
+				</Link>
 			) : (
 				<span />
 			)}
@@ -544,6 +582,7 @@ function FindingsPager({ nextCursor }: { nextCursor: string | null }) {
 				<Link
 					className={buttonVariants({ variant: "outline" })}
 					href={operationsHref(pathname, searchParams, {
+						cursorTrail: appendCursorTrail(cursorTrail, currentCursor),
 						findingsCursor: nextCursor,
 					})}
 				>
@@ -622,6 +661,7 @@ function ImportActions({
 }) {
 	const workspace = useWorkspace();
 	const [purgeOpen, setPurgeOpen] = useState(false);
+	const [approveOpen, setApproveOpen] = useState(false);
 	const [reportPending, setReportPending] = useState(false);
 	const [reportError, setReportError] = useState<unknown>(null);
 	const productApprove = useMutation(
@@ -659,6 +699,9 @@ function ImportActions({
 	const actionError = lifecycleMutations.find((item) => item.error)?.error;
 	const actionPending = lifecycleMutations.some((item) => item.isPending);
 	const purge = target === "product" ? productPurge : stockPurge;
+	useWorkspaceWorkGuard(
+		workspaceWorkState(actionPending || purge.isPending || reportPending, false)
+	);
 	const perform = async (action: ImportAction) => {
 		if (!(workspace.contextId && workspace.isOnline)) {
 			return;
@@ -736,12 +779,69 @@ function ImportActions({
 		<div className="grid gap-4">
 			<div className="flex flex-wrap gap-2">
 				{canApproveImport(job) ? (
-					<Button
-						disabled={actionPending || !workspace.isOnline}
-						onClick={() => requestAction("approve")}
-					>
-						{actionPending ? "Working…" : "Approve and commit"}
-					</Button>
+					<Dialog onOpenChange={setApproveOpen} open={approveOpen}>
+						<DialogTrigger
+							render={
+								<Button disabled={actionPending || !workspace.isOnline} />
+							}
+						>
+							Review and commit
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>
+									Approve and commit {importTargetLabel(target)}?
+								</DialogTitle>
+								<DialogDescription>
+									Current authority and maker/checker separation are checked
+									again by the server. The uploader cannot approve their own
+									import.
+								</DialogDescription>
+							</DialogHeader>
+							<dl className="grid gap-2 rounded-xl border p-3 text-sm sm:grid-cols-2">
+								<Definition label="Target" value={importTargetLabel(target)} />
+								<Definition
+									label="Total rows"
+									value={String(job.counts.total)}
+								/>
+								<Definition label="Valid" value={String(job.counts.valid)} />
+								<Definition
+									label="Warnings"
+									value={String(job.counts.warning)}
+								/>
+								<Definition
+									label="Rejected or failed"
+									value={String(job.counts.rejected + job.counts.failed)}
+								/>
+								<Definition label="Uploader" value={job.createdByUserId} />
+							</dl>
+							{target === "opening-stock" ? (
+								<p className="text-sm">
+									This posts immutable opening-stock ledger facts in the active
+									workspace. Corrections require governed compensating
+									movements; they are not destructive edits.
+								</p>
+							) : null}
+							<MutationError
+								error={actionError}
+								isOnline={workspace.isOnline}
+							/>
+							<DialogFooter>
+								<DialogClose render={<Button variant="outline" />}>
+									Keep uncommitted
+								</DialogClose>
+								<Button
+									disabled={actionPending || !workspace.isOnline}
+									onClick={async () => {
+										await perform("approve");
+										setApproveOpen(false);
+									}}
+								>
+									{actionPending ? "Working…" : "Approve and commit"}
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
 				) : null}
 				{canCancelImport(job) ? (
 					<Button
@@ -781,9 +881,9 @@ function ImportActions({
 					Refresh before deciding again.
 				</p>
 			) : (
-				<MutationError error={actionError} />
+				<MutationError error={actionError} isOnline={workspace.isOnline} />
 			)}
-			<MutationError error={reportError} />
+			<MutationError error={reportError} isOnline={workspace.isOnline} />
 
 			{isTerminalImport(job) ? (
 				<details className="rounded-2xl border p-4">
@@ -810,7 +910,10 @@ function ImportActions({
 										evidence remain.
 									</DialogDescription>
 								</DialogHeader>
-								<MutationError error={purge.error} />
+								<MutationError
+									error={purge.error}
+									isOnline={workspace.isOnline}
+								/>
 								<DialogFooter>
 									<DialogClose render={<Button variant="outline" />}>
 										Keep staging data

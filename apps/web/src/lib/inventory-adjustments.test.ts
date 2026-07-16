@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
 	adjustmentCanApprove,
 	adjustmentCanReverse,
+	adjustmentCorrectionPrefill,
 	adjustmentStateFromSearch,
 	formatAdjustmentQuantity,
 } from "./inventory-adjustments";
@@ -51,5 +52,36 @@ describe("inventory adjustment client state", () => {
 	test("keeps the quantity sign and unit visible", () => {
 		expect(formatAdjustmentQuantity("4.5", "each")).toBe("+4.5 each");
 		expect(formatAdjustmentQuantity("-2", "case")).toBe("-2 case");
+	});
+
+	test("accepts only bounded correction-prefill values in the permitted location", () => {
+		const valid = adjustmentCorrectionPrefill(
+			new URLSearchParams({
+				locationId: "location_12345678",
+				productId: "product_123456789",
+				reason: "Correction for transfer transfer_123456, line line_123456789",
+				variantId: "variant_12345678",
+			}),
+			["location_12345678"],
+			"location_87654321"
+		);
+		expect(valid.ignored).toEqual([]);
+		expect(valid.locationId).toBe("location_12345678");
+		expect(valid.productId).toBe("product_123456789");
+		expect(valid.variantId).toBe("variant_12345678");
+
+		const rejected = adjustmentCorrectionPrefill(
+			new URLSearchParams({
+				locationId: "location_foreign12",
+				productId: "not valid",
+				reason: "x".repeat(501),
+			}),
+			["location_12345678"],
+			"location_12345678"
+		);
+		expect(rejected.locationId).toBe("location_12345678");
+		expect(rejected.productId).toBe("");
+		expect(rejected.reason).toBe("");
+		expect(rejected.ignored).toEqual(["location", "Product", "reason"]);
 	});
 });

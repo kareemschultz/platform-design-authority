@@ -29,6 +29,7 @@ import {
 	operationsHref,
 	safeOperationsReturn,
 } from "@/lib/operations";
+import { workspaceWorkState } from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
 
 import {
@@ -39,7 +40,7 @@ import {
 	StateBadge,
 } from "./operations-shared";
 import { QueryFailure } from "./query-state";
-import { useWorkspace } from "./workspace-context";
+import { useWorkspace, useWorkspaceWorkGuard } from "./workspace-context";
 
 const DIGITS_ONLY_PATTERN = /^\d+$/u;
 const PRODUCT_STATES = [
@@ -249,6 +250,8 @@ function ProductCreateForm() {
 	const workspace = useWorkspace();
 	const router = useRouter();
 	const create = useMutation(orpc.catalog.products.create.mutationOptions());
+	const [isDirty, setIsDirty] = useState(false);
+	useWorkspaceWorkGuard(workspaceWorkState(create.isPending, isDirty));
 	const form = useForm({
 		defaultValues: {
 			barcode: "",
@@ -306,6 +309,7 @@ function ProductCreateForm() {
 			className="grid max-w-2xl gap-5"
 			id="product-create-form"
 			noValidate
+			onChangeCapture={() => setIsDirty(true)}
 			onSubmit={(event) => {
 				event.preventDefault();
 				form.handleSubmit();
@@ -355,7 +359,7 @@ function ProductCreateForm() {
 					/>
 				)}
 			</form.Field>
-			<MutationError error={create.error} />
+			<MutationError error={create.error} isOnline={workspace.isOnline} />
 			<form.Subscribe
 				selector={(state) => ({
 					canSubmit: state.canSubmit,
@@ -365,7 +369,12 @@ function ProductCreateForm() {
 				{({ canSubmit, isSubmitting }) => (
 					<Button
 						className="min-h-10 w-fit"
-						disabled={!canSubmit || isSubmitting || !workspace.contextId}
+						disabled={
+							!canSubmit ||
+							isSubmitting ||
+							!workspace.contextId ||
+							!workspace.isOnline
+						}
 						type="submit"
 					>
 						{isSubmitting ? "Creating Product…" : "Create Product draft"}
@@ -450,12 +459,15 @@ function ProductNameEditor({ product }: { product: Product }) {
 	const queryClient = useQueryClient();
 	const update = useMutation(orpc.catalog.products.update.mutationOptions());
 	const [name, setName] = useState(product.name);
+	useWorkspaceWorkGuard(
+		workspaceWorkState(update.isPending, name !== product.name)
+	);
 	return (
 		<form
 			className="grid gap-3 rounded-2xl border p-4 sm:grid-cols-[1fr_auto] sm:items-end"
 			onSubmit={async (event) => {
 				event.preventDefault();
-				await update.mutateAsync({
+				const result = await update.mutateAsync({
 					body: { name: name.trim() },
 					headers: {
 						"idempotency-key": crypto.randomUUID(),
@@ -464,6 +476,7 @@ function ProductNameEditor({ product }: { product: Product }) {
 					},
 					params: { productId: product.id },
 				});
+				setName(result.name);
 				await queryClient.invalidateQueries({
 					queryKey: orpc.catalog.products.key(),
 				});
@@ -482,7 +495,7 @@ function ProductNameEditor({ product }: { product: Product }) {
 			</div>
 			<Button
 				className="min-h-10"
-				disabled={update.isPending || !name.trim()}
+				disabled={update.isPending || !name.trim() || !workspace.isOnline}
 				type="submit"
 			>
 				{update.isPending ? "Saving…" : "Save name"}
@@ -494,7 +507,7 @@ function ProductNameEditor({ product }: { product: Product }) {
 					later.
 				</p>
 			) : (
-				<MutationError error={update.error} />
+				<MutationError error={update.error} isOnline={workspace.isOnline} />
 			)}
 		</form>
 	);
@@ -508,6 +521,9 @@ function ProductLifecycleActions({ product }: { product: Product }) {
 	);
 	const archive = useMutation(orpc.catalog.products.archive.mutationOptions());
 	const [reason, setReason] = useState("");
+	useWorkspaceWorkGuard(
+		workspaceWorkState(activate.isPending || archive.isPending, Boolean(reason))
+	);
 	const headers = {
 		"idempotency-key": crypto.randomUUID(),
 		"if-match": String(product.version),
@@ -519,7 +535,7 @@ function ProductLifecycleActions({ product }: { product: Product }) {
 		<div className="flex flex-wrap gap-2">
 			{product.state === "Draft" ? (
 				<Button
-					disabled={activate.isPending}
+					disabled={activate.isPending || !workspace.isOnline}
 					onClick={async () => {
 						await activate.mutateAsync({
 							headers,
@@ -554,13 +570,18 @@ function ProductLifecycleActions({ product }: { product: Product }) {
 								value={reason}
 							/>
 						</div>
-						<MutationError error={archive.error} />
+						<MutationError
+							error={archive.error}
+							isOnline={workspace.isOnline}
+						/>
 						<DialogFooter>
 							<DialogClose render={<Button variant="outline" />}>
 								Keep Product
 							</DialogClose>
 							<Button
-								disabled={archive.isPending || !reason.trim()}
+								disabled={
+									archive.isPending || !reason.trim() || !workspace.isOnline
+								}
 								onClick={async () => {
 									await archive.mutateAsync({
 										body: { reason: reason.trim() },

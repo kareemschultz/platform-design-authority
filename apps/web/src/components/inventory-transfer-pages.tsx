@@ -19,10 +19,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { isVersionConflict, operationsHref } from "@/lib/operations";
+import {
+	isVersionConflict,
+	operationsHref,
+	stableIntentKey,
+} from "@/lib/operations";
+import { workspaceWorkState } from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
 
 import {
@@ -33,7 +38,7 @@ import {
 	StateBadge,
 } from "./operations-shared";
 import { QueryFailure } from "./query-state";
-import { useWorkspace } from "./workspace-context";
+import { useWorkspace, useWorkspaceWorkGuard } from "./workspace-context";
 
 const TRANSFER_STATES = [
 	"Draft",
@@ -48,16 +53,23 @@ function activeHeaders(contextId: string | null) {
 	return { "x-active-context-id": contextId ?? "" };
 }
 
-function commandHeaders(contextId: string | null) {
+function commandHeaders(
+	contextId: string | null,
+	idempotencyKey = crypto.randomUUID()
+) {
 	return {
-		"idempotency-key": crypto.randomUUID(),
+		"idempotency-key": idempotencyKey,
 		"x-active-context-id": contextId ?? "",
 	};
 }
 
-function versionedCommandHeaders(contextId: string | null, version: number) {
+function versionedCommandHeaders(
+	contextId: string | null,
+	version: number,
+	idempotencyKey?: string
+) {
 	return {
-		...commandHeaders(contextId),
+		...commandHeaders(contextId, idempotencyKey),
 		"if-match": String(version),
 	};
 }
@@ -211,6 +223,19 @@ export function TransferCreatePage() {
 	const [variantId, setVariantId] = useState("");
 	const [quantity, setQuantity] = useState("");
 	const [unit, setUnit] = useState("each");
+	useWorkspaceWorkGuard(
+		workspaceWorkState(
+			create.isPending,
+			Boolean(
+				sourceLocationId ||
+					destinationLocationId ||
+					productId ||
+					variantId ||
+					quantity ||
+					unit !== "each"
+			)
+		)
+	);
 	return (
 		<OperationsPageFrame
 			actions={
@@ -296,7 +321,7 @@ export function TransferCreatePage() {
 					The source and destination must differ. Quantities and unit conversion
 					are revalidated by Inventory.
 				</p>
-				<MutationError error={create.error} />
+				<MutationError error={create.error} isOnline={workspace.isOnline} />
 				<Button
 					className="min-h-10 w-fit"
 					disabled={
@@ -393,6 +418,23 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 	const [receivedQuantity, setReceivedQuantity] = useState("");
 	const [outcome, setOutcome] = useState<"Accepted" | "Exception">("Accepted");
 	const [exceptionReason, setExceptionReason] = useState("");
+	const [receiveOpen, setReceiveOpen] = useState(false);
+	const receiptIntentKey = useRef<string | null>(null);
+	useWorkspaceWorkGuard(
+		workspaceWorkState(
+			dispatch.isPending || receive.isPending,
+			Boolean(receivedQuantity || exceptionReason || outcome !== "Accepted")
+		)
+	);
+	const resetReceiptDraft = () => {
+		setLineId(
+			transfer.lines.find((line) => line.remainingQuantity !== "0")?.id ?? ""
+		);
+		setReceivedQuantity("");
+		setOutcome("Accepted");
+		setExceptionReason("");
+		receiptIntentKey.current = null;
+	};
 	const refresh = async () =>
 		queryClient.invalidateQueries({ queryKey: orpc.inventory.transfers.key() });
 	return (
@@ -408,7 +450,10 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 								is not a reversible edit.
 							</DialogDescription>
 						</DialogHeader>
-						<MutationError error={dispatch.error} />
+						<MutationError
+							error={dispatch.error}
+							isOnline={workspace.isOnline}
+						/>
 						<DialogFooter>
 							<DialogClose render={<Button variant="outline" />}>
 								Keep draft
@@ -435,7 +480,18 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 			) : null}
 			{transfer.state === "Dispatched" ||
 			transfer.state === "PartiallyReceived" ? (
-				<Dialog>
+				<Dialog
+					onOpenChange={(open) => {
+						if (!open && receive.isPending) {
+							return;
+						}
+						setReceiveOpen(open);
+						if (!open) {
+							resetReceiptDraft();
+						}
+					}}
+					open={receiveOpen}
+				>
 					<DialogTrigger render={<Button />}>Receive stock</DialogTrigger>
 					<DialogContent>
 						<DialogHeader>
@@ -502,7 +558,10 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 								retrying.
 							</p>
 						) : (
-							<MutationError error={receive.error} />
+							<MutationError
+								error={receive.error}
+								isOnline={workspace.isOnline}
+							/>
 						)}
 						<DialogFooter>
 							<DialogClose render={<Button variant="outline" />}>
@@ -517,6 +576,11 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 									(outcome === "Exception" && !exceptionReason.trim())
 								}
 								onClick={async () => {
+									const intentKey = stableIntentKey(
+										receiptIntentKey.current,
+										() => crypto.randomUUID()
+									);
+									receiptIntentKey.current = intentKey;
 									await receive.mutateAsync({
 										body: {
 											exceptionReason:
@@ -528,11 +592,14 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 										},
 										headers: versionedCommandHeaders(
 											workspace.contextId,
-											transfer.version
+											transfer.version,
+											intentKey
 										),
 										params: { id: transfer.id },
 									});
 									await refresh();
+									resetReceiptDraft();
+									setReceiveOpen(false);
 									toast.success("Receipt recorded");
 								}}
 							>
@@ -639,25 +706,25 @@ export function TransferDetailPage({ transferId }: { transferId: string }) {
 								</div>
 								<div>
 									<dt>Dispatched</dt>
-									<dd>{line.dispatchedQuantity}</dd>
+									<dd>{`${line.dispatchedQuantity} ${line.unit}`}</dd>
 								</div>
 								<div>
 									<dt>Received</dt>
-									<dd>{line.receivedQuantity}</dd>
+									<dd>{`${line.receivedQuantity} ${line.unit}`}</dd>
 								</div>
 								<div>
 									<dt>Exception</dt>
-									<dd>{line.exceptionQuantity}</dd>
+									<dd>{`${line.exceptionQuantity} ${line.unit}`}</dd>
 								</div>
 								<div>
 									<dt>Remaining</dt>
-									<dd>{line.remainingQuantity}</dd>
+									<dd>{`${line.remainingQuantity} ${line.unit}`}</dd>
 								</div>
 							</dl>
 							{transfer.data.state === "Exception" ? (
 								<Link
 									className="mt-3 inline-flex underline"
-									href={`/operations/inventory/adjustments/new?locationId=${encodeURIComponent(transfer.data.destinationLocationId)}&productId=${encodeURIComponent(line.productId)}&reason=${encodeURIComponent(`Correction for transfer ${transfer.data.id}, line ${line.id}`)}`}
+									href={`/operations/inventory/adjustments/new?locationId=${encodeURIComponent(transfer.data.destinationLocationId)}&productId=${encodeURIComponent(line.productId)}${line.variantId ? `&variantId=${encodeURIComponent(line.variantId)}` : ""}&reason=${encodeURIComponent(`Correction for transfer ${transfer.data.id}, line ${line.id}`)}`}
 								>
 									Create compensating Adjustment
 								</Link>

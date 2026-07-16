@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-023
 title: Sequence and Numbering Service
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-16
 ---
 
 # Sequence and Numbering Service
@@ -83,6 +83,12 @@ An offline client creates a clearly provisional reference that is replaced or su
 ### External Number
 
 A trusted external fiscal device, government service, marketplace, or partner allocates the official number. The platform records the external authority, result, and verification.
+
+### WS2 controlled-prototype selection
+
+PR5 implements Strict Online allocation only through runtime-neutral `@meridian/platform-numbering` and owner-specific `@meridian/persistence-platform-numbering-postgres`. A definition is tenant-scoped and uses a fixed prefix, increment of one, fixed decimal padding, no automatic reset, and one active version. Allocation locks the tenant/definition row, records the immutable allocation and `platform.sequence.number-issued.v1` in the same PostgreSQL transaction, then advances the counter. The request fingerprint binds tenant, definition, source command, and optional business-record reference to the idempotency key.
+
+Retrying identical input returns the existing reference without advancing the counter. Reusing an idempotency key with different input fails closed. Concurrent callers cannot issue the same value. A transaction failure, including an outbox append failure, rolls back both allocation and counter advancement. Definition administration, reset, void, rollover, legal/fiscal patterns, range leasing, device signing, and multi-region allocation remain unimplemented gates and may not be inferred from the online prototype.
 
 ## Offline Range Leasing
 
@@ -187,3 +193,11 @@ Fail closed for legally strict numbering unless an approved continuity mode exis
 - A fiscal-year rollover does not invalidate active records or create duplicates.
 - A stolen device's unused range is revoked and reconciled.
 - A jurisdiction requiring explicit void documents receives a complete gap explanation.
+
+## PR5 Persistence Classification
+
+`platform_number_sequence` owns the tenant-scoped definition and current counter. `platform_number_allocation` owns immutable issued-reference and idempotency evidence. Neither table grants authority to create or change the numbered business record. PDA-DAT-019 defines every PR5 field before migration generation; RR-007 and production retention remain open.
+
+## Change Log
+
+- 0.2.0 (2026-07-16): Selected the bounded Strict Online PR5 implementation, atomic allocation-plus-outbox boundary, fingerprinted idempotency, concurrency and rollback proof, concrete table ownership, and explicit offline/administration deferrals.

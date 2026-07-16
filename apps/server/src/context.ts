@@ -4,6 +4,7 @@ import type {
 	ActiveContextRequest,
 	AuditRecord,
 	AuthorizationDecision,
+	CreateCsvImport,
 	CreateEventReplayRequest,
 	CreateInventoryAdjustment,
 	CreateOrganizationParty,
@@ -17,6 +18,9 @@ import type {
 	CurrentIdentity,
 	Entitlement,
 	EventReplayRequest,
+	ImportCorrectionReport,
+	ImportFindings,
+	ImportJob,
 	InventoryAdjustment,
 	Location,
 	Organization,
@@ -453,12 +457,57 @@ export interface InventoryApplication {
 	}) => Promise<StockCount>;
 }
 
+export interface ImportApplication {
+	approveImport: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+		version: number;
+	}) => Promise<ImportJob>;
+	createImport: (input: {
+		actorUserId: string;
+		body: CreateCsvImport;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportJob>;
+	getImport: (input: {
+		actorUserId: string;
+		contextId: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportJob>;
+	getImportCorrectionReport: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportCorrectionReport>;
+	listImportFindings: (input: {
+		actorUserId: string;
+		contextId: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportFindings>;
+}
+
 export interface ServerApplication
 	extends AuditApplication,
 		CatalogApplication,
 		EntitlementsApplication,
 		EventReplayApplication,
 		IdentitySessionsApplication,
+		ImportApplication,
 		InventoryApplication,
 		PartyApplication,
 		TenancyApplication {}

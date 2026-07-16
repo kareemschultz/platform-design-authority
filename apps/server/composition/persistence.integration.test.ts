@@ -10,6 +10,7 @@ import {
 	migratePlatformEvents,
 } from "@meridian/persistence-platform-events-postgres";
 import { migratePlatformIdentity } from "@meridian/persistence-platform-identity-postgres";
+import { createNumberingRepository } from "@meridian/persistence-platform-numbering-postgres";
 import {
 	createTenancyRepository,
 	migratePlatformTenancy,
@@ -20,6 +21,7 @@ import {
 	createEntitlementService,
 } from "@meridian/platform-entitlements";
 import type { OutboxEvent } from "@meridian/platform-events";
+import { createNumberingService } from "@meridian/platform-numbering";
 import {
 	createTenancyApplication,
 	createTenancyService,
@@ -101,6 +103,7 @@ describe.serial("WS1 persistence orchestration", () => {
 			"party.records",
 		]);
 		expect(WS2_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual([
+			"platform.import-export",
 			"platform.numbering",
 			"catalog",
 			"inventory",
@@ -157,9 +160,16 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_event_outbox",
 			"platform_event_replay_request",
 			"platform_identity_session_command_receipt",
+			"platform_import_command_receipt",
+			"platform_import_finding",
+			"platform_import_job",
+			"platform_import_row",
+			"platform_import_wave",
 			"platform_location",
 			"platform_membership",
 			"platform_membership_invitation",
+			"platform_number_allocation",
+			"platform_number_sequence",
 			"platform_organization",
 			"platform_role",
 			"platform_role_assignment",
@@ -182,9 +192,112 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_entitlements_migrations",
 			"platform_events_migrations",
 			"platform_identity_migrations",
+			"platform_import_export_migrations",
 			"platform_numbering_migrations",
 			"platform_tenancy_migrations",
 		]);
+	});
+
+	test("allocates online numbers atomically under concurrency and replays idempotently", async () => {
+		await testPool.query(
+			"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, sequence_key, prefix, padding, current_value, next_value, state, version, classification, created_at, updated_at) VALUES ('tenant_numbering_a', 'sequence_invoice_a', 'organization_numbering_a', 'invoice', 'INV-', 6, 0, 1, 'Active', 1, 'Confidential', now(), now())"
+		);
+		let serial = 0;
+		const service = createNumberingService({
+			clock: () => new Date(),
+			ids: {
+				create(kind) {
+					serial += 1;
+					return `numbering_${kind}_${serial}`;
+				},
+			},
+			unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+				events: createPostgresOutbox(client),
+				repository: createNumberingRepository(client),
+			})),
+		});
+		const allocations = await Promise.all(
+			Array.from({ length: 20 }, (_, index) =>
+				service.allocate({
+					actorUserId: "user_numbering_a",
+					correlationId: `correlation_numbering_${index}`,
+					idempotencyKey: `allocation_${index}`,
+					organizationId: "organization_numbering_a",
+					sequenceId: "sequence_invoice_a",
+					tenantId: "tenant_numbering_a",
+				})
+			)
+		);
+		expect(
+			new Set(allocations.map((allocation) => allocation.formattedValue)).size
+		).toBe(20);
+		expect(
+			allocations
+				.map((allocation) => allocation.value)
+				.sort((left, right) => left - right)
+		).toEqual(Array.from({ length: 20 }, (_, index) => index + 1));
+		const replay = await service.allocate({
+			actorUserId: "user_numbering_a",
+			correlationId: "correlation_numbering_replay",
+			idempotencyKey: "allocation_0",
+			organizationId: "organization_numbering_a",
+			sequenceId: "sequence_invoice_a",
+			tenantId: "tenant_numbering_a",
+		});
+		const [firstAllocation] = allocations;
+		if (!firstAllocation) {
+			throw new Error(
+				"Concurrent numbering proof returned no first allocation"
+			);
+		}
+		expect(replay).toEqual(firstAllocation);
+		const state = await testPool.query<{
+			current_value: number;
+			next_value: number;
+		}>(
+			"SELECT current_value, next_value FROM platform_number_sequence WHERE tenant_id = 'tenant_numbering_a' AND id = 'sequence_invoice_a'"
+		);
+		expect(state.rows[0]).toEqual({ current_value: 20, next_value: 21 });
+	});
+
+	test("rolls back a number allocation when its outbox append fails", async () => {
+		await testPool.query(
+			"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, sequence_key, prefix, padding, current_value, next_value, state, version, classification, created_at, updated_at) VALUES ('tenant_numbering_rollback', 'sequence_invoice_rollback', 'organization_numbering_rollback', 'invoice', 'R-', 4, 0, 1, 'Active', 1, 'Confidential', now(), now())"
+		);
+		const service = createNumberingService({
+			clock: () => new Date(),
+			ids: { create: (kind) => `numbering_rollback_${kind}` },
+			unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+				events: {
+					append: () =>
+						Promise.reject(new Error("injected numbering outbox failure")),
+				},
+				repository: createNumberingRepository(client),
+			})),
+		});
+		let failure: unknown;
+		try {
+			await service.allocate({
+				actorUserId: "user_numbering_rollback",
+				correlationId: "correlation_numbering_rollback",
+				idempotencyKey: "allocation_rollback",
+				organizationId: "organization_numbering_rollback",
+				sequenceId: "sequence_invoice_rollback",
+				tenantId: "tenant_numbering_rollback",
+			});
+		} catch (error) {
+			failure = error;
+		}
+		expect((failure as Error).message).toBe(
+			"injected numbering outbox failure"
+		);
+		const state = await testPool.query<{
+			allocations: number;
+			current_value: number;
+		}>(
+			"SELECT (SELECT count(*)::int FROM platform_number_allocation WHERE tenant_id = 'tenant_numbering_rollback') AS allocations, current_value FROM platform_number_sequence WHERE tenant_id = 'tenant_numbering_rollback' AND id = 'sequence_invoice_rollback'"
+		);
+		expect(state.rows[0]).toEqual({ allocations: 0, current_value: 0 });
 	});
 
 	test("enforces current scoped authorization and atomic role assignment", async () => {

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-OPS-015
 title: Service Catalog and Runbook Index
-version: 0.1.1
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # Service Catalog and Runbook Index
@@ -81,10 +81,13 @@ At minimum:
 
 Implemented controlled-prototype runbook: [Event Backbone Delivery Runbook](./EVENT_BACKBONE_DELIVERY_RUNBOOK.md) (PDA-OPS-018). Its production SLO, alert, role/RLS, capacity, and exercise gates remain open.
 
+Implemented controlled-prototype runbook: [Import and Online Numbering Recovery Runbook](./IMPORT_AND_NUMBERING_RECOVERY_RUNBOOK.md) (PDA-OPS-019). Production scanner/provider, retention purge, fiscal policy, offline range, SLO, alert, role/RLS, and exercise gates remain open.
+
 ## Change History
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.0 | 2026-07-16 | Platform Design Authority | Linked the WS2 controlled-prototype import/wave and Strict Online Numbering recovery runbook without claiming production operations readiness. |
 | 0.1.1 | 2026-07-15 | Platform Design Authority | Linked the WS2 controlled-prototype Event Backbone delivery runbook without claiming production operations readiness. |
 
 ## Runbook Contract

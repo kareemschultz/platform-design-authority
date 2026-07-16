@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Business Operating Platform First Slice API
-  version: 0.4.0
+  version: 0.5.0
   description: >-
     Draft implementation-review contract for the Guyana Retail Foundation Slice.
     This is not a GA public API and does not assert production provider or jurisdiction certification.
@@ -955,12 +955,51 @@ paths:
       parameters:
         - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateCsvImport'}
       responses:
-        '200':
+        '202':
           description: CSV Product import job accepted
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}:
+    get:
+      tags: [Catalog]
+      operationId: getProductImport
+      x-permission: catalog.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Tenant-scoped Product import status and reconciliation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}/findings:
+    get:
+      tags: [Catalog]
+      operationId: getProductImportFindings
+      x-permission: catalog.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Safe row and field findings for one Product import
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportFindings'}
+        default:
+          $ref: '#/components/responses/Error'
   /product-imports/{importId}/approve:
     post:
       tags: [Catalog]
@@ -977,6 +1016,24 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}/correction-report:
+    get:
+      tags: [Catalog]
+      operationId: getProductImportCorrectionReport
+      x-permission: catalog.import.download
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Bounded correction report without unrestricted source values
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportCorrectionReport'}
+        default:
+          $ref: '#/components/responses/Error'
   /customer-imports:
     post:
       tags: [Identity]
@@ -995,12 +1052,85 @@ paths:
       parameters:
         - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateCsvImport'}
       responses:
-        '200':
+        '202':
           description: CSV opening-stock import job accepted
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}:
+    get:
+      tags: [Inventory]
+      operationId: getOpeningStockImport
+      x-permission: inventory.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Tenant-scoped opening-stock import status and reconciliation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/findings:
+    get:
+      tags: [Inventory]
+      operationId: getOpeningStockImportFindings
+      x-permission: inventory.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Safe row and field findings for one opening-stock import
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportFindings'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/approve:
+    post:
+      tags: [Inventory]
+      operationId: approveOpeningStockImport
+      x-permission: inventory.import.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      responses:
+        '200':
+          description: Opening-stock import approved and committed through Inventory commands
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/correction-report:
+    get:
+      tags: [Inventory]
+      operationId: getOpeningStockImportCorrectionReport
+      x-permission: inventory.import.download
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Bounded correction report without unrestricted source values
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportCorrectionReport'}
+        default:
+          $ref: '#/components/responses/Error'
   /inventory-adjustments/{id}/approve:
     post:
       tags: [Inventory]
@@ -2054,16 +2184,87 @@ components:
       required: [reason]
       properties:
         reason: {type: string, minLength: 1, maxLength: 500}
+    CsvImportManifest:
+      type: object
+      additionalProperties: false
+      required: [delimiter, quote, newline, encoding, locale, decimalSeparator, timezone]
+      properties:
+        delimiter: {type: string, enum: [',', ';', "\t", '|']}
+        quote: {type: string, enum: ['"']}
+        newline: {type: string, enum: [LF, CRLF]}
+        encoding: {type: string, enum: [UTF-8]}
+        locale: {type: string, minLength: 2, maxLength: 35}
+        decimalSeparator: {type: string, enum: ['.', ',']}
+        timezone: {type: string, minLength: 1, maxLength: 100}
+        defaultUnit: {type: string, minLength: 1, maxLength: 50}
+    CreateCsvImport:
+      type: object
+      additionalProperties: false
+      required: [fileName, contentType, sha256, content, manifest]
+      properties:
+        fileName: {type: string, minLength: 1, maxLength: 200}
+        contentType: {type: string, enum: [text/csv]}
+        sha256: {type: string, pattern: '^[A-Fa-f0-9]{64}$'}
+        content: {type: string, minLength: 1, maxLength: 1048576}
+        manifest: {$ref: '#/components/schemas/CsvImportManifest'}
+    ImportCounts:
+      type: object
+      additionalProperties: false
+      required: [total, valid, warning, rejected, applied, skipped, failed]
+      properties:
+        total: {type: integer, minimum: 0, maximum: 1000}
+        valid: {type: integer, minimum: 0, maximum: 1000}
+        warning: {type: integer, minimum: 0, maximum: 1000}
+        rejected: {type: integer, minimum: 0, maximum: 1000}
+        applied: {type: integer, minimum: 0, maximum: 1000}
+        skipped: {type: integer, minimum: 0, maximum: 1000}
+        failed: {type: integer, minimum: 0, maximum: 1000}
     ImportJob:
       type: object
       additionalProperties: false
-      required: [id, state, version]
+      required: [id, target, state, version, counts, lastCompletedRow, createdAt, updatedAt]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
+        target: {type: string, enum: [Product, OpeningStock]}
         state:
           type: string
           enum: [Uploaded, Validating, ReadyForApproval, Approved, Committing, Completed, Failed, Cancelled]
         version: {type: integer, minimum: 1}
+        counts: {$ref: '#/components/schemas/ImportCounts'}
+        lastCompletedRow: {type: integer, minimum: 0, maximum: 1000}
+        failureCode: {type: [string, 'null'], maxLength: 100}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+        completedAt: {type: [string, 'null'], format: date-time}
+    ImportFinding:
+      type: object
+      additionalProperties: false
+      required: [rowNumber, sourceKey, field, code, severity]
+      properties:
+        rowNumber: {type: integer, minimum: 1, maximum: 1000}
+        sourceKey: {type: string, minLength: 1, maxLength: 128}
+        field: {type: [string, 'null'], maxLength: 100}
+        code: {type: string, minLength: 1, maxLength: 100}
+        severity: {type: string, enum: [Info, Warning, Error]}
+    ImportFindings:
+      type: object
+      additionalProperties: false
+      required: [importId, items]
+      properties:
+        importId: {$ref: '#/components/schemas/Identifier'}
+        items:
+          type: array
+          maxItems: 5000
+          items: {$ref: '#/components/schemas/ImportFinding'}
+    ImportCorrectionReport:
+      type: object
+      additionalProperties: false
+      required: [fileName, contentType, sha256, content]
+      properties:
+        fileName: {type: string, minLength: 1, maxLength: 220}
+        contentType: {type: string, enum: [text/csv]}
+        sha256: {type: string, pattern: '^[A-Fa-f0-9]{64}$'}
+        content: {type: string, maxLength: 524288}
     CreateInventoryAdjustment:
       type: object
       additionalProperties: false

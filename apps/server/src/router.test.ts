@@ -33,11 +33,13 @@ function context(input?: {
 	return {
 		application: {
 			activateProduct: () => Promise.reject(new Error("not used")),
+			approveImport: () => Promise.reject(new Error("not used")),
 			approveInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			approveStockCount: () => Promise.reject(new Error("not used")),
 			archiveProduct: () => Promise.reject(new Error("not used")),
 			createEventReplay: () => Promise.reject(new Error("not used")),
 			createIdentityLink: () => Promise.reject(new Error("not used")),
+			createImport: () => Promise.reject(new Error("not used")),
 			createInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			createOrganizationParty: () => Promise.reject(new Error("not used")),
 			createPersonParty: () => Promise.reject(new Error("not used")),
@@ -67,6 +69,8 @@ function context(input?: {
 				partyId: null,
 				sessionId,
 			}),
+			getImport: () => Promise.reject(new Error("not used")),
+			getImportCorrectionReport: () => Promise.reject(new Error("not used")),
 			getInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			getOrganization: () => Promise.reject(new Error("not used")),
 			getParty: () => Promise.reject(new Error("not used")),
@@ -77,6 +81,7 @@ function context(input?: {
 			listAuditRecords: async () => ({ items: [], nextCursor: null }),
 			listCurrentUserSessions: async () => ({ items: [], nextCursor: null }),
 			listEntitlements: async () => ({ items: [], nextCursor: null }),
+			listImportFindings: () => Promise.reject(new Error("not used")),
 			listInventoryAdjustments: async () => ({ items: [], nextCursor: null }),
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
@@ -145,7 +150,10 @@ describe("appRouter contract surface", () => {
 			"sessions",
 			"users",
 		]);
-		expect(Object.keys(appRouter.catalog).sort()).toEqual(["products"]);
+		expect(Object.keys(appRouter.catalog).sort()).toEqual([
+			"imports",
+			"products",
+		]);
 		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
 			"activate",
 			"archive",
@@ -160,6 +168,7 @@ describe("appRouter contract surface", () => {
 			"adjustments",
 			"balances",
 			"counts",
+			"imports",
 			"transfers",
 		]);
 		expect(Object.keys(appRouter.audit).sort()).toEqual(["list"]);

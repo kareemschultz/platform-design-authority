@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.9.0
+version: 0.10.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0013, ADR-0020, ADR-0025, ADR-0027]
 ---
 
@@ -141,8 +141,9 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Entry:** WS1 done.
 - **Proves:** PDA-RDM-004 §Prototype 2.
 - **Detailed plan:** `WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md` (PDA-RDM-009) — exact 14-capability depth, ADR-0027 package ownership, contract/schema closure, durable event delivery, WS2/WS5 offline boundary, PR sequence, evidence, and exit gates. This entry stays the authoritative summary; PDA-RDM-009 does not override it.
+- **Progress:** PR1-PR4 are merged with independent exact-head concurrence. PR5 bounded Product/opening-stock CSV imports and Strict Online Numbering are implemented on issue #71 with PDA-APP-024 evidence and PDA-OPS-019 recovery guidance; exact-head gates, independent concurrence, and merge remain open. PR6-PR7 remain blocked in sequence.
 - **Packages:** NEW runtime-neutral `domains/catalog` and `domains/inventory` cores with ports; NEW owner-specific `persistence/catalog-postgres` and `persistence/inventory-postgres` concrete schemas/migrations under ADR-0027; EXTEND the minimum `platform/events` transactional outbox introduced by WS1 into publication/consumer infrastructure; NEW `platform/numbering` core plus owner-specific Persistence adapter (sequence service consumed later by receipts).
-- **Contracts:** `/products*`, `/product-imports*`, `/opening-stock-imports`, `/stock-balances`, `/inventory-adjustments*`, `/stock-counts*`, `/stock-transfers*`; `catalog.*` + `inventory.*` events (registered in `registry/events.json`).
+- **Contracts:** `/products*`, `/product-imports*`, `/opening-stock-imports*`, `/stock-balances`, `/inventory-adjustments*`, `/stock-counts*`, `/stock-transfers*`; `catalog.*`, `inventory.*`, bounded `platform.import.*`, and `platform.sequence.number-issued.v1` events (registered in `registry/events.json`).
 - **Tests:** dominant dimensions `idempotency_and_duplicate`, `concurrency_and_conflict`, `events_jobs_and_projections`; budgets: inventory ledger 99.95% correctness; barcode lookup 300ms p95; search 800ms p95; outbox 99.99% eventual publication.
 - **Exit:** scenarios 2 and 8 demonstrated; ledger corrections only by reversal; DoD §6.
 - **Gates:** none external.

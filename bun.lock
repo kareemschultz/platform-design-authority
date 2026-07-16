@@ -111,6 +111,7 @@
         "@meridian/persistence-platform-entitlements-postgres": "workspace:*",
         "@meridian/persistence-platform-events-postgres": "workspace:*",
         "@meridian/persistence-platform-identity-postgres": "workspace:*",
+        "@meridian/persistence-platform-import-export-postgres": "workspace:*",
         "@meridian/persistence-platform-numbering-postgres": "workspace:*",
         "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
         "@meridian/platform-audit": "workspace:*",
@@ -118,6 +119,8 @@
         "@meridian/platform-entitlements": "workspace:*",
         "@meridian/platform-events": "workspace:*",
         "@meridian/platform-identity": "workspace:*",
+        "@meridian/platform-import-export": "workspace:*",
+        "@meridian/platform-numbering": "workspace:*",
         "@meridian/platform-tenancy": "workspace:*",
         "@meridian/tooling-env": "workspace:*",
         "@orpc/openapi": "catalog:",
@@ -179,6 +182,8 @@
     "apps/worker": {
       "name": "worker",
       "dependencies": {
+        "@meridian/persistence-catalog-postgres": "workspace:*",
+        "@meridian/persistence-inventory-postgres": "workspace:*",
         "@meridian/persistence-platform-events-postgres": "workspace:*",
         "@meridian/platform-events": "workspace:*",
         "@meridian/tooling-env": "workspace:*",
@@ -400,6 +405,22 @@
         "typescript": "^6",
       },
     },
+    "packages/persistence/platform-import-export-postgres": {
+      "name": "@meridian/persistence-platform-import-export-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/platform-import-export": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
+        "typescript": "^6",
+      },
+    },
     "packages/persistence/platform-numbering-postgres": {
       "name": "@meridian/persistence-platform-numbering-postgres",
       "version": "0.0.0",
@@ -412,6 +433,7 @@
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
         "typescript": "^6",
       },
     },
@@ -509,6 +531,18 @@
         "@meridian/tooling-config": "workspace:*",
         "typescript": "^6",
         "vitest": "4.1.10",
+      },
+    },
+    "packages/platform/import-export": {
+      "name": "@meridian/platform-import-export",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/contracts-events": "workspace:*",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
       },
     },
     "packages/platform/numbering": {
@@ -1127,6 +1161,8 @@
 
     "@meridian/persistence-platform-identity-postgres": ["@meridian/persistence-platform-identity-postgres@workspace:packages/persistence/platform-identity-postgres"],
 
+    "@meridian/persistence-platform-import-export-postgres": ["@meridian/persistence-platform-import-export-postgres@workspace:packages/persistence/platform-import-export-postgres"],
+
     "@meridian/persistence-platform-numbering-postgres": ["@meridian/persistence-platform-numbering-postgres@workspace:packages/persistence/platform-numbering-postgres"],
 
     "@meridian/persistence-platform-tenancy-postgres": ["@meridian/persistence-platform-tenancy-postgres@workspace:packages/persistence/platform-tenancy-postgres"],
@@ -1142,6 +1178,8 @@
     "@meridian/platform-events": ["@meridian/platform-events@workspace:packages/platform/events"],
 
     "@meridian/platform-identity": ["@meridian/platform-identity@workspace:packages/platform/identity"],
+
+    "@meridian/platform-import-export": ["@meridian/platform-import-export@workspace:packages/platform/import-export"],
 
     "@meridian/platform-numbering": ["@meridian/platform-numbering@workspace:packages/platform/numbering"],
 

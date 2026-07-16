@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ARC-014
 title: First Slice API and Event Contracts
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0006, ADR-0007, ADR-0016, ADR-0017, ADR-0020]
 ---
 
@@ -80,9 +80,16 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | `POST /v1/products/{productId}/activate` | `catalog.product.activate` |
 | `POST /v1/products/{productId}/archive` | `catalog.product.archive` |
 | `POST /v1/product-imports` | `catalog.import.create` |
+| `GET /v1/product-imports/{importId}` | `catalog.import.read` |
+| `GET /v1/product-imports/{importId}/findings` | `catalog.import.read` |
 | `POST /v1/product-imports/{importId}/approve` | `catalog.import.approve` |
+| `GET /v1/product-imports/{importId}/correction-report` | `catalog.import.download` |
 | `POST /v1/customer-imports` | `platform.import.create` |
 | `POST /v1/opening-stock-imports` | `inventory.import.create` |
+| `GET /v1/opening-stock-imports/{importId}` | `inventory.import.read` |
+| `GET /v1/opening-stock-imports/{importId}/findings` | `inventory.import.read` |
+| `POST /v1/opening-stock-imports/{importId}/approve` | `inventory.import.approve` |
+| `GET /v1/opening-stock-imports/{importId}/correction-report` | `inventory.import.download` |
 
 ### Inventory
 
@@ -278,4 +285,5 @@ Additive changes are preferred. Breaking changes require a new major version. Of
 
 ## Change Log
 
+- 0.7.0 (2026-07-16): Added reloadable Product and opening-stock import status/findings, distinct approval, and protected correction-report operations for WS2 PR5.
 - 0.6.0 (2026-07-15): Added the authenticated, tenant-context-bound internal Event Backbone replay command and distinguished it from Developer Platform webhook replay after the ADR-0027 PR4 Security review.

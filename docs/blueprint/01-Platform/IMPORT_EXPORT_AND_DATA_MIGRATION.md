@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-024
 title: Import Export and Data Migration
-version: 0.2.0
+version: 0.3.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-16
 ---
 
 # Import, Export, and Data Migration
@@ -49,6 +49,12 @@ WS2 Product and opening-inventory import is CSV-first. Parsing, validation, stag
 
 XLSX remains deferred. It may be added only after a governed technology-evidence update proves bounded server-side streaming, formula and external-link rejection, decompression and worksheet limits, malware controls, deterministic type/date handling, resource budgets, and CSV-equivalent dry-run/replay behavior. This deferral does not narrow the platform-wide list of candidate formats above.
 
+### WS2 controlled-prototype bounds
+
+The PR5 request boundary accepts one `text/csv` UTF-8 payload of at most 1 MiB, 1,000 data rows, 100 columns, and 10,000 UTF-8 characters per field. The manifest declares delimiter, quote character, newline convention, locale, decimal separator, default unit where applicable, and IANA timezone. The server verifies the supplied SHA-256 digest, rejects NUL bytes and invalid UTF-8, and fails closed when the injected malware-scanner seam reports blocked or unavailable.
+
+Raw CSV exists only in the bounded request/scanner/parser lifetime. It is not persisted in PostgreSQL, logged, copied into Audit, emitted in events, or returned in errors. Persistence stores the manifest, digest, normalized allowlisted row representation, safe finding codes, checkpoints, target references, and reconciliation counts. Production object storage, antivirus-provider selection, production retention, and larger streaming uploads remain separate evidence gates.
+
 ## Import Lifecycle
 
 1. Create project and select tenant, target domains, and source system.
@@ -62,6 +68,8 @@ XLSX remains deferred. It may be added only after a governed technology-evidence
 9. Commit in idempotent waves through domain commands.
 10. Reconcile source counts, target counts, totals, balances, and exceptions.
 11. Record acceptance and archive evidence.
+
+For WS2, create performs upload validation, scanning, parsing, domain-target validation, and dry run. A dry run ends in `ReadyForApproval` or `Failed` and makes no Catalog or Inventory mutation. Approval requires the expected version and a different current actor, then commits deterministic waves through published Catalog or Inventory application commands. A failed wave retains its last completed row and safe failure code. Retrying resumes from that checkpoint; stable per-row idempotency keys prevent duplicate Products, Identifiers, stock movements, events, Audit records, or references.
 
 ## Validation
 
@@ -113,8 +121,29 @@ The platform must not make customer exit artificially difficult. Exit packages s
 - Data classification and redaction
 - Approval for sensitive or large exports
 - Tenant isolation in staging and jobs
-- Automatic staging retention and deletion
+- Governed terminal-staging retention and deletion, with durable purge evidence
 - Full audit of who initiated, approved, downloaded, or cancelled work
+
+### WS2 API and authority surface
+
+Product imports expose create, tenant-scoped status, tenant-scoped findings, approve, and correction-report download operations under `catalog.import.create`, `catalog.import.read`, `catalog.import.approve`, and `catalog.import.download`. Opening-stock imports expose the equivalent operations under `inventory.import.create`, `inventory.import.read`, `inventory.import.approve`, and `inventory.import.download`. Transport and application boundaries both enforce current active context, permission, and the relevant entitlement. Foreign-tenant and nonexistent identifiers return the same non-disclosing outcome.
+
+Correction reports contain only import ID, row number, stable source key, field, severity, and safe finding code. They never echo unrestricted field values or embed a durable public URL. Download permission is evaluated for every request and the download is audited.
+
+## WS2 Runtime Ownership
+
+`@meridian/platform-import-export` owns runtime-neutral parsing, bounds, lifecycle, checkpoint, reconciliation, and target-port orchestration. `@meridian/persistence-platform-import-export-postgres` owns only import job, normalized row, finding, wave, and command-receipt state. Catalog and Inventory remain the sole owners of Product and stock facts. The import orchestrator may call their published application commands but may never import their repositories, migrations, schemas, or tables.
+
+## Events
+
+The canonical WS2 lifecycle events are:
+
+- `platform.import.validated.v1`
+- `platform.import.approved.v1`
+- `platform.import.completed.v1`
+- `platform.import.failed.v1`
+
+These events carry safe identifiers, target capability, counts, state, and correlation only. Row content and unrestricted findings are prohibited. Catalog Product commands and Inventory adjustment commands continue to emit their own owner events for each authoritative effect.
 
 ## Offline and Edge
 
@@ -130,4 +159,6 @@ Offline clients may import bounded operational packages only through signed mani
 
 ## Change Log
 
+- 0.3.1 (2026-07-16): Bound tenant/operation/key command receipts, separate owner-command permissions, mixed duplicate/corrected fixtures, deterministic crash-window recovery, and terminal-only staging purge while retaining production scheduling and deletion-journal gates.
+- 0.3.0 (2026-07-16): Bound the PR5 CSV request/resource limits, scanner and raw-content rules, owner-specific orchestration persistence, reloadable API/permission surface, resumable idempotent waves, safe correction reports, and canonical lifecycle events.
 - 0.2.0 (2026-07-14): Select UTF-8 CSV-first server-side imports for WS2 and defer XLSX pending bounded streaming and security evidence.

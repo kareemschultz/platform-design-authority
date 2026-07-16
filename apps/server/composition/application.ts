@@ -7,6 +7,7 @@ import { createCurrentIdentityResolver } from "./current-identity";
 import { entitlementTransportApplication } from "./entitlements";
 import { eventReplayTransportApplication } from "./events";
 import { identitySessionTransportApplication } from "./identity";
+import { importTransportApplication } from "./imports";
 import { inventoryTransportApplication } from "./inventory";
 import { partyIdentityLinkDirectory, partyTransportApplication } from "./party";
 import {
@@ -33,6 +34,7 @@ export const serverApplication = {
 	...entitlementTransportApplication,
 	...eventReplayTransportApplication,
 	...identitySessionTransportApplication,
+	...importTransportApplication,
 	...inventoryTransportApplication,
 	...tenancyApplication,
 	...partyTransportApplication,

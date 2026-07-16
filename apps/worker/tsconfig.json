@@ -1,0 +1,8 @@
+{
+  "extends": "@meridian/tooling-config/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "dist",
+    "strictNullChecks": true
+  }
+}

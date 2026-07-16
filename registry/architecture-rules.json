@@ -155,6 +155,7 @@
       "pattern": "**/!(persistence)/** -> database-client",
       "except": [
         "apps/server/composition",
+        "apps/worker/composition",
         "packages/tooling/composition/*"
       ]
     },
@@ -234,6 +235,7 @@
     "exceptions_require_expiry": true,
     "composition_roots": [
       "apps/server/composition",
+      "apps/worker/composition",
       "packages/tooling/composition/*"
     ],
     "composition_root_may_depend_on": [

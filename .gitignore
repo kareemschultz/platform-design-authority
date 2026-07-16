@@ -14,6 +14,8 @@ out
 .source
 .expo
 next-env.d.ts
+__pycache__/
+*.py[cod]
 
 # Environment variables
 .env

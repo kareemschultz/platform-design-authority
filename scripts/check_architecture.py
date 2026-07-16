@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import os
 import re
 import sys
 from collections import defaultdict
@@ -113,13 +114,18 @@ def classify(path: str, families: list[dict[str, Any]]) -> str | None:
 
 
 def source_files(root: Path) -> list[Path]:
-    return [
-        path
-        for path in root.rglob("*")
-        if path.is_file()
-        and path.suffix in SOURCE_SUFFIXES
-        and not EXCLUDED_DIRECTORIES.intersection(path.parts)
-    ]
+    sources: list[Path] = []
+    for directory, child_directories, files in os.walk(root, followlinks=False):
+        child_directories[:] = [
+            name for name in child_directories if name not in EXCLUDED_DIRECTORIES
+        ]
+        directory_path = Path(directory)
+        sources.extend(
+            directory_path / name
+            for name in files
+            if Path(name).suffix in SOURCE_SUFFIXES
+        )
+    return sources
 
 
 def dependency_name(specifier: str) -> str:
@@ -354,6 +360,14 @@ def main() -> int:
             ):
                 errors.append(
                     f"{source_path}: migration-outside-persistence: runtime-neutral package owns a concrete migration artifact"
+                )
+
+            if (
+                source_family == "applications"
+                and "migrations" in source.relative_to(package_root).parts
+            ):
+                errors.append(
+                    f"{source_path}: application-migration-owned: applications may invoke registered migration streams but may not own migration artifacts"
                 )
 
     for root, record in owner_by_root.items():

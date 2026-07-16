@@ -92,9 +92,38 @@ def main() -> int:
         / "worker"
         / "composition"
         / "__architecture_worker_pool_fixture.ts",
+        expected_success=True,
+        source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker-adjacent"
+        / "composition"
+        / "__architecture_adjacent_worker_pool_fixture.ts",
         expected_success=False,
         expected_text="unregistered-application-source",
         source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "migrations"
+        / "0000_forbidden.sql",
+        expected_success=False,
+        expected_text="application-migration-owned",
+        source="CREATE TABLE worker_owned_migration (id text PRIMARY KEY);\n",
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "src"
+        / "__architecture_cross_owner_consumer_fixture.ts",
+        expected_success=False,
+        expected_text="concrete application binding belongs in a registered composition root",
+        source='import type { CatalogPersistencePort } from "@meridian/domain-catalog";\nexport type Fixture = CatalogPersistencePort;\n',
     )
     probe(
         ROOT

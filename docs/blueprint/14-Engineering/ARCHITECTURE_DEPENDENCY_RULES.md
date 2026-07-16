@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.2.1
+version: 1.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-15
@@ -69,14 +69,15 @@ Family-level entries in `registry/architecture-rules.json` are a conservative gr
 
 ### Registered Composition Roots
 
-Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027 selects `apps/worker/composition` as the candidate Event Backbone root, but it is deliberately absent from this registered table and therefore rejected by the executable checker until all three named controlled-prototype review lenses have recorded concurrence. A Changes-required row is not closure and requires a superseding exact-head concurrence row.
+Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027's three named controlled-prototype review lenses recorded exact-head concurrence at `771cb493fce4040dc1edb501fed1005aec585d63`; this table therefore registers only the literal Event Backbone worker root. Adjacent or wildcard application roots remain denied.
 
 | Composition root | Process owner | Allowed process resources | Prohibited responsibility |
 |---|---|---|---|
 | `apps/server/composition` | API server | one bounded process-local PostgreSQL pool; HTTP adapters; deterministic migration runner | background event-delivery loop or another process's pool |
+| `apps/worker/composition` | Event Backbone worker | one bounded process-local PostgreSQL pool; internal delivery, replay, and owner-projection adapter binding | migrations, HTTP business routes, another process's pool, or direct cross-owner repository/table access |
 | `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | application business processing or an unregistered long-running service |
 
-PR4 may add `apps/worker/composition` to this table and regenerate the rules only after ADR-0027's Platform Architecture, Data Platform, and Security lenses are dated and each records concurrence at the remediated exact head. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; PR1 grants no executable exception in advance.
+PR4 adds this exact root after the required concurrence. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; registration does not authorize a wildcard, another application root, production topology, or closure of RR-006/RR-007.
 
 ### Registered Persistence Owners
 
@@ -195,6 +196,7 @@ These paths are part of the rule definition, not temporary risk exceptions. They
 | Rule | Allowed path | Reason |
 |---|---|---|
 | `database-outside-persistence` | `apps/server/composition` | The API server composition root may construct and inject its single process-local connection. |
+| `database-outside-persistence` | `apps/worker/composition` | The Event Backbone worker composition root may construct and inject its single bounded process-local connection after ADR-0027 exact-head concurrence. |
 | `database-outside-persistence` | `packages/tooling/composition/*` | Approved Tooling composition packages may construct a governed infrastructure connection. |
 | `connection-lifecycle-outside-composition` | `packages/tooling/env/src/server.ts` | The validated environment schema must declare `DATABASE_URL`; it exports validated configuration and may not import a database client, construct a pool, or close a connection. |
 
@@ -210,6 +212,8 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 2026-07-15 — v1.3.0 recorded the three exact-head ADR-0027 concurrence rows and registered only literal `apps/worker/composition`; adjacent roots, worker-owned migrations, and ordinary worker-source imports of owner implementations remain executable denials.
 
 - 2026-07-15 — v1.2.1 clarified that recording a Changes-required specialist row does not authorize the worker root; all three lenses require exact-head concurrence before registration.
 

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -29,41 +29,37 @@ No severity is downgraded merely because later files exist. File existence is no
 
 ## Live-Branch Verification
 
-The audit cutoff was `c9faa31`. Before this disposition, the branch added:
+The immutable audit cutoff remains `c9faa31`. This disposition was reverified on 2026-07-16 after the initial research synthesis (`b70b879`), qualified research closeout (`f98b1e2`), and depth/status remediation (`87d995b`). The current generated registry contains 438 governed records: 409 Draft, 28 Proposed, and one Superseded. It contains all 86 competitive-research documents. The research ledger now records CIR-LED-0001 through CIR-LED-0009, while CIR-BACK-021 through CIR-BACK-025 preserve the comparator families and direct-observation work that remain open.
 
-- `a2b1a91` — workforce research wave;
-- `1b4b053` — platform-services research wave;
-- `03a616b` — immutable audit report and governance exemption.
+PR #75 at `f98b1e2` has passing `meridian` and both `validate-docs` checks. Local commits and this navigation batch are newer than that PR head and therefore require their own fresh CI run before merge. The branch still does not ratify authority, govern product MDX, close remaining research families, supply founder/external decisions, or prove pilot/production readiness.
 
-Those post-cutoff waves add HR, payroll, workforce, expense, analytics, automation, collaboration, documentation, notification, search, and AI-pattern research. They partially reduce DCA-008. They do not update the research ledger or backlog, regenerate the document registry, ratify authority, correct program status, add MDX governance, register WS2 evidence, or supply founder/external decisions.
-
-At disposition time, the branch contains 79 competitive-research Markdown documents, while `registry/documents.json` still contains 345 records. `RESEARCH_LEDGER.md` still has only CIR-LED-0001 through CIR-LED-0003, and every domain backlog item retains its pre-wave Ready or Planned status.
+The navigation checkpoint adds canonical linked catalogs for every governed document, parent navigation for every governed index, and `scripts/validate_document_indexes.py` with seeded regression cases for removed, bare-filename, metadata-incomplete, and duplicate entries. Local index validation reports zero unexplained governed documents. Independent review is still required before DCA-009 is marked Closed.
 
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
 |---|---|---|---|---|
 | DCA-001 | Blocker | Accepted | Open for production authority; prototype exception preserved | Constitution and required ADR/specification set promoted only by named reviewers with dated `review_evidence`; ratification-wave record complete; validators green |
-| DCA-002 | Critical | Accepted | Open | Binary completeness claim replaced by class/depth/evidence semantics and independently reviewed |
-| DCA-003 | Critical | Accepted | Open | Program status and first-slice plan match current main, issues, PRs, and evidence at a stated SHA |
-| DCA-004 | Critical | Accepted | Open | Generated document registry current; PR #75 documentation jobs green in a fresh checkout |
+| DCA-002 | Critical | Accepted | Implemented in Draft; independent review open | Binary completeness claim replaced by class/depth/evidence semantics and independently reviewed |
+| DCA-003 | Critical | Accepted | Reconciled to `main` `4045474`; independent and pre-merge refresh pending | Program status and first-slice plan match current main, issues, PRs, and evidence at a stated SHA |
+| DCA-004 | Critical | Accepted | Implemented at PR #75 head; newer local commits require fresh CI | Generated document registry current; PR #75 documentation jobs green in a fresh checkout |
 | DCA-005 | High | Accepted | Open | Every capability family has an explicit readiness depth and admission trigger; no speculative first-slice expansion |
 | DCA-006 | High | Accepted | Open | Governed artifact-class standard, templates, validator behavior, and sample review evidence agree |
-| DCA-007 | High | Accepted | Open; post-cutoff waves increase the unregistered output | Every research wave has a ledger record; affected backlog entries have honest states and exact output/source links |
+| DCA-007 | High | Accepted | Initial waves registered; independent review and continuing backlog remain | Every research wave has a ledger record; affected backlog entries have honest states and exact output/source links |
 | DCA-008 | High | Partially Accepted | Workforce and platform-service gaps reduced after cutoff; ITSM/MSP/RMM, IAM, infrastructure/IPAM/DCIM, mobile/offline, and named-product depth remain | Reviewed matrices/workflows/findings and dated source ledger for each remaining research family |
-| DCA-009 | High | Accepted | Open | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |
+| DCA-009 | High | Accepted | Implemented; independent closure review pending | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |
 | DCA-010 | High | Accepted | Open | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
 | DCA-011 | High | Accepted | Open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |
 | DCA-012 | High | Accepted | Open | Capability source model consolidated or explicitly ratified as multi-source with provenance and zero identifier drift |
 | DCA-013 | High | Accepted | Open | Ratification wave manifests record exact versions, reviewers, dissent, dispositions, authority, and promotion evidence |
 | DCA-014 | Medium | Accepted | Open monitoring obligation | Technology ledger separates available, assessed, pinned, and proven versions with dated evidence and compatibility results |
 | DCA-015 | Medium | Accepted | Open | GitHub issue #59 and the existing project are dispositioned into one consistent state |
-| DCA-016 | High | Accepted | Open | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |
+| DCA-016 | High | Accepted | Partially implemented: status and index/orphan seeded checks exist; MDX and research checks remain | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |
 | DCA-017 | Medium | Accepted | Open | Active OpenAPI filler removed; unresolved cost inputs carry owner, evidence need, and decision trigger |
 | DCA-018 | High | Accepted | Open | WS2 evidence source resolves applicable capability-dimension cells to reviewed test evidence or explicit depth deferral |
 | DCA-019 | Blocker | Needs Founder/External Decision | Open; documentation may prepare but not close | Actual founder decisions, professional opinions, provider evidence, customer evidence, and security/accessibility/operations results linked at their gates |
 
-No finding is Rejected with Evidence, Superseded, or Closed at this disposition checkpoint.
+No finding is Rejected with Evidence, Superseded, or Closed at this checkpoint. Implemented findings remain reviewable until their exact closure evidence passes on the final branch state and an independent reviewer dispositions the result.
 
 ## Remediation Batches
 

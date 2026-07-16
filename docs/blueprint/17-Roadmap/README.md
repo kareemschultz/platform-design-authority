@@ -1,23 +1,27 @@
 ---
 document_id: PDA-RDM-005
 title: Roadmap Section Index
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-16
 ---
 
 # Roadmap
 
-## Current Specifications
+## Artifact Catalog
 
-- `BLUEPRINT_AND_DELIVERY_ROADMAP.md`
-- `FIRST_SLICE_MANIFEST.md`
-- `FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`
-- `TECHNICAL_PROTOTYPE_PLAN.md`
-- `FIRST_SLICE_IMPLEMENTATION_PLAN.md`
-- `WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md`
-- `RATIFICATION_WAVES.md`
+- [Blueprint and Delivery Roadmap](BLUEPRINT_AND_DELIVERY_ROADMAP.md) — `PDA-RDM-001` · Draft
+- [Blueprint Ratification Waves](RATIFICATION_WAVES.md) — `PDA-RDM-002` · Draft
+- [First Slice Capability Manifest](FIRST_SLICE_MANIFEST.md) — `PDA-RDM-003` · Draft
+- [Technical Prototype Plan](TECHNICAL_PROTOTYPE_PLAN.md) — `PDA-RDM-004` · Draft
+- [First Slice Provisional Quality Budgets](FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md) — `PDA-RDM-006` · Draft
+- [Meridian First-Slice Implementation Plan](FIRST_SLICE_IMPLEMENTATION_PLAN.md) — `PDA-RDM-007` · Draft
+- [WS1 Implementation Plan: Identity, Tenancy, Party, Authorization](WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md) — `PDA-RDM-008` · Draft
+- [WS2 Implementation Plan: Catalog and Inventory Ledger](WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md) — `PDA-RDM-009` · Draft
+
+## Related Authority and Contracts
+
 - `registry/first-slice.json`
 - `registry/first-slice-tests.json`
 - `docs/blueprint/02-Architecture/FIRST_SLICE_API_AND_EVENT_CONTRACTS.md`

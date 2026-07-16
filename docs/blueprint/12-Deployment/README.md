@@ -1,22 +1,25 @@
 ---
 document_id: PDA-DEP-001
 title: Deployment Section Index
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # Deployment
 
-## Current Specifications
+## Artifact Catalog
 
-- `DEPLOYMENT_REFERENCE_ARCHITECTURE.md`
-- `INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md`
-- `CAPACITY_COST_AND_MULTI_REGION_STRATEGY.md`
-- `BACKUP_RESTORE_AND_DISASTER_RECOVERY.md`
-- `SELF_HOSTED_COMPATIBILITY_MATRIX.md`
-- `INFRASTRUCTURE_COST_WORKSHEET.md`
+- [Backup Restore and Disaster Recovery](BACKUP_RESTORE_AND_DISASTER_RECOVERY.md) — `PDA-DEP-010` · Draft
+- [Deployment Reference Architecture](DEPLOYMENT_REFERENCE_ARCHITECTURE.md) — `PDA-DEP-011` · Draft
+- [Infrastructure as Code and Environment Topology](INFRASTRUCTURE_AS_CODE_AND_ENVIRONMENT_TOPOLOGY.md) — `PDA-DEP-012` · Draft
+- [Capacity Cost and Multi Region Strategy](CAPACITY_COST_AND_MULTI_REGION_STRATEGY.md) — `PDA-DEP-013` · Draft
+- [Self Hosted Compatibility Matrix](SELF_HOSTED_COMPATIBILITY_MATRIX.md) — `PDA-DEP-014` · Draft
+- [Infrastructure Cost Worksheet](INFRASTRUCTURE_COST_WORKSHEET.md) — `PDA-DEP-015` · Draft
+
+## Related Authority
+
 - `docs/blueprint/18-Decisions/ADR-0018-USE-OPENTOFU-FOR-INFRASTRUCTURE-AS-CODE.md`
 - `docs/blueprint/02-Architecture/RECOMMENDED_TECHNOLOGY_STACK.md`
 - `docs/blueprint/02-Architecture/FIRST_SLICE_SYSTEM_CONTEXT_AND_FLOWS.md`

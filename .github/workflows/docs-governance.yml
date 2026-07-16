@@ -53,3 +53,8 @@ jobs:
 
       - name: Verify generated registries are current
         run: python scripts/generate_registries.py --check
+
+      - name: Test and validate canonical document indexes
+        run: |
+          python -m unittest scripts/test_validate_document_indexes.py
+          python scripts/validate_document_indexes.py

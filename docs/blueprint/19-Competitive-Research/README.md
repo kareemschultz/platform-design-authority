@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-001
 title: Competitive Intelligence and Product Research
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -232,3 +232,119 @@ The initial research program was authored through 2026-07-16. All artifacts rema
 | Cross-domain synthesis | PDA-CIR-080 through PDA-CIR-086 | differentiation, advantage, dispositions, shared workflows/recovery/review and closeout |
 
 The initial section contains 86 uniquely identified Markdown documents. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial nine-wave writing set and records access limits, omitted comparator families, continuing research backlog, and external evidence gates.
+
+## 14. Artifact Catalog
+
+This catalog is the canonical navigation surface for the research artifacts. Identifier ranges in the completion index summarize waves; they do not substitute for explicit artifact links or page-level evidence.
+
+### 14.1 Framework and living registers
+
+- [Competitive Research Methodology](COMPETITIVE_RESEARCH_METHODOLOGY.md) — `PDA-CIR-002` · Draft
+- [Competitive Research Source Trust Model](SOURCE_TRUST_MODEL.md) — `PDA-CIR-003` · Draft
+- [Competitor Evaluation Framework](COMPETITOR_EVALUATION_FRAMEWORK.md) — `PDA-CIR-004` · Draft
+- [Competitive Research Standards](RESEARCH_STANDARDS.md) — `PDA-CIR-005` · Draft
+- [Competitive Research Source Registry](SOURCE_REGISTRY.md) — `PDA-CIR-006` · Draft
+- [Competitive Research Ledger](RESEARCH_LEDGER.md) — `PDA-CIR-007` · Draft
+- [Competitive Research Backlog](RESEARCH_BACKLOG.md) — `PDA-CIR-008` · Draft
+- [Common Failures and Pain Points Register](COMMON_FAILURES_AND_PAIN_POINTS.md) — `PDA-CIR-009` · Draft
+- [Market Gap Register](MARKET_GAP_REGISTER.md) — `PDA-CIR-010` · Draft
+- [Meridian Differentiation Register](DIFFERENTIATION_REGISTER.md) — `PDA-CIR-011` · Draft
+- [Best-in-Class Comparative Scorecard](BEST_IN_CLASS_SCORECARD.md) — `PDA-CIR-012` · Draft
+- [World-Class Capability Criteria](WORLD_CLASS_CRITERIA.md) — `PDA-CIR-013` · Draft
+- [Product Teardown Standard](PRODUCT_TEARDOWN_STANDARD.md) — `PDA-CIR-014` · Draft
+- [Competitive Research Refresh Schedule](RESEARCH_REFRESH_SCHEDULE.md) — `PDA-CIR-015` · Draft
+- [Competitive Research Discoveries Register](DISCOVERIES_REGISTER.md) — `PDA-CIR-016` · Draft
+- [Competitive Pattern Decision Register](PATTERN_DECISION_REGISTER.md) — `PDA-CIR-017` · Draft
+- [Research-to-Implementation Playbook Standard](IMPLEMENTATION_PLAYBOOK_STANDARD.md) — `PDA-CIR-018` · Draft
+- [Competitive Research Implementation Evidence Register](IMPLEMENTATION_EVIDENCE_REGISTER.md) — `PDA-CIR-019` · Draft
+
+### 14.2 Accounting and bookkeeping
+
+- [Accounting and Bookkeeping Competitive Capability Matrix](ACCOUNTING_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-020` · Draft
+- [Bookkeeping Workflow Reference](BOOKKEEPING_WORKFLOW_REFERENCE.md) — `PDA-CIR-021` · Draft
+- [Automation and AI-Assisted Bookkeeping](AUTOMATION_AND_AI_BOOKKEEPING.md) — `PDA-CIR-022` · Draft
+- [Accounting Product Teardown Synthesis](ACCOUNTING_PRODUCT_TEARDOWNS.md) — `PDA-CIR-023` · Draft
+- [Accounting Implementation Findings](ACCOUNTING_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-024` · Draft
+
+### 14.3 ERP administration
+
+- [ERP Competitive Capability Matrix](ERP_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-025` · Draft
+- [ERP Cross-Domain Workflow Reference](ERP_CROSS_DOMAIN_WORKFLOW_REFERENCE.md) — `PDA-CIR-026` · Draft
+- [ERP Product Teardown Synthesis](ERP_PRODUCT_TEARDOWNS.md) — `PDA-CIR-027` · Draft
+- [ERP Implementation Findings](ERP_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-028` · Draft
+
+### 14.4 Supply chain
+
+- [Catalog and Inventory Competitive Capability Matrix](CATALOG_AND_INVENTORY_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-029` · Draft
+- [Catalog and Inventory Workflow Reference](CATALOG_AND_INVENTORY_WORKFLOW_REFERENCE.md) — `PDA-CIR-030` · Draft
+- [Procurement and Warehouse Competitive Capability Matrix](PROCUREMENT_AND_WAREHOUSE_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-031` · Draft
+- [Procurement and Warehouse Workflow Reference](PROCUREMENT_AND_WAREHOUSE_WORKFLOW_REFERENCE.md) — `PDA-CIR-032` · Draft
+- [Manufacturing Competitive Capability Matrix](MANUFACTURING_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-033` · Draft
+- [Manufacturing Workflow Reference](MANUFACTURING_WORKFLOW_REFERENCE.md) — `PDA-CIR-034` · Draft
+- [Supply Chain Product Teardown Synthesis](SUPPLY_CHAIN_PRODUCT_TEARDOWNS.md) — `PDA-CIR-035` · Draft
+- [Supply Chain Implementation Findings](SUPPLY_CHAIN_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-036` · Draft
+
+### 14.5 Commerce and payments
+
+- [POS Competitive Capability Matrix](POS_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-037` · Draft
+- [POS Workflow Reference](POS_WORKFLOW_REFERENCE.md) — `PDA-CIR-038` · Draft
+- [Commerce Competitive Capability Matrix](COMMERCE_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-039` · Draft
+- [Commerce Workflow Reference](COMMERCE_WORKFLOW_REFERENCE.md) — `PDA-CIR-040` · Draft
+- [Payments Competitive Capability Matrix](PAYMENTS_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-041` · Draft
+- [Payments Provider Workflow Reference](PAYMENTS_PROVIDER_WORKFLOW_REFERENCE.md) — `PDA-CIR-042` · Draft
+- [Stored Value Competitive Capability Matrix](STORED_VALUE_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-043` · Draft
+- [Stored Value Workflow Reference](STORED_VALUE_WORKFLOW_REFERENCE.md) — `PDA-CIR-044` · Draft
+- [Marketplace Competitive Capability Matrix](MARKETPLACE_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-045` · Draft
+- [Commerce and Payments Product Teardowns](COMMERCE_AND_PAYMENTS_PRODUCT_TEARDOWNS.md) — `PDA-CIR-046` · Draft
+- [Commerce and Payments Implementation Findings](COMMERCE_AND_PAYMENTS_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-047` · Draft
+
+### 14.6 Customer and service
+
+- [CRM Competitive Capability Matrix](CRM_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-048` · Draft
+- [CRM Workflow Reference](CRM_WORKFLOW_REFERENCE.md) — `PDA-CIR-049` · Draft
+- [Projects Competitive Capability Matrix](PROJECTS_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-050` · Draft
+- [Projects Workflow Reference](PROJECTS_WORKFLOW_REFERENCE.md) — `PDA-CIR-051` · Draft
+- [Service and Support Competitive Capability Matrix](SERVICE_AND_SUPPORT_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-052` · Draft
+- [Service Workflow Reference](SERVICE_WORKFLOW_REFERENCE.md) — `PDA-CIR-053` · Draft
+- [Field Service Competitive Capability Matrix](FIELD_SERVICE_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-054` · Draft
+- [Field Service Workflow Reference](FIELD_SERVICE_WORKFLOW_REFERENCE.md) — `PDA-CIR-055` · Draft
+- [Rental and Booking Competitive Capability Matrix](RENTAL_AND_BOOKING_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-056` · Draft
+- [Rental and Booking Workflow Reference](RENTAL_AND_BOOKING_WORKFLOW_REFERENCE.md) — `PDA-CIR-057` · Draft
+- [Customer and Service Product Teardowns](CUSTOMER_AND_SERVICE_PRODUCT_TEARDOWNS.md) — `PDA-CIR-058` · Draft
+- [Customer and Service Implementation Findings](CUSTOMER_AND_SERVICE_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-059` · Draft
+
+### 14.7 Workforce
+
+- [HR Competitive Capability Matrix](HR_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-060` · Draft
+- [HR Workflow Reference](HR_WORKFLOW_REFERENCE.md) — `PDA-CIR-061` · Draft
+- [Payroll Competitive Capability Matrix](PAYROLL_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-062` · Draft
+- [Payroll Workflow Reference](PAYROLL_WORKFLOW_REFERENCE.md) — `PDA-CIR-063` · Draft
+- [Workforce and Scheduling Competitive Capability Matrix](WORKFORCE_AND_SCHEDULING_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-064` · Draft
+- [Workforce Workflow Reference](WORKFORCE_WORKFLOW_REFERENCE.md) — `PDA-CIR-065` · Draft
+- [Expense Management Competitive Capability Matrix](EXPENSE_MANAGEMENT_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-066` · Draft
+- [Expense Workflow Reference](EXPENSE_WORKFLOW_REFERENCE.md) — `PDA-CIR-067` · Draft
+- [Workforce Product Teardowns](WORKFORCE_PRODUCT_TEARDOWNS.md) — `PDA-CIR-068` · Draft
+- [Workforce Implementation Findings](WORKFORCE_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-069` · Draft
+
+### 14.8 Platform services
+
+- [AI-Assisted Product Patterns](AI_ASSISTED_PRODUCT_PATTERNS.md) — `PDA-CIR-070` · Draft
+- [Automation Competitive Pattern Matrix](AUTOMATION_COMPETITIVE_PATTERN_MATRIX.md) — `PDA-CIR-071` · Draft
+- [Analytics Competitive Capability Matrix](ANALYTICS_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-072` · Draft
+- [Analytics Workflow Reference](ANALYTICS_WORKFLOW_REFERENCE.md) — `PDA-CIR-073` · Draft
+- [Search Competitive Pattern Matrix](SEARCH_COMPETITIVE_PATTERN_MATRIX.md) — `PDA-CIR-074` · Draft
+- [Notifications and Inbox Pattern Matrix](NOTIFICATIONS_AND_INBOX_PATTERN_MATRIX.md) — `PDA-CIR-075` · Draft
+- [Collaboration Competitive Pattern Matrix](COLLABORATION_COMPETITIVE_PATTERN_MATRIX.md) — `PDA-CIR-076` · Draft
+- [Documentation and Changelog Pattern Matrix](DOCUMENTATION_AND_CHANGELOG_PATTERN_MATRIX.md) — `PDA-CIR-077` · Draft
+- [Cross-Platform Productivity Teardowns](CROSS_PLATFORM_PRODUCTIVITY_TEARDOWNS.md) — `PDA-CIR-078` · Draft
+- [Platform Services Implementation Findings](PLATFORM_SERVICES_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-079` · Draft
+
+### 14.9 Cross-domain synthesis
+
+- [Meridian Differentiation Manifest](MERIDIAN_DIFFERENTIATION_MANIFEST.md) — `PDA-CIR-080` · Draft
+- [Platform Advantage Register](PLATFORM_ADVANTAGE_REGISTER.md) — `PDA-CIR-081` · Draft
+- [Adopt Improve Reject Register](ADOPT_IMPROVE_REJECT_REGISTER.md) — `PDA-CIR-082` · Draft
+- [Cross-Domain Workflow Patterns](CROSS_DOMAIN_WORKFLOW_PATTERNS.md) — `PDA-CIR-083` · Draft
+- [Cross-Domain Failure and Recovery Patterns](CROSS_DOMAIN_FAILURE_AND_RECOVERY_PATTERNS.md) — `PDA-CIR-084` · Draft
+- [Cross-Domain Review Queue Standard](CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md) — `PDA-CIR-085` · Draft
+- [Initial Competitive Research Program Closeout](COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md) — `PDA-CIR-086` · Draft

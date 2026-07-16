@@ -60,7 +60,7 @@ docs/reviews/                Independent audits, registrations, and dispositions
 docs/templates/              Standard authoring templates
 .agents/skills/          Agent Skills-compatible project workflows
 .claude/skills/         Project-local agent skills
-docs/implementation/     Scaffold provenance, conflicts, and migration records
+docs/implementation/     Prototype evidence, dispositions, audits, scaffold provenance, and migration records
 .github/workflows/      Read-only documentation governance CI
 AGENTS.md                Agent-neutral contributor operating contract
 CLAUDE.md               AI-agent operating contract
@@ -151,6 +151,8 @@ Run:
 ```bash
 python scripts/validate_docs.py
 python scripts/generate_registries.py --check
+python -m unittest scripts/test_validate_document_indexes.py
+python scripts/validate_document_indexes.py
 ```
 
 ## Document Lifecycle

@@ -1,25 +1,28 @@
 ---
 document_id: PDA-DEV-001
 title: Developer Platform Section Index
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-16
 ---
 
 # Developer Platform
 
-## Current Specifications
+## Artifact Catalog
 
-- `WEBHOOKS_AND_EVENT_DELIVERY.md`
-- `REGISTRY_AND_AGENT_AUTOMATION.md`
-- `API_VERSIONING_AND_DEPRECATION.md`
-- `PUBLIC_API_AND_APPLICATION_REGISTRATION.md`
-- `SDK_CLI_AND_SCAFFOLDING.md`
-- `EXTENSION_PLUGIN_AND_SANDBOX_ARCHITECTURE.md`
-- `REFERENCE_INTEGRATIONS_AND_PROVIDER_SIMULATORS.md`
-- `PROJECT_AGENT_SKILLS.md`
-- `PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md`
+- [Webhooks and Event Delivery](WEBHOOKS_AND_EVENT_DELIVERY.md) — `PDA-DEV-002` · Draft
+- [Registry and Agent Automation](REGISTRY_AND_AGENT_AUTOMATION.md) — `PDA-DEV-003` · Draft
+- [API Versioning and Deprecation](API_VERSIONING_AND_DEPRECATION.md) — `PDA-DEV-004` · Draft
+- [Project Agent Skills](PROJECT_AGENT_SKILLS.md) — `PDA-DEV-005` · Draft
+- [SDK CLI and Scaffolding](SDK_CLI_AND_SCAFFOLDING.md) — `PDA-DEV-006` · Draft
+- [Extension Plugin and Sandbox Architecture](EXTENSION_PLUGIN_AND_SANDBOX_ARCHITECTURE.md) — `PDA-DEV-007` · Draft
+- [Public API and Application Registration](PUBLIC_API_AND_APPLICATION_REGISTRATION.md) — `PDA-DEV-008` · Draft
+- [Reference Integrations and Provider Simulators](REFERENCE_INTEGRATIONS_AND_PROVIDER_SIMULATORS.md) — `PDA-DEV-009` · Draft
+- [Product Documentation and Knowledge Architecture](PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md) — `PDA-DEV-010` · Draft
+
+## Related Authority and Contracts
+
 - `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md`
 - `docs/blueprint/18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md`
 - `docs/blueprint/18-Decisions/ADR-0019-PHASED-EXTENSION-EXECUTION-MODEL.md`

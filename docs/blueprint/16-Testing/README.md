@@ -1,20 +1,23 @@
 ---
 document_id: PDA-TST-001
 title: Testing Section Index
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # Testing
 
-## Current Specifications
+## Artifact Catalog
 
-- `PLATFORM_TESTING_STRATEGY.md`
-- `SPECIALIST_TESTING_STANDARDS.md`
-- `TEST_DATA_ENVIRONMENTS_AND_RELEASE_EVIDENCE.md`
-- `FIRST_SLICE_CAPABILITY_TEST_MATRIX.md`
+- [Platform Testing Strategy](PLATFORM_TESTING_STRATEGY.md) — `PDA-TST-010` · Draft
+- [Specialist Testing Standards](SPECIALIST_TESTING_STANDARDS.md) — `PDA-TST-011` · Draft
+- [Test Data Environments and Release Evidence](TEST_DATA_ENVIRONMENTS_AND_RELEASE_EVIDENCE.md) — `PDA-TST-012` · Draft
+- [First Slice Capability Test Matrix](FIRST_SLICE_CAPABILITY_TEST_MATRIX.md) — `PDA-TST-013` · Draft
+
+## Related Authority and Contracts
+
 - `registry/first-slice-tests.json`
 - `docs/blueprint/11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
 - `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`

@@ -112,6 +112,7 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 			"catalog_identifier",
 			"catalog_product",
 			"catalog_product_command_receipt",
+			"catalog_product_search_projection",
 			"catalog_variant",
 		]);
 	});

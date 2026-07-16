@@ -40,6 +40,7 @@ function mapAllocation(
 		requestFingerprint: row.requestFingerprint,
 		sequenceId: row.sequenceId,
 		sequenceKey: row.sequenceKey,
+		sequenceVersion: row.sequenceVersion,
 		sourceCommandId: row.sourceCommandId,
 		state: row.state as "Issued",
 		tenantId: row.tenantId,
@@ -59,9 +60,10 @@ export function createNumberingRepository(
 				padding: number;
 				prefix: string;
 				sequence_key: string;
+				version: number;
 				state: "Active" | "Suspended";
 			}>(
-				`SELECT increment, next_value, padding, prefix, sequence_key, state
+				`SELECT increment, next_value, padding, prefix, sequence_key, state, version
 				 FROM platform_number_sequence
 				 WHERE tenant_id = $1 AND id = $2 AND organization_id = $3
 				 FOR UPDATE`,
@@ -93,6 +95,7 @@ export function createNumberingRepository(
 					requestFingerprint: input.requestFingerprint,
 					sequenceId: input.sequenceId,
 					sequenceKey: sequence.sequence_key,
+					sequenceVersion: sequence.version,
 					sourceCommandId: input.sourceCommandId,
 					state: "Issued",
 					tenantId: input.tenantId,
@@ -118,6 +121,58 @@ export function createNumberingRepository(
 				throw new Error("Number allocation insert returned no row");
 			}
 			return mapAllocation(allocation);
+		},
+		async ensureSystemSequence(input) {
+			await database
+				.insert(numberSequences)
+				.values({
+					classification: "Confidential",
+					createdAt: input.createdAt,
+					currentValue: 0n,
+					gapPolicy: "AllowedWithEvidence",
+					id: input.id,
+					increment: 1,
+					nextValue: 1n,
+					organizationId: input.organizationId,
+					ownerNamespace: input.ownerNamespace,
+					padding: input.padding,
+					prefix: input.prefix,
+					recordType: input.recordType,
+					resetPolicy: "None",
+					sequenceKey: input.sequenceKey,
+					state: "Active",
+					tenantId: input.tenantId,
+					updatedAt: input.createdAt,
+					version: 1,
+					voidPolicy: "NotSupportedPrototype",
+				})
+				.onConflictDoNothing();
+			const rows = await database
+				.select()
+				.from(numberSequences)
+				.where(
+					and(
+						eq(numberSequences.tenantId, input.tenantId),
+						eq(numberSequences.id, input.id)
+					)
+				)
+				.limit(1);
+			const [sequence] = rows;
+			if (
+				!sequence ||
+				sequence.organizationId !== input.organizationId ||
+				sequence.ownerNamespace !== input.ownerNamespace ||
+				sequence.recordType !== input.recordType ||
+				sequence.sequenceKey !== input.sequenceKey ||
+				sequence.prefix !== input.prefix ||
+				sequence.padding !== input.padding ||
+				sequence.increment !== 1 ||
+				sequence.resetPolicy !== "None" ||
+				sequence.state !== "Active"
+			) {
+				return "configuration_conflict";
+			}
+			return "ready";
 		},
 		async findAllocation(input) {
 			const rows = await database

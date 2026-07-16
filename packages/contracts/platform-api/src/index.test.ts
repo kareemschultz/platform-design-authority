@@ -118,7 +118,7 @@ describe("WS2 Catalog and Inventory API contract", () => {
 		);
 
 		expect(actual).toEqual(expected);
-		expect(actual).toHaveLength(32);
+		expect(actual).toHaveLength(40);
 	});
 
 	test("requires positive directional quantities while signed adjustment quantities remain separate", () => {

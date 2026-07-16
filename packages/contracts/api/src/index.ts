@@ -12,6 +12,7 @@ export const KNOWN_PERMISSION_IDS = [
 	"catalog.import.approve",
 	"catalog.import.create",
 	"catalog.import.download",
+	"catalog.import.purge",
 	"catalog.import.read",
 	"catalog.product.activate",
 	"catalog.product.archive",
@@ -67,6 +68,7 @@ export const KNOWN_PERMISSION_IDS = [
 	"inventory.import.approve",
 	"inventory.import.create",
 	"inventory.import.download",
+	"inventory.import.purge",
 	"inventory.import.read",
 	"inventory.transfer.create",
 	"inventory.transfer.dispatch",
@@ -284,6 +286,12 @@ export const ENDPOINTS = [
 		permission: "platform.offline-lease.issue",
 	},
 	{
+		method: "GET",
+		operationId: "listOpeningStockImports",
+		path: "/v1/opening-stock-imports",
+		permission: "inventory.import.read",
+	},
+	{
 		method: "POST",
 		operationId: "postOpeningStockImports",
 		path: "/v1/opening-stock-imports",
@@ -297,8 +305,20 @@ export const ENDPOINTS = [
 	},
 	{
 		method: "POST",
+		operationId: "acceptOpeningStockImport",
+		path: "/v1/opening-stock-imports/{importId}/accept",
+		permission: "inventory.import.approve",
+	},
+	{
+		method: "POST",
 		operationId: "approveOpeningStockImport",
 		path: "/v1/opening-stock-imports/{importId}/approve",
+		permission: "inventory.import.approve",
+	},
+	{
+		method: "POST",
+		operationId: "cancelOpeningStockImport",
+		path: "/v1/opening-stock-imports/{importId}/cancel",
 		permission: "inventory.import.approve",
 	},
 	{
@@ -312,6 +332,12 @@ export const ENDPOINTS = [
 		operationId: "getOpeningStockImportFindings",
 		path: "/v1/opening-stock-imports/{importId}/findings",
 		permission: "inventory.import.read",
+	},
+	{
+		method: "POST",
+		operationId: "purgeOpeningStockImportStaging",
+		path: "/v1/opening-stock-imports/{importId}/purge-staging",
+		permission: "inventory.import.purge",
 	},
 	{
 		method: "GET",
@@ -428,6 +454,12 @@ export const ENDPOINTS = [
 		permission: "security.privacy-request.verify",
 	},
 	{
+		method: "GET",
+		operationId: "listProductImports",
+		path: "/v1/product-imports",
+		permission: "catalog.import.read",
+	},
+	{
 		method: "POST",
 		operationId: "postProductImports",
 		path: "/v1/product-imports",
@@ -441,8 +473,20 @@ export const ENDPOINTS = [
 	},
 	{
 		method: "POST",
+		operationId: "acceptProductImport",
+		path: "/v1/product-imports/{importId}/accept",
+		permission: "catalog.import.approve",
+	},
+	{
+		method: "POST",
 		operationId: "postProductImportsByImportIdApprove",
 		path: "/v1/product-imports/{importId}/approve",
+		permission: "catalog.import.approve",
+	},
+	{
+		method: "POST",
+		operationId: "cancelProductImport",
+		path: "/v1/product-imports/{importId}/cancel",
 		permission: "catalog.import.approve",
 	},
 	{
@@ -456,6 +500,12 @@ export const ENDPOINTS = [
 		operationId: "getProductImportFindings",
 		path: "/v1/product-imports/{importId}/findings",
 		permission: "catalog.import.read",
+	},
+	{
+		method: "POST",
+		operationId: "purgeProductImportStaging",
+		path: "/v1/product-imports/{importId}/purge-staging",
+		permission: "catalog.import.purge",
 	},
 	{
 		method: "GET",

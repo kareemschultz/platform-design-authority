@@ -21,6 +21,7 @@ import { createNumberingService } from "@meridian/platform-numbering";
 import { env } from "@meridian/tooling-env/server";
 import { Pool, type PoolClient } from "pg";
 import { type MigrationStream, runMigrationStreams } from "./migrations";
+import { createImportReferenceAllocator } from "./numbering";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
 const databaseName = `meridian_pr2_node_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -106,6 +107,7 @@ try {
 		},
 		unitOfWork: createPostgresUnitOfWork(pool, (client) => ({
 			events: { append: () => Promise.resolve("inserted") },
+			references: createImportReferenceAllocator(client),
 			repository: createImportRepository(client),
 		})),
 	});

@@ -87,6 +87,7 @@ export const numberAllocations = pgTable(
 		requestFingerprint: text("request_fingerprint").notNull(),
 		sequenceId: text("sequence_id").notNull(),
 		sequenceKey: text("sequence_key").notNull(),
+		sequenceVersion: integer("sequence_version").notNull(),
 		sourceCommandId: text("source_command_id").notNull(),
 		state: text("state").default("Issued").notNull(),
 		tenantId: text("tenant_id").notNull(),
@@ -119,7 +120,7 @@ export const numberAllocations = pgTable(
 		),
 		check(
 			"platform_number_allocation_counter_ck",
-			sql`${table.counterValue} > 0`
+			sql`${table.counterValue} > 0 AND ${table.sequenceVersion} > 0`
 		),
 		check(
 			"platform_number_allocation_state_ck",

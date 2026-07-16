@@ -12,7 +12,7 @@
       "source_heading": "Catalog",
       "source_line": 69,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 3
     },
     {
       "id": "catalog.import.create",
@@ -39,6 +39,18 @@
       "endpoint_count": 1
     },
     {
+      "id": "catalog.import.purge",
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "resource": "import",
+      "action": "purge",
+      "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
+      "source_heading": "Catalog",
+      "source_line": 71,
+      "status": "Draft",
+      "endpoint_count": 1
+    },
+    {
       "id": "catalog.import.read",
       "namespace": "catalog",
       "owner": "Product Catalog",
@@ -48,7 +60,7 @@
       "source_heading": "Catalog",
       "source_line": 68,
       "status": "Draft",
-      "endpoint_count": 2
+      "endpoint_count": 3
     },
     {
       "id": "catalog.product.activate",
@@ -118,7 +130,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 113,
+      "source_line": 116,
       "status": "Draft",
       "endpoint_count": 2
     },
@@ -130,7 +142,7 @@
       "action": "approve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 114,
+      "source_line": 117,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -142,7 +154,7 @@
       "action": "confirm",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 116,
+      "source_line": 119,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -154,7 +166,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 115,
+      "source_line": 118,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -166,7 +178,7 @@
       "action": "approve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 106,
+      "source_line": 109,
       "status": "Draft",
       "endpoint_count": 0
     },
@@ -178,7 +190,7 @@
       "action": "request",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 105,
+      "source_line": 108,
       "status": "Draft",
       "endpoint_count": 0
     },
@@ -190,7 +202,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 117,
+      "source_line": 120,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -202,7 +214,7 @@
       "action": "reissue",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 118,
+      "source_line": 121,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -214,7 +226,7 @@
       "action": "void",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 119,
+      "source_line": 122,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -226,7 +238,7 @@
       "action": "approve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 110,
+      "source_line": 113,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -238,7 +250,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 109,
+      "source_line": 112,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -250,7 +262,7 @@
       "action": "close",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 112,
+      "source_line": 115,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -262,7 +274,7 @@
       "action": "open",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 111,
+      "source_line": 114,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -274,7 +286,7 @@
       "action": "approve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 108,
+      "source_line": 111,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -286,7 +298,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 107,
+      "source_line": 110,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -298,7 +310,7 @@
       "action": "complete",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 104,
+      "source_line": 107,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -310,7 +322,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 102,
+      "source_line": 105,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -322,7 +334,7 @@
       "action": "hold",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Commerce and Registers",
-      "source_line": 103,
+      "source_line": 106,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -334,7 +346,7 @@
       "action": "adjust",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Stored Value",
-      "source_line": 128,
+      "source_line": 131,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -346,7 +358,7 @@
       "action": "issue",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Stored Value",
-      "source_line": 124,
+      "source_line": 127,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -358,7 +370,7 @@
       "action": "load",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Stored Value",
-      "source_line": 125,
+      "source_line": 128,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -370,7 +382,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Stored Value",
-      "source_line": 123,
+      "source_line": 126,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -382,7 +394,7 @@
       "action": "reconcile",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Stored Value",
-      "source_line": 130,
+      "source_line": 133,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -394,7 +406,7 @@
       "action": "redeem",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Stored Value",
-      "source_line": 127,
+      "source_line": 130,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -406,7 +418,7 @@
       "action": "reserve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Stored Value",
-      "source_line": 126,
+      "source_line": 129,
       "status": "Draft",
       "endpoint_count": 2
     },
@@ -418,7 +430,7 @@
       "action": "suspend",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Stored Value",
-      "source_line": 129,
+      "source_line": 132,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -478,7 +490,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Developer Platform",
-      "source_line": 151,
+      "source_line": 154,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -490,7 +502,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Developer Platform",
-      "source_line": 150,
+      "source_line": 153,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -502,7 +514,7 @@
       "action": "replay",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Developer Platform",
-      "source_line": 153,
+      "source_line": 156,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -514,7 +526,7 @@
       "action": "update",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Developer Platform",
-      "source_line": 152,
+      "source_line": 155,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -526,7 +538,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Finance Handoff",
-      "source_line": 145,
+      "source_line": 148,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -538,7 +550,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Finance Handoff",
-      "source_line": 146,
+      "source_line": 149,
       "status": "Draft",
       "endpoint_count": 0
     },
@@ -550,7 +562,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Finance Handoff",
-      "source_line": 144,
+      "source_line": 147,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -562,7 +574,7 @@
       "action": "approve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 77,
+      "source_line": 78,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -574,7 +586,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 76,
+      "source_line": 77,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -586,7 +598,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 75,
+      "source_line": 76,
       "status": "Draft",
       "endpoint_count": 2
     },
@@ -598,7 +610,7 @@
       "action": "reverse",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 78,
+      "source_line": 79,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -610,7 +622,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 74,
+      "source_line": 75,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -622,7 +634,7 @@
       "action": "approve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 82,
+      "source_line": 83,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -634,7 +646,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 80,
+      "source_line": 81,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -646,7 +658,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 79,
+      "source_line": 80,
       "status": "Draft",
       "endpoint_count": 2
     },
@@ -658,7 +670,7 @@
       "action": "submit",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 81,
+      "source_line": 82,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -670,9 +682,9 @@
       "action": "approve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 89,
+      "source_line": 90,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 3
     },
     {
       "id": "inventory.import.create",
@@ -682,7 +694,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 87,
+      "source_line": 88,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -694,7 +706,19 @@
       "action": "download",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 90,
+      "source_line": 91,
+      "status": "Draft",
+      "endpoint_count": 1
+    },
+    {
+      "id": "inventory.import.purge",
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "resource": "import",
+      "action": "purge",
+      "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
+      "source_heading": "Inventory",
+      "source_line": 92,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -706,9 +730,9 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 88,
+      "source_line": 89,
       "status": "Draft",
-      "endpoint_count": 2
+      "endpoint_count": 3
     },
     {
       "id": "inventory.transfer.create",
@@ -718,7 +742,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 84,
+      "source_line": 85,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -730,7 +754,7 @@
       "action": "dispatch",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 85,
+      "source_line": 86,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -742,7 +766,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 83,
+      "source_line": 84,
       "status": "Draft",
       "endpoint_count": 2
     },
@@ -754,7 +778,7 @@
       "action": "receive",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Inventory",
-      "source_line": 86,
+      "source_line": 87,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -826,7 +850,7 @@
       "action": "confirm",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Payment",
-      "source_line": 136,
+      "source_line": 139,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -838,7 +862,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Payment",
-      "source_line": 134,
+      "source_line": 137,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -850,7 +874,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Payment",
-      "source_line": 135,
+      "source_line": 138,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -862,7 +886,7 @@
       "action": "refund",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Payment",
-      "source_line": 137,
+      "source_line": 140,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -874,7 +898,7 @@
       "action": "reverse",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Payment",
-      "source_line": 138,
+      "source_line": 141,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -886,7 +910,7 @@
       "action": "configure",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Payment",
-      "source_line": 140,
+      "source_line": 143,
       "status": "Draft",
       "endpoint_count": 0
     },
@@ -898,7 +922,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Payment",
-      "source_line": 139,
+      "source_line": 142,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -1174,7 +1198,7 @@
       "action": "approve",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Security and Privacy",
-      "source_line": 163,
+      "source_line": 166,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -1186,7 +1210,7 @@
       "action": "apply",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Security and Privacy",
-      "source_line": 164,
+      "source_line": 167,
       "status": "Draft",
       "endpoint_count": 0
     },
@@ -1198,7 +1222,7 @@
       "action": "create",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Security and Privacy",
-      "source_line": 160,
+      "source_line": 163,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -1210,7 +1234,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Security and Privacy",
-      "source_line": 161,
+      "source_line": 164,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -1222,7 +1246,7 @@
       "action": "verify",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Security and Privacy",
-      "source_line": 162,
+      "source_line": 165,
       "status": "Draft",
       "endpoint_count": 1
     },
@@ -1234,7 +1258,7 @@
       "action": "apply",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Security and Privacy",
-      "source_line": 159,
+      "source_line": 162,
       "status": "Draft",
       "endpoint_count": 0
     },
@@ -1246,7 +1270,7 @@
       "action": "read",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Security and Privacy",
-      "source_line": 157,
+      "source_line": 160,
       "status": "Draft",
       "endpoint_count": 0
     },
@@ -1258,7 +1282,7 @@
       "action": "review",
       "source_path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "source_heading": "Security and Privacy",
-      "source_line": 158,
+      "source_line": 161,
       "status": "Draft",
       "endpoint_count": 0
     }

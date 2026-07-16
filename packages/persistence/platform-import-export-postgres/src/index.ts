@@ -7,7 +7,7 @@ import type {
 	ImportRowRecord,
 	ImportTarget,
 } from "@meridian/platform-import-export";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, gt, isNull, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool, PoolClient } from "pg";
@@ -38,8 +38,12 @@ export async function migratePlatformImportExport(pool: Pool): Promise<void> {
 
 function mapJob(row: typeof importJobs.$inferSelect): ImportJobRecord {
 	return {
+		acceptedAt: row.acceptedAt,
+		acceptedByUserId: row.acceptedByUserId,
 		approvedAt: row.approvedAt,
 		approvedByUserId: row.approvedByUserId,
+		cancelledAt: row.cancelledAt,
+		cancelledByUserId: row.cancelledByUserId,
 		completedAt: row.completedAt,
 		counts: {
 			applied: row.appliedRows,
@@ -54,10 +58,15 @@ function mapJob(row: typeof importJobs.$inferSelect): ImportJobRecord {
 		createdByUserId: row.createdByUserId,
 		createIdempotencyKey: row.createIdempotencyKey,
 		failureCode: row.failureCode,
+		humanReference: row.humanReference,
 		id: row.id,
 		lastCompletedRow: row.lastCompletedRow,
 		manifest: row.manifest as ImportJobRecord["manifest"],
+		numberAllocationId: row.numberAllocationId,
+		numberSequenceVersion: row.numberSequenceVersion,
 		organizationId: row.organizationId,
+		reconciliationState:
+			row.reconciliationState as ImportJobRecord["reconciliationState"],
 		requestFingerprint: row.requestFingerprint,
 		scannerResult: row.scannerResult as ImportJobRecord["scannerResult"],
 		sourceFileName: row.sourceFileName,
@@ -103,19 +112,27 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 	return {
 		async create(input) {
 			await database.insert(importJobs).values({
+				acceptedAt: input.job.acceptedAt,
+				acceptedByUserId: input.job.acceptedByUserId,
 				appliedRows: input.job.counts.applied,
 				approvedAt: input.job.approvedAt,
 				approvedByUserId: input.job.approvedByUserId,
+				cancelledAt: input.job.cancelledAt,
+				cancelledByUserId: input.job.cancelledByUserId,
 				completedAt: input.job.completedAt,
 				createdAt: input.job.createdAt,
 				createdByUserId: input.job.createdByUserId,
 				createIdempotencyKey: input.job.createIdempotencyKey,
 				failedRows: input.job.counts.failed,
 				failureCode: input.job.failureCode,
+				humanReference: input.job.humanReference,
 				id: input.job.id,
 				lastCompletedRow: input.job.lastCompletedRow,
 				manifest: input.job.manifest,
+				numberAllocationId: input.job.numberAllocationId,
+				numberSequenceVersion: input.job.numberSequenceVersion,
 				organizationId: input.job.organizationId,
+				reconciliationState: input.job.reconciliationState,
 				rejectedRows: input.job.counts.rejected,
 				requestFingerprint: input.job.requestFingerprint,
 				scannerResult: input.job.scannerResult,
@@ -188,6 +205,7 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 				.select({
 					importId: importCommandReceipts.importId,
 					requestFingerprint: importCommandReceipts.requestFingerprint,
+					result: importCommandReceipts.result,
 				})
 				.from(importCommandReceipts)
 				.where(
@@ -198,7 +216,27 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 					)
 				)
 				.limit(1);
-			return rows[0] ?? null;
+			const [receipt] = rows;
+			if (!receipt) {
+				return null;
+			}
+			const result = receipt.result as {
+				purgeResult?: unknown;
+				targetId?: unknown;
+			};
+			return {
+				importId: receipt.importId,
+				purgeResult:
+					result.purgeResult && typeof result.purgeResult === "object"
+						? (result.purgeResult as {
+								findings: number;
+								rows: number;
+								waves: number;
+							})
+						: null,
+				requestFingerprint: receipt.requestFingerprint,
+				targetId: typeof result.targetId === "string" ? result.targetId : null,
+			};
 		},
 		async get(tenantId, importId, target) {
 			const rows = await database
@@ -214,19 +252,47 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 				.limit(1);
 			return rows[0] ? mapJob(rows[0]) : null;
 		},
-		async listFindings(tenantId, importId) {
-			return (
-				await database
-					.select()
-					.from(importFindings)
-					.where(
-						and(
-							eq(importFindings.tenantId, tenantId),
-							eq(importFindings.importId, importId)
-						)
+		async list(input) {
+			const rows = await database
+				.select()
+				.from(importJobs)
+				.where(
+					and(
+						eq(importJobs.tenantId, input.tenantId),
+						eq(importJobs.organizationId, input.organizationId),
+						eq(importJobs.targetType, input.target),
+						input.state ? eq(importJobs.state, input.state) : undefined,
+						input.cursor ? gt(importJobs.id, input.cursor) : undefined
 					)
-					.orderBy(importFindings.rowNumber)
-			).map(mapFinding);
+				)
+				.orderBy(importJobs.id)
+				.limit(input.limit + 1);
+			const hasMore = rows.length > input.limit;
+			const items = rows.slice(0, input.limit);
+			return {
+				items: items.map(mapJob),
+				nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
+			};
+		},
+		async listFindings(tenantId, importId, page) {
+			const rows = await database
+				.select()
+				.from(importFindings)
+				.where(
+					and(
+						eq(importFindings.tenantId, tenantId),
+						eq(importFindings.importId, importId),
+						page.cursor ? gt(importFindings.id, page.cursor) : undefined
+					)
+				)
+				.orderBy(importFindings.id)
+				.limit(page.limit + 1);
+			const hasMore = rows.length > page.limit;
+			const items = rows.slice(0, page.limit);
+			return {
+				items: items.map(mapFinding),
+				nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
+			};
 		},
 		async listRows(tenantId, importId) {
 			return (
@@ -241,6 +307,28 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 					)
 					.orderBy(importRows.rowNumber)
 			).map(mapRow);
+		},
+		async markAccepted(input) {
+			const rows = await database
+				.update(importJobs)
+				.set({
+					acceptedAt: input.acceptedAt,
+					acceptedByUserId: input.acceptedByUserId,
+					reconciliationState: "Accepted",
+					updatedAt: input.acceptedAt,
+					version: sql`${importJobs.version} + 1`,
+				})
+				.where(
+					and(
+						eq(importJobs.tenantId, input.tenantId),
+						eq(importJobs.id, input.importId),
+						eq(importJobs.version, input.version),
+						eq(importJobs.state, "Completed"),
+						eq(importJobs.reconciliationState, "Reconciled")
+					)
+				)
+				.returning();
+			return rows[0] ? mapJob(rows[0]) : "version_conflict";
 		},
 		async markApproved(input) {
 			const rows = await database
@@ -277,6 +365,27 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 				);
 			return mapJob(approved);
 		},
+		async markCancelled(input) {
+			const rows = await database
+				.update(importJobs)
+				.set({
+					cancelledAt: input.cancelledAt,
+					cancelledByUserId: input.cancelledByUserId,
+					state: "Cancelled",
+					updatedAt: input.cancelledAt,
+					version: sql`${importJobs.version} + 1`,
+				})
+				.where(
+					and(
+						eq(importJobs.tenantId, input.tenantId),
+						eq(importJobs.id, input.importId),
+						eq(importJobs.version, input.version),
+						eq(importJobs.state, "ReadyForApproval")
+					)
+				)
+				.returning();
+			return rows[0] ? mapJob(rows[0]) : "version_conflict";
+		},
 		async markCompleted(input) {
 			for (const row of input.rows) {
 				// biome-ignore lint/performance/noAwaitInLoops: one transaction client preserves deterministic checkpoint order and forbids overlapping pg queries.
@@ -303,6 +412,9 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 					appliedRows: applied,
 					completedAt: input.completedAt,
 					lastCompletedRow: input.rows.at(-1)?.rowNumber ?? 0,
+					reconciliationState: input.rows.some((row) => row.state === "Failed")
+						? "Mismatch"
+						: "Reconciled",
 					state: "Completed",
 					updatedAt: input.completedAt,
 					version: sql`${importJobs.version} + 1`,
@@ -385,6 +497,17 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 			return mapJob(failed);
 		},
 		async markRowApplied(input) {
+			const locked = await client.query<{ state: string }>(
+				`SELECT state
+				 FROM platform_import_job
+				 WHERE tenant_id = $1 AND id = $2
+				 FOR UPDATE`,
+				[input.tenantId, input.importId]
+			);
+			const [job] = locked.rows;
+			if (!(job && ["Approved", "Committing"].includes(job.state))) {
+				return "state_conflict";
+			}
 			const changed = await database
 				.update(importRows)
 				.set({
@@ -456,6 +579,8 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 					and(
 						eq(importJobs.tenantId, input.tenantId),
 						eq(importJobs.id, input.importId),
+						isNull(importJobs.stagingPurgedAt),
+						lte(importJobs.updatedAt, input.eligibleBefore),
 						sql`${importJobs.state} IN ('Completed','Failed','Cancelled')`
 					)
 				)
@@ -497,16 +622,23 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 			};
 		},
 		async recordCommandReceipt(input) {
-			await database.insert(importCommandReceipts).values({
-				classification: "Confidential",
-				createdAt: input.createdAt,
-				idempotencyKey: input.idempotencyKey,
-				importId: input.importId,
-				operation: input.operation,
-				requestFingerprint: input.requestFingerprint,
-				result: { importId: input.importId },
-				tenantId: input.tenantId,
-			});
+			await database
+				.insert(importCommandReceipts)
+				.values({
+					classification: "Confidential",
+					createdAt: input.createdAt,
+					idempotencyKey: input.idempotencyKey,
+					importId: input.importId,
+					operation: input.operation,
+					requestFingerprint: input.requestFingerprint,
+					result: {
+						importId: input.importId,
+						purgeResult: input.purgeResult ?? null,
+						targetId: input.targetId,
+					},
+					tenantId: input.tenantId,
+				})
+				.onConflictDoNothing();
 		},
 	};
 }

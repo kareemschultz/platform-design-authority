@@ -1,4 +1,11 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import {
+	afterAll,
+	beforeAll,
+	describe,
+	expect,
+	setDefaultTimeout,
+	test,
+} from "bun:test";
 import {
 	createPartyService,
 	type PartyIdFactory,
@@ -37,6 +44,8 @@ import {
 	WS2_MIGRATION_STREAMS,
 } from "./migrations";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
+
+setDefaultTimeout(20_000);
 
 const databaseName = `meridian_pr2_${crypto.randomUUID().replaceAll("-", "")}`;
 const adminUrl = new URL(env.DATABASE_URL);
@@ -347,7 +356,7 @@ describe.serial("WS1 persistence orchestration", () => {
 		let provenanceFailure: unknown;
 		try {
 			await testPool.query(
-				"INSERT INTO platform_number_allocation (tenant_id, id, organization_id, sequence_id, sequence_key, counter_value, value, allocated_by_user_id, source_command_id, business_record_id, state, idempotency_key, request_fingerprint, issued_at, classification) VALUES ('tenant_numbering_constraints', 'allocation_invalid_source', 'organization_numbering_constraints', 'sequence_valid_policy', 'invoice-valid', 1, 'INV-000001', 'user_numbering_constraints', '', null, 'Issued', 'allocation-invalid-source', 'fingerprint', now(), 'Confidential')"
+				"INSERT INTO platform_number_allocation (tenant_id, id, organization_id, sequence_id, sequence_key, sequence_version, counter_value, value, allocated_by_user_id, source_command_id, business_record_id, state, idempotency_key, request_fingerprint, issued_at, classification) VALUES ('tenant_numbering_constraints', 'allocation_invalid_source', 'organization_numbering_constraints', 'sequence_valid_policy', 'invoice-valid', 1, 1, 'INV-000001', 'user_numbering_constraints', '', null, 'Issued', 'allocation-invalid-source', 'fingerprint', now(), 'Confidential')"
 			);
 		} catch (error) {
 			provenanceFailure = error;

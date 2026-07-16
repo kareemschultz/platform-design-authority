@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.10.0
+version: 0.11.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -53,7 +53,7 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 
 The contract-first oRPC/client exception closed in WS1 PR1. The temporary embedded Identity persistence exception closed in PR2 through ADR-0027's owner-specific adapters and composition-owned pool. No exception may be silently recreated for later owners.
 
-**Still does not exist at first-slice implementation depth:** Catalog, Inventory, POS, stored value, offline sync, provider integration, or recovery tooling. The Event Backbone still stops at the minimum transactional outbox; delivery workers and consumers remain later work. Production RLS, OTP/provider evidence, formal accessibility/penetration evidence, operational exercises, and external/founder gates remain open. This section is the honesty anchor: WS1 completion is a controlled-prototype workstream exit, not overall first-slice or production completion.
+**Current honesty anchor:** Catalog, Inventory, and Event Backbone delivery/projections now exist at the merged WS2 PR2-PR4 controlled-prototype depth recorded in PDA-RDM-009. PR5 bounded imports and Strict Online Numbering are in remediation after exact-head review; PR6 UI and PR7 closeout have not started. POS, stored value, general offline sync, provider integration, and broad recovery tooling do not yet exist at first-slice implementation depth. Production RLS, OTP/provider evidence, formal accessibility/penetration evidence, operational exercises, and external/founder gates remain open. No merged or active WS2 work is pilot or production authority.
 
 ## 3. Package Architecture Target
 
@@ -141,8 +141,8 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Entry:** WS1 done.
 - **Proves:** PDA-RDM-004 §Prototype 2.
 - **Detailed plan:** `WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md` (PDA-RDM-009) — exact 14-capability depth, ADR-0027 package ownership, contract/schema closure, durable event delivery, WS2/WS5 offline boundary, PR sequence, evidence, and exit gates. This entry stays the authoritative summary; PDA-RDM-009 does not override it.
-- **Progress:** PR1-PR4 are merged with independent exact-head concurrence. PR5 bounded Product/opening-stock CSV imports and Strict Online Numbering are implemented on issue #71 with PDA-APP-024 evidence and PDA-OPS-019 recovery guidance; exact-head gates, independent concurrence, and merge remain open. PR6-PR7 remain blocked in sequence.
-- **Packages:** NEW runtime-neutral `domains/catalog` and `domains/inventory` cores with ports; NEW owner-specific `persistence/catalog-postgres` and `persistence/inventory-postgres` concrete schemas/migrations under ADR-0027; EXTEND the minimum `platform/events` transactional outbox introduced by WS1 into publication/consumer infrastructure; NEW `platform/numbering` core plus owner-specific Persistence adapter (sequence service consumed later by receipts).
+- **Progress:** PR1-PR4 are merged with independent exact-head concurrence. PR5 bounded Product/opening-stock CSV imports and Strict Online Numbering are under remediation on issue #71 after concurrence was withheld at exact head `26b70ab1e61bbf4877c5ba5b7c119e20b37fea1c`; PDA-APP-024, PDA-OPS-019, and ADR-0027 v0.3.4 assign the closures. Renewed exact-head gates, concurrence, and merge remain open. PR6-PR7 remain blocked in sequence.
+- **Packages:** Implemented runtime-neutral `domains/catalog` and `domains/inventory` cores with ports; owner-specific `persistence/catalog-postgres` and `persistence/inventory-postgres` concrete schemas/migrations under ADR-0027; extended `platform/events` into controlled-prototype publication/consumer infrastructure; active PR5 adds `platform/import-export` and `platform/numbering` cores plus owner-specific Persistence adapters, with Numbering consumed by real import creation. Receipt/fiscal/offline numbering remains later work.
 - **Contracts:** `/products*`, `/product-imports*`, `/opening-stock-imports*`, `/stock-balances`, `/inventory-adjustments*`, `/stock-counts*`, `/stock-transfers*`; `catalog.*`, `inventory.*`, bounded `platform.import.*`, and `platform.sequence.number-issued.v1` events (registered in `registry/events.json`).
 - **Tests:** dominant dimensions `idempotency_and_duplicate`, `concurrency_and_conflict`, `events_jobs_and_projections`; budgets: inventory ledger 99.95% correctness; barcode lookup 300ms p95; search 800ms p95; outbox 99.99% eventual publication.
 - **Exit:** scenarios 2 and 8 demonstrated; ledger corrections only by reversal; DoD §6.

@@ -1,4 +1,11 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import {
+	afterAll,
+	beforeAll,
+	describe,
+	expect,
+	setDefaultTimeout,
+	test,
+} from "bun:test";
 import { createHash } from "node:crypto";
 import { createCatalogService } from "@meridian/domain-catalog";
 import { createInventoryService } from "@meridian/domain-inventory";
@@ -18,6 +25,7 @@ import {
 	createImportRepository,
 	migratePlatformImportExport,
 } from "@meridian/persistence-platform-import-export-postgres";
+import { migratePlatformNumbering } from "@meridian/persistence-platform-numbering-postgres";
 import {
 	createImportService,
 	ImportProcessInterruptedError,
@@ -25,7 +33,7 @@ import {
 } from "@meridian/platform-import-export";
 import { env } from "@meridian/tooling-env/server";
 import { Pool } from "pg";
-
+import { createImportReferenceAllocator } from "./numbering";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
 const databaseName = `meridian_imports_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -35,6 +43,8 @@ const testUrl = new URL(env.DATABASE_URL);
 testUrl.pathname = `/${databaseName}`;
 const adminPool = new Pool({ connectionString: adminUrl.toString() });
 let testPool: Pool;
+
+setDefaultTimeout(20_000);
 
 function quoteIdentifier(value: string) {
 	return `"${value.replaceAll('"', '""')}"`;
@@ -74,6 +84,7 @@ function fullEvent(event: Record<string, unknown>) {
 function createServices(
 	options: {
 		failAfterProductSourceKey?: string;
+		failValidatedEvent?: boolean;
 		onProductCommit?: () => void;
 		rejectProductSourceKey?: string;
 	} = {}
@@ -180,9 +191,17 @@ function createServices(
 		targets,
 		unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
 			events: {
-				append: (event) =>
-					createPostgresOutbox(client).append(fullEvent(event)),
+				append: (event) => {
+					if (
+						options.failValidatedEvent &&
+						event.name === "platform.import.validated.v1"
+					) {
+						throw new Error("injected validated-event failure");
+					}
+					return createPostgresOutbox(client).append(fullEvent(event));
+				},
 			},
+			references: createImportReferenceAllocator(client),
 			repository: createImportRepository(client),
 		})),
 	});
@@ -202,6 +221,7 @@ beforeAll(async () => {
 	await adminPool.query(`CREATE DATABASE ${quoteIdentifier(databaseName)}`);
 	testPool = new Pool({ connectionString: testUrl.toString(), max: 8 });
 	await migratePlatformEvents(testPool);
+	await migratePlatformNumbering(testPool);
 	await migratePlatformImportExport(testPool);
 	await migrateCatalog(testPool);
 	await migrateInventory(testPool);
@@ -216,6 +236,35 @@ afterAll(async () => {
 });
 
 describe.serial("WS2 bounded import PostgreSQL prototype", () => {
+	test("rolls back the Number allocation, Import job, and events when atomic create fails", async () => {
+		const service = createServices({ failValidatedEvent: true });
+		const content =
+			"source_key,name,variant_name,sku,barcode,barcode_scheme\nrollback-1,Rollback Product,Default,ROLLBACK-1,,";
+		await expect(
+			service.create({
+				actorUserId: "rollback_uploader",
+				content,
+				contentType: "text/csv",
+				correlationId: "correlation_rollback",
+				fileName: "rollback.csv",
+				idempotencyKey: "rollback-create",
+				manifest,
+				organizationId: "organization_rollback",
+				sha256: createHash("sha256").update(content).digest("hex"),
+				target: "Product",
+				tenantId: "tenant_rollback",
+			})
+		).rejects.toThrow("injected validated-event failure");
+		const facts = await testPool.query<{
+			allocations: number;
+			events: number;
+			jobs: number;
+		}>(
+			"SELECT (SELECT count(*)::int FROM platform_number_allocation WHERE tenant_id = 'tenant_rollback') AS allocations, (SELECT count(*)::int FROM platform_import_job WHERE tenant_id = 'tenant_rollback') AS jobs, (SELECT count(*)::int FROM platform_event_outbox WHERE tenant_id = 'tenant_rollback') AS events"
+		);
+		expect(facts.rows[0]).toEqual({ allocations: 0, events: 0, jobs: 0 });
+	});
+
 	test("dry-runs mixed Tenant A Product rows, commits accepted rows, and replays without duplicates", async () => {
 		const service = createServices();
 		const content =
@@ -242,6 +291,26 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			valid: 2,
 			warning: 1,
 		});
+		expect(job).toMatchObject({
+			humanReference: "IMP-000001",
+			numberSequenceVersion: 1,
+			reconciliationState: "Pending",
+		});
+		const referenceEvidence = await testPool.query<{
+			allocation_id: string;
+			business_record_id: string;
+			sequence_version: number;
+		}>(
+			`SELECT allocation.id AS allocation_id, allocation.business_record_id, allocation.sequence_version
+			 FROM platform_number_allocation allocation
+			 WHERE allocation.tenant_id = $1 AND allocation.id = $2`,
+			[job.tenantId, job.numberAllocationId]
+		);
+		expect(referenceEvidence.rows[0]).toEqual({
+			allocation_id: job.numberAllocationId,
+			business_record_id: job.id,
+			sequence_version: 1,
+		});
 		expect(
 			(
 				await testPool.query(
@@ -261,6 +330,7 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			version: 1,
 		});
 		expect(completed.state).toBe("Completed");
+		expect(completed.reconciliationState).toBe("Reconciled");
 		const replay = await service.approve({
 			actorUserId: "import_approver",
 			contextId: "context_demerara",
@@ -280,7 +350,7 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 		}>(
 			"SELECT (SELECT count(*)::int FROM catalog_product WHERE tenant_id = 'tenant_demerara_retail_test_group') AS products, (SELECT count(*)::int FROM catalog_product_command_receipt WHERE tenant_id = 'tenant_demerara_retail_test_group') AS receipts, (SELECT count(*)::int FROM platform_event_outbox WHERE tenant_id = 'tenant_demerara_retail_test_group') AS events"
 		);
-		expect(facts.rows[0]).toEqual({ events: 11, products: 3, receipts: 3 });
+		expect(facts.rows[0]).toEqual({ events: 12, products: 3, receipts: 3 });
 		const lifecycle = await testPool.query<{
 			data: Record<string, unknown>;
 			name: string;
@@ -338,6 +408,7 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			tenantId: "tenant_essequibo_isolation_test",
 		});
 		expect(job.counts).toMatchObject({ rejected: 0, total: 1, valid: 1 });
+		expect(job.humanReference).toBe("IMP-000001");
 		expect(
 			await service.get("tenant_demerara_retail_test_group", job.id, "Product")
 		).toBeNull();
@@ -356,6 +427,52 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			"SELECT count(*)::int AS count FROM catalog_product WHERE tenant_id = 'tenant_essequibo_isolation_test'"
 		);
 		expect(product.rows[0]?.count).toBe(1);
+		const tenantIsolation = await testPool.query<{ count: number }>(
+			"SELECT count(*)::int AS count FROM platform_number_allocation WHERE tenant_id = 'tenant_demerara_retail_test_group' AND id = $1",
+			[job.numberAllocationId]
+		);
+		expect(tenantIsolation.rows[0]?.count).toBe(0);
+	});
+
+	test("keeps one owner effect and one row receipt under concurrent approval resumes", async () => {
+		const service = createServices();
+		const content =
+			"source_key,name,variant_name,sku,barcode,barcode_scheme\nrace-1,Race Product,Default,RACE-1,,";
+		const job = await service.create({
+			actorUserId: "race_uploader",
+			content,
+			contentType: "text/csv",
+			correlationId: "correlation_race_create",
+			fileName: "race.csv",
+			idempotencyKey: "race-create",
+			manifest,
+			organizationId: "organization_race",
+			sha256: createHash("sha256").update(content).digest("hex"),
+			target: "Product",
+			tenantId: "tenant_race",
+		});
+		const base = {
+			actorUserId: "race_approver",
+			contextId: "context_race",
+			correlationId: "correlation_race_approve",
+			importId: job.id,
+			sessionId: "session_race",
+			target: "Product" as const,
+			tenantId: "tenant_race",
+			version: job.version,
+		};
+		const results = await Promise.allSettled([
+			service.approve({ ...base, idempotencyKey: "race-approve-a" }),
+			service.approve({ ...base, idempotencyKey: "race-approve-b" }),
+		]);
+		expect(results.some((result) => result.status === "fulfilled")).toBeTrue();
+		const facts = await testPool.query<{
+			import_receipts: number;
+			products: number;
+		}>(
+			"SELECT (SELECT count(*)::int FROM catalog_product WHERE tenant_id = 'tenant_race') AS products, (SELECT count(*)::int FROM platform_import_command_receipt WHERE tenant_id = 'tenant_race' AND operation = 'commit:Product') AS import_receipts"
+		);
+		expect(facts.rows[0]).toEqual({ import_receipts: 1, products: 1 });
 	});
 
 	test("resumes after an owner effect/checkpoint crash and purges only terminal staging", async () => {
@@ -418,18 +535,26 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			"SELECT (SELECT count(*)::int FROM catalog_product WHERE tenant_id = 'tenant_recovery') AS products, (SELECT count(*)::int FROM catalog_product_command_receipt WHERE tenant_id = 'tenant_recovery') AS receipts, (SELECT count(*)::int FROM platform_event_outbox WHERE tenant_id = 'tenant_recovery') AS events"
 		);
 		expect(beforePurge.rows[0]).toEqual({
-			events: 9,
+			events: 10,
 			products: 2,
 			receipts: 2,
 		});
+		const purgeCommand = {
+			idempotencyKey: "purge-recovery-staging",
+			importId: job.id,
+			purgedAt: new Date("2026-08-16T00:00:00Z"),
+			target: "Product" as const,
+			tenantId: "tenant_recovery",
+		};
 		expect(
-			await service.purgeStaging({
-				importId: job.id,
-				purgedAt: new Date("2026-08-16T00:00:00Z"),
-				target: "Product",
-				tenantId: "tenant_recovery",
-			})
-		).toEqual({ findings: 0, rows: 2, waves: 1 });
+			await Promise.all([
+				service.purgeStaging(purgeCommand),
+				service.purgeStaging(purgeCommand),
+			])
+		).toEqual([
+			{ findings: 0, rows: 2, waves: 1 },
+			{ findings: 0, rows: 2, waves: 1 },
+		]);
 		const afterPurge = await testPool.query<{
 			events: number;
 			jobs: number;
@@ -439,7 +564,7 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			"SELECT (SELECT count(*)::int FROM platform_import_row WHERE tenant_id = 'tenant_recovery') AS rows, (SELECT count(*)::int FROM platform_import_job WHERE tenant_id = 'tenant_recovery' AND staging_purged_at IS NOT NULL) AS jobs, (SELECT count(*)::int FROM catalog_product WHERE tenant_id = 'tenant_recovery') AS products, (SELECT count(*)::int FROM platform_event_outbox WHERE tenant_id = 'tenant_recovery') AS events"
 		);
 		expect(afterPurge.rows[0]).toEqual({
-			events: 9,
+			events: 10,
 			jobs: 1,
 			products: 2,
 			rows: 0,
@@ -515,6 +640,31 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			version: 3,
 			wave_state: "Failed",
 		});
+		const failedRow = await testPool.query<{ id: string }>(
+			"SELECT id FROM platform_import_row WHERE tenant_id = 'tenant_failure' AND import_id = $1",
+			[job.id]
+		);
+		expect(
+			await createPostgresUnitOfWork(testPool, (client) =>
+				createImportRepository(client)
+			).execute((repository) =>
+				repository.markRowApplied({
+					completedAt: new Date(),
+					importId: job.id,
+					rowId: failedRow.rows[0]?.id ?? "missing",
+					targetId: "late-owner-result",
+					tenantId: "tenant_failure",
+				})
+			)
+		).toBe("state_conflict");
+		expect(
+			(
+				await testPool.query<{ state: string }>(
+					"SELECT state FROM platform_import_job WHERE tenant_id = 'tenant_failure' AND id = $1",
+					[job.id]
+				)
+			).rows[0]?.state
+		).toBe("Failed");
 		const failedEvent = await testPool.query<{ data: Record<string, unknown> }>(
 			"SELECT data FROM platform_event_outbox WHERE tenant_id = 'tenant_failure' AND aggregate_id = $1 AND name = 'platform.import.failed.v1'",
 			[job.id]

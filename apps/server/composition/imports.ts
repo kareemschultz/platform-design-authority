@@ -4,6 +4,7 @@ import type {
 	CreateCsvImport,
 	ImportCorrectionReport,
 	ImportJob,
+	PagedImports,
 } from "@meridian/contracts-platform-api";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import { createImportRepository } from "@meridian/persistence-platform-import-export-postgres";
@@ -19,6 +20,7 @@ import { permissionAuthorizer } from "./authorization";
 import { catalogApplication } from "./catalog";
 import { entitlementEvaluator } from "./entitlements";
 import { inventoryService } from "./inventory";
+import { createImportReferenceAllocator } from "./numbering";
 import { databasePool } from "./postgres";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 import { tenancyService } from "./tenancy";
@@ -53,6 +55,7 @@ const unitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({
 			return createPostgresOutbox(client).append(eventEnvelope(event));
 		},
 	},
+	references: createImportReferenceAllocator(client),
 	repository: createImportRepository(client),
 }));
 
@@ -193,12 +196,27 @@ const importService = createImportService({
 
 function toApiJob(job: ImportJobRecord): ImportJob {
 	return {
+		acceptedAt: job.acceptedAt?.toISOString() ?? null,
+		acceptedByUserId: job.acceptedByUserId,
+		approvedAt: job.approvedAt?.toISOString() ?? null,
+		approvedByUserId: job.approvedByUserId,
+		cancelledAt: job.cancelledAt?.toISOString() ?? null,
+		cancelledByUserId: job.cancelledByUserId,
 		completedAt: job.completedAt?.toISOString() ?? null,
 		counts: job.counts,
 		createdAt: job.createdAt.toISOString(),
+		createdByUserId: job.createdByUserId,
 		failureCode: job.failureCode,
+		humanReference: job.humanReference,
 		id: job.id,
 		lastCompletedRow: job.lastCompletedRow,
+		manifest: job.manifest,
+		numberAllocationId: job.numberAllocationId,
+		numberSequenceVersion: job.numberSequenceVersion,
+		reconciliationState: job.reconciliationState,
+		scannerResult: job.scannerResult,
+		sourceFileName: job.sourceFileName,
+		sourceSha256: job.sourceSha256,
 		state: job.state,
 		target: job.target,
 		updatedAt: job.updatedAt.toISOString(),
@@ -211,12 +229,14 @@ const permissions = {
 		approve: "inventory.import.approve",
 		create: "inventory.import.create",
 		download: "inventory.import.download",
+		purge: "inventory.import.purge",
 		read: "inventory.import.read",
 	},
 	Product: {
 		approve: "catalog.import.approve",
 		create: "catalog.import.create",
 		download: "catalog.import.download",
+		purge: "catalog.import.purge",
 		read: "catalog.import.read",
 	},
 } as const;
@@ -278,6 +298,46 @@ async function getAuthorized(input: {
 }
 
 export const importTransportApplication = {
+	async acceptImport(input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		importId: string;
+		sessionId: string;
+		target: ImportTarget;
+		version: number;
+	}) {
+		const { context } = await authorize(
+			{ ...input, permission: permissions[input.target].approve },
+			"Write"
+		);
+		const accepted = await importService.accept({
+			actorUserId: input.actorUserId,
+			idempotencyKey: input.idempotencyKey,
+			importId: input.importId,
+			target: input.target,
+			tenantId: context.tenantId,
+			version: input.version,
+		});
+		await auditApplication.append({
+			action: "platform.import.accepted",
+			actorType: "human",
+			actorUserId: input.actorUserId,
+			classification: "Confidential",
+			correlationId: input.correlationId,
+			metadata: { target: input.target },
+			occurredAt: new Date(),
+			outcome: "success",
+			retentionClass: "platform-security-evidence",
+			scopeType: "Tenant",
+			sourceChannel: "api",
+			targetId: input.importId,
+			targetType: "ImportJob",
+			tenantId: context.tenantId,
+		});
+		return toApiJob(accepted);
+	},
 	async approveImport(input: {
 		actorUserId: string;
 		contextId: string;
@@ -321,6 +381,46 @@ export const importTransportApplication = {
 			tenantId: context.tenantId,
 		});
 		return toApiJob(completed);
+	},
+	async cancelImport(input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		importId: string;
+		sessionId: string;
+		target: ImportTarget;
+		version: number;
+	}) {
+		const { context } = await authorize(
+			{ ...input, permission: permissions[input.target].approve },
+			"Write"
+		);
+		const cancelled = await importService.cancel({
+			actorUserId: input.actorUserId,
+			idempotencyKey: input.idempotencyKey,
+			importId: input.importId,
+			target: input.target,
+			tenantId: context.tenantId,
+			version: input.version,
+		});
+		await auditApplication.append({
+			action: "platform.import.cancelled",
+			actorType: "human",
+			actorUserId: input.actorUserId,
+			classification: "Confidential",
+			correlationId: input.correlationId,
+			metadata: { target: input.target },
+			occurredAt: new Date(),
+			outcome: "success",
+			retentionClass: "platform-security-evidence",
+			scopeType: "Tenant",
+			sourceChannel: "api",
+			targetId: input.importId,
+			targetType: "ImportJob",
+			tenantId: context.tenantId,
+		});
+		return toApiJob(cancelled);
 	},
 	async createImport(input: {
 		actorUserId: string;
@@ -379,11 +479,12 @@ export const importTransportApplication = {
 		const findings = await importService.findings(
 			context.tenantId,
 			job.id,
-			input.target
+			input.target,
+			{ limit: 1000 }
 		);
 		const content = [
 			"row_number,source_key,field,severity,code",
-			...findings.map(
+			...findings.items.map(
 				(item) =>
 					`${item.rowNumber},${item.sourceKey},${item.field ?? ""},${item.severity},${item.code}`
 			),
@@ -406,8 +507,10 @@ export const importTransportApplication = {
 		});
 		return {
 			content,
+			contentDisposition: `attachment; filename="${input.target === "Product" ? "product" : "opening-stock"}-import-${input.importId}-findings.csv"`,
 			contentType: "text/csv",
 			fileName: `${input.target === "Product" ? "product" : "opening-stock"}-import-${input.importId}-findings.csv`,
+			schemaVersion: "1.0.0",
 			sha256: createHash("sha256").update(content, "utf8").digest("hex"),
 		};
 	},
@@ -415,6 +518,8 @@ export const importTransportApplication = {
 		actorUserId: string;
 		contextId: string;
 		importId: string;
+		cursor?: string;
+		limit: number;
 		sessionId: string;
 		target: ImportTarget;
 	}) {
@@ -422,17 +527,83 @@ export const importTransportApplication = {
 		const items = await importService.findings(
 			job.tenantId,
 			job.id,
-			input.target
+			input.target,
+			{ cursor: input.cursor, limit: input.limit }
 		);
 		return {
 			importId: job.id,
-			items: items.map(({ code, field, rowNumber, severity, sourceKey }) => ({
-				code,
-				field,
-				rowNumber,
-				severity,
-				sourceKey,
-			})),
+			items: items.items.map(
+				({ code, field, rowNumber, severity, sourceKey }) => ({
+					code,
+					field,
+					rowNumber,
+					severity,
+					sourceKey,
+				})
+			),
+			nextCursor: items.nextCursor,
 		};
+	},
+	async listImports(input: {
+		actorUserId: string;
+		contextId: string;
+		cursor?: string;
+		limit: number;
+		sessionId: string;
+		state?: ImportJob["state"];
+		target: ImportTarget;
+	}): Promise<PagedImports> {
+		const { context } = await authorize(
+			{ ...input, permission: permissions[input.target].read },
+			"Read"
+		);
+		const page = await importService.list({
+			cursor: input.cursor,
+			limit: input.limit,
+			organizationId: context.organizationId,
+			state: input.state,
+			target: input.target,
+			tenantId: context.tenantId,
+		});
+		return { items: page.items.map(toApiJob), nextCursor: page.nextCursor };
+	},
+	async purgeImportStaging(input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		importId: string;
+		sessionId: string;
+		target: ImportTarget;
+	}) {
+		const { context } = await authorize(
+			{ ...input, permission: permissions[input.target].purge },
+			"Write"
+		);
+		const result = await importService.purgeStaging({
+			idempotencyKey: input.idempotencyKey,
+			importId: input.importId,
+			purgedAt: new Date(),
+			target: input.target,
+			tenantId: context.tenantId,
+		});
+		await auditApplication.append({
+			action: "platform.import.staging-purged",
+			actorType: "human",
+			actorUserId: input.actorUserId,
+			classification: "Confidential",
+			correlationId: input.correlationId,
+			metadata: { ...result, target: input.target },
+			occurredAt: new Date(),
+			outcome: "success",
+			retentionClass: "platform-security-evidence",
+			scopeType: "Tenant",
+			sourceChannel: "api",
+			sourceEventId: `import-purge:${context.tenantId}:${input.idempotencyKey}`,
+			targetId: input.importId,
+			targetType: "ImportJob",
+			tenantId: context.tenantId,
+		});
+		return result;
 	},
 };

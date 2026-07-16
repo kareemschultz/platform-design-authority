@@ -15,6 +15,20 @@
       "when": 1784211526533,
       "tag": "0001_perpetual_darkstar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784224231046,
+      "tag": "0002_woozy_molly_hayes",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784224575648,
+      "tag": "0003_rare_wallop",
+      "breakpoints": true
     }
   ]
 }

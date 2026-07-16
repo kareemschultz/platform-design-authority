@@ -34,6 +34,7 @@ export interface NumberAllocation {
 	requestFingerprint: string;
 	sequenceId: string;
 	sequenceKey: string;
+	sequenceVersion: number;
 	sourceCommandId: string;
 	state: "Issued";
 	tenantId: string;
@@ -48,6 +49,17 @@ export interface NumberingRepository {
 			requestFingerprint: string;
 		}
 	) => Promise<NumberAllocation | "not_found" | "suspended">;
+	ensureSystemSequence: (input: {
+		createdAt: Date;
+		id: string;
+		organizationId: string;
+		ownerNamespace: string;
+		padding: number;
+		prefix: string;
+		recordType: string;
+		sequenceKey: string;
+		tenantId: string;
+	}) => Promise<"configuration_conflict" | "ready">;
 	findAllocation: (
 		input: Pick<
 			NumberAllocationRequest,
@@ -96,10 +108,18 @@ export interface NumberingIdFactory {
 }
 
 export class NumberingError extends Error {
-	readonly code: "idempotency_conflict" | "not_found" | "sequence_suspended";
+	readonly code:
+		| "configuration_conflict"
+		| "idempotency_conflict"
+		| "not_found"
+		| "sequence_suspended";
 
 	constructor(
-		code: "idempotency_conflict" | "not_found" | "sequence_suspended",
+		code:
+			| "configuration_conflict"
+			| "idempotency_conflict"
+			| "not_found"
+			| "sequence_suspended",
 		message: string
 	) {
 		super(message);
@@ -191,6 +211,29 @@ export function createNumberingService(options: {
 				});
 				return allocation;
 			});
+		},
+		async ensureSystemSequence(input: {
+			id: string;
+			organizationId: string;
+			ownerNamespace: string;
+			padding: number;
+			prefix: string;
+			recordType: string;
+			sequenceKey: string;
+			tenantId: string;
+		}): Promise<void> {
+			const result = await options.unitOfWork.execute(({ repository }) =>
+				repository.ensureSystemSequence({
+					...input,
+					createdAt: options.clock(),
+				})
+			);
+			if (result === "configuration_conflict") {
+				throw new NumberingError(
+					"configuration_conflict",
+					"The system-managed sequence conflicts with an existing definition"
+				);
+			}
 		},
 	};
 }

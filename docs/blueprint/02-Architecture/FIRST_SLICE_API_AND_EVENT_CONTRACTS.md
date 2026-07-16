@@ -80,15 +80,23 @@ Define the minimum public and first-party contracts required for the Guyana reta
 | `POST /v1/products/{productId}/activate` | `catalog.product.activate` |
 | `POST /v1/products/{productId}/archive` | `catalog.product.archive` |
 | `POST /v1/product-imports` | `catalog.import.create` |
+| `GET /v1/product-imports` | `catalog.import.read` |
 | `GET /v1/product-imports/{importId}` | `catalog.import.read` |
 | `GET /v1/product-imports/{importId}/findings` | `catalog.import.read` |
 | `POST /v1/product-imports/{importId}/approve` | `catalog.import.approve` |
+| `POST /v1/product-imports/{importId}/accept` | `catalog.import.approve` |
+| `POST /v1/product-imports/{importId}/cancel` | `catalog.import.approve` |
+| `POST /v1/product-imports/{importId}/purge-staging` | `catalog.import.purge` |
 | `GET /v1/product-imports/{importId}/correction-report` | `catalog.import.download` |
 | `POST /v1/customer-imports` | `platform.import.create` |
 | `POST /v1/opening-stock-imports` | `inventory.import.create` |
+| `GET /v1/opening-stock-imports` | `inventory.import.read` |
 | `GET /v1/opening-stock-imports/{importId}` | `inventory.import.read` |
 | `GET /v1/opening-stock-imports/{importId}/findings` | `inventory.import.read` |
 | `POST /v1/opening-stock-imports/{importId}/approve` | `inventory.import.approve` |
+| `POST /v1/opening-stock-imports/{importId}/accept` | `inventory.import.approve` |
+| `POST /v1/opening-stock-imports/{importId}/cancel` | `inventory.import.approve` |
+| `POST /v1/opening-stock-imports/{importId}/purge-staging` | `inventory.import.purge` |
 | `GET /v1/opening-stock-imports/{importId}/correction-report` | `inventory.import.download` |
 
 ### Inventory

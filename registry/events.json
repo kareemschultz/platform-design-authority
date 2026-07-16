@@ -1830,7 +1830,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
       "source_heading": "Events",
-      "source_line": 142,
+      "source_line": 152,
       "document_status": "Draft",
       "schema_path": "schemas/events/platform.import.approved.v1.schema.json"
     },
@@ -1843,7 +1843,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
       "source_heading": "Events",
-      "source_line": 143,
+      "source_line": 153,
       "document_status": "Draft",
       "schema_path": "schemas/events/platform.import.completed.v1.schema.json"
     },
@@ -1856,7 +1856,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
       "source_heading": "Events",
-      "source_line": 144,
+      "source_line": 154,
       "document_status": "Draft",
       "schema_path": "schemas/events/platform.import.failed.v1.schema.json"
     },
@@ -1869,7 +1869,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
       "source_heading": "Events",
-      "source_line": 141,
+      "source_line": 151,
       "document_status": "Draft",
       "schema_path": "schemas/events/platform.import.validated.v1.schema.json"
     },
@@ -2181,7 +2181,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 164,
+      "source_line": 166,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2194,7 +2194,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 163,
+      "source_line": 165,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2207,7 +2207,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 165,
+      "source_line": 167,
       "document_status": "Draft",
       "schema_path": "schemas/events/platform.sequence.number-issued.v1.schema.json"
     },
@@ -2220,7 +2220,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 168,
+      "source_line": 170,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2233,7 +2233,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 166,
+      "source_line": 168,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2246,7 +2246,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 169,
+      "source_line": 171,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2259,7 +2259,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 167,
+      "source_line": 169,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2272,7 +2272,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 170,
+      "source_line": 172,
       "document_status": "Draft",
       "schema_path": null
     },

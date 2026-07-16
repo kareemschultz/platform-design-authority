@@ -676,12 +676,32 @@ export const ImportCountsSchema = z.object({
 });
 
 export const ImportJobSchema = z.object({
+	acceptedAt: InstantSchema.nullable(),
+	acceptedByUserId: NullableIdentifierSchema,
+	approvedAt: InstantSchema.nullable(),
+	approvedByUserId: NullableIdentifierSchema,
+	cancelledAt: InstantSchema.nullable(),
+	cancelledByUserId: NullableIdentifierSchema,
 	completedAt: InstantSchema.nullable(),
 	counts: ImportCountsSchema,
 	createdAt: InstantSchema,
+	createdByUserId: IdentifierSchema,
 	failureCode: z.string().max(100).nullable(),
+	humanReference: z.string().min(1).max(100),
 	id: IdentifierSchema,
 	lastCompletedRow: z.number().int().min(0).max(1000),
+	manifest: CsvImportManifestSchema,
+	numberAllocationId: IdentifierSchema,
+	numberSequenceVersion: z.number().int().min(1),
+	reconciliationState: z.enum([
+		"Pending",
+		"Reconciled",
+		"Mismatch",
+		"Accepted",
+	]),
+	scannerResult: z.enum(["Clean", "Blocked", "Unavailable"]),
+	sourceFileName: z.string().min(1).max(200),
+	sourceSha256: z.string().regex(/^[A-Fa-f0-9]{64}$/),
 	state: z.enum([
 		"Uploaded",
 		"Validating",
@@ -697,6 +717,11 @@ export const ImportJobSchema = z.object({
 	version: z.number().int().min(1),
 });
 
+export const PagedImportsSchema = z.object({
+	items: z.array(ImportJobSchema).max(200),
+	nextCursor: z.string().nullable(),
+});
+
 export const ImportFindingSchema = z.object({
 	code: z.string().min(1).max(100),
 	field: z.string().max(100).nullable(),
@@ -707,14 +732,23 @@ export const ImportFindingSchema = z.object({
 
 export const ImportFindingsSchema = z.object({
 	importId: IdentifierSchema,
-	items: z.array(ImportFindingSchema).max(5000),
+	items: z.array(ImportFindingSchema).max(200),
+	nextCursor: z.string().nullable(),
 });
 
 export const ImportCorrectionReportSchema = z.object({
 	content: z.string().max(524_288),
+	contentDisposition: z.string().min(1).max(300),
 	contentType: z.literal("text/csv"),
 	fileName: z.string().min(1).max(220),
+	schemaVersion: z.literal("1.0.0"),
 	sha256: z.string().regex(/^[A-Fa-f0-9]{64}$/),
+});
+
+export const ImportPurgeResultSchema = z.object({
+	findings: z.number().int().min(0).max(5000),
+	rows: z.number().int().min(0).max(1000),
+	waves: z.number().int().min(0).max(100),
 });
 
 export const ProblemSchema = z.object({
@@ -842,6 +876,8 @@ export type ImportCorrectionReport = z.infer<
 export type ImportFinding = z.infer<typeof ImportFindingSchema>;
 export type ImportFindings = z.infer<typeof ImportFindingsSchema>;
 export type ImportJob = z.infer<typeof ImportJobSchema>;
+export type ImportPurgeResult = z.infer<typeof ImportPurgeResultSchema>;
+export type PagedImports = z.infer<typeof PagedImportsSchema>;
 export type CreateInventoryAdjustment = z.infer<
 	typeof CreateInventoryAdjustmentSchema
 >;

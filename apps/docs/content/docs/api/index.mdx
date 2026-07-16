@@ -18,7 +18,7 @@ The local server listens at `http://localhost:3000` by default. Browser code doe
 | oRPC transport | `/rpc/*` | Procedure-dependent | Type-safe application procedures |
 | oRPC OpenAPI handler | `/api-reference/*` | Procedure-dependent | Generated prototype schema/reference surface |
 
-The HTTP shell allows the governed `DELETE`, `GET`, `PATCH`, `POST`, `PUT`, and `OPTIONS` methods from the exact configured `CORS_ORIGIN`. `PUT` is required by the versioned Stock Count draft-line operation. Credentials are enabled only for the approved origin; widening methods does not widen origins or allowed headers.
+The HTTP shell allows the governed `DELETE`, `GET`, `PATCH`, `POST`, `PUT`, and `OPTIONS` methods from the exact configured `CORS_ORIGIN`. `PUT` and its `If-Match` precondition are required by the versioned Stock Count draft-line operation. Credentials are enabled only for the approved origin; the header allowlist remains exact and widening methods does not widen origins.
 
 ## Implemented procedures
 

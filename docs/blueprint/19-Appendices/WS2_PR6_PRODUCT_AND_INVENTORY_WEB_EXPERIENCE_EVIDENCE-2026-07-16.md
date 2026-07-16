@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-025
 title: WS2 PR6 Product and Inventory Web Experience Evidence
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Frontend Platform
 last_reviewed: 2026-07-16
@@ -46,8 +46,11 @@ The implemented UI is deterministic with AI disabled. It never treats navigation
 - Browser authentication and oRPC calls use same-origin `/api/auth` and `/rpc` paths. Next rewrites those paths to the private API address; only server execution reads `PLATFORM_API_INTERNAL_URL`. This prevents cross-host cookie loss without exposing the Compose service name to the browser bundle.
 - Every protected request supplies the current server-issued active-context ID. Mutations additionally carry idempotency and version preconditions where the command requires them.
 - Context changes cancel and remove incompatible Catalog/Inventory queries and remount context-bound interactive state. They do not mint or broaden authority.
+- A failed latest context activation refetches the cancelled active queries for the still-current workspace; a stale failed request cannot revive queries after a newer activation starts.
+- Create and receipt idempotency keys are bound to canonical command intent plus current context. They survive double-submit and uncertain response loss, rotate when material intent changes, and clear only after authoritative success.
 - Product exact-SKU lookup, Product state filtering, balance pagination, activity metadata, and durable Count draft-line save are published through OpenAPI, oRPC, generated TypeScript contracts, router bindings, and permission parity.
-- The HTTP shell allows the governed `PUT` method required by durable Count draft-line saves. CORS tests prove the method is allowed without widening origins or headers.
+- Exact SKU lookup uses the same tenant-identifier normalization as creation, so valid separators are preserved. Stock-balance cursors use a versioned structural owner cursor inside the opaque public token, including for contract-valid units containing control delimiters.
+- The HTTP shell allows the governed `PUT` and `If-Match` precondition required by durable Count draft-line saves. CORS tests prove the method/header are allowed without widening origins or the header allowlist.
 - Count draft editing intentionally reuses `inventory.count.create`; the internal receipt operation is `inventory.count.draft.save`. This does not introduce a second permission ID.
 - Transfer receiver metadata represents the latest receiving action. The current model does not fabricate a full receipt-history actor list. Count has no separate `submittedAt`, so the UI does not invent one.
 - Repository and application tenant predicates remain mandatory after transport authorization. Foreign and nonexistent identifiers retain the same non-disclosing response behavior.
@@ -56,11 +59,11 @@ The implemented UI is deterministic with AI disabled. It never treats navigation
 
 | Workflow | Safety and usability evidence |
 |---|---|
-| Product | Stable aggregate/child IDs remain visible; Identifierless Variants are supported; exact SKU is distinct from text search; archive is a confirmed lifecycle transition, never deletion; stale versions preserve the proposed edit for deliberate recovery. |
+| Product | Stable aggregate/child IDs remain visible; Identifierless Variants are supported; exact SKU is distinct from text search and preserves tenant separators; archive is a confirmed lifecycle transition, never deletion; stale versions preserve the proposed edit for deliberate recovery. |
 | Balance | Location is mandatory; pagination is bounded; projection source, timestamp, freshness, reconciliation, unit, reserved, on-hand, and available quantities are visible without presenting the projection as write authority. |
 | Adjustment | Maker/checker identity is visible; approve/post and reverse are consequential confirmations; reversal links a compensating movement and never edits the original ledger fact. |
 | Count | Each observation persists through the Inventory draft API and reloads from owner state; standard scanner keyboard input works without a device-specific SDK; blind expected values remain hidden until posting; approval/posting is one atomic command. |
-| Transfer | Dispatch and receipt transitions are explicit; partial receipt preserves the remaining amount; exception is terminal and points to a compensating Adjustment rather than mutation. |
+| Transfer | Dispatch and receipt transitions are explicit; partial receipt preserves the remaining amount and advances selection to an outstanding line; exception is terminal and points to a compensating Adjustment rather than mutation. |
 | Import | The browser validates bounded UTF-8 bytes and computes SHA-256 but never builds an authoritative CSV dataset. Server findings and lifecycle remain reloadable; temporary correction-report object URLs are always revoked. Opening-stock approval creates ledger facts only through the governed confirmed server command. |
 
 ## Formal UI-pattern disposition
@@ -120,8 +123,8 @@ These are uncompressed build-artifact totals, not per-route transferred bytes or
 | Lane | Reproduced result |
 |---|---|
 | Generated contract/API closure | Targeted contract, domain, router, and application tests: 65 passed; OpenAPI, permission, and generated-client parity clean |
-| Live Catalog/Inventory PostgreSQL | 35 tests / 200 expectations: 25 Catalog/Inventory cases plus 10 Import/Numbering cases, covering paged balances, Count draft persistence/idempotency, exact SKU/state filtering, tenant non-disclosure, activity metadata, and dedicated Numbering tenant isolation |
-| Web unit/type/format | 33 tests / 95 expectations after consequential-UX, same-origin proxy, and browser-found remediation; TypeScript and scoped Biome checks clean |
+| Live Catalog/Inventory PostgreSQL | 37 tests / 209 expectations: 27 Catalog/Inventory cases plus 10 Import/Numbering cases, covering delimiter-safe paged balances, Count draft persistence/idempotency, separator-preserving exact SKU/state filtering, tenant non-disclosure, activity metadata, and dedicated Numbering tenant isolation |
+| Web unit/type/format | 38 tests / 107 expectations after consequential-UX, same-origin proxy, review remediation, and browser-found fixes; TypeScript and scoped Biome checks clean |
 | Product documentation | `check-content`, Fumadocs generation, TypeScript, and Biome clean; one stable documentation ID |
 | Browser and real-authority workflow | 6/6 desktop/mobile Chromium tests in the exact Compose topology: login keyboard/skip-link/reflow/axe, protected redirect, and authenticated Product create/read/list through same-origin Better Auth and oRPC, tenant membership, tenant-scoped role, entitlements, active context, and Catalog persistence |
 | Direct API and import-security proof | 62 tests / 190 expectations prove transport and application-boundary permission and entitlement denial, stable non-disclosure, exact-byte CSV bounds, malformed UTF-8 replacement rejection, canonical EICAR scanner wiring, and safe HTTP validation titles |
@@ -144,6 +147,7 @@ Each authenticated browser lane attaches bounded Navigation Timing/resource-coun
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.5.0 | 2026-07-16 | Frontend Platform | Dispositioned the seven automated exact-head findings through intent-bound idempotency, filter-trail reset, outstanding Transfer-line selection, failed-context query recovery, exact `If-Match` CORS proof, separator-preserving SKU lookup, and versioned structural balance cursors. |
 | 0.4.0 | 2026-07-16 | Frontend Platform | Added the same-origin auth/oRPC proxy remediation, exact Compose 6/6 browser result, corrected integrated PostgreSQL and web-unit counts, and bounded browser-performance-artifact disposition. |
 | 0.3.0 | 2026-07-16 | Frontend Platform | Added direct transport/application denial, import-security, canonical scanner, CORS, dedicated Numbering tenant-isolation, and Node evidence. |
 | 0.2.0 | 2026-07-16 | Frontend Platform | Added reproduced authenticated desktop/mobile browser, real-authority fixture, CI orchestration, production-build, bundle-delta, and consequential-UX remediation evidence. |

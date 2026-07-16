@@ -49,7 +49,10 @@ export function classifyShellFailure(
 	if (!isOnline) {
 		return "offline";
 	}
-	if (!(error instanceof Error) && typeof error !== "object") {
+	if (
+		error === null ||
+		(!(error instanceof Error) && typeof error !== "object")
+	) {
 		return "unavailable";
 	}
 	const candidate = error as ErrorShape;

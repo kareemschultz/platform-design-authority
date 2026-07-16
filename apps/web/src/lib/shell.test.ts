@@ -40,6 +40,7 @@ describe("application shell", () => {
 			"step-up-required"
 		);
 		expect(classifyShellFailure(new Error("network"), false)).toBe("offline");
+		expect(classifyShellFailure(null)).toBe("unavailable");
 	});
 
 	test("marks only the matching administration branch as current", () => {

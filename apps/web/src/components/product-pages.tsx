@@ -550,7 +550,7 @@ function ProductLifecycleActions({ product }: { product: Product }) {
 			) : null}
 			{product.state === "Archived" ? null : (
 				<Dialog>
-					<DialogTrigger render={<Button variant="destructive" />}>
+					<DialogTrigger render={<Button variant="outline" />}>
 						Archive
 					</DialogTrigger>
 					<DialogContent>
@@ -620,7 +620,7 @@ export function ProductDetailPage({ productId }: { productId: string }) {
 		searchParams.get("returnTo"),
 		"/operations/products"
 	);
-	if (product.isLoading) {
+	if (!workspace.contextId || product.isLoading) {
 		return (
 			<OperationsPageFrame
 				description="Loading current Product state."

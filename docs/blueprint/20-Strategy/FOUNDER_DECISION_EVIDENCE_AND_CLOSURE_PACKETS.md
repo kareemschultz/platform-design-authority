@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-030
 title: Founder Decision Evidence and Closure Packets
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Founder
 last_reviewed: 2026-07-16
@@ -16,7 +16,7 @@ applicable_dimensions: [purpose, authority-and-scope, failure-and-recovery, veri
 
 ## Purpose
 
-Make FDR-001 through FDR-010 decision-ready without choosing a business fact, issuing professional advice, selecting a provider, or promoting a Draft or Proposed authority. Each packet defines the exact question, safe current posture, admissible evidence, affected owners and contracts, decision trigger, propagation work, and closure test.
+Make FDR-001 through FDR-011 decision-ready without choosing a business fact, issuing professional advice, selecting a provider, or promoting a Draft or Proposed authority. Each packet defines the exact question, safe current posture, admissible evidence, affected owners and contracts, decision trigger, propagation work, and closure test.
 
 This document implements only the documentation-preparation portion of DCA-019 in PDA-REV-014. It does not close DCA-019, any Founder Decision Register entry, a ratification wave, or a pilot/production gate.
 
@@ -63,13 +63,14 @@ Evidence expires when its named source changes materially, a provider/product/pl
 |---|---|---|---|
 | 1 | FDR-005 repository visibility/license | the repository is already public and disclosure consequences exist now | redact prohibited content and maintain current public-safe controls; do not infer a license grant |
 | 2 | FDR-002 operating legal entity | entity identity controls contracts, tax, banking, provider eligibility, premium licensing, billing, and privacy roles | architecture and simulators only; no production commercial/provider commitment |
-| 3 | FDR-004 first retail beachhead | bounds implementation and customer commitments | named controlled prototypes under PDA-RDM-003/PDA-RDM-007 only |
-| 4 | FDR-003 billing/settlement currency | depends on entity, bank, tax, invoice, and customer evidence | GYD-first domain modeling and explicit USD seams; no platform invoice promise |
-| 5 | FDR-001 tenant payment model and FDR-007 provider coverage | require entity, legal/regulatory, customer, provider, settlement, and support evidence | direct-contract architecture and provider simulators; no custody or provider claim |
-| 6 | FDR-006 terminal strategy | depends on pilot need and certified provider/device evidence | cash, wallet/request-to-pay seam, and terminal-neutral UI states only |
-| 7 | FDR-009 premium UI asset scope | requires the purchasing entity and exact license evidence | source-owned shadcn/Tailwind baseline; no unverified premium redistribution |
-| 8 | FDR-008 paid marketplace phase | depends on entity, contracts, tax, payout, sanctions, accounting, provider, and customer evidence | private/free listings or direct publisher billing only |
-| 9 | FDR-010 SaaS cash collection | depends on entity, accounting, tax, custody, agent, insurance, security, and operational evidence | physical cash collection for Platform Subscription invoices remains disabled |
+| 3 | FDR-011 commercial product brand/publishing identity | depends on entity/IP ownership and repository/publication posture; controls public names, domains, packages, apps, documentation and attribution | generic/configured customer-visible branding and private internal codename packages only |
+| 4 | FDR-004 first retail beachhead | bounds implementation and customer commitments | named controlled prototypes under PDA-RDM-003/PDA-RDM-007 only |
+| 5 | FDR-003 billing/settlement currency | depends on entity, bank, tax, invoice, and customer evidence | GYD-first domain modeling and explicit USD seams; no platform invoice promise |
+| 6 | FDR-001 tenant payment model and FDR-007 provider coverage | require entity, legal/regulatory, customer, provider, settlement, and support evidence | direct-contract architecture and provider simulators; no custody or provider claim |
+| 7 | FDR-006 terminal strategy | depends on pilot need and certified provider/device evidence | cash, wallet/request-to-pay seam, and terminal-neutral UI states only |
+| 8 | FDR-009 premium UI asset scope | requires the purchasing entity and exact license evidence | source-owned shadcn/Tailwind baseline; no unverified premium redistribution |
+| 9 | FDR-008 paid marketplace phase | depends on entity, contracts, tax, payout, sanctions, accounting, provider, and customer evidence | private/free listings or direct publisher billing only |
+| 10 | FDR-010 SaaS cash collection | depends on entity, accounting, tax, custody, agent, insurance, security, and operational evidence | physical cash collection for Platform Subscription invoices remains disabled |
 
 Sequence expresses dependency, not automatic approval. Independent work may run in parallel when it cannot prejudice an upstream decision.
 
@@ -99,7 +100,7 @@ Sequence expresses dependency, not automatic approval. Independent work may run 
 
 **Contract and scope impact:** `commercial.contracts`, `commercial.platform-subscriptions`, `commercial.billing`, `commercial.partner-settlement`, platform legal-entity/organization context, jurisdiction profiles, secrets, privacy and audit. No Commercial permission or OpenAPI operation is currently registered for entity formation or platform billing; none may be invented from this packet. FDR-002 blocks real WS6 provider onboarding and production commercial contracts.
 
-**Closure test:** the Founder names the entity and effective structure; qualified opinions and executed records match; ownership and contracting authority are evidenced; FDR-003/005/007/008/009/010 and all Commercial, privacy, tax, provider, employment, IP, deployment and customer documents are propagated before an external commitment.
+**Closure test:** the Founder names the entity and effective structure; qualified opinions and executed records match; ownership and contracting authority are evidenced; FDR-003/005/007/008/009/010/011 and all Commercial, privacy, tax, provider, employment, IP, brand, deployment and customer documents are propagated before an external commitment.
 
 ## FDR-003 — Platform Billing and Settlement Currency
 
@@ -207,6 +208,20 @@ Sequence expresses dependency, not automatic approval. Independent work may run 
 
 **Closure test:** either the Founder retains disabled status, or a fully evidenced entity/collector model is selected; permissions, contracts, numbering, receipts, custody, accounting, reconciliation, incident and customer-dispute behavior are governed before collection; Commerce tenant-cash and Commercial platform-cash records remain separate.
 
+## FDR-011 — Commercial Product Brand and Publishing Identity
+
+**Decision to record:** commercial product name and owner; covered markets and variants; trademark posture; public domains, npm organization, developer/social identities and app-store identities; public documentation/API/sender presentation; platform attribution; white-label inheritance/fallback; and rebrand, redirect, deprecation and exit behavior.
+
+**Current safe posture:** “Meridian” is an internal engineering codename only under ADR-0026. Internal workspace, package, service, database, CI, prototype slug/scheme and private bundle identifiers may use it; canonical capabilities/events/permissions/contracts and customer-visible product, receipt, communication, documentation, API and installed-app names may not. `@meridian/*` publication and commercial-name claims remain disabled.
+
+**Material alternatives:** select and clear a new platform brand; select a house brand with market variants; use a corporate brand; retain a generic platform presentation until evidence exists; operate partner/tenant-first white label with a governed platform fallback. Architecture does not select a name or imply availability.
+
+**Evidence required:** FDR-002 legal/IP owner and FDR-005 repository/publication posture; founder naming brief; qualified trademark search and clearance for named goods/services, territories and confusingly similar marks; domain, social, npm and app-store availability plus defensible ownership; linguistic/cultural, accessibility and pronunciation review; competitor/confusion/phishing analysis; partner/tenant and support research; package/app/domain migration plan; cost, monitoring, renewal, opposition and rebrand contingencies.
+
+**Contract and scope impact:** ADR-0026, PDA-FND-010, `engine.branding`, `platform.branding.configure`, `platform.branding.changed.v1`, product documentation publication, public OpenAPI presentation, notification/document/receipt rendering, custom domains, passkey relying-party display, mobile packaging and Commercial white-label tiers. The decision creates no capability, permission, event, endpoint, trademark right or public package by itself.
+
+**Closure test:** the Founder records a selected identity, owner, scope, effective date and fallback; qualified clearance and availability evidence covers every claimed market/channel; domains/accounts are controlled by the correct entity; public packages/apps/docs/communications use the approved identity; canonical IDs remain neutral; white-label inheritance and required disclosures are tested; migration/rollback is executable; and ADR/specification/repository/customer claims agree.
+
 ## Failure, Conflict, and Decision Reversal
 
 - Missing, stale, inaccessible, contradictory, wrong-jurisdiction or vendor-asserted-only evidence leaves the affected packet not evidence-ready.
@@ -231,7 +246,7 @@ For each FDR closure:
 
 ## Verification and Evidence Position
 
-This version is verified only as a repository-derived decision-preparation control. Its FDR identifiers, capability IDs, event/permission examples, OpenAPI boundaries, first-slice statements, owners and prohibitions were reconciled against PDA-STR-002, ADR-0011/0013/0015/0019/0022/0026, PDA-RDM-003, PDA-DOM-021, the domain dependency matrix, canonical registries and OpenAPI at the 2026-07-16 audit checkpoint.
+This version is verified only as a repository-derived decision-preparation control. Its FDR identifiers, capability IDs, event/permission examples, OpenAPI boundaries, first-slice statements, owners and prohibitions were reconciled against PDA-STR-002, ADR-0011/0013/0015/0019/0022/0026, PDA-RDM-003, PDA-DOM-021, the domain dependency matrix, canonical registries and OpenAPI at the 2026-07-16 audit checkpoint. FDR-011 closes the decision-registration contradiction in ADR-0026 without selecting a name or supplying clearance evidence.
 
 No founder selection, qualified opinion, customer result, provider certification, security/accessibility result, commercial contract or operational exercise is supplied by this document. Evidence state therefore remains `documented`, not `verified` or `externally-gated` completion.
 

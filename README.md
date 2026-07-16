@@ -181,7 +181,7 @@ The documentation-completion audit is registered by `docs/reviews/MERIDIAN_DOCUM
 
 WS1 is complete at controlled-prototype depth. WS2 is active: PR1–PR4 are merged through PR #74, including Catalog Product, Inventory ledger/workflows, and bounded durable event delivery/projections. PR5–PR7 remain sequenced under issues #71–#73, and no WS2 exit credit is claimed. Proposed ADR-0020 makes Bun/Hono/oRPC the preferred prototype path with an evidence-driven Node fallback; production ratification remains pending.
 
-Pilot and production readiness still require FDR-001 through FDR-010, qualified Guyana review, provider certification, customer evidence, executable tests, accessibility and security evidence, and operational exercises.
+Pilot and production readiness still require FDR-001 through FDR-011, qualified Guyana and trademark/brand-channel review, provider certification, customer evidence, executable tests, accessibility and security evidence, and operational exercises.
 
 ## Working Agreement
 

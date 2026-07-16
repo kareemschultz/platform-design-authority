@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-001
 title: Strategy Section Index
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -74,6 +74,7 @@ Commercial specifications are authoritative over handbook summaries for editions
 8. FDR-008 — decide whether and when a paid marketplace phase may begin.
 9. FDR-009 — verify premium UI and marketing-asset license scope for the owning entity and products.
 10. FDR-010 — decide whether Platform Subscription cash collection remains disabled or enters a separately controlled model.
+11. FDR-011 — decide the commercial product brand and public publishing identity after entity, trademark, domain, npm, app-store and white-label evidence.
 
 PDA-STR-030 defines the evidence, dependencies and closure test for each gate. The list order does not override its critical-path sequencing or the authority of PDA-STR-002.
 

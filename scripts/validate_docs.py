@@ -13,6 +13,8 @@ from typing import Any
 
 from jsonschema import validators
 
+from validate_codename_boundary import validate_codename_boundary
+
 ROOT = Path(__file__).resolve().parents[1]
 ADR_FILE = re.compile(r"^ADR-\d{4}-[A-Z0-9-]+\.md$")
 SPEC_FILE = re.compile(r"^[A-Z0-9_]+(?:-\d{4}-\d{2}-\d{2})?\.md$")
@@ -748,6 +750,7 @@ def main() -> int:
         + validate_governance_exemptions()
         + validate_contract_files()
         + validate_founder_decision_register()
+        + validate_codename_boundary()
         + validate_repository_layout()
         + validate_skills()
     )

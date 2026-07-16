@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-16
 ---
 
 # Founder Decision Register
@@ -134,6 +134,25 @@ Decide whether the platform operating entity will ever accept physical cash for 
 Until ratified, tenants may not treat platform staff, partners, resellers, or implementation personnel as authorized cash collectors for Platform Subscription invoices. This decision is separate from tenant customer cash handled by Commerce.
 
 **Ratification required before:** publishing a cash-payment option, appointing a collector, accepting physical funds, or implementing agent receivables.
+
+## FDR-011 — Commercial Product Brand and Publishing Identity
+
+**Status:** Open — the commercial product name and public publishing identity are undecided.
+
+Decide:
+
+- Commercial product name, legal owner, markets, languages, pronunciations, and permitted variants
+- Trademark search, clearance, filing, monitoring, opposition, renewal, and rebrand posture
+- Public domains, social/developer identities, npm organization or fallback scope, and anti-impersonation controls
+- App-store names, public bundle/package identifiers, documentation and API presentation, sender identities, and platform attribution
+- Relationship between the platform brand, partner/reseller brands, tenant brands, and full-white-label fallback behavior
+- Migration, redirects, package deprecation, customer communication, and exit behavior if the selected identity changes
+
+Until ratified, “Meridian” remains an internal engineering codename under ADR-0026. Internal `@meridian/*` packages remain private; canonical identifiers remain brand-neutral; customer-visible strings use generic or configured branding; and public package publication, product-domain launch, app-store submission, or representation of the codename as the commercial brand is disabled.
+
+Required evidence: FDR-002 and FDR-005; qualified trademark and naming review in each intended market; domain, social, npm and app-store availability/ownership evidence; linguistic and accessibility review; phishing/confusion and competitor-collision analysis; white-label and partner impact; migration cost; and founder selection with an effective date.
+
+**Ratification required before:** adopting a commercial name, publishing a public package or documentation/product domain under that identity, submitting a branded app, issuing branded customer communications, or making a trademark or availability claim.
 
 ## Governance
 

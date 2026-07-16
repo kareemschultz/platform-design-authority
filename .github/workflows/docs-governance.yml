@@ -58,6 +58,11 @@ jobs:
           python -m unittest scripts/test_generate_registries.py
           python scripts/generate_registries.py --check
 
+      - name: Test and validate codename and public-brand boundary
+        run: |
+          python -m unittest scripts/test_validate_codename_boundary.py
+          python scripts/validate_codename_boundary.py
+
       - name: Test and validate canonical document indexes
         run: |
           python -m unittest scripts/test_validate_document_indexes.py

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -191,6 +191,33 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | FA4-033 | Finance schema controlTotals lacked inventory fields | Closed architecturally | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Accountant/inventory prototype validation fails |
 | FA4-034 | Marketing/status/analytics docs lacked slice-boundary declarations | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Scope admitted without scope-change process |
 
+## Documentation Completion Audit (DCA) — checkpoint `c9faa31` plus continuation
+
+The immutable audit defines DCA-001 through DCA-019. PDA-REV-014 is the living disposition. DCA-020 is a continuation finding discovered after the fixed cutoff and therefore does not alter the audit evidence.
+
+| ID | Title | Status | Evidence | Re-open trigger |
+|---|---|---|---|---|
+| DCA-001 | No production-directing authority set | Open; ratification/external evidence | PDA-REV-014 §Finding Matrix | Required reviews, approvals and promotions complete |
+| DCA-002 | Binary completeness claims lacked depth semantics | Implemented in Draft; independent review open | PDA-REV-014 §Finding Matrix | Class/depth/evidence controls regress |
+| DCA-003 | Program and implementation status drift | Reconciled; refresh obligation | PDA-REV-014 §Finding Matrix | Main/project/evidence state changes |
+| DCA-004 | Generated registry and fresh-check evidence | Implemented; exact-head repetition required | PDA-REV-014 §Finding Matrix | Registry or CI freshness fails |
+| DCA-005 | Capability-family readiness incomplete | Partially implemented | PDA-REV-014 §Finding Matrix | Admitted family lacks declared depth/trigger/evidence |
+| DCA-006 | Document-class applicability absent | Implemented in Draft; independent review open | PDA-REV-014 §Finding Matrix | Class/template/validator semantics diverge |
+| DCA-007 | Research waves lacked durable registration | Structurally reduced; external/independent evidence open | PDA-REV-014 §Finding Matrix | Ledger/result/backlog parity fails |
+| DCA-008 | Requested enterprise research families incomplete | Partially accepted; direct/configured evidence open | PDA-REV-014 §Finding Matrix | Named family lacks reviewed output/evidence state |
+| DCA-009 | Orphan and navigation coverage | Implemented; independent review open | PDA-REV-014 §Finding Matrix | Any prose artifact loses its single inventory route |
+| DCA-010 | Product/API documentation governance | Implemented; independent review and release depth open | PDA-REV-014 §Finding Matrix | Manifest, MDX, API parity or release evidence fails |
+| DCA-011 | Pilot-critical operational procedures incomplete | Procedure drafts only | PDA-REV-014 §Finding Matrix | Implementation advances without reviewed/exercised operations |
+| DCA-012 | Duplicate capability-source authority | Implemented; independent review open | PDA-REV-014 §Finding Matrix | Multiple current sources or identifier drift recur |
+| DCA-013 | Ratification preparation absent | Prepared; all real reviews/promotions open | PDA-REV-014 §Finding Matrix | Lifecycle advances without manifest evidence |
+| DCA-014 | Technology evidence freshness | Open monitoring obligation | PDA-REV-014 §Finding Matrix | Version/compatibility claim lacks dated state/evidence |
+| DCA-015 | GitHub issue/project state contradicts repository | Open; owner-controlled reconciliation required | PDA-REV-014 §Finding Matrix | Issue #59/#71 and project state agree with merged reality |
+| DCA-016 | Governance validators lacked mutation evidence | Implemented; independent review open | PDA-REV-014 §Finding Matrix | Seeded defect passes a governed validator |
+| DCA-017 | Active placeholder/cost evidence defects | Implemented; independent review open | PDA-REV-014 §Finding Matrix | Filler or unowned cost assumption recurs |
+| DCA-018 | WS2 capability evidence registration incomplete | Interim registration; PR7 closeout open | PDA-REV-014 §Finding Matrix | Cells overclaim or PR7 reconciliation fails |
+| DCA-019 | Founder/professional/provider/customer evidence absent | Open blocker; packets prepared | PDA-REV-014 §Finding Matrix | Any decision/evidence gate is falsely inferred or genuinely closes |
+| DCA-020 | Required commercial-brand decision and codename boundary absent | Repository control implemented in Draft; FDR-011/external/independent evidence open | PDA-REV-014 §Finding Matrix | Codename leaks, private-package gate fails, or FDR-011 closes |
+
 ## Currently Open Risks
 
 Consolidated list of every register entry not fully closed (status Partially closed, External evidence, Founder decision, or Open), plus implementation risks that remain after WS1 controlled-prototype closeout.
@@ -206,7 +233,8 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | TA-031 | Competitor baseline execution (Odoo, ERPNext, specialists) | External evidence | Experience-budget freeze |
 | TA-044 | Marketplace paid-phase settlement decision (FDR-008) | Founder | Paid marketplace phase |
 | TA-054 | Platform-SaaS cash receivables policy (FDR-010) | Founder | Platform Subscription cash collection |
-| TA-055 | FDR-001 through FDR-010 ratification | Founder | Pilot and production |
+| TA-055 | FDR-001 through FDR-011 ratification | Founder | Pilot and production |
+| DCA-020 | Commercial product brand and publishing identity (FDR-011) | Founder, qualified trademark advisers, Platform Design Authority | Public product/package/domain/app/documentation identity and pilot/production claims |
 | FA4-014 | Marketplace payout gating (FDR-008 plus legal/tax/provider review) | Founder | Paid marketplace phase |
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
 | FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |

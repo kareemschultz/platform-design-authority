@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.15.0
+version: 0.16.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -48,10 +48,10 @@ Where an area contains mixed depths, the result names the proven subset and does
 | UX and accessibility | Architecture/pattern standards plus WS1 prototype evidence | Formal per-workstream audits, assistive-technology evidence, full responsive/offline/product flows |
 | Data, reporting, and analytics | Architecture-specified; schemas and selected first-slice contracts exist | Metric implementation, lineage/quality operation, warehouse/projection performance and recovery evidence |
 | Deployment and operations | Architecture and requirements catalogues exist; four prototype service groups have machine-registered draft procedures, and merged PR #74 adds the bounded Event Backbone worker and PDA-OPS-018 runbook | Independent procedure review, production Event Backbone capacity/SLO and multi-replica evidence, live dashboards, tested alerts, on-call escalation, backup/restore, incident, migration, rollback, and recovery exercises |
-| Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled; PDA-STR-030 makes FDR-001 through FDR-010 decision-ready at documented packet depth with exact evidence, sequencing, contract-impact and closure rules | Actual founder decisions, qualified legal/tax/accounting/privacy evidence, entity, pricing, contracts, provider, customer, license, custody/payout and operational gates |
+| Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled; PDA-STR-030 makes FDR-001 through FDR-011 decision-ready at documented packet depth with exact evidence, sequencing, contract-impact and closure rules; the codename/public-brand boundary is machine-enforced for current repository surfaces | Actual founder decisions, qualified legal/tax/accounting/privacy/trademark evidence, entity, brand, domains/channels, pricing, contracts, provider, customer, license, custody/payout and operational gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
 | Competitive research | Initial nine-wave writing set plus ITSM/MSP/RMM, IAM, infrastructure/DCIM/IPAM, named-product lineage, explicit primary evidence for Acumatica, QuickBooks Desktop Enterprise, monday.com, ClickUp and Rippling, and device/offline continuations are In Review with exact source/ledger/result/backlog reconciliation through SRC-079; CIR-BACK-021 through CIR-BACK-025 are transferred | direct tenant/agent/provider/scanner/controller/device observation, owner/provider decisions, edition/geography parity, protocol/security/accessibility/operational trials, customer evidence, volatile-source refresh, and independent review |
-| Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; the API page preserves an implemented-runtime view and a generated 100-operation canonical Draft contract table | Full task/admin/migration/troubleshooting depth, later-workstream release evidence, editorial/accessibility review |
+| Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, a governed manifest, and a release-preview/published codename-boundary gate; the API page preserves an implemented-runtime view and a generated 100-operation canonical Draft contract table | Full task/admin/migration/troubleshooting depth, later-workstream release evidence, approved FDR-011 brand or neutral release posture, editorial/accessibility review |
 | Testing and evidence | Thirteen-dimension matrix supports planned, partial, evidenced, not-applicable, and depth-deferred states; 223 cells have evidence | Complete remaining WS2 cells, WS3–WS7 sources, scale/security/accessibility/operations results, external evidence |
 | Roadmap and program control | Workstreams and project exist; current status is non-authoritative | Continuous evidence-cutoff updates, generated status feasibility, founder/customer sequencing decisions |
 

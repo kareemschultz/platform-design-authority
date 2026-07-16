@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.14.0
+version: 0.15.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -36,7 +36,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 
 | Area | Current depth/evidence | Material gaps before the next claim |
 |---|---|---|
-| Foundation and governance | Architecture-specified; nine document classes and thirteen dimensions have an opt-in register, templates, author self-review, and seeded validation; all 524 repository Markdown/MDX artifacts have exactly one governed, exempt, product-manifested, or bounded auxiliary inventory route; ratification evidence gates exist; all material remains Draft | Independent class/depth review, measured legacy adoption, actual ratification reviews/approvals, Constitution promotion evidence |
+| Foundation and governance | Architecture-specified; nine document classes and thirteen dimensions have an opt-in register, templates, author self-review, and seeded validation; all 525 repository Markdown/MDX artifacts have exactly one governed, exempt, product-manifested, or bounded auxiliary inventory route; ratification evidence gates exist; all material remains Draft | Independent class/depth review, measured legacy adoption, actual ratification reviews/approvals, Constitution promotion evidence |
 | ADR estate | Architecture decisions are Proposed and generally coherent | Zero Accepted ADRs; complete review records and ratification waves |
 | Platform Kernel / WS1 | Prototype-ready and verified at controlled-prototype depth for 11 first-slice capabilities | Production RLS/topology, external auth/provider evidence, security/accessibility/operations gates |
 | Catalog and Inventory / WS2 | Contract-specified and partially implemented through merged PR4; PDA-APP-023 records bounded Event Backbone evidence; 13 partial rows/80 cells retain interim PR2/PR3 registration while bulk import stays planned | imports/numbering, web UX/accessibility, PR4–PR7 capability-evidence reconciliation, remaining planned cells, final audit and closeout |
@@ -48,7 +48,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 | UX and accessibility | Architecture/pattern standards plus WS1 prototype evidence | Formal per-workstream audits, assistive-technology evidence, full responsive/offline/product flows |
 | Data, reporting, and analytics | Architecture-specified; schemas and selected first-slice contracts exist | Metric implementation, lineage/quality operation, warehouse/projection performance and recovery evidence |
 | Deployment and operations | Architecture and requirements catalogues exist; four prototype service groups have machine-registered draft procedures, and merged PR #74 adds the bounded Event Backbone worker and PDA-OPS-018 runbook | Independent procedure review, production Event Backbone capacity/SLO and multi-replica evidence, live dashboards, tested alerts, on-call escalation, backup/restore, incident, migration, rollback, and recovery exercises |
-| Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled | Founder decisions, legal entity, pricing, contracts, provider, tax, custody/payout gates |
+| Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled; PDA-STR-030 makes FDR-001 through FDR-010 decision-ready at documented packet depth with exact evidence, sequencing, contract-impact and closure rules | Actual founder decisions, qualified legal/tax/accounting/privacy evidence, entity, pricing, contracts, provider, customer, license, custody/payout and operational gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
 | Competitive research | Initial nine-wave writing set plus ITSM/MSP/RMM, IAM, infrastructure/DCIM/IPAM, named-product lineage, explicit primary evidence for Acumatica, QuickBooks Desktop Enterprise, monday.com, ClickUp and Rippling, and device/offline continuations are In Review with exact source/ledger/result/backlog reconciliation through SRC-079; CIR-BACK-021 through CIR-BACK-025 are transferred | direct tenant/agent/provider/scanner/controller/device observation, owner/provider decisions, edition/geography parity, protocol/security/accessibility/operational trials, customer evidence, volatile-source refresh, and independent review |
 | Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; the API page preserves an implemented-runtime view and a generated 100-operation canonical Draft contract table | Full task/admin/migration/troubleshooting depth, later-workstream release evidence, editorial/accessibility review |
@@ -80,7 +80,7 @@ These counts demonstrate inventory and internal parity, not enterprise implement
 - WS2: 13 capabilities have interim PR2/PR3 registration covering 80 cells; PDA-APP-023 records merged PR4 behavior, but its capability-dimension mapping remains for PR7; bulk import and all other unproven PR4–PR7 cells remain planned.
 - Operations: four service groups have bounded registered procedure drafts and merged PR4 adds the focused Event Backbone runbook; there are zero pilot-ready claims, while independent review, production telemetry, alerts, escalation, capacity, restore/failover, and all dated exercises remain open.
 - Product documentation: build/type checks, a nine-page manifest, metadata/link/release-evidence validation, one class-adopted API sample, and generated canonical OpenAPI parity exist; broader behavioral, editorial, and accessibility evidence remains open.
-- External: founder decisions, customer evidence, qualified Guyana review, providers, penetration testing, accessibility evidence, and operational exercises remain open.
+- External: PDA-STR-030 documents admissible evidence and closure packets; founder decisions, customer evidence, qualified Guyana review, providers, penetration testing, accessibility evidence, and operational exercises remain open.
 
 ## Honest Readiness Claims
 
@@ -108,7 +108,7 @@ It may not claim:
 3. Complete Wave 0/1 review packets without self-ratification.
 4. Close WS2 vertically with UI, operations, product docs, and registered evidence.
 5. Obtain independent/direct/configured evidence for transferred CIR-BACK-021 through CIR-BACK-025; a Transferred backlog state records a durable output or explicit access block, not behavioral acceptance.
-6. Produce real operational, security, accessibility, migration, and external evidence.
+6. Execute PDA-STR-030 through authorized founder/professional/provider/customer processes and produce real operational, security, accessibility, migration, and external evidence.
 7. Reassess at a fixed merged `main` SHA.
 
 ## Supersession

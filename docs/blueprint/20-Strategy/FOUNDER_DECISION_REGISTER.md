@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Founder
 last_reviewed: 2026-07-12
@@ -12,6 +12,8 @@ last_reviewed: 2026-07-12
 ## Purpose
 
 Record business decisions architecture cannot safely infer. Recommendations remain provisional until explicit founder ratification and required professional review.
+
+PDA-STR-030 supplies the supporting evidence and closure packet for every entry below: exact decision scope, safe current posture, alternatives, admissible evidence, affected capabilities/contracts, sequencing, propagation and closure tests. It prepares decisions but does not make them; this register remains the authoritative decision record.
 
 ## FDR-001 — Initial Tenant Payment Operating Model
 

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-001
 title: Strategy Section Index
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -12,6 +12,7 @@ last_reviewed: 2026-07-16
 ## Artifact Catalog
 
 - [Founder Decision Register](FOUNDER_DECISION_REGISTER.md) — `PDA-STR-002` · Draft
+- [Founder Decision Evidence and Closure Packets](FOUNDER_DECISION_EVIDENCE_AND_CLOSURE_PACKETS.md) — `PDA-STR-030` · Draft
 - [Competitive Intelligence and Benchmarking](COMPETITIVE_INTELLIGENCE_AND_BENCHMARKING.md) — `PDA-STR-010` · Draft
 - [Platform Experience Index](PLATFORM_EXPERIENCE_INDEX.md) — `PDA-STR-011` · Draft
 - [Business DNA Strategy Rationale](BUSINESS_DNA_ENGINE.md) — `PDA-STR-012` · Draft
@@ -59,16 +60,21 @@ Commercial specifications are authoritative over handbook summaries for editions
 - Repository visibility and licensing decision
 - Long-term financial and financing model
 - Founder ratification of current gates
+- Admissible founder, professional, provider, customer, security, accessibility, operational, commercial, and license evidence identified by PDA-STR-030
 
 ## Current Founder Gates
 
-1. Ratify direct tenant-provider merchant contracts.
-2. Decide the platform legal entity and contracting structure.
-3. Decide platform billing and settlement currencies.
-4. Ratify first-slice inclusion and deferrals.
-5. Decide repository visibility and documentation license.
-6. Decide terminal and provider coverage.
-7. Decide whether and when a paid marketplace phase may begin.
-8. Verify premium UI license scope for the owning entity and products.
+1. FDR-001 — ratify the initial tenant payment operating model.
+2. FDR-002 — decide the platform legal entity and contracting structure.
+3. FDR-003 — decide platform billing and settlement currencies.
+4. FDR-004 — ratify first-slice inclusion and deferrals.
+5. FDR-005 — decide repository visibility and documentation license.
+6. FDR-006 — decide the payment terminal strategy.
+7. FDR-007 — decide initial provider coverage beyond MMG.
+8. FDR-008 — decide whether and when a paid marketplace phase may begin.
+9. FDR-009 — verify premium UI and marketing-asset license scope for the owning entity and products.
+10. FDR-010 — decide whether Platform Subscription cash collection remains disabled or enters a separately controlled model.
+
+PDA-STR-030 defines the evidence, dependencies and closure test for each gate. The list order does not override its critical-path sequencing or the authority of PDA-STR-002.
 
 Strategy guides prioritization but does not bypass architecture, security, evidence, qualified advice, lifecycle governance, or customer validation.

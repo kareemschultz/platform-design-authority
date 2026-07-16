@@ -1397,6 +1397,7 @@ export const appApiContract = {
 		z.object({ message: z.literal("This is private"), user: z.unknown() })
 	),
 	...platformApiContract,
+	...ws2CatalogInventoryApiContract,
 };
 
 export const WS1_OPERATION_IDS = [

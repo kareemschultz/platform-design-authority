@@ -87,6 +87,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	const activate = useCallback(
 		async (nextOrganizationId: string, locationId?: string | null) => {
+			await Promise.all([
+				queryClient.cancelQueries({ queryKey: orpc.catalog.key() }),
+				queryClient.cancelQueries({ queryKey: orpc.inventory.key() }),
+			]);
 			const result = await setContext.mutateAsync({
 				body: {
 					locationId: locationId ?? null,
@@ -94,6 +98,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 				},
 				headers: { "idempotency-key": crypto.randomUUID() },
 			});
+			queryClient.removeQueries({ queryKey: orpc.catalog.key() });
+			queryClient.removeQueries({ queryKey: orpc.inventory.key() });
 			persistContext(result.contextId);
 			await queryClient.invalidateQueries({ queryKey: orpc.identity.key() });
 		},
@@ -276,7 +282,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 				</div>
 			</section>
 			{connectivityAlert}
-			{children}
+			<div key={contextId ?? "no-active-context"}>{children}</div>
 		</WorkspaceContext.Provider>
 	);
 }

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
 	ActiveContextRequestSchema,
+	appApiContract,
 	CreateProductSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
@@ -101,6 +102,13 @@ describe("WS1 platform API contract", () => {
 });
 
 describe("WS2 Catalog and Inventory API contract", () => {
+	test("is exposed through the transport-neutral application client contract", () => {
+		expect(appApiContract.catalog).toBe(ws2CatalogInventoryApiContract.catalog);
+		expect(appApiContract.inventory).toBe(
+			ws2CatalogInventoryApiContract.inventory
+		);
+	});
+
 	test("is semantically aligned with every generated Catalog and Inventory operation", () => {
 		const actual = collectProcedures(ws2CatalogInventoryApiContract)
 			.map((procedure) => ({

@@ -9,8 +9,24 @@ export const ADMINISTRATION_NAVIGATION = [
 	{ href: "/administration/audit", label: "Audit" },
 ] as const;
 
-const SAFE_RETURN_PATHS = ADMINISTRATION_NAVIGATION.map((item) => item.href);
-export type SafeReturnPath = (typeof ADMINISTRATION_NAVIGATION)[number]["href"];
+export const OPERATIONS_NAVIGATION = [
+	{ href: "/operations", label: "Overview" },
+	{ href: "/operations/products", label: "Products" },
+	{ href: "/operations/inventory", label: "Inventory" },
+	{ href: "/operations/imports", label: "Imports" },
+] as const;
+
+export const PRIMARY_NAVIGATION = [
+	{ href: "/", label: "Home" },
+	{ href: "/operations", label: "Operations" },
+	{ href: "/administration", label: "Administration" },
+] as const;
+
+const SAFE_RETURN_PATHS = [
+	...ADMINISTRATION_NAVIGATION.map((item) => item.href),
+	...OPERATIONS_NAVIGATION.map((item) => item.href),
+];
+export type SafeReturnPath = (typeof SAFE_RETURN_PATHS)[number];
 
 export type ShellFailure =
 	| "approval-required"

@@ -12,29 +12,24 @@ import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { isNavigationCurrent } from "@/lib/shell";
+import { isNavigationCurrent, PRIMARY_NAVIGATION } from "@/lib/shell";
 import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
 
 export default function Header() {
 	const pathname = usePathname();
-	const links = [
-		{ label: "Home", to: "/" },
-		{ label: "Administration", to: "/administration" },
-	] as const;
-
 	return (
 		<header className="border-b bg-background">
 			<div className="mx-auto flex min-h-14 max-w-screen-2xl items-center justify-between gap-3 px-4">
 				<nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
-					{links.map(({ to, label }) => (
+					{PRIMARY_NAVIGATION.map(({ href, label }) => (
 						<Link
 							aria-current={
-								isNavigationCurrent(pathname, to) ? "page" : undefined
+								isNavigationCurrent(pathname, href) ? "page" : undefined
 							}
 							className="flex min-h-10 items-center rounded-xl px-3 font-medium text-sm hover:bg-muted aria-[current=page]:bg-muted"
-							href={to}
-							key={to}
+							href={href}
+							key={href}
 						>
 							{label}
 						</Link>
@@ -59,14 +54,14 @@ export default function Header() {
 							<SheetDescription>Primary navigation</SheetDescription>
 						</SheetHeader>
 						<nav aria-label="Mobile primary" className="grid gap-1 px-4">
-							{links.map(({ to, label }) => (
+							{PRIMARY_NAVIGATION.map(({ href, label }) => (
 								<Link
 									aria-current={
-										isNavigationCurrent(pathname, to) ? "page" : undefined
+										isNavigationCurrent(pathname, href) ? "page" : undefined
 									}
 									className="flex min-h-12 items-center rounded-xl px-3 font-medium hover:bg-muted aria-[current=page]:bg-muted"
-									href={to}
-									key={to}
+									href={href}
+									key={href}
 								>
 									{label}
 								</Link>

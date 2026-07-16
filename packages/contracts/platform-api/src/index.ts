@@ -5,6 +5,7 @@ import { OPENAPI_OPERATION_METADATA } from "./generated";
 import {
 	ActiveContextRequestSchema,
 	ActiveContextSchema,
+	CreateEventReplayRequestSchema,
 	CreateInventoryAdjustmentSchema,
 	CreateOrganizationPartySchema,
 	CreatePartyIdentityLinkRequestSchema,
@@ -15,6 +16,7 @@ import {
 	CreateStockTransferSchema,
 	CreateUserInvitationRequestSchema,
 	CurrentIdentitySchema,
+	EventReplayRequestSchema,
 	IdentifierSchema,
 	ImportJobSchema,
 	InventoryAdjustmentSchema,
@@ -99,6 +101,23 @@ const TenantCommandHeadersSchema = IdempotencyHeadersSchema.extend({
 const VersionedTenantCommandHeadersSchema = TenantCommandHeadersSchema.extend({
 	"if-match": z.string().regex(/^[1-9][0-9]*$/),
 });
+
+export const createEventReplayContract = base
+	.route({ method: "POST", path: "/v1/event-replays", successStatus: 202 })
+	.meta({
+		operationId: "createEventReplay",
+		permission: "platform.event.replay",
+		requestRef: "#/components/schemas/CreateEventReplayRequest",
+		responseRef: "#/components/schemas/EventReplayRequest",
+		successStatus: 202,
+	})
+	.input(
+		z.object({
+			body: CreateEventReplayRequestSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(EventReplayRequestSchema);
 
 export const getCurrentIdentityContract = base
 	.route({ method: "GET", path: "/v1/me", successStatus: 200 })
@@ -998,6 +1017,7 @@ export const ws2CatalogInventoryApiContract = {
 export const platformApiContract = {
 	audit: { list: listAuditRecordsContract },
 	entitlements: { list: listEntitlementsContract },
+	events: { createReplay: createEventReplayContract },
 	identity: {
 		getCurrent: getCurrentIdentityContract,
 		setActiveContext: setActiveContextContract,
@@ -1071,9 +1091,22 @@ export const WS1_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(
 		(WS1_OPERATION_IDS as readonly string[]).includes(operation.operationId)
 );
 
+export const PLATFORM_OPENAPI_OPERATION_METADATA =
+	OPENAPI_OPERATION_METADATA.filter(
+		(operation) =>
+			(WS1_OPERATION_IDS as readonly string[]).includes(
+				operation.operationId
+			) || operation.operationId === "createEventReplay"
+	);
+
 export const WS2_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(
 	(operation) =>
 		"permission" in operation &&
 		(operation.permission.startsWith("catalog.") ||
 			operation.permission.startsWith("inventory."))
 );
+
+export const WS2_EVENT_OPENAPI_OPERATION_METADATA =
+	OPENAPI_OPERATION_METADATA.filter(
+		(operation) => operation.operationId === "createEventReplay"
+	);

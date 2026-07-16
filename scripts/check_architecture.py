@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import os
 import re
 import sys
 from collections import defaultdict
@@ -53,6 +54,9 @@ PG_TABLE_PATTERN = re.compile(r"\bpgTable\s*\(\s*[\"']([^\"']+)[\"']")
 SQL_TABLE_PATTERN = re.compile(
     r"\bCREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\"']?([a-zA-Z0-9_]+)[\"']?",
     re.IGNORECASE,
+)
+MIGRATION_INVOCATION_PATTERN = re.compile(
+    r"\b(?:await\s+)?migrate[A-Z][A-Za-z0-9_$]*\s*\("
 )
 
 
@@ -113,13 +117,18 @@ def classify(path: str, families: list[dict[str, Any]]) -> str | None:
 
 
 def source_files(root: Path) -> list[Path]:
-    return [
-        path
-        for path in root.rglob("*")
-        if path.is_file()
-        and path.suffix in SOURCE_SUFFIXES
-        and not EXCLUDED_DIRECTORIES.intersection(path.parts)
-    ]
+    sources: list[Path] = []
+    for directory, child_directories, files in os.walk(root, followlinks=False):
+        child_directories[:] = [
+            name for name in child_directories if name not in EXCLUDED_DIRECTORIES
+        ]
+        directory_path = Path(directory)
+        sources.extend(
+            directory_path / name
+            for name in files
+            if Path(name).suffix in SOURCE_SUFFIXES
+        )
+    return sources
 
 
 def dependency_name(specifier: str) -> str:
@@ -150,6 +159,9 @@ def main() -> int:
     composition_targets = set(
         str(item) for item in requirements.get("composition_root_may_depend_on", [])
     )
+    migration_invocation_roots = [
+        str(item) for item in requirements.get("migration_invocation_roots", [])
+    ]
     runtime_neutral = set(
         str(item) for item in requirements.get("runtime_neutral_families", [])
     )
@@ -237,6 +249,17 @@ def main() -> int:
         for source in source_files(package_root):
             source_path = posix(source)
             text = source.read_text(encoding="utf-8")
+
+            if (
+                source_family == "applications"
+                and not is_test_source(source)
+                and MIGRATION_INVOCATION_PATTERN.search(text)
+                and not matches(source_path, migration_invocation_roots)
+            ):
+                errors.append(
+                    f"{source_path}: migration-invocation-outside-authority: "
+                    "application migration runners are server-composition-only"
+                )
 
             if source_family == "persistence":
                 discovered_tables[package_root].update(PG_TABLE_PATTERN.findall(text))
@@ -354,6 +377,14 @@ def main() -> int:
             ):
                 errors.append(
                     f"{source_path}: migration-outside-persistence: runtime-neutral package owns a concrete migration artifact"
+                )
+
+            if (
+                source_family == "applications"
+                and "migrations" in source.relative_to(package_root).parts
+            ):
+                errors.append(
+                    f"{source_path}: application-migration-owned: applications may invoke registered migration streams but may not own migration artifacts"
                 )
 
     for root, record in owner_by_root.items():

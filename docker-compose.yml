@@ -74,6 +74,22 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  worker:
+    image: meridian-worker:prototype-2026-07-15
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    init: true
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for local Compose}@postgres:5432/meridian
+      WORKER_DATABASE_POOL_MAX: 5
+      WORKER_PAUSED_TENANT_IDS: ${WORKER_PAUSED_TENANT_IDS:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   postgres:
     image: postgres:18.4@sha256:22c89fe0d0f507606260237fd55e51f6137f58b2d5bcf6152242b96d9fe8f9a4
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
@@ -81,6 +97,8 @@ services:
       POSTGRES_DB: meridian
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for local Compose}
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-55432}:5432"
     volumes:
       - meridian_postgres_data:/var/lib/postgresql
       - ./ops/postgres/001-approved-extensions.sql:/docker-entrypoint-initdb.d/001-approved-extensions.sql:ro

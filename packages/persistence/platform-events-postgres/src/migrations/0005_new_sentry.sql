@@ -1,0 +1,5 @@
+ALTER TABLE "platform_event_consumer_receipt" ADD COLUMN "receipt_scope" text DEFAULT 'delivery' NOT NULL;--> statement-breakpoint
+ALTER TABLE "platform_event_consumer_receipt" DROP CONSTRAINT "platform_event_consumer_receipt_pk";
+--> statement-breakpoint
+ALTER TABLE "platform_event_consumer_receipt" ADD CONSTRAINT "platform_event_consumer_receipt_pk" PRIMARY KEY("receipt_scope","consumer_id","event_id","consumer_schema_version");--> statement-breakpoint
+ALTER TABLE "platform_event_consumer_receipt" ADD CONSTRAINT "platform_event_consumer_receipt_scope_ck" CHECK (("platform_event_consumer_receipt"."replay_request_id" IS NULL AND "platform_event_consumer_receipt"."receipt_scope" = 'delivery') OR ("platform_event_consumer_receipt"."replay_request_id" IS NOT NULL AND "platform_event_consumer_receipt"."receipt_scope" = "platform_event_consumer_receipt"."replay_request_id"));

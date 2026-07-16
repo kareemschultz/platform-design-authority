@@ -4,6 +4,7 @@ import {
 	approveInventoryAdjustmentContract,
 	approveStockCountContract,
 	archiveProductContract,
+	createEventReplayContract,
 	createInventoryAdjustmentContract,
 	createOrganizationPartyContract,
 	createPartyIdentityLinkContract,
@@ -204,9 +205,13 @@ function mapApplicationError(context: Context, error: unknown): never {
 	if (
 		code === "invalid_identifier" ||
 		code === "invalid_quantity" ||
-		code === "invalid_reference"
+		code === "invalid_reference" ||
+		code === "validation"
 	) {
 		let validationTitle = "Identifier is invalid";
+		if (code === "validation") {
+			validationTitle = "Request is invalid";
+		}
 		if (code === "invalid_reference") {
 			validationTitle = "Resource reference is invalid";
 		}
@@ -1293,6 +1298,33 @@ const listEntitlements = implement(listEntitlementsContract)
 		}
 	});
 
+const createEventReplay = implement(createEventReplayContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.event.replay",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createEventReplay({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				tenantId: activeContext.tenantId,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const listCurrentUserSessions = implement(listCurrentUserSessionsContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -1369,6 +1401,7 @@ export const appRouter = {
 		},
 	},
 	entitlements: { list: listEntitlements },
+	events: { createReplay: createEventReplay },
 	healthCheck: publicProcedure.handler(() => "OK"),
 	identity: {
 		getCurrent: currentIdentity,

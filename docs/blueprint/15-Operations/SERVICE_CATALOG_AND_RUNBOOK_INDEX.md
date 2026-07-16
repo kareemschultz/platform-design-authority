@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-015
 title: Service Catalog and Runbook Index
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -78,6 +78,14 @@ At minimum:
 - Restore and failover
 - Tenant suspension and recovery
 - Data repair
+
+Implemented controlled-prototype runbook: [Event Backbone Delivery Runbook](./EVENT_BACKBONE_DELIVERY_RUNBOOK.md) (PDA-OPS-018). Its production SLO, alert, role/RLS, capacity, and exercise gates remain open.
+
+## Change History
+
+| Version | Date | Author | Change |
+|---|---|---|---|
+| 0.1.1 | 2026-07-15 | Platform Design Authority | Linked the WS2 controlled-prototype Event Backbone delivery runbook without claiming production operations readiness. |
 
 ## Runbook Contract
 

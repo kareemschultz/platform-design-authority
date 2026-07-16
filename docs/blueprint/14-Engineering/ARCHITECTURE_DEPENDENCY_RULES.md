@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.2.0
+version: 1.3.4
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027, ADR-0028]
 ---
 
@@ -69,14 +69,15 @@ Family-level entries in `registry/architecture-rules.json` are a conservative gr
 
 ### Registered Composition Roots
 
-Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027 selects `apps/worker/composition` as the candidate Event Backbone root, but it is deliberately absent from this registered table and therefore rejected by the executable checker until all three named controlled-prototype review rows are recorded.
+Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027's three named controlled-prototype review lenses recorded exact-head concurrence at `771cb493fce4040dc1edb501fed1005aec585d63`; this table therefore registers only the literal Event Backbone worker root. Adjacent or wildcard application roots remain denied.
 
-| Composition root | Process owner | Allowed process resources | Prohibited responsibility |
-|---|---|---|---|
-| `apps/server/composition` | API server | one bounded process-local PostgreSQL pool; HTTP adapters; deterministic migration runner | background event-delivery loop or another process's pool |
-| `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | application business processing or an unregistered long-running service |
+| Composition root | Process owner | Allowed process resources | Migration invocation | Prohibited responsibility |
+|---|---|---|---|---|
+| `apps/server/composition` | API server | one bounded process-local PostgreSQL pool; HTTP adapters; deterministic migration runner | Allowed for registered deterministic migration streams | background event-delivery loop or another process's pool |
+| `apps/worker/composition` | Event Backbone worker | one bounded process-local PostgreSQL pool; internal delivery, replay, and owner-projection adapter binding | Prohibited | migrations, HTTP business routes, another process's pool, or direct cross-owner repository/table access |
+| `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | Prohibited unless a later governed row explicitly grants it | application business processing or an unregistered long-running service |
 
-PR4 may add `apps/worker/composition` to this table and regenerate the rules only after ADR-0027's Platform Architecture, Data Platform, and Security rows are dated and record concurrence. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; PR1 grants no executable exception in advance.
+PR4 adds this exact root after the required concurrence. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; registration does not authorize a wildcard, another application root, production topology, or closure of RR-006/RR-007.
 
 ### Registered Persistence Owners
 
@@ -88,9 +89,9 @@ The executable registry maps every concrete package, table, and migration stream
 | `packages/persistence/platform-tenancy-postgres` | `platform.tenancy` | `@meridian/platform-tenancy` | `platform_active_context`, `platform_delegation`, `platform_location`, `platform_membership`, `platform_membership_invitation`, `platform_organization`, `platform_role`, `platform_role_assignment`, `platform_tenant`, `platform_tenancy_command_receipt` | `packages/persistence/platform-tenancy-postgres/src/migrations` |
 | `packages/persistence/platform-entitlements-postgres` | `platform.entitlements` | `@meridian/platform-entitlements` | `platform_entitlement`, `platform_entitlement_change`, `platform_entitlement_command_receipt` | `packages/persistence/platform-entitlements-postgres/src/migrations` |
 | `packages/persistence/platform-audit-postgres` | `platform.audit` | `@meridian/platform-audit` | `platform_audit_record`, `platform_audit_privacy_overlay` | `packages/persistence/platform-audit-postgres/src/migrations` |
-| `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox` | `packages/persistence/platform-events-postgres/src/migrations` |
+| `packages/persistence/platform-events-postgres` | `platform.events` | `@meridian/platform-events` | `platform_event_outbox`, `platform_event_delivery_attempt`, `platform_event_dead_letter`, `platform_event_replay_request`, `platform_event_consumer_receipt` | `packages/persistence/platform-events-postgres/src/migrations` |
 | `packages/persistence/party-postgres` | `party.records` | `@meridian/domain-party` | `party_command_receipt`, `party_contact_point`, `party_identity_link`, `party_organization_detail`, `party_person_detail`, `party_record` | `packages/persistence/party-postgres/src/migrations` |
-| `packages/persistence/catalog-postgres` | `catalog` | `@meridian/domain-catalog` | `catalog_product`, `catalog_variant`, `catalog_identifier`, `catalog_product_command_receipt` | `packages/persistence/catalog-postgres/src/migrations` |
+| `packages/persistence/catalog-postgres` | `catalog` | `@meridian/domain-catalog` | `catalog_product`, `catalog_variant`, `catalog_identifier`, `catalog_product_command_receipt`, `catalog_product_search_projection` | `packages/persistence/catalog-postgres/src/migrations` |
 | `packages/persistence/inventory-postgres` | `inventory` | `@meridian/domain-inventory` | `inventory_stock_movement`, `inventory_stock_balance`, `inventory_reservation`, `inventory_adjustment`, `inventory_count`, `inventory_count_line`, `inventory_transfer`, `inventory_transfer_line`, `inventory_command_receipt` | `packages/persistence/inventory-postgres/src/migrations` |
 | `packages/persistence/platform-numbering-postgres` | `platform.numbering` | `@meridian/platform-numbering` | None in PR1; PDA-DAT-019 classifies the proposed PR5 table set | `packages/persistence/platform-numbering-postgres/src/migrations` |
 
@@ -118,6 +119,7 @@ Provider adapters depend on stable platform-facing adapter interfaces. Provider 
 - oRPC transport objects outside application transport adapters and generated-client boundaries
 - Database adapters from runtime-neutral Platform, Engine, Domain, application-contract, or authorization-policy packages
 - Another owner's repository, private schema, tables, or migrations from a Persistence package
+- `migrate*` runner invocation from an application path other than an explicitly migration-authorized composition root
 
 ## Persistence Rules
 
@@ -157,7 +159,7 @@ The implementation must include tests that:
 - Fail owner-specific Persistence packages that import another owner's private schema, repository, table, or migration
 - Fail pool creation, shutdown, or connection-configuration reads outside registered composition roots
 - Fail an unregistered `apps/*/composition` path even when its directory name is `composition`
-- Fail pool construction in the unregistered `apps/worker/composition` candidate until ADR-0027's three review rows are recorded; after registration, prove the worker may construct only its process-local pool and may not invoke migration streams
+- Fail pool construction in the unregistered `apps/worker/composition` candidate until ADR-0027's three review lenses have each recorded concurrence; after registration, prove the worker may construct only its process-local pool and may not invoke migration streams
 - Fail provider SDK leakage into domain contracts
 - Fail unregistered capability, event, and permission constants
 - Fail application packages that contain migrations
@@ -195,8 +197,10 @@ These paths are part of the rule definition, not temporary risk exceptions. They
 | Rule | Allowed path | Reason |
 |---|---|---|
 | `database-outside-persistence` | `apps/server/composition` | The API server composition root may construct and inject its single process-local connection. |
+| `database-outside-persistence` | `apps/worker/composition` | The Event Backbone worker composition root may construct and inject its single bounded process-local connection after ADR-0027 exact-head concurrence. |
 | `database-outside-persistence` | `packages/tooling/composition/*` | Approved Tooling composition packages may construct a governed infrastructure connection. |
 | `connection-lifecycle-outside-composition` | `packages/tooling/env/src/server.ts` | The validated environment schema must declare `DATABASE_URL`; it exports validated configuration and may not import a database client, construct a pool, or close a connection. |
+| `connection-lifecycle-outside-composition` | `packages/tooling/env/src/worker.ts` | The validated worker environment schema declares `DATABASE_URL` and enforces the reviewed pool maximum of `5`; it may not import a database client, construct a pool, or close a connection. |
 
 The generator derives each executable pattern's `except` list from this table. A broader allowance, an expiring waiver, or permission to construct/use a connection requires a governed source change and the normal ADR/risk process.
 
@@ -210,6 +214,16 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 1.3.4 (2026-07-16): Made migration invocation authority executable: only `apps/server/composition` may call registered `migrate*` runners; added worker and server regression probes plus explicit source-derived registry propagation.
+
+- 2026-07-15 — v1.3.2 registered the exact worker environment declaration path while keeping connection construction and shutdown confined to `apps/worker/composition`.
+
+- 2026-07-15 — v1.3.1 registered the five classified Event Backbone storage families to the existing `platform.events` owner before migration generation.
+
+- 2026-07-15 — v1.3.0 recorded the three exact-head ADR-0027 concurrence rows and registered only literal `apps/worker/composition`; adjacent roots, worker-owned migrations, and ordinary worker-source imports of owner implementations remain executable denials.
+
+- 2026-07-15 — v1.2.1 clarified that recording a Changes-required specialist row does not authorize the worker root; all three lenses require exact-head concurrence before registration.
 
 - 2026-07-15 — v1.2.0 registered the nine concrete Inventory-owned PR3 tables while preserving the owner-isolated migration stream and cross-owner persistence prohibition.
 

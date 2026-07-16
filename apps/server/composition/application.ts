@@ -5,6 +5,7 @@ import { permissionAuthorizer } from "./authorization";
 import { catalogTransportApplication } from "./catalog";
 import { createCurrentIdentityResolver } from "./current-identity";
 import { entitlementTransportApplication } from "./entitlements";
+import { eventReplayTransportApplication } from "./events";
 import { identitySessionTransportApplication } from "./identity";
 import { inventoryTransportApplication } from "./inventory";
 import { partyIdentityLinkDirectory, partyTransportApplication } from "./party";
@@ -30,6 +31,7 @@ export const serverApplication = {
 	...auditTransportApplication,
 	...catalogTransportApplication,
 	...entitlementTransportApplication,
+	...eventReplayTransportApplication,
 	...identitySessionTransportApplication,
 	...inventoryTransportApplication,
 	...tenancyApplication,

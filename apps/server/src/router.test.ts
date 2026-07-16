@@ -36,6 +36,7 @@ function context(input?: {
 			approveInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			approveStockCount: () => Promise.reject(new Error("not used")),
 			archiveProduct: () => Promise.reject(new Error("not used")),
+			createEventReplay: () => Promise.reject(new Error("not used")),
 			createIdentityLink: () => Promise.reject(new Error("not used")),
 			createInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			createOrganizationParty: () => Promise.reject(new Error("not used")),
@@ -133,6 +134,7 @@ describe("appRouter contract surface", () => {
 			"audit",
 			"catalog",
 			"entitlements",
+			"events",
 			"healthCheck",
 			"identity",
 			"inventory",
@@ -153,6 +155,7 @@ describe("appRouter contract surface", () => {
 			"update",
 		]);
 		expect(Object.keys(appRouter.entitlements).sort()).toEqual(["list"]);
+		expect(Object.keys(appRouter.events).sort()).toEqual(["createReplay"]);
 		expect(Object.keys(appRouter.inventory).sort()).toEqual([
 			"adjustments",
 			"balances",
@@ -735,6 +738,85 @@ describe("appRouter contract surface", () => {
 					context: context({
 						application: {
 							listAuditRecords: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		expect(dispatched).toBe(false);
+	});
+
+	test("derives replay tenant and actor from the revalidated active context", async () => {
+		let observedTenantId = "";
+		const result = await call(
+			appRouter.events.createReplay,
+			{
+				body: {
+					consumerId: "catalog-search-projection",
+					consumerSchemaVersion: "1.0.0",
+					eventNames: ["catalog.product.created.v1"],
+					firstSequence: "1",
+					lastSequence: "2",
+					purpose: "Rebuild a verified bounded projection.",
+				},
+				headers: {
+					"idempotency-key": "event-replay-unit-test-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						createEventReplay: ({ tenantId }) => {
+							observedTenantId = tenantId;
+							return Promise.resolve({
+								consumerId: "catalog-search-projection",
+								consumerSchemaVersion: "1.0.0",
+								eventNames: ["catalog.product.created.v1"],
+								firstSequence: "1",
+								id: "event_replay_unit_test_0001",
+								lastSequence: "2",
+								requestedAt: "2026-07-15T12:00:00.000Z",
+								state: "Pending",
+							});
+						},
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(observedTenantId).toBe("tenant_unit_test_0001");
+		expect(result.state).toBe("Pending");
+	});
+
+	test("denies replay at the transport boundary before application dispatch", async () => {
+		let dispatched = false;
+		await expect(
+			call(
+				appRouter.events.createReplay,
+				{
+					body: {
+						consumerId: "catalog-search-projection",
+						consumerSchemaVersion: "1.0.0",
+						eventNames: ["catalog.product.created.v1"],
+						firstSequence: "1",
+						lastSequence: "2",
+						purpose: "Rebuild a verified bounded projection.",
+					},
+					headers: {
+						"idempotency-key": "event-replay-unit-test-0002",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+				},
+				{
+					context: context({
+						application: {
+							createEventReplay: () => {
 								dispatched = true;
 								return Promise.reject(new Error("must not dispatch"));
 							},

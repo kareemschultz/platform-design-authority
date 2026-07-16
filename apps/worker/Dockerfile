@@ -1,0 +1,15 @@
+FROM node:24-slim AS base
+COPY --from=oven/bun:1.3.14 /usr/local/bin/bun /usr/local/bin/bun
+WORKDIR /app
+ENV SKIP_ENV_VALIDATION=1
+
+COPY . .
+RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
+
+ENV NODE_ENV=production
+RUN cd apps/worker && bun run build
+ENV SKIP_ENV_VALIDATION=
+
+WORKDIR /app/apps/worker
+USER node
+CMD ["bun", "dist/main.mjs"]

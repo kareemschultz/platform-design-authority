@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+	bigint,
 	check,
 	foreignKey,
 	index,
@@ -16,17 +17,27 @@ export const numberSequences = pgTable(
 	{
 		classification: text("classification").default("Confidential").notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
-		currentValue: integer("current_value").default(0).notNull(),
+		currentValue: bigint("current_value", { mode: "bigint" })
+			.default(sql`0`)
+			.notNull(),
+		gapPolicy: text("gap_policy"),
 		id: text("id").notNull(),
-		nextValue: integer("next_value").default(1).notNull(),
+		increment: integer("increment").default(1).notNull(),
+		nextValue: bigint("next_value", { mode: "bigint" })
+			.default(sql`1`)
+			.notNull(),
 		organizationId: text("organization_id").notNull(),
+		ownerNamespace: text("owner_namespace").notNull(),
 		padding: integer("padding").default(6).notNull(),
 		prefix: text("prefix").default("").notNull(),
+		recordType: text("record_type").notNull(),
+		resetPolicy: text("reset_policy").default("None").notNull(),
 		sequenceKey: text("sequence_key").notNull(),
 		state: text("state").default("Active").notNull(),
 		tenantId: text("tenant_id").notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 		version: integer("version").default(1).notNull(),
+		voidPolicy: text("void_policy"),
 	},
 	(table) => [
 		primaryKey({
@@ -48,7 +59,15 @@ export const numberSequences = pgTable(
 		),
 		check(
 			"platform_number_sequence_padding_ck",
-			sql`${table.padding} >= 1 AND ${table.padding} <= 20`
+			sql`${table.padding} >= 1 AND ${table.padding} <= 18`
+		),
+		check(
+			"platform_number_sequence_prototype_policy_ck",
+			sql`${table.increment} = 1 AND ${table.resetPolicy} = 'None'`
+		),
+		check(
+			"platform_number_sequence_contract_ck",
+			sql`length(${table.sequenceKey}) BETWEEN 1 AND 100 AND length(${table.ownerNamespace}) BETWEEN 1 AND 100 AND length(${table.recordType}) BETWEEN 1 AND 100 AND length(${table.prefix}) <= 50 AND (${table.gapPolicy} IS NULL OR length(${table.gapPolicy}) BETWEEN 1 AND 100) AND (${table.voidPolicy} IS NULL OR length(${table.voidPolicy}) BETWEEN 1 AND 100)`
 		),
 		check("platform_number_sequence_version_ck", sql`${table.version} > 0`),
 	]
@@ -57,17 +76,21 @@ export const numberSequences = pgTable(
 export const numberAllocations = pgTable(
 	"platform_number_allocation",
 	{
-		allocatedAt: timestamp("allocated_at", { withTimezone: true }).notNull(),
 		allocatedByUserId: text("allocated_by_user_id").notNull(),
+		businessRecordId: text("business_record_id"),
 		classification: text("classification").default("Confidential").notNull(),
-		formattedValue: text("formatted_value").notNull(),
+		counterValue: bigint("counter_value", { mode: "bigint" }).notNull(),
 		id: text("id").notNull(),
 		idempotencyKey: text("idempotency_key").notNull(),
+		issuedAt: timestamp("issued_at", { withTimezone: true }).notNull(),
 		organizationId: text("organization_id").notNull(),
 		requestFingerprint: text("request_fingerprint").notNull(),
 		sequenceId: text("sequence_id").notNull(),
+		sequenceKey: text("sequence_key").notNull(),
+		sourceCommandId: text("source_command_id").notNull(),
+		state: text("state").default("Issued").notNull(),
 		tenantId: text("tenant_id").notNull(),
-		value: integer("value").notNull(),
+		value: text("value").notNull(),
 	},
 	(table) => [
 		primaryKey({
@@ -82,7 +105,7 @@ export const numberAllocations = pgTable(
 		uniqueIndex("platform_number_allocation_value_uidx").on(
 			table.tenantId,
 			table.sequenceId,
-			table.value
+			table.counterValue
 		),
 		uniqueIndex("platform_number_allocation_idempotency_uidx").on(
 			table.tenantId,
@@ -92,8 +115,23 @@ export const numberAllocations = pgTable(
 		index("platform_number_allocation_lookup_idx").on(
 			table.tenantId,
 			table.organizationId,
-			table.formattedValue
+			table.value
 		),
-		check("platform_number_allocation_value_ck", sql`${table.value} > 0`),
+		check(
+			"platform_number_allocation_counter_ck",
+			sql`${table.counterValue} > 0`
+		),
+		check(
+			"platform_number_allocation_state_ck",
+			sql`${table.state} = 'Issued'`
+		),
+		check(
+			"platform_number_allocation_source_ck",
+			sql`length(${table.sourceCommandId}) BETWEEN 1 AND 128`
+		),
+		check(
+			"platform_number_allocation_contract_ck",
+			sql`length(${table.sequenceKey}) BETWEEN 1 AND 100 AND length(${table.value}) BETWEEN 1 AND 100 AND (${table.businessRecordId} IS NULL OR length(${table.businessRecordId}) BETWEEN 1 AND 128)`
+		),
 	]
 );

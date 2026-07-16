@@ -82,7 +82,7 @@ export const importJobs = pgTable(
 		),
 		check(
 			"platform_import_job_purge_state_ck",
-			sql`${table.stagingPurgedAt} IS NULL OR ${table.state} IN ('Completed','Cancelled')`
+			sql`${table.stagingPurgedAt} IS NULL OR ${table.state} IN ('Completed','Failed','Cancelled')`
 		),
 		check("platform_import_job_version_ck", sql`${table.version} > 0`),
 	]

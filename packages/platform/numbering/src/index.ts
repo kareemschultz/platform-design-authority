@@ -1,8 +1,8 @@
 export interface NumberSequence {
 	createdAt: Date;
-	currentValue: number;
+	currentValue: bigint;
 	id: string;
-	nextValue: number;
+	nextValue: bigint;
 	organizationId: string;
 	padding: number;
 	prefix: string;
@@ -15,23 +15,29 @@ export interface NumberSequence {
 
 export interface NumberAllocationRequest {
 	actorUserId: string;
+	businessRecordId: string | null;
 	correlationId: string;
 	idempotencyKey: string;
 	organizationId: string;
 	sequenceId: string;
+	sourceCommandId: string;
 	tenantId: string;
 }
 
 export interface NumberAllocation {
-	allocatedAt: Date;
-	formattedValue: string;
+	businessRecordId: string | null;
+	counterValue: bigint;
 	id: string;
 	idempotencyKey: string;
+	issuedAt: Date;
 	organizationId: string;
 	requestFingerprint: string;
 	sequenceId: string;
+	sequenceKey: string;
+	sourceCommandId: string;
+	state: "Issued";
 	tenantId: string;
-	value: number;
+	value: string;
 }
 
 export interface NumberingRepository {
@@ -103,8 +109,10 @@ export class NumberingError extends Error {
 
 function fingerprint(input: NumberAllocationRequest): string {
 	return JSON.stringify({
+		businessRecordId: input.businessRecordId,
 		organizationId: input.organizationId,
 		sequenceId: input.sequenceId,
+		sourceCommandId: input.sourceCommandId,
 		tenantId: input.tenantId,
 	});
 }
@@ -159,8 +167,11 @@ export function createNumberingService(options: {
 					classification: "Confidential",
 					correlationId: input.correlationId,
 					data: {
-						formattedValue: allocation.formattedValue,
+						allocationId: allocation.id,
+						businessRecordId: allocation.businessRecordId,
 						sequenceId: allocation.sequenceId,
+						sequenceKey: allocation.sequenceKey,
+						sourceCommandId: allocation.sourceCommandId,
 						value: allocation.value,
 					},
 					id: options.ids.create("event"),

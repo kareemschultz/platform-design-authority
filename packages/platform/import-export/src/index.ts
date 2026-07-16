@@ -144,6 +144,14 @@ export interface ImportRepository {
 		tenantId: string;
 		version: number;
 	}) => Promise<ImportJobRecord | "version_conflict">;
+	markFailed: (input: {
+		failedAt: Date;
+		failureCode: string;
+		importId: string;
+		rowId: string;
+		tenantId: string;
+		version: number;
+	}) => Promise<ImportJobRecord | "version_conflict">;
 	markRowApplied: (input: {
 		completedAt: Date;
 		importId: string;
@@ -230,6 +238,9 @@ export class ImportError extends Error {
 		this.code = code;
 	}
 }
+
+/** Test/recovery seam representing process loss, where no catch handler can persist state. */
+export class ImportProcessInterruptedError extends Error {}
 
 const PRODUCT_HEADERS = [
 	"source_key",
@@ -446,11 +457,34 @@ function normalize(
 
 function createImportFingerprint(input: CreateImportRequest) {
 	return JSON.stringify({
+		manifest: {
+			decimalSeparator: input.manifest.decimalSeparator,
+			defaultUnit: input.manifest.defaultUnit ?? null,
+			delimiter: input.manifest.delimiter,
+			encoding: input.manifest.encoding,
+			locale: input.manifest.locale,
+			newline: input.manifest.newline,
+			quote: input.manifest.quote,
+			timezone: input.manifest.timezone,
+		},
 		organizationId: input.organizationId,
 		sha256: input.sha256.toLowerCase(),
 		target: input.target,
 		tenantId: input.tenantId,
 	});
+}
+
+function safeFailureCode(error: unknown) {
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"code" in error &&
+		typeof error.code === "string"
+	) {
+		const safeCode = error.code.replaceAll(/[^a-z0-9_.-]/gi, "_").slice(0, 80);
+		return safeCode ? `owner_${safeCode}` : "owner_command_failed";
+	}
+	return "owner_command_failed";
 }
 
 function sanitizeFileName(value: string) {
@@ -540,7 +574,7 @@ export function createImportService(options: {
 			if (!existing) {
 				throw new ImportError("not_found", "Import was not found");
 			}
-			if (existing.state === "Completed") {
+			if (existing.state === "Completed" || existing.state === "Failed") {
 				return existing;
 			}
 			const job = await options.unitOfWork.execute(
@@ -584,7 +618,12 @@ export function createImportService(options: {
 					await events.append({
 						aggregateId: input.importId,
 						correlationId: input.correlationId,
-						data: { target: input.target },
+						data: {
+							eligibleRows: approved.counts.valid + approved.counts.warning,
+							importId: input.importId,
+							target: input.target,
+							version: approved.version,
+						},
 						id: options.ids.create("event"),
 						name: "platform.import.approved.v1",
 						tenantId: input.tenantId,
@@ -601,18 +640,62 @@ export function createImportService(options: {
 					committed.push(row);
 					continue;
 				}
-				// biome-ignore lint/performance/noAwaitInLoops: commit waves preserve deterministic source order and checkpoint after each owner command.
-				const result = await options.targets[input.target].commit({
-					actorUserId: input.actorUserId,
-					contextId: input.contextId,
-					correlationId: input.correlationId,
-					createdByUserId: job.createdByUserId,
-					idempotencyKey: `${input.importId}:row:${row.sourceKey}`,
-					organizationId: job.organizationId,
-					row,
-					sessionId: input.sessionId,
-					tenantId: input.tenantId,
-				});
+				let result: { targetId: string };
+				try {
+					// biome-ignore lint/performance/noAwaitInLoops: commit waves preserve deterministic source order and checkpoint after each owner command.
+					result = await options.targets[input.target].commit({
+						actorUserId: input.actorUserId,
+						contextId: input.contextId,
+						correlationId: input.correlationId,
+						createdByUserId: job.createdByUserId,
+						idempotencyKey: `${input.importId}:row:${row.sourceKey}`,
+						organizationId: job.organizationId,
+						row,
+						sessionId: input.sessionId,
+						tenantId: input.tenantId,
+					});
+				} catch (error) {
+					if (error instanceof ImportProcessInterruptedError) {
+						throw error;
+					}
+					const failureCode = safeFailureCode(error);
+					await options.unitOfWork.execute(async ({ events, repository }) => {
+						const failed = await repository.markFailed({
+							failedAt: options.clock(),
+							failureCode,
+							importId: input.importId,
+							rowId: row.id,
+							tenantId: input.tenantId,
+							version: job.version,
+						});
+						if (failed === "version_conflict") {
+							return;
+						}
+						await events.append({
+							aggregateId: input.importId,
+							correlationId: input.correlationId,
+							data: {
+								failureCode,
+								importId: input.importId,
+								lastCompletedRow: failed.lastCompletedRow,
+								target: input.target,
+								version: failed.version,
+							},
+							id: options.ids.create("event"),
+							name: "platform.import.failed.v1",
+							tenantId: input.tenantId,
+						});
+						await repository.recordCommandReceipt({
+							createdAt: options.clock(),
+							idempotencyKey: input.idempotencyKey,
+							importId: input.importId,
+							operation,
+							requestFingerprint: expectedFingerprint,
+							tenantId: input.tenantId,
+						});
+					});
+					throw error;
+				}
 				const checkpoint = await options.unitOfWork.execute(({ repository }) =>
 					repository.markRowApplied({
 						completedAt: options.clock(),
@@ -638,7 +721,15 @@ export function createImportService(options: {
 				await events.append({
 					aggregateId: input.importId,
 					correlationId: input.correlationId,
-					data: { counts: completed.counts, target: input.target },
+					data: {
+						appliedRows: completed.counts.applied,
+						failedRows: completed.counts.failed,
+						importId: input.importId,
+						lastCompletedRow: completed.lastCompletedRow,
+						skippedRows: completed.counts.skipped,
+						target: input.target,
+						version: completed.version,
+					},
 					id: options.ids.create("event"),
 					name: "platform.import.completed.v1",
 					tenantId: input.tenantId,
@@ -775,7 +866,15 @@ export function createImportService(options: {
 				await events.append({
 					aggregateId: id,
 					correlationId: input.correlationId,
-					data: { counts, target: input.target },
+					data: {
+						importId: id,
+						rejectedRows: counts.rejected,
+						target: input.target,
+						totalRows: counts.total,
+						validRows: counts.valid,
+						version: job.version,
+						warningRows: counts.warning,
+					},
 					id: options.ids.create("event"),
 					name: "platform.import.validated.v1",
 					tenantId: input.tenantId,
@@ -819,7 +918,11 @@ export function createImportService(options: {
 				if (!job) {
 					throw new ImportError("not_found", "Import was not found");
 				}
-				if (job.state !== "Completed" && job.state !== "Cancelled") {
+				if (
+					job.state !== "Completed" &&
+					job.state !== "Failed" &&
+					job.state !== "Cancelled"
+				) {
 					throw new ImportError(
 						"invalid_state",
 						"Import staging can only be purged after terminal completion"

@@ -31,13 +31,17 @@ function mapAllocation(
 	row: typeof numberAllocations.$inferSelect
 ): NumberAllocation {
 	return {
-		allocatedAt: row.allocatedAt,
-		formattedValue: row.formattedValue,
+		businessRecordId: row.businessRecordId,
+		counterValue: row.counterValue,
 		id: row.id,
 		idempotencyKey: row.idempotencyKey,
+		issuedAt: row.issuedAt,
 		organizationId: row.organizationId,
 		requestFingerprint: row.requestFingerprint,
 		sequenceId: row.sequenceId,
+		sequenceKey: row.sequenceKey,
+		sourceCommandId: row.sourceCommandId,
+		state: row.state as "Issued",
 		tenantId: row.tenantId,
 		value: row.value,
 	};
@@ -50,13 +54,14 @@ export function createNumberingRepository(
 	return {
 		async allocateLocked(input) {
 			const locked = await client.query<{
-				current_value: number;
-				next_value: number;
+				increment: number;
+				next_value: string;
 				padding: number;
 				prefix: string;
+				sequence_key: string;
 				state: "Active" | "Suspended";
 			}>(
-				`SELECT current_value, next_value, padding, prefix, state
+				`SELECT increment, next_value, padding, prefix, sequence_key, state
 				 FROM platform_number_sequence
 				 WHERE tenant_id = $1 AND id = $2 AND organization_id = $3
 				 FOR UPDATE`,
@@ -73,19 +78,23 @@ export function createNumberingRepository(
 			if (prior) {
 				return prior;
 			}
-			const value = sequence.next_value;
-			const formattedValue = `${sequence.prefix}${String(value).padStart(sequence.padding, "0")}`;
+			const counterValue = BigInt(sequence.next_value);
+			const value = `${sequence.prefix}${String(counterValue).padStart(sequence.padding, "0")}`;
 			const inserted = await database
 				.insert(numberAllocations)
 				.values({
-					allocatedAt: input.now,
 					allocatedByUserId: input.actorUserId,
-					formattedValue,
+					businessRecordId: input.businessRecordId,
+					counterValue,
 					id: input.allocationId,
 					idempotencyKey: input.idempotencyKey,
+					issuedAt: input.now,
 					organizationId: input.organizationId,
 					requestFingerprint: input.requestFingerprint,
 					sequenceId: input.sequenceId,
+					sequenceKey: sequence.sequence_key,
+					sourceCommandId: input.sourceCommandId,
+					state: "Issued",
 					tenantId: input.tenantId,
 					value,
 				})
@@ -93,8 +102,8 @@ export function createNumberingRepository(
 			await database
 				.update(numberSequences)
 				.set({
-					currentValue: value,
-					nextValue: value + 1,
+					currentValue: counterValue,
+					nextValue: counterValue + BigInt(sequence.increment),
 					updatedAt: input.now,
 					version: sql`${numberSequences.version} + 1`,
 				})

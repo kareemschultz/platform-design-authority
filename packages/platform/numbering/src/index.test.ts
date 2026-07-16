@@ -7,7 +7,7 @@ import {
 } from ".";
 
 function harness() {
-	let next = 1;
+	let next = 1n;
 	const allocations = new Map<string, NumberAllocation>();
 	const events: unknown[] = [];
 	const scope: NumberingTransactionScope = {
@@ -19,18 +19,22 @@ function harness() {
 		},
 		repository: {
 			allocateLocked(input) {
-				const value = next;
-				next += 1;
+				const counterValue = next;
+				next += 1n;
 				const result: NumberAllocation = {
-					allocatedAt: input.now,
-					formattedValue: `INV-${String(value).padStart(6, "0")}`,
+					businessRecordId: input.businessRecordId,
+					counterValue,
 					id: input.allocationId,
 					idempotencyKey: input.idempotencyKey,
+					issuedAt: input.now,
 					organizationId: input.organizationId,
 					requestFingerprint: input.requestFingerprint,
 					sequenceId: input.sequenceId,
+					sequenceKey: "invoice",
+					sourceCommandId: input.sourceCommandId,
+					state: "Issued",
 					tenantId: input.tenantId,
-					value,
+					value: `INV-${String(counterValue).padStart(6, "0")}`,
 				};
 				allocations.set(
 					`${input.tenantId}:${input.sequenceId}:${input.idempotencyKey}`,
@@ -66,36 +70,53 @@ describe("Numbering service", () => {
 		const { events, service } = harness();
 		const input = {
 			actorUserId: "user_1",
+			businessRecordId: "invoice_1",
 			correlationId: "corr_1",
 			idempotencyKey: "key_1",
 			organizationId: "org_1",
 			sequenceId: "seq_1",
+			sourceCommandId: "invoice.issue:key_1",
 			tenantId: "tenant_1",
 		};
 		const first = await service.allocate(input);
 		const replay = await service.allocate(input);
 		expect(replay).toEqual(first);
-		expect(first.formattedValue).toBe("INV-000001");
+		expect(first.value).toBe("INV-000001");
 		expect(events).toHaveLength(1);
+		expect(events[0]).toMatchObject({
+			data: {
+				allocationId: first.id,
+				businessRecordId: "invoice_1",
+				sequenceId: "seq_1",
+				sequenceKey: "invoice",
+				sourceCommandId: "invoice.issue:key_1",
+				value: "INV-000001",
+			},
+			name: "platform.sequence.number-issued.v1",
+		});
 	});
 
 	test("rejects reuse of an idempotency key for another sequence scope", async () => {
 		const { service } = harness();
 		await service.allocate({
 			actorUserId: "user_1",
+			businessRecordId: null,
 			correlationId: "corr_1",
 			idempotencyKey: "key_1",
 			organizationId: "org_1",
 			sequenceId: "seq_1",
+			sourceCommandId: "number.issue:key_1",
 			tenantId: "tenant_1",
 		});
 		await expect(
 			service.allocate({
 				actorUserId: "user_1",
+				businessRecordId: null,
 				correlationId: "corr_2",
 				idempotencyKey: "key_1",
 				organizationId: "org_2",
 				sequenceId: "seq_1",
+				sourceCommandId: "number.issue:key_1",
 				tenantId: "tenant_1",
 			})
 		).rejects.toBeInstanceOf(NumberingError);

@@ -20,6 +20,7 @@ import {
 } from "@meridian/persistence-platform-import-export-postgres";
 import {
 	createImportService,
+	ImportProcessInterruptedError,
 	type ImportTargetPort,
 } from "@meridian/platform-import-export";
 import { env } from "@meridian/tooling-env/server";
@@ -70,7 +71,13 @@ function fullEvent(event: Record<string, unknown>) {
 	};
 }
 
-function createServices(options: { failAfterProductSourceKey?: string } = {}) {
+function createServices(
+	options: {
+		failAfterProductSourceKey?: string;
+		onProductCommit?: () => void;
+		rejectProductSourceKey?: string;
+	} = {}
+) {
 	let injectedFailure = false;
 	const catalog = createCatalogService({
 		clock: () => new Date(),
@@ -125,6 +132,12 @@ function createServices(options: { failAfterProductSourceKey?: string } = {}) {
 		Product: {
 			async commit(input) {
 				const data = input.row.normalizedData;
+				options.onProductCommit?.();
+				if (options.rejectProductSourceKey === input.row.sourceKey) {
+					throw Object.assign(new Error("owner rejected the Product command"), {
+						code: "invalid_reference",
+					});
+				}
 				const product = await catalog.createProduct({
 					actorUserId: input.actorUserId,
 					body: {
@@ -148,7 +161,9 @@ function createServices(options: { failAfterProductSourceKey?: string } = {}) {
 					!injectedFailure
 				) {
 					injectedFailure = true;
-					throw new Error("injected failure after owner command commit");
+					throw new ImportProcessInterruptedError(
+						"injected failure after owner command commit"
+					);
 				}
 				return { targetId: product.id };
 			},
@@ -266,6 +281,43 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			"SELECT (SELECT count(*)::int FROM catalog_product WHERE tenant_id = 'tenant_demerara_retail_test_group') AS products, (SELECT count(*)::int FROM catalog_product_command_receipt WHERE tenant_id = 'tenant_demerara_retail_test_group') AS receipts, (SELECT count(*)::int FROM platform_event_outbox WHERE tenant_id = 'tenant_demerara_retail_test_group') AS events"
 		);
 		expect(facts.rows[0]).toEqual({ events: 11, products: 3, receipts: 3 });
+		const lifecycle = await testPool.query<{
+			data: Record<string, unknown>;
+			name: string;
+		}>(
+			"SELECT name, data FROM platform_event_outbox WHERE tenant_id = 'tenant_demerara_retail_test_group' AND aggregate_id = $1 AND name LIKE 'platform.import.%' ORDER BY name",
+			[job.id]
+		);
+		expect(
+			Object.fromEntries(
+				lifecycle.rows.map((event) => [event.name, event.data])
+			)
+		).toEqual({
+			"platform.import.approved.v1": {
+				eligibleRows: 3,
+				importId: job.id,
+				target: "Product",
+				version: 2,
+			},
+			"platform.import.completed.v1": {
+				appliedRows: 3,
+				failedRows: 0,
+				importId: job.id,
+				lastCompletedRow: 5,
+				skippedRows: 0,
+				target: "Product",
+				version: 3,
+			},
+			"platform.import.validated.v1": {
+				importId: job.id,
+				rejectedRows: 2,
+				target: "Product",
+				totalRows: 5,
+				validRows: 2,
+				version: 1,
+				warningRows: 1,
+			},
+		});
 	});
 
 	test("accepts a corrected Tenant B row without disclosing either tenant's import", async () => {
@@ -392,6 +444,95 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 			products: 2,
 			rows: 0,
 		});
+	});
+
+	test("records a terminal failed checkpoint and schema-shaped event when an owner rejects a row", async () => {
+		let ownerCommandAttempts = 0;
+		const service = createServices({
+			onProductCommit: () => {
+				ownerCommandAttempts += 1;
+			},
+			rejectProductSourceKey: "owner-reject",
+		});
+		const content =
+			"source_key,name,variant_name,sku,barcode,barcode_scheme\nowner-reject,Rejected Owner Product,Default,OWNER-REJECT,,";
+		const job = await service.create({
+			actorUserId: "failure_uploader",
+			content,
+			contentType: "text/csv",
+			correlationId: "correlation_failure_create",
+			fileName: "failure.csv",
+			idempotencyKey: "failure-create",
+			manifest,
+			organizationId: "organization_failure",
+			sha256: createHash("sha256").update(content).digest("hex"),
+			target: "Product",
+			tenantId: "tenant_failure",
+		});
+		const approval = {
+			actorUserId: "failure_approver",
+			contextId: "context_failure",
+			correlationId: "correlation_failure_approve",
+			idempotencyKey: "failure-approve",
+			importId: job.id,
+			sessionId: "session_failure",
+			target: "Product" as const,
+			tenantId: "tenant_failure",
+			version: 1,
+		};
+		let ownerFailure: unknown;
+		try {
+			await service.approve(approval);
+		} catch (error) {
+			ownerFailure = error;
+		}
+		expect(ownerFailure).toMatchObject({ code: "invalid_reference" });
+		expect((await service.approve(approval)).state).toBe("Failed");
+		expect(ownerCommandAttempts).toBe(1);
+		const state = await testPool.query<{
+			failed_rows: number;
+			failure_code: string;
+			job_state: string;
+			last_completed_row: number;
+			row_state: string;
+			version: number;
+			wave_state: string;
+		}>(
+			`SELECT job.state AS job_state, job.failure_code, job.failed_rows, job.last_completed_row, job.version,
+			        row.state AS row_state, wave.state AS wave_state
+			 FROM platform_import_job job
+			 JOIN platform_import_row row ON row.tenant_id = job.tenant_id AND row.import_id = job.id
+			 JOIN platform_import_wave wave ON wave.tenant_id = job.tenant_id AND wave.import_id = job.id
+			 WHERE job.tenant_id = 'tenant_failure' AND job.id = $1`,
+			[job.id]
+		);
+		expect(state.rows[0]).toEqual({
+			failed_rows: 1,
+			failure_code: "owner_invalid_reference",
+			job_state: "Failed",
+			last_completed_row: 0,
+			row_state: "Failed",
+			version: 3,
+			wave_state: "Failed",
+		});
+		const failedEvent = await testPool.query<{ data: Record<string, unknown> }>(
+			"SELECT data FROM platform_event_outbox WHERE tenant_id = 'tenant_failure' AND aggregate_id = $1 AND name = 'platform.import.failed.v1'",
+			[job.id]
+		);
+		expect(failedEvent.rows[0]?.data).toEqual({
+			failureCode: "owner_invalid_reference",
+			importId: job.id,
+			lastCompletedRow: 0,
+			target: "Product",
+			version: 3,
+		});
+		expect(
+			(
+				await testPool.query<{ count: number }>(
+					"SELECT count(*)::int AS count FROM catalog_product WHERE tenant_id = 'tenant_failure'"
+				)
+			).rows[0]?.count
+		).toBe(0);
 	});
 
 	test("posts opening stock through the immutable Inventory adjustment workflow", async () => {

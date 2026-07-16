@@ -332,6 +332,58 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 				);
 			return mapJob(completed);
 		},
+		async markFailed(input) {
+			const jobs = await database
+				.update(importJobs)
+				.set({
+					failedRows: sql`${importJobs.failedRows} + 1`,
+					failureCode: input.failureCode,
+					state: "Failed",
+					updatedAt: input.failedAt,
+					version: sql`${importJobs.version} + 1`,
+				})
+				.where(
+					and(
+						eq(importJobs.tenantId, input.tenantId),
+						eq(importJobs.id, input.importId),
+						eq(importJobs.version, input.version),
+						sql`${importJobs.state} IN ('Approved','Committing')`
+					)
+				)
+				.returning();
+			const [failed] = jobs;
+			if (!failed) {
+				return "version_conflict";
+			}
+			const failedRows = await database
+				.update(importRows)
+				.set({ state: "Failed", updatedAt: input.failedAt })
+				.where(
+					and(
+						eq(importRows.tenantId, input.tenantId),
+						eq(importRows.importId, input.importId),
+						eq(importRows.id, input.rowId),
+						sql`${importRows.state} IN ('Valid','Warning')`
+					)
+				)
+				.returning({ id: importRows.id });
+			if (!failedRows[0]) {
+				throw new Error(
+					"Failed import row was not eligible for failure marking"
+				);
+			}
+			await database
+				.update(importWaves)
+				.set({ failureCode: input.failureCode, state: "Failed" })
+				.where(
+					and(
+						eq(importWaves.tenantId, input.tenantId),
+						eq(importWaves.importId, input.importId),
+						eq(importWaves.waveNumber, 1)
+					)
+				);
+			return mapJob(failed);
+		},
 		async markRowApplied(input) {
 			const changed = await database
 				.update(importRows)
@@ -404,7 +456,7 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 					and(
 						eq(importJobs.tenantId, input.tenantId),
 						eq(importJobs.id, input.importId),
-						sql`${importJobs.state} IN ('Completed','Cancelled')`
+						sql`${importJobs.state} IN ('Completed','Failed','Cancelled')`
 					)
 				)
 				.returning({ id: importJobs.id });

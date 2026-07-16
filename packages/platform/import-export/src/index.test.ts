@@ -109,6 +109,31 @@ function harness(scanner: "Clean" | "Blocked" | "Unavailable" = "Clean") {
 			return structuredClone(job);
 		},
 		// biome-ignore lint/suspicious/useAwait: test double implements an asynchronous persistence port.
+		async markFailed(input) {
+			const job = jobs.get(input.importId);
+			if (
+				!job ||
+				job.tenantId !== input.tenantId ||
+				job.version !== input.version
+			) {
+				return "version_conflict";
+			}
+			const failedRow = (rows.get(input.importId) ?? []).find(
+				(row) => row.id === input.rowId
+			);
+			if (failedRow) {
+				failedRow.state = "Failed";
+			}
+			Object.assign(job, {
+				failureCode: input.failureCode,
+				state: "Failed",
+				updatedAt: input.failedAt,
+				version: job.version + 1,
+			});
+			job.counts.failed += 1;
+			return structuredClone(job);
+		},
+		// biome-ignore lint/suspicious/useAwait: test double implements an asynchronous persistence port.
 		async markRowApplied(input) {
 			const importRows = rows.get(input.importId) ?? [];
 			const row = importRows.find((candidate) => candidate.id === input.rowId);
@@ -297,5 +322,30 @@ describe("bounded CSV import", () => {
 			})
 		).rejects.toBeInstanceOf(ImportError);
 		expect(testkit.jobs).toHaveLength(0);
+	});
+
+	test("binds parser and normalization manifest fields to create idempotency", async () => {
+		const testkit = harness();
+		const request = {
+			actorUserId: "uploader",
+			content:
+				"source_key,name,variant_name,sku,barcode,barcode_scheme\nvalid-1,Tea,Default,SKU-1,,",
+			contentType: "text/csv" as const,
+			correlationId: "correlation_123",
+			fileName: "products.csv",
+			idempotencyKey: "create-1",
+			manifest: testkit.manifest,
+			organizationId: "org-1",
+			sha256: "a".repeat(64),
+			target: "Product" as const,
+			tenantId: "tenant-1",
+		};
+		await testkit.service.create(request);
+		await expect(
+			testkit.service.create({
+				...request,
+				manifest: { ...request.manifest, locale: "en-US" },
+			})
+		).rejects.toMatchObject({ code: "idempotency_conflict" });
 	});
 });

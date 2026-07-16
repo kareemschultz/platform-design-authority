@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-019
 title: Import and Online Numbering Recovery Runbook
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -50,6 +50,14 @@ Prototype diagnostics are tenant-scoped counts and opaque IDs only:
 4. Verify row target IDs, applied count, last-completed-row, wave completion, lifecycle events, Catalog receipts or Inventory create/approve receipts, and Audit evidence.
 5. If reconciliation differs, stop. Record opaque IDs and counts, preserve all facts, and escalate under PDA-OPS-012. Do not mark the job completed manually.
 
+## Rejected owner command
+
+1. Treat a job, active row, and wave recorded as `Failed` with the same safe failure code as terminal evidence of a deterministic owner-command rejection, not as an interrupted process.
+2. Verify `platform.import.failed.v1` contains only the schema-governed import ID, target, safe failure code, last completed row, and version. Never copy exception text or row content into the event, Audit, logs, or tickets.
+3. Replaying the same approval command must return the same terminal job without invoking the owner command again.
+4. Correct the source through a new import and a new idempotency key. Do not change the failed row, reset the wave, or convert the failed job back to `Approved`/`Committing`.
+5. Once reconciliation and retention conditions are satisfied, the governed staging purge may remove normalized rows/findings/waves while preserving the failed job, command receipt, event, and Audit evidence.
+
 ## Number allocation uncertainty
 
 1. Retry the exact tenant, organization, sequence, and idempotency key. Do not mint a replacement key merely because the caller timed out.
@@ -60,7 +68,7 @@ Prototype diagnostics are tenant-scoped counts and opaque IDs only:
 
 ## Terminal staging purge
 
-1. Verify the job is `Completed` or `Cancelled`, its owner effects and command receipts reconcile, and the applicable ADR-0014 retention period has expired.
+1. Verify the job is `Completed`, `Failed`, or `Cancelled`, its owner effects and command receipts reconcile, and the applicable ADR-0014 retention period has expired.
 2. Invoke the tenant-scoped import-owner purge command; never issue ad hoc SQL deletes.
 3. Verify normalized rows, findings, and wave staging are absent and `staging_purged_at` is present.
 4. Verify the import job/count evidence, import command receipts, Catalog or Inventory owner facts, immutable Inventory movements, and outbox/Audit evidence remain.
@@ -74,5 +82,6 @@ Close only when tenant scope is verified, no raw content was exposed, owner effe
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.0 | 2026-07-16 | Platform Design Authority | Distinguished resumable process interruption from terminal owner-command rejection, added failed-event/replay handling, and allowed governed staging purge for reconciled failed jobs. |
 | 0.2.0 | 2026-07-16 | Platform Design Authority | Added the terminal-only staging purge procedure and retained production scheduling/deletion-journal automation as open gates. |
 | 0.1.0 | 2026-07-16 | Platform Design Authority | Added controlled-prototype import/scanner/wave and online Numbering uncertainty/recovery procedures without granting direct data-repair authority. |

@@ -1,0 +1,2 @@
+ALTER TABLE "platform_import_job" DROP CONSTRAINT "platform_import_job_purge_state_ck";--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD CONSTRAINT "platform_import_job_purge_state_ck" CHECK ("platform_import_job"."staging_purged_at" IS NULL OR "platform_import_job"."state" IN ('Completed','Failed','Cancelled'));

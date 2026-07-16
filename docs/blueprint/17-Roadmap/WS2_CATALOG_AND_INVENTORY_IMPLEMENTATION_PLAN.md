@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.5.0
+version: 0.5.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -509,8 +509,9 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 
 | Version | Date | Author | Change |
 |---|---|---|---|
-| 0.4.0 | 2026-07-16 | Platform Design Authority | Recorded PR4 exact-head concurrence and merge, closed RR-006 at controlled-prototype depth through the risk register, activated issue #71, and bound the PR5 import/Numbering contract and persistence ownership baseline without closing RR-007. |
+| 0.5.1 | 2026-07-16 | Platform Design Authority | Dispositioned PR5 review findings through schema-shaped Import/Numbering events, manifest-bound create idempotency, atomic terminal owner-rejection evidence, and aligned Numbering provenance/constraints; retained exact-head gates, independent concurrence, merge, and RR-007 as open. |
 | 0.5.0 | 2026-07-16 | Platform Design Authority | Recorded implemented PR5 bounded import and Strict Online Numbering scope, PDA-APP-024 evidence, PDA-OPS-019 recovery guidance, and retained exact-head review/merge plus RR-007 as open gates. |
+| 0.4.0 | 2026-07-16 | Platform Design Authority | Recorded PR4 exact-head concurrence and merge, closed RR-006 at controlled-prototype depth through the risk register, activated issue #71, and bound the PR5 import/Numbering contract and persistence ownership baseline without closing RR-007. |
 | 0.3.6 | 2026-07-16 | Platform Design Authority | Dispositioned the implementation audit and recorded replay-scoped receipts, same-row contention proof, executable worker-migration denial, literal optional coverage, and reproducible evidence commands; retained RR-006/RR-007. |
 | 0.3.5 | 2026-07-16 | Platform Design Authority | Recorded PR4 implementation and local evidence completion pending exact-head independent review and merge; linked PDA-APP-023 and retained RR-006/RR-007 plus every production gate. |
 | 0.3.4 | 2026-07-15 | Platform Design Authority | Recorded exact-head concurrence for all three PR4 pre-worker lenses and moved PR4 from review-only remediation to bounded worker implementation without closing RR-006/RR-007 or any delivery evidence gate. |

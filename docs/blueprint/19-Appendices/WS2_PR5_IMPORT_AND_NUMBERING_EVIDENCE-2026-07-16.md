@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: WS2 PR5 Import and Online Numbering Evidence
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -24,24 +24,24 @@ This record covers issue #71 at controlled-prototype depth: bounded server-side 
 | Dry run | Parsing, normalization, warning/error findings, duplicate source-key rejection, and staging complete before any Catalog Product or Inventory movement command runs. |
 | Authority | Transport and direct application boundaries revalidate active context, the target-specific permission, and the target entitlement. The owner-command adapter separately checks `catalog.product.create` or both `inventory.adjustment.create` and `inventory.adjustment.approve` before a wave mutates owner state. Uploaders cannot approve their own import. Correction-report download has a separate permission and Audit record. |
 | Domain ownership | Product rows call Catalog's idempotent Product application command. Opening-stock rows call Inventory's idempotent Adjustment create and approval commands; they never write owner tables directly. |
-| Recovery | Create and approval commands persist tenant/operation/key receipts in the same import-owner transactions as their lifecycle facts and events. One deterministic wave preserves source order. Every accepted owner effect is followed by a durable row/job/wave checkpoint. A crash injected after an owner effect but before checkpoint replays the stable owner receipt and produces no duplicate Product, event, or number. |
-| Retention | A terminal-only purge command deletes normalized rows, findings, and wave staging, records `staging_purged_at`, and preserves the import job, command receipts, owner facts, immutable Inventory movements, and outbox evidence. Scheduling and production retention automation remain operational gates. |
+| Recovery | Create and approval commands persist tenant/operation/key receipts in the same import-owner transactions as their lifecycle facts and events. The create fingerprint binds the complete parsing manifest as well as the content and target. One deterministic wave preserves source order. Every accepted owner effect is followed by a durable row/job/wave checkpoint. A process interruption injected after an owner effect but before checkpoint replays the stable owner receipt and produces no duplicate Product, event, or number. A deterministic owner-command rejection atomically records terminal job/row/wave failure, a safe code, the approval receipt, and `platform.import.failed.v1`; same-key replay does not invoke the owner again. |
+| Retention | A terminal-only purge command accepts Completed, Failed, or Cancelled jobs; deletes normalized rows, findings, and wave staging; records `staging_purged_at`; and preserves the import job, command receipts, owner facts, immutable Inventory movements, and outbox evidence. Scheduling and production retention automation remain operational gates. |
 | Privacy | Tenant is derived from current context; job, row, finding, wave, report, and reference lookup use tenant predicates. Foreign and nonexistent IDs share the same not-found behavior. Reports contain only row number, constrained source key, field, severity, and safe code. |
-| Events and Audit | Import validation, approval, completion, and failure schemas are registered. Import lifecycle state and outbox append share the import-owner transaction. Consequential approval and report access append allowlisted Audit metadata. |
+| Events and Audit | Import validation, approval, completion, and failure schemas are registered. Executable assertions compare every emitted lifecycle payload to the canonical schema field set, including the failure checkpoint. Import lifecycle state and outbox append share the import-owner transaction. Consequential approval and report access append allowlisted Audit metadata. |
 
 ## Implemented Numbering evidence
 
-`@meridian/platform-numbering` is runtime-neutral. `@meridian/persistence-platform-numbering-postgres` owns only `platform_number_sequence` and `platform_number_allocation`, with its own generated migration history. Allocation uses a tenant/organization/sequence predicate and `FOR UPDATE`, then records the immutable allocation, increments the sequence, and appends `platform.sequence.number-issued.v1` on one checked-out PostgreSQL client and transaction.
+`@meridian/platform-numbering` is runtime-neutral. `@meridian/persistence-platform-numbering-postgres` owns only `platform_number_sequence` and `platform_number_allocation`, with its own generated migration history. Allocation uses a tenant/organization/sequence predicate and `FOR UPDATE`, then records the immutable bigint counter, formatted string value, source command, optional business record, actor, and issuance time; increments the sequence; and appends a schema-shaped `platform.sequence.number-issued.v1` on one checked-out PostgreSQL client and transaction.
 
 The controlled configuration is fixed prefix, decimal padding, increment one, no automatic reset, and Active/Suspended state. Retry with the same tenant, sequence, and idempotency key returns the original allocation. Reuse with a different fingerprint is rejected. Offline leasing, voids, rollover, reset policy, and administrative definition APIs remain deferred.
 
 ## Live PostgreSQL 18 evidence
 
-The disposable import suite proves the two PDA-TST-013 synthetic tenant boundaries, mixed valid/warning/rejected/duplicate/corrected rows, Product dry run, Catalog command commit, completed-import replay, opening-stock Inventory movement, tenant non-disclosure, raw-content absence, an injected owner-effect/checkpoint crash, deterministic resume, and terminal staging purge without erasing owner/event evidence. Result: **5 passed, 0 failed, 18 expectations**.
+The disposable import suite proves the two PDA-TST-013 synthetic tenant boundaries, mixed valid/warning/rejected/duplicate/corrected rows, Product dry run, Catalog command commit, completed-import replay, opening-stock Inventory movement, tenant non-disclosure, raw-content absence, an injected owner-effect/checkpoint process interruption, deterministic resume, terminal owner-command rejection, same-key failed replay without a second owner invocation, exact lifecycle event payloads, and terminal staging purge without erasing owner/event evidence. Result: **6 passed, 0 failed, 25 expectations**.
 
-The serial persistence suite proves repeat migrations and exact owner histories, 20 concurrent unique Numbering allocations with values 1–20, idempotent replay without increment, and injected outbox rollback leaving zero allocation rows and the sequence at zero. The full suite result after PR5 additions is **12 passed, 0 failed, 79 expectations**.
+The serial persistence suite proves repeat migrations and exact owner histories, 20 concurrent unique Numbering allocations with bigint counter values 1–20, exact schema-shaped number-issued event provenance, database-enforced increment/reset and source-command constraints, idempotent replay without increment, and injected outbox rollback leaving zero allocation rows and the sequence at zero. The full suite result after PR5 additions is **13 passed, 0 failed, 82 expectations**.
 
-The complete live PostgreSQL composition lane passes **51 tests, 0 failures, and 517 expectations** across Audit/session, Catalog, Import, Inventory, serial persistence, and WS2 ledger-spike suites. The approved Node fallback then executes the ten-owner migration, Import receipt lookup, Numbering allocation/replay, and WS1 critical checks successfully against a clean validation database.
+The complete live PostgreSQL composition lane passes **53 tests, 0 failures, and 527 expectations** across Audit/session, Catalog, Import, Inventory, serial persistence, and WS2 ledger-spike suites. The approved Node fallback then executes the ten-owner migration, Import receipt lookup, Numbering allocation/replay, and WS1 critical checks successfully against a clean validation database.
 
 The exact commands are:
 
@@ -64,5 +64,6 @@ Final exact-head CI, migration freshness for all ten owners, Bun tests, Node fal
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.0 | 2026-07-16 | Platform Design Authority | Remediated exact event-payload parity, manifest-bound create idempotency, deterministic terminal owner-rejection evidence, and the binding Numbering provenance/constraint model; recorded the exact post-remediation Bun, PostgreSQL, and Node evidence. |
 | 0.2.0 | 2026-07-16 | Platform Design Authority | Added command-receipt use, owner-permission checks, two-tenant mixed/corrected fixtures, injected cross-owner crash recovery, and terminal staging-purge evidence while retaining production scheduling and retention gates. |
 | 0.1.0 | 2026-07-16 | Platform Design Authority | Added the WS2 PR5 bounded import, owner-command, privacy, recovery, migration, concurrency, rollback, and online Numbering evidence boundary. |

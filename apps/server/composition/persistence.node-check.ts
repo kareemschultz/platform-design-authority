@@ -135,7 +135,7 @@ try {
 	assert.equal(nodeImport.state, "ReadyForApproval");
 
 	await pool.query(
-		"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, sequence_key, prefix, padding, current_value, next_value, state, version, classification, created_at, updated_at) VALUES ('tenant_node_numbering', 'sequence_node_numbering', 'organization_node_numbering', 'invoice', 'N-', 4, 0, 1, 'Active', 1, 'Confidential', now(), now())"
+		"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, owner_namespace, record_type, sequence_key, prefix, padding, current_value, next_value, state, version, classification, created_at, updated_at) VALUES ('tenant_node_numbering', 'sequence_node_numbering', 'organization_node_numbering', 'test', 'invoice', 'invoice', 'N-', 4, 0, 1, 'Active', 1, 'Confidential', now(), now())"
 	);
 	let numberingId = 0;
 	const numbering = createNumberingService({
@@ -153,13 +153,15 @@ try {
 	});
 	const nodeNumber = await numbering.allocate({
 		actorUserId: "node_numbering_user",
+		businessRecordId: "node_invoice_1",
 		correlationId: "correlation_node_numbering",
 		idempotencyKey: "node-number-allocation",
 		organizationId: "organization_node_numbering",
 		sequenceId: "sequence_node_numbering",
+		sourceCommandId: "invoice.issue:node-number-allocation",
 		tenantId: "tenant_node_numbering",
 	});
-	assert.equal(nodeNumber.formattedValue, "N-0001");
+	assert.equal(nodeNumber.value, "N-0001");
 
 	const failingStream: MigrationStream = {
 		id: "test.node-failure",

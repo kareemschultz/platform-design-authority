@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Business Operating Platform First Slice API
-  version: 0.3.1
+  version: 0.4.0
   description: >-
     Draft implementation-review contract for the Guyana Retail Foundation Slice.
     This is not a GA public API and does not assert production provider or jurisdiction certification.
@@ -24,6 +24,7 @@ tags:
   - name: StoredValue
   - name: Devices
   - name: Exports
+  - name: Events
   - name: Webhooks
   - name: Privacy
 paths:
@@ -1448,6 +1449,27 @@ paths:
       responses:
         '200':
           description: Contract response; the owning specification defines state and error semantics
+  /event-replays:
+    post:
+      tags: [Events]
+      operationId: createEventReplay
+      x-permission: platform.event.replay
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateEventReplayRequest'}
+      responses:
+        '202':
+          description: Bounded replay request accepted for current-authority and compatibility evaluation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/EventReplayRequest'}
+        default:
+          $ref: '#/components/responses/Error'
   /webhook-subscriptions/{id}:
     patch:
       tags: [Webhooks]
@@ -1586,6 +1608,49 @@ components:
     Identifier:
       type: string
       pattern: '^[A-Za-z0-9_-]{12,64}$'
+    EventName:
+      type: string
+      pattern: '^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*\.v[1-9][0-9]*$'
+    SemanticVersion:
+      type: string
+      pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    PositiveSequence:
+      type: string
+      pattern: '^[1-9][0-9]{0,18}$'
+    CreateEventReplayRequest:
+      type: object
+      additionalProperties: false
+      required: [consumerId, consumerSchemaVersion, firstSequence, lastSequence, eventNames, purpose]
+      properties:
+        consumerId: {$ref: '#/components/schemas/Identifier'}
+        consumerSchemaVersion: {$ref: '#/components/schemas/SemanticVersion'}
+        firstSequence: {$ref: '#/components/schemas/PositiveSequence'}
+        lastSequence: {$ref: '#/components/schemas/PositiveSequence'}
+        eventNames:
+          type: array
+          minItems: 1
+          maxItems: 25
+          uniqueItems: true
+          items: {$ref: '#/components/schemas/EventName'}
+        purpose: {type: string, minLength: 1, maxLength: 500}
+    EventReplayRequest:
+      type: object
+      additionalProperties: false
+      required: [id, consumerId, consumerSchemaVersion, firstSequence, lastSequence, eventNames, state, requestedAt]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        consumerId: {$ref: '#/components/schemas/Identifier'}
+        consumerSchemaVersion: {$ref: '#/components/schemas/SemanticVersion'}
+        firstSequence: {$ref: '#/components/schemas/PositiveSequence'}
+        lastSequence: {$ref: '#/components/schemas/PositiveSequence'}
+        eventNames:
+          type: array
+          minItems: 1
+          maxItems: 25
+          uniqueItems: true
+          items: {$ref: '#/components/schemas/EventName'}
+        state: {type: string, enum: [Pending, Running, Completed, PartiallyCompleted, Rejected, Failed]}
+        requestedAt: {type: string, format: date-time}
     Money:
       type: object
       required: [currency, amountMinor]

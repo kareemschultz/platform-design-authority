@@ -155,6 +155,7 @@
       "pattern": "**/!(persistence)/** -> database-client",
       "except": [
         "apps/server/composition",
+        "apps/worker/composition",
         "packages/tooling/composition/*"
       ]
     },
@@ -223,7 +224,8 @@
       "description": "Pool creation, shutdown, and connection-bearing environment reads belong to registered composition roots.",
       "pattern": "**/!(composition)/** -> (pool-construction|pool-shutdown|connection-environment)",
       "except": [
-        "packages/tooling/env/src/server.ts"
+        "packages/tooling/env/src/server.ts",
+        "packages/tooling/env/src/worker.ts"
       ]
     }
   ],
@@ -234,6 +236,7 @@
     "exceptions_require_expiry": true,
     "composition_roots": [
       "apps/server/composition",
+      "apps/worker/composition",
       "packages/tooling/composition/*"
     ],
     "composition_root_may_depend_on": [
@@ -250,6 +253,9 @@
       "platform",
       "engines",
       "domains"
+    ],
+    "migration_invocation_roots": [
+      "apps/server/composition"
     ]
   },
   "persistence_owners": [
@@ -325,7 +331,11 @@
       "owner": "platform.events",
       "owner_package": "@meridian/platform-events",
       "tables": [
-        "platform_event_outbox"
+        "platform_event_outbox",
+        "platform_event_delivery_attempt",
+        "platform_event_dead_letter",
+        "platform_event_replay_request",
+        "platform_event_consumer_receipt"
       ],
       "migration_directory": "packages/persistence/platform-events-postgres/src/migrations"
     },
@@ -355,7 +365,8 @@
         "catalog_product",
         "catalog_variant",
         "catalog_identifier",
-        "catalog_product_command_receipt"
+        "catalog_product_command_receipt",
+        "catalog_product_search_projection"
       ],
       "migration_directory": "packages/persistence/catalog-postgres/src/migrations"
     },

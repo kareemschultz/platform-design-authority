@@ -83,4 +83,4 @@ Registration: CIR-LED-0015, RES-013, PDA-CIR-097 and PDA-CIR-098, and SRC-070 th
 
 ## Related Meridian Authorities
 
-PDA-FND-002, ADR-0003, ADR-0010, ADR-0014, ADR-0017, FIRST_SLICE_MANIFEST.md, PDA-PLT-005, PDA-DOM-003, PDA-DOM-004, PDA-SEC-001, PDA-UX-011, PDA-TST-001, PDA-OPS-018, PDA-CIR-097, `registry/first-slice.json`, `registry/first-slice-tests.json`, `registry/permissions.json`, and `registry/endpoint-permissions.json`.
+PDA-FND-002, ADR-0003, ADR-0010, ADR-0014, ADR-0017, FIRST_SLICE_MANIFEST.md, PDA-PLT-005, PDA-DOM-003, PDA-DOM-004, PDA-SEC-001, PDA-UX-011, PDA-TST-001, PDA-OPS-019, PDA-CIR-097, `registry/first-slice.json`, `registry/first-slice-tests.json`, `registry/permissions.json`, and `registry/endpoint-permissions.json`.

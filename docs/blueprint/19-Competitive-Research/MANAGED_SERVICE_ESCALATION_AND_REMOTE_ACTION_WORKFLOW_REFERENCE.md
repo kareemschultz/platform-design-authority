@@ -88,4 +88,4 @@ Capacity evidence must use target/cohort counts, output volume, queue age, provi
 
 ## Sources and Traceability
 
-Product evidence is registered by SRC-041 through SRC-048 and cited in PDA-CIR-087. Governing Meridian references are ADR-0002, ADR-0003, ADR-0014, ADR-0019, PDA-DOM-021, PDA-DOM-013, PDA-DOM-014, PDA-PLT-005, PDA-SEC-001, PDA-DEV-003, PDA-OPS-018, `registry/capabilities.json`, `registry/permissions.json`, `registry/events.json`, `registry/endpoint-permissions.json`, and `openapi/first-slice-v1.yaml`.
+Product evidence is registered by SRC-041 through SRC-048 and cited in PDA-CIR-087. Governing Meridian references are ADR-0002, ADR-0003, ADR-0014, ADR-0019, PDA-DOM-021, PDA-DOM-013, PDA-DOM-014, PDA-PLT-005, PDA-SEC-001, PDA-DEV-003, PDA-OPS-019, `registry/capabilities.json`, `registry/permissions.json`, `registry/events.json`, `registry/endpoint-permissions.json`, and `openapi/first-slice-v1.yaml`.

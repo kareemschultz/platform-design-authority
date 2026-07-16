@@ -92,6 +92,15 @@ export const OPENAPI_OPERATION_METADATA = [
 	},
 	{
 		method: "POST",
+		operationId: "createEventReplay",
+		path: "/v1/event-replays",
+		permission: "platform.event.replay",
+		requestRef: "#/components/schemas/CreateEventReplayRequest",
+		responseRef: "#/components/schemas/EventReplayRequest",
+		successStatus: 202,
+	},
+	{
+		method: "POST",
 		operationId: "createAccountantHandoffExport",
 		path: "/v1/exports/accountant-handoff",
 		permission: "platform.export.create",

@@ -40,6 +40,77 @@ import {
 export type InventoryPostgresConnection = Pool | PoolClient;
 export const INVENTORY_MIGRATION_TABLE = "inventory_migrations";
 
+export function createInventoryReconciliationAdapter(
+	connection: InventoryPostgresConnection
+) {
+	return {
+		async reconcileTenant(tenantId: string): Promise<void> {
+			await connection.query(
+				`WITH ledger AS (
+				   SELECT tenant_id, location_id, item_key, unit,
+				          max(organization_id) AS organization_id,
+				          max(product_id) AS product_id,
+				          max(variant_id) AS variant_id,
+				          sum(quantity) AS on_hand,
+				          max(occurred_at) AS as_of,
+				          count(*)::integer AS version
+				   FROM inventory_stock_movement
+				   WHERE tenant_id = $1
+				   GROUP BY tenant_id, location_id, item_key, unit
+				 )
+				 INSERT INTO inventory_stock_balance (
+				   tenant_id, location_id, item_key, unit, organization_id,
+				   product_id, variant_id, on_hand, as_of, classification,
+				   reconciliation_state, version, updated_at
+				 )
+				 SELECT tenant_id, location_id, item_key, unit, organization_id,
+				        product_id, variant_id, on_hand, as_of, 'Confidential',
+				        'Current', version, now()
+				 FROM ledger
+				 WHERE on_hand >= 0
+				 ON CONFLICT (tenant_id, location_id, item_key, unit) DO NOTHING`,
+				[tenantId]
+			);
+			await connection.query(
+				`UPDATE inventory_stock_balance AS balance
+				 SET reconciliation_state = CASE
+				       WHEN balance.on_hand = COALESCE((
+				         SELECT sum(movement.quantity)
+				         FROM inventory_stock_movement AS movement
+				         WHERE movement.tenant_id = balance.tenant_id
+				           AND movement.location_id = balance.location_id
+				           AND movement.item_key = balance.item_key
+				           AND movement.unit = balance.unit
+				       ), 0) THEN 'Current'
+				       ELSE 'RequiresReview'
+				     END,
+				     updated_at = now()
+				 WHERE balance.tenant_id = $1`,
+				[tenantId]
+			);
+			const unresolved = await connection.query<{ count: number }>(
+				`WITH ledger AS (
+				   SELECT tenant_id, location_id, item_key, unit
+				   FROM inventory_stock_movement
+				   WHERE tenant_id = $1
+				   GROUP BY tenant_id, location_id, item_key, unit
+				 )
+				 SELECT count(*)::int AS count
+				 FROM ledger
+				 LEFT JOIN inventory_stock_balance AS balance
+				   USING (tenant_id, location_id, item_key, unit)
+				 WHERE balance.tenant_id IS NULL`,
+				[tenantId]
+			);
+			if ((unresolved.rows[0]?.count ?? 0) > 0) {
+				const error = new Error("inventory reconciliation requires review");
+				Object.assign(error, { code: "inventory_projection_divergence" });
+				throw error;
+			}
+		},
+	};
+}
+
 function isConstraintViolation(error: unknown, constraint: string): boolean {
 	if (typeof error !== "object" || error === null) {
 		return false;

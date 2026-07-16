@@ -95,6 +95,7 @@
     {"method":"GET","path":"/v1/exports/{exportId}","permission":"platform.export.read"},
     {"method":"POST","path":"/v1/deposit-reconciliations","permission":"finance.bank-reconciliation.create"},
     {"method":"GET","path":"/v1/finance-handoff/posting-batches","permission":"finance.posting-batch.read"},
+    {"method":"POST","path":"/v1/event-replays","permission":"platform.event.replay"},
     {"method":"GET","path":"/v1/webhook-subscriptions","permission":"developer.webhook.read"},
     {"method":"POST","path":"/v1/webhook-subscriptions","permission":"developer.webhook.create"},
     {"method":"PATCH","path":"/v1/webhook-subscriptions/{id}","permission":"developer.webhook.update"},

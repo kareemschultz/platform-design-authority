@@ -79,7 +79,7 @@ Every record requires opaque ID, tenant/organization scope where applicable, own
 
 Security review must cover issuer confusion, mix-up, malicious discovery/metadata, SSRF, redirect and ACS attacks, weak algorithms, replay, account-link takeover, domain takeover, claim/group escalation, SCIM bearer theft, cross-tenant service identities, recovery abuse, compromised upstream administrators, provider outage and migration rollback. Privacy review covers attribute minimization, purpose, notices, cross-border/provider processing, retention, subject rights, Party-link errors and deprovisioning without destructive overreach.
 
-Operations needs connection and certificate inventory, expiry alerts, provider health, sign-in/provisioning/reconciliation telemetry, safe log redaction, rate/capacity limits, backup/restore scope, upgrade compatibility, incident and lockout runbooks, tested break-glass, credential rotation and provider-exit exercises. PDA-OPS-018 does not certify these unimplemented services.
+Operations needs connection and certificate inventory, expiry alerts, provider health, sign-in/provisioning/reconciliation telemetry, safe log redaction, rate/capacity limits, backup/restore scope, upgrade compatibility, incident and lockout runbooks, tested break-glass, credential rotation and provider-exit exercises. PDA-OPS-019 does not certify these unimplemented services.
 
 UX must make provider-local and Meridian concepts visibly distinct, show connection scope and risk, preview mapping consequences, expose quarantine/reconciliation, support accessible recovery and avoid generic confirmation for role revocation, connection suspension or credential rotation. Essential sign-in and recovery paths require deterministic behavior with AI disabled.
 
@@ -104,4 +104,4 @@ CIR-BACK-022 can be marked Transferred because PDA-CIR-090 through PDA-CIR-092, 
 
 ## Related Meridian Authorities
 
-PDA-FND-013, ADR-0003, ADR-0006, ADR-0007, ADR-0014, ADR-0028, PDA-PLT-002, PDA-PLT-003, PDA-PLT-004, PDA-PLT-020, PDA-PLT-021, PDA-PLT-028, PDA-SEC-011, PDA-SEC-012, PDA-SEC-013, PDA-DEV-003, PDA-OPS-018, PDA-CIR-090, PDA-CIR-091, `registry/capabilities.json`, `registry/events.json`, `registry/permissions.json`, `registry/endpoint-permissions.json`, and `openapi/first-slice-v1.yaml`.
+PDA-FND-013, ADR-0003, ADR-0006, ADR-0007, ADR-0014, ADR-0028, PDA-PLT-002, PDA-PLT-003, PDA-PLT-004, PDA-PLT-020, PDA-PLT-021, PDA-PLT-028, PDA-SEC-011, PDA-SEC-012, PDA-SEC-013, PDA-DEV-003, PDA-OPS-019, PDA-CIR-090, PDA-CIR-091, `registry/capabilities.json`, `registry/events.json`, `registry/permissions.json`, `registry/endpoint-permissions.json`, and `openapi/first-slice-v1.yaml`.

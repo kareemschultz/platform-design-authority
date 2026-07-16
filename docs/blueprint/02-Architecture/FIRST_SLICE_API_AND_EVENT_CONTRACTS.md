@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ARC-014
 title: First Slice API and Event Contracts
-version: 0.5.1
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-15
 related_adrs: [ADR-0006, ADR-0007, ADR-0016, ADR-0017, ADR-0020]
 ---
 
@@ -180,6 +180,14 @@ Inventory adjustment approval approves and posts the adjustment atomically under
 | `POST /v1/deposit-reconciliations` | `finance.bank-reconciliation.create` |
 | `GET /v1/finance-handoff/posting-batches` | `finance.posting-batch.read` |
 
+### Event Backbone Administration
+
+| Method and path | Permission |
+|---|---|
+| `POST /v1/event-replays` | `platform.event.replay` |
+
+The internal replay command is distinct from Developer Platform webhook replay. It operates inside one currently revalidated tenant context, accepts one registered consumer/version plus an inclusive bounded outbox-sequence range and canonical event-name allowlist, and requires an idempotency key and purpose. Tenant ID, requester, and approver are resolved from the authenticated principal, active context, and current policy; they are never accepted from the request body. The command verifies current permission, retention eligibility, schema compatibility, range bounds, and append-only Audit evidence before queueing a replay. A repository call or operator script is not an authority boundary.
+
 ### Webhooks
 
 | Method and path | Permission |
@@ -203,6 +211,8 @@ Inventory adjustment approval approves and posts the adjustment atomically under
 Every consequential command declares idempotency, authorization, entitlement, state preconditions, concurrency, audit, canonical event output, retry safety, and provider uncertainty.
 
 WS2 Product activation/archive and Inventory dispatch commands require `Idempotency-Key` plus an expected version. Adjustment, Count, and Transfer list/detail queries use resource-specific read permissions; mutation permissions do not grant inspection, and `inventory.balance.read` does not expose workflow evidence. Quantities are decimal strings with an explicit unit and optional governed conversion provenance.
+
+`POST /v1/event-replays` is asynchronous and returns a replay-request reference, never delivery success. A request is restricted to at most 1,000 monotonically sequenced source events, one registered consumer, one semantic consumer schema version, and 25 canonical event names. Cross-tenant, empty, inverted, unbounded, retention-ineligible, or incompatible ranges fail closed without revealing foreign event existence. A consumer-version change does not itself authorize replay or repeated business effects.
 
 `POST /v1/users/{userId}/suspend` suspends the target user's membership in the active tenant context. It does not globally disable the Better Auth account or mutate memberships in another tenant. Global protective account action belongs to a separately governed Security/Platform Identity command.
 
@@ -265,3 +275,7 @@ Additive changes are preferred. Breaking changes require a new major version. Of
 - Event registry inclusion checks
 - Offline multi-version tests
 - Error and accessibility review
+
+## Change Log
+
+- 0.6.0 (2026-07-15): Added the authenticated, tenant-context-bound internal Event Backbone replay command and distinguished it from Developer Platform webhook replay after the ADR-0027 PR4 Security review.

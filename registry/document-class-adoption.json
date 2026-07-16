@@ -118,7 +118,7 @@
     {
       "artifact_id": "CLASS-SAMPLE-007",
       "path": "docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md",
-      "identity": "PDA-OPS-018",
+      "identity": "PDA-OPS-019",
       "class_id": "operations-runbook",
       "declared_depth": "prototype-ready",
       "evidence_state": "implemented",

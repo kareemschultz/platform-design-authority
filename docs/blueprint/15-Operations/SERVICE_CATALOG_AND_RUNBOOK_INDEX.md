@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-015
 title: Service Catalog and Runbook Index
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -13,7 +13,7 @@ last_reviewed: 2026-07-16
 
 Define the operational catalog required for every critical platform service and capability, including ownership, dependencies, SLOs, dashboards, alerts, runbooks, support, recovery, and customer impact.
 
-`registry/operational-readiness.json` is the machine-readable status register for implemented controlled-prototype services. PDA-OPS-018 supplies bounded procedures for behavior that exists on merged `main`. Neither artifact supplies missing dashboards, tested alerts, exercises, escalation contacts, or pilot authority.
+`registry/operational-readiness.json` is the machine-readable status register for implemented controlled-prototype services. PDA-OPS-019 supplies bounded cross-service procedures for behavior that exists on merged `main`; PDA-OPS-018 supplies the focused Event Backbone delivery procedure. Neither artifact supplies missing dashboards, tested alerts, exercises, escalation contacts, or pilot authority.
 
 ## Readiness States
 
@@ -90,6 +90,14 @@ At minimum:
 - Restore and failover
 - Tenant suspension and recovery
 - Data repair
+
+Implemented controlled-prototype runbook: [Event Backbone Delivery Runbook](./EVENT_BACKBONE_DELIVERY_RUNBOOK.md) (PDA-OPS-018). Its production SLO, alert, role/RLS, capacity, and exercise gates remain open.
+
+## Change History
+
+| Version | Date | Author | Change |
+|---|---|---|---|
+| 0.1.1 | 2026-07-15 | Platform Design Authority | Linked the WS2 controlled-prototype Event Backbone delivery runbook without claiming production operations readiness. |
 
 ## Runbook Contract
 

@@ -102,6 +102,7 @@
         "@meridian/contracts-permissions": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
         "@meridian/domain-catalog": "workspace:*",
+        "@meridian/domain-inventory": "workspace:*",
         "@meridian/domain-party": "workspace:*",
         "@meridian/persistence-catalog-postgres": "workspace:*",
         "@meridian/persistence-inventory-postgres": "workspace:*",
@@ -175,6 +176,23 @@
         "typescript": "^6",
       },
     },
+    "apps/worker": {
+      "name": "worker",
+      "dependencies": {
+        "@meridian/persistence-platform-events-postgres": "workspace:*",
+        "@meridian/platform-events": "workspace:*",
+        "@meridian/tooling-env": "workspace:*",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "tsdown": "^0.22.3",
+        "tsx": "4.21.0",
+        "typescript": "^6",
+      },
+    },
     "packages/contracts/api": {
       "name": "@meridian/contracts-api",
       "version": "0.0.0",
@@ -240,6 +258,8 @@
       "name": "@meridian/domain-inventory",
       "version": "0.0.0",
       "devDependencies": {
+        "@meridian/contracts-events": "workspace:*",
+        "@meridian/contracts-platform-api": "workspace:*",
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
         "typescript": "^6",
@@ -295,6 +315,7 @@
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
         "typescript": "^6",
       },
     },
@@ -3105,6 +3126,8 @@
     "wildcard-match": ["wildcard-match@5.1.4", "", {}, "sha512-wldeCaczs8XXq7hj+5d/F38JE2r7EXgb6WQDM84RVwxy81T/sxB5e9+uZLK9Q9oNz1mlvjut+QtvgaOQFPVq/g=="],
 
     "word-wrap": ["word-wrap@1.2.5", "", {}, "sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA=="],
+
+    "worker": ["worker@workspace:apps/worker"],
 
     "wrap-ansi": ["wrap-ansi@7.0.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, "sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q=="],
 

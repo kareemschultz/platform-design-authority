@@ -3,6 +3,49 @@ import { z } from "zod";
 export const IdentifierSchema = z.string().regex(/^[A-Za-z0-9_-]{12,64}$/);
 export const InstantSchema = z.iso.datetime({ offset: true });
 export const NullableIdentifierSchema = IdentifierSchema.nullable();
+export const SemanticVersionSchema = z
+	.string()
+	.regex(/^[0-9]+\.[0-9]+\.[0-9]+$/);
+export const PositiveSequenceSchema = z.string().regex(/^[1-9][0-9]*$/);
+export const EventNameSchema = z
+	.string()
+	.regex(/^[a-z][a-z0-9-]*\.[a-z0-9-]+\.[a-z0-9-]+\.v[1-9][0-9]*$/);
+
+export const CreateEventReplayRequestSchema = z
+	.object({
+		consumerId: IdentifierSchema,
+		consumerSchemaVersion: SemanticVersionSchema,
+		eventNames: z.array(EventNameSchema).min(1).max(25),
+		firstSequence: PositiveSequenceSchema,
+		lastSequence: PositiveSequenceSchema,
+		purpose: z.string().min(1).max(500),
+	})
+	.strict()
+	.refine(
+		(value) => new Set(value.eventNames).size === value.eventNames.length,
+		{
+			message: "Event names must be unique",
+			path: ["eventNames"],
+		}
+	);
+
+export const EventReplayRequestSchema = z.object({
+	consumerId: IdentifierSchema,
+	consumerSchemaVersion: SemanticVersionSchema,
+	eventNames: z.array(EventNameSchema).min(1).max(25),
+	firstSequence: PositiveSequenceSchema,
+	id: IdentifierSchema,
+	lastSequence: PositiveSequenceSchema,
+	requestedAt: InstantSchema,
+	state: z.enum([
+		"Pending",
+		"Running",
+		"Completed",
+		"PartiallyCompleted",
+		"Rejected",
+		"Failed",
+	]),
+});
 
 export const ActiveContextSchema = z.object({
 	authUserId: IdentifierSchema,
@@ -692,6 +735,10 @@ export type CreateUserInvitationRequest = z.infer<
 	typeof CreateUserInvitationRequestSchema
 >;
 export type CurrentIdentity = z.infer<typeof CurrentIdentitySchema>;
+export type CreateEventReplayRequest = z.infer<
+	typeof CreateEventReplayRequestSchema
+>;
+export type EventReplayRequest = z.infer<typeof EventReplayRequestSchema>;
 export type Entitlement = z.infer<typeof EntitlementSchema>;
 export type Location = z.infer<typeof LocationSchema>;
 export type MembershipSummary = z.infer<typeof MembershipSummarySchema>;

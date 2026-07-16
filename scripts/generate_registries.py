@@ -550,6 +550,7 @@ def build_architecture_rules_registry() -> dict[str, Any]:
     records: list[dict[str, Any]] = []
     rule_allowances: dict[str, list[str]] = {}
     composition_roots: list[str] = []
+    migration_invocation_roots: list[str] = []
     in_owner_table = False
     in_allowance_table = False
     in_composition_table = False
@@ -574,9 +575,11 @@ def build_architecture_rules_registry() -> dict[str, Any]:
             in_composition_table = False
         if in_composition_table and line.startswith("| `"):
             cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-            if len(cells) != 4:
+            if len(cells) != 5:
                 raise ValueError(f"invalid composition-root row: {line}")
             composition_roots.append(cells[0].strip("`"))
+            if cells[3].startswith("Allowed"):
+                migration_invocation_roots.append(cells[0].strip("`"))
             continue
         if in_allowance_table and line.startswith("| `"):
             cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
@@ -612,8 +615,11 @@ def build_architecture_rules_registry() -> dict[str, Any]:
         raise ValueError("registered architecture-rule allowance table is empty")
     if not composition_roots:
         raise ValueError("registered composition-root table is empty")
+    if not migration_invocation_roots:
+        raise ValueError("registered migration-invocation authority is empty")
     apply_rule_allowances(data, rule_allowances)
     data["requirements"]["composition_roots"] = composition_roots
+    data["requirements"]["migration_invocation_roots"] = migration_invocation_roots
     data["persistence_owners"] = records
     return data
 

@@ -26,6 +26,78 @@ import {
 export type CatalogPostgresConnection = Pool | PoolClient;
 export const CATALOG_MIGRATION_TABLE = "catalog_migrations";
 
+export interface CatalogSearchProjectionInput {
+	eventId: string;
+	productId: string;
+	projectedAt: string;
+	tenantId: string;
+}
+
+export function createCatalogSearchProjectionAdapter(
+	connection: CatalogPostgresConnection
+) {
+	return {
+		async rebuildProduct(input: CatalogSearchProjectionInput): Promise<void> {
+			const source = await connection.query<{
+				name: string;
+				state: string;
+				version: number;
+			}>(
+				`SELECT name, state, version FROM catalog_product
+				 WHERE tenant_id = $1 AND id = $2`,
+				[input.tenantId, input.productId]
+			);
+			const [product] = source.rows;
+			if (!product) {
+				const error = new Error("catalog projection source unavailable");
+				Object.assign(error, { code: "projection_source_unavailable" });
+				throw error;
+			}
+			const [variants, identifiers] = await Promise.all([
+				connection.query<{ name: string }>(
+					`SELECT name FROM catalog_variant
+					 WHERE tenant_id = $1 AND product_id = $2 ORDER BY position, id`,
+					[input.tenantId, input.productId]
+				),
+				connection.query<{ value: string }>(
+					`SELECT value FROM catalog_identifier
+					 WHERE tenant_id = $1 AND product_id = $2 ORDER BY id`,
+					[input.tenantId, input.productId]
+				),
+			]);
+			const searchText = [
+				product.name,
+				...variants.rows.map((row) => row.name),
+				...identifiers.rows.map((row) => row.value),
+			]
+				.join(" ")
+				.toLocaleLowerCase("en-US");
+			await connection.query(
+				`INSERT INTO catalog_product_search_projection
+				 (tenant_id, product_id, name, state, search_text, source_version,
+				  source_event_id, projected_at)
+				 VALUES ($1,$2,$3,$4,$5,$6,$7,$8::timestamptz)
+				 ON CONFLICT (tenant_id, product_id) DO UPDATE SET
+				 name = EXCLUDED.name, state = EXCLUDED.state,
+				 search_text = EXCLUDED.search_text,
+				 source_version = EXCLUDED.source_version,
+				 source_event_id = EXCLUDED.source_event_id,
+				 projected_at = EXCLUDED.projected_at`,
+				[
+					input.tenantId,
+					input.productId,
+					product.name,
+					product.state,
+					searchText,
+					product.version,
+					input.eventId,
+					input.projectedAt,
+				]
+			);
+		},
+	};
+}
+
 function isUniqueViolation(error: unknown): boolean {
 	if (typeof error !== "object" || error === null) {
 		return false;

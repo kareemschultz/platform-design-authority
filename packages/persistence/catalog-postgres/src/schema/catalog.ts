@@ -58,6 +58,40 @@ export const catalogProducts = pgTable(
 	]
 );
 
+export const catalogProductSearchProjections = pgTable(
+	"catalog_product_search_projection",
+	{
+		name: text("name").notNull(),
+		productId: text("product_id").notNull(),
+		projectedAt: timestamp("projected_at", { withTimezone: true }).notNull(),
+		searchText: text("search_text").notNull(),
+		sourceEventId: text("source_event_id").notNull(),
+		sourceVersion: integer("source_version").notNull(),
+		state: text("state").notNull(),
+		tenantId: text("tenant_id").notNull(),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.tenantId, table.productId],
+			name: "catalog_product_search_projection_pk",
+		}),
+		foreignKey({
+			columns: [table.tenantId, table.productId],
+			foreignColumns: [catalogProducts.tenantId, catalogProducts.id],
+			name: "catalog_product_search_projection_product_fk",
+		}).onDelete("cascade"),
+		check(
+			"catalog_product_search_projection_source_version_check",
+			sql`${table.sourceVersion} >= 1`
+		),
+		index("catalog_product_search_projection_tenant_name_idx").on(
+			table.tenantId,
+			table.name,
+			table.productId
+		),
+	]
+);
+
 export const catalogVariants = pgTable(
 	"catalog_variant",
 	{

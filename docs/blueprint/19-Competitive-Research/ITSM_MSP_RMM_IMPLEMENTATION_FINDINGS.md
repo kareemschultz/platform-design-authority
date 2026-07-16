@@ -65,7 +65,7 @@ No currently registered Service permission/event/OpenAPI contract exists. The ex
 
 Required threat modeling includes malicious/compromised technician, wrong-client selection, compromised agent/provider, script supply chain, session hijack, consent bypass, covert monitoring, credential/output exfiltration, lateral movement, replay, target drift, privilege revocation race, and immutable-provider-admin risk. Controls require least privilege, strong authentication, device/session risk, time-bound delegation, explicit resource scope, brokered secrets, signed definitions, allowlisted diagnostics, kill/revoke paths, protected evidence, and independent break-glass review.
 
-Operational readiness requires deployable service/agent inventory, telemetry for queue/agent/provider/session state, alerts tied to runbooks, support ownership, vendor escalation, capacity/timeout limits, reconciliation jobs, backup/restore scope, compatibility and agent-update policy, incident exercises, mass-action kill exercise, credential rotation, and tenant-isolation verification. PDA-OPS-018 does not cover these unimplemented services.
+Operational readiness requires deployable service/agent inventory, telemetry for queue/agent/provider/session state, alerts tied to runbooks, support ownership, vendor escalation, capacity/timeout limits, reconciliation jobs, backup/restore scope, compatibility and agent-update policy, incident exercises, mass-action kill exercise, credential rotation, and tenant-isolation verification. PDA-OPS-019 does not cover these unimplemented services.
 
 ## UX and Accessibility Implications
 
@@ -110,4 +110,4 @@ CIR-BACK-021 can be marked Transferred because PDA-CIR-087 through PDA-CIR-089, 
 
 ## Related Meridian Authorities
 
-PDA-FND-002, ADR-0002, ADR-0003, ADR-0014, ADR-0019, PDA-DOM-021, PDA-DOM-013, PDA-DOM-014, PDA-PLT-005, PDA-SEC-001, PDA-DEV-003, PDA-OPS-018, PDA-CIR-087, PDA-CIR-088, `registry/capabilities.json`, `registry/events.json`, `registry/permissions.json`, `registry/endpoint-permissions.json`, and `openapi/first-slice-v1.yaml`.
+PDA-FND-002, ADR-0002, ADR-0003, ADR-0014, ADR-0019, PDA-DOM-021, PDA-DOM-013, PDA-DOM-014, PDA-PLT-005, PDA-SEC-001, PDA-DEV-003, PDA-OPS-019, PDA-CIR-087, PDA-CIR-088, `registry/capabilities.json`, `registry/events.json`, `registry/permissions.json`, `registry/endpoint-permissions.json`, and `openapi/first-slice-v1.yaml`.

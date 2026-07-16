@@ -19,7 +19,7 @@ last_reviewed: 2026-07-16
 - [Service Catalog and Runbook Index](SERVICE_CATALOG_AND_RUNBOOK_INDEX.md) — `PDA-OPS-015` · Draft
 - [Status Page and Customer Communication](STATUS_PAGE_AND_CUSTOMER_COMMUNICATION.md) — `PDA-OPS-016` · Draft
 - [Tenant Migration Exit and Data Repair](TENANT_MIGRATION_EXIT_AND_DATA_REPAIR.md) — `PDA-OPS-017` · Draft
-- [Controlled-Prototype Service Runbooks](CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md) — `PDA-OPS-018` · Draft
+- [Controlled-Prototype Service Runbooks](CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md) — `PDA-OPS-019` · Draft
 
 ## Related Authority
 

@@ -39,6 +39,24 @@ Closes #
 
 <!-- Link an existing RR-### / TD-### entry, or note a new one this PR creates -->
 
+## Documentation impact disposition
+
+<!-- Check exactly one option and replace Evidence with paths, rationale, or a blocking issue. -->
+
+- [ ] Updated in this PR
+- [ ] No documentation impact
+- [ ] Blocking documentation issue
+Evidence: TBD
+
+## Changeset and release impact disposition
+
+<!-- Check exactly one option and replace Evidence with Changeset paths, rationale, or a blocking issue. -->
+
+- [ ] Changeset included
+- [ ] No Changeset required
+- [ ] Blocking Changeset issue
+Evidence: TBD
+
 ## Test evidence
 
 - [ ] `bun install --frozen-lockfile`

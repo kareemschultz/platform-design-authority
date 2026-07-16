@@ -212,6 +212,8 @@ After editing:
 5. Update dispositions.
 6. Do not claim readiness beyond evidence.
 
+Pull requests use `.github/PULL_REQUEST_TEMPLATE.md` and must pass `scripts/validate_pr_governance.py`: exactly one documentation-impact disposition, exactly one Changeset/release disposition, concrete evidence or rationale, an exact lifecycle statement, and the unsupported-readiness acknowledgement.
+
 ## 13. ADR Triggers
 
 Create or amend an ADR for ownership, boundaries, stack, persistence, offline semantics, public contracts, extension execution, deployment, security, privacy, payments, settlement, commercial runtime, or platform-wide lifecycle changes.

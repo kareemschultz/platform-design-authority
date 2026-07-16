@@ -63,6 +63,13 @@ jobs:
           python -m unittest scripts/test_validate_codename_boundary.py
           python scripts/validate_codename_boundary.py
 
+      - name: Test pull-request governance contract
+        run: python -m unittest scripts/test_validate_pr_governance.py
+
+      - name: Validate pull-request governance contract
+        if: github.event_name == 'pull_request'
+        run: python scripts/validate_pr_governance.py --event-path "$GITHUB_EVENT_PATH"
+
       - name: Test and validate canonical document indexes
         run: |
           python -m unittest scripts/test_validate_document_indexes.py

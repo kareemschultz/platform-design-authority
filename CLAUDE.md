@@ -218,5 +218,7 @@ After editing:
 4. Run governance checks.
 5. Update dispositions.
 6. Do not claim readiness beyond evidence.
+
+Pull requests use `.github/PULL_REQUEST_TEMPLATE.md` and must pass `scripts/validate_pr_governance.py`: exactly one documentation-impact disposition, exactly one Changeset/release disposition, concrete evidence or rationale, an exact lifecycle statement, and the unsupported-readiness acknowledgement.
 7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
 8. Record documentation and release-note impact for user-visible, API, configuration, migration, permission, workflow, or troubleshooting changes.

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DEV-010
 title: Product Documentation and Knowledge Architecture
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Developer Platform
 last_reviewed: 2026-07-16
@@ -65,7 +65,9 @@ packages/
 
 ## Change and Release Integration
 
-Every feature pull request declares documentation impact. User-visible, API, permission, migration, configuration, workflow, or troubleshooting changes update documentation in the same pull request or link a blocking documentation issue.
+Every feature pull request declares documentation impact. User-visible, API, permission, migration, configuration, workflow, or troubleshooting changes update documentation in the same pull request or link a blocking documentation issue. The governed PR body checks exactly one documentation disposition and supplies `Evidence:`; `scripts/validate_pr_governance.py` rejects a claimed in-PR update when no governed documentation path changed and rejects a blocking disposition without an issue number.
+
+The parallel Changeset/release disposition makes release metadata explicit without treating a Changeset as product documentation. `Changeset included` requires a changed Markdown record under `.changeset/`; `No Changeset required` requires reviewable rationale; and `Blocking Changeset issue` requires a numbered issue. Reviewers remain responsible for deciding whether the selected disposition matches the behavioral and publication impact.
 
 Use Changesets for package/release metadata in an implementation monorepo. Generate package changelogs and GitHub releases from approved changesets; curate user-facing release notes by audience. ADRs remain the architecture record and are not replaced by changelog entries.
 

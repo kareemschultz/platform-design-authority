@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -217,6 +217,7 @@ The immutable audit defines DCA-001 through DCA-019. PDA-REV-014 is the living d
 | DCA-018 | WS2 capability evidence registration incomplete | Interim registration; PR7 closeout open | PDA-REV-014 §Finding Matrix | Cells overclaim or PR7 reconciliation fails |
 | DCA-019 | Founder/professional/provider/customer evidence absent | Open blocker; packets prepared | PDA-REV-014 §Finding Matrix | Any decision/evidence gate is falsely inferred or genuinely closes |
 | DCA-020 | Required commercial-brand decision and codename boundary absent | Repository control implemented in Draft; FDR-011/external/independent evidence open | PDA-REV-014 §Finding Matrix | Codename leaks, private-package gate fails, or FDR-011 closes |
+| DCA-021 | Required PR documentation/release dispositions unenforced and active PR evidence stale | Repository control and PR-body reconciliation implemented; independent review open | PDA-REV-014 §Finding Matrix | Event validator regresses, disposition mismatches paths, or body evidence drifts |
 
 ## Currently Open Risks
 
@@ -235,6 +236,7 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | TA-054 | Platform-SaaS cash receivables policy (FDR-010) | Founder | Platform Subscription cash collection |
 | TA-055 | FDR-001 through FDR-011 ratification | Founder | Pilot and production |
 | DCA-020 | Commercial product brand and publishing identity (FDR-011) | Founder, qualified trademark advisers, Platform Design Authority | Public product/package/domain/app/documentation identity and pilot/production claims |
+| DCA-021 | Pull-request documentation/release disposition and evidence freshness | Platform Engineering, Developer Platform, Release Management | Any PR merge or release claim without validated current dispositions |
 | FA4-014 | Marketplace payout gating (FDR-008 plus legal/tax/provider review) | Founder | Paid marketplace phase |
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
 | FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |

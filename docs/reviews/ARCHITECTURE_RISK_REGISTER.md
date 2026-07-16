@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-16
 ---
 
 # Architecture Risk Register
@@ -215,11 +215,12 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | RR-003 | apps/native Biome lint exclusion | Implementation | Uniform lint enforcement across workspaces |
 | RR-004 | Design-token-to-CSS generation pipeline | Implementation | Token registry as the single styling source in code |
 | RR-005 | packages/ui catalog completion versus PDA-UX-028 | Implementation | Component catalog conformance |
-| RR-006 | Minimum outbox has no delivery worker, retry/dead-letter policy, delivery observability, or consumer idempotency | Implementation | Event publication/projection claims; WS2 PR4 |
 | RR-007 | Production PostgreSQL RLS role topology and evidence remain deferred | Security/Data | Pilot and production tenant-isolation defense in depth |
 | RR-008 | Production OTP delivery and provider evidence remain blocked by FDR-007 | Founder/External evidence | Production factor delivery and recovery |
 | RR-009 | Independent assistive-technology conformance, penetration testing, and production-content review remain open | External evidence | Pilot and production accessibility/security claims |
 | RR-010 | Party merge, rich identifiers/relationships, duplicate resolution, and privacy-request execution remain beyond WS1 prototype depth | Platform/Party | Any claim or workflow requiring full Party depth |
+
+**RR-006 — Closed at controlled-prototype depth.** PR #74 merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de` after exact-head concurrence at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` and green Documentation Governance plus Meridian Prototype workflows. PDA-APP-023 proves bounded claim/lease recovery, retry/dead-letter behavior, replay authority and replay-scoped receipts, consumer idempotency, safe observability, tenant isolation, and rebuildable Catalog/Inventory consumers. Claude Code's final independent re-audit recorded zero remaining actionable findings in PR #74 comment `4991097241`. This closes only the missing controlled-prototype delivery-runtime risk; RR-007, production capacity/SLO/alerting, multi-replica topology, production retention, restore exercises, and external webhook delivery remain open under their named owners. Reopen RR-006 only if new evidence invalidates the merged delivery or idempotency controls.
 
 **RR-011 — Closed.** PDA-REV-011 audited exact merge `8f9d93f` and found 0 P0/1 P1/5 P2/4 P3. PDA-REV-012 accepted and remediated all ten findings; PR #57 merged at exact-head-green CI, closing issue #56. Removed from the not-fully-closed list above per Register Rule 4; reopens only on new evidence invalidating PDA-REV-012's disposition.
 

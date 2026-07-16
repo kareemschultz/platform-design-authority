@@ -1822,6 +1822,58 @@
       "schema_path": null
     },
     {
+      "name": "platform.import.approved.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "import",
+      "fact": "approved",
+      "major_version": 1,
+      "source_path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
+      "source_heading": "Events",
+      "source_line": 152,
+      "document_status": "Draft",
+      "schema_path": "schemas/events/platform.import.approved.v1.schema.json"
+    },
+    {
+      "name": "platform.import.completed.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "import",
+      "fact": "completed",
+      "major_version": 1,
+      "source_path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
+      "source_heading": "Events",
+      "source_line": 153,
+      "document_status": "Draft",
+      "schema_path": "schemas/events/platform.import.completed.v1.schema.json"
+    },
+    {
+      "name": "platform.import.failed.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "import",
+      "fact": "failed",
+      "major_version": 1,
+      "source_path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
+      "source_heading": "Events",
+      "source_line": 154,
+      "document_status": "Draft",
+      "schema_path": "schemas/events/platform.import.failed.v1.schema.json"
+    },
+    {
+      "name": "platform.import.validated.v1",
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "entity": "import",
+      "fact": "validated",
+      "major_version": 1,
+      "source_path": "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
+      "source_heading": "Events",
+      "source_line": 151,
+      "document_status": "Draft",
+      "schema_path": "schemas/events/platform.import.validated.v1.schema.json"
+    },
+    {
       "name": "platform.legal-entity.created.v1",
       "namespace": "platform",
       "owner": "Platform Kernel",
@@ -2129,7 +2181,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 158,
+      "source_line": 166,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2142,7 +2194,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 157,
+      "source_line": 165,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2155,9 +2207,9 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 159,
+      "source_line": 167,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/platform.sequence.number-issued.v1.schema.json"
     },
     {
       "name": "platform.sequence.number-voided.v1",
@@ -2168,7 +2220,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 162,
+      "source_line": 170,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2181,7 +2233,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 160,
+      "source_line": 168,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2194,7 +2246,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 163,
+      "source_line": 171,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2207,7 +2259,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 161,
+      "source_line": 169,
       "document_status": "Draft",
       "schema_path": null
     },
@@ -2220,7 +2272,7 @@
       "major_version": 1,
       "source_path": "docs/blueprint/01-Platform/SEQUENCE_AND_NUMBERING_SERVICE.md",
       "source_heading": "Events",
-      "source_line": 164,
+      "source_line": 172,
       "document_status": "Draft",
       "schema_path": null
     },

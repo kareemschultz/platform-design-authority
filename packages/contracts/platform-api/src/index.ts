@@ -5,6 +5,7 @@ import { OPENAPI_OPERATION_METADATA } from "./generated";
 import {
 	ActiveContextRequestSchema,
 	ActiveContextSchema,
+	CreateCsvImportSchema,
 	CreateEventReplayRequestSchema,
 	CreateInventoryAdjustmentSchema,
 	CreateOrganizationPartySchema,
@@ -18,11 +19,15 @@ import {
 	CurrentIdentitySchema,
 	EventReplayRequestSchema,
 	IdentifierSchema,
+	ImportCorrectionReportSchema,
+	ImportFindingsSchema,
 	ImportJobSchema,
+	ImportPurgeResultSchema,
 	InventoryAdjustmentSchema,
 	OrganizationSchema,
 	PagedAuditRecordsSchema,
 	PagedEntitlementsSchema,
+	PagedImportsSchema,
 	PagedInventoryAdjustmentsSchema,
 	PagedLocationsSchema,
 	PagedOrganizationsSchema,
@@ -610,15 +615,140 @@ export const archiveProductContract = base
 	.output(ProductSchema);
 
 export const createProductImportContract = base
-	.route({ method: "POST", path: "/v1/product-imports", successStatus: 200 })
+	.route({ method: "POST", path: "/v1/product-imports", successStatus: 202 })
 	.meta({
 		operationId: "postProductImports",
 		permission: "catalog.import.create",
+		requestRef: "#/components/schemas/CreateCsvImport",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 202,
+	})
+	.input(
+		z.object({
+			body: CreateCsvImportSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(ImportJobSchema);
+
+export const listProductImportsContract = base
+	.route({ method: "GET", path: "/v1/product-imports", successStatus: 200 })
+	.meta({
+		operationId: "listProductImports",
+		permission: "catalog.import.read",
+		responseRef: "#/components/schemas/PagedImports",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: ImportJobSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedImportsSchema);
+
+export const getProductImportContract = base
+	.route({
+		method: "GET",
+		path: "/v1/product-imports/{importId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getProductImport",
+		permission: "catalog.import.read",
 		responseRef: "#/components/schemas/ImportJob",
 		successStatus: 200,
 	})
-	.input(z.object({ headers: TenantCommandHeadersSchema }))
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
 	.output(ImportJobSchema);
+
+export const acceptProductImportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/product-imports/{importId}/accept",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "acceptProductImport",
+		permission: "catalog.import.approve",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportJobSchema);
+
+export const cancelProductImportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/product-imports/{importId}/cancel",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "cancelProductImport",
+		permission: "catalog.import.approve",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportJobSchema);
+
+export const purgeProductImportStagingContract = base
+	.route({
+		method: "POST",
+		path: "/v1/product-imports/{importId}/purge-staging",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "purgeProductImportStaging",
+		permission: "catalog.import.purge",
+		responseRef: "#/components/schemas/ImportPurgeResult",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportPurgeResultSchema);
+
+export const listProductImportFindingsContract = base
+	.route({
+		method: "GET",
+		path: "/v1/product-imports/{importId}/findings",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getProductImportFindings",
+		permission: "catalog.import.read",
+		responseRef: "#/components/schemas/ImportFindings",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+			query: PageQuerySchema,
+		})
+	)
+	.output(ImportFindingsSchema);
 
 export const approveProductImportContract = base
 	.route({
@@ -639,6 +769,26 @@ export const approveProductImportContract = base
 		})
 	)
 	.output(ImportJobSchema);
+
+export const getProductImportCorrectionReportContract = base
+	.route({
+		method: "GET",
+		path: "/v1/product-imports/{importId}/correction-report",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getProductImportCorrectionReport",
+		permission: "catalog.import.download",
+		responseRef: "#/components/schemas/ImportCorrectionReport",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportCorrectionReportSchema);
 
 export const listStockBalancesContract = base
 	.route({ method: "GET", path: "/v1/stock-balances", successStatus: 200 })
@@ -769,16 +919,185 @@ export const createOpeningStockImportContract = base
 	.route({
 		method: "POST",
 		path: "/v1/opening-stock-imports",
-		successStatus: 200,
+		successStatus: 202,
 	})
 	.meta({
 		operationId: "postOpeningStockImports",
 		permission: "inventory.import.create",
+		requestRef: "#/components/schemas/CreateCsvImport",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 202,
+	})
+	.input(
+		z.object({
+			body: CreateCsvImportSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(ImportJobSchema);
+
+export const listOpeningStockImportsContract = base
+	.route({
+		method: "GET",
+		path: "/v1/opening-stock-imports",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "listOpeningStockImports",
+		permission: "inventory.import.read",
+		responseRef: "#/components/schemas/PagedImports",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: ImportJobSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedImportsSchema);
+
+export const getOpeningStockImportContract = base
+	.route({
+		method: "GET",
+		path: "/v1/opening-stock-imports/{importId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getOpeningStockImport",
+		permission: "inventory.import.read",
 		responseRef: "#/components/schemas/ImportJob",
 		successStatus: 200,
 	})
-	.input(z.object({ headers: TenantCommandHeadersSchema }))
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
 	.output(ImportJobSchema);
+
+export const acceptOpeningStockImportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/opening-stock-imports/{importId}/accept",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "acceptOpeningStockImport",
+		permission: "inventory.import.approve",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportJobSchema);
+
+export const cancelOpeningStockImportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/opening-stock-imports/{importId}/cancel",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "cancelOpeningStockImport",
+		permission: "inventory.import.approve",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportJobSchema);
+
+export const purgeOpeningStockImportStagingContract = base
+	.route({
+		method: "POST",
+		path: "/v1/opening-stock-imports/{importId}/purge-staging",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "purgeOpeningStockImportStaging",
+		permission: "inventory.import.purge",
+		responseRef: "#/components/schemas/ImportPurgeResult",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportPurgeResultSchema);
+
+export const listOpeningStockImportFindingsContract = base
+	.route({
+		method: "GET",
+		path: "/v1/opening-stock-imports/{importId}/findings",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getOpeningStockImportFindings",
+		permission: "inventory.import.read",
+		responseRef: "#/components/schemas/ImportFindings",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+			query: PageQuerySchema,
+		})
+	)
+	.output(ImportFindingsSchema);
+
+export const approveOpeningStockImportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/opening-stock-imports/{importId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "approveOpeningStockImport",
+		permission: "inventory.import.approve",
+		responseRef: "#/components/schemas/ImportJob",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportJobSchema);
+
+export const getOpeningStockImportCorrectionReportContract = base
+	.route({
+		method: "GET",
+		path: "/v1/opening-stock-imports/{importId}/correction-report",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getOpeningStockImportCorrectionReport",
+		permission: "inventory.import.download",
+		responseRef: "#/components/schemas/ImportCorrectionReport",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ importId: IdentifierSchema }),
+		})
+	)
+	.output(ImportCorrectionReportSchema);
 
 export const listStockCountsContract = base
 	.route({ method: "GET", path: "/v1/stock-counts", successStatus: 200 })
@@ -975,8 +1294,15 @@ export const receiveStockTransferContract = base
 export const ws2CatalogInventoryApiContract = {
 	catalog: {
 		imports: {
+			accept: acceptProductImportContract,
 			approve: approveProductImportContract,
+			cancel: cancelProductImportContract,
+			correctionReport: getProductImportCorrectionReportContract,
 			create: createProductImportContract,
+			findings: listProductImportFindingsContract,
+			get: getProductImportContract,
+			list: listProductImportsContract,
+			purgeStaging: purgeProductImportStagingContract,
 		},
 		products: {
 			activate: activateProductContract,
@@ -1003,7 +1329,18 @@ export const ws2CatalogInventoryApiContract = {
 			list: listStockCountsContract,
 			submit: submitStockCountContract,
 		},
-		imports: { createOpeningStock: createOpeningStockImportContract },
+		imports: {
+			acceptOpeningStock: acceptOpeningStockImportContract,
+			approveOpeningStock: approveOpeningStockImportContract,
+			cancelOpeningStock: cancelOpeningStockImportContract,
+			createOpeningStock: createOpeningStockImportContract,
+			getOpeningStock: getOpeningStockImportContract,
+			listOpeningStock: listOpeningStockImportsContract,
+			openingStockCorrectionReport:
+				getOpeningStockImportCorrectionReportContract,
+			openingStockFindings: listOpeningStockImportFindingsContract,
+			purgeOpeningStockStaging: purgeOpeningStockImportStagingContract,
+		},
 		transfers: {
 			create: createStockTransferContract,
 			dispatch: dispatchStockTransferContract,

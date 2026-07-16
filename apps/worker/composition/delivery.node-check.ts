@@ -14,6 +14,12 @@ const pool = new Pool({ connectionString: workerEnv.DATABASE_URL, max: 1 });
 const eventId = `event_node_${randomUUID()}`;
 
 try {
+	const existing = await pool.query<{ count: number }>(
+		"SELECT count(*)::int AS count FROM platform_event_outbox"
+	);
+	if (existing.rows[0]?.count !== 0) {
+		throw new Error("Node delivery check requires an isolated event database");
+	}
 	await createPostgresOutbox(pool).append({
 		aggregateId: `product_node_${randomUUID()}`,
 		classification: "Internal",

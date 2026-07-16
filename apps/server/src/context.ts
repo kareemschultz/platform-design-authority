@@ -4,6 +4,7 @@ import type {
 	ActiveContextRequest,
 	AuditRecord,
 	AuthorizationDecision,
+	CreateCsvImport,
 	CreateEventReplayRequest,
 	CreateInventoryAdjustment,
 	CreateOrganizationParty,
@@ -17,9 +18,14 @@ import type {
 	CurrentIdentity,
 	Entitlement,
 	EventReplayRequest,
+	ImportCorrectionReport,
+	ImportFindings,
+	ImportJob,
+	ImportPurgeResult,
 	InventoryAdjustment,
 	Location,
 	Organization,
+	PagedImports,
 	Party,
 	PlatformIdentityLink,
 	Product,
@@ -453,12 +459,97 @@ export interface InventoryApplication {
 	}) => Promise<StockCount>;
 }
 
+export interface ImportApplication {
+	acceptImport: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+		version: number;
+	}) => Promise<ImportJob>;
+	approveImport: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+		version: number;
+	}) => Promise<ImportJob>;
+	cancelImport: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+		version: number;
+	}) => Promise<ImportJob>;
+	createImport: (input: {
+		actorUserId: string;
+		body: CreateCsvImport;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportJob>;
+	getImport: (input: {
+		actorUserId: string;
+		contextId: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportJob>;
+	getImportCorrectionReport: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportCorrectionReport>;
+	listImportFindings: (input: {
+		actorUserId: string;
+		contextId: string;
+		importId: string;
+		cursor?: string;
+		limit: number;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportFindings>;
+	listImports: (input: {
+		actorUserId: string;
+		contextId: string;
+		cursor?: string;
+		limit: number;
+		sessionId: string;
+		state?: ImportJob["state"];
+		target: "Product" | "OpeningStock";
+	}) => Promise<PagedImports>;
+	purgeImportStaging: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		importId: string;
+		sessionId: string;
+		target: "Product" | "OpeningStock";
+	}) => Promise<ImportPurgeResult>;
+}
+
 export interface ServerApplication
 	extends AuditApplication,
 		CatalogApplication,
 		EntitlementsApplication,
 		EventReplayApplication,
 		IdentitySessionsApplication,
+		ImportApplication,
 		InventoryApplication,
 		PartyApplication,
 		TenancyApplication {}

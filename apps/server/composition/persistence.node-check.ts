@@ -10,10 +10,18 @@ import {
 import { createCatalogRepository } from "@meridian/persistence-catalog-postgres";
 import { createInventoryRepository } from "@meridian/persistence-inventory-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
+import { createImportRepository } from "@meridian/persistence-platform-import-export-postgres";
+import { createNumberingRepository } from "@meridian/persistence-platform-numbering-postgres";
 import type { OutboxEvent } from "@meridian/platform-events";
+import {
+	CSV_IMPORT_LIMITS,
+	createImportService,
+} from "@meridian/platform-import-export";
+import { createNumberingService } from "@meridian/platform-numbering";
 import { env } from "@meridian/tooling-env/server";
 import { Pool, type PoolClient } from "pg";
 import { type MigrationStream, runMigrationStreams } from "./migrations";
+import { createImportReferenceAllocator } from "./numbering";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
 const databaseName = `meridian_pr2_node_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -56,24 +64,106 @@ try {
 		outbox: string | null;
 		entitlements: string | null;
 		inventory: string | null;
+		importJob: string | null;
+		numberSequence: string | null;
 		party: string | null;
 		role: string | null;
 		tenancy: string | null;
 		tenancyReceipts: string | null;
 	}>(
-		"SELECT to_regclass('public.platform_audit_record')::text AS audit, to_regclass('public.catalog_product')::text AS catalog, to_regclass('public.inventory_stock_movement')::text AS inventory, to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_entitlement')::text AS entitlements, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_role')::text AS role, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
+		"SELECT to_regclass('public.platform_audit_record')::text AS audit, to_regclass('public.catalog_product')::text AS catalog, to_regclass('public.inventory_stock_movement')::text AS inventory, to_regclass('public.platform_import_job')::text AS \"importJob\", to_regclass('public.platform_number_sequence')::text AS \"numberSequence\", to_regclass('public.platform_event_outbox')::text AS outbox, to_regclass('public.platform_entitlement')::text AS entitlements, to_regclass('public.party_record')::text AS party, to_regclass('public.platform_role')::text AS role, to_regclass('public.platform_tenant')::text AS tenancy, to_regclass('public.platform_tenancy_command_receipt')::text AS \"tenancyReceipts\""
 	);
 	assert.deepEqual(ownerTables.rows[0], {
 		audit: "platform_audit_record",
 		catalog: "catalog_product",
 		entitlements: "platform_entitlement",
+		importJob: "platform_import_job",
 		inventory: "inventory_stock_movement",
+		numberSequence: "platform_number_sequence",
 		outbox: "platform_event_outbox",
 		party: "party_record",
 		role: "platform_role",
 		tenancy: "platform_tenant",
 		tenancyReceipts: "platform_tenancy_command_receipt",
 	});
+
+	assert.equal(CSV_IMPORT_LIMITS.rows, 1000);
+	let importId = 0;
+	const importService = createImportService({
+		clock: () => new Date("2026-07-16T12:00:00.000Z"),
+		hash: { sha256: () => Promise.resolve("a".repeat(64)) },
+		ids: {
+			create(kind) {
+				importId += 1;
+				return `node_${kind}_${importId}`;
+			},
+		},
+		scanner: { scan: () => Promise.resolve("Clean") },
+		targets: {
+			OpeningStock: {
+				commit: () => Promise.resolve({ targetId: "node_stock" }),
+			},
+			Product: { commit: () => Promise.resolve({ targetId: "node_product" }) },
+		},
+		unitOfWork: createPostgresUnitOfWork(pool, (client) => ({
+			events: { append: () => Promise.resolve("inserted") },
+			references: createImportReferenceAllocator(client),
+			repository: createImportRepository(client),
+		})),
+	});
+	const nodeCsv =
+		"source_key,name,variant_name,sku,barcode,barcode_scheme\nnode-1,Node Product,Default,NODE-SKU,,";
+	const nodeImport = await importService.create({
+		actorUserId: "node_uploader",
+		content: nodeCsv,
+		contentType: "text/csv",
+		correlationId: "correlation_node_import",
+		fileName: "node.csv",
+		idempotencyKey: "node-import-create",
+		manifest: {
+			decimalSeparator: ".",
+			delimiter: ",",
+			encoding: "UTF-8",
+			locale: "en-GY",
+			newline: "LF",
+			quote: '"',
+			timezone: "America/Guyana",
+		},
+		organizationId: "organization_node_import",
+		sha256: "a".repeat(64),
+		target: "Product",
+		tenantId: "tenant_node_import",
+	});
+	assert.equal(nodeImport.state, "ReadyForApproval");
+
+	await pool.query(
+		"INSERT INTO platform_number_sequence (tenant_id, id, organization_id, owner_namespace, record_type, sequence_key, prefix, padding, current_value, next_value, state, version, classification, created_at, updated_at) VALUES ('tenant_node_numbering', 'sequence_node_numbering', 'organization_node_numbering', 'test', 'invoice', 'invoice', 'N-', 4, 0, 1, 'Active', 1, 'Confidential', now(), now())"
+	);
+	let numberingId = 0;
+	const numbering = createNumberingService({
+		clock: () => new Date(),
+		ids: {
+			create(kind) {
+				numberingId += 1;
+				return `node_numbering_${kind}_${numberingId}`;
+			},
+		},
+		unitOfWork: createPostgresUnitOfWork(pool, (client) => ({
+			events: createPostgresOutbox(client),
+			repository: createNumberingRepository(client),
+		})),
+	});
+	const nodeNumber = await numbering.allocate({
+		actorUserId: "node_numbering_user",
+		businessRecordId: "node_invoice_1",
+		correlationId: "correlation_node_numbering",
+		idempotencyKey: "node-number-allocation",
+		organizationId: "organization_node_numbering",
+		sequenceId: "sequence_node_numbering",
+		sourceCommandId: "invoice.issue:node-number-allocation",
+		tenantId: "tenant_node_numbering",
+	});
+	assert.equal(nodeNumber.value, "N-0001");
 
 	const failingStream: MigrationStream = {
 		id: "test.node-failure",

@@ -32,12 +32,16 @@ function context(input?: {
 }): Context {
 	return {
 		application: {
+			acceptImport: () => Promise.reject(new Error("not used")),
 			activateProduct: () => Promise.reject(new Error("not used")),
+			approveImport: () => Promise.reject(new Error("not used")),
 			approveInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			approveStockCount: () => Promise.reject(new Error("not used")),
 			archiveProduct: () => Promise.reject(new Error("not used")),
+			cancelImport: () => Promise.reject(new Error("not used")),
 			createEventReplay: () => Promise.reject(new Error("not used")),
 			createIdentityLink: () => Promise.reject(new Error("not used")),
+			createImport: () => Promise.reject(new Error("not used")),
 			createInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			createOrganizationParty: () => Promise.reject(new Error("not used")),
 			createPersonParty: () => Promise.reject(new Error("not used")),
@@ -67,6 +71,8 @@ function context(input?: {
 				partyId: null,
 				sessionId,
 			}),
+			getImport: () => Promise.reject(new Error("not used")),
+			getImportCorrectionReport: () => Promise.reject(new Error("not used")),
 			getInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			getOrganization: () => Promise.reject(new Error("not used")),
 			getParty: () => Promise.reject(new Error("not used")),
@@ -77,6 +83,8 @@ function context(input?: {
 			listAuditRecords: async () => ({ items: [], nextCursor: null }),
 			listCurrentUserSessions: async () => ({ items: [], nextCursor: null }),
 			listEntitlements: async () => ({ items: [], nextCursor: null }),
+			listImportFindings: () => Promise.reject(new Error("not used")),
+			listImports: async () => ({ items: [], nextCursor: null }),
 			listInventoryAdjustments: async () => ({ items: [], nextCursor: null }),
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
@@ -87,6 +95,7 @@ function context(input?: {
 			listStockCounts: async () => ({ items: [], nextCursor: null }),
 			listStockTransfers: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
+			purgeImportStaging: async () => ({ findings: 0, rows: 0, waves: 0 }),
 			receiveStockTransfer: () => Promise.reject(new Error("not used")),
 			reverseInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			revokeCurrentUserSession: () => Promise.resolve(),
@@ -145,7 +154,10 @@ describe("appRouter contract surface", () => {
 			"sessions",
 			"users",
 		]);
-		expect(Object.keys(appRouter.catalog).sort()).toEqual(["products"]);
+		expect(Object.keys(appRouter.catalog).sort()).toEqual([
+			"imports",
+			"products",
+		]);
 		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
 			"activate",
 			"archive",
@@ -154,13 +166,36 @@ describe("appRouter contract surface", () => {
 			"list",
 			"update",
 		]);
+		expect(Object.keys(appRouter.catalog.imports).sort()).toEqual([
+			"accept",
+			"approve",
+			"cancel",
+			"correctionReport",
+			"create",
+			"findings",
+			"get",
+			"list",
+			"purgeStaging",
+		]);
 		expect(Object.keys(appRouter.entitlements).sort()).toEqual(["list"]);
 		expect(Object.keys(appRouter.events).sort()).toEqual(["createReplay"]);
 		expect(Object.keys(appRouter.inventory).sort()).toEqual([
 			"adjustments",
 			"balances",
 			"counts",
+			"imports",
 			"transfers",
+		]);
+		expect(Object.keys(appRouter.inventory.imports).sort()).toEqual([
+			"acceptOpeningStock",
+			"approveOpeningStock",
+			"cancelOpeningStock",
+			"createOpeningStock",
+			"getOpeningStock",
+			"listOpeningStock",
+			"openingStockCorrectionReport",
+			"openingStockFindings",
+			"purgeOpeningStockStaging",
 		]);
 		expect(Object.keys(appRouter.audit).sort()).toEqual(["list"]);
 		expect(Object.keys(appRouter.sessions).sort()).toEqual(["list", "revoke"]);
@@ -300,6 +335,48 @@ describe("appRouter contract surface", () => {
 			contextId: "context_unit_test_0001",
 			idempotencyKey: "idempotency-catalog-unit-0001",
 			sessionId: "session_unit_test_0001",
+		});
+	});
+
+	test("dispatches retention purge only through the dedicated current-context permission", async () => {
+		let received:
+			| Parameters<Context["application"]["purgeImportStaging"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.catalog.imports.purgeStaging,
+			{
+				headers: {
+					"idempotency-key": "idempotency-import-purge-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { importId: "import_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						purgeImportStaging(input) {
+							received = input;
+							return Promise.resolve({ findings: 2, rows: 1, waves: 1 });
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toEqual({ findings: 2, rows: 1, waves: 1 });
+		expect(permission).toBe("catalog.import.purge");
+		expect(received).toMatchObject({
+			actorUserId: "user_unit_test_000001",
+			contextId: "context_unit_test_0001",
+			idempotencyKey: "idempotency-import-purge-0001",
+			importId: "import_unit_test_0001",
+			sessionId: "session_unit_test_0001",
+			target: "Product",
 		});
 	});
 

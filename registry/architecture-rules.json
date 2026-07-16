@@ -340,6 +340,21 @@
       "migration_directory": "packages/persistence/platform-events-postgres/src/migrations"
     },
     {
+      "id": "platform-import-export-postgres",
+      "package": "packages/persistence/platform-import-export-postgres",
+      "package_name": "@meridian/persistence-platform-import-export-postgres",
+      "owner": "platform.import-export",
+      "owner_package": "@meridian/platform-import-export",
+      "tables": [
+        "platform_import_job",
+        "platform_import_row",
+        "platform_import_finding",
+        "platform_import_wave",
+        "platform_import_command_receipt"
+      ],
+      "migration_directory": "packages/persistence/platform-import-export-postgres/src/migrations"
+    },
+    {
       "id": "party-postgres",
       "package": "packages/persistence/party-postgres",
       "package_name": "@meridian/persistence-party-postgres",
@@ -395,7 +410,10 @@
       "package_name": "@meridian/persistence-platform-numbering-postgres",
       "owner": "platform.numbering",
       "owner_package": "@meridian/platform-numbering",
-      "tables": [],
+      "tables": [
+        "platform_number_sequence",
+        "platform_number_allocation"
+      ],
       "migration_directory": "packages/persistence/platform-numbering-postgres/src/migrations"
     }
   ],

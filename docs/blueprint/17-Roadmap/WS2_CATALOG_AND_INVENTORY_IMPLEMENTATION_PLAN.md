@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -16,7 +16,7 @@ This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section
 
 This is a **Draft plan for a controlled prototype**. It may guide only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, close FDR-004, establish a contractual service level, or claim the first slice is complete. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and WS2 stops for disposition.
 
-Issue #62 owns the merged plan; issues #64, #66, #68, and #70 own merged PR1-PR4 execution evidence; issue #71 owns active PR5 import and Numbering implementation; and issues #72-#73 own blocked PR6-PR7. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on every merged implementation head through PR #74. Every remaining implementation PR still requires exact-head independent review before merge.
+Issue #62 owns the merged plan; issues #64, #66, #68, #70, and #71 own merged PR1-PR5 execution evidence; issue #72 owns active PR6 web-experience implementation; and issue #73 owns blocked PR7 closeout. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on every merged implementation head through PR #76. Every remaining implementation PR still requires exact-head independent review before merge.
 
 ### 1.1 Implementation progress
 
@@ -26,8 +26,9 @@ Issue #62 owns the merged plan; issues #64, #66, #68, and #70 own merged PR1-PR4
 | PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
 | PR3 — Inventory ledger and workflows | Merged as PR #69 after exact-head Claude Code concurrence | Retain Inventory core/persistence/API, immutable ledger/reversal, workflow, rebuild, concurrency, tenant-isolation, offline-boundary, Bun/Node, and PostgreSQL evidence; no PR4 delivery claim |
 | PR4 — durable delivery and projections | Merged as PR #74 after exact-head Claude Code concurrence | Merge commit `7202fc819b70982c013e1ca11a4fcc136e01e2de`; PDA-APP-023 plus final re-audit comment `4991097241` close RR-006 at controlled-prototype depth. RR-007 and production delivery gates remain open. |
-| PR5 — bounded imports and online Numbering | Remediation active on issue #71 after exact-head review; concurrence withheld | Eighteen Product/opening-stock operations, bounded CSV dry run/approval/owner-command waves, list/findings/cancel/reconcile/accept/purge lifecycle, Audit/report evidence, atomic import references, owner migrations, and Strict Online Numbering must pass renewed exact-head review; PDA-APP-024 and PDA-OPS-019 record proof and recovery limits. |
-| PR6–PR7 | Not started; blocked on preceding merge | Execute in order; no later phase may be pre-closed by earlier evidence |
+| PR5 — bounded imports and online Numbering | Merged as PR #76 after exact-head Claude Code concurrence | Merge commit `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`; retain bounded CSV, owner-command, atomic import-reference, strict online Numbering, tenant, recovery, and disclosed residual evidence in PDA-APP-024. |
+| PR6 — Product and Inventory web experience | Active on issue #72; exact-head review and merge pending | Implement section 11 over generated clients; PDA-APP-025 records only reproduced UI-pattern, accessibility-target, browser, help, performance, and direct-denial evidence. |
+| PR7 — verification and controlled-prototype closeout | Blocked on merged PR6 | Execute the complete section 14 matrix and program/risk/roadmap propagation without pre-closing WS2. |
 
 ### 1.2 Governing sources
 

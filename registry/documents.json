@@ -470,10 +470,10 @@
       "document_id": "PDA-APP-001",
       "path": "docs/blueprint/19-Appendices/README.md",
       "title": "Appendices Section Index",
-      "version": "0.10.0",
+      "version": "0.11.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-12",
+      "last_reviewed": "2026-07-16",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -697,6 +697,22 @@
         "ADR-0016",
         "ADR-0020",
         "ADR-0027"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-APP-025",
+      "path": "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+      "title": "WS2 PR6 Product and Inventory Web Experience Evidence",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Frontend Platform",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0020",
+        "ADR-0022"
       ],
       "review_evidence": null
     },
@@ -2163,7 +2179,7 @@
       "document_id": "PDA-ENGR-013",
       "path": "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.21.0",
+      "version": "0.22.0",
       "status": "Draft",
       "owner": "Platform Engineering",
       "last_reviewed": "2026-07-16",
@@ -3395,7 +3411,7 @@
       "document_id": "PDA-RDM-009",
       "path": "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md",
       "title": "WS2 Implementation Plan: Catalog and Inventory Ledger",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-16",

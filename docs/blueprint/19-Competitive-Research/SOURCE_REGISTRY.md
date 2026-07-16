@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-006
 title: Competitive Research Source Registry
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -228,8 +228,16 @@ The page-level citations remain in their research documents. These stable record
 | SRC-038 | FreshBooks | official help | https://support.freshbooks.com/hc/en-us/articles/360048900792-How-do-I-use-Bank-Reconciliation | 2026-07-16 | documented | plan, edition and regional behavior vary |
 | SRC-039 | Zoho Books | official help | https://www.zoho.com/us/books/help/banking/ | 2026-07-16 | documented | US surface; edition, integration and regional behavior vary |
 | SRC-040 | Sage Accounting | official help | https://help.sbc.sage.com/en-us/accounting/banking/extra-bank-reconcile.html | 2026-07-16 | documented | one Sage product/region; no suite-wide parity claim |
+| SRC-041 | ServiceNow IT Service Management | official documentation | https://www.servicenow.com/docs/r/it-service-management/incident-management/c_IncidentManagement.html | 2026-07-16 | documented | Australia release; plugins, roles, edition and configured tenant behavior vary |
+| SRC-042 | Freshservice / Freshservice for MSPs | official support/developer documentation | https://support.freshservice.com/support/solutions/articles/50000012090-change-account-modes-on-multiple-requester-portals | 2026-07-16 | documented | ESM, MSP mode and multi-account isolation differ; no tenant observed |
+| SRC-043 | HaloPSA | official guide index | https://halopsa.com/guides/ | 2026-07-16 | documented | guide index supports capability discovery; edition/configuration behavior unobserved |
+| SRC-044 | ConnectWise PSA | official documentation | https://docs.connectwise.com/ConnectWise_Documentation/060/010/010/001 | 2026-07-16 | documented | documentation spans editions/versions; configured integrations and finance behavior unobserved |
+| SRC-045 | NinjaOne Endpoint Management | official documentation | https://www.ninjaone.com/docs/endpoint-management/users/user-roles-and-permissions/ | 2026-07-16 | documented | subscription, agent, OS and enrollment affect behavior; no remote session executed |
+| SRC-046 | SuperOps | official help/developer documentation | https://support.superops.com/en/articles/7054997-using-scripts-in-superops | 2026-07-16 | documented | public help only; role defaults, execution evidence and client isolation untested |
+| SRC-047 | Datto RMM | official documentation | https://rmm.datto.com/help/en/Content/3NEWUI/Setup/SecurityLevels.htm | 2026-07-16 | documented | account/security-level configuration and agent modes vary; no provider environment tested |
+| SRC-048 | IT Glue | official security documentation | https://www.itglue.com/resources/itglue-security/ | 2026-07-16 | documented/vendor-asserted | security/control claims not independently verified; tenant and offboarding workflow unobserved |
 
-SRC-001 through SRC-040 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in the initial waves.
+SRC-001 through SRC-048 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in these waves.
 
 ## 12. Review and Maintenance
 

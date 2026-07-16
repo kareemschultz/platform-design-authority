@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.12.0
+version: 0.13.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -29,7 +29,7 @@ No severity is downgraded merely because later files exist. File existence is no
 
 ## Live-Branch Verification
 
-The immutable audit cutoff remains `c9faa31`. This disposition was reverified on 2026-07-16 after the initial research synthesis (`b70b879`), qualified research closeout (`f98b1e2`), depth/status remediation (`87d995b`), canonical-navigation checkpoint (`c87b04a`), and product-documentation checkpoint (`6b76684`). The current generated registry contains 442 governed records: 412 Draft, 28 Proposed, and two Superseded. It contains all 86 competitive-research documents. The research ledger now records CIR-LED-0001 through CIR-LED-0010, while CIR-BACK-021 through CIR-BACK-025 preserve the comparator families and direct-observation work that remain open.
+The immutable audit cutoff remains `c9faa31`. This disposition was reverified on 2026-07-16 after the initial research synthesis (`b70b879`), qualified research closeout (`f98b1e2`), depth/status remediation (`87d995b`), canonical-navigation checkpoint (`c87b04a`), and product-documentation checkpoint (`6b76684`). The current generated registry contains 445 governed records: 415 Draft, 28 Proposed, and two Superseded. It contains 89 competitive-research documents. The research ledger now records CIR-LED-0001 through CIR-LED-0011. CIR-BACK-021 is transferred with documented evidence; CIR-BACK-022 through CIR-BACK-025 and direct-observation/independent-review work remain open.
 
 PR #75 at `f98b1e2` has passing `meridian` and both `validate-docs` checks. Local commits are newer than that PR head and therefore require their own fresh CI run before merge. The branch still does not ratify authority, close remaining research families, supply founder/external decisions, or prove pilot/production readiness.
 
@@ -37,7 +37,9 @@ The navigation checkpoint adds canonical linked catalogs for every governed docu
 
 The product-documentation checkpoint adds a separate nine-page `PDOC-*` manifest, MDX build-time metadata schema, implementation/version/evidence binding, internal-route and registry-reference validation, and seeded failure cases. Stale pre-WS1 claims were corrected to the `4045474` implementation baseline. The API page now keeps a separately labeled implemented-runtime view and generates a 99-operation Draft-contract table from canonical OpenAPI. Generator freshness and content-derived operation parity are CI-enforced without duplicating the operation list in metadata. This implements DCA-010's repository controls; independent closure review and broader release/task content remain open.
 
-The research-registration checkpoint adds the missing accounting ledger entry, stable first-party source records SRC-033 through SRC-040, and an exact result index covering all 67 durable outputs and all 18 Transferred backlog questions. Six seeded tests reject orphan outputs, unregistered transfers, false transfers, and unresolved ledger/source references. This is structural traceability, not independent acceptance of the research conclusions.
+The research-registration checkpoint adds stable first-party source records through SRC-048 and an exact result index covering all 70 durable outputs and all 19 Transferred backlog questions. Six seeded tests reject orphan outputs, unregistered transfers, false transfers, and unresolved ledger/source references. This is structural traceability, not independent acceptance of the research conclusions.
+
+The ITSM/MSP/RMM continuation adds a capability matrix, managed-service escalation and remote-action workflow, threat boundary, implementation findings, eight first-party source records, and exact ledger/result/backlog registration. It preserves Service, Assets/Maintenance, Platform, Developer Platform, Security, and Commercial ownership; introduces no identifiers or first-slice scope; and explicitly lacks tenant/agent observation and independent review. This reduces DCA-008 and transfers CIR-BACK-021 without closing the remaining families.
 
 The capability-source consolidation checkpoint folds Party, Payment, Business DNA, and Marketplace identifiers into PDA-DOM-021 version 0.4.0, preserves PDA-DOM-090 as Superseded provenance, and leaves PDA-MKT-010 as scoped architecture rather than a parser input. Before/after registry comparison reports 497 capabilities, zero added or removed identifiers, zero semantic metadata changes, and one current `capability_sources` entry. Independent review remains required before DCA-012 closure.
 
@@ -64,7 +66,7 @@ The document-class checkpoint defines nine canonical classes over thirteen reusa
 | DCA-005 | High | Accepted | Partially implemented: all families registered; admitted contract/evidence gaps remain | Every capability family has an explicit readiness depth and admission trigger; no speculative first-slice expansion |
 | DCA-006 | High | Accepted | Implemented in Draft; nine-class sample self-review passes, independent review open | Governed artifact-class standard, templates, validator behavior, and sample review evidence agree |
 | DCA-007 | High | Accepted | Initial waves registered; independent review and continuing backlog remain | Every research wave has a ledger record; affected backlog entries have honest states and exact output/source links |
-| DCA-008 | High | Partially Accepted | Workforce and platform-service gaps reduced after cutoff; ITSM/MSP/RMM, IAM, infrastructure/IPAM/DCIM, mobile/offline, and named-product depth remain | Reviewed matrices/workflows/findings and dated source ledger for each remaining research family |
+| DCA-008 | High | Partially Accepted | Workforce, platform-service, and documented ITSM/MSP/RMM gaps reduced; IAM, infrastructure/IPAM/DCIM, mobile/offline, named-product depth, direct observation, and independent review remain | Reviewed matrices/workflows/findings and dated source ledger for each remaining research family |
 | DCA-009 | High | Accepted | Implemented; independent closure review pending | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |
 | DCA-010 | High | Accepted | Implemented; generated 99-operation Draft reference and all MDX controls pass, independent closure review pending | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
 | DCA-011 | High | Accepted | Four implemented service groups registered with draft procedures; review, live telemetry, tested alerts, escalation, and exercises remain open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |

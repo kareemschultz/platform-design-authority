@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-007
 title: Competitive Research Ledger
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -235,6 +235,28 @@ Confidence is not approval. A high-confidence observation may still be unsuitabl
 - Follow-up: independent review, qualified accounting evidence, and implementation evaluation before any consequential automation.
 - Revalidate when: a related Finance or AI workstream begins, a cited automation model changes materially, or twelve months elapse.
 
+### CIR-LED-0011 — ITSM, MSP, and RMM documented research transferred
+
+- Status: In Review
+- Completed: 2026-07-16
+- Researcher: Codex with Platform Design Authority, Service, Assets/Maintenance, Security, Operations, and independent review pending
+- Wave: Continuing study — ITSM / MSP / RMM
+- Question: Which service-management, managed-service, device-operations, remote-action, automation, credential, and escalation patterns transfer without collapsing domain ownership or operator authority?
+- Products: ServiceNow, Freshservice/Freshservice for MSPs, HaloPSA, ConnectWise PSA, NinjaOne, SuperOps, Datto RMM, and IT Glue
+- Sources: SRC-041 through SRC-048; page-level first-party citations in PDA-CIR-087
+- Evidence mode: documented public product, help, developer, security, and administration evidence; internal architectural synthesis
+- Access limitations: no configured tenants, paid editions, remote sessions, agent deployments, provider sandbox/API calls, accessibility review, scale test, support evidence, or Guyana availability review
+- Finding: incident/problem/change, agreement/SLA, configuration/device, credential, and remote-operation identities must remain separate; consequential remote work requires target-bound authority, consent/presence policy, signed/versioned action, uncertainty reconciliation, and protected evidence.
+- Contradictions: products combine PSA/RMM for operator efficiency while Meridian ownership and tenant rules prohibit the combined UI from becoming a universal data or authority owner; several products expose broad administrator or unattended-action modes that Meridian must constrain rather than copy.
+- Confidence: Medium for documented workflow/control patterns; Low for configured defaults, effectiveness, edition parity, accessibility, and operational quality
+- Meridian impact:
+  - outputs: PDA-CIR-087 through PDA-CIR-089;
+  - capabilities: research input for `service.*`, `maintenance.*`, `platform.devices`, `platform.jobs`, `platform.secrets`, `platform.audit`, `platform.delegation`, `engine.workflow`, `engine.automation`, and `developer.*`;
+  - contracts: no identifiers or endpoints introduced; registration and ADR review required at roadmap admission;
+  - implementation: no first-slice expansion and no provider selection.
+- Follow-up: independent review, role-based customer/technician evidence, lawful tenant/agent trials, provider/security/deployment evaluation, and roadmap authority.
+- Revalidate when: Service/MSP/RMM scope is proposed, a remote-action provider is evaluated, a cited edition changes materially, or 2027-07-16, whichever occurs first.
+
 ## 6.1 Stable Research Result Index
 
 This index is the machine-checked registration boundary between backlog questions, durable outputs, ledger evidence, and stable source records. `Transferred` means the outputs are registered; it does not mean the Draft findings are approved or implementation-ready.
@@ -249,6 +271,7 @@ This index is the machine-checked registration boundary between backlog question
 | RES-006 | Workforce | Transferred | CIR-LED-0007 | CIR-BACK-014 | PDA-CIR-060 through PDA-CIR-069 | SRC-022 through SRC-025 | Independent review and qualified jurisdiction evidence pending |
 | RES-007 | Platform services | Transferred | CIR-LED-0008 | CIR-BACK-017 through CIR-BACK-019 | PDA-CIR-070 through PDA-CIR-079 | SRC-026 through SRC-031 | Independent review and controlled prototype evidence pending |
 | RES-008 | Cross-domain synthesis | Transferred | CIR-LED-0009 | CIR-BACK-020 | PDA-CIR-080 through PDA-CIR-086 | SRC-001 through SRC-040 | Independent review; direct mobile/offline study remains CIR-BACK-025 |
+| RES-009 | ITSM/MSP/RMM | Transferred | CIR-LED-0011 | CIR-BACK-021 | PDA-CIR-087 through PDA-CIR-089 | SRC-041 through SRC-048 | Independent review, direct tenant/agent observation, provider evaluation and roadmap admission pending |
 
 ## 6.2 Registration Invariants
 

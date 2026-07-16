@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-008
 title: Competitive Research Backlog
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -258,7 +258,7 @@ Each entry records:
 ### CIR-BACK-021 — ITSM, MSP, RMM, and managed-device operations
 
 - Priority: P2
-- Status: Planned
+- Status: Transferred
 - Domain: Service / Assets / Maintenance / Developer Platform
 - Trigger: before managed-service, service-desk, or remote-device operations enter roadmap scope
 - Question: What should Meridian learn from ServiceNow, Freshservice, HaloPSA, SuperOps, NinjaOne, ConnectWise, Datto, and IT Glue about incident/problem/change relationships, service agreements, configuration evidence, remote actions, automation, credentials, tenancy, and operator authority?
@@ -267,6 +267,7 @@ Each entry records:
 - Dependencies: Party/domain-role boundaries, ADR-0019, service ownership, security review, and explicit roadmap admission.
 - Owner: Platform Design Authority with Service, Assets, Maintenance, Developer Platform, and Security owners
 - Completion: reviewed comparison with product/edition limits, stable sources, authority boundaries, failure recovery, and no implied first-slice expansion.
+- Transfer evidence: CIR-LED-0011, RES-009, PDA-CIR-087 through PDA-CIR-089, and SRC-041 through SRC-048. Independent review, direct tenant/agent observation, and any roadmap admission remain open.
 
 ### CIR-BACK-022 — IAM and identity-administration comparison
 

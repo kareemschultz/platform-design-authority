@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-001
 title: Competitive Intelligence and Product Research
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -232,8 +232,9 @@ The initial research program was authored through 2026-07-16. All artifacts rema
 | Workforce | PDA-CIR-060 through PDA-CIR-069 | HR, payroll, scheduling, expenses, teardown and findings |
 | Platform services | PDA-CIR-070 through PDA-CIR-079 | AI, automation, analytics, search, inbox, collaboration, docs, teardown and findings |
 | Cross-domain synthesis | PDA-CIR-080 through PDA-CIR-086 | differentiation, advantage, dispositions, shared workflows/recovery/review and closeout |
+| Continuing ITSM/MSP/RMM study | PDA-CIR-087 through PDA-CIR-089 | capability comparison, escalation/remote-action workflow, threat boundary and implementation findings |
 
-The initial section contains 86 uniquely identified Markdown documents. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial nine-wave writing set and records access limits, omitted comparator families, continuing research backlog, and external evidence gates.
+The section contains 89 uniquely identified Markdown documents, including the first continuing study after the initial nine-wave set. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial writing set and records access limits, omitted comparator families, continuing research backlog, and external evidence gates.
 
 ## 14. Artifact Catalog
 
@@ -350,3 +351,9 @@ This catalog is the canonical navigation surface for the research artifacts. Ide
 - [Cross-Domain Failure and Recovery Patterns](CROSS_DOMAIN_FAILURE_AND_RECOVERY_PATTERNS.md) — `PDA-CIR-084` · Draft
 - [Cross-Domain Review Queue Standard](CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md) — `PDA-CIR-085` · Draft
 - [Initial Competitive Research Program Closeout](COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md) — `PDA-CIR-086` · Draft
+
+### 14.10 Continuing studies
+
+- [ITSM, MSP, and RMM Competitive Capability Matrix](ITSM_MSP_RMM_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-087` · Draft
+- [Managed-Service Escalation and Remote-Action Workflow Reference](MANAGED_SERVICE_ESCALATION_AND_REMOTE_ACTION_WORKFLOW_REFERENCE.md) — `PDA-CIR-088` · Draft
+- [ITSM, MSP, and RMM Implementation Findings](ITSM_MSP_RMM_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-089` · Draft

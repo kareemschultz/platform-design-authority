@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.9.0
+version: 0.10.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -51,7 +51,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 | Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled | Founder decisions, legal entity, pricing, contracts, provider, tax, custody/payout gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
 | Competitive research | Initial nine-wave writing set plus ITSM/MSP/RMM, IAM, infrastructure/DCIM/IPAM, named-product lineage, and device/offline continuations are In Review with exact source/ledger/result/backlog reconciliation; CIR-BACK-021 through CIR-BACK-025 are transferred | direct tenant/agent/provider/scanner/controller/device observation, owner/provider decisions, protocol/security/accessibility/operational trials, customer evidence, volatile-source refresh, and independent review |
-| Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; the API page preserves an implemented-runtime view and a generated 99-operation canonical Draft contract table | Full task/admin/migration/troubleshooting depth, later-workstream release evidence, editorial/accessibility review |
+| Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; the API page preserves an implemented-runtime view and a generated 100-operation canonical Draft contract table | Full task/admin/migration/troubleshooting depth, later-workstream release evidence, editorial/accessibility review |
 | Testing and evidence | Thirteen-dimension matrix supports planned, partial, evidenced, not-applicable, and depth-deferred states; 223 cells have evidence | Complete remaining WS2 cells, WS3–WS7 sources, scale/security/accessibility/operations results, external evidence |
 | Roadmap and program control | Workstreams and project exist; current status is non-authoritative | Continuous evidence-cutoff updates, generated status feasibility, founder/customer sequencing decisions |
 
@@ -68,7 +68,7 @@ The repository has useful draft machine contracts:
 - 497 capabilities;
 - 204 canonical events;
 - 100 permissions;
-- 99 OpenAPI operations and endpoint-authority mappings;
+- 100 OpenAPI operations and endpoint-authority mappings;
 - 103 included first-slice capabilities and 13 explicit deferrals;
 - architecture dependency and persistence-owner rules with no registered exceptions.
 

@@ -8,16 +8,21 @@ import {
 } from "./inventory-adjustments";
 
 const adjustment = {
+	approvedByUserId: null,
 	conversionSourceId: null,
+	createdAt: "2026-07-16T12:00:00.000Z",
+	createdByUserId: "user_maker_123456",
 	id: "adjustment_123456",
 	locationId: "location_12345678",
 	movementId: null,
+	postedAt: null,
 	productId: "product_123456789",
 	quantity: "4.5",
 	reason: "Cycle review",
 	reversalMovementId: null,
 	state: "PendingApproval" as const,
 	unit: "each",
+	updatedAt: "2026-07-16T12:00:00.000Z",
 	variantId: null,
 	version: 1,
 };

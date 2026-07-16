@@ -2,6 +2,7 @@ import type {
 	ImportCorrectionReport,
 	ImportJob,
 } from "@meridian/contracts-platform-api";
+import type { Route } from "next";
 
 import { safeDownloadName } from "./operations";
 
@@ -43,9 +44,11 @@ export function importDetailHref(
 	target: ImportTarget,
 	importId: string,
 	returnTo?: string
-): string {
+): Route {
 	const base = `/operations/imports/${target}/${encodeURIComponent(importId)}`;
-	return returnTo ? `${base}?returnTo=${encodeURIComponent(returnTo)}` : base;
+	return (
+		returnTo ? `${base}?returnTo=${encodeURIComponent(returnTo)}` : base
+	) as Route;
 }
 
 export function canApproveImport(job: ImportJob): boolean {

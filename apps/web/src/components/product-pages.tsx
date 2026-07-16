@@ -42,17 +42,32 @@ import { QueryFailure } from "./query-state";
 import { useWorkspace } from "./workspace-context";
 
 const DIGITS_ONLY_PATTERN = /^\d+$/u;
+const PRODUCT_STATES = [
+	"Draft",
+	"Active",
+	"Suspended",
+	"Discontinued",
+	"Archived",
+] as const satisfies readonly Product["state"][];
+const PRODUCT_STATE_SET = new Set<string>(PRODUCT_STATES);
+
+const productStateFromSearch = (value: string | null) =>
+	value && PRODUCT_STATE_SET.has(value)
+		? (value as Product["state"])
+		: undefined;
 
 function ProductFilters() {
 	const pathname = usePathname();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [query, setQuery] = useState(searchParams.get("query") ?? "");
+	const [sku, setSku] = useState(searchParams.get("sku") ?? "");
 	const [barcode, setBarcode] = useState(searchParams.get("barcode") ?? "");
+	const [state, setState] = useState(searchParams.get("state") ?? "");
 	return (
 		<form
 			aria-label="Product filters"
-			className="mb-5 grid gap-3 rounded-2xl border p-4 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
+			className="mb-5 grid gap-3 rounded-2xl border p-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] xl:items-end"
 			onSubmit={(event) => {
 				event.preventDefault();
 				router.push(
@@ -60,18 +75,30 @@ function ProductFilters() {
 						barcode: barcode.trim() || null,
 						cursor: null,
 						query: query.trim() || null,
+						sku: sku.trim() || null,
+						state: productStateFromSearch(state) ?? null,
 					})
 				);
 			}}
 		>
 			<div className="grid gap-1">
-				<Label htmlFor="product-query">Name or SKU</Label>
+				<Label htmlFor="product-query">Product text</Label>
 				<Input
 					id="product-query"
 					maxLength={200}
 					onChange={(event) => setQuery(event.target.value)}
 					placeholder="Search permitted Product text"
 					value={query}
+				/>
+			</div>
+			<div className="grid gap-1">
+				<Label htmlFor="product-sku">Exact tenant SKU</Label>
+				<Input
+					id="product-sku"
+					maxLength={64}
+					onChange={(event) => setSku(event.target.value)}
+					placeholder="Enter the complete SKU"
+					value={sku}
 				/>
 			</div>
 			<div className="grid gap-1">
@@ -83,6 +110,22 @@ function ProductFilters() {
 					placeholder="Enter a complete GTIN"
 					value={barcode}
 				/>
+			</div>
+			<div className="grid gap-1">
+				<Label htmlFor="product-state">Lifecycle state</Label>
+				<select
+					className="min-h-10 rounded-xl border bg-background px-3 text-sm"
+					id="product-state"
+					onChange={(event) => setState(event.target.value)}
+					value={state}
+				>
+					<option value="">All states</option>
+					{PRODUCT_STATES.map((item) => (
+						<option key={item} value={item}>
+							{item}
+						</option>
+					))}
+				</select>
 			</div>
 			<Button className="min-h-10" type="submit" variant="outline">
 				<Search /> Apply filters
@@ -98,11 +141,13 @@ export function ProductsPage() {
 	const cursor = searchParams.get("cursor") ?? undefined;
 	const barcode = searchParams.get("barcode") ?? undefined;
 	const queryText = searchParams.get("query") ?? undefined;
+	const sku = searchParams.get("sku") ?? undefined;
+	const state = productStateFromSearch(searchParams.get("state"));
 	const products = useQuery({
 		...orpc.catalog.products.list.queryOptions({
 			input: {
 				headers: { "x-active-context-id": workspace.contextId ?? "" },
-				query: { barcode, cursor, limit: 50, query: queryText },
+				query: { barcode, cursor, limit: 50, query: queryText, sku, state },
 			},
 		}),
 		enabled: Boolean(workspace.contextId),
@@ -166,7 +211,7 @@ export function ProductsPage() {
 				caption="Products in the current tenant"
 				columns={columns}
 				empty={
-					queryText || barcode
+					queryText || barcode || sku || state
 						? "No Products match these filters."
 						: "No Products are available in this tenant."
 				}

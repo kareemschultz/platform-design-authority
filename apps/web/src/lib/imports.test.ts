@@ -32,7 +32,7 @@ describe("import client boundaries", () => {
 				"opening-stock",
 				"import/123",
 				"/operations/imports?state=Completed"
-			)
+			) as string
 		).toBe(
 			"/operations/imports/opening-stock/import%2F123?returnTo=%2Foperations%2Fimports%3Fstate%3DCompleted"
 		);

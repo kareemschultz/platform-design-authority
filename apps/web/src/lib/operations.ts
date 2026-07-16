@@ -10,6 +10,7 @@ const SAFE_OPERATIONS_QUERY_KEYS = new Set([
 	"query",
 	"reason",
 	"returnTo",
+	"sku",
 	"state",
 	"target",
 	"variantId",

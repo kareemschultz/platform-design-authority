@@ -80,6 +80,22 @@ If the root succeeds but the web page is disconnected, verify `NEXT_PUBLIC_SERVE
 
 The dashboard requires a current Better Auth session. Sign in again using a synthetic account. If the session endpoint fails, diagnose the server, database, trusted origins, and cookie environment rather than bypassing the route guard.
 
+## Operations shows permission denied or capability unavailable
+
+These are different server-authoritative outcomes. **Permission denied** means the current principal lacks the action authority. **Capability unavailable** means the tenant or organization lacks the required entitlement. Do not add browser-side roles, bypass the API, or infer authority from a visible control. Verify the active tenant, organization, location, current membership, role assignment, and entitlement fixture.
+
+## A Product or Inventory change reports a conflict
+
+The owner record changed after the page loaded. Preserve the operator's proposed values, refresh the record, compare the new version, then deliberately retry. Do not remove `If-Match`, replace the current version locally, edit a ledger fact, or repeat a receipt with a new intent key after an uncertain response.
+
+## A balance projection is stale or unreconciled
+
+The balance page labels source, timestamp, and reconciliation state. A stale or unreconciled row is not command authority. Refresh or run the governed projection/reconciliation procedure; Inventory commands still recheck current owner state. Do not rewrite projection or ledger tables manually.
+
+## An import file is rejected before upload
+
+Use one non-empty UTF-8 CSV no larger than 1 MiB. Correct the adjacent file error for invalid UTF-8, size, name, or missing content. Server-side validation additionally checks hash, scanner availability, declared newline, header, column, row, field, quoting, control-character, and formula-prefix rules. Never disable those checks or paste rejected file contents into logs or issues.
+
 ## Formatting fails only on Windows
 
 The repository uses LF-formatted source. Configure Git consistently and run:
@@ -127,4 +143,4 @@ Include:
 - whether the failure reproduces from a fresh disposable environment;
 - relevant test or CI link.
 
-Classify missing implementation separately from a defect. Retail, tenant, permission, entitlement, offline-sync, payment, reporting, and other first-slice workflows are not present in this scaffold.
+Classify missing implementation separately from a defect. WS1 administration and controlled WS2 Product/Inventory workflows are present at documented prototype depth; POS, broad offline sync, payment, reporting, and the remaining first-slice workflows are not complete.

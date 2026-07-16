@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.17.0
+version: 0.18.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -47,7 +47,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 | Security and privacy | Architecture-specified with control/evidence models | Penetration tests, control operation, exercises, provider/professional evidence, production topology |
 | UX and accessibility | Architecture/pattern standards plus WS1 prototype evidence | Formal per-workstream audits, assistive-technology evidence, full responsive/offline/product flows |
 | Data, reporting, and analytics | Architecture-specified; schemas and selected first-slice contracts exist | Metric implementation, lineage/quality operation, warehouse/projection performance and recovery evidence |
-| Deployment and operations | Architecture and requirements catalogues exist; four prototype service groups have machine-registered draft procedures, and merged PR #74 adds the bounded Event Backbone worker and PDA-OPS-018 runbook | Independent procedure review, production Event Backbone capacity/SLO and multi-replica evidence, live dashboards, tested alerts, on-call escalation, backup/restore, incident, migration, rollback, and recovery exercises |
+| Deployment and operations | Architecture and requirements catalogues exist; five merged prototype service groups have machine-registered draft procedures, including `OPS-SVC-005` for the bounded Event Backbone worker and PDA-OPS-018 runbook | Independent procedure review, production Event Backbone capacity/SLO and multi-replica evidence, live dashboards, tested alerts, on-call escalation, backup/restore, incident, migration, rollback, and recovery exercises |
 | Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled; PDA-STR-030 makes FDR-001 through FDR-011 decision-ready at documented packet depth with exact evidence, sequencing, contract-impact and closure rules; the codename/public-brand boundary is machine-enforced for current repository surfaces | Actual founder decisions, qualified legal/tax/accounting/privacy/trademark evidence, entity, brand, domains/channels, pricing, contracts, provider, customer, license, custody/payout and operational gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
 | Competitive research | Initial nine-wave writing set plus ITSM/MSP/RMM, IAM, infrastructure/DCIM/IPAM, named-product lineage, explicit primary evidence for Acumatica, QuickBooks Desktop Enterprise, monday.com, ClickUp and Rippling, and device/offline continuations are In Review with exact source/ledger/result/backlog reconciliation through SRC-079; CIR-BACK-021 through CIR-BACK-025 are transferred | direct tenant/agent/provider/scanner/controller/device observation, owner/provider decisions, edition/geography parity, protocol/security/accessibility/operational trials, customer evidence, volatile-source refresh, and independent review |
@@ -78,7 +78,7 @@ These counts demonstrate inventory and internal parity, not enterprise implement
 
 - WS1: 11 capabilities and 143 of 1,294 currently required first-slice evidence cells are fully registered.
 - WS2: 13 capabilities have interim PR2/PR3 registration covering 80 cells; PDA-APP-023 records merged PR4 behavior, but its capability-dimension mapping remains for PR7; bulk import and all other unproven PR4–PR7 cells remain planned.
-- Operations: four service groups have bounded registered procedure drafts and merged PR4 adds the focused Event Backbone runbook; there are zero pilot-ready claims, while independent review, production telemetry, alerts, escalation, capacity, restore/failover, and all dated exercises remain open.
+- Operations: five merged service groups have bounded registered procedure drafts; `OPS-SVC-005` binds merged PR4 to the focused Event Backbone runbook; there are zero pilot-ready claims, while independent review, production telemetry, alerts, escalation, capacity, restore/failover, and all dated exercises remain open.
 - Product documentation: build/type checks, a nine-page manifest, metadata/link/release-evidence validation, one class-adopted API sample, and generated canonical OpenAPI parity exist; broader behavioral, editorial, and accessibility evidence remains open.
 - External: PDA-STR-030 documents admissible evidence and closure packets; founder decisions, customer evidence, qualified Guyana review, providers, penetration testing, accessibility evidence, and operational exercises remain open.
 

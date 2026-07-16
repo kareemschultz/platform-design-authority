@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-019
 title: Controlled-Prototype Service Runbooks
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Operations
 last_reviewed: 2026-07-16
@@ -16,7 +16,7 @@ applicable_dimensions: [authority-and-scope, data-and-integrity, contracts-and-c
 
 ## Purpose and Authority Boundary
 
-Provide executable, bounded response procedures for the services that exist on merged `main` through WS2 PR3: the web shell, API/application runtime, Better Auth and Platform Identity boundary, authorization and entitlements, the composition-owned PostgreSQL database, transactional outbox storage, Party, Catalog, Inventory, and Audit behavior.
+Provide executable, bounded response procedures for the services that exist on merged `main` through WS2 PR4: the web shell, API/application runtime, Better Auth and Platform Identity boundary, authorization and entitlements, the composition-owned PostgreSQL database, transactional outbox storage, Party, Catalog, Inventory, Audit, and the Event Backbone delivery/projection runtime.
 
 These are Draft controlled-prototype procedures. They do not prove production observability, on-call coverage, backup recovery, failover, provider response, contractual SLOs, or pilot readiness. `registry/operational-readiness.json` is the status register. A missing dashboard, tested alert, escalation contact, or exercise remains a blocker; this document is not substitute evidence.
 
@@ -126,13 +126,13 @@ Escalate to Data Platform for any retained-data migration failure, corruption, u
 - Catalog capabilities: `catalog.products`, `catalog.variants`, `catalog.identifiers`, `catalog.barcodes`, and `catalog.lifecycle`. `catalog.bulk-import` is unimplemented and excluded.
 - Inventory capabilities: `inventory.stock-ledger`, `inventory.stock-balances`, `inventory.availability`, `inventory.reservations`, `inventory.adjustments`, `inventory.transfers`, `inventory.counts`, and `inventory.offline-movements` at the boundaries recorded in PDA-RDM-009.
 - Relevant permissions include `catalog.product.read`, `catalog.product.update`, `catalog.product.activate`, `catalog.product.archive`, `inventory.balance.read`, `inventory.adjustment.read`, `inventory.adjustment.reverse`, `inventory.count.read`, and `inventory.transfer.read`.
-- Relevant facts include Catalog Product/Variant/Identifier facts and Inventory adjustment, count, transfer, reservation, and reversal facts in `registry/events.json`. They are transactionally stored in the outbox; merged `main` does not deliver them continuously.
+- Relevant facts include Catalog Product/Variant/Identifier facts and Inventory adjustment, count, transfer, reservation, and reversal facts in `registry/events.json`. They are transactionally stored in the outbox; registered consumers are delivered by `OPS-SVC-005` under PDA-OPS-018.
 
 ### Trigger and Impact
 
 Use this runbook for duplicate or cross-tenant identifiers, stale Product identity after update, an invalid lifecycle transition, unexplained Inventory balance divergence, negative stock, missing/duplicate movements, transfer non-conservation, count variance disagreement, an unlinked reversal, command replay disagreement, or state committed without its expected outbox record.
 
-Outbox row accumulation is expected before the PR4 worker merges. Do not page on backlog age or count until delivery, retry horizon, dead-letter, and lag alerts exist and are reviewed.
+Unbounded outbox accumulation is no longer an expected pre-worker condition. Use PDA-OPS-018 to diagnose delivery, retry, dead-letter, replay, projection, and reconciliation state. Do not treat its safe aggregate health snapshot as a production alert or contractual threshold until the dashboard, SLO, capacity, and tested-alert gates are reviewed.
 
 ### Safe Diagnosis
 
@@ -157,6 +157,12 @@ Outbox row accumulation is expected before the PR4 worker merges. Do not page on
 Verify the original business invariant, idempotent repeat outcome, exact quantity conservation, linked reversal where used, tenant non-disclosure, command receipt, outbox atomicity, and Audit evidence. Run the relevant domain, contract, architecture, and PostgreSQL integration suites against a clean test database. Escalate to Catalog or Inventory owner, Data Platform, Security, Audit/Privacy, and Finance when classification or accounting consequences require them.
 
 Close only when zero unexplained divergence remains, the correction used a governed command, affected projections/consumers are reconciled through PDA-OPS-018 where applicable, the tenant impact window is known, and a regression test or explicit residual-risk item exists. This runbook cannot close PR6 UI/accessibility, PR7 exercise, production capacity/SLO, or production recovery gates.
+
+## Registered Companion Runbook — Event Backbone
+
+`OPS-SVC-005` uses [PDA-OPS-018](./EVENT_BACKBONE_DELIVERY_RUNBOOK.md) as its executable controlled-prototype procedure. That runbook owns backlog, claim/lease recovery, retry, dead-letter, authorized replay, consumer receipt, Catalog projection, Inventory reconciliation, pause/resume, and shutdown/recovery response. CP-RUN-003 remains responsible for authoritative Catalog and Inventory fact integrity; PDA-OPS-018 cannot authorize direct owner-table repair or manufacture missing business facts.
+
+The service remains `procedure-draft`. PR #74's independent implementation concurrence and green CI prove a bounded runtime implementation, not independent Operations review, production telemetry, paging, capacity, disaster recovery, or an exercised incident process.
 
 ## Known Missing Operational Evidence
 

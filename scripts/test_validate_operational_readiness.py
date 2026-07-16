@@ -15,13 +15,22 @@ class OperationalReadinessValidatorTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)
-        for name in ("SOURCE.md", "RUNBOOK.md", "APP.ts"):
+        (self.root / "SOURCE.md").write_text(
+            "Registered service OPS-SVC-001", encoding="utf-8"
+        )
+        for name in ("RUNBOOK.md", "APP.ts"):
             (self.root / name).write_text(name, encoding="utf-8")
         self.capabilities = {"capabilities": [{"id": "alpha.first"}]}
         self.register = {
             "schema_version": "1.0.0",
             "source_document": "SOURCE.md",
             "runbook_document": "RUNBOOK.md",
+            "evidence_cutoff": {
+                "main_commit": "a" * 40,
+                "verified_on": "2026-07-16",
+                "merged_pull_requests": [74],
+                "excludes_open_pull_requests": [],
+            },
             "readiness_states": {state: state for state in READINESS_STATES},
             "services": [
                 {
@@ -98,6 +107,24 @@ class OperationalReadinessValidatorTests(unittest.TestCase):
     def test_non_pilot_service_requires_blockers(self) -> None:
         self.register["services"][0]["blockers"] = []
         self.assertTrue(any("requires explicit blockers" in error for error in self.validate()))
+
+    def test_evidence_cutoff_rejects_merged_and_excluded_pr_overlap(self) -> None:
+        self.register["evidence_cutoff"]["excludes_open_pull_requests"] = [74]
+        self.assertTrue(any("both merged and excluded" in error for error in self.validate()))
+
+    def test_deferred_service_rejects_reference_to_merged_pr(self) -> None:
+        self.register["deferred_services"][0]["reason"] = (
+            "The executable service remains unavailable because PR #74 is not merged."
+        )
+        self.assertTrue(any("already-merged PRs" in error for error in self.validate()))
+
+    def test_source_catalog_and_register_service_ids_must_match(self) -> None:
+        (self.root / "SOURCE.md").write_text(
+            "Registered services OPS-SVC-001 and OPS-SVC-002", encoding="utf-8"
+        )
+        self.assertTrue(
+            any("register omits source services" in error for error in self.validate())
+        )
 
 
 if __name__ == "__main__":

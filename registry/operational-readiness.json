@@ -4,9 +4,10 @@
   "source_document": "docs/blueprint/15-Operations/SERVICE_CATALOG_AND_RUNBOOK_INDEX.md",
   "runbook_document": "docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md",
   "evidence_cutoff": {
-    "main_commit": "40454740838bba4426b9ca48b2e82811bc7b466d",
+    "main_commit": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
     "verified_on": "2026-07-16",
-    "excludes_open_pull_requests": [74]
+    "merged_pull_requests": [74],
+    "excludes_open_pull_requests": []
   },
   "readiness_states": {
     "requirements-only": "Requirements exist but no executable service procedure is registered.",
@@ -194,17 +195,61 @@
       "exercise_evidence_paths": [],
       "blockers": [
         "Catalog bulk import, online numbering workflow, UI, and formal accessibility evidence are absent",
-        "Event delivery/retry/dead-letter/replay remains unmerged in PR #74",
+        "Event delivery is separately registered as OPS-SVC-005, but no reviewed cross-service correctness dashboard or delivery-lag alert exists",
         "No reviewed operator repair tool, tested correctness alert, recovery exercise, or final WS2 audit exists"
+      ]
+    },
+    {
+      "service_id": "OPS-SVC-005",
+      "name": "Controlled-prototype Event Backbone delivery and projections",
+      "owner": "Platform Kernel",
+      "escalation_owner": "Platform Operations, Data Platform, Catalog, Inventory, and Security",
+      "implementation_state": "merged-controlled-prototype",
+      "readiness_state": "procedure-draft",
+      "pilot_critical": true,
+      "pilot_ready": false,
+      "capabilities": [
+        "platform.events",
+        "platform.audit",
+        "catalog.products",
+        "inventory.stock-ledger",
+        "inventory.stock-balances"
+      ],
+      "artifact_paths": [
+        "apps/worker/composition/delivery.ts",
+        "apps/worker/composition/main.ts",
+        "packages/platform/events/src/delivery.ts",
+        "packages/platform/events/src/replay.ts",
+        "packages/persistence/platform-events-postgres/src/delivery-store.ts",
+        "packages/persistence/platform-events-postgres/src/replay-store.ts",
+        "docs/blueprint/19-Appendices/WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md"
+      ],
+      "runbook_paths": [
+        "docs/blueprint/15-Operations/EVENT_BACKBONE_DELIVERY_RUNBOOK.md"
+      ],
+      "review_evidence_paths": [],
+      "telemetry": {
+        "liveness_probes": [
+          "Worker process lifecycle plus PostgreSQL reachability; no HTTP health endpoint exists"
+        ],
+        "business_checks": [
+          "Safe aggregate backlog health, claim lease recovery, bounded retry/dead-letter, authorized replay, consumer-receipt idempotency, Catalog projection freshness, and Inventory balance reconciliation"
+        ],
+        "dashboard_paths": [],
+        "tested_alert_evidence_paths": [],
+        "limitations": [
+          "Safe aggregate health exists, but no production telemetry backend, dashboard, tested alert route, or multi-replica capacity evidence exists"
+        ]
+      },
+      "exercise_evidence_paths": [],
+      "blockers": [
+        "Independent Operations review of the exact runbook version is absent",
+        "No production SLO, capacity, multi-replica, dashboard, tested alert, or named on-call evidence exists",
+        "No dated backlog, dead-letter, replay, projection-rebuild, database-recovery, privacy, or incident-communication exercise exists"
       ]
     }
   ],
   "deferred_services": [
-    {
-      "name": "Event delivery worker and projections",
-      "reason": "Open PR #74 is not merged and therefore cannot direct an implemented runbook claim.",
-      "admission_trigger": "After exact-head reviewed PR #74 merges, register the worker, telemetry, delivery-lag/dead-letter procedures, and exercise evidence."
-    },
     {
       "name": "Catalog and opening-stock import plus online numbering",
       "reason": "WS2 PR5 issue #71 has not begun implementation.",

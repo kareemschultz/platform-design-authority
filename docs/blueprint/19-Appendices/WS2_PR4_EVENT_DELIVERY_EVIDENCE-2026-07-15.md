@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-023
 title: WS2 PR4 Event Delivery and Projection Evidence
-version: 0.1.2
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -47,7 +47,7 @@ The disposable live suite applies Platform Events, Catalog, and Inventory owner 
 - Catalog projection rebuild and foreign-tenant non-disclosure;
 - Inventory ledger/balance divergence detection with literal `on_hand` non-overwrite and missing-projection rebuild.
 
-The targeted live result is **12 passed, 0 failed, 48 expectations**, reproduced with `bun run --cwd apps/worker db:test` against PostgreSQL 18 after setting the validated worker `DATABASE_URL`, `NODE_ENV=test`, and `WORKER_DATABASE_POOL_MAX=5`. The runtime-neutral Event Backbone plus server transport/application replay result is **36 passed, 0 failed, 91 expectations**, reproduced with `bun test packages/platform/events/src/index.test.ts packages/platform/events/src/delivery.test.ts packages/platform/events/src/replay.test.ts apps/server/src/router.test.ts`. Final PR exact-head CI remains the authoritative aggregate and must be green before concurrence or merge.
+The targeted live result is **12 passed, 0 failed, 48 expectations**, reproduced with `bun run --cwd apps/worker db:test` against PostgreSQL 18 after setting the validated worker `DATABASE_URL`, `NODE_ENV=test`, and `WORKER_DATABASE_POOL_MAX=5`. The runtime-neutral Event Backbone plus server transport/application replay result is **36 passed, 0 failed, 91 expectations**, reproduced with `bun test packages/platform/events/src/index.test.ts packages/platform/events/src/delivery.test.ts packages/platform/events/src/replay.test.ts apps/server/src/router.test.ts`. Exact implementation head `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` received superseding independent concurrence and green CI before PR #74 merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de` on 2026-07-16.
 
 ## Privacy and safety
 
@@ -55,7 +55,7 @@ PDA-DAT-019 classifies every Event Backbone table/field and the Catalog projecti
 
 ## RR-006 disposition
 
-The implementation now supplies the code and live evidence needed to remedy RR-006 at controlled-prototype depth. The register remains Open in this PR until the exact implementation head receives independent concurrence, all required CI is green, and PR #74 merges, because PDA-RDM-009 G6 requires merged exact-head evidence. After merge, the next governed housekeeping change may mark RR-006 Closed with this document, the concurrence comment, merge SHA, and CI links. RR-007 and every pilot/production gate remain open.
+PDA-REV-009 closes RR-006 at controlled-prototype depth because the exact implementation head received superseding independent concurrence, all required CI was green, and PR #74 merged. The implemented service is registered as `OPS-SVC-005` with PDA-OPS-018 as its `procedure-draft` runbook. This closure proves only the bounded worker/composition and delivery contract. RR-007, independent Operations review, production topology/capacity/SLOs, dashboards, tested alerts, named escalation, backup/PITR/failover behavior, privacy-deletion execution, incident exercises, WS2 exit, pilot, and production authority remain open.
 
 ## Known limits
 
@@ -70,6 +70,7 @@ The implementation now supplies the code and live evidence needed to remedy RR-0
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.0 | 2026-07-16 | Platform Design Authority | Reconciled superseding exact-head concurrence, green CI, PR #74 merge, RR-006 controlled-prototype closure, and `OPS-SVC-005` registration without advancing operational or production readiness. |
 | 0.1.2 | 2026-07-16 | Platform Design Authority | Remediated the independent audit with replay-scoped receipts, stale-recovery deduplication, same-row claim contention, executable worker-migration denial, literal optional coverage, and exact evidence commands; RR-006 remains open pending superseding concurrence and merge. |
 | 0.1.1 | 2026-07-16 | Platform Design Authority | Strengthened producer-schema and retention-compatible replay, lease renewal, idempotency conflict/non-disclosure, persisted dead-letter, missing Inventory projection rebuild, stale-running replay recovery, and updated live PostgreSQL evidence without closing RR-006. |
 | 0.1.0 | 2026-07-15 | Platform Design Authority | Added WS2 PR4 implementation, live PostgreSQL, authorization, replay, projection, recovery, and observability evidence with conditional RR-006 disposition. |

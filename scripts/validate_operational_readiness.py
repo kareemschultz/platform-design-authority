@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTER_PATH = REPO_ROOT / "registry" / "operational-readiness.json"
 CAPABILITIES_PATH = REPO_ROOT / "registry" / "capabilities.json"
 SERVICE_ID = re.compile(r"^OPS-SVC-\d{3}$")
+SERVICE_REF = re.compile(r"\bOPS-SVC-\d{3}\b")
 READINESS_STATES = {
     "requirements-only",
     "procedure-draft",
@@ -24,6 +25,9 @@ IMPLEMENTATION_STATES = {
     "merged-controlled-prototype",
     "merged-storage-only",
 }
+COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
+ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+PULL_REQUEST_REF = re.compile(r"\bPR\s+#(\d+)\b", re.IGNORECASE)
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -61,6 +65,60 @@ def validate_operational_readiness(
         errors.append("operational readiness schema_version must be 1.0.0")
     if set(register.get("readiness_states", {})) != READINESS_STATES:
         errors.append("readiness state definitions must match the governed state set")
+
+    evidence_cutoff = register.get("evidence_cutoff", {})
+    if not isinstance(evidence_cutoff, dict):
+        errors.append("operational readiness evidence_cutoff must be an object")
+        evidence_cutoff = {}
+    main_commit = str(evidence_cutoff.get("main_commit", ""))
+    if not COMMIT_SHA.fullmatch(main_commit):
+        errors.append(
+            "operational readiness evidence_cutoff.main_commit must be a full commit SHA"
+        )
+    verified_on = str(evidence_cutoff.get("verified_on", ""))
+    if not ISO_DATE.fullmatch(verified_on):
+        errors.append("operational readiness evidence_cutoff.verified_on must be an ISO date")
+    merged_pull_requests = evidence_cutoff.get("merged_pull_requests", [])
+    excluded_pull_requests = evidence_cutoff.get("excludes_open_pull_requests", [])
+    for label, values in (
+        ("merged_pull_requests", merged_pull_requests),
+        ("excludes_open_pull_requests", excluded_pull_requests),
+    ):
+        if not isinstance(values, list) or any(
+            not isinstance(value, int) or isinstance(value, bool) or value < 1
+            for value in values
+        ):
+            errors.append(
+                f"operational readiness evidence_cutoff.{label} "
+                "must contain positive PR numbers"
+            )
+    valid_merged_pull_requests = (
+        {
+            value
+            for value in merged_pull_requests
+            if isinstance(value, int) and not isinstance(value, bool) and value > 0
+        }
+        if isinstance(merged_pull_requests, list)
+        else set()
+    )
+    valid_excluded_pull_requests = (
+        {
+            value
+            for value in excluded_pull_requests
+            if isinstance(value, int) and not isinstance(value, bool) and value > 0
+        }
+        if isinstance(excluded_pull_requests, list)
+        else set()
+    )
+    if isinstance(merged_pull_requests, list) and isinstance(
+        excluded_pull_requests, list
+    ):
+        overlap = sorted(valid_merged_pull_requests & valid_excluded_pull_requests)
+        if overlap:
+            errors.append(
+                "operational readiness evidence cutoff cannot mark PRs both merged and excluded: "
+                + ", ".join(f"#{number}" for number in overlap)
+            )
 
     for field in ("source_document", "runbook_document"):
         value = str(register.get(field, ""))
@@ -167,6 +225,25 @@ def validate_operational_readiness(
         elif not nonempty_strings(blockers):
             errors.append(f"{service_id}: non-pilot service requires explicit blockers")
 
+    source_path = repo_root / str(register.get("source_document", ""))
+    if source_path.is_file():
+        source_service_ids = set(
+            SERVICE_REF.findall(source_path.read_text(encoding="utf-8"))
+        )
+        if source_service_ids != seen_ids:
+            missing_from_source = sorted(seen_ids - source_service_ids)
+            missing_from_register = sorted(source_service_ids - seen_ids)
+            if missing_from_source:
+                errors.append(
+                    "operational readiness source omits registered services: "
+                    + ", ".join(missing_from_source)
+                )
+            if missing_from_register:
+                errors.append(
+                    "operational readiness register omits source services: "
+                    + ", ".join(missing_from_register)
+                )
+
     deferred = register.get("deferred_services", [])
     if not isinstance(deferred, list) or not deferred:
         errors.append("deferred_services must record unimplemented operational scope")
@@ -177,6 +254,19 @@ def validate_operational_readiness(
                     errors.append(
                         f"deferred service {index}: {field} is missing or too vague"
                     )
+            deferred_text = " ".join(
+                str(item.get(field, ""))
+                for field in ("name", "reason", "admission_trigger")
+            )
+            referenced_prs = {
+                int(match.group(1)) for match in PULL_REQUEST_REF.finditer(deferred_text)
+            }
+            stale_refs = sorted(referenced_prs & valid_merged_pull_requests)
+            if stale_refs:
+                errors.append(
+                    f"deferred service {index}: references already-merged PRs: "
+                    + ", ".join(f"#{number}" for number in stale_refs)
+                )
     return errors
 
 

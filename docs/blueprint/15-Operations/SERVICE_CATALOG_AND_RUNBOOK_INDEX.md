@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-015
 title: Service Catalog and Runbook Index
-version: 0.2.1
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -13,7 +13,7 @@ last_reviewed: 2026-07-16
 
 Define the operational catalog required for every critical platform service and capability, including ownership, dependencies, SLOs, dashboards, alerts, runbooks, support, recovery, and customer impact.
 
-`registry/operational-readiness.json` is the machine-readable status register for implemented controlled-prototype services. PDA-OPS-019 supplies bounded cross-service procedures for behavior that exists on merged `main`; PDA-OPS-018 supplies the focused Event Backbone delivery procedure. Neither artifact supplies missing dashboards, tested alerts, exercises, escalation contacts, or pilot authority.
+`registry/operational-readiness.json` is the machine-readable status register for implemented controlled-prototype services. Its evidence cutoff is merged `main` `7202fc819b70982c013e1ca11a4fcc136e01e2de`, including Event Backbone PR #74. PDA-OPS-019 supplies bounded cross-service procedures for the web, API/authority, PostgreSQL, Catalog, Inventory, and outbox behavior; PDA-OPS-018 supplies the focused Event Backbone delivery procedure. Neither artifact supplies missing dashboards, tested alerts, exercises, escalation contacts, or pilot authority.
 
 ## Readiness States
 
@@ -69,6 +69,18 @@ Every service records:
 
 Only merged services enter the implemented-service portion of the registry. Unimplemented services remain in its deferred list with an admission trigger; documentation must not fabricate their operational procedure.
 
+## Registered Controlled-Prototype Services
+
+| Service ID | Service group | Procedure | Readiness | Material remaining gates |
+|---|---|---|---|---|
+| `OPS-SVC-001` | Web application shell | PDA-OPS-019 CP-RUN-001 | `procedure-draft` | Dashboard, alert, escalation, outage exercise |
+| `OPS-SVC-002` | API, identity, tenancy, authority, Party, and Audit | PDA-OPS-019 CP-RUN-001 | `procedure-draft` | Security/Operations review, authority SLIs, incident exercise |
+| `OPS-SVC-003` | PostgreSQL and migrations | PDA-OPS-019 CP-RUN-002 | `procedure-draft` | Production role/RLS topology, capacity, backup/restore/PITR/failover evidence |
+| `OPS-SVC-004` | Catalog, Inventory, and transactional outbox owner behavior | PDA-OPS-019 CP-RUN-003 | `procedure-draft` | Imports, UI/accessibility, repair tooling, correctness alerts, WS2 closeout |
+| `OPS-SVC-005` | Event Backbone delivery, replay, and Catalog/Inventory projections | PDA-OPS-018 | `procedure-draft` | Runbook review, production SLO/capacity/multi-replica evidence, dashboards, alerts, exercises |
+
+The PR #74 implementation audit and exact-head CI are implementation evidence for `OPS-SVC-005`; they are not Operations review of the runbook and do not satisfy the `reviewed`, `exercised`, or `pilot-ready` states.
+
 ## Required Runbooks
 
 At minimum:
@@ -91,12 +103,18 @@ At minimum:
 - Tenant suspension and recovery
 - Data repair
 
-Implemented controlled-prototype runbook: [Event Backbone Delivery Runbook](./EVENT_BACKBONE_DELIVERY_RUNBOOK.md) (PDA-OPS-018). Its production SLO, alert, role/RLS, capacity, and exercise gates remain open.
+Implemented controlled-prototype runbooks:
+
+- [Controlled-Prototype Service Runbooks](./CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md) (PDA-OPS-019) for `OPS-SVC-001` through `OPS-SVC-004`.
+- [Event Backbone Delivery Runbook](./EVENT_BACKBONE_DELIVERY_RUNBOOK.md) (PDA-OPS-018) for `OPS-SVC-005`.
+
+Their independent Operations review, production SLO, dashboard, alert, role/RLS, capacity, recovery, escalation, and exercise gates remain open as applicable.
 
 ## Change History
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.0 | 2026-07-16 | Platform Design Authority | Reconciled merged PR #74, registered `OPS-SVC-005`, linked each controlled-prototype service to its procedure, and retained every review, telemetry, recovery, and exercise gate. |
 | 0.2.1 | 2026-07-16 | Platform Design Authority | Linked the merged WS2 controlled-prototype Event Backbone delivery runbook without claiming production operations readiness. |
 
 ## Runbook Contract

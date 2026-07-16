@@ -89,5 +89,16 @@ describe("operations client state", () => {
 		expect(
 			safeOperationsReturn("https://evil.test", "/operations/products")
 		).toBe("/operations/products");
+		for (const unsafe of [
+			"//evil.test/operations",
+			"/operations\\evil.test",
+			"/operations/products#hidden",
+			"/operations/products?token=secret",
+			"/operations%00/products",
+		]) {
+			expect(safeOperationsReturn(unsafe, "/operations/products")).toBe(
+				"/operations/products"
+			);
+		}
 	});
 });

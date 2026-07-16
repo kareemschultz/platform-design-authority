@@ -88,7 +88,7 @@ export function safeReturnPath(
 }
 
 export function isNavigationCurrent(pathname: string, href: string): boolean {
-	return href === "/administration"
+	return href === "/administration" || href === "/operations" || href === "/"
 		? pathname === href
 		: pathname === href || pathname.startsWith(`${href}/`);
 }

@@ -49,5 +49,11 @@ describe("application shell", () => {
 		expect(
 			isNavigationCurrent("/administration/users", "/administration")
 		).toBe(false);
+		expect(isNavigationCurrent("/operations/products", "/operations")).toBe(
+			false
+		);
+		expect(
+			isNavigationCurrent("/operations/products/new", "/operations/products")
+		).toBe(true);
 	});
 });

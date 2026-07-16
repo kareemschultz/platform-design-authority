@@ -1,5 +1,11 @@
 import type { EventEnvelope } from "@meridian/contracts-events";
 
+// biome-ignore lint/performance/noBarrelFile: this package intentionally exposes one governed Event Backbone public entry point.
+export {
+	CATALOG_SEARCH_CONSUMER,
+	INVENTORY_RECONCILIATION_CONSUMER,
+	WS2_EVENT_CONSUMER_DECLARATIONS,
+} from "./consumers";
 export type {
 	ClaimEventInput,
 	ClaimedOutboxEvent,
@@ -9,6 +15,7 @@ export type {
 	DeliveryAttemptRecord,
 	DeliveryClock,
 	DeliveryFailureDisposition,
+	DeliveryHealthSnapshot,
 	DeliveryJitter,
 	DeliveryPolicyInput,
 	DeliveryProcessorDependencies,
@@ -17,7 +24,6 @@ export type {
 	EventConsumerRegistry,
 	RegisteredEventConsumer,
 } from "./delivery";
-// biome-ignore lint/performance/noBarrelFile: this package intentionally exposes one governed Event Backbone public entry point.
 export {
 	calculateRetryDelayMs,
 	createEventConsumerRegistry,
@@ -26,6 +32,22 @@ export {
 	processClaimedEvent,
 	WS2_DELIVERY_POLICY,
 } from "./delivery";
+export type {
+	ClaimedEventReplayRequest,
+	EventReplayAuditPort,
+	EventReplayAuthorizationPort,
+	EventReplayConsumerRegistryPort,
+	EventReplayExecutionStorePort,
+	EventReplayRequestInput,
+	EventReplayRequestResult,
+	EventReplayStoredRequest,
+	EventReplayStorePort,
+} from "./replay";
+export {
+	createEventReplayService,
+	EventReplayError,
+	processNextReplayRequest,
+} from "./replay";
 
 export type OutboxAppendResult = "inserted" | "duplicate";
 export type OutboxEvent<

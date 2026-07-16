@@ -13,6 +13,10 @@ import { eventOutbox } from "./schema";
 
 // biome-ignore lint/performance/noBarrelFile: the owner adapter package exposes one governed public entry point.
 export { createPostgresDeliveryStore } from "./delivery-store";
+export {
+	createPostgresReplayExecutionStore,
+	createPostgresReplayStore,
+} from "./replay-store";
 
 export type EventsPostgresConnection = Pool | PoolClient;
 

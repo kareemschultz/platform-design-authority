@@ -668,6 +668,21 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-APP-023",
+      "path": "docs/blueprint/19-Appendices/WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md",
+      "title": "WS2 PR4 Event Delivery and Projection Evidence",
+      "version": "0.1.1",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0027"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-ARC-001",
       "path": "docs/blueprint/02-Architecture/SYSTEM_CONTEXT.md",
       "title": "System Context",
@@ -2112,7 +2127,7 @@
       "document_id": "PDA-ENGR-012",
       "path": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-15",
@@ -2129,7 +2144,7 @@
       "document_id": "PDA-ENGR-013",
       "path": "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.19.0",
+      "version": "0.20.0",
       "status": "Draft",
       "owner": "Platform Engineering",
       "last_reviewed": "2026-07-15",
@@ -2830,7 +2845,7 @@
       "document_id": "PDA-OPS-015",
       "path": "docs/blueprint/15-Operations/SERVICE_CATALOG_AND_RUNBOOK_INDEX.md",
       "title": "Service Catalog and Runbook Index",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
@@ -2857,6 +2872,21 @@
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-OPS-018",
+      "path": "docs/blueprint/15-Operations/EVENT_BACKBONE_DELIVERY_RUNBOOK.md",
+      "title": "Event Backbone Delivery Runbook",
+      "version": "0.1.1",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0027"
+      ],
       "review_evidence": null
     },
     {
@@ -2953,10 +2983,10 @@
       "document_id": "PDA-PLT-008",
       "path": "docs/blueprint/01-Platform/EVENT_BACKBONE.md",
       "title": "Event Backbone",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-15",
+      "last_reviewed": "2026-07-16",
       "related_adrs": [
         "ADR-0014",
         "ADR-0016",
@@ -3331,10 +3361,10 @@
       "document_id": "PDA-RDM-009",
       "path": "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md",
       "title": "WS2 Implementation Plan: Catalog and Inventory Ledger",
-      "version": "0.3.4",
+      "version": "0.3.5",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-15",
+      "last_reviewed": "2026-07-16",
       "related_adrs": [
         "ADR-0002",
         "ADR-0003",

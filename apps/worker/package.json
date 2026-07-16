@@ -13,6 +13,8 @@
     "test:node": "node node_modules/tsx/dist/cli.mjs composition/delivery.node-check.ts"
   },
   "dependencies": {
+    "@meridian/persistence-catalog-postgres": "workspace:*",
+    "@meridian/persistence-inventory-postgres": "workspace:*",
     "@meridian/persistence-platform-events-postgres": "workspace:*",
     "@meridian/platform-events": "workspace:*",
     "@meridian/tooling-env": "workspace:*",

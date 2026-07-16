@@ -39,6 +39,7 @@ export interface ClaimEventInput {
 	claimToken: string;
 	leaseExpiresAt: string;
 	now: string;
+	pausedTenantIds?: readonly string[];
 }
 
 export interface DeliveryAttemptRecord {
@@ -88,6 +89,7 @@ export interface DeliveryStorePort {
 	claimNext: (
 		input: ClaimEventInput
 	) => Promise<ClaimedOutboxEvent | undefined>;
+	getHealthSnapshot: (now: string) => Promise<DeliveryHealthSnapshot>;
 	hasReceipt: (input: {
 		consumerId: string;
 		consumerSchemaVersion: string;
@@ -122,6 +124,17 @@ export interface DeliveryStorePort {
 		leaseExpiresAt: string;
 		now: string;
 	}) => Promise<boolean>;
+}
+
+export interface DeliveryHealthSnapshot {
+	attemptsLastHour: number;
+	claimed: number;
+	deadLettered: number;
+	deliveredLastHour: number;
+	failuresLastHour: number;
+	oldestEligibleAgeMs: number;
+	pending: number;
+	retrying: number;
 }
 
 export class DeliveryConsumerError extends Error {
@@ -192,6 +205,9 @@ export async function processClaimedEvent(
 		}
 		const startedAt = dependencies.clock.now().toISOString();
 		try {
+			if (!consumer.eventSchemaVersions.includes(claim.event.schemaVersion)) {
+				throw new DeliveryConsumerError("schema_incompatible", false);
+			}
 			await consumer.consume(claim.event);
 			const finishedAt = dependencies.clock.now().toISOString();
 			await dependencies.store.recordReceipt({
@@ -348,7 +364,9 @@ export function decideDeliveryFailure(
 export interface RegisteredEventConsumer {
 	consume: (event: CommittedEventEnvelope) => Promise<void>;
 	eventNames: readonly string[];
+	eventSchemaVersions: readonly string[];
 	id: string;
+	replayRetentionClasses?: readonly string[];
 	schemaVersion: string;
 }
 

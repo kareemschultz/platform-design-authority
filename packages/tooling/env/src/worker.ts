@@ -18,6 +18,10 @@ export const workerEnv = createEnv({
 			.enum(["development", "production", "test"])
 			.default("development"),
 		WORKER_DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(5).default(5),
+		WORKER_PAUSED_TENANT_IDS: z
+			.string()
+			.regex(/^[A-Za-z0-9_-]+(?:,[A-Za-z0-9_-]+)*$/)
+			.optional(),
 	},
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 });

@@ -3,10 +3,10 @@ import { spawnSync } from "bun";
 
 const loaderScript = [
 	'const { workerEnv } = await import("./worker.ts");',
-	"console.log(JSON.stringify({ max: workerEnv.WORKER_DATABASE_POOL_MAX }));",
+	"console.log(JSON.stringify({ max: workerEnv.WORKER_DATABASE_POOL_MAX, paused: workerEnv.WORKER_PAUSED_TENANT_IDS }));",
 ].join("\n");
 
-function loadWorkerEnv(maximum: string) {
+function loadWorkerEnv(maximum: string, paused?: string) {
 	return spawnSync({
 		cmd: [process.execPath, "--eval", loaderScript],
 		cwd: import.meta.dir,
@@ -16,6 +16,7 @@ function loadWorkerEnv(maximum: string) {
 			NODE_ENV: "test",
 			SKIP_ENV_VALIDATION: "",
 			WORKER_DATABASE_POOL_MAX: maximum,
+			...(paused ? { WORKER_PAUSED_TENANT_IDS: paused } : {}),
 		},
 		stderr: "pipe",
 		stdout: "pipe",
@@ -29,5 +30,15 @@ describe("@meridian/tooling-env worker schema", () => {
 		expect(JSON.parse(accepted.stdout.toString())).toEqual({ max: 5 });
 		const rejected = loadWorkerEnv("6");
 		expect(rejected.exitCode).not.toBe(0);
+	});
+
+	test("accepts only bounded opaque tenant identifiers for pause control", () => {
+		const accepted = loadWorkerEnv("5", "tenant_a,tenant-b");
+		expect(accepted.exitCode).toBe(0);
+		expect(JSON.parse(accepted.stdout.toString())).toEqual({
+			max: 5,
+			paused: "tenant_a,tenant-b",
+		});
+		expect(loadWorkerEnv("5", "tenant_a, tenant_b").exitCode).not.toBe(0);
 	});
 });

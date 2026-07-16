@@ -4,6 +4,7 @@ import { getTableColumns, getTableName } from "drizzle-orm";
 import {
 	catalogCommandReceipts,
 	catalogIdentifiers,
+	catalogProductSearchProjections,
 	catalogProducts,
 	catalogVariants,
 } from "./schema";
@@ -11,12 +12,13 @@ import {
 const tables = [
 	catalogCommandReceipts,
 	catalogIdentifiers,
+	catalogProductSearchProjections,
 	catalogProducts,
 	catalogVariants,
 ];
 
 describe("Catalog PostgreSQL ownership", () => {
-	test("declares exactly the four registered Catalog-owned PR2 tables", () => {
+	test("declares the registered Catalog source and PR4 projection tables", () => {
 		expect(
 			tables
 				.map(getTableName)
@@ -25,6 +27,7 @@ describe("Catalog PostgreSQL ownership", () => {
 			"catalog_identifier",
 			"catalog_product",
 			"catalog_product_command_receipt",
+			"catalog_product_search_projection",
 			"catalog_variant",
 		]);
 	});

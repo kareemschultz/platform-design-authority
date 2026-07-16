@@ -109,6 +109,7 @@ export function createPostgresDeliveryStore(
 					FROM platform_event_outbox AS candidate
 					WHERE candidate.status IN ('pending', 'retrying', 'claimed')
 					  AND candidate.next_attempt_at <= $1::timestamptz
+					  AND (candidate.tenant_id IS NULL OR NOT (candidate.tenant_id = ANY($4::text[])))
 					  AND (candidate.status <> 'claimed' OR candidate.lease_expires_at <= $1::timestamptz)
 					  AND NOT EXISTS (
 						SELECT 1
@@ -134,10 +135,53 @@ export function createPostgresDeliveryStore(
 				FROM candidate
 				WHERE claimed.id = candidate.id
 				RETURNING claimed.*`,
-				[input.now, digest(input.claimToken), input.leaseExpiresAt]
+				[
+					input.now,
+					digest(input.claimToken),
+					input.leaseExpiresAt,
+					input.pausedTenantIds ?? [],
+				]
 			);
 			const [row] = result.rows;
 			return row ? toClaimed(row, input.claimToken) : undefined;
+		},
+		async getHealthSnapshot(now) {
+			const result = await connection.query<{
+				attempts_last_hour: number;
+				claimed: number;
+				dead_lettered: number;
+				delivered_last_hour: number;
+				failures_last_hour: number;
+				oldest_eligible_age_ms: number;
+				pending: number;
+				retrying: number;
+			}>(
+				`SELECT
+				 count(*) FILTER (WHERE status = 'pending')::int AS pending,
+				 count(*) FILTER (WHERE status = 'retrying')::int AS retrying,
+				 count(*) FILTER (WHERE status = 'claimed')::int AS claimed,
+				 count(*) FILTER (WHERE status = 'dead_lettered')::int AS dead_lettered,
+				 count(*) FILTER (WHERE status = 'delivered' AND published_at >= $1::timestamptz - interval '1 hour')::int AS delivered_last_hour,
+				 GREATEST(COALESCE(extract(epoch FROM ($1::timestamptz - min(occurred_at) FILTER (WHERE status IN ('pending','retrying')))) * 1000, 0), 0)::int AS oldest_eligible_age_ms,
+				 (SELECT count(*)::int FROM platform_event_delivery_attempt WHERE started_at >= $1::timestamptz - interval '1 hour') AS attempts_last_hour,
+				 (SELECT count(*)::int FROM platform_event_delivery_attempt WHERE started_at >= $1::timestamptz - interval '1 hour' AND outcome <> 'succeeded') AS failures_last_hour
+				 FROM platform_event_outbox`,
+				[now]
+			);
+			const [row] = result.rows;
+			if (!row) {
+				throw new Error("delivery health query returned no row");
+			}
+			return {
+				attemptsLastHour: row.attempts_last_hour,
+				claimed: row.claimed,
+				deadLettered: row.dead_lettered,
+				deliveredLastHour: row.delivered_last_hour,
+				failuresLastHour: row.failures_last_hour,
+				oldestEligibleAgeMs: row.oldest_eligible_age_ms,
+				pending: row.pending,
+				retrying: row.retrying,
+			};
 		},
 		async hasReceipt(input) {
 			const result = await connection.query(

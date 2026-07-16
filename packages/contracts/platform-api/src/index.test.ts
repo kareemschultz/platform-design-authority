@@ -5,6 +5,7 @@ import {
 	CreateProductSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
+	PLATFORM_OPENAPI_OPERATION_METADATA,
 	PositiveDecimalQuantitySchema,
 	ProductSchema,
 	platformApiContract,
@@ -12,7 +13,7 @@ import {
 	StockTransferSchema,
 	SubmitStockCountSchema,
 	UpdateProductSchema,
-	WS1_OPENAPI_OPERATION_METADATA,
+	WS2_EVENT_OPENAPI_OPERATION_METADATA,
 	WS2_OPENAPI_OPERATION_METADATA,
 	ws2CatalogInventoryApiContract,
 } from "./index";
@@ -63,8 +64,8 @@ describe("WS1 platform API contract", () => {
 					String((right as Record<string, unknown>).operationId)
 				)
 			);
-		const expected = [...WS1_OPENAPI_OPERATION_METADATA].sort((left, right) =>
-			left.operationId.localeCompare(right.operationId)
+		const expected = [...PLATFORM_OPENAPI_OPERATION_METADATA].sort(
+			(left, right) => left.operationId.localeCompare(right.operationId)
 		);
 
 		expect(actual).toEqual(expected);
@@ -222,5 +223,23 @@ describe("WS2 Catalog and Inventory API contract", () => {
 				version: 3,
 			}).success
 		).toBe(true);
+	});
+});
+
+describe("WS2 Event Backbone API contract", () => {
+	test("keeps the replay enforcement point aligned with generated OpenAPI", () => {
+		const actual = collectProcedures({ replay: platformApiContract.events })
+			.map((procedure) => ({
+				...procedure["~orpc"].meta,
+				method: procedure["~orpc"].route.method,
+				path: procedure["~orpc"].route.path,
+			}))
+			.sort((left, right) =>
+				String((left as Record<string, unknown>).operationId).localeCompare(
+					String((right as Record<string, unknown>).operationId)
+				)
+			);
+		expect(actual).toEqual(WS2_EVENT_OPENAPI_OPERATION_METADATA);
+		expect(actual).toHaveLength(1);
 	});
 });

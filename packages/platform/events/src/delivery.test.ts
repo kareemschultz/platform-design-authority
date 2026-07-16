@@ -51,6 +51,7 @@ describe("WS2 delivery policy", () => {
 		const consumer = {
 			consume: () => Promise.resolve(),
 			eventNames: ["catalog.product.created.v1"],
+			eventSchemaVersions: ["1.0.0"],
 			id: "catalog-search-projection",
 			schemaVersion: "1.0.0",
 		};
@@ -97,6 +98,17 @@ function memoryStore() {
 		`${consumerId}:${eventId}:${version}`;
 	const store: DeliveryStorePort = {
 		claimNext: () => Promise.resolve(undefined),
+		getHealthSnapshot: () =>
+			Promise.resolve({
+				attemptsLastHour: 0,
+				claimed: 0,
+				deadLettered: 0,
+				deliveredLastHour: 0,
+				failuresLastHour: 0,
+				oldestEligibleAgeMs: 0,
+				pending: 0,
+				retrying: 0,
+			}),
 		hasReceipt: ({ consumerId, consumerSchemaVersion, eventId }) =>
 			Promise.resolve(
 				receipts.has(key(consumerId, eventId, consumerSchemaVersion))
@@ -136,6 +148,37 @@ function memoryStore() {
 }
 
 describe("Event Backbone consumer processing", () => {
+	test("dead-letters an incompatible producer schema without invoking the consumer", async () => {
+		const memory = memoryStore();
+		let invoked = false;
+		const incompatible = claimed();
+		incompatible.event.schemaVersion = "2.0.0";
+		expect(
+			await processClaimedEvent(incompatible, {
+				clock,
+				idFactory: () => crypto.randomUUID(),
+				jitter: { next: () => 0.5 },
+				registry: createEventConsumerRegistry([
+					{
+						consume: () => {
+							invoked = true;
+							return Promise.resolve();
+						},
+						eventNames: ["catalog.product.created.v1"],
+						eventSchemaVersions: ["1.0.0"],
+						id: "catalog-search-projection",
+						schemaVersion: "1.0.0",
+					},
+				]),
+				store: memory.store,
+			})
+		).toBe("dead_lettered");
+		expect(invoked).toBe(false);
+		expect(memory.deadLetters[0]?.envelopeSummary).toMatchObject({
+			schemaVersion: "2.0.0",
+		});
+	});
+
 	test("keeps sibling success receipts while one consumer retries", async () => {
 		const memory = memoryStore();
 		let catalogCalls = 0;
@@ -146,6 +189,7 @@ describe("Event Backbone consumer processing", () => {
 				return Promise.resolve();
 			},
 			eventNames: ["catalog.product.created.v1"],
+			eventSchemaVersions: ["1.0.0"],
 			id: "catalog-search-projection",
 			schemaVersion: "1.0.0",
 		};
@@ -159,6 +203,7 @@ describe("Event Backbone consumer processing", () => {
 					: Promise.resolve();
 			},
 			eventNames: ["catalog.product.created.v1"],
+			eventSchemaVersions: ["1.0.0"],
 			id: "inventory-availability-reconciliation",
 			schemaVersion: "1.0.0",
 		};
@@ -190,6 +235,7 @@ describe("Event Backbone consumer processing", () => {
 						new DeliveryConsumerError("schema_incompatible", false)
 					),
 				eventNames: ["catalog.product.created.v1"],
+				eventSchemaVersions: ["1.0.0"],
 				id: "catalog-search-projection",
 				schemaVersion: "1.0.0",
 			},

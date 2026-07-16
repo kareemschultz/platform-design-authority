@@ -4,6 +4,7 @@ import type {
 	ActiveContextRequest,
 	AuditRecord,
 	AuthorizationDecision,
+	CreateEventReplayRequest,
 	CreateInventoryAdjustment,
 	CreateOrganizationParty,
 	CreatePartyIdentityLinkRequest,
@@ -15,6 +16,7 @@ import type {
 	CreateUserInvitationRequest,
 	CurrentIdentity,
 	Entitlement,
+	EventReplayRequest,
 	InventoryAdjustment,
 	Location,
 	Organization,
@@ -75,6 +77,18 @@ export interface CreateContextOptions {
 export interface Page<T> {
 	items: T[];
 	nextCursor: string | null;
+}
+
+export interface EventReplayApplication {
+	createEventReplay: (input: {
+		actorUserId: string;
+		body: CreateEventReplayRequest;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		tenantId: string;
+	}) => Promise<EventReplayRequest>;
 }
 
 export interface TenancyApplication {
@@ -443,6 +457,7 @@ export interface ServerApplication
 	extends AuditApplication,
 		CatalogApplication,
 		EntitlementsApplication,
+		EventReplayApplication,
 		IdentitySessionsApplication,
 		InventoryApplication,
 		PartyApplication,

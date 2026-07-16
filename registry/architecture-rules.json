@@ -362,7 +362,8 @@
         "catalog_product",
         "catalog_variant",
         "catalog_identifier",
-        "catalog_product_command_receipt"
+        "catalog_product_command_receipt",
+        "catalog_product_search_projection"
       ],
       "migration_directory": "packages/persistence/catalog-postgres/src/migrations"
     },

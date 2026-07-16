@@ -73,6 +73,9 @@ The following field record is the concrete pre-migration classification for the 
 | `catalog_product_command_receipt.resource_id` | Opaque Product result reference | Bounded with receipt | Diagnostic exact lookup only | Tenant-scoped index; never used as current authority |
 | `catalog_product_command_receipt.result` | Safe Product command result snapshot | Bounded with receipt; purged under receipt schedule | No search/offline/ordinary export | JSON shape is restricted to the published Product result; secrets, headers, unrestricted input, and unclassified PII are prohibited |
 | `catalog_product_command_receipt.created_at` | Server-generated receipt time | Bounded with receipt | Diagnostic metadata only | Timezone-aware; supports retention enforcement evidence |
+| `catalog_product_search_projection.tenant_id`, `product_id` | Tenant-preserving rebuild key for the Catalog-owned non-authoritative projection | Replaced or purged with the source Product purpose | Catalog-local exact/lexical lookup only | Composite primary and source foreign key prevent cross-tenant substitution; never authorizes a command |
+| `catalog_product_search_projection.name`, `state`, `search_text` | Rebuildable copy of approved Product, Variant, and identifier search fields | Replaceable; purged when the source purpose ends | Catalog-local lexical/exact search only; no global search | Confidential; projection results require current tenant, permission, entitlement, and authoritative revalidation before mutation |
+| `catalog_product_search_projection.source_version`, `source_event_id`, `projected_at` | Projection freshness and lineage evidence | Retained only with the replaceable projection | Returned only as bounded freshness metadata | Positive source version, opaque event reference, and server time make staleness visible without claiming authority |
 
 ## PR3 Inventory Field Classification
 

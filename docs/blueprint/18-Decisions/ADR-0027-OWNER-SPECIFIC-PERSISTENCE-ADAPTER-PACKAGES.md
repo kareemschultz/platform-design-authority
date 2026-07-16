@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.3.1
+version: 0.3.2
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-15
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0024, ADR-0025]
@@ -17,7 +17,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0024, ADR-0025]
 
 Proposed. This decision may guide the named controlled prototypes in PDA-RDM-008 and PDA-RDM-009, but it is not production authority. The three architecture-consistency review rows required before WS1 PR2 merged — Platform Architecture, Data Platform, and Security — are **recorded as Approved at prototype scope (2026-07-13)** against PR #37's CI-green implementation; that merge gate is satisfied. These were performed by Claude Code as the reviewer designated by the repository owner (one reviewer covering all three lenses, transparently attributed), not by three independent human specialists, and they do not constitute production acceptance. The Security row carries a forward caveat: DB-level tenant-isolation controls (RLS disposition, tenant-scoped constraints per PDA-SEC-011) remain an open gate for the PRs that introduce tenancy/domain tables.
 
-WS2 selects a second process only for the Event Backbone delivery runtime. The topology amendment below requires independent Platform Architecture, Data Platform, and Security concurrence at controlled-prototype scope before `apps/worker` implementation begins. The path is reserved by this decision as a candidate name only: until those review rows are recorded, PDA-ENGR-012 and the generated executable rules do not register `apps/worker/composition`, and the checker rejects database imports or pool lifecycle there.
+WS2 selects a second process only for the Event Backbone delivery runtime. Claude Code reviewed the exact pre-worker baseline at `40454740838bba4426b9ca48b2e82811bc7b466d` on 2026-07-15 through the Platform Architecture, Data Platform, and Security lenses. Platform Architecture concurred at prototype scope; Data Platform and Security required the contract, classification, pool-budget, and replay-authority remediations recorded in v0.3.2. The path remains a candidate name only: PDA-ENGR-012 and the generated executable rules do not register `apps/worker/composition`, and no worker implementation may begin until an independent exact-head re-review records superseding concurrence for both remaining lenses.
 
 ## Context
 
@@ -60,11 +60,13 @@ Adopt option C for owner-specific persistence and option F for the WS2 delivery 
 8. **Connection budgets cover the deployment topology.** Server and worker pool maxima are explicit, bounded, independently observable, and included with replica counts in the PostgreSQL connection budget. A worker drains claims, releases checked-out clients, and closes its own pool on shutdown. Neither process reaches into the other's lifecycle.
 9. **Worker authority remains narrow.** An event envelope supplies scope and causation for delivery, not current user authority. A consumer mutates authoritative state only through the target owner's published application command or an explicitly owned projection adapter. External webhooks remain Developer Platform ownership.
 
+For the named WS2 controlled prototype, the server pool maximum remains `10`, the proposed worker pool maximum is `5`, one server replica and one worker replica are assumed, and `10` connections are reserved for direct migration and administrative access. The binding budget is `(server_pool_max × server_replicas) + (worker_pool_max × worker_replicas) + reserve ≤ configured PostgreSQL max_connections`; the current prototype allocation is `10 + 5 + 10 = 25`. These values authorize no production capacity claim. Any replica, provider, pool, or connection-limit change triggers a new Data Platform review before deployment.
+
 `packages/foundation/database` and embedded persistence subpaths inside runtime-neutral core packages are prohibited.
 
 ## Required Rules Propagation
 
-PDA-ENGR-012 and `registry/architecture-rules.json` register the `persistence` family and currently authorized exact composition roots. The selected worker candidate is added only after the three pending review rows are recorded. Architecture tests must enforce:
+PDA-ENGR-012 and `registry/architecture-rules.json` register the `persistence` family and currently authorized exact composition roots. The selected worker candidate is added only after all three named review lenses have recorded concurrence at prototype scope; a Changes-required row must be followed by a superseding exact-head concurrence row. Architecture tests must enforce:
 
 - ordinary application paths cannot import Persistence, Platform, Engine, or Domain implementations;
 - registered composition roots may import owner-specific persistence adapters only for construction and binding;
@@ -96,7 +98,7 @@ The `database-outside-persistence` forbidden pattern in `registry/architecture-r
 
 ## Required Prototype Controls
 
-- Before the three WS2 review rows are recorded, prove `apps/worker/composition/**` and an unknown `apps/*/composition` path are rejected while only the registered server and Tooling roots receive their narrow allowances.
+- Before all three WS2 review lenses record concurrence, prove `apps/worker/composition/**` and an unknown `apps/*/composition` path are rejected while only the registered server and Tooling roots receive their narrow allowances.
 - When PR4 records those reviews and registers the worker root, prove only `apps/server/composition/**` and `apps/worker/composition/**` create/close application pools, each process creates at most one pool, and the worker cannot invoke migrations.
 - Prove database imports exist only in registered owner-specific persistence packages and the composition pool factory.
 - Prove a module state change and its outbox record commit or roll back together without another module's business-table mutation.
@@ -139,14 +141,15 @@ PDA-REV-011 found that the validated Tooling environment schema's necessary `DAT
 | Claude Code (Data Platform perspective) | Pooling, transactions, migration orchestration | Approved — prototype scope | 2026-07-13 | Single process pool (`postgres.ts`); narrow unit-of-work that BEGIN/COMMIT/ROLLBACKs without leaking `PoolClient` (`postgres-unit-of-work.ts`); deterministic serial migration runner with per-stream error wrapping (`migrations.ts`); distinct per-owner migration tables (`platform_identity_migrations` / `platform_events_migrations`) preserving `single_migration_owner`. `persistence.integration.test.ts` proves empty-migrate, repeat-without-drift, representative upgrade, failed-stream recovery without partial state, atomic owner-state+outbox commit/rollback, and event-id idempotency. Exact locks recorded in PDA-APP-020 (Drizzle 0.45.2 / drizzle-kit 0.31.10 / pg 8.22.0 / PostgreSQL 18.4 / Bun 1.3.14 / Node 24). |
 | Claude Code (Security perspective) | Env/secret handling, tenant-safe connections | Approved — prototype scope, with a forward caveat | 2026-07-13 | `DATABASE_URL`/pool construction confined to `apps/server/composition/**`; no persistence or runtime-neutral package reads connection env; Better Auth `secret` injected via options, never from env inside the package; no secret logging (only `error.message` on idle-client). Outbox is tenant-scoped (`tenant_id NOT NULL` + tenant index) with classification/retention/idempotency columns. Enforced by the `connection-lifecycle-outside-composition` and `database-outside-persistence` CI patterns. **Caveat:** DB-level tenant-isolation controls (RLS disposition, tenant-scoped uniqueness/FKs per PDA-SEC-011) are a separate gate that applies when tenancy/domain tables land in PR3+; PR2's schemas are Better Auth core + the outbox only, so that gate is not yet exercised and remains open for later PRs. |
 | Claude Code | Consolidated WS1 architecture audit | Concurred after remediation — prototype scope | 2026-07-14 | PDA-REV-011 identified the hidden Tooling-family connection-rule carve-out; PDA-REV-012 replaces it with an authoritative, generated, exact-path allowance and negative regression proof. RR-007 remains open. |
-| Claude Code (Platform Architecture perspective) | Explicit server/worker composition roots and modular-monolith boundary | Pending — WS2 prototype scope | | Required before `apps/worker` implementation. |
-| Claude Code (Data Platform perspective) | Per-process pool budget, migrations, transactions, and recovery | Pending — WS2 prototype scope | | Required before `apps/worker` implementation. |
-| Claude Code (Security perspective) | Worker scope, tenant context, configuration, and least privilege | Pending — WS2 prototype scope | | Required before `apps/worker` implementation. Production RLS remains RR-007. |
+| Claude Code (Platform Architecture perspective) | Explicit server/worker composition roots and modular-monolith boundary | Concurred — prototype scope | 2026-07-15 | Reviewed exact commit `40454740838bba4426b9ca48b2e82811bc7b466d`. Confirmed the worker candidate is absent and executable-denied, one bounded pool per authorized process is internally consistent, migrations remain server-only, owner application/projection ports preserve the modular-monolith boundary, and existing unknown-application probes are the correct base. Registration must add only literal `apps/worker/composition`, literal positive/adjacent-negative probes, cross-owner consumer-import denial, and renewed runtime-neutrality evidence. Evidence: issue #70 comment `4985693566`. |
+| Claude Code (Data Platform perspective) | Per-process pool budget, migrations, transactions, and recovery | Changes required — prototype scope | 2026-07-15 | Reviewed exact commit `40454740838bba4426b9ca48b2e82811bc7b466d`. Accepted findings: PDA-PLT-008/PDA-RDM-009 disagreed on receipt identity; PDA-DAT-019 lacked field-level delivery-state classification; no worker pool budget existed. PDA-PLT-008 v0.4.0 and PDA-RDM-009 v0.3.3 select `(consumer_id, event_id, consumer_schema_version)`; PDA-DAT-019 v0.4.0 classifies all five storage families before migration; ADR-0027 v0.3.2 binds server `10` + worker `5` + reserve `10` at one replica each. Claim token/CAS, monotonic sequence, deterministic retry fields, server-only migration denial, and a superseding exact-head concurrence remain pre-code gates. Evidence: issue #70 comment `4985693566`. |
+| Claude Code (Security perspective) | Worker scope, tenant context, configuration, and least privilege | Changes required — prototype scope | 2026-07-15 | Reviewed exact commit `40454740838bba4426b9ca48b2e82811bc7b466d`. Accepted findings: `platform.event.replay` had no enforcement point and Event Backbone retention/encryption controls referenced unclassified storage. PDA-ARC-014 v0.6.0 and OpenAPI v0.4.0 add the authenticated, tenant-context-bound `POST /v1/event-replays` contract with endpoint-permission parity; PDA-DAT-019 v0.4.0 supplies field-level classification. The current principal supplies approver identity, and purpose/range/consumer version are bounded inputs. Executable replay authorization/Audit and payload-minimization tests remain implementation gates; RR-007 and production role/RLS topology remain open. Evidence: issue #70 comment `4985693566`. |
 
 ## Change Log
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.2 | 2026-07-15 | Platform Design Authority | Recorded the exact-commit PR4 Platform Architecture/Data Platform/Security review, retained the worker prohibition after two Changes-required dispositions, bound the controlled-prototype two-process connection budget, and linked the contract/classification/replay remediations required for re-review. |
 | 0.3.1 | 2026-07-14 | Platform Design Authority | Made the pre-worker review gate executable: the selected worker path remains unregistered and denied until the three pending review rows are recorded; added literal worker-candidate and unknown-app denial requirements. |
 | 0.3.0 | 2026-07-14 | Platform Design Authority | Selected an explicit Event Backbone worker with one process-local bounded pool for the WS2 controlled prototype; narrowed composition roots to exact paths, kept migrations server-only, and added required pre-worker review gates. |
 | 0.2.7 | 2026-07-14 | Platform Design Authority | Replaced the hidden Tooling connection-rule bypass with a source-derived exact-path allowance under the RR-011 disposition. |

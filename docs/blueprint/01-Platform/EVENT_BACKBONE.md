@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-008
 title: Event Backbone
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-15
 related_adrs: [ADR-0014, ADR-0016, ADR-0027]
 ---
 
@@ -62,7 +62,17 @@ The following parameters are the implementation contract for WS2 PR4. They autho
 - Ordering is narrow: events sharing `(tenant_id, producer_namespace, aggregate_id)` are delivered in outbox sequence. No ordering is promised across tenants, aggregates, or independent producer namespaces.
 - A dead-letter record retains the minimized event envelope, schema reference, failure classification, attempt summary, and encrypted payload only when the event retention class permits it. The prototype review window is 30 days; a shorter governing privacy or domain retention rule wins. This value is not a production records schedule.
 - Replay is a new authorized delivery attempt, never a mutation of the original event. It requires `platform.event.replay`, an authenticated tenant scope, a recorded purpose and approver, compatible producer and consumer schema versions, an allowlisted event range, and append-only audit evidence. Cross-tenant, unbounded, or unaudited replay is prohibited.
-- Consumer receipts are unique by `(consumer_id, event_id)`. A replay or expired lease may repeat transport but must not repeat a business effect.
+- Consumer receipts are unique by `(consumer_id, event_id, consumer_schema_version)`. A version change does not automatically replay an event: the target version must be registered and schema-compatible, and reprocessing requires the same scoped replay authorization and Audit evidence as any other replay. Authoritative target commands additionally deduplicate by source event identity independent of consumer version, so a consumer upgrade cannot repeat a business effect.
+
+The outbox carries a monotonic database sequence distinct from event ID and `occurred_at`; that sequence is the delivery order within each `(tenant_id, producer_namespace, aggregate_id)` stream. A later row is ineligible while an earlier row in the same stream is pending, leased, retrying, or quarantined for review. Claim ownership uses an opaque claim token plus `claimed_at` and `lease_expires_at`; renew, complete, release, and terminal transitions use compare-and-set against the current token. Retry state records first, last, and next attempt instants plus a safe terminal reason. Runtime-neutral policy receives injected clock and jitter sources.
+
+Delivery is evaluated per registered consumer. A successful `(consumer_id, event_id, consumer_schema_version)` receipt suppresses repeated work for that consumer while a sibling consumer retries independently. The outbox row becomes terminally complete only after every consumer registered for that event/version has either a receipt or an explicitly governed terminal disposition; it is marked delivered only when every required consumer has a receipt, while any dead-letter outcome remains explicit. Dead-letter and replay records target one consumer/version without mutating the original event or another consumer's receipt.
+
+The controlled-prototype connection budget is one server replica with pool maximum `10`, one worker replica with pool maximum `5`, and a reserve of `10` for direct migration and administrative access. The binding formula is `(server_pool_max × server_replicas) + (worker_pool_max × worker_replicas) + reserve ≤ configured PostgreSQL max_connections`, producing a current allocation of `25`. Replica, provider, pool, or connection-limit changes require renewed Data Platform review; this is not production capacity evidence.
+
+### Internal replay command
+
+`POST /v1/event-replays` is the only first-slice HTTP authority boundary for an internal Event Backbone replay. It requires `platform.event.replay`, a currently revalidated active tenant context, an idempotency key, a bounded inclusive outbox-sequence range, an allowlist of canonical event names, one registered consumer and consumer schema version, and a non-empty purpose. Tenant scope and approver identity come from the authenticated current principal and active context, never from request data. The application command verifies range size, consumer registration, producer/consumer schema compatibility, retention eligibility, current permission, and append-only Audit evidence before creating a replay request. Cross-tenant, unbounded, incompatible, unaudited, or repository-direct operator replay is denied without disclosing foreign event existence.
 
 PR4 must measure claim recovery, retry timing, poison-message isolation, tenant-scoped pause/recovery, and zero duplicate consumer effects before RR-006 can close. These parameters do not claim that the present outbox is already a delivery system.
 
@@ -92,6 +102,8 @@ Events preserve tenant isolation, minimize sensitive payloads, encrypt transport
 
 Direct identifiers and secrets are avoided. Where a privacy action applies, retained payloads, dead letters, replay stores, search projections, and external webhook payload retention follow ADR-0014 and the deletion journal.
 
+PDA-DAT-019 classifies the outbox claim/lease fields, delivery attempts, dead letters, replay requests, and consumer receipts before migration. Unknown fields remain Confidential. Claim tokens, encrypted payload material, raw exception text, credentials, authorization headers, cookies, tokens, unrestricted request objects, and unclassified Party PII are prohibited from logs, metrics, Audit metadata, and ordinary API responses. Encrypted retained payload is permitted only when the committed envelope's governing retention class allows it; a shorter privacy or owner retention rule wins.
+
 ## Registered Initial Event Families
 
 - `platform` — tenancy, organization, identity, authorization, entitlements, configuration, audit, jobs, notifications, devices, and privacy primitives
@@ -117,4 +129,5 @@ Measure publish failures, throughput, queue delay, consumer lag, retries, dead l
 
 ## Change Log
 
+- 0.4.0 (2026-07-15): Reconciled consumer receipt identity, bound the two-process pool budget, specified monotonic ordering and claim-token/CAS retry state, defined per-consumer completion, established the authenticated internal replay command, and linked field-level delivery-state classification after the PR4 specialist review.
 - 0.3.0 (2026-07-14): Select the bounded WS2 claim lease, retry horizon, ordering key, dead-letter review window, replay authority, and consumer-idempotency contract.

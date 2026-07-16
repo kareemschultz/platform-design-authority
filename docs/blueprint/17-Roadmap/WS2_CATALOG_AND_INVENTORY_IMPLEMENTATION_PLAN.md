@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.3.2
+version: 0.3.3
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-15
@@ -16,7 +16,7 @@ This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section
 
 This is a **Draft plan for a controlled prototype**. It may guide only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, close FDR-004, establish a contractual service level, or claim the first slice is complete. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and WS2 stops for disposition.
 
-Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, issue #66 owns merged PR2 Catalog execution, and issue #68 owns active PR3 Inventory execution. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began, on PR1 at PR #65 before merge, and on PR2 at PR #67 before merge. Every implementation PR still requires exact-head independent review before merge.
+Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, issue #66 owns merged PR2 Catalog execution, issue #68 owns merged PR3 Inventory execution, and issue #70 owns the active PR4 Event Backbone gate and implementation. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began, on PR1 at PR #65 before merge, on PR2 at PR #67 before merge, and on PR3 at PR #69 before merge. Every implementation PR still requires exact-head independent review before merge.
 
 ### 1.1 Implementation progress
 
@@ -24,8 +24,9 @@ Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, is
 |---|---|---|
 | PR1 — governance, contracts, schemas, and spike | Merged after exact-head Claude Code concurrence | Retain as the contract/governance baseline; it does not prove later business behavior or delivery |
 | PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
-| PR3 — Inventory ledger and workflows | Implementation and local evidence complete on issue #68; exact-head independent review required before merge | PDA-APP-022 records the controlled-prototype core, owner persistence, API, live PostgreSQL, rebuild, concurrency, offline-boundary, and runtime evidence; no PR4 delivery claim |
-| PR4–PR7 | Not started | Execute in order; no later phase may be pre-closed by earlier evidence |
+| PR3 — Inventory ledger and workflows | Merged as PR #69 after exact-head Claude Code concurrence | Retain Inventory core/persistence/API, immutable ledger/reversal, workflow, rebuild, concurrency, tenant-isolation, offline-boundary, Bun/Node, and PostgreSQL evidence; no PR4 delivery claim |
+| PR4 — durable delivery and projections | Review-only gate active on issue #70 | Claude Code concurred on Platform Architecture and required Data Platform/Security remediation at exact base `40454740838bba4426b9ca48b2e82811bc7b466d`; no worker registration or source begins before remediated exact-head concurrence |
+| PR5–PR7 | Not started | Execute in order; no later phase may be pre-closed by earlier evidence |
 
 ### 1.2 Governing sources
 
@@ -152,8 +153,8 @@ ADR-0027's owner-specific adapter, logical ownership, transaction-scope, and run
 - concrete schemas, Drizzle adapters, and owner migration streams live in `packages/persistence/catalog-postgres`, `inventory-postgres`, `platform-numbering-postgres`, and any explicitly approved supporting Platform owner package;
 - logical table and migration ownership remains Catalog, Inventory, or the named Platform owner even though concrete artifacts live in the Persistence family;
 - PR1 must amend or supersede ADR-0027 before `apps/worker` implementation, deciding whether delivery runs in a separate worker process with one process-local pool or remains bound through the existing server composition root; Platform Architecture, Data Platform, and Security review are required at controlled-prototype scope;
-- PR1 records the selected topology in ADR-0027 but deliberately withholds `apps/worker/composition` from PDA-ENGR-012 and `registry/architecture-rules.json`; exact negative tests deny the worker candidate and a genuinely unknown application root until the three named reviews are recorded;
-- PR4 begins by recording those reviews and registering the worker root in PDA-ENGR-012; only then may its implementation commits construct the second process pool, and the same PR must prove the worker cannot run migrations;
+- PR1 records the selected topology in ADR-0027 but deliberately withholds `apps/worker/composition` from PDA-ENGR-012 and `registry/architecture-rules.json`; exact negative tests deny the worker candidate and a genuinely unknown application root until all three named review lenses record concurrence;
+- PR4 begins by recording those reviews and remediating every Changes-required disposition; only after all three lenses independently concur at the remediated exact head may it register the worker root in PDA-ENGR-012 and construct the second process pool, and the same PR must prove the worker cannot run migrations;
 - each approved process owns at most one bounded pool and its transaction coordinator; pools are not shared through global service location, and no owner mutates another owner's private tables inside a shared transaction;
 - PR1 registers `catalog-postgres` to Catalog, `inventory-postgres` to Inventory, and `platform-numbering-postgres` to Platform Numbering in the authoritative Persistence ownership source, then regenerates `registry/architecture-rules.json` and adds negative ownership probes;
 - Inventory consumes published Catalog contracts and stable IDs, never Catalog repositories, tables, migrations, or implementation modules.
@@ -286,13 +287,15 @@ PR4 must prove:
 3. at-least-once delivery with bounded exponential backoff and jitter;
 4. narrowly declared ordering per tenant/aggregate stream, never global ordering;
 5. terminal dead-letter/quarantine evidence with reason, classification, and safe diagnostics;
-6. consumer receipts keyed by event ID and consumer version so retries cause zero duplicate business effects;
+6. Consumer receipts are unique by `(consumer_id, event_id, consumer_schema_version)`. A version change does not automatically replay an event: the target version must be registered and schema-compatible, and reprocessing requires the same scoped replay authorization and Audit evidence as any other replay. Authoritative target commands additionally deduplicate by source event identity independent of consumer version, so a consumer upgrade cannot repeat a business effect.
 7. replay requires permission, purpose, tenant scope, compatibility, and audit;
 8. lag, throughput, oldest-event age, retries, failures, dead letters, and consumer health are observable without payload leakage;
 9. a killed worker, transient database failure, poison event, and stale claim recover predictably;
 10. privacy/deletion behavior covers live outbox rows, attempts, dead letters, and projections.
 
 The first consumers are bounded, tenant-safe projections such as Catalog search documents and Inventory availability/reconciliation views. External webhook subscriptions remain Developer Platform ownership and are not implemented by this worker.
+
+For the named controlled prototype, the server pool maximum remains `10`, the worker pool maximum is `5`, one server and one worker replica are assumed, and `10` connections are reserved for direct migration and administrative access. The binding formula is `(server_pool_max × server_replicas) + (worker_pool_max × worker_replicas) + reserve ≤ configured PostgreSQL max_connections`, giving a current allocation of `25`. A replica/provider/pool-limit change requires renewed Data Platform review and measured capacity evidence.
 
 ## 9. Offline and WS5 Boundary
 
@@ -353,7 +356,7 @@ Every PR has one issue, branch, worktree, explicit owner, migration/API/security
 1. **PR1 — Governance, contracts, schemas, and ledger spike.** Propagate G2 contract corrections; resolve lifecycle/archive and transfer-dispatch semantics; add missing read surfaces; amend ADR-0027 to select the worker/pool topology while leaving the worker root executable-denied pending the named prototype reviews; propagate exact registered-root and negative connection rules; classify all proposed tables; create/verify all event schemas; regenerate contracts/registries; register Catalog, Inventory, Platform Numbering, and any Import/Export Persistence ownership plus migration streams; run Drizzle/ledger/query spikes; record exact locks and ADR/technology/risk consequences. No broad business migration.
 2. **PR2 — Catalog core, persistence, API, and lifecycle.** Implement `catalog.products`, `catalog.variants`, `catalog.identifiers`, `catalog.barcodes`, and prototype `catalog.lifecycle`; add owner migrations, state-plus-outbox atomicity, version conflicts, tenant isolation, barcode/search budgets, Bun/Node tests, and Catalog command events.
 3. **PR3 — Inventory ledger, balances, adjustments, counts, transfers, and offline command boundary.** Implement the Inventory core and owner persistence; immutable posting/reversal; reservations prototype; transfer dispatch/receipt; count variance posting; balance/availability representations; command receipts; two-tenant, concurrency, conservation, rebuild, and offline-origin tests.
-4. **PR4 — Durable event delivery and projections.** First record the three ADR-0027 prototype-scope reviews and register `apps/worker/composition`; only after that gate may implementation commits add the selected worker, claim/lease/retry/dead-letter/replay/observability, consumer receipts, Catalog search projection, Inventory availability/reconciliation consumers, rebuild tools, kill/recovery tests, and RR-006 disposition. Outbox-only evidence is insufficient.
+4. **PR4 — Durable event delivery and projections.** First record the three ADR-0027 prototype-scope reviews, remediate every Changes-required disposition, and obtain exact-head concurrence from all three lenses; only then register `apps/worker/composition`. After that gate, implementation commits may add the selected worker, claim/lease/retry/dead-letter/replay/observability, consumer receipts, Catalog search projection, Inventory availability/reconciliation consumers, rebuild tools, kill/recovery tests, and RR-006 disposition. Outbox-only evidence is insufficient.
 5. **PR5 — Imports and supporting numbering foundation.** Implement bounded Product and opening-stock import through domain commands with malware/file controls, dry run, row findings, approval, idempotent waves, correction report, reconciliation, and audit. Add the PDA-RDM-007-assigned Numbering core/adapter and prove atomic/idempotent online allocation without claiming WS5 offline range leasing.
 6. **PR6 — Product and Inventory web experience.** Implement section 11 over generated clients and current authority. Include formal UI-pattern and accessibility reviews, responsive evidence, direct-API denial tests, projection freshness labels, and performance/bundle evidence.
 7. **PR7 — WS2 verification and controlled-prototype closeout.** Execute the complete section 14 matrix for all 14 capabilities; scenarios 2 and 8; Bun and approved Node paths; migration, delivery, recovery, performance, accessibility, security, and two-tenant evidence. Update PDA-RDM-007, PDA-RDM-004, the risk register, technology lessons, evidence sources, and program status without lifecycle overclaim.
@@ -498,9 +501,11 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 | Codex | Author and cross-document reconciliation | Drafted for independent review | 2026-07-14 | Reconciled ADR-0027 ownership, current registry counts, missing lifecycle/dispatch/read contracts, RR-006, and the WS2/WS5 offline boundary. |
 | Claude Code | Independent architecture and registry consistency | Changes required on v0.1.0 | 2026-07-14 | Submitted one P1, one P2, and two P3 findings on worker/pool authority, Persistence owner registration, dispatch permission naming, and offline-budget meaning; all accepted and remediated in v0.1.1, with implementation closure still assigned to PR1/WS5. |
 | Claude Code | Independent plan concurrence | Concurred on PR #63 exact head | 2026-07-14 | Re-verified all four remediations in an isolated worktree, confirmed identifier non-collision and clean governance/CI, and declared G1 satisfied before PR1 began. |
+| Claude Code | PR4 pre-worker Platform Architecture, Data Platform, and Security review | Architecture concurred; Data and Security changes required — prototype scope | 2026-07-15 | Reviewed exact base `40454740838bba4426b9ca48b2e82811bc7b466d` in an isolated worktree. Accepted blockers: receipt-identity contradiction, missing delivery-state field classification, absent pool budget, and no internal replay enforcement point. v0.3.3 propagates the selected receipt identity, pool formula, classification gate, and authenticated replay contract; worker registration remains prohibited pending superseding exact-head concurrence. Evidence: issue #70 comment `4985693566`. |
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.3 | 2026-07-15 | Platform Design Authority | Recorded PR3 merge/concurrence and the active PR4 specialist review; reconciled versioned consumer-receipt identity with PDA-PLT-008, bound the controlled-prototype pool budget, and retained the worker prohibition pending Data Platform/Security remediation concurrence. |
 | 0.3.2 | 2026-07-15 | Platform Design Authority | Recorded PR3 implementation/evidence completion pending exact-head independent review, linked PDA-APP-022, and retained RR-006/RR-007 plus WS5 offline transport deferrals. |
 | 0.3.1 | 2026-07-15 | Platform Design Authority | Recorded PR2 merge/concurrence and active issue #68; selected atomic adjustment/count approve-and-post semantics and the explicit `inventory.adjustment.reverse` correction contract before PR3 persistence generation. |
 | 0.3.0 | 2026-07-14 | Platform Design Authority | Recorded merged PR1 concurrence and issue #66 PR2 execution status; clarified that PR2 preserves validated Variant/Identifier identities and remains pending exact-head independent review and merge. |

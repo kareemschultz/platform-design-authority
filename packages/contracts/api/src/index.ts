@@ -208,6 +208,12 @@ export const ENDPOINTS = [
 	},
 	{
 		method: "POST",
+		operationId: "createEventReplay",
+		path: "/v1/event-replays",
+		permission: "platform.event.replay",
+	},
+	{
+		method: "POST",
 		operationId: "createAccountantHandoffExport",
 		path: "/v1/exports/accountant-handoff",
 		permission: "platform.export.create",

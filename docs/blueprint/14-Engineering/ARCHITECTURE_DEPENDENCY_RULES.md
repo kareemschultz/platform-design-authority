@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.2.0
+version: 1.2.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-15
@@ -69,14 +69,14 @@ Family-level entries in `registry/architecture-rules.json` are a conservative gr
 
 ### Registered Composition Roots
 
-Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027 selects `apps/worker/composition` as the candidate Event Backbone root, but it is deliberately absent from this registered table and therefore rejected by the executable checker until all three named controlled-prototype review rows are recorded.
+Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027 selects `apps/worker/composition` as the candidate Event Backbone root, but it is deliberately absent from this registered table and therefore rejected by the executable checker until all three named controlled-prototype review lenses have recorded concurrence. A Changes-required row is not closure and requires a superseding exact-head concurrence row.
 
 | Composition root | Process owner | Allowed process resources | Prohibited responsibility |
 |---|---|---|---|
 | `apps/server/composition` | API server | one bounded process-local PostgreSQL pool; HTTP adapters; deterministic migration runner | background event-delivery loop or another process's pool |
 | `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | application business processing or an unregistered long-running service |
 
-PR4 may add `apps/worker/composition` to this table and regenerate the rules only after ADR-0027's Platform Architecture, Data Platform, and Security rows are dated and record concurrence. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; PR1 grants no executable exception in advance.
+PR4 may add `apps/worker/composition` to this table and regenerate the rules only after ADR-0027's Platform Architecture, Data Platform, and Security lenses are dated and each records concurrence at the remediated exact head. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; PR1 grants no executable exception in advance.
 
 ### Registered Persistence Owners
 
@@ -157,7 +157,7 @@ The implementation must include tests that:
 - Fail owner-specific Persistence packages that import another owner's private schema, repository, table, or migration
 - Fail pool creation, shutdown, or connection-configuration reads outside registered composition roots
 - Fail an unregistered `apps/*/composition` path even when its directory name is `composition`
-- Fail pool construction in the unregistered `apps/worker/composition` candidate until ADR-0027's three review rows are recorded; after registration, prove the worker may construct only its process-local pool and may not invoke migration streams
+- Fail pool construction in the unregistered `apps/worker/composition` candidate until ADR-0027's three review lenses have each recorded concurrence; after registration, prove the worker may construct only its process-local pool and may not invoke migration streams
 - Fail provider SDK leakage into domain contracts
 - Fail unregistered capability, event, and permission constants
 - Fail application packages that contain migrations
@@ -210,6 +210,8 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 2026-07-15 — v1.2.1 clarified that recording a Changes-required specialist row does not authorize the worker root; all three lenses require exact-head concurrence before registration.
 
 - 2026-07-15 — v1.2.0 registered the nine concrete Inventory-owned PR3 tables while preserving the owner-isolated migration stream and cross-owner persistence prohibition.
 

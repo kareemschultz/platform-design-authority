@@ -112,8 +112,8 @@ An optimized Next.js 16.2.10 build succeeds with all 13 new Operations route pat
 | Measure | Merged-main baseline | PR6 measured state | Change |
 |---|---:|---:|---:|
 | Static files | 46 | 62 | +16 |
-| Total emitted static bytes | 1,883,011 | 2,225,038 | +342,027 (18.16%) |
-| JavaScript bytes | 1,427,096 | 1,766,161 | +339,065 (23.76%) |
+| Total emitted static bytes | 1,883,011 | 2,227,100 | +344,089 (18.27%) |
+| JavaScript bytes | 1,427,096 | 1,768,223 | +341,127 (23.90%) |
 | CSS bytes | 64,632 | 67,594 | +2,962 (4.58%) |
 
 These are uncompressed build-artifact totals, not per-route transferred bytes or a contractual performance budget. The comparison prevents an unmeasured “thin UI” claim; route-level transfer, field-device latency, production cache behavior, and capacity/SLO evidence remain open. No new table, state-store, form, spreadsheet, chart, or visualization dependency was added for the workflows. Existing backend Catalog query budgets remain the separately governed 300 ms/800 ms p95 assertions; this build does not relabel them as end-user latency.
@@ -130,7 +130,7 @@ These are uncompressed build-artifact totals, not per-route transferred bytes or
 | Direct API and import-security proof | 62 tests / 190 expectations prove transport and application-boundary permission and entitlement denial, stable non-disclosure, exact-byte CSV bounds, malformed UTF-8 replacement rejection, canonical EICAR scanner wiring, and safe HTTP validation titles |
 | Residual live persistence proof | Imports plus dedicated Numbering tenant-isolation: 10 tests / 42 expectations; direct Node persistence fallback passes |
 
-The browser lane was reproduced against freshly built `web` and `server` images plus PostgreSQL 18 in one isolated Compose project. The sequence applied committed migrations, ran the server-owned `e2e:seed` fixture, and then executed `bun run --cwd apps/web test:e2e`; all six desktop/mobile tests passed in 11.4 seconds. The fixture creates only synthetic controlled-prototype identities and authority records and does not bypass authentication, current-context, permission, entitlement, oRPC, or owner persistence boundaries.
+The browser lane was reproduced after review remediation against freshly built `web` and `server` images plus PostgreSQL 18 in one isolated Compose project. The sequence applied committed migrations, ran the server-owned `e2e:seed` fixture, and then executed `bun run --cwd apps/web test:e2e`; all six desktop/mobile tests passed in 10.6 seconds. The fixture creates only synthetic controlled-prototype identities and authority records and does not bypass authentication, current-context, permission, entitlement, oRPC, or owner persistence boundaries.
 
 Each authenticated browser lane attaches bounded Navigation Timing/resource-count JSON to its Playwright report. CI retains the report and failure evidence; these measurements are diagnostic artifacts, not an SLA. Final exact-head repository checks, CI links, and independent-review disposition are added only after they are reproduced on the review head.
 

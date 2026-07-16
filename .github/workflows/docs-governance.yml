@@ -68,6 +68,8 @@ jobs:
 
       - name: Test and validate product documentation
         run: |
+          python -m unittest scripts/test_generate_api_reference.py
+          python scripts/generate_api_reference.py --check
           python -m unittest scripts/test_validate_product_docs.py
           python scripts/validate_product_docs.py
 

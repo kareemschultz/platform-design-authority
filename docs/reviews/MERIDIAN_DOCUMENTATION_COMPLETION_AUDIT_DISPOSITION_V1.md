@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.11.0
+version: 0.12.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -35,7 +35,7 @@ PR #75 at `f98b1e2` has passing `meridian` and both `validate-docs` checks. Loca
 
 The navigation checkpoint adds canonical linked catalogs for every governed document, parent navigation for every governed index, and `scripts/validate_document_indexes.py` with seeded regression cases for removed, bare-filename, metadata-incomplete, and duplicate entries. Local index validation reports zero unexplained governed documents. Independent review is still required before DCA-009 is marked Closed.
 
-The product-documentation checkpoint adds a separate nine-page `PDOC-*` manifest, MDX build-time metadata schema, implementation/version/evidence binding, internal-route and registry-reference validation, and seeded failure cases. Stale pre-WS1 claims were corrected to the `4045474` implementation baseline. The API page is honestly classified as `boundary-overview`; complete generated canonical OpenAPI reference parity remains open, so DCA-010 is only partially implemented.
+The product-documentation checkpoint adds a separate nine-page `PDOC-*` manifest, MDX build-time metadata schema, implementation/version/evidence binding, internal-route and registry-reference validation, and seeded failure cases. Stale pre-WS1 claims were corrected to the `4045474` implementation baseline. The API page now keeps a separately labeled implemented-runtime view and generates a 99-operation Draft-contract table from canonical OpenAPI. Generator freshness and content-derived operation parity are CI-enforced without duplicating the operation list in metadata. This implements DCA-010's repository controls; independent closure review and broader release/task content remain open.
 
 The research-registration checkpoint adds the missing accounting ledger entry, stable first-party source records SRC-033 through SRC-040, and an exact result index covering all 67 durable outputs and all 18 Transferred backlog questions. Six seeded tests reject orphan outputs, unregistered transfers, false transfers, and unresolved ledger/source references. This is structural traceability, not independent acceptance of the research conclusions.
 
@@ -66,7 +66,7 @@ The document-class checkpoint defines nine canonical classes over thirteen reusa
 | DCA-007 | High | Accepted | Initial waves registered; independent review and continuing backlog remain | Every research wave has a ledger record; affected backlog entries have honest states and exact output/source links |
 | DCA-008 | High | Partially Accepted | Workforce and platform-service gaps reduced after cutoff; ITSM/MSP/RMM, IAM, infrastructure/IPAM/DCIM, mobile/offline, and named-product depth remain | Reviewed matrices/workflows/findings and dated source ledger for each remaining research family |
 | DCA-009 | High | Accepted | Implemented; independent closure review pending | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |
-| DCA-010 | High | Accepted | Partially implemented: manifest, MDX build/metadata/link/release evidence checks exist; generated canonical API reference remains | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
+| DCA-010 | High | Accepted | Implemented; generated 99-operation Draft reference and all MDX controls pass, independent closure review pending | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
 | DCA-011 | High | Accepted | Four implemented service groups registered with draft procedures; review, live telemetry, tested alerts, escalation, and exercises remain open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |
 | DCA-012 | High | Accepted | Implemented; independent closure review pending | Capability source model consolidated or explicitly ratified as multi-source with provenance and zero identifier drift |
 | DCA-013 | High | Accepted | Preparation implemented; all reviews and promotions remain open | Ratification wave manifests record exact versions, reviewers, dissent, dispositions, authority, and promotion evidence |

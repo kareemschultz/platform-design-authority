@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -51,7 +51,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 | Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled | Founder decisions, legal entity, pricing, contracts, provider, tax, custody/payout gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
 | Competitive research | Initial nine-wave writing set In Review with source/ledger/backlog reconciliation | CIR-BACK-021–025, direct observation, omitted products/families, independent review and governed transfer |
-| Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; OpenAPI is canonical | Generated canonical API reference, full task/admin/migration/troubleshooting depth, later-workstream release evidence |
+| Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; the API page preserves an implemented-runtime view and a generated 99-operation canonical Draft contract table | Full task/admin/migration/troubleshooting depth, later-workstream release evidence, editorial/accessibility review |
 | Testing and evidence | Thirteen-dimension matrix supports planned, partial, evidenced, not-applicable, and depth-deferred states; 223 cells have evidence | Complete remaining WS2 cells, WS3–WS7 sources, scale/security/accessibility/operations results, external evidence |
 | Roadmap and program control | Workstreams and project exist; current status is non-authoritative | Continuous evidence-cutoff updates, generated status feasibility, founder/customer sequencing decisions |
 
@@ -79,7 +79,7 @@ These counts demonstrate inventory and internal parity, not enterprise implement
 - WS1: 11 capabilities and 143 of 1,294 currently required first-slice evidence cells are fully registered.
 - WS2: 13 capabilities have interim PR2/PR3 registration covering 80 cells; bulk import and all other unproven PR4–PR7 cells remain planned.
 - Operations: four merged service groups have bounded procedure drafts and zero pilot-ready claims; independent review, telemetry, alerts, escalation, restore/failover, and all dated exercises remain open.
-- Product documentation: build/type checks, a nine-page manifest, metadata/link/release-evidence validation, and one class-adopted API sample exist; generated canonical OpenAPI parity and broader behavioral evidence remain open.
+- Product documentation: build/type checks, a nine-page manifest, metadata/link/release-evidence validation, one class-adopted API sample, and generated canonical OpenAPI parity exist; broader behavioral, editorial, and accessibility evidence remains open.
 - External: founder decisions, customer evidence, qualified Guyana review, providers, penetration testing, accessibility evidence, and operational exercises remain open.
 
 ## Honest Readiness Claims

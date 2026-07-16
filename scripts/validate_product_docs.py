@@ -27,6 +27,7 @@ PAGE_FIELDS = (
     "publication_state",
     "applicable_version",
     "evidence_revision",
+    "generated_reference_source",
     "last_verified",
     "implementation_evidence",
     "related_capabilities",
@@ -35,6 +36,11 @@ PAGE_FIELDS = (
 )
 LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 OPENAPI_OPERATION = re.compile(r"^\s{6}operationId:\s*(\S+)\s*$", re.MULTILINE)
+GENERATED_START = "{/* GENERATED:OPENAPI-REFERENCE:START */}"
+GENERATED_END = "{/* GENERATED:OPENAPI-REFERENCE:END */}"
+GENERATED_OPERATION = re.compile(
+    r"^\| `[A-Z]+` \| `[^`]+` \| `([^`]+)` \|", re.MULTILINE
+)
 
 
 def load_json(path: Path) -> Any:
@@ -222,26 +228,49 @@ def validate_product_docs(
 
         if page.get("content_class") == "api-reference":
             mode = page.get("api_reference_mode")
-            declared_ids = set(page.get("openapi_operation_ids", []))
             if metadata.get("api_reference_mode") != mode:
                 errors.append(f"{relative_path}: API reference mode differs from manifest")
-            if metadata.get("openapi_operation_ids") != page.get("openapi_operation_ids"):
-                errors.append(f"{relative_path}: OpenAPI operation list differs from manifest")
             if mode == "boundary-overview":
-                if declared_ids:
+                if page.get("openapi_operation_ids") or metadata.get("openapi_operation_ids"):
                     errors.append(
                         f"{relative_path}: boundary overview must not claim generated operation parity"
+                    )
+                if page.get("generated_reference_source") or metadata.get(
+                    "generated_reference_source"
+                ):
+                    errors.append(
+                        f"{relative_path}: boundary overview must not claim a generated reference source"
                     )
                 if "boundary overview" not in body.lower():
                     errors.append(
                         f"{relative_path}: boundary overview must label itself in page content"
                     )
-            elif mode == "generated-canonical" and declared_ids != openapi_operation_ids:
-                errors.append(
-                    f"{relative_path}: generated canonical API parity differs from OpenAPI "
-                    f"(missing {sorted(openapi_operation_ids - declared_ids)}, "
-                    f"extra {sorted(declared_ids - openapi_operation_ids)})"
-                )
+            elif mode == "generated-canonical":
+                source = page.get("generated_reference_source")
+                if source != "openapi/first-slice-v1.yaml":
+                    errors.append(
+                        f"{relative_path}: generated canonical source must be openapi/first-slice-v1.yaml"
+                    )
+                if body.count(GENERATED_START) != 1 or body.count(GENERATED_END) != 1:
+                    errors.append(
+                        f"{relative_path}: generated canonical reference requires one marker pair"
+                    )
+                else:
+                    generated_block = body.split(GENERATED_START, 1)[1].split(
+                        GENERATED_END, 1
+                    )[0]
+                    generated_list = GENERATED_OPERATION.findall(generated_block)
+                    generated_ids = set(generated_list)
+                    if len(generated_list) != len(generated_ids):
+                        errors.append(
+                            f"{relative_path}: generated canonical reference contains duplicate operation IDs"
+                        )
+                    if generated_ids != openapi_operation_ids:
+                        errors.append(
+                            f"{relative_path}: generated canonical API parity differs from OpenAPI "
+                            f"(missing {sorted(openapi_operation_ids - generated_ids)}, "
+                            f"extra {sorted(generated_ids - openapi_operation_ids)})"
+                        )
 
     meta_file = content_root / "meta.json"
     if not meta_file.exists():

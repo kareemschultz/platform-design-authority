@@ -58,7 +58,6 @@ class ProductDocumentationValidatorTests(unittest.TestCase):
             "permission_refs": ["platform.user.read"],
             "contract_refs": ["openapi/first-slice-v1.yaml"],
             "api_reference_mode": "boundary-overview",
-            "openapi_operation_ids": [],
         }
         self.write_manifest([self.page])
         self.write_page(self.page, "This API page is a boundary overview.")
@@ -95,8 +94,10 @@ class ProductDocumentationValidatorTests(unittest.TestCase):
             "permission_refs",
             "contract_refs",
             "api_reference_mode",
-            "openapi_operation_ids",
+            "generated_reference_source",
         ):
+            if field not in page:
+                continue
             value = page[field]
             rendered = "[" + ", ".join(value) + "]" if isinstance(value, list) else value
             lines.append(f"{field}: {rendered}")
@@ -147,10 +148,30 @@ class ProductDocumentationValidatorTests(unittest.TestCase):
     def test_generated_reference_requires_exact_openapi_parity(self) -> None:
         generated = dict(self.page)
         generated["api_reference_mode"] = "generated-canonical"
-        generated["openapi_operation_ids"] = []
+        generated["generated_reference_source"] = "openapi/first-slice-v1.yaml"
         self.write_manifest([generated])
-        self.write_page(generated, "Generated reference")
+        self.write_page(
+            generated,
+            "{/* GENERATED:OPENAPI-REFERENCE:START */}\n"
+            "Generated reference with no rows.\n"
+            "{/* GENERATED:OPENAPI-REFERENCE:END */}",
+        )
         self.assertTrue(any("parity differs" in error for error in self.validate()))
+
+    def test_generated_reference_with_exact_content_parity_passes(self) -> None:
+        generated = dict(self.page)
+        generated["api_reference_mode"] = "generated-canonical"
+        generated["generated_reference_source"] = "openapi/first-slice-v1.yaml"
+        self.write_manifest([generated])
+        self.write_page(
+            generated,
+            "{/* GENERATED:OPENAPI-REFERENCE:START */}\n"
+            "| Method | Path | `operationId` | Authority | Success |\n"
+            "|---|---|---|---|---:|\n"
+            "| `GET` | `/v1/users` | `listUsers` | permission `platform.user.read` | `200` |\n"
+            "{/* GENERATED:OPENAPI-REFERENCE:END */}",
+        )
+        self.assertEqual(self.validate(), [])
 
 
 if __name__ == "__main__":

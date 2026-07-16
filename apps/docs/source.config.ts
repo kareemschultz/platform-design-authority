@@ -59,9 +59,9 @@ const productDocumentationSchema = pageSchema.extend({
 			"superseded",
 		])
 		.optional(),
+	generated_reference_source: z.string().min(1).optional(),
 	implementation_evidence: z.array(z.string()).min(1),
 	last_verified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-	openapi_operation_ids: z.array(z.string()).optional(),
 	owner: z.string().min(1),
 	permission_refs: z.array(z.string()).default([]),
 	publication_state: z.enum([

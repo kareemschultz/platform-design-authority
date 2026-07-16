@@ -40,7 +40,7 @@ The exact reviewed class identifiers are `foundation-authority`, `architecture-d
 | CLASS-SAMPLE-005 | Plan/roadmap/register | PDA-RDM-010 | `contract-specified` / `implemented` | Mapping coherent | Preparation controls exist; ratification reviews do not |
 | CLASS-SAMPLE-006 | Research/review/evidence | PDA-CIR-002 | `contract-specified` / `documented` | Mapping coherent | Method documentation is not completion of the research backlog |
 | CLASS-SAMPLE-007 | Operations/runbook | PDA-OPS-018 | `prototype-ready` / `implemented` | Mapping coherent with offline disposition | Procedures are unexercised and not pilot-ready |
-| CLASS-SAMPLE-008 | Product documentation | PDOC-0005 | `prototype-ready` / `implemented` | Mapping coherent with accessibility/offline dispositions | Page is a boundary overview, not generated canonical API parity |
+| CLASS-SAMPLE-008 | Product documentation | PDOC-0005 | `prototype-ready` / `implemented` | Mapping coherent with accessibility/offline dispositions | Page separates the implemented boundary from a generated Draft canonical table; neither is production evidence |
 | CLASS-SAMPLE-009 | Index/derived/evidence | PDA-FND-015 | `indexed` / `implemented` | Mapping coherent | Index correctness depends on the separate navigation validator |
 
 ## Adversarial Findings

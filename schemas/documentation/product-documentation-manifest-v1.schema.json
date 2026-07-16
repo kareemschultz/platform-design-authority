@@ -106,16 +106,19 @@
           "items": { "type": "string", "minLength": 1 }
         },
         "api_reference_mode": { "enum": ["boundary-overview", "generated-canonical"] },
-        "openapi_operation_ids": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": { "type": "string", "minLength": 1 }
-        }
+        "generated_reference_source": { "type": "string", "minLength": 1 }
       },
       "allOf": [
         {
           "if": { "properties": { "content_class": { "const": "api-reference" } } },
-          "then": { "required": ["api_reference_mode", "openapi_operation_ids"] }
+          "then": { "required": ["api_reference_mode"] }
+        },
+        {
+          "if": {
+            "required": ["api_reference_mode"],
+            "properties": { "api_reference_mode": { "const": "generated-canonical" } }
+          },
+          "then": { "required": ["generated_reference_source"] }
         }
       ]
     }

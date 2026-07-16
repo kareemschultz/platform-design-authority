@@ -192,8 +192,8 @@
         "openapi/first-slice-v1.yaml",
         "registry/endpoint-permissions.json"
       ],
-      "api_reference_mode": "boundary-overview",
-      "openapi_operation_ids": []
+      "api_reference_mode": "generated-canonical",
+      "generated_reference_source": "openapi/first-slice-v1.yaml"
     },
     {
       "documentation_id": "PDOC-0006",

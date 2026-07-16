@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-007
 title: Competitive Research Ledger
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -214,18 +214,53 @@ Confidence is not approval. A high-confidence observation may still be unsuitabl
 - Confidence: Medium
 - Follow-up: independent review, disposition, prototype evidence and scheduled refresh.
 
+### CIR-LED-0010 — Accounting and bookkeeping wave completed
+
+- Status: In Review
+- Completed: 2026-07-16
+- Researcher: Codex with Platform Design Authority review pending
+- Wave: Accounting / Bookkeeping
+- Question: Which accounting, reconciliation, close, review, and AI-assistance patterns are transferable without allowing research to override Finance authority?
+- Products: Kick, Akaunting, Xero, QuickBooks Online, Wave, FreshBooks, Zoho Books, Odoo, ERPNext, Sage, NetSuite, and adjacent products
+- Sources: SRC-001, SRC-002, SRC-004, SRC-026, and SRC-033 through SRC-040; page-level first-party citations in PDA-CIR-020 through PDA-CIR-024
+- Evidence mode: documented public product/help evidence and internal synthesis
+- Access limitations: authenticated ledgers, bank feeds, accountant workflows, model-quality evidence, regional availability, and qualified Guyana accounting review unavailable
+- Finding: reconciliation and assisted bookkeeping require explicit evidence, confidence, review, close-state, reversal, and deterministic fallback boundaries; product automation claims do not establish posting safety.
+- Contradictions: vendors increasingly describe automated or agentic reconciliation, while direct accuracy, calibration, correction, and jurisdiction evidence remains unavailable.
+- Confidence: Medium for workflow patterns; Low for automation quality and jurisdiction fit
+- Meridian impact:
+  - outputs: PDA-CIR-020 through PDA-CIR-024;
+  - capabilities and contracts: research input only; no authority promotion;
+  - implementation: prototype hypotheses remain subject to Finance, AI, security, privacy, and first-slice authority.
+- Follow-up: independent review, qualified accounting evidence, and implementation evaluation before any consequential automation.
+- Revalidate when: a related Finance or AI workstream begins, a cited automation model changes materially, or twelve months elapse.
+
 ## 6.1 Stable Research Result Index
 
-| Result ID | Wave | Status | Transfer |
-|---|---|---|---|
-| RES-001 | Accounting/bookkeeping | Transferred | PDA-CIR-020 through PDA-CIR-024 |
-| RES-002 | ERP administration | Transferred | PDA-CIR-025 through PDA-CIR-028 |
-| RES-003 | Supply chain | Transferred | PDA-CIR-029 through PDA-CIR-036 |
-| RES-004 | Commerce/payments | Transferred | PDA-CIR-037 through PDA-CIR-047 |
-| RES-005 | Customer/service | Transferred | PDA-CIR-048 through PDA-CIR-059 |
-| RES-006 | Workforce | Transferred | PDA-CIR-060 through PDA-CIR-069 |
-| RES-007 | Platform services | Transferred | PDA-CIR-070 through PDA-CIR-079 |
-| RES-008 | Cross-domain synthesis | Transferred | PDA-CIR-080 through PDA-CIR-086 |
+This index is the machine-checked registration boundary between backlog questions, durable outputs, ledger evidence, and stable source records. `Transferred` means the outputs are registered; it does not mean the Draft findings are approved or implementation-ready.
+
+| Result ID | Wave | Status | Ledger entry | Backlog transfers | Output documents | Source records | Review boundary |
+|---|---|---|---|---|---|---|---|
+| RES-001 | Accounting/bookkeeping | Transferred | CIR-LED-0010 | CIR-BACK-001 through CIR-BACK-004; CIR-BACK-016 | PDA-CIR-020 through PDA-CIR-024 | SRC-001; SRC-002; SRC-004; SRC-026; SRC-033 through SRC-040 | Independent review and qualified accounting evidence pending |
+| RES-002 | ERP administration | Transferred | CIR-LED-0004 | CIR-BACK-007 | PDA-CIR-025 through PDA-CIR-028 | SRC-001 through SRC-005 | Independent review pending |
+| RES-003 | Supply chain | Transferred | CIR-LED-0004 | CIR-BACK-008; CIR-BACK-012; CIR-BACK-013 | PDA-CIR-029 through PDA-CIR-036 | SRC-001 through SRC-006 | Independent review and direct warehouse/device evidence pending |
+| RES-004 | Commerce/payments | Transferred | CIR-LED-0005 | CIR-BACK-009; CIR-BACK-010 | PDA-CIR-037 through PDA-CIR-047 | SRC-006 through SRC-014 | Independent review, provider certification, and Guyana evidence pending |
+| RES-005 | Customer/service | Transferred | CIR-LED-0006 | CIR-BACK-011; CIR-BACK-015 | PDA-CIR-048 through PDA-CIR-059 | SRC-015 through SRC-021; SRC-032 | Independent review and authenticated workflow evidence pending |
+| RES-006 | Workforce | Transferred | CIR-LED-0007 | CIR-BACK-014 | PDA-CIR-060 through PDA-CIR-069 | SRC-022 through SRC-025 | Independent review and qualified jurisdiction evidence pending |
+| RES-007 | Platform services | Transferred | CIR-LED-0008 | CIR-BACK-017 through CIR-BACK-019 | PDA-CIR-070 through PDA-CIR-079 | SRC-026 through SRC-031 | Independent review and controlled prototype evidence pending |
+| RES-008 | Cross-domain synthesis | Transferred | CIR-LED-0009 | CIR-BACK-020 | PDA-CIR-080 through PDA-CIR-086 | SRC-001 through SRC-040 | Independent review; direct mobile/offline study remains CIR-BACK-025 |
+
+## 6.2 Registration Invariants
+
+`scripts/validate_research_registration.py` enforces the following bounded structural claims:
+
+- every research output from PDA-CIR-020 onward is assigned to exactly one stable result;
+- every `Transferred` backlog entry is assigned to exactly one result, while Planned, Deferred, Blocked, Superseded, and Withdrawn entries are not misrepresented as transferred;
+- every referenced ledger entry, output document, backlog entry, and stable source record exists;
+- result, ledger, backlog, source, and document identifiers are unique;
+- the result index remains parseable and its status vocabulary stays explicit.
+
+The validator does not judge whether a comparison is correct, complete, fair, current, or suitable for Meridian. Those conclusions require source review, contradiction analysis, domain-owner review, and the ordinary authority process.
 
 ## 7. Ledger Maintenance Rules
 

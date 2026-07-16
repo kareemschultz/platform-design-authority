@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-001
 title: Competitive Intelligence and Product Research
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -67,6 +67,8 @@ The program produces six kinds of durable knowledge:
 - `PATTERN_DECISION_REGISTER.md`
 - `DISCOVERIES_REGISTER.md`
 - `IMPLEMENTATION_EVIDENCE_REGISTER.md`
+
+The stable result index in `RESEARCH_LEDGER.md` binds each transferred backlog question to exactly one result, ledger entry, output set, source-record set, and explicit review boundary. `scripts/validate_research_registration.py` enforces that structural registration and includes seeded failure tests. It does not certify research accuracy or promote Draft findings.
 
 ### 4.3 Domain research waves
 

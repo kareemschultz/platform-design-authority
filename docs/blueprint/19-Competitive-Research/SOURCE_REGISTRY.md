@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-006
 title: Competitive Research Source Registry
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -220,8 +220,16 @@ The page-level citations remain in their research documents. These stable record
 | SRC-030 | Slack/GitHub/Teams collaboration | official documentation | https://slack.com/help/ | 2026-07-16 | documented | tenant policies and external sharing untested |
 | SRC-031 | Stripe/GitHub/Vercel/Linear/shadcn changelogs | official changelogs | https://github.blog/changelog/ | 2026-07-16 | documented | current snapshots are volatile |
 | SRC-032 | Rental/booking products | official product/documentation | https://www.odoo.com/documentation/19.0/applications/sales/rental.html | 2026-07-16 | documented | authenticated operations and legal terms unavailable |
+| SRC-033 | Kick | official product/documentation | https://www.kick.co/ | 2026-07-16 | documented | vendor claims; authenticated ledger, model quality and correction behavior untested |
+| SRC-034 | Akaunting | official product/documentation/public source | https://akaunting.com/features | 2026-07-16 | documented/public source | edition, application and deployment behavior vary |
+| SRC-035 | Xero | official product/documentation | https://www.xero.com/us/accounting-software/reconcile-bank-transactions/ | 2026-07-16 | documented | US edition; plan, beta, automation and regional behavior vary |
+| SRC-036 | QuickBooks Online | official help/product | https://quickbooks.intuit.com/learn-support/en-us/help-article/reconciliation/reconcile-account-quickbooks-online/L5rOz7Kew_US_en_US | 2026-07-16 | documented | US help; subscription, add-on and regional behavior vary |
+| SRC-037 | Wave | official help | https://support.waveapps.com/hc/en-us/articles/208621656-How-to-reconcile-your-accounts | 2026-07-16 | documented | regional availability and authenticated behavior untested |
+| SRC-038 | FreshBooks | official help | https://support.freshbooks.com/hc/en-us/articles/360048900792-How-do-I-use-Bank-Reconciliation | 2026-07-16 | documented | plan, edition and regional behavior vary |
+| SRC-039 | Zoho Books | official help | https://www.zoho.com/us/books/help/banking/ | 2026-07-16 | documented | US surface; edition, integration and regional behavior vary |
+| SRC-040 | Sage Accounting | official help | https://help.sbc.sage.com/en-us/accounting/banking/extra-bank-reconcile.html | 2026-07-16 | documented | one Sage product/region; no suite-wide parity claim |
 
-SRC-001 through SRC-032 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in the initial waves.
+SRC-001 through SRC-040 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in the initial waves.
 
 ## 12. Review and Maintenance
 

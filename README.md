@@ -155,6 +155,8 @@ python -m unittest scripts/test_validate_document_indexes.py
 python scripts/validate_document_indexes.py
 python -m unittest scripts/test_validate_product_docs.py
 python scripts/validate_product_docs.py
+python -m unittest scripts/test_validate_research_registration.py
+python scripts/validate_research_registration.py
 ```
 
 ## Document Lifecycle

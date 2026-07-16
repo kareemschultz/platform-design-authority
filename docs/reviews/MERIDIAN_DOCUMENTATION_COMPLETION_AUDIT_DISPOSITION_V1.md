@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -29,13 +29,15 @@ No severity is downgraded merely because later files exist. File existence is no
 
 ## Live-Branch Verification
 
-The immutable audit cutoff remains `c9faa31`. This disposition was reverified on 2026-07-16 after the initial research synthesis (`b70b879`), qualified research closeout (`f98b1e2`), and depth/status remediation (`87d995b`). The current generated registry contains 438 governed records: 409 Draft, 28 Proposed, and one Superseded. It contains all 86 competitive-research documents. The research ledger now records CIR-LED-0001 through CIR-LED-0009, while CIR-BACK-021 through CIR-BACK-025 preserve the comparator families and direct-observation work that remain open.
+The immutable audit cutoff remains `c9faa31`. This disposition was reverified on 2026-07-16 after the initial research synthesis (`b70b879`), qualified research closeout (`f98b1e2`), depth/status remediation (`87d995b`), canonical-navigation checkpoint (`c87b04a`), and product-documentation checkpoint (`6b76684`). The current generated registry contains 438 governed records: 409 Draft, 28 Proposed, and one Superseded. It contains all 86 competitive-research documents. The research ledger now records CIR-LED-0001 through CIR-LED-0010, while CIR-BACK-021 through CIR-BACK-025 preserve the comparator families and direct-observation work that remain open.
 
-PR #75 at `f98b1e2` has passing `meridian` and both `validate-docs` checks. Local commits and this navigation batch are newer than that PR head and therefore require their own fresh CI run before merge. The branch still does not ratify authority, govern product MDX, close remaining research families, supply founder/external decisions, or prove pilot/production readiness.
+PR #75 at `f98b1e2` has passing `meridian` and both `validate-docs` checks. Local commits are newer than that PR head and therefore require their own fresh CI run before merge. The branch still does not ratify authority, close remaining research families, supply founder/external decisions, or prove pilot/production readiness.
 
 The navigation checkpoint adds canonical linked catalogs for every governed document, parent navigation for every governed index, and `scripts/validate_document_indexes.py` with seeded regression cases for removed, bare-filename, metadata-incomplete, and duplicate entries. Local index validation reports zero unexplained governed documents. Independent review is still required before DCA-009 is marked Closed.
 
 The product-documentation checkpoint adds a separate nine-page `PDOC-*` manifest, MDX build-time metadata schema, implementation/version/evidence binding, internal-route and registry-reference validation, and seeded failure cases. Stale pre-WS1 claims were corrected to the `4045474` implementation baseline. The API page is honestly classified as `boundary-overview`; complete generated canonical OpenAPI reference parity remains open, so DCA-010 is only partially implemented.
+
+The research-registration checkpoint adds the missing accounting ledger entry, stable first-party source records SRC-033 through SRC-040, and an exact result index covering all 67 durable outputs and all 18 Transferred backlog questions. Six seeded tests reject orphan outputs, unregistered transfers, false transfers, and unresolved ledger/source references. This is structural traceability, not independent acceptance of the research conclusions.
 
 ## Finding Matrix
 
@@ -56,7 +58,7 @@ The product-documentation checkpoint adds a separate nine-page `PDOC-*` manifest
 | DCA-013 | High | Accepted | Open | Ratification wave manifests record exact versions, reviewers, dissent, dispositions, authority, and promotion evidence |
 | DCA-014 | Medium | Accepted | Open monitoring obligation | Technology ledger separates available, assessed, pinned, and proven versions with dated evidence and compatibility results |
 | DCA-015 | Medium | Accepted | Open | GitHub issue #59 and the existing project are dispositioned into one consistent state |
-| DCA-016 | High | Accepted | Partially implemented: status, index/orphan, and MDX seeded checks exist; research registration remains | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |
+| DCA-016 | High | Accepted | Implemented; independent closure review pending | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |
 | DCA-017 | Medium | Accepted | Open | Active OpenAPI filler removed; unresolved cost inputs carry owner, evidence need, and decision trigger |
 | DCA-018 | High | Accepted | Open | WS2 evidence source resolves applicable capability-dimension cells to reviewed test evidence or explicit depth deferral |
 | DCA-019 | Blocker | Needs Founder/External Decision | Open; documentation may prepare but not close | Actual founder decisions, professional opinions, provider evidence, customer evidence, and security/accessibility/operations results linked at their gates |

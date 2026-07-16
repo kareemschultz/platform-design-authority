@@ -39,4 +39,4 @@ Begin with `BUSINESS_CAPABILITY_MAP.md`, `DOMAIN_DEPENDENCY_MATRIX.md`, and `CAP
 - [Recurring Commerce and Memberships](RECURRING_COMMERCE_AND_MEMBERSHIPS.md) — `PDA-DOM-024` · Draft
 - [Stored Value and Customer Balances](STORED_VALUE_AND_CUSTOMER_BALANCES.md) — `PDA-DOM-025` · Draft
 - [First Slice Finance Handoff Contract](FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md) — `PDA-DOM-026` · Draft
-- [Capability Map Amendment 2026-07-11](CAPABILITY_MAP_AMENDMENT-2026-07-11.md) — `PDA-DOM-090` · Draft
+- [Capability Map Amendment 2026-07-11](CAPABILITY_MAP_AMENDMENT-2026-07-11.md) — `PDA-DOM-090` · Superseded

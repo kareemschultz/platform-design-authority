@@ -20,8 +20,6 @@ IGNORED_TREE_PARTS = {"node_modules", ".next", ".turbo", ".source", "dist"}
 
 CAPABILITY_SOURCES = [
     ROOT / "docs" / "blueprint" / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md",
-    ROOT / "docs" / "blueprint" / "04-Business-Domains" / "CAPABILITY_MAP_AMENDMENT-2026-07-11.md",
-    ROOT / "docs" / "blueprint" / "08-Marketplace" / "MARKETPLACE_ARCHITECTURE.md",
 ]
 
 TEST_DIMENSIONS = [
@@ -162,7 +160,7 @@ def is_capability_heading(heading: str) -> bool:
     approved = {
         "platform kernel", "shared engine registrations", "ai orchestration", "loyalty",
         "fiscalization and statutory reporting", "security platform", "developer platform",
-        "commercial control plane", "capability family", "party and relationships",
+        "marketplace", "commercial control plane", "capability family", "party and relationships",
         "payment orchestration", "business dna",
         "commerce", "product catalog", "inventory", "warehouse", "procurement", "finance",
         "crm", "workforce", "payroll", "supply chain and logistics", "manufacturing",

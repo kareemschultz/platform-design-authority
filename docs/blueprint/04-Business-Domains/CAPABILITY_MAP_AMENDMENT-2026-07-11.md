@@ -1,20 +1,21 @@
 ---
 document_id: PDA-DOM-090
 title: Capability Map Amendment 2026-07-11
-version: 0.2.1
-status: Draft
+version: 0.3.0
+status: Superseded
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0007, ADR-0016, ADR-0017]
+superseded_by: PDA-DOM-021 v0.4.0
 ---
 
 # Capability Map Amendment — 2026-07-11
 
 ## Purpose
 
-Amend the Business Capability Map for ownership and namespaces introduced after version 0.3.0 without silently rewriting historical audit evidence.
+Preserve the dated amendment that introduced Party, Payment, and Business DNA identifiers after Business Capability Map version 0.3.0.
 
-This document is a canonical capability source consumed by the registry generator. The next consolidated capability-map revision should fold these entries into the main map and supersede this amendment.
+Business Capability Map version 0.4.0 incorporated these identifiers without renaming, lifecycle promotion, first-slice change, or contract change. This document is no longer parsed as a canonical capability source. It remains historical evidence for provenance and must not direct new registration work.
 
 ## Party and Relationships
 
@@ -57,8 +58,18 @@ Business DNA remains a shared-engine registration. Its profile data and recommen
 
 ## Governance Rules
 
-- These identifiers have the same status and lifecycle requirements as capabilities in `BUSINESS_CAPABILITY_MAP.md`.
+- The current identifiers and their lifecycle requirements resolve through `BUSINESS_CAPABILITY_MAP.md` version 0.4.0 or later.
 - A capability listed here must resolve to an authoritative namespace owner.
 - First-slice depth is recorded separately in `registry/first-slice.json`.
 - Permissions, events, APIs, packaging, offline behavior, and test declarations remain separate governed artifacts.
 - This amendment does not grant entitlements or permissions.
+
+## Supersession Evidence
+
+- Successor: PDA-DOM-021 version 0.4.0
+- Consolidated families: Party and Relationships, Payment Orchestration, and Business DNA
+- Identifier delta: none
+- Owner delta: none
+- First-slice depth delta: none
+- Permission, event, API, packaging, and offline delta: none
+- Registry generator action: remove this document from `CAPABILITY_SOURCES` after equality validation

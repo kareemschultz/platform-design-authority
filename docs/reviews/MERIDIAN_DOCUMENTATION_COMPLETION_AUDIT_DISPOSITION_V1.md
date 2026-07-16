@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -39,6 +39,8 @@ The product-documentation checkpoint adds a separate nine-page `PDOC-*` manifest
 
 The research-registration checkpoint adds the missing accounting ledger entry, stable first-party source records SRC-033 through SRC-040, and an exact result index covering all 67 durable outputs and all 18 Transferred backlog questions. Six seeded tests reject orphan outputs, unregistered transfers, false transfers, and unresolved ledger/source references. This is structural traceability, not independent acceptance of the research conclusions.
 
+The capability-source consolidation checkpoint folds Party, Payment, Business DNA, and Marketplace identifiers into PDA-DOM-021 version 0.4.0, preserves PDA-DOM-090 as Superseded provenance, and leaves PDA-MKT-010 as scoped architecture rather than a parser input. Before/after registry comparison reports 497 capabilities, zero added or removed identifiers, zero semantic metadata changes, and one current `capability_sources` entry. Independent review remains required before DCA-012 closure.
+
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
@@ -54,7 +56,7 @@ The research-registration checkpoint adds the missing accounting ledger entry, s
 | DCA-009 | High | Accepted | Implemented; independent closure review pending | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |
 | DCA-010 | High | Accepted | Partially implemented: manifest, MDX build/metadata/link/release evidence checks exist; generated canonical API reference remains | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
 | DCA-011 | High | Accepted | Open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |
-| DCA-012 | High | Accepted | Open | Capability source model consolidated or explicitly ratified as multi-source with provenance and zero identifier drift |
+| DCA-012 | High | Accepted | Implemented; independent closure review pending | Capability source model consolidated or explicitly ratified as multi-source with provenance and zero identifier drift |
 | DCA-013 | High | Accepted | Open | Ratification wave manifests record exact versions, reviewers, dissent, dispositions, authority, and promotion evidence |
 | DCA-014 | Medium | Accepted | Open monitoring obligation | Technology ledger separates available, assessed, pinned, and proven versions with dated evidence and compatibility results |
 | DCA-015 | Medium | Accepted | Open | GitHub issue #59 and the existing project are dispositioned into one consistent state |

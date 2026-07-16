@@ -1,18 +1,20 @@
 ---
 document_id: PDA-DOM-021
 title: Business Capability Map
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
-related_adrs: [ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0012, ADR-0013, ADR-0014, ADR-0015, ADR-0016]
+last_reviewed: 2026-07-16
+related_adrs: [ADR-0007, ADR-0008, ADR-0009, ADR-0010, ADR-0012, ADR-0013, ADR-0014, ADR-0015, ADR-0016, ADR-0017]
 ---
 
 # Business Capability Map
 
 ## Purpose
 
-This document is the master index of business and platform capabilities. It defines the canonical hierarchy used for planning, packaging, entitlements, permissions, implementation, documentation, testing, AI tooling, and industry composition.
+This document is the single canonical current list of business and platform capability identifiers. It defines the hierarchy used for planning, packaging, entitlements, permissions, implementation, documentation, testing, AI tooling, and industry composition.
+
+Version 0.4.0 consolidates the Party, Payment, Business DNA, and Marketplace identifiers previously parsed from PDA-DOM-090 and PDA-MKT-010. The consolidation changes source provenance only: it creates, removes, renames, promotes, or admits no capability. PDA-DOM-090 remains preserved as Superseded evidence, and PDA-MKT-010 remains the scoped Marketplace architecture authority rather than a parallel capability-list source.
 
 ## Capability Model
 
@@ -69,6 +71,20 @@ Each capability must eventually define:
 - `platform.secrets`
 - `platform.administration`
 
+### Party and Relationships
+
+- `party.records`
+- `party.contact-points`
+- `party.addresses`
+- `party.identifiers`
+- `party.relationships`
+- `party.duplicate-detection`
+- `party.merge`
+- `party.identity-links`
+- `party.privacy-state`
+
+`platform.party` is a deprecated Draft alias retained only for historical resolution. New work uses `party.records` and the registered `party` namespace under Proposed ADR-0007.
+
 ### Shared Engine Registrations
 
 - `engine.workflow`
@@ -88,6 +104,7 @@ Each capability must eventually define:
 - `engine.dashboards`
 - `engine.reporting`
 - `engine.ai-orchestration`
+- `engine.business-dna`
 
 ### AI Orchestration
 
@@ -99,6 +116,23 @@ Each capability must eventually define:
 - `ai.evaluation`
 - `ai.governance`
 - `ai.usage-metering`
+
+### Payment Orchestration
+
+- `payment.intents`
+- `payment.methods`
+- `payment.provider-adapters`
+- `payment.authorization`
+- `payment.capture`
+- `payment.refunds`
+- `payment.reversals`
+- `payment.disputes`
+- `payment.settlement`
+- `payment.reconciliation`
+- `payment.terminals`
+- `payment.offline-policy`
+
+`engine.payments` registers the shared engine. Detailed contracts use `payment.*` under ADR-0017.
 
 ### Loyalty
 
@@ -148,6 +182,21 @@ Each capability must eventually define:
 - `developer.sandboxes`
 - `developer.compatibility`
 - `developer.registry-automation`
+
+### Marketplace
+
+- `marketplace.publishers`
+- `marketplace.listings`
+- `marketplace.submissions`
+- `marketplace.reviews`
+- `marketplace.installations`
+- `marketplace.licenses`
+- `marketplace.compatibility`
+- `marketplace.security-advisories`
+- `marketplace.ratings`
+- `marketplace.settlement`
+- `marketplace.suspension`
+- `marketplace.removal`
 
 ### Commercial Control Plane
 

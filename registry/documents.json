@@ -671,7 +671,7 @@
       "document_id": "PDA-APP-024",
       "path": "docs/blueprint/19-Appendices/DOCUMENTATION_DEPTH_ASSESSMENT-2026-07-16.md",
       "title": "Documentation Depth and Readiness Assessment 2026-07-16",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-16",
@@ -4181,7 +4181,7 @@
       "document_id": "PDA-OPS-001",
       "path": "docs/blueprint/15-Operations/README.md",
       "title": "Operations Section Index",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-16",
@@ -4247,10 +4247,10 @@
       "document_id": "PDA-OPS-015",
       "path": "docs/blueprint/15-Operations/SERVICE_CATALOG_AND_RUNBOOK_INDEX.md",
       "title": "Service Catalog and Runbook Index",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-16",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -4274,6 +4274,23 @@
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-11",
       "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-OPS-018",
+      "path": "docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md",
+      "title": "Controlled-Prototype Service Runbooks",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Operations",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0027"
+      ],
       "review_evidence": null
     },
     {
@@ -4914,7 +4931,7 @@
       "document_id": "PDA-REV-014",
       "path": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_DISPOSITION_V1.md",
       "title": "Meridian Documentation Completion Audit Disposition V1",
-      "version": "0.9.0",
+      "version": "0.10.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-16",

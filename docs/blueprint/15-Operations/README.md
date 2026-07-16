@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-001
 title: Operations Section Index
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -19,6 +19,7 @@ last_reviewed: 2026-07-16
 - [Service Catalog and Runbook Index](SERVICE_CATALOG_AND_RUNBOOK_INDEX.md) — `PDA-OPS-015` · Draft
 - [Status Page and Customer Communication](STATUS_PAGE_AND_CUSTOMER_COMMUNICATION.md) — `PDA-OPS-016` · Draft
 - [Tenant Migration Exit and Data Repair](TENANT_MIGRATION_EXIT_AND_DATA_REPAIR.md) — `PDA-OPS-017` · Draft
+- [Controlled-Prototype Service Runbooks](CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md) — `PDA-OPS-018` · Draft
 
 ## Related Authority
 
@@ -28,6 +29,7 @@ last_reviewed: 2026-07-16
 - `docs/blueprint/01-Platform/PLATFORM_ADMINISTRATION_AND_DIAGNOSTICS.md`
 - `docs/blueprint/11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
 - `docs/blueprint/20-Strategy/SUPPORT_HANDBOOK.md`
+- `registry/operational-readiness.json`
 
 ## Current Governed Controls
 
@@ -43,7 +45,8 @@ last_reviewed: 2026-07-16
 
 - Named service owners and on-call coverage
 - Live SLO, capacity, cost, and business-correctness dashboards
-- Executable runbooks and automation
+- Independent review and exercise evidence for the controlled-prototype runbooks
+- Runbooks and automation for services not yet implemented
 - Status-page implementation
 - Repair utilities
 - Self-hosted installation evidence

@@ -75,7 +75,6 @@ package.json             Bun/Turborepo workspace root
 - `docs/blueprint/00-Foundation/GLOSSARY.md`
 - `docs/blueprint/01-Platform/PLATFORM_KERNEL_OVERVIEW.md`
 - `docs/blueprint/04-Business-Domains/BUSINESS_CAPABILITY_MAP.md`
-- `docs/blueprint/04-Business-Domains/CAPABILITY_MAP_AMENDMENT-2026-07-11.md`
 - `docs/blueprint/17-Roadmap/FIRST_SLICE_MANIFEST.md`
 - `docs/blueprint/17-Roadmap/FIRST_SLICE_PROVISIONAL_QUALITY_BUDGETS.md`
 - `docs/blueprint/18-Decisions/ADR-0020-BUN-HONO-ORPC-PREFERRED-PROTOTYPE-STACK.md`
@@ -95,6 +94,7 @@ package.json             Bun/Turborepo workspace root
 - `docs/blueprint/18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md`
 - `docs/blueprint/18-Decisions/ADR-0025-NORMALIZE-MONOREPO-AND-DOCUMENTATION-LAYOUT.md`
 - `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- `docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md`
 - `docs/blueprint/19-Appendices/DOCUMENTATION_DEPTH_ASSESSMENT-2026-07-16.md`
 - `docs/blueprint/19-Competitive-Research/README.md`
 - `docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_V1.md`
@@ -142,7 +142,7 @@ Generated registries include:
 - `registry/permissions.json`
 - `registry/first-slice-tests.json`
 
-Curated governance includes namespaces, first-slice scope, capability metadata and family readiness, ratification-wave preparation, endpoint permissions, product-documentation evidence, design tokens, architecture rules, governance exemptions, and premium-source provenance templates.
+Curated governance includes namespaces, first-slice scope, capability metadata and family readiness, operational readiness, ratification-wave preparation, endpoint permissions, product-documentation evidence, design tokens, architecture rules, governance exemptions, and premium-source provenance templates.
 
 Draft implementation contracts are under `openapi/` and `schemas/`.
 

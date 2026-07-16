@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.9.0
+version: 0.10.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -49,6 +49,8 @@ The active-placeholder checkpoint replaces the fictitious OpenAPI host with the 
 
 The WS2 interim-evidence checkpoint corrects the binary evidence model: required cells can now remain `planned`, become `evidenced`, or retain governed depth/non-applicability states while the capability row reports `Planned`, `Partially Evidenced`, or `Evidenced`. The merged PR2/PR3 heads contribute 80 bounded cells across 13 partial WS2 capabilities; unimplemented bulk import remains wholly planned and none is marked complete. Live GitHub reconciliation also corrects PDA-RDM-009 from active issue #68 to merged PR #69 and keeps open PR #74 outside the merged baseline. This implements DCA-018's registration defect without claiming the PR7 workstream exit.
 
+The operational-procedure checkpoint registers four actually merged controlled-prototype service groups and supplies bounded runtime/authentication, PostgreSQL/migration, and Catalog/Inventory/outbox-consistency procedures. Eight seeded tests reject unknown capabilities, missing artifacts, false review/exercise advancement, and pilot-ready claims without required evidence. All four services remain `procedure-draft`, with zero pilot-ready claims; dashboards, tested alerts, named on-call escalation, independent review, restore/failover, and dated exercises remain open. DCA-011 is therefore structurally reduced, not closed.
+
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
@@ -63,7 +65,7 @@ The WS2 interim-evidence checkpoint corrects the binary evidence model: required
 | DCA-008 | High | Partially Accepted | Workforce and platform-service gaps reduced after cutoff; ITSM/MSP/RMM, IAM, infrastructure/IPAM/DCIM, mobile/offline, and named-product depth remain | Reviewed matrices/workflows/findings and dated source ledger for each remaining research family |
 | DCA-009 | High | Accepted | Implemented; independent closure review pending | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |
 | DCA-010 | High | Accepted | Partially implemented: manifest, MDX build/metadata/link/release evidence checks exist; generated canonical API reference remains | Product-doc manifest and MDX build/link/metadata/release/API-parity checks enforced in CI |
-| DCA-011 | High | Accepted | Open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |
+| DCA-011 | High | Accepted | Four implemented service groups registered with draft procedures; review, live telemetry, tested alerts, escalation, and exercises remain open | Each implemented pilot-critical service has reviewed runbooks, telemetry links, and exercise evidence |
 | DCA-012 | High | Accepted | Implemented; independent closure review pending | Capability source model consolidated or explicitly ratified as multi-source with provenance and zero identifier drift |
 | DCA-013 | High | Accepted | Preparation implemented; all reviews and promotions remain open | Ratification wave manifests record exact versions, reviewers, dissent, dispositions, authority, and promotion evidence |
 | DCA-014 | Medium | Accepted | Open monitoring obligation | Technology ledger separates available, assessed, pinned, and proven versions with dated evidence and compatibility results |

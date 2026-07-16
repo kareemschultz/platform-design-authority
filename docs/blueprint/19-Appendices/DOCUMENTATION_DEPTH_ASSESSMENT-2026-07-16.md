@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -47,7 +47,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 | Security and privacy | Architecture-specified with control/evidence models | Penetration tests, control operation, exercises, provider/professional evidence, production topology |
 | UX and accessibility | Architecture/pattern standards plus WS1 prototype evidence | Formal per-workstream audits, assistive-technology evidence, full responsive/offline/product flows |
 | Data, reporting, and analytics | Architecture-specified; schemas and selected first-slice contracts exist | Metric implementation, lineage/quality operation, warehouse/projection performance and recovery evidence |
-| Deployment and operations | Architecture and requirements catalogues exist; Event Backbone runbook is on PR #74 | Real service runbooks, telemetry, capacity, backup/restore, incident, migration, rollback, and recovery exercises |
+| Deployment and operations | Architecture and requirements catalogues exist; four merged prototype service groups have machine-registered draft procedures; Event Backbone runbook remains on open PR #74 | Independent procedure review, live dashboards, tested alerts, on-call escalation, capacity, backup/restore, incident, migration, rollback, and recovery exercises |
 | Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled | Founder decisions, legal entity, pricing, contracts, provider, tax, custody/payout gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
 | Competitive research | Initial nine-wave writing set In Review with source/ledger/backlog reconciliation | CIR-BACK-021–025, direct observation, omitted products/families, independent review and governed transfer |
@@ -78,7 +78,7 @@ These counts demonstrate inventory and internal parity, not enterprise implement
 
 - WS1: 11 capabilities and 143 of 1,294 currently required first-slice evidence cells are fully registered.
 - WS2: 13 capabilities have interim PR2/PR3 registration covering 80 cells; bulk import and all other unproven PR4–PR7 cells remain planned.
-- Operations: most runbooks and exercises are planned rather than verified.
+- Operations: four merged service groups have bounded procedure drafts and zero pilot-ready claims; independent review, telemetry, alerts, escalation, restore/failover, and all dated exercises remain open.
 - Product documentation: build/type checks exist, but architecture governance does not yet validate MDX metadata and behavioral/release parity.
 - External: founder decisions, customer evidence, qualified Guyana review, providers, penetration testing, accessibility evidence, and operational exercises remain open.
 

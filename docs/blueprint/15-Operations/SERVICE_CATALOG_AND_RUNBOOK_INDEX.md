@@ -1,10 +1,10 @@
 ---
 document_id: PDA-OPS-015
 title: Service Catalog and Runbook Index
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # Service Catalog and Runbook Index
@@ -12,6 +12,16 @@ last_reviewed: 2026-07-11
 ## Purpose
 
 Define the operational catalog required for every critical platform service and capability, including ownership, dependencies, SLOs, dashboards, alerts, runbooks, support, recovery, and customer impact.
+
+`registry/operational-readiness.json` is the machine-readable status register for implemented controlled-prototype services. PDA-OPS-018 supplies bounded procedures for behavior that exists on merged `main`. Neither artifact supplies missing dashboards, tested alerts, exercises, escalation contacts, or pilot authority.
+
+## Readiness States
+
+- `requirements-only`: service requirements exist, but no executable service procedure is registered.
+- `procedure-draft`: a bounded procedure references implemented behavior; independent review, telemetry, alerts, and exercises may remain open.
+- `reviewed`: the service owner and Operations reviewed the exact procedure version; this is not exercise evidence.
+- `exercised`: the reviewed procedure has dated execution evidence and residual findings.
+- `pilot-ready`: all required runbooks, dashboards, tested alerts, escalation, recovery/reconciliation, and exercises pass the pilot gate. A registry validator rejects this state without evidence.
 
 ## Service Record
 
@@ -56,6 +66,8 @@ Every service records:
 - Export and Finance handoff
 - Observability
 - Backup and recovery
+
+Only merged services enter the implemented-service portion of the registry. Unimplemented services remain in its deferred list with an admission trigger; documentation must not fabricate their operational procedure.
 
 ## Required Runbooks
 

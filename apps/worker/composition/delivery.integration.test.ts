@@ -168,6 +168,37 @@ describe.serial("Event Backbone PostgreSQL delivery", () => {
 		).toBe(true);
 	});
 
+	test("permits only one concurrent claim of the same row", async () => {
+		await createPostgresOutbox(firstWorkerPool).append(
+			event("event_same_row_claim", "product_same_row_claim")
+		);
+		const [left, right] = await Promise.all([
+			createPostgresDeliveryStore(firstWorkerPool).claimNext({
+				claimToken: "claim-same-row-left",
+				leaseExpiresAt: "2100-07-15T12:01:35.000Z",
+				now: "2100-07-15T12:01:05.000Z",
+			}),
+			createPostgresDeliveryStore(secondWorkerPool).claimNext({
+				claimToken: "claim-same-row-right",
+				leaseExpiresAt: "2100-07-15T12:01:35.000Z",
+				now: "2100-07-15T12:01:05.000Z",
+			}),
+		]);
+		const claims = [left, right].filter((value) => value !== undefined);
+		expect(claims).toHaveLength(1);
+		expect(claims[0]?.event.id).toBe("event_same_row_claim");
+		if (!claims[0]) {
+			throw new Error("the same-row race produced no owner");
+		}
+		expect(
+			await createPostgresDeliveryStore(firstWorkerPool).markDelivered({
+				claimToken: claims[0].claimToken,
+				eventId: claims[0].event.id,
+				publishedAt: "2100-07-15T12:01:06.000Z",
+			})
+		).toBe(true);
+	});
+
 	test("pauses one tenant without blocking another and resumes after configuration recovery", async () => {
 		const outbox = createPostgresOutbox(firstWorkerPool);
 		await outbox.append(
@@ -227,6 +258,13 @@ describe.serial("Event Backbone PostgreSQL delivery", () => {
 				now: "2100-07-15T12:02:10.000Z",
 			})
 		).toBe(true);
+		expect(
+			await secondStore.claimNext({
+				claimToken: "claim-recovery-too-early",
+				leaseExpiresAt: "2100-07-15T12:03:05.000Z",
+				now: "2100-07-15T12:02:35.000Z",
+			})
+		).toBeUndefined();
 		const recovered = await secondStore.claimNext({
 			claimToken: "claim-recovery-current",
 			leaseExpiresAt: "2100-07-15T12:03:31.000Z",
@@ -328,6 +366,47 @@ describe.serial("Event Backbone PostgreSQL delivery", () => {
 			tenantId: "tenant_events_a",
 		});
 		expect(stored.id).toBe("event_replay_integration_0001");
+		const replayReceipt = {
+			consumerId: "catalog-search-projection",
+			consumerSchemaVersion: "1.0.0",
+			effectReference: "projection_replay_integration_0001",
+			eventId: "event_recovery",
+			processedAt: "2100-07-15T12:05:00.500Z",
+			replayRequestId: stored.id,
+			resultCode: "replayed",
+			tenantId: "tenant_events_a",
+		};
+		const deliveryStore = createPostgresDeliveryStore(firstWorkerPool);
+		expect(await deliveryStore.recordReceipt(replayReceipt)).toBe("inserted");
+		expect(await deliveryStore.recordReceipt(replayReceipt)).toBe("duplicate");
+		expect(
+			await deliveryStore.hasReceipt({
+				consumerId: replayReceipt.consumerId,
+				consumerSchemaVersion: replayReceipt.consumerSchemaVersion,
+				eventId: replayReceipt.eventId,
+				replayRequestId: replayReceipt.replayRequestId,
+			})
+		).toBe(true);
+		const receiptScopes = await firstWorkerPool.query<{
+			delivery_receipts: number;
+			replay_receipts: number;
+		}>(
+			`SELECT
+			 count(*) FILTER (WHERE replay_request_id IS NULL)::int AS delivery_receipts,
+			 count(*) FILTER (WHERE replay_request_id = $1)::int AS replay_receipts
+			 FROM platform_event_consumer_receipt
+			 WHERE event_id = $2 AND consumer_id = $3 AND consumer_schema_version = $4`,
+			[
+				stored.id,
+				replayReceipt.eventId,
+				replayReceipt.consumerId,
+				replayReceipt.consumerSchemaVersion,
+			]
+		);
+		expect(receiptScopes.rows[0]).toEqual({
+			delivery_receipts: 1,
+			replay_receipts: 1,
+		});
 		expect(
 			(
 				await requestStore.createRequest({
@@ -530,11 +609,17 @@ describe.serial("Event Backbone PostgreSQL delivery", () => {
 		await createInventoryReconciliationAdapter(firstWorkerPool).reconcileTenant(
 			"tenant_events_a"
 		);
-		const state = await firstWorkerPool.query<{ reconciliation_state: string }>(
-			"SELECT reconciliation_state FROM inventory_stock_balance WHERE tenant_id = $1 AND product_id = $2",
+		const state = await firstWorkerPool.query<{
+			on_hand: string;
+			reconciliation_state: string;
+		}>(
+			"SELECT on_hand::text, reconciliation_state FROM inventory_stock_balance WHERE tenant_id = $1 AND product_id = $2",
 			["tenant_events_a", "product_inventory_projection_0001"]
 		);
-		expect(state.rows[0]?.reconciliation_state).toBe("RequiresReview");
+		expect(state.rows[0]).toEqual({
+			on_hand: "9.000000",
+			reconciliation_state: "RequiresReview",
+		});
 		await firstWorkerPool.query(
 			`INSERT INTO inventory_stock_movement
 			 (id, tenant_id, organization_id, location_id, product_id, item_key, unit,

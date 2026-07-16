@@ -55,6 +55,9 @@ SQL_TABLE_PATTERN = re.compile(
     r"\bCREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\"']?([a-zA-Z0-9_]+)[\"']?",
     re.IGNORECASE,
 )
+MIGRATION_INVOCATION_PATTERN = re.compile(
+    r"\b(?:await\s+)?migrate[A-Z][A-Za-z0-9_$]*\s*\("
+)
 
 
 def load_json(path: Path) -> Any:
@@ -156,6 +159,9 @@ def main() -> int:
     composition_targets = set(
         str(item) for item in requirements.get("composition_root_may_depend_on", [])
     )
+    migration_invocation_roots = [
+        str(item) for item in requirements.get("migration_invocation_roots", [])
+    ]
     runtime_neutral = set(
         str(item) for item in requirements.get("runtime_neutral_families", [])
     )
@@ -243,6 +249,17 @@ def main() -> int:
         for source in source_files(package_root):
             source_path = posix(source)
             text = source.read_text(encoding="utf-8")
+
+            if (
+                source_family == "applications"
+                and not is_test_source(source)
+                and MIGRATION_INVOCATION_PATTERN.search(text)
+                and not matches(source_path, migration_invocation_roots)
+            ):
+                errors.append(
+                    f"{source_path}: migration-invocation-outside-authority: "
+                    "application migration runners are server-composition-only"
+                )
 
             if source_family == "persistence":
                 discovered_tables[package_root].update(PG_TABLE_PATTERN.findall(text))

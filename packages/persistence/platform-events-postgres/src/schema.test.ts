@@ -40,5 +40,8 @@ describe("Platform Event Backbone PostgreSQL ownership", () => {
 			"platform_event_replay_request",
 			"platform_event_consumer_receipt",
 		]);
+		const receipt = getTableColumns(eventConsumerReceipt);
+		expect(receipt.receiptScope.notNull).toBe(true);
+		expect(receipt.replayRequestId.notNull).toBe(false);
 	});
 });

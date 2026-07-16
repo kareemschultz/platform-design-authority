@@ -92,6 +92,20 @@ export interface EventReplayExecutionStorePort {
 	) => Promise<import("./delivery").CommittedEventEnvelope[]>;
 }
 
+export interface EventReplayReceiptStorePort {
+	hasReceipt: (input: {
+		consumerId: string;
+		consumerSchemaVersion: string;
+		eventId: string;
+		replayRequestId: string;
+	}) => Promise<boolean>;
+	recordReceipt: (
+		receipt: import("./delivery").ConsumerReceiptRecord & {
+			replayRequestId: string;
+		}
+	) => Promise<"duplicate" | "inserted">;
+}
+
 export interface EventReplayAuthorizationPort {
 	decide: (input: {
 		actorUserId: string;
@@ -236,6 +250,8 @@ export function createEventReplayService(options: {
 
 export async function processNextReplayRequest(options: {
 	clock: () => Date;
+	idFactory: () => string;
+	receipts: EventReplayReceiptStorePort;
 	registry: import("./delivery").EventConsumerRegistry;
 	store: EventReplayExecutionStorePort;
 }): Promise<"completed" | "failed" | "idle"> {
@@ -281,8 +297,28 @@ export async function processNextReplayRequest(options: {
 			return "failed";
 		}
 		for (const event of events) {
-			// biome-ignore lint/performance/noAwaitInLoops: an authorized replay preserves committed sequence order for one bounded request.
+			if (
+				// biome-ignore lint/performance/noAwaitInLoops: replay receipts are checked in committed order so stale recovery skips each completed event deterministically.
+				await options.receipts.hasReceipt({
+					consumerId: consumer.id,
+					consumerSchemaVersion: consumer.schemaVersion,
+					eventId: event.id,
+					replayRequestId: request.id,
+				})
+			) {
+				continue;
+			}
 			await consumer.consume(event);
+			await options.receipts.recordReceipt({
+				consumerId: consumer.id,
+				consumerSchemaVersion: consumer.schemaVersion,
+				effectReference: options.idFactory(),
+				eventId: event.id,
+				processedAt: options.clock().toISOString(),
+				replayRequestId: request.id,
+				resultCode: "replayed",
+				tenantId: request.tenantId,
+			});
 		}
 		await options.store.complete({
 			completedAt: options.clock().toISOString(),

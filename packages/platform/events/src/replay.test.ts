@@ -129,8 +129,17 @@ describe("Event Backbone replay execution", () => {
 	test("replays a bounded request in committed order and completes it", async () => {
 		const consumed: string[] = [];
 		const completed: string[] = [];
+		const receipts = new Set(["event_test_0001"]);
 		const result = await processNextReplayRequest({
 			clock: () => new Date("2026-07-15T12:00:00.000Z"),
+			idFactory: () => "effect_replay_test_0001",
+			receipts: {
+				hasReceipt: ({ eventId }) => Promise.resolve(receipts.has(eventId)),
+				recordReceipt: (receipt) => {
+					receipts.add(receipt.eventId);
+					return Promise.resolve("inserted");
+				},
+			},
 			registry: createEventConsumerRegistry([
 				{
 					consume: (event) => {
@@ -175,11 +184,25 @@ describe("Event Backbone replay execution", () => {
 							scopeType: "Tenant",
 							tenantId: request.tenantId,
 						},
+						{
+							classification: "Confidential",
+							data: { productId: "product_test_0002" },
+							id: "event_test_0002",
+							name: "catalog.product.created.v1",
+							occurredAt: "2026-07-15T11:59:01.000Z",
+							producerNamespace: "catalog",
+							retentionClass: "catalog-operational-event",
+							schemaRef: "catalog.product.created.v1",
+							schemaVersion: "1.0.0",
+							scopeType: "Tenant",
+							tenantId: request.tenantId,
+						},
 					]),
 			},
 		});
 		expect(result).toBe("completed");
-		expect(consumed).toEqual(["event_test_0001"]);
+		expect(consumed).toEqual(["event_test_0002"]);
+		expect(receipts).toEqual(new Set(["event_test_0001", "event_test_0002"]));
 		expect(completed).toEqual(["event_replay_test_0001"]);
 	});
 });

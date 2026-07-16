@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.3.5
+version: 0.3.6
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -25,7 +25,7 @@ Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, is
 | PR1 — governance, contracts, schemas, and spike | Merged after exact-head Claude Code concurrence | Retain as the contract/governance baseline; it does not prove later business behavior or delivery |
 | PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
 | PR3 — Inventory ledger and workflows | Merged as PR #69 after exact-head Claude Code concurrence | Retain Inventory core/persistence/API, immutable ledger/reversal, workflow, rebuild, concurrency, tenant-isolation, offline-boundary, Bun/Node, and PostgreSQL evidence; no PR4 delivery claim |
-| PR4 — durable delivery and projections | Implementation and local evidence complete on PR #74; exact-head review pending | Claude Code recorded pre-worker concurrence at `771cb493fce4040dc1edb501fed1005aec585d63`; PDA-APP-023 records the resulting worker, delivery, replay, projection, recovery, Bun/Node, and PostgreSQL proof. RR-006 remains open until exact implementation-head concurrence, green CI, merge, and a governed post-merge risk-register update. |
+| PR4 — durable delivery and projections | Independent implementation audit returned Changes required; remediation active on PR #74 | Claude Code withheld concurrence at `ffadf60409111fba72a0829098cd0904e6e269c7` for replay receipt/recovery idempotency, same-row contention proof, and executable worker-migration denial. v0.3.6 and PDA-APP-023 record the remediation; RR-006 remains open until superseding exact-head concurrence, green CI, merge, and a governed post-merge risk-register update. |
 | PR5–PR7 | Not started | Execute in order; no later phase may be pre-closed by earlier evidence |
 
 ### 1.2 Governing sources
@@ -287,7 +287,7 @@ PR4 must prove:
 3. at-least-once delivery with bounded exponential backoff and jitter;
 4. narrowly declared ordering per tenant/aggregate stream, never global ordering;
 5. terminal dead-letter/quarantine evidence with reason, classification, and safe diagnostics;
-6. Consumer receipts are unique by `(consumer_id, event_id, consumer_schema_version)`. A version change does not automatically replay an event: the target version must be registered and schema-compatible, and reprocessing requires the same scoped replay authorization and Audit evidence as any other replay. Authoritative target commands additionally deduplicate by source event identity independent of consumer version, so a consumer upgrade cannot repeat a business effect.
+6. Ordinary consumer receipts use `(consumer_id, event_id, consumer_schema_version)`. Each authorized replay uses the same base identity plus `replay_request_id`, allowing intentional reprocessing while preventing stale recovery from repeating events already completed within that request. A version change does not automatically replay an event: the target version must be registered and schema-compatible, and reprocessing requires scoped replay authorization and Audit evidence. Authoritative target commands additionally deduplicate by source event identity independent of consumer version.
 7. replay requires permission, purpose, tenant scope, compatibility, and audit;
 8. lag, throughput, oldest-event age, retries, failures, dead letters, and consumer health are observable without payload leakage;
 9. a killed worker, transient database failure, poison event, and stale claim recover predictably;
@@ -503,9 +503,11 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 | Claude Code | Independent plan concurrence | Concurred on PR #63 exact head | 2026-07-14 | Re-verified all four remediations in an isolated worktree, confirmed identifier non-collision and clean governance/CI, and declared G1 satisfied before PR1 began. |
 | Claude Code | PR4 pre-worker Platform Architecture, Data Platform, and Security review | Architecture concurred; Data and Security changes required — prototype scope | 2026-07-15 | Reviewed exact base `40454740838bba4426b9ca48b2e82811bc7b466d` in an isolated worktree. Accepted blockers: receipt-identity contradiction, missing delivery-state field classification, absent pool budget, and no internal replay enforcement point. v0.3.3 propagates the selected receipt identity, pool formula, classification gate, and authenticated replay contract; worker registration remains prohibited pending superseding exact-head concurrence. Evidence: issue #70 comment `4985693566`. |
 | Claude Code | PR4 pre-worker exact-head re-review | All three lenses concurred — prototype scope | 2026-07-15 | Re-reviewed remediated exact head `771cb493fce4040dc1edb501fed1005aec585d63`, confirmed the review-only checkpoint contained no worker or migration, reproduced repository and CI gates, and authorized literal worker-root registration subject to the retained implementation proof obligations. Evidence: PR #74 comment `4987122519`. |
+| Claude Code | PR4 implementation exact-head audit | Changes required — concurrence withheld | 2026-07-16 | Audited `ffadf60409111fba72a0829098cd0904e6e269c7` across six lenses. Confirmed topology, delivery mechanics, replay authorization, projection ownership, privacy, and most gates; required replay-request receipt/idempotency evidence, a real same-row concurrent claim, and executable server-only migration invocation. Remediated in v0.3.6 pending superseding exact-head review. Evidence: PR #74 comment `4989112444`. |
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.6 | 2026-07-16 | Platform Design Authority | Dispositioned the implementation audit and recorded replay-scoped receipts, same-row contention proof, executable worker-migration denial, literal optional coverage, and reproducible evidence commands; retained RR-006/RR-007. |
 | 0.3.5 | 2026-07-16 | Platform Design Authority | Recorded PR4 implementation and local evidence completion pending exact-head independent review and merge; linked PDA-APP-023 and retained RR-006/RR-007 plus every production gate. |
 | 0.3.4 | 2026-07-15 | Platform Design Authority | Recorded exact-head concurrence for all three PR4 pre-worker lenses and moved PR4 from review-only remediation to bounded worker implementation without closing RR-006/RR-007 or any delivery evidence gate. |
 | 0.3.3 | 2026-07-15 | Platform Design Authority | Recorded PR3 merge/concurrence and the active PR4 specialist review; reconciled versioned consumer-receipt identity with PDA-PLT-008, bound the controlled-prototype pool budget, and retained the worker prohibition pending Data Platform/Security remediation concurrence. |

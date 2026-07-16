@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-018
 title: Event Backbone Delivery Runbook
-version: 0.1.1
+version: 0.1.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -57,7 +57,7 @@ Production alert thresholds and SLOs remain a pilot gate under PDA-OPS-015.
 3. Read aggregate health. Do not start by selecting event payloads.
 4. Check whether an earlier nonterminal event blocks the same narrow stream.
 5. Check claim lease expiry and attempt reason codes. Never reveal the claim-token digest.
-6. Check consumer receipt identity `(consumer_id, event_id, consumer_schema_version)`.
+6. Check the base consumer receipt identity `(consumer_id, event_id, consumer_schema_version)` and its execution scope: `delivery` for ordinary transport or the exact `replay_request_id` for authorized replay.
 7. For Catalog, compare Product source version with projection source version inside the same tenant.
 8. For Inventory, compare the balance against the signed movement sum; do not repair by editing movements or quantities.
 9. Confirm the event's retention/privacy state before any replay or payload inspection.
@@ -104,5 +104,6 @@ RR-007, production SLOs/alerts, multi-replica capacity, production roles/RLS, ba
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.1.2 | 2026-07-16 | Platform Design Authority | Added replay-request receipt reconciliation so stale replay recovery skips already-completed events without suppressing a new authorized replay. |
 | 0.1.1 | 2026-07-16 | Platform Design Authority | Added bounded stale-running replay recovery under the reviewed single-worker prototype topology. |
 | 0.1.0 | 2026-07-15 | Platform Design Authority | Added controlled-prototype delivery, replay, projection, reconciliation, and safe recovery procedure for WS2 PR4. |

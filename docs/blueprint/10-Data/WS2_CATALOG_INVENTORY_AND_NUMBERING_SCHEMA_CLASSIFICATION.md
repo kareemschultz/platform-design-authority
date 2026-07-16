@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DAT-019
 title: WS2 Catalog Inventory and Numbering Schema Classification
-version: 0.4.0
+version: 0.4.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0003, ADR-0014, ADR-0027]
 review_evidence: []
 ---
@@ -133,7 +133,7 @@ This is the concrete pre-migration classification for the Event Backbone deliver
 | `platform_event_replay_request.id`, `tenant_id`, `consumer_id`, `consumer_schema_version`, `first_sequence`, `last_sequence`, `event_names`, `idempotency_key` | Authoritative bounded replay request identity inside current tenant context | Confidential; bounded administrative retention; production schedule pending | Privileged exact/status lookup only if contracted; no cross-tenant substitution, general export, or offline use | Tenant comes from revalidated active context; range is positive, inclusive, bounded, and allowlisted; composite idempotency prevents duplicate replay requests |
 | `platform_event_replay_request.purpose`, `requested_by`, `approved_by`, `permission_decision_id`, `audit_record_id`, `compatibility_result` | Server-resolved replay authority and evidence | Confidential; bounded text and opaque evidence references; actor references may be pseudonymized while decision/Audit integrity remains | Never general search or telemetry label; safe compatibility/denial code may be aggregated | Purpose required; requester/approver derive from current principal/policy, never request body; permission, schema compatibility, retention, and append-only Audit must succeed before queueing |
 | `platform_event_replay_request.state`, `requested_at`, `started_at`, `completed_at`, `failure_code` | Replay workflow state/provenance | Confidential; retained with request evidence; safe failure code may outlive minimized purpose | Tenant-scoped operational status only; aggregate counts use safe states/codes | State machine is append-evidenced; replay creates new attempts and never mutates source event, dead letter, or existing receipt |
-| `platform_event_consumer_receipt.consumer_id`, `event_id`, `consumer_schema_version`, `tenant_id` | Authoritative delivery deduplication key for one registered consumer version | Confidential; retained at least through eligible replay/source operational window; production schedule pending | Exact tenant/event/consumer reconciliation only; no general export/offline/search | Unique `(consumer_id, event_id, consumer_schema_version)`; same-scope source reference; version change alone does not authorize reprocessing |
+| `platform_event_consumer_receipt.receipt_scope`, `consumer_id`, `event_id`, `consumer_schema_version`, `tenant_id` | Authoritative delivery/replay deduplication key for one registered consumer version | Confidential; retained at least through eligible replay/source operational window; production schedule pending | Exact tenant/event/consumer/replay reconciliation only; no general export/offline/search | `receipt_scope='delivery'` preserves ordinary `(consumer_id, event_id, consumer_schema_version)` uniqueness; replay scope must equal its same-tenant `replay_request_id`; version change alone does not authorize reprocessing |
 | `platform_event_consumer_receipt.processed_at`, `effect_reference`, `replay_request_id`, `result_code` | Server-generated receipt provenance and safe effect/replay reference | Confidential; bounded with receipt; opaque effect reference may be minimized when target retention ends | Safe consumer health/throughput aggregates; never payload, target result object, exception, or high-cardinality tenant metric label | Authoritative target commands separately deduplicate by source event identity; receipt insert and consumer-owned effect follow the reviewed transaction/idempotency boundary without cross-owner table mutation |
 
 ## Isolation and Integrity Controls
@@ -161,6 +161,8 @@ PR2, PR3, PR4, and PR5 must not generate a business migration until the owning t
 Production retention periods, RLS, partitioning, lots/serials/expiry/quarantine depth, supplier/cost fields, global Search, production import staging, offline range leasing, financial valuation, and warehouse execution remain deferred to their named owners and gates.
 
 ## Change Log
+
+- 2026-07-16 — v0.4.1 classified replay receipt scope and bound it to the same-tenant replay request so intentional replay remains possible while stale recovery skips completed events.
 
 - 2026-07-15 — v0.4.0 added pre-migration table- and field-level classification, retention, erasure, indexing, observability, replay-authority, and privacy controls for Event Backbone claim/lease state, delivery attempts, dead letters, replay requests, and versioned consumer receipts after the PR4 specialist review.
 - 2026-07-15 — v0.3.0 added field-level classification, scope, retention, erasure, offline/export/search, audit, and integrity declarations for every PR3 Inventory migration field before generation.

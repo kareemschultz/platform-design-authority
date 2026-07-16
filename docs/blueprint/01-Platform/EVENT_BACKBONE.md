@@ -1,7 +1,7 @@
 ---
 document_id: PDA-PLT-008
 title: Event Backbone
-version: 0.4.1
+version: 0.4.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -62,7 +62,7 @@ The following parameters are the implementation contract for WS2 PR4. They autho
 - Ordering is narrow: events sharing `(tenant_id, producer_namespace, aggregate_id)` are delivered in outbox sequence. No ordering is promised across tenants, aggregates, or independent producer namespaces.
 - A dead-letter record retains the minimized event envelope, schema reference, failure classification, attempt summary, and encrypted payload only when the event retention class permits it. The prototype review window is 30 days; a shorter governing privacy or domain retention rule wins. This value is not a production records schedule.
 - Replay is a new authorized delivery attempt, never a mutation of the original event. It requires `platform.event.replay`, an authenticated tenant scope, a recorded purpose and approver, compatible producer and consumer schema versions, an allowlisted event range, and append-only audit evidence. Cross-tenant, unbounded, or unaudited replay is prohibited.
-- Consumer receipts are unique by `(consumer_id, event_id, consumer_schema_version)`. A version change does not automatically replay an event: the target version must be registered and schema-compatible, and reprocessing requires the same scoped replay authorization and Audit evidence as any other replay. Authoritative target commands additionally deduplicate by source event identity independent of consumer version, so a consumer upgrade cannot repeat a business effect.
+- Ordinary delivery receipts use the base identity `(consumer_id, event_id, consumer_schema_version)`. An authorized replay retains that base identity but adds `replay_request_id` as its execution scope: a normal receipt does not suppress intentional replay, while a receipt from the same replay request suppresses completed work during stale-running recovery. A version change does not automatically replay an event; the target version must be registered and schema-compatible, and reprocessing requires scoped replay authorization and Audit evidence. Authoritative target commands additionally deduplicate by source event identity independent of consumer version, so a consumer upgrade or a crash between an idempotent effect and receipt persistence cannot repeat a business effect.
 
 The outbox carries a monotonic database sequence distinct from event ID and `occurred_at`; that sequence is the delivery order within each `(tenant_id, producer_namespace, aggregate_id)` stream. A later row is ineligible while an earlier row in the same stream is pending, leased, retrying, or quarantined for review. Claim ownership uses an opaque claim token plus `claimed_at` and `lease_expires_at`; renew, complete, release, and terminal transitions use compare-and-set against the current token. Retry state records first, last, and next attempt instants plus a safe terminal reason. Runtime-neutral policy receives injected clock and jitter sources.
 
@@ -129,6 +129,7 @@ Measure publish failures, throughput, queue delay, consumer lag, retries, dead l
 
 ## Change Log
 
+- 0.4.2 (2026-07-16): Added replay-request-scoped consumer receipts and recovery deduplication while retaining the canonical consumer/event/version base identity and owner-command source-event idempotency.
 - 0.4.1 (2026-07-16): Linked PDA-APP-023 controlled-prototype delivery, replay, projection, recovery, and runtime evidence while retaining exact-head review, merge, RR-006, and every production gate.
 - 0.4.0 (2026-07-15): Reconciled consumer receipt identity, bound the two-process pool budget, specified monotonic ordering and claim-token/CAS retry state, defined per-consumer completion, established the authenticated internal replay command, and linked field-level delivery-state classification after the PR4 specialist review.
 - 0.3.0 (2026-07-14): Select the bounded WS2 claim lease, retry horizon, ordering key, dead-letter review window, replay authority, and consumer-idempotency contract.

@@ -119,6 +119,31 @@ def main() -> int:
         ROOT
         / "apps"
         / "worker"
+        / "composition"
+        / "__architecture_worker_migration_invocation_fixture.ts",
+        expected_success=False,
+        expected_text="migration-invocation-outside-authority",
+        source=(
+            'import { migrateCatalog } from "@meridian/persistence-catalog-postgres";\n'
+            "await migrateCatalog({} as never);\n"
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "server"
+        / "composition"
+        / "__architecture_server_migration_invocation_fixture.ts",
+        expected_success=True,
+        source=(
+            'import { migrateCatalog } from "@meridian/persistence-catalog-postgres";\n'
+            "await migrateCatalog({} as never);\n"
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
         / "src"
         / "__architecture_cross_owner_consumer_fixture.ts",
         expected_success=False,
@@ -185,6 +210,16 @@ def main() -> int:
         ROOT / "apps" / "server" / "src" / "__architecture_pool_fixture.ts",
         expected_success=False,
         expected_text="connection-lifecycle-outside-composition",
+        source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "src"
+        / "__architecture_worker_pool_outside_composition_fixture.ts",
+        expected_success=False,
+        expected_text="database-outside-persistence",
         source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
     )
     probe(

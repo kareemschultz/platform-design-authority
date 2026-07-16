@@ -36,6 +36,13 @@
       "when": 1784170373791,
       "tag": "0004_flat_human_robot",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784185820528,
+      "tag": "0005_new_sentry",
+      "breakpoints": true
     }
   ]
 }

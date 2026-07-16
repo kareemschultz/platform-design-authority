@@ -209,13 +209,19 @@ export const eventConsumerReceipt = pgTable(
 		})
 			.defaultNow()
 			.notNull(),
+		receiptScope: text("receipt_scope").default("delivery").notNull(),
 		replayRequestId: text("replay_request_id"),
 		resultCode: text("result_code").notNull(),
 		tenantId: text("tenant_id").notNull(),
 	},
 	(table) => [
 		primaryKey({
-			columns: [table.consumerId, table.eventId, table.consumerSchemaVersion],
+			columns: [
+				table.receiptScope,
+				table.consumerId,
+				table.eventId,
+				table.consumerSchemaVersion,
+			],
 			name: "platform_event_consumer_receipt_pk",
 		}),
 		index("platform_event_consumer_receipt_tenant_idx").on(
@@ -227,6 +233,10 @@ export const eventConsumerReceipt = pgTable(
 			foreignColumns: [eventOutbox.id, eventOutbox.tenantId],
 			name: "platform_event_consumer_receipt_scope_fk",
 		}).onDelete("restrict"),
+		check(
+			"platform_event_consumer_receipt_scope_ck",
+			sql`(${table.replayRequestId} IS NULL AND ${table.receiptScope} = 'delivery') OR (${table.replayRequestId} IS NOT NULL AND ${table.receiptScope} = ${table.replayRequestId})`
+		),
 		foreignKey({
 			columns: [table.replayRequestId, table.tenantId],
 			foreignColumns: [eventReplayRequest.id, eventReplayRequest.tenantId],

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.3.3
+version: 1.3.4
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027, ADR-0028]
 ---
 
@@ -71,11 +71,11 @@ Family-level entries in `registry/architecture-rules.json` are a conservative gr
 
 Composition authority is exact, not a wildcard grant to every application. Each authorized application process owns at most one bounded pool. The server alone executes migrations. ADR-0027's three named controlled-prototype review lenses recorded exact-head concurrence at `771cb493fce4040dc1edb501fed1005aec585d63`; this table therefore registers only the literal Event Backbone worker root. Adjacent or wildcard application roots remain denied.
 
-| Composition root | Process owner | Allowed process resources | Prohibited responsibility |
-|---|---|---|---|
-| `apps/server/composition` | API server | one bounded process-local PostgreSQL pool; HTTP adapters; deterministic migration runner | background event-delivery loop or another process's pool |
-| `apps/worker/composition` | Event Backbone worker | one bounded process-local PostgreSQL pool; internal delivery, replay, and owner-projection adapter binding | migrations, HTTP business routes, another process's pool, or direct cross-owner repository/table access |
-| `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | application business processing or an unregistered long-running service |
+| Composition root | Process owner | Allowed process resources | Migration invocation | Prohibited responsibility |
+|---|---|---|---|---|
+| `apps/server/composition` | API server | one bounded process-local PostgreSQL pool; HTTP adapters; deterministic migration runner | Allowed for registered deterministic migration streams | background event-delivery loop or another process's pool |
+| `apps/worker/composition` | Event Backbone worker | one bounded process-local PostgreSQL pool; internal delivery, replay, and owner-projection adapter binding | Prohibited | migrations, HTTP business routes, another process's pool, or direct cross-owner repository/table access |
+| `packages/tooling/composition/*` | Platform Tooling | one explicitly governed infrastructure connection for the named tool | Prohibited unless a later governed row explicitly grants it | application business processing or an unregistered long-running service |
 
 PR4 adds this exact root after the required concurrence. The registration change, worker implementation, and proof that the worker cannot run migrations remain reviewable in that PR; registration does not authorize a wildcard, another application root, production topology, or closure of RR-006/RR-007.
 
@@ -119,6 +119,7 @@ Provider adapters depend on stable platform-facing adapter interfaces. Provider 
 - oRPC transport objects outside application transport adapters and generated-client boundaries
 - Database adapters from runtime-neutral Platform, Engine, Domain, application-contract, or authorization-policy packages
 - Another owner's repository, private schema, tables, or migrations from a Persistence package
+- `migrate*` runner invocation from an application path other than an explicitly migration-authorized composition root
 
 ## Persistence Rules
 
@@ -213,6 +214,8 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 1.3.4 (2026-07-16): Made migration invocation authority executable: only `apps/server/composition` may call registered `migrate*` runners; added worker and server regression probes plus explicit source-derived registry propagation.
 
 - 2026-07-15 — v1.3.2 registered the exact worker environment declaration path while keeping connection construction and shutdown confined to `apps/worker/composition`.
 

@@ -63,6 +63,8 @@ const pausedTenantIds = workerEnv.WORKER_PAUSED_TENANT_IDS?.split(",") ?? [];
 export async function runDeliveryCycle(): Promise<boolean> {
 	const replayResult = await processNextReplayRequest({
 		clock: () => new Date(),
+		idFactory: randomUUID,
+		receipts: store,
 		registry,
 		store: replayStore,
 	});

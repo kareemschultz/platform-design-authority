@@ -94,6 +94,7 @@ export interface DeliveryStorePort {
 		consumerId: string;
 		consumerSchemaVersion: string;
 		eventId: string;
+		replayRequestId?: string;
 	}) => Promise<boolean>;
 	markDeadLettered: (input: {
 		claimToken: string;

@@ -253,6 +253,9 @@
       "platform",
       "engines",
       "domains"
+    ],
+    "migration_invocation_roots": [
+      "apps/server/composition"
     ]
   },
   "persistence_owners": [

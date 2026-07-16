@@ -186,8 +186,14 @@ export function createPostgresDeliveryStore(
 		async hasReceipt(input) {
 			const result = await connection.query(
 				`SELECT 1 FROM platform_event_consumer_receipt
-				 WHERE consumer_id = $1 AND event_id = $2 AND consumer_schema_version = $3`,
-				[input.consumerId, input.eventId, input.consumerSchemaVersion]
+				 WHERE consumer_id = $1 AND event_id = $2 AND consumer_schema_version = $3
+				   AND replay_request_id IS NOT DISTINCT FROM $4`,
+				[
+					input.consumerId,
+					input.eventId,
+					input.consumerSchemaVersion,
+					input.replayRequestId,
+				]
 			);
 			return result.rowCount === 1;
 		},
@@ -266,11 +272,12 @@ export function createPostgresDeliveryStore(
 		async recordReceipt(receipt: ConsumerReceiptRecord) {
 			const result = await connection.query(
 				`INSERT INTO platform_event_consumer_receipt
-				 (consumer_id, event_id, consumer_schema_version, tenant_id, processed_at,
+				 (receipt_scope, consumer_id, event_id, consumer_schema_version, tenant_id, processed_at,
 				  effect_reference, replay_request_id, result_code)
-				 VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-				 ON CONFLICT (consumer_id, event_id, consumer_schema_version) DO NOTHING`,
+				 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+				 ON CONFLICT DO NOTHING`,
 				[
+					receipt.replayRequestId ?? "delivery",
 					receipt.consumerId,
 					receipt.eventId,
 					receipt.consumerSchemaVersion,

@@ -3177,11 +3177,28 @@
       "document_id": "PDA-DOM-027",
       "path": "docs/blueprint/04-Business-Domains/README.md",
       "title": "Business Domains Section Index",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-16",
       "related_adrs": [],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-DOM-028",
+      "path": "docs/blueprint/04-Business-Domains/CAPABILITY_FAMILY_CONTRACT_READINESS.md",
+      "title": "Capability Family Contract Readiness Register",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0007",
+        "ADR-0016",
+        "ADR-0017"
+      ],
       "review_evidence": null
     },
     {
@@ -4881,7 +4898,7 @@
       "document_id": "PDA-REV-014",
       "path": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_DISPOSITION_V1.md",
       "title": "Meridian Documentation Completion Audit Disposition V1",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-16",

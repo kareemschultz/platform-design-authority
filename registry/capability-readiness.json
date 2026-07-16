@@ -1,0 +1,273 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft",
+  "source_document": "docs/blueprint/04-Business-Domains/CAPABILITY_FAMILY_CONTRACT_READINESS.md",
+  "description": "Curated namespace-level admission and contract-readiness declarations. States do not promote capability or document lifecycle.",
+  "state_definitions": {
+    "outline": "Ownership and a broad boundary exist; detailed contract work is not admitted.",
+    "research": "A governed research question or evidence set exists; implementation scope is not admitted.",
+    "decision-blocked": "Material founder, professional, provider, regulatory, or architecture decisions prevent contract commitment.",
+    "contract-planned": "At least one first-slice capability is admitted, but the family contract set is incomplete.",
+    "workstream-active": "An admitted controlled-prototype workstream is implementing part of the family; completion is not implied.",
+    "prototype-evidenced": "At least one admitted capability has verified controlled-prototype evidence; the family is not thereby complete.",
+    "deferred": "The family is explicitly outside current delivery scope until its named trigger is met."
+  },
+  "families": [
+    {
+      "namespace": "ai",
+      "owner": "AI Orchestration",
+      "readiness_state": "research",
+      "admission_trigger": "A bounded AI workstream names deterministic fallback, tool authority, evaluation, privacy, cost, and first-slice non-essentiality.",
+      "blockers": ["No broad autonomous-AI scope", "Controlled evaluation and provider evidence are not complete"],
+      "evidence_refs": ["docs/blueprint/03-Business-Engines/AI_ORCHESTRATION_ENGINE.md", "docs/blueprint/19-Competitive-Research/AI_ASSISTED_PRODUCT_PATTERNS.md"]
+    },
+    {
+      "namespace": "assets",
+      "owner": "Assets and Maintenance",
+      "readiness_state": "outline",
+      "admission_trigger": "An Assets workstream resolves authoritative inventory versus discovered projections and declares lifecycle, custody, privacy, and service seams.",
+      "blockers": ["No admitted roadmap workstream", "Infrastructure-discovery research remains CIR-BACK-023"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/ASSETS_AND_MAINTENANCE_DOMAIN.md", "docs/blueprint/19-Competitive-Research/RESEARCH_BACKLOG.md"]
+    },
+    {
+      "namespace": "catalog",
+      "owner": "Product Catalog",
+      "readiness_state": "workstream-active",
+      "admission_trigger": "Complete WS2 evidence registration and independent workstream review before any claim beyond the admitted Product subset.",
+      "blockers": ["WS2 capability-dimension evidence is incomplete", "Product and Inventory web/accessibility evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/PRODUCT_CATALOG_DOMAIN.md", "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md", "openapi/first-slice-v1.yaml"]
+    },
+    {
+      "namespace": "commerce",
+      "owner": "Commerce",
+      "readiness_state": "contract-planned",
+      "admission_trigger": "Prototype 3 admits the exact POS, register, cash, return, receipt, stored-value, and offline capability subset after WS2 closure.",
+      "blockers": ["Prototype 3 workstream has not started", "Provider, fiscal, offline, UI, accessibility, and recovery evidence remain open"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/COMMERCE_DOMAIN.md", "docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md", "openapi/first-slice-v1.yaml"]
+    },
+    {
+      "namespace": "commercial",
+      "owner": "Commercial Control Plane",
+      "readiness_state": "decision-blocked",
+      "admission_trigger": "Founder decisions FDR-002 and FDR-003 establish the operating entity and billing/settlement currency before contract commitment.",
+      "blockers": ["FDR-002 is open", "FDR-003 is open", "No commercial-runtime workstream is admitted"],
+      "evidence_refs": ["docs/blueprint/13-Commercial/COMMERCIAL_ARCHITECTURE_OVERVIEW.md", "docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md"]
+    },
+    {
+      "namespace": "crm",
+      "owner": "CRM",
+      "readiness_state": "contract-planned",
+      "admission_trigger": "Admit only the first-slice Party projection and consent subset, with CRM-owned role data and no duplicate Party authority.",
+      "blockers": ["No CRM implementation workstream", "Only a prototype first-slice subset is declared"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/CRM_DOMAIN.md", "registry/first-slice.json"]
+    },
+    {
+      "namespace": "developer",
+      "owner": "Developer Platform",
+      "readiness_state": "contract-planned",
+      "admission_trigger": "Admit webhook and event-delivery increments only with internal-event ownership, signing, replay, quota, privacy, and operational evidence.",
+      "blockers": ["First-slice webhook delivery is not complete", "External publication and support policy remain Draft"],
+      "evidence_refs": ["docs/blueprint/07-Developer-Platform/README.md", "docs/blueprint/07-Developer-Platform/WEBHOOKS_AND_EVENT_DELIVERY.md", "openapi/first-slice-v1.yaml"]
+    },
+    {
+      "namespace": "engine",
+      "owner": "Shared Business Engines",
+      "readiness_state": "contract-planned",
+      "admission_trigger": "Each shared engine is admitted independently by a named workstream with an owner, consumer contracts, failure behavior, and first-slice depth.",
+      "blockers": ["The namespace aggregates engines at different depths", "Several engine families have no admitted implementation workstream"],
+      "evidence_refs": ["docs/blueprint/03-Business-Engines/BUSINESS_ENGINES_OVERVIEW.md", "registry/first-slice.json"]
+    },
+    {
+      "namespace": "finance",
+      "owner": "Finance",
+      "readiness_state": "decision-blocked",
+      "admission_trigger": "Limit the first slice to the accountant-handoff seams until qualified accounting evidence and a future Finance workstream admit deeper contracts.",
+      "blockers": ["Full General Ledger and financial statements are deferred", "Qualified Guyana accounting review is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/FINANCE_DOMAIN.md", "docs/blueprint/04-Business-Domains/FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md", "registry/first-slice.json"]
+    },
+    {
+      "namespace": "fiscalization",
+      "owner": "Fiscalization and Statutory Reporting",
+      "readiness_state": "decision-blocked",
+      "admission_trigger": "Admit production statutory contracts only after qualified jurisdiction requirements, provider/certification evidence, contingency rules, and founder scope authority exist.",
+      "blockers": ["Production submission is explicitly deferred", "Qualified Guyana fiscal evidence and certification are absent"],
+      "evidence_refs": ["docs/blueprint/03-Business-Engines/FISCALIZATION_AND_STATUTORY_REPORTING_ENGINE.md", "registry/first-slice.json"]
+    },
+    {
+      "namespace": "fleet",
+      "owner": "Fleet",
+      "readiness_state": "outline",
+      "admission_trigger": "A Fleet workstream resolves asset ownership, driver eligibility, telematics/provider boundaries, maintenance, privacy, and jurisdiction rules.",
+      "blockers": ["No admitted roadmap workstream", "Direct vehicle/provider and jurisdiction evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/FLEET_DOMAIN.md", "docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md"]
+    },
+    {
+      "namespace": "governance",
+      "owner": "Governance and Compliance",
+      "readiness_state": "outline",
+      "admission_trigger": "A Governance workstream defines obligation sources, control/evidence authority, assessment lifecycle, legal hold, segregation, and audit interoperability.",
+      "blockers": ["No admitted roadmap workstream", "Regulatory and professional evidence is jurisdiction-dependent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/GOVERNANCE_AND_COMPLIANCE_DOMAIN.md", "docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md"]
+    },
+    {
+      "namespace": "inventory",
+      "owner": "Inventory",
+      "readiness_state": "workstream-active",
+      "admission_trigger": "Complete WS2 durable delivery, capability evidence, UI/accessibility evidence, and independent review before claiming the admitted subset complete.",
+      "blockers": ["WS2 capability-dimension evidence is incomplete", "Product and Inventory web/accessibility evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/INVENTORY_DOMAIN.md", "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md", "openapi/first-slice-v1.yaml"]
+    },
+    {
+      "namespace": "knowledge",
+      "owner": "Documents and Knowledge",
+      "readiness_state": "outline",
+      "admission_trigger": "A Knowledge workstream defines controlled-document authority, publication/review lifecycle, retention/legal hold, external sharing, search, and AI boundaries.",
+      "blockers": ["No admitted roadmap workstream", "Product documentation does not establish business-record knowledge contracts"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/DOCUMENTS_AND_KNOWLEDGE_DOMAIN.md", "docs/blueprint/07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md"]
+    },
+    {
+      "namespace": "logistics",
+      "owner": "Supply Chain and Logistics",
+      "readiness_state": "research",
+      "admission_trigger": "A Logistics workstream selects a bounded shipment/dispatch scope and resolves carrier, customs, trade-document, route, proof, and provider evidence.",
+      "blockers": ["No admitted roadmap workstream", "Carrier, customs, device, and jurisdiction evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/SUPPLY_CHAIN_AND_LOGISTICS_DOMAIN.md", "docs/blueprint/19-Competitive-Research/SUPPLY_CHAIN_IMPLEMENTATION_FINDINGS.md"]
+    },
+    {
+      "namespace": "loyalty",
+      "owner": "Loyalty",
+      "readiness_state": "deferred",
+      "admission_trigger": "A future roadmap decision admits non-cash loyalty after stored value is proven and preserves Commerce ownership of monetary balances.",
+      "blockers": ["Advanced loyalty is explicitly deferred from the first slice", "No admitted loyalty workstream"],
+      "evidence_refs": ["docs/blueprint/03-Business-Engines/LOYALTY_ENGINE.md", "registry/first-slice.json"]
+    },
+    {
+      "namespace": "maintenance",
+      "owner": "Assets and Maintenance",
+      "readiness_state": "outline",
+      "admission_trigger": "An Assets/Maintenance workstream resolves asset, inventory, workforce, meter, warranty, failure, work-order, and correction authority.",
+      "blockers": ["No admitted roadmap workstream", "Device, condition, predictive, and compliance evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/ASSETS_AND_MAINTENANCE_DOMAIN.md", "docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md"]
+    },
+    {
+      "namespace": "manufacturing",
+      "owner": "Manufacturing",
+      "readiness_state": "research",
+      "admission_trigger": "A Manufacturing workstream chooses a bounded production model and resolves formulas/BOMs, genealogy, planning, consumption, output, scrap, rework, quality, and costing seams.",
+      "blockers": ["No admitted roadmap workstream", "Planning, shop-floor device, costing, and direct product evidence remain limited"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/MANUFACTURING_DOMAIN.md", "docs/blueprint/19-Competitive-Research/MANUFACTURING_WORKFLOW_REFERENCE.md"]
+    },
+    {
+      "namespace": "marketing",
+      "owner": "Marketing",
+      "readiness_state": "outline",
+      "admission_trigger": "A Marketing workstream defines consent source, audience projection, content, experiments, delivery providers, attribution limits, privacy, and deletion behavior.",
+      "blockers": ["No admitted roadmap workstream", "Consent, messaging-provider, privacy, and attribution evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/MARKETING_DOMAIN.md", "docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md"]
+    },
+    {
+      "namespace": "marketplace",
+      "owner": "Marketplace",
+      "readiness_state": "deferred",
+      "admission_trigger": "A future phase admits bounded extension discovery/installation; paid billing and payout additionally require FDR-008 and legal/provider gates.",
+      "blockers": ["Arbitrary core-process extension execution is prohibited", "Paid marketplace and publisher payout are disabled"],
+      "evidence_refs": ["docs/blueprint/08-Marketplace/MARKETPLACE_ARCHITECTURE.md", "docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md"]
+    },
+    {
+      "namespace": "party",
+      "owner": "Party and Relationships",
+      "readiness_state": "prototype-evidenced",
+      "admission_trigger": "Deepen beyond the evidenced Party-record subset only after ADR-0007 review and a workstream names matching, merge, privacy, and cross-domain projection evidence.",
+      "blockers": ["ADR-0007 remains Proposed", "Matching, merge, restricted identifiers, and privacy depth remain incomplete"],
+      "evidence_refs": ["docs/blueprint/01-Platform/PARTY_AND_RELATIONSHIP_MODEL.md", "evidence/first-slice/ws1-capability-evidence.json"]
+    },
+    {
+      "namespace": "payment",
+      "owner": "Payment Orchestration",
+      "readiness_state": "decision-blocked",
+      "admission_trigger": "Admit provider-specific prototypes only after FDR-001, FDR-006, and FDR-007 plus provider availability/certification evidence; preserve direct tenant-provider contracts.",
+      "blockers": ["Provider and terminal strategy decisions are open", "Guyana availability, certification, settlement, dispute, and offline evidence is absent"],
+      "evidence_refs": ["docs/blueprint/03-Business-Engines/PAYMENT_ENGINE.md", "docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md", "registry/first-slice.json"]
+    },
+    {
+      "namespace": "payroll",
+      "owner": "Payroll",
+      "readiness_state": "research",
+      "admission_trigger": "A jurisdiction-specific Payroll workstream is admitted only after qualified legal/tax evidence defines calculation, finalization, filing, payment, correction, privacy, and records obligations.",
+      "blockers": ["No admitted roadmap workstream", "Qualified Guyana payroll, tax, filing, and provider evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/PAYROLL_DOMAIN.md", "docs/blueprint/19-Competitive-Research/PAYROLL_WORKFLOW_REFERENCE.md"]
+    },
+    {
+      "namespace": "planning",
+      "owner": "Planning and Analytics",
+      "readiness_state": "outline",
+      "admission_trigger": "A Planning workstream defines governed metric inputs, scenario/version authority, approvals, forecast lineage, write-back boundaries, and predictive-model evidence.",
+      "blockers": ["No admitted roadmap workstream", "Governed metrics and operational write-back contracts are not selected"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/PLANNING_AND_ANALYTICS_DOMAIN.md", "docs/blueprint/10-Data/ANALYTICS_SEMANTIC_LAYER_AND_METRIC_GOVERNANCE.md"]
+    },
+    {
+      "namespace": "platform",
+      "owner": "Platform Kernel",
+      "readiness_state": "prototype-evidenced",
+      "admission_trigger": "Admit each remaining Platform capability through its named first-slice or later workstream; WS1 evidence applies only to the registered subset.",
+      "blockers": ["Only nine Platform capabilities have evidenced first-slice records", "Offline, devices, numbering, import/export, privacy, search, jobs, files, and operations remain at mixed depths"],
+      "evidence_refs": ["docs/blueprint/01-Platform/PLATFORM_KERNEL_OVERVIEW.md", "evidence/first-slice/ws1-capability-evidence.json", "registry/first-slice-tests.json"]
+    },
+    {
+      "namespace": "procurement",
+      "owner": "Procurement",
+      "readiness_state": "research",
+      "admission_trigger": "A Procurement workstream selects a bounded requisition-to-receipt scope and defines Party/supplier roles, approvals, matching, returns, Inventory and Finance seams.",
+      "blockers": ["No admitted roadmap workstream", "Supplier, warehouse, invoice-matching, UI, and offline evidence is not implementation-ready"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/PROCUREMENT_DOMAIN.md", "docs/blueprint/19-Competitive-Research/PROCUREMENT_AND_WAREHOUSE_WORKFLOW_REFERENCE.md"]
+    },
+    {
+      "namespace": "projects",
+      "owner": "Projects",
+      "readiness_state": "research",
+      "admission_trigger": "A Projects workstream chooses a bounded delivery model and resolves configuration depth, assignment, time/expense, billing inputs, acceptance, correction, and reporting authority.",
+      "blockers": ["No admitted roadmap workstream", "Configuration, billing, workforce, and customer evidence remains research-only"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/PROJECTS_DOMAIN.md", "docs/blueprint/19-Competitive-Research/PROJECTS_WORKFLOW_REFERENCE.md"]
+    },
+    {
+      "namespace": "rental",
+      "owner": "Rental",
+      "readiness_state": "research",
+      "admission_trigger": "A Rental workstream resolves asset/inventory authority, availability, reservation, deposits, payment, delivery/collection, inspection, damage, overdue, tax, and agreement rules.",
+      "blockers": ["No admitted roadmap workstream", "Deposit/legal terms, devices, payments, and direct workflow evidence are absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/RENTAL_DOMAIN.md", "docs/blueprint/19-Competitive-Research/RENTAL_AND_BOOKING_WORKFLOW_REFERENCE.md"]
+    },
+    {
+      "namespace": "security",
+      "owner": "Security Platform",
+      "readiness_state": "prototype-evidenced",
+      "admission_trigger": "Treat WS1 tenant-isolation evidence as one bounded result; deeper privacy/risk/protective-action work requires its own implementation and independent security evidence.",
+      "blockers": ["Only tenant isolation has a first-slice evidence record", "Penetration, privacy exercise, risk-model, abuse, and operational evidence remains open"],
+      "evidence_refs": ["docs/blueprint/11-Security/README.md", "evidence/first-slice/ws1-capability-evidence.json", "registry/first-slice-tests.json"]
+    },
+    {
+      "namespace": "service",
+      "owner": "Service and Help Desk",
+      "readiness_state": "research",
+      "admission_trigger": "A Service workstream chooses service-desk or field-service depth and resolves Party, assets, inventory, scheduling, SLA, entitlement, mobile, remote-action, and escalation authority.",
+      "blockers": ["No admitted roadmap workstream", "ITSM/MSP/RMM comparison remains CIR-BACK-021", "Direct field/mobile evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/SERVICE_AND_HELP_DESK_DOMAIN.md", "docs/blueprint/19-Competitive-Research/RESEARCH_BACKLOG.md"]
+    },
+    {
+      "namespace": "warehouse",
+      "owner": "Warehouse",
+      "readiness_state": "research",
+      "admission_trigger": "A Warehouse workstream selects receiving/putaway/picking/count depth and resolves task authority, Inventory seams, devices, labels, offline behavior, labor privacy, and recovery.",
+      "blockers": ["No admitted roadmap workstream", "Direct warehouse-device, offline, accessibility, and capacity evidence is absent"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/WAREHOUSE_DOMAIN.md", "docs/blueprint/19-Competitive-Research/PROCUREMENT_AND_WAREHOUSE_WORKFLOW_REFERENCE.md"]
+    },
+    {
+      "namespace": "workforce",
+      "owner": "Workforce",
+      "readiness_state": "research",
+      "admission_trigger": "A Workforce workstream selects a bounded worker/assignment scope and resolves Party linkage, effective dating, sensitive data, jurisdiction rules, self-service, offline, and Payroll seams.",
+      "blockers": ["No admitted roadmap workstream", "Qualified employment/privacy/jurisdiction evidence is absent", "Direct authenticated workflow evidence is limited"],
+      "evidence_refs": ["docs/blueprint/04-Business-Domains/WORKFORCE_DOMAIN.md", "docs/blueprint/19-Competitive-Research/WORKFORCE_IMPLEMENTATION_FINDINGS.md"]
+    }
+  ]
+}

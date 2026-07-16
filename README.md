@@ -142,7 +142,7 @@ Generated registries include:
 - `registry/permissions.json`
 - `registry/first-slice-tests.json`
 
-Curated governance includes namespaces, first-slice scope, capability metadata, endpoint permissions, product-documentation evidence, design tokens, architecture rules, governance exemptions, and premium-source provenance templates.
+Curated governance includes namespaces, first-slice scope, capability metadata and family readiness, endpoint permissions, product-documentation evidence, design tokens, architecture rules, governance exemptions, and premium-source provenance templates.
 
 Draft implementation contracts are under `openapi/` and `schemas/`.
 
@@ -157,6 +157,8 @@ python -m unittest scripts/test_validate_product_docs.py
 python scripts/validate_product_docs.py
 python -m unittest scripts/test_validate_research_registration.py
 python scripts/validate_research_registration.py
+python -m unittest scripts/test_validate_capability_readiness.py
+python scripts/validate_capability_readiness.py
 ```
 
 ## Document Lifecycle

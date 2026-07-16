@@ -1,7 +1,7 @@
 ---
 document_id: PDA-DOM-027
 title: Business Domains Section Index
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -9,7 +9,7 @@ last_reviewed: 2026-07-16
 
 # Business Domains
 
-Begin with `BUSINESS_CAPABILITY_MAP.md`, `DOMAIN_DEPENDENCY_MATRIX.md`, and `CAPABILITY_MAP_AMENDMENT-2026-07-11.md`. Domain specifications own their authoritative data and behavior; the first-slice Finance seam is `FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`.
+Begin with `BUSINESS_CAPABILITY_MAP.md`, `CAPABILITY_FAMILY_CONTRACT_READINESS.md`, and `DOMAIN_DEPENDENCY_MATRIX.md`. Domain specifications own their authoritative data and behavior; the first-slice Finance seam is `FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`. The dated capability amendment is Superseded provenance, not a current source.
 
 ## Artifact Catalog
 
@@ -39,4 +39,5 @@ Begin with `BUSINESS_CAPABILITY_MAP.md`, `DOMAIN_DEPENDENCY_MATRIX.md`, and `CAP
 - [Recurring Commerce and Memberships](RECURRING_COMMERCE_AND_MEMBERSHIPS.md) — `PDA-DOM-024` · Draft
 - [Stored Value and Customer Balances](STORED_VALUE_AND_CUSTOMER_BALANCES.md) — `PDA-DOM-025` · Draft
 - [First Slice Finance Handoff Contract](FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md) — `PDA-DOM-026` · Draft
+- [Capability Family Contract Readiness Register](CAPABILITY_FAMILY_CONTRACT_READINESS.md) — `PDA-DOM-028` · Draft
 - [Capability Map Amendment 2026-07-11](CAPABILITY_MAP_AMENDMENT-2026-07-11.md) — `PDA-DOM-090` · Superseded

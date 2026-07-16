@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -41,6 +41,8 @@ The research-registration checkpoint adds the missing accounting ledger entry, s
 
 The capability-source consolidation checkpoint folds Party, Payment, Business DNA, and Marketplace identifiers into PDA-DOM-021 version 0.4.0, preserves PDA-DOM-090 as Superseded provenance, and leaves PDA-MKT-010 as scoped architecture rather than a parser input. Before/after registry comparison reports 497 capabilities, zero added or removed identifiers, zero semantic metadata changes, and one current `capability_sources` entry. Independent review remains required before DCA-012 closure.
 
+The capability-readiness checkpoint registers all 32 namespaces with their authoritative owner, honest readiness state, admission trigger, blockers, and evidence paths. The validator reconciles 497 capabilities, 103 first-slice entries, and 11 evidenced capabilities, and seven seeded tests reject missing families, owner drift, false deferral, unsupported evidence claims, and broken evidence paths. DCA-005 remains partially implemented because registration does not supply the missing contracts and evidence for admitted families.
+
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
@@ -49,7 +51,7 @@ The capability-source consolidation checkpoint folds Party, Payment, Business DN
 | DCA-002 | Critical | Accepted | Implemented in Draft; independent review open | Binary completeness claim replaced by class/depth/evidence semantics and independently reviewed |
 | DCA-003 | Critical | Accepted | Reconciled to `main` `4045474`; independent and pre-merge refresh pending | Program status and first-slice plan match current main, issues, PRs, and evidence at a stated SHA |
 | DCA-004 | Critical | Accepted | Implemented at PR #75 head; newer local commits require fresh CI | Generated document registry current; PR #75 documentation jobs green in a fresh checkout |
-| DCA-005 | High | Accepted | Open | Every capability family has an explicit readiness depth and admission trigger; no speculative first-slice expansion |
+| DCA-005 | High | Accepted | Partially implemented: all families registered; admitted contract/evidence gaps remain | Every capability family has an explicit readiness depth and admission trigger; no speculative first-slice expansion |
 | DCA-006 | High | Accepted | Open | Governed artifact-class standard, templates, validator behavior, and sample review evidence agree |
 | DCA-007 | High | Accepted | Initial waves registered; independent review and continuing backlog remain | Every research wave has a ledger record; affected backlog entries have honest states and exact output/source links |
 | DCA-008 | High | Partially Accepted | Workforce and platform-service gaps reduced after cutoff; ITSM/MSP/RMM, IAM, infrastructure/IPAM/DCIM, mobile/offline, and named-product depth remain | Reviewed matrices/workflows/findings and dated source ledger for each remaining research family |

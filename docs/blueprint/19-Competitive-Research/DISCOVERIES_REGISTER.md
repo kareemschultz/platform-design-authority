@@ -195,3 +195,17 @@ Review discoveries at the end of every research wave. Unsupported observations m
 - Observation: every credible offline workflow needs leases, limits, identity, conflicts, certainty and reconciliation.
 - Confidence: High
 - Transferred to: CROSS_DOMAIN_FAILURE_AND_RECOVERY_PATTERNS.md.
+
+### DISC-015 — Infrastructure discovery is evidence, not business authority
+
+- Status: Transferred
+- Observation: intended network data, discovered state, asset accountability and controller state overlap visibly but have different provenance, freshness, owners and correction meaning.
+- Confidence: High for the boundary; implementation effectiveness untested
+- Transferred to: PDA-CIR-093 through PDA-CIR-095, PAT-021 and EVID-009.
+
+### DISC-016 — Offline behavior depends on outage topology and device context
+
+- Status: Transferred
+- Observation: official Square, Shopify POS, Toast and Dynamics Field Service guidance varies by device, local network, internet, platform/provider, profile, tender and prepared state; a single offline boolean cannot express safe authority or recovery.
+- Confidence: Medium-to-High for documented behavior; direct observation unknown
+- Transferred to: PDA-CIR-097, PDA-CIR-098, PAT-022 and EVID-010.

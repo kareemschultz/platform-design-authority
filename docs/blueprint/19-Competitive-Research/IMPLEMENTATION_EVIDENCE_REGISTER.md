@@ -245,5 +245,7 @@ These EVID identifiers standardize the new program entries. None is implementati
 | EVID-006 | AI action preview, prompt-injection containment, budget and disabled fallback | Prototype Required | AI/security/domain acceptance tests |
 | EVID-007 | permission-aware search/analytics freshness and accessible alternatives | Prototype Required | security/data/accessibility/performance tests |
 | EVID-008 | audience-aware documentation and change communication | Prototype Required | public/in-app/developer/tenant-audit publishing test |
+| EVID-009 | infrastructure observation/reconciliation and consequential remote-action certainty | Deferred | owner/roadmap decision, adapter/provider test, Security/Operations exercises and accessible reconciliation prototype |
+| EVID-010 | direct device/offline behavior across exact hardware, topology, provider and assistive technology | Prototype Required | PDA-CIR-097 OFF-01 through OFF-12; no scenario complete from documentation alone |
 
 Research citations may satisfy the “why test” field only. Advancement requires first-party Meridian evidence and independent review.

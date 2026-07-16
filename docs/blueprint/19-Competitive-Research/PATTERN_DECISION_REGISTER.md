@@ -242,3 +242,5 @@ Review entries after relevant prototypes and market refreshes. Promote no extern
 | PAT-018 | governed metric plus table/text alternative | Adopt | Prototype Required | reconciliation and WCAG evidence |
 | PAT-019 | AI action preview and deterministic fallback | Custom Meridian Required | Prototype Required | prompt-injection, disabled and budget-failure tests |
 | PAT-020 | audience-aware release state taxonomy | Improve | Prototype Required | public/in-app/API/audit separation test |
+| PAT-021 | intended, discovered and operational state remain source-qualified | Custom Meridian Required | Prototype Required | cross-source freshness, contradiction, owner-command and tenant-isolation tests |
+| PAT-022 | degraded state is dependency/topology specific rather than one offline boolean | Improve | Prototype Required | OFF-01 through OFF-12 device, provider, reconnect and accessibility evidence |

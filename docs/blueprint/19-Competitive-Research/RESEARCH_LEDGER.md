@@ -301,6 +301,48 @@ Confidence is not approval. A high-confidence observation may still be unsuitabl
 - Follow-up: independent owner/Security review, customer requirements, lawful configured-product and device/controller trials, owner/roadmap/ADR decision, provider/deployment evaluation, accessibility and operational exercises.
 - Revalidate when: infrastructure inventory, DCIM, IPAM, discovery, controller or network-change scope is proposed; cited product behavior changes materially; or 2027-07-16, whichever occurs first.
 
+### CIR-LED-0014 — Named-product lineage and coverage reconciled
+
+- Status: In Review
+- Completed: 2026-07-16
+- Researcher: Codex with Competitive Research Lead and independent review pending
+- Wave: Continuing study — named-product lineage and coverage accounting
+- Question: Which explicitly requested comparators are current, renamed, acquired, historical, grouped under a product family, or only partially covered by the completed waves?
+- Products: Peachtree/Sage 50, Vend/Lightspeed Retail POS (X-Series), Retail Pro Prism, Invoice Ninja v5, Horilla HR, Open HRMS, OpenProject 17.x, Freshworks/Freshservice/Freshdesk/Freshsales, and the complete requested catalog grouped by wave
+- Sources: SRC-062 through SRC-069; page-level first-party citations in PDA-CIR-096; prior wave source records for already studied products
+- Evidence mode: current first-party product, help, documentation, release, lineage and public-source evidence; cross-wave accounting
+- Access limitations: no paid/configured tenant, normalized edition/geography comparison, acquisition/legal analysis, historical product installation, accessibility test, or full workflow parity test
+- Finding: historical aliases must resolve to the current product without double counting; company/family names must resolve to separate product contexts; “studied” means bounded wave evidence, not exhaustive testing.
+- Contradictions: vendor families use overlapping names and series while detailed capabilities vary by edition, geography and acquisition lineage; wave-level synthesis is useful but cannot support product-wide parity claims.
+- Confidence: High for explicitly documented Peachtree/Sage 50 and Vend/Lightspeed lineage; Medium for family canonicalization and coverage accounting; Low for unconfigured detailed behavior
+- Meridian impact:
+  - output: PDA-CIR-096;
+  - capabilities/contracts: none introduced or promoted;
+  - research governance: requested aliases remain searchable and every named set has a dated disposition.
+- Follow-up: independent catalog review and product/edition-specific revalidation when a comparator becomes load-bearing for a governed decision.
+- Revalidate when: a product is renamed, acquired, discontinued or redirected; a cited wave enters implementation; or 2027-07-16, whichever occurs first.
+
+### CIR-LED-0015 — Device and offline documented evidence transferred with direct observation blocked
+
+- Status: In Review
+- Completed: 2026-07-16
+- Researcher: Codex with Client Platform, Offline, POS/Payment, Field Service, Security, Accessibility, Testing, and independent review pending
+- Wave: Continuing study — direct device and offline evidence
+- Question: Do representative products' actual device workflows support documented assumptions about bounded local work, certainty, leases, persistence, retry, conflict, recovery and reconciliation?
+- Products: Square POS, Shopify POS, Toast, Dynamics 365 Field Service Mobile, Retail Pro Prism, and future Meridian controlled prototypes
+- Sources: SRC-070 through SRC-074; page-level first-party citations in PDA-CIR-097
+- Evidence mode: current first-party documentation and explicit access-block accounting; no behavior was directly observed
+- Access limitations: no lawful configured tenants, representative hardware/peripherals, payment/provider test permission, controlled outage lab, assistive-technology evaluation, or available Meridian implementation artifact
+- Finding: official documentation consistently exposes dependency-specific degraded modes, bounded features, pending/uncertain states, local data-loss hazards, reconnect requirements and provider risk; actual behavior and accessibility remain unknown until directly tested.
+- Contradictions: product guidance differs by device, outage topology, plan, processor and supported feature; this reinforces a dependency/certainty model and prohibits a universal “offline works” claim.
+- Confidence: Medium-to-High for documented constraints; Unknown for directly observed behavior; no Meridian implementation confidence is claimed
+- Meridian impact:
+  - outputs: PDA-CIR-097 and PDA-CIR-098;
+  - capabilities/contracts: no identifier, endpoint, provider, device or scope change introduced;
+  - implementation: OFF-01 through OFF-12 are proposed evidence scenarios, not completed tests.
+- Follow-up: acquire lawful exact product/device/provider environments where relevant, execute controlled disruptions and accessibility review, and create implementation-linked EVID records without marking them complete prematurely.
+- Revalidate when: an affected controlled prototype approaches exit criteria, exact hardware/provider/product changes, cited guidance changes materially, or 2027-07-16, whichever occurs first.
+
 ## 6.1 Stable Research Result Index
 
 This index is the machine-checked registration boundary between backlog questions, durable outputs, ledger evidence, and stable source records. `Transferred` means the outputs are registered; it does not mean the Draft findings are approved or implementation-ready.
@@ -318,6 +360,8 @@ This index is the machine-checked registration boundary between backlog question
 | RES-009 | ITSM/MSP/RMM | Transferred | CIR-LED-0011 | CIR-BACK-021 | PDA-CIR-087 through PDA-CIR-089 | SRC-041 through SRC-048 | Independent review, direct tenant/agent observation, provider evaluation and roadmap admission pending |
 | RES-010 | IAM/identity administration | Transferred | CIR-LED-0012 | CIR-BACK-022 | PDA-CIR-090 through PDA-CIR-092 | SRC-049 through SRC-056 | Independent review, configured-provider observation, protocol/security evaluation and roadmap admission pending |
 | RES-011 | Infrastructure/DCIM/IPAM | Transferred | CIR-LED-0013 | CIR-BACK-023 | PDA-CIR-093 through PDA-CIR-095 | SRC-057 through SRC-061 | Independent review, direct discovery/controller observation, owner/provider decision and operational/security evaluation pending |
+| RES-012 | Named-product lineage | Transferred | CIR-LED-0014 | CIR-BACK-024 | PDA-CIR-096 | SRC-062 through SRC-069 | Independent catalog review and product/edition-specific revalidation pending |
+| RES-013 | Device/offline evidence | Transferred | CIR-LED-0015 | CIR-BACK-025 | PDA-CIR-097 through PDA-CIR-098 | SRC-070 through SRC-074 | Direct observation explicitly blocked; implementation, accessibility, provider and operational evidence pending |
 
 ## 6.2 Registration Invariants
 

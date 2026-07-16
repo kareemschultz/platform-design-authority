@@ -235,8 +235,10 @@ The initial research program was authored through 2026-07-16. All artifacts rema
 | Continuing ITSM/MSP/RMM study | PDA-CIR-087 through PDA-CIR-089 | capability comparison, escalation/remote-action workflow, threat boundary and implementation findings |
 | Continuing IAM/identity-administration study | PDA-CIR-090 through PDA-CIR-092 | terminology/capability comparison, administration/provisioning/recovery controls, and retain/extend/replace findings |
 | Continuing infrastructure/DCIM/IPAM study | PDA-CIR-093 through PDA-CIR-095 | capability/authority matrix, discovery/reconciliation workflow and network-operations findings |
+| Named-product lineage reconciliation | PDA-CIR-096 | requested-name lineage, current locator, grouped wave coverage and bounded disposition |
+| Device/offline evidence disposition | PDA-CIR-097 through PDA-CIR-098 | documented device/degraded behavior, explicit direct-observation blocks and executable evidence scenarios |
 
-The section contains 95 uniquely identified Markdown documents, including three continuing studies after the initial nine-wave set. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial writing set and records access limits, omitted comparator families, continuing research backlog, and external evidence gates.
+The section contains 98 uniquely identified Markdown documents, including continuation studies and evidence-accounting work after the initial nine-wave set. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial writing set and records access limits, comparator lineage, continuation studies, direct-observation blocks, and external evidence gates.
 
 ## 14. Artifact Catalog
 
@@ -365,3 +367,6 @@ This catalog is the canonical navigation surface for the research artifacts. Ide
 - [Infrastructure, DCIM, IPAM, and Network Operations Competitive Capability Matrix](INFRASTRUCTURE_DCIM_IPAM_COMPETITIVE_CAPABILITY_MATRIX.md) — `PDA-CIR-093` · Draft
 - [Infrastructure Discovery and Reconciliation Workflow Reference](INFRASTRUCTURE_DISCOVERY_RECONCILIATION_WORKFLOW_REFERENCE.md) — `PDA-CIR-094` · Draft
 - [Infrastructure Operations Implementation Findings](INFRASTRUCTURE_OPERATIONS_IMPLEMENTATION_FINDINGS.md) — `PDA-CIR-095` · Draft
+- [Named Product Lineage and Coverage Register](NAMED_PRODUCT_LINEAGE_AND_COVERAGE_REGISTER.md) — `PDA-CIR-096` · Draft
+- [Direct Device and Offline Evidence Matrix](DIRECT_DEVICE_AND_OFFLINE_EVIDENCE_MATRIX.md) — `PDA-CIR-097` · Draft
+- [Device and Offline Evidence Disposition](DEVICE_OFFLINE_EVIDENCE_DISPOSITION.md) — `PDA-CIR-098` · Draft

@@ -300,7 +300,7 @@ Each entry records:
 ### CIR-BACK-024 — Named-product gap and historical-product reconciliation
 
 - Priority: P3
-- Status: Planned
+- Status: Transferred
 - Domain: Cross-domain competitive research
 - Trigger: before claiming the user-requested comparator catalogue is complete or using a missing product as decision evidence
 - Question: Which requested products remain absent, renamed, acquired, historical, region-limited, or materially duplicated, including Peachtree/Sage 50, Vend/Lightspeed, Retail Pro, Invoice Ninja, Horilla, OpenHRMS, OpenProject, Freshworks products, and other named comparators?
@@ -309,11 +309,12 @@ Each entry records:
 - Dependencies: source trust model and product-comparison fairness rules.
 - Owner: Competitive Research Lead
 - Completion: every requested name has a dated `studied`, `covered-by-successor`, `deferred-with-reason`, or `rejected-as-irrelevant` disposition; name presence alone is not completion.
+- Transfer evidence: CIR-LED-0014, RES-012, PDA-CIR-096, and SRC-062 through SRC-069. Product-family coverage remains bounded by the original wave limitations and no configured-product parity claim is implied.
 
 ### CIR-BACK-025 — Direct mobile, kiosk, and offline workflow evidence
 
 - Priority: P1
-- Status: Planned
+- Status: Transferred
 - Domain: Clients / Offline / POS / Field Operations
 - Trigger: before native, kiosk, warehouse-scanner, field-service, or offline behavior exits controlled prototype
 - Question: Do representative products' real device workflows support the documented assumptions about bounded commands, leases, local certainty, conflict handling, accessibility, retry, and reconciliation?
@@ -322,6 +323,7 @@ Each entry records:
 - Dependencies: device security, offline authority, provider access, accessibility review, and implementation evidence.
 - Owner: Client Platform, Offline, Security, Accessibility, and affected domain owners
 - Completion: representative scenarios are directly observed or explicitly blocked; documentation-only evidence is not mislabeled as behavioral proof.
+- Transfer evidence: CIR-LED-0015, RES-013, PDA-CIR-097 and PDA-CIR-098, and SRC-070 through SRC-074. Direct observation is explicitly blocked on lawful configured tenants, representative hardware/provider access, controlled outage labs, and available Meridian implementations; no implementation evidence is complete.
 
 ## 5. Backlog Management
 

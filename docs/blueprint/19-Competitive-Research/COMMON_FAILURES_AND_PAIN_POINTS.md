@@ -275,3 +275,4 @@ The original CFP identifiers remain stable. The required FAIL identifiers below 
 | FAIL-006 | dashboards/search/inboxes present projections as current truth | Supported | analytics, search and inbox waves; CFP-007 | CROSS_DOMAIN_WORKFLOW_PATTERNS.md |
 | FAIL-007 | bulk/mobile/board interactions omit accessible and partial-failure paths | Supported | cross-wave UX; CFP-009 through CFP-011 | proposed UX/accessibility review |
 | FAIL-008 | notification, comment or status is mistaken for assignment, audit or completion | Supported | service/collaboration/inbox waves | CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md |
+| FAIL-009 | discovered/controller state is treated as authoritative or provider acceptance is treated as verified effect | Supported | infrastructure and device/offline continuation studies | PDA-CIR-094, PDA-CIR-095 and PDA-CIR-098; prototype evidence required |

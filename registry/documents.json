@@ -3142,6 +3142,64 @@
       "applicable_dimensions": []
     },
     {
+      "document_id": "PDA-CIR-096",
+      "path": "docs/blueprint/19-Competitive-Research/NAMED_PRODUCT_LINEAGE_AND_COVERAGE_REGISTER.md",
+      "title": "Named Product Lineage and Coverage Register",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null,
+      "document_class": null,
+      "declared_depth": null,
+      "evidence_state": null,
+      "applicable_dimensions": []
+    },
+    {
+      "document_id": "PDA-CIR-097",
+      "path": "docs/blueprint/19-Competitive-Research/DIRECT_DEVICE_AND_OFFLINE_EVIDENCE_MATRIX.md",
+      "title": "Direct Device and Offline Evidence Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014",
+        "ADR-0017"
+      ],
+      "review_evidence": null,
+      "document_class": null,
+      "declared_depth": null,
+      "evidence_state": null,
+      "applicable_dimensions": []
+    },
+    {
+      "document_id": "PDA-CIR-098",
+      "path": "docs/blueprint/19-Competitive-Research/DEVICE_OFFLINE_EVIDENCE_DISPOSITION.md",
+      "title": "Device and Offline Evidence Disposition",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014",
+        "ADR-0017"
+      ],
+      "review_evidence": null,
+      "document_class": null,
+      "declared_depth": null,
+      "evidence_state": null,
+      "applicable_dimensions": []
+    },
+    {
       "document_id": "PDA-COM-001",
       "path": "docs/blueprint/13-Commercial/COMMERCIAL_ARCHITECTURE_OVERVIEW.md",
       "title": "Commercial Architecture Overview",

@@ -29,7 +29,7 @@ The initial program contains the framework, accounting/bookkeeping, ERP administ
 
 ## Limitations and inaccessible evidence
 
-No normalized paid-tier comparison, production tenant, terminal certification, Guyana provider/payroll/legal/tax/fiscal review, enterprise implementation study, statistically valid customer study, accessibility audit of competitor products, source-code architecture inspection, or private support data was available. Sage/Infor/Acumatica depth, several field-service/rental flows, enterprise HR/payroll configuration, pricing/packaging and regional availability are less complete. Documented ITSM/MSP/RMM, IAM/identity-administration, and infrastructure/DCIM/IPAM continuations now exist in PDA-CIR-087 through PDA-CIR-095, but configured/direct observation, protocol/security/operational evaluation, owner/provider decisions and independent review remain open. Dedicated direct device/offline and named-product lineage studies were not completed. Secondary anecdotes were not used as load-bearing evidence.
+No normalized paid-tier comparison, production tenant, terminal certification, Guyana provider/payroll/legal/tax/fiscal review, enterprise implementation study, statistically valid customer study, accessibility audit of competitor products, source-code architecture inspection, or private support data was available. Sage/Infor/Acumatica depth, several field-service/rental flows, enterprise HR/payroll configuration, pricing/packaging and regional availability are less complete. Documented ITSM/MSP/RMM, IAM/identity-administration, and infrastructure/DCIM/IPAM continuations now exist in PDA-CIR-087 through PDA-CIR-095. Requested product-name lineage is reconciled in PDA-CIR-096, and PDA-CIR-097/098 record current device/offline documentation plus explicit direct-observation blocks. Configured-tenant/provider/device observation, protocol/security evaluation, accessibility evidence, customer evidence and independent review remain open. Secondary anecdotes were not used as load-bearing evidence.
 
 ## Governed transfer status
 
@@ -40,7 +40,7 @@ Implementation-findings documents list proposed authority changes; none are sile
 - Independent PDA review and disposition of every proposed governed follow-up.
 - Prototype and implementation evidence tracked in IMPLEMENTATION_EVIDENCE_REGISTER.md.
 - Qualified jurisdiction/provider research at scope admission.
-- CIR-BACK-024 and CIR-BACK-025 for named-product reconciliation and direct device/offline evidence; CIR-BACK-021 through CIR-BACK-023 are transferred but still await independent, direct/configured-observation, owner/provider and implementation evidence.
+- CIR-BACK-021 through CIR-BACK-025 are structurally transferred into durable Draft outputs, but all still await their stated independent and direct/configured-observation, provider, security, accessibility, customer, operational, roadmap or implementation evidence. In particular, direct device/offline observation is explicitly blocked rather than represented as complete behavioral proof.
 - Quarterly volatile-source refresh and contradiction handling.
 - Customer/pilot validation before external differentiation claims.
 
@@ -50,4 +50,4 @@ Initial-wave structural coverage confidence is medium: all planned wave headings
 
 ## Source register
 
-See SOURCE_REGISTRY.md, RESEARCH_LEDGER.md, and PDA-CIR-020 through PDA-CIR-079 for page-level evidence and access limits.
+See SOURCE_REGISTRY.md, RESEARCH_LEDGER.md, and PDA-CIR-020 through PDA-CIR-098 for page-level evidence and access limits.

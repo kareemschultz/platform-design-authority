@@ -19,9 +19,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { outstandingTransferLineId } from "@/lib/inventory-transfers";
 import {
 	isVersionConflict,
 	operationsHref,
@@ -92,6 +93,7 @@ function TransferFilters() {
 				router.push(
 					operationsHref(pathname, searchParams, {
 						cursor: null,
+						cursorTrail: null,
 						locationId: locationId || null,
 						state: state || null,
 					})
@@ -223,6 +225,7 @@ export function TransferCreatePage() {
 	const [variantId, setVariantId] = useState("");
 	const [quantity, setQuantity] = useState("");
 	const [unit, setUnit] = useState("each");
+	const createIntent = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	useWorkspaceWorkGuard(
 		workspaceWorkState(
 			create.isPending,
@@ -253,21 +256,29 @@ export function TransferCreatePage() {
 				className="grid max-w-2xl gap-4"
 				onSubmit={async (event) => {
 					event.preventDefault();
+					const body = {
+						destinationLocationId,
+						lines: [
+							{
+								productId: productId.trim(),
+								quantity: quantity.trim(),
+								unit: unit.trim(),
+								variantId: variantId.trim() || null,
+							},
+						],
+						sourceLocationId,
+					};
+					const intent = stableIntentKey(
+						createIntent.current,
+						JSON.stringify({ body, contextId: workspace.contextId }),
+						() => crypto.randomUUID()
+					);
+					createIntent.current = intent;
 					const result = await create.mutateAsync({
-						body: {
-							destinationLocationId,
-							lines: [
-								{
-									productId: productId.trim(),
-									quantity: quantity.trim(),
-									unit: unit.trim(),
-									variantId: variantId.trim() || null,
-								},
-							],
-							sourceLocationId,
-						},
-						headers: commandHeaders(workspace.contextId),
+						body,
+						headers: commandHeaders(workspace.contextId, intent.key),
 					});
+					createIntent.current = null;
 					toast.success("Transfer draft created");
 					router.push(
 						`/operations/inventory/transfers/${encodeURIComponent(result.id)}`
@@ -419,7 +430,15 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 	const [outcome, setOutcome] = useState<"Accepted" | "Exception">("Accepted");
 	const [exceptionReason, setExceptionReason] = useState("");
 	const [receiveOpen, setReceiveOpen] = useState(false);
-	const receiptIntentKey = useRef<string | null>(null);
+	const receiptIntentKey = useRef<ReturnType<typeof stableIntentKey> | null>(
+		null
+	);
+	const selectedLineId = outstandingTransferLineId(transfer.lines, lineId);
+	useEffect(() => {
+		if (lineId !== selectedLineId) {
+			setLineId(selectedLineId);
+		}
+	}, [lineId, selectedLineId]);
 	useWorkspaceWorkGuard(
 		workspaceWorkState(
 			dispatch.isPending || receive.isPending,
@@ -427,9 +446,7 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 		)
 	);
 	const resetReceiptDraft = () => {
-		setLineId(
-			transfer.lines.find((line) => line.remainingQuantity !== "0")?.id ?? ""
-		);
+		setLineId(outstandingTransferLineId(transfer.lines, ""));
 		setReceivedQuantity("");
 		setOutcome("Accepted");
 		setExceptionReason("");
@@ -509,7 +526,7 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 									className="min-h-10 rounded-xl border bg-background px-3 text-sm"
 									id="receive-line"
 									onChange={(event) => setLineId(event.target.value)}
-									value={lineId}
+									value={selectedLineId}
 								>
 									{transfer.lines
 										.filter((line) => line.remainingQuantity !== "0")
@@ -571,29 +588,38 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 								disabled={
 									receive.isPending ||
 									!workspace.isOnline ||
-									!lineId ||
+									!selectedLineId ||
 									!receivedQuantity.trim() ||
 									(outcome === "Exception" && !exceptionReason.trim())
 								}
 								onClick={async () => {
-									const intentKey = stableIntentKey(
+									const body = {
+										exceptionReason:
+											outcome === "Exception" ? exceptionReason.trim() : null,
+										lines: [
+											{
+												lineId: selectedLineId,
+												receivedQuantity: receivedQuantity.trim(),
+											},
+										],
+										outcome,
+									};
+									const intent = stableIntentKey(
 										receiptIntentKey.current,
+										JSON.stringify({
+											body,
+											contextId: workspace.contextId,
+											transferVersion: transfer.version,
+										}),
 										() => crypto.randomUUID()
 									);
-									receiptIntentKey.current = intentKey;
+									receiptIntentKey.current = intent;
 									await receive.mutateAsync({
-										body: {
-											exceptionReason:
-												outcome === "Exception" ? exceptionReason.trim() : null,
-											lines: [
-												{ lineId, receivedQuantity: receivedQuantity.trim() },
-											],
-											outcome,
-										},
+										body,
 										headers: versionedCommandHeaders(
 											workspace.contextId,
 											transfer.version,
-											intentKey
+											intent.key
 										),
 										params: { id: transfer.id },
 									});

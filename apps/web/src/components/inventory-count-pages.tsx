@@ -22,7 +22,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { isVersionConflict, operationsHref } from "@/lib/operations";
+import {
+	isVersionConflict,
+	operationsHref,
+	stableIntentKey,
+} from "@/lib/operations";
 import { workspaceWorkState } from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
 
@@ -49,9 +53,12 @@ function activeHeaders(contextId: string | null) {
 	return { "x-active-context-id": contextId ?? "" };
 }
 
-function commandHeaders(contextId: string | null) {
+function commandHeaders(
+	contextId: string | null,
+	idempotencyKey = crypto.randomUUID()
+) {
 	return {
-		"idempotency-key": crypto.randomUUID(),
+		"idempotency-key": idempotencyKey,
 		"x-active-context-id": contextId ?? "",
 	};
 }
@@ -92,6 +99,7 @@ function CountFilters() {
 				router.push(
 					operationsHref(pathname, searchParams, {
 						cursor: null,
+						cursorTrail: null,
 						locationId: locationId || null,
 						state: COUNT_STATES.find((item) => item === state) ?? null,
 					})
@@ -211,6 +219,7 @@ export function CountCreatePage() {
 	const [locationId, setLocationId] = useState(
 		workspace.identity?.activeContext?.locationId ?? ""
 	);
+	const createIntent = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	useWorkspaceWorkGuard(
 		workspaceWorkState(
 			create.isPending,
@@ -234,10 +243,18 @@ export function CountCreatePage() {
 				className="grid max-w-xl gap-4"
 				onSubmit={async (event) => {
 					event.preventDefault();
+					const body = { blind: true as const, locationId };
+					const intent = stableIntentKey(
+						createIntent.current,
+						JSON.stringify({ body, contextId: workspace.contextId }),
+						() => crypto.randomUUID()
+					);
+					createIntent.current = intent;
 					const result = await create.mutateAsync({
-						body: { blind: true, locationId },
-						headers: commandHeaders(workspace.contextId),
+						body,
+						headers: commandHeaders(workspace.contextId, intent.key),
 					});
+					createIntent.current = null;
 					toast.success("Blind Count draft created");
 					router.push(
 						`/operations/inventory/counts/${encodeURIComponent(result.id)}`

@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -56,6 +56,7 @@ import {
 	parseCursorTrail,
 	previousCursorState,
 	safeOperationsReturn,
+	stableIntentKey,
 } from "@/lib/operations";
 import { workspaceWorkState } from "@/lib/workspace-change";
 import { client, orpc } from "@/utils/orpc";
@@ -94,6 +95,7 @@ function ImportFilters({ selectedTarget }: { selectedTarget: ImportTarget }) {
 				router.push(
 					operationsHref(pathname, searchParams, {
 						cursor: null,
+						cursorTrail: null,
 						state: parseImportState(state) ?? null,
 						target,
 					})
@@ -258,6 +260,7 @@ export function ImportCreatePage() {
 	const [error, setError] = useState<unknown>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [isDirty, setIsDirty] = useState(false);
+	const createIntent = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	useWorkspaceWorkGuard(workspaceWorkState(isSubmitting, isDirty));
 	const updateManifest = <K extends keyof ImportManifestValues>(
 		key: K,
@@ -302,27 +305,38 @@ export function ImportCreatePage() {
 							);
 							return;
 						}
-						const input = {
-							body: {
-								content: upload.content,
-								contentType: "text/csv" as const,
-								fileName: upload.fileName,
-								manifest: {
-									decimalSeparator: manifest.decimalSeparator,
-									...(manifest.defaultUnit.trim()
-										? { defaultUnit: manifest.defaultUnit.trim() }
-										: {}),
-									delimiter: manifest.delimiter,
-									encoding: "UTF-8" as const,
-									locale: manifest.locale.trim(),
-									newline: manifest.newline,
-									quote: '"' as const,
-									timezone: manifest.timezone.trim(),
-								},
-								sha256: upload.sha256,
+						const body = {
+							content: upload.content,
+							contentType: "text/csv" as const,
+							fileName: upload.fileName,
+							manifest: {
+								decimalSeparator: manifest.decimalSeparator,
+								...(manifest.defaultUnit.trim()
+									? { defaultUnit: manifest.defaultUnit.trim() }
+									: {}),
+								delimiter: manifest.delimiter,
+								encoding: "UTF-8" as const,
+								locale: manifest.locale.trim(),
+								newline: manifest.newline,
+								quote: '"' as const,
+								timezone: manifest.timezone.trim(),
 							},
+							sha256: upload.sha256,
+						};
+						const intent = stableIntentKey(
+							createIntent.current,
+							JSON.stringify({
+								body,
+								contextId: workspace.contextId,
+								target,
+							}),
+							() => crypto.randomUUID()
+						);
+						createIntent.current = intent;
+						const input = {
+							body,
 							headers: {
-								"idempotency-key": crypto.randomUUID(),
+								"idempotency-key": intent.key,
 								"x-active-context-id": workspace.contextId,
 							},
 						};
@@ -330,6 +344,7 @@ export function ImportCreatePage() {
 							target === "product"
 								? await client.catalog.imports.create(input)
 								: await client.inventory.imports.createOpeningStock(input);
+						createIntent.current = null;
 						setFile(null);
 						setIsDirty(false);
 						toast.success(`${importTargetLabel(target)} import uploaded`);

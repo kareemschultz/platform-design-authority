@@ -99,16 +99,23 @@ describe("operations client state", () => {
 		expect(parseCursorTrail('{"not":"a trail"}')).toEqual([]);
 	});
 
-	test("retains one idempotency key across double-submit and uncertain retry", () => {
+	test("retains one idempotency key until success or material intent change", () => {
 		let generated = 0;
 		const create = () => {
 			generated += 1;
 			return `intent-${generated}`;
 		};
-		const first = stableIntentKey(null, create);
-		expect(stableIntentKey(first, create)).toBe(first);
+		const first = stableIntentKey(null, "body-a", create);
+		expect(stableIntentKey(first, "body-a", create)).toBe(first);
 		expect(generated).toBe(1);
-		expect(stableIntentKey(null, create)).toBe("intent-2");
+		expect(stableIntentKey(first, "body-b", create)).toEqual({
+			key: "intent-2",
+			signature: "body-b",
+		});
+		expect(stableIntentKey(null, "body-b", create)).toEqual({
+			key: "intent-3",
+			signature: "body-b",
+		});
 	});
 
 	test("classifies mutation authority and recovery states with a safe reference", () => {

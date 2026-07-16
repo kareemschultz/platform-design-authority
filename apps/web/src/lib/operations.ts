@@ -271,11 +271,25 @@ export function mutationFailurePresentation(
 	);
 }
 
+export interface StableIntentKey {
+	key: string;
+	signature: string;
+}
+
+/**
+ * Retains an idempotency key while the canonical command intent is unchanged.
+ * A caller clears the returned state only after an authoritative success. An
+ * uncertain failure therefore retries the same command with the same key,
+ * while any material input change produces a new key before submission.
+ */
 export function stableIntentKey(
-	current: string | null,
+	current: StableIntentKey | null,
+	signature: string,
 	create: () => string
-): string {
-	return current ?? create();
+): StableIntentKey {
+	return current?.signature === signature
+		? current
+		: { key: create(), signature };
 }
 
 export function isVersionConflict(error: unknown): boolean {

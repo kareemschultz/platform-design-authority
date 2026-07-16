@@ -20,7 +20,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, PackagePlus, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -28,6 +28,7 @@ import {
 	isVersionConflict,
 	operationsHref,
 	safeOperationsReturn,
+	stableIntentKey,
 } from "@/lib/operations";
 import { workspaceWorkState } from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
@@ -75,6 +76,7 @@ function ProductFilters() {
 					operationsHref(pathname, searchParams, {
 						barcode: barcode.trim() || null,
 						cursor: null,
+						cursorTrail: null,
 						query: query.trim() || null,
 						sku: sku.trim() || null,
 						state: productStateFromSearch(state) ?? null,
@@ -251,6 +253,7 @@ function ProductCreateForm() {
 	const router = useRouter();
 	const create = useMutation(orpc.catalog.products.create.mutationOptions());
 	const [isDirty, setIsDirty] = useState(false);
+	const createIntent = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	useWorkspaceWorkGuard(workspaceWorkState(create.isPending, isDirty));
 	const form = useForm({
 		defaultValues: {
@@ -280,16 +283,24 @@ function ProductCreateForm() {
 					value: value.barcode.trim(),
 				});
 			}
+			const body = {
+				name: value.name.trim(),
+				variants: [{ identifiers, name: value.variantName.trim() }],
+			};
+			const intent = stableIntentKey(
+				createIntent.current,
+				JSON.stringify({ body, contextId: workspace.contextId }),
+				() => crypto.randomUUID()
+			);
+			createIntent.current = intent;
 			const result = await create.mutateAsync({
-				body: {
-					name: value.name.trim(),
-					variants: [{ identifiers, name: value.variantName.trim() }],
-				},
+				body,
 				headers: {
-					"idempotency-key": crypto.randomUUID(),
+					"idempotency-key": intent.key,
 					"x-active-context-id": workspace.contextId ?? "",
 				},
 			});
+			createIntent.current = null;
 			toast.success("Product draft created");
 			router.push(`/operations/products/${encodeURIComponent(result.id)}`);
 		},

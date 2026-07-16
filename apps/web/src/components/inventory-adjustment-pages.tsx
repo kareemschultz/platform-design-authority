@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -55,6 +55,7 @@ import {
 	isVersionConflict,
 	operationsHref,
 	safeOperationsReturn,
+	stableIntentKey,
 } from "@/lib/operations";
 import { workspaceWorkState } from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
@@ -225,6 +226,7 @@ function AdjustmentFilters() {
 				router.push(
 					operationsHref(pathname, searchParams, {
 						cursor: null,
+						cursorTrail: null,
 						locationId: locationId || null,
 						state: state || null,
 					})
@@ -399,6 +401,7 @@ function InventoryAdjustmentCreateForm() {
 		)
 	);
 	const [locationTouched, setLocationTouched] = useState(false);
+	const createIntent = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	useWorkspaceWorkGuard(workspaceWorkState(create.isPending, isDirty));
 	const form = useForm({
 		defaultValues: {
@@ -411,21 +414,29 @@ function InventoryAdjustmentCreateForm() {
 			variantId: initialPrefill.variantId,
 		},
 		onSubmit: async ({ value }) => {
+			const body = {
+				conversionSourceId: value.conversionSourceId.trim() || null,
+				locationId: value.locationId,
+				productId: value.productId.trim(),
+				quantity: value.quantity,
+				reason: value.reason.trim(),
+				unit: value.unit.trim(),
+				variantId: value.variantId.trim() || null,
+			};
+			const intent = stableIntentKey(
+				createIntent.current,
+				JSON.stringify({ body, contextId: workspace.contextId }),
+				() => crypto.randomUUID()
+			);
+			createIntent.current = intent;
 			const result = await create.mutateAsync({
-				body: {
-					conversionSourceId: value.conversionSourceId.trim() || null,
-					locationId: value.locationId,
-					productId: value.productId.trim(),
-					quantity: value.quantity,
-					reason: value.reason.trim(),
-					unit: value.unit.trim(),
-					variantId: value.variantId.trim() || null,
-				},
+				body,
 				headers: {
-					"idempotency-key": crypto.randomUUID(),
+					"idempotency-key": intent.key,
 					"x-active-context-id": workspace.contextId ?? "",
 				},
 			});
+			createIntent.current = null;
 			toast.success("Inventory Adjustment submitted for approval");
 			router.push(
 				`/operations/inventory/adjustments/${encodeURIComponent(result.id)}`

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-020
 title: Accounting and Bookkeeping Competitive Capability Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -24,6 +24,7 @@ The comparison set deliberately spans different product categories:
 |---|---|
 | Automation-first bookkeeping | Kick |
 | Small-business cloud accounting | QuickBooks Online, Xero, Wave, FreshBooks, Zoho Books |
+| Desktop accounting and inventory suite | QuickBooks Desktop Enterprise with edition/add-on qualification |
 | Open-source accounting | Akaunting |
 | ERP accounting modules | Odoo Accounting, ERPNext Accounting |
 | Established accounting suites | Sage |
@@ -50,6 +51,7 @@ The remaining products require deeper authenticated workflow review before high-
 | Akaunting | [banking transactions](https://akaunting.com/hc/docs/banking/transactions/) | 2026-07-16 | public documentation/open-source surface; deployment variance |
 | Xero | [reconcile bank transactions](https://www.xero.com/us/accounting-software/reconcile-bank-transactions/) | 2026-07-16 | US public documentation; edition/region vary |
 | QuickBooks Online | [reconcile an account](https://quickbooks.intuit.com/learn-support/en-us/help-article/reconciliation/reconcile-account-quickbooks-online/L5rOz7Kew_US_en_US) | 2026-07-16 | US help; subscription/add-ons vary |
+| QuickBooks Desktop Enterprise | [Advanced Inventory](https://quickbooks.intuit.com/learn-support/en-us/help-article/feature-preferences/set-advanced-inventory/L2IZIdPVM_US_en_US) and [users and roles](https://quickbooks.intuit.com/learn-support/en-ca/help-article/manage-users/create-manage-users-roles-quickbooks-desktop/L9z3XdBcQ_CA_en_CA) | 2026-07-16 | desktop edition and regional help; subscription/add-on, release, migration and configured company-file behavior vary |
 | Wave | [account reconciliation](https://support.waveapps.com/hc/en-us/articles/208621656-How-to-reconcile-your-accounts) | 2026-07-16 | public help; regional availability varies |
 | FreshBooks | [bank reconciliation](https://support.freshbooks.com/hc/en-us/articles/360048900792-How-do-I-use-Bank-Reconciliation) | 2026-07-16 | public help; plan/region vary |
 | Zoho Books | [banking](https://www.zoho.com/books/help/banking/) | 2026-07-16 | public help; edition/region vary |
@@ -292,6 +294,13 @@ Do not automatically implement:
 - Best research value: breadth, accountant familiarity, bank workflows, reporting, tax ecosystem, and small-business operational coverage.
 - Meridian decision: Match table stakes while improving navigation, state clarity, auditability, packaging transparency, and automation explanation.
 - Confidence: Medium pending deeper first-party workflow review.
+
+### QuickBooks Desktop Enterprise
+
+- Best research value: customizable roles and permission visibility, multiple inventory sites, per-site reorder points, transfers, and explicit migration warnings when inventory history can be lost.
+- Meridian decision: adopt visible role scope, permission reporting, location-aware inventory controls, and consequence-first migration warnings.
+- Never copy: a desktop company-file role model as Meridian tenant authorization; optional inventory packaging as proof of ledger, costing, availability, or audit correctness; or migration that discards site history without an immutable manifest, reconciliation, approval, and recovery plan.
+- Confidence: Medium for the cited US/Canada help surfaces and Low for cross-release, geography, add-on and configured behavior. QuickBooks Desktop Enterprise is not treated as QuickBooks Online parity.
 
 ### Remaining Products
 

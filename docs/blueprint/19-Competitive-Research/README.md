@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-001
 title: Competitive Intelligence and Product Research
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -235,7 +235,7 @@ The initial research program was authored through 2026-07-16. All artifacts rema
 | Continuing ITSM/MSP/RMM study | PDA-CIR-087 through PDA-CIR-089 | capability comparison, escalation/remote-action workflow, threat boundary and implementation findings |
 | Continuing IAM/identity-administration study | PDA-CIR-090 through PDA-CIR-092 | terminology/capability comparison, administration/provisioning/recovery controls, and retain/extend/replace findings |
 | Continuing infrastructure/DCIM/IPAM study | PDA-CIR-093 through PDA-CIR-095 | capability/authority matrix, discovery/reconciliation workflow and network-operations findings |
-| Named-product lineage reconciliation | PDA-CIR-096 | requested-name lineage, current locator, grouped wave coverage and bounded disposition |
+| Named-product lineage reconciliation | PDA-CIR-096 | requested-name lineage, current locator, grouped wave coverage, explicit comparator primary-evidence completion and bounded disposition |
 | Device/offline evidence disposition | PDA-CIR-097 through PDA-CIR-098 | documented device/degraded behavior, explicit direct-observation blocks and executable evidence scenarios |
 
 The section contains 98 uniquely identified Markdown documents, including continuation studies and evidence-accounting work after the initial nine-wave set. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md closes only the initial writing set and records access limits, comparator lineage, continuation studies, direct-observation blocks, and external evidence gates.

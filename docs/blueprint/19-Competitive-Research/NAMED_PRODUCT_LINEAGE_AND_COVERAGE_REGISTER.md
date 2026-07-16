@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-096
 title: Named Product Lineage and Coverage Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -68,6 +68,20 @@ No explicitly requested name was rejected as irrelevant. Some products received 
 
 Historical brands are not treated as current evidence when an official successor exists. Company names are not treated as product names when the company publishes separate products. Acquired or renamed products are counted once under the current canonical product while the requested alias remains searchable here.
 
+## Grouped Comparator Primary-Evidence Completion
+
+The catalog reconciliation exposed five names that had only grouped wave treatment or generalized prose without an exact first-party workflow citation. The following completion narrows that evidence gap. It does not supply configured-product, plan, edition, geography, usability, reliability, accessibility, customer, implementation, or independent-review evidence.
+
+| Comparator | First-party evidence at cutoff | Adopt or improve | Reject or constrain |
+|---|---|---|---|
+| Acumatica | official help documents functional-area workspaces and mapped import scenarios with prepare/import and result review | task-shaped entry points; staged, mapped and reviewable imports | a UI workspace as a domain-ownership boundary; direct-table import or silent partial mutation |
+| QuickBooks Desktop Enterprise | official help documents customizable roles and Advanced Inventory with multiple sites, per-site reorder points, transfers and migration-history warnings | visible role scope and permission reporting; location-aware controls; explicit migration consequences | desktop company-file authorization as tenant authority; add-on presence as ledger/costing correctness; history loss without reconciliation and recovery |
+| monday.com | official help documents dependency modes and automatic date movement plus configurable automations | explicit dependency direction, mode, impact preview and bounded automation | silent cross-task date mutation; plan/beta behavior as a core contract |
+| ClickUp | official help documents `blocks`/`blocked by`, dependency automation, permanent clearing and a mobile limitation | directional relationships, cycle checks, warnings and accessible alternatives | domain rules hidden in custom-field automation; irreversible bulk mutation without confirmation and recovery evidence |
+| Rippling | official product pages describe centralized employee data, staged HR workflows, payroll data flow, permissions and approvals | staged onboarding/offboarding and payroll orchestration with provenance | “single source of truth” marketing overriding Party, HR, Payroll, IT, Assets or Authorization ownership; any inferred Guyana payroll support |
+
+Detailed citations and access limits are retained in PDA-CIR-020, PDA-CIR-025, PDA-CIR-050, PDA-CIR-060, PDA-CIR-062 and SRC-075 through SRC-079.
+
 ## Findings and Meridian Implications
 
 - Lineage is a source-integrity requirement: a stable alias-to-current-product record prevents stale links and double counting.
@@ -84,4 +98,4 @@ Revalidate a row when a source redirects, product or edition is renamed/disconti
 
 ## Transfer Record
 
-CIR-BACK-024 may be marked **Transferred** through this register, CIR-LED-0014, RES-012, and SRC-062 through SRC-069. Transfer closes the naming/accounting gap; it does not convert grouped coverage into full product testing or remove each wave's limitations.
+CIR-BACK-024 may be marked **Transferred** through this register, CIR-LED-0014, RES-012, SRC-062 through SRC-069, and SRC-075 through SRC-079. Transfer closes the naming/accounting and explicit primary-citation gaps; it does not convert grouped coverage into full product testing or remove each wave's limitations.

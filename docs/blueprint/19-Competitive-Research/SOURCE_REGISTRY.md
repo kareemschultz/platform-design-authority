@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-006
 title: Competitive Research Source Registry
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -262,8 +262,13 @@ The page-level citations remain in their research documents. These stable record
 | SRC-072 | Toast offline mode and payments | official platform/support documentation | https://doc.toasttab.com/doc/platformguide/platformOfflineMode.html | 2026-07-16 | documented | restaurant topology/configuration dependent; no tenant, devices, processor, KDS/printer network or outage trial |
 | SRC-073 | Dynamics 365 Field Service Mobile offline | official documentation | https://learn.microsoft.com/en-us/dynamics365/field-service/mobile/work-offline | 2026-07-16 | documented | no licensed tenant, offline profile, technician device, sync/failure trial or accessibility test |
 | SRC-074 | Retail Pro Prism application/device guides | official documentation | https://my.retailpro.com/documentation/?bookid=287&chapterid=0&documentid=287&p=4 | 2026-07-16 | documented | current device/version context only; direct offline and failure/reconnect behavior remains insufficiently evidenced |
+| SRC-075 | Acumatica workspaces and import scenarios | official help | https://help.acumatica.com/Wiki/ShowWiki.aspx?PageID=51c2588f-6596-4091-9545-1d6fe1447303&wikiname=HelpRoot_Interface | 2026-07-16 | documented | representative workspace locator; import-scenario mapping is cited at page level in PDA-CIR-025; edition, configured workflow and implementation behavior untested |
+| SRC-076 | QuickBooks Desktop Enterprise roles and Advanced Inventory | official help | https://quickbooks.intuit.com/learn-support/en-us/help-article/feature-preferences/set-advanced-inventory/L2IZIdPVM_US_en_US | 2026-07-16 | documented | US desktop help; role guidance is cited at page level in PDA-CIR-020; subscription, add-on, release, migration and configured company-file behavior vary |
+| SRC-077 | monday.com dependencies and automations | official help | https://support.monday.com/hc/en-us/articles/360007402599-Dependencies-on-monday-com | 2026-07-16 | documented | plan, beta, column, recipe and configuration availability vary; no configured board, mobile workflow or accessibility test |
+| SRC-078 | ClickUp task dependencies and automations | official help | https://help.clickup.com/hc/en-us/articles/6309943321751-Create-Dependency-Relationships-in-tasks | 2026-07-16 | documented | plan and client behavior vary; no configured workspace, mobile workflow, recovery or accessibility test |
+| SRC-079 | Rippling HRIS and payroll | official product documentation | https://www.rippling.com/products/hr/hris | 2026-07-16 | documented/vendor-asserted | product claims only; payroll page is cited at page level in PDA-CIR-062; edition, geography, implementation, Guyana statutory coverage and configured controls untested |
 
-SRC-001 through SRC-074 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in these waves.
+SRC-001 through SRC-079 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in these waves.
 
 ## 12. Review and Maintenance
 

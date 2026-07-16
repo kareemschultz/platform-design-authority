@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-025
 title: ERP Competitive Capability Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -27,7 +27,7 @@ Research cutoff: 2026-07-16. Evidence is officially documented unless marked oth
 | Dynamics 365 | Enterprise cloud applications | Implementation lifecycle guidance, legal-entity context, workflow and Power Platform seams | Licensing, environment, and implementation dependencies are substantial and volatile | Adopt explicit context and lifecycle; reject platform jargon in task UI |
 | NetSuite OneWorld | Multi-subsidiary cloud ERP | Subsidiary-aware master data, intercompany and elimination concepts | OneWorld-only behavior must not be generalized to all NetSuite editions | Adopt legal-entity consequence visibility |
 | SAP S/4HANA / Business One | Enterprise and SMB product families | Role-oriented entry points, approval stages, document audit, inventory authorization | Products are not equivalent; configuration and implementation access are extensive | Adopt role/task entry; reject transaction-code and menu maze imitation |
-| Acumatica | Mid-market cloud ERP | Workspace-oriented modules, workflows, import scenarios, tenant/company administration | Public help coverage and edition packaging require revalidation | Investigate workspace configuration without ownership leakage |
+| Acumatica | Mid-market cloud ERP | Workspace-oriented navigation plus mapped, prepared and reviewed import scenarios | Public help coverage and edition packaging require revalidation; no configured tenant was tested | Adopt task-shaped workspaces and governed staged imports; reject UI workspaces as ownership boundaries or direct-table import contracts |
 | Zoho One | Bundled business-app suite | Broad app discovery and integration across SMB tools | App boundaries can duplicate records and policy; suite packaging is not one data model | Reject bundle-equals-platform reasoning |
 | Sage X3 / Infor CloudSuite | Mid-market and industry ERP | Localization, industry depth, role/security configuration | Detailed documentation can be gated; no direct workflow test | Defer product-specific claims; retain implementation-risk lessons |
 
@@ -63,4 +63,4 @@ Confidence is High for the cited documented workflows, Medium for cross-product 
 - [Dynamics 365 Finance documentation](https://learn.microsoft.com/en-us/dynamics365/finance/) — retrieved 2026-07-16.
 - [NetSuite subsidiary records](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_N272471.html) — retrieved 2026-07-16.
 - [SAP Business One approvals](https://help.sap.com/docs/SAP_BUSINESS_ONE/68a2e87fb29941b5bf959a184d9c6727/077beb5578d80033e10000000a44538d.html) and [authorizations](https://help.sap.com/docs/SAP_BUSINESS_ONE/68a2e87fb29941b5bf959a184d9c6727/45071a5bf61941dee10000000a1553f6.html) — retrieved 2026-07-16.
-
+- [Acumatica workspaces](https://help.acumatica.com/Wiki/ShowWiki.aspx?PageID=51c2588f-6596-4091-9545-1d6fe1447303&wikiname=HelpRoot_Interface) and [import scenarios](https://help.acumatica.com/Wiki/ShowWiki.aspx?PageID=c6a08ccf-7f71-4b69-9508-fbfef5720a53&wikiname=HelpRoot_Integration) — official help, retrieved 2026-07-16; edition and configured behavior untested.

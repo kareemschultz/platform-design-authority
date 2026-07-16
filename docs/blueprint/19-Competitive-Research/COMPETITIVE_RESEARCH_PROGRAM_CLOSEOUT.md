@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-086
 title: Initial Competitive Research Program Closeout
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -29,7 +29,7 @@ The initial program contains the framework, accounting/bookkeeping, ERP administ
 
 ## Limitations and inaccessible evidence
 
-No normalized paid-tier comparison, production tenant, terminal certification, Guyana provider/payroll/legal/tax/fiscal review, enterprise implementation study, statistically valid customer study, accessibility audit of competitor products, source-code architecture inspection, or private support data was available. Sage/Infor/Acumatica depth, several field-service/rental flows, enterprise HR/payroll configuration, pricing/packaging and regional availability are less complete. Documented ITSM/MSP/RMM, IAM/identity-administration, and infrastructure/DCIM/IPAM continuations now exist in PDA-CIR-087 through PDA-CIR-095. Requested product-name lineage is reconciled in PDA-CIR-096, and PDA-CIR-097/098 record current device/offline documentation plus explicit direct-observation blocks. Configured-tenant/provider/device observation, protocol/security evaluation, accessibility evidence, customer evidence and independent review remain open. Secondary anecdotes were not used as load-bearing evidence.
+No normalized paid-tier comparison, production tenant, terminal certification, Guyana provider/payroll/legal/tax/fiscal review, enterprise implementation study, statistically valid customer study, accessibility audit of competitor products, source-code architecture inspection, or private support data was available. Sage/Infor depth, several field-service/rental flows, enterprise HR/payroll configuration, pricing/packaging and regional availability are less complete. Documented ITSM/MSP/RMM, IAM/identity-administration, and infrastructure/DCIM/IPAM continuations now exist in PDA-CIR-087 through PDA-CIR-095. Requested product-name lineage is reconciled in PDA-CIR-096; its 0.2.0 completion adds explicit first-party workflow evidence for Acumatica, QuickBooks Desktop Enterprise, monday.com, ClickUp and Rippling through SRC-075 through SRC-079. PDA-CIR-097/098 record current device/offline documentation plus explicit direct-observation blocks. Configured-tenant/provider/device observation, edition and geography parity, protocol/security evaluation, accessibility evidence, customer evidence and independent review remain open. Secondary anecdotes were not used as load-bearing evidence.
 
 ## Governed transfer status
 

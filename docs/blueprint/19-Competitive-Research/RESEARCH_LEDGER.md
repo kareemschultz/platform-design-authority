@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-007
 title: Competitive Research Ledger
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -308,11 +308,11 @@ Confidence is not approval. A high-confidence observation may still be unsuitabl
 - Researcher: Codex with Competitive Research Lead and independent review pending
 - Wave: Continuing study — named-product lineage and coverage accounting
 - Question: Which explicitly requested comparators are current, renamed, acquired, historical, grouped under a product family, or only partially covered by the completed waves?
-- Products: Peachtree/Sage 50, Vend/Lightspeed Retail POS (X-Series), Retail Pro Prism, Invoice Ninja v5, Horilla HR, Open HRMS, OpenProject 17.x, Freshworks/Freshservice/Freshdesk/Freshsales, and the complete requested catalog grouped by wave
-- Sources: SRC-062 through SRC-069; page-level first-party citations in PDA-CIR-096; prior wave source records for already studied products
+- Products: Peachtree/Sage 50, Vend/Lightspeed Retail POS (X-Series), Retail Pro Prism, Invoice Ninja v5, Horilla HR, Open HRMS, OpenProject 17.x, Freshworks/Freshservice/Freshdesk/Freshsales, Acumatica, QuickBooks Desktop Enterprise, monday.com, ClickUp, Rippling, and the complete requested catalog grouped by wave
+- Sources: SRC-062 through SRC-069; SRC-075 through SRC-079; page-level first-party citations in PDA-CIR-020, PDA-CIR-025, PDA-CIR-050, PDA-CIR-060, PDA-CIR-062 and PDA-CIR-096; prior wave source records for already studied products
 - Evidence mode: current first-party product, help, documentation, release, lineage and public-source evidence; cross-wave accounting
 - Access limitations: no paid/configured tenant, normalized edition/geography comparison, acquisition/legal analysis, historical product installation, accessibility test, or full workflow parity test
-- Finding: historical aliases must resolve to the current product without double counting; company/family names must resolve to separate product contexts; “studied” means bounded wave evidence, not exhaustive testing.
+- Finding: historical aliases must resolve to the current product without double counting; company/family names must resolve to separate product contexts; every named comparator used for a load-bearing workflow observation needs exact first-party page evidence; “studied” means bounded wave evidence, not exhaustive testing.
 - Contradictions: vendor families use overlapping names and series while detailed capabilities vary by edition, geography and acquisition lineage; wave-level synthesis is useful but cannot support product-wide parity claims.
 - Confidence: High for explicitly documented Peachtree/Sage 50 and Vend/Lightspeed lineage; Medium for family canonicalization and coverage accounting; Low for unconfigured detailed behavior
 - Meridian impact:
@@ -360,7 +360,7 @@ This index is the machine-checked registration boundary between backlog question
 | RES-009 | ITSM/MSP/RMM | Transferred | CIR-LED-0011 | CIR-BACK-021 | PDA-CIR-087 through PDA-CIR-089 | SRC-041 through SRC-048 | Independent review, direct tenant/agent observation, provider evaluation and roadmap admission pending |
 | RES-010 | IAM/identity administration | Transferred | CIR-LED-0012 | CIR-BACK-022 | PDA-CIR-090 through PDA-CIR-092 | SRC-049 through SRC-056 | Independent review, configured-provider observation, protocol/security evaluation and roadmap admission pending |
 | RES-011 | Infrastructure/DCIM/IPAM | Transferred | CIR-LED-0013 | CIR-BACK-023 | PDA-CIR-093 through PDA-CIR-095 | SRC-057 through SRC-061 | Independent review, direct discovery/controller observation, owner/provider decision and operational/security evaluation pending |
-| RES-012 | Named-product lineage | Transferred | CIR-LED-0014 | CIR-BACK-024 | PDA-CIR-096 | SRC-062 through SRC-069 | Independent catalog review and product/edition-specific revalidation pending |
+| RES-012 | Named-product lineage | Transferred | CIR-LED-0014 | CIR-BACK-024 | PDA-CIR-096 | SRC-062 through SRC-069; SRC-075 through SRC-079 | Independent catalog review and product/edition-specific revalidation pending |
 | RES-013 | Device/offline evidence | Transferred | CIR-LED-0015 | CIR-BACK-025 | PDA-CIR-097 through PDA-CIR-098 | SRC-070 through SRC-074 | Direct observation explicitly blocked; implementation, accessibility, provider and operational evidence pending |
 
 ## 6.2 Registration Invariants

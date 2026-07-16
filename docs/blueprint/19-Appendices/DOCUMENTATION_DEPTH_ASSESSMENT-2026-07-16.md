@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.13.0
+version: 0.14.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -19,7 +19,7 @@ Replace the superseded binary “complete blueprint coverage” assessment with 
 Evidence includes:
 
 - independent audit PDA-REV-013 and disposition PDA-REV-014;
-- audited research head `c9faa31bf97414ecf308ae59bc18c8e4a6ea44ec` and live research reconciliation through `85dcb87`;
+- audited research head `c9faa31bf97414ecf308ae59bc18c8e4a6ea44ec` and live research reconciliation through `85dcb87` plus the requested-comparator primary-evidence completion;
 - `main` at `7202fc819b70982c013e1ca11a4fcc136e01e2de` through merged WS2 PR4;
 - PR #74 exact implementation head `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26`, independently concurred and green before merge;
 - current registries, OpenAPI, schemas, first-slice evidence, plans, and GitHub project state queried 2026-07-16.
@@ -50,7 +50,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 | Deployment and operations | Architecture and requirements catalogues exist; four prototype service groups have machine-registered draft procedures, and merged PR #74 adds the bounded Event Backbone worker and PDA-OPS-018 runbook | Independent procedure review, production Event Backbone capacity/SLO and multi-replica evidence, live dashboards, tested alerts, on-call escalation, backup/restore, incident, migration, rollback, and recovery exercises |
 | Commercial and marketplace | Ownership/boundaries architecture-specified; paid runtime disabled | Founder decisions, legal entity, pricing, contracts, provider, tax, custody/payout gates |
 | AI and automation | Architecture-specified with governed record schemas and research findings | Provider selection, evaluation datasets/graders, abuse/security evidence, deterministic fallback proof by workflow |
-| Competitive research | Initial nine-wave writing set plus ITSM/MSP/RMM, IAM, infrastructure/DCIM/IPAM, named-product lineage, and device/offline continuations are In Review with exact source/ledger/result/backlog reconciliation; CIR-BACK-021 through CIR-BACK-025 are transferred | direct tenant/agent/provider/scanner/controller/device observation, owner/provider decisions, protocol/security/accessibility/operational trials, customer evidence, volatile-source refresh, and independent review |
+| Competitive research | Initial nine-wave writing set plus ITSM/MSP/RMM, IAM, infrastructure/DCIM/IPAM, named-product lineage, explicit primary evidence for Acumatica, QuickBooks Desktop Enterprise, monday.com, ClickUp and Rippling, and device/offline continuations are In Review with exact source/ledger/result/backlog reconciliation through SRC-079; CIR-BACK-021 through CIR-BACK-025 are transferred | direct tenant/agent/provider/scanner/controller/device observation, owner/provider decisions, edition/geography parity, protocol/security/accessibility/operational trials, customer evidence, volatile-source refresh, and independent review |
 | Product and developer documentation | Nine evidence-bound MDX guides have stable IDs, release/implementation metadata, link validation, and a governed manifest; the API page preserves an implemented-runtime view and a generated 100-operation canonical Draft contract table | Full task/admin/migration/troubleshooting depth, later-workstream release evidence, editorial/accessibility review |
 | Testing and evidence | Thirteen-dimension matrix supports planned, partial, evidenced, not-applicable, and depth-deferred states; 223 cells have evidence | Complete remaining WS2 cells, WS3–WS7 sources, scale/security/accessibility/operations results, external evidence |
 | Roadmap and program control | Workstreams and project exist; current status is non-authoritative | Continuous evidence-cutoff updates, generated status feasibility, founder/customer sequencing decisions |

@@ -467,6 +467,37 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 		);
 	});
 
+	test("stores and finds numeric tenant SKUs without removing separators", async () => {
+		const catalog = service();
+		const tenantId = "tenant_catalog_separator_sku";
+		const created = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "Separator SKU Product",
+				variants: [
+					{
+						identifiers: [{ scheme: "Tenant", type: "SKU", value: "12-34" }],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_separator_sku",
+			tenantId,
+		});
+		const stored = await testPool.query<{ normalized_value: string }>(
+			"SELECT normalized_value FROM catalog_identifier WHERE tenant_id = $1 AND type = 'SKU'",
+			[tenantId]
+		);
+
+		expect(stored.rows).toEqual([{ normalized_value: "12-34" }]);
+		expect(
+			await catalog.listProducts(tenantId, { limit: 50, sku: " 12-34 " })
+		).toHaveProperty("items.0.id", created.id);
+		expect(
+			await catalog.listProducts(tenantId, { limit: 50, sku: "1234" })
+		).toEqual({ items: [], nextCursor: null });
+	});
+
 	test("rolls Product, receipt, and outbox state back together on append failure", async () => {
 		const before = await testPool.query<{ count: string }>(
 			"SELECT count(*)::text AS count FROM catalog_product"

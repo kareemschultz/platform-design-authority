@@ -385,6 +385,35 @@ describe("Catalog service", () => {
 		).toHaveProperty("items.0.state", "Active");
 	});
 
+	test("preserves separators when normalizing exact tenant SKU lookups", async () => {
+		const harness = createMemoryHarness();
+		const created = await harness.service.createProduct({
+			...createInput,
+			body: {
+				...createInput.body,
+				variants: [
+					{
+						identifiers: [{ scheme: "Tenant", type: "SKU", value: "12-34" }],
+						name: "Numeric SKU",
+					},
+				],
+			},
+		});
+
+		expect(
+			await harness.service.listProducts(createInput.tenantId, {
+				limit: 50,
+				sku: " 12-34 ",
+			})
+		).toHaveProperty("items.0.id", created.id);
+		expect(
+			await harness.service.listProducts(createInput.tenantId, {
+				limit: 50,
+				sku: "1234",
+			})
+		).toEqual({ items: [], nextCursor: null });
+	});
+
 	test("preserves Variant and Identifier identity on a name-only update", async () => {
 		const harness = createMemoryHarness();
 		const created = await harness.service.createProduct(createInput);
@@ -542,5 +571,55 @@ describe("Catalog service", () => {
 			"entitlement:catalog.identifiers",
 			"entitlement:catalog.barcodes",
 		]);
+	});
+
+	test("preserves tenant SKU separators through the application list boundary", async () => {
+		const harness = createMemoryHarness();
+		const application = createCatalogApplication({
+			activeContexts: {
+				requireActiveContext: () =>
+					resolved({
+						organizationId: createInput.organizationId,
+						tenantId: createInput.tenantId,
+					}),
+			},
+			entitlements: { requireEntitlement: () => resolved(undefined) },
+			permissions: { requirePermission: () => resolved(undefined) },
+			service: harness.service,
+		});
+		const created = await application.create({
+			actorUserId: createInput.actorUserId,
+			body: {
+				...createInput.body,
+				variants: [
+					{
+						identifiers: [{ scheme: "Tenant", type: "SKU", value: "12-34" }],
+						name: "Numeric SKU",
+					},
+				],
+			},
+			contextId: "context_catalog_sku",
+			correlationId: createInput.correlationId,
+			idempotencyKey: "idempotency_catalog_application_sku",
+			sessionId: "session_catalog_sku",
+		});
+		const request = {
+			authUserId: createInput.actorUserId,
+			contextId: "context_catalog_sku",
+			sessionId: "session_catalog_sku",
+		};
+
+		expect(
+			await application.list({
+				...request,
+				page: { limit: 50, sku: " 12-34 " },
+			})
+		).toHaveProperty("items.0.id", created.id);
+		expect(
+			await application.list({
+				...request,
+				page: { limit: 50, sku: "1234" },
+			})
+		).toEqual({ items: [], nextCursor: null });
 	});
 });

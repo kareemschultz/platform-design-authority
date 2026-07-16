@@ -6,6 +6,7 @@ import {
 import {
 	createInventoryRepository,
 	migrateInventory,
+	serializeInventoryStockBalanceCursor,
 } from "@meridian/persistence-inventory-postgres";
 import {
 	createPostgresOutbox,
@@ -86,7 +87,11 @@ afterAll(async () => {
 
 describe.serial("Inventory PostgreSQL controlled prototype", () => {
 	test("wraps owner cursors in a versioned opaque transport token", () => {
-		const raw = "product_a\u001flocation_a\u001feach";
+		const raw = serializeInventoryStockBalanceCursor({
+			itemKey: "product_a",
+			locationId: "location_a",
+			unit: "case\u001feach",
+		});
 		const encoded = encodeStockBalanceCursor(raw);
 		expect(encoded).toStartWith("sb1_");
 		expect(encoded).not.toContain("product_a");
@@ -235,6 +240,56 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			balances.items.find((entry) => entry.locationId === "concurrent_location")
 				?.onHand
 		).toBe("3.000003");
+	});
+
+	test("paginates balances whose contract-valid unit contains the former delimiter", async () => {
+		const inventory = service();
+		const tenantId = "tenant_inventory_structural_cursor";
+		const delimiterUnit = "case\u001feach";
+		for (const [index, productId] of [
+			"cursor_product_a",
+			"cursor_product_z",
+		].entries()) {
+			// biome-ignore lint/performance/noAwaitInLoops: committed commands create deterministic cursor boundaries.
+			const adjustment = await inventory.createAdjustment({
+				...base,
+				body: {
+					locationId: "cursor_location",
+					productId,
+					quantity: "1",
+					reason: "structural cursor proof",
+					unit: index === 0 ? delimiterUnit : "each",
+				},
+				idempotencyKey: `cursor-adjustment-create-${index}`,
+				tenantId,
+			});
+			await inventory.approveAdjustment({
+				actorUserId: "cursor_approver",
+				adjustmentId: adjustment.id,
+				correlationId: base.correlationId,
+				idempotencyKey: `cursor-adjustment-approve-${index}`,
+				tenantId,
+				version: 1,
+			});
+		}
+
+		const firstPage = await inventory.listBalances({
+			page: { limit: 1 },
+			tenantId,
+		});
+		expect(firstPage.items).toHaveLength(1);
+		expect(firstPage.items[0]?.unit).toBe(delimiterUnit);
+		expect(firstPage.nextCursor).toContain('"version":1');
+		const secondPage = await inventory.listBalances({
+			page: { cursor: firstPage.nextCursor ?? undefined, limit: 1 },
+			tenantId,
+		});
+		expect(secondPage.items).toHaveLength(1);
+		expect(secondPage.items[0]).toMatchObject({
+			productId: "cursor_product_z",
+			unit: "each",
+		});
+		expect(secondPage.nextCursor).toBeNull();
 	});
 
 	test("serializes duplicate command identities before creating owner facts", async () => {

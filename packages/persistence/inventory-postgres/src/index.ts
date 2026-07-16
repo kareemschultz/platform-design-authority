@@ -40,6 +40,52 @@ import {
 export type InventoryPostgresConnection = Pool | PoolClient;
 export const INVENTORY_MIGRATION_TABLE = "inventory_migrations";
 
+export interface InventoryStockBalanceCursor {
+	itemKey: string;
+	locationId: string;
+	unit: string;
+	version: 1;
+}
+
+export function serializeInventoryStockBalanceCursor(
+	cursor: Omit<InventoryStockBalanceCursor, "version">
+): string {
+	return JSON.stringify({ version: 1, ...cursor });
+}
+
+export function parseInventoryStockBalanceCursor(
+	cursor: string
+): InventoryStockBalanceCursor | null {
+	try {
+		const value: unknown = JSON.parse(cursor);
+		if (
+			typeof value !== "object" ||
+			value === null ||
+			!("version" in value) ||
+			value.version !== 1 ||
+			!("itemKey" in value) ||
+			typeof value.itemKey !== "string" ||
+			value.itemKey.length === 0 ||
+			!("locationId" in value) ||
+			typeof value.locationId !== "string" ||
+			value.locationId.length === 0 ||
+			!("unit" in value) ||
+			typeof value.unit !== "string" ||
+			value.unit.length === 0
+		) {
+			return null;
+		}
+		return {
+			itemKey: value.itemKey,
+			locationId: value.locationId,
+			unit: value.unit,
+			version: 1,
+		};
+	} catch {
+		return null;
+	}
+}
+
 export function createInventoryReconciliationAdapter(
 	connection: InventoryPostgresConnection
 ) {
@@ -629,19 +675,23 @@ export function createInventoryRepository(
 			page: InventoryPageRequest,
 			filters?: InventoryBalanceFilters
 		): Promise<InventoryPage<InventoryBalanceRecord>> {
-			const [cursorItemKey, cursorLocationId, cursorUnit] =
-				page.cursor?.split("\u001f") ?? [];
-			const afterCursor = cursorItemKey
+			const cursor = page.cursor
+				? parseInventoryStockBalanceCursor(page.cursor)
+				: null;
+			if (page.cursor && !cursor) {
+				throw new Error("Inventory stock balance cursor is invalid");
+			}
+			const afterCursor = cursor
 				? or(
-						gt(inventoryStockBalances.itemKey, cursorItemKey),
+						gt(inventoryStockBalances.itemKey, cursor.itemKey),
 						and(
-							eq(inventoryStockBalances.itemKey, cursorItemKey),
-							gt(inventoryStockBalances.locationId, cursorLocationId ?? "")
+							eq(inventoryStockBalances.itemKey, cursor.itemKey),
+							gt(inventoryStockBalances.locationId, cursor.locationId)
 						),
 						and(
-							eq(inventoryStockBalances.itemKey, cursorItemKey),
-							eq(inventoryStockBalances.locationId, cursorLocationId ?? ""),
-							gt(inventoryStockBalances.unit, cursorUnit ?? "")
+							eq(inventoryStockBalances.itemKey, cursor.itemKey),
+							eq(inventoryStockBalances.locationId, cursor.locationId),
+							gt(inventoryStockBalances.unit, cursor.unit)
 						)
 					)
 				: undefined;
@@ -666,15 +716,17 @@ export function createInventoryRepository(
 					asc(inventoryStockBalances.unit)
 				)
 				.limit(page.limit + 1);
+			const pageRows = rows.slice(0, page.limit);
+			const boundary = pageRows.at(-1);
 			return {
-				items: rows.slice(0, page.limit).map(mapBalance),
+				items: pageRows.map(mapBalance),
 				nextCursor:
-					rows.length > page.limit
-						? [
-								rows[page.limit - 1]?.itemKey,
-								rows[page.limit - 1]?.locationId,
-								rows[page.limit - 1]?.unit,
-							].join("\u001f")
+					rows.length > page.limit && boundary
+						? serializeInventoryStockBalanceCursor({
+								itemKey: boundary.itemKey,
+								locationId: boundary.locationId,
+								unit: boundary.unit,
+							})
 						: null,
 			};
 		},

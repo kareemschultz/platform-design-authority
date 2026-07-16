@@ -1085,7 +1085,7 @@ export function createCatalogService(options: CatalogServiceOptions) {
 				const result = await repository.listProducts(tenantId, {
 					...page,
 					...(page.barcode ? { barcode: normalizeLookup(page.barcode) } : {}),
-					...(page.sku ? { sku: normalizeLookup(page.sku) } : {}),
+					...(page.sku ? { sku: normalizeTenantIdentifier(page.sku) } : {}),
 				});
 				return { ...result, items: result.items.map(productView) };
 			});

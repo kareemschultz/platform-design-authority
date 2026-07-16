@@ -6,7 +6,11 @@ import {
 	InventoryError,
 	type InventoryIdFactory,
 } from "@meridian/domain-inventory";
-import { createInventoryRepository } from "@meridian/persistence-inventory-postgres";
+import {
+	createInventoryRepository,
+	parseInventoryStockBalanceCursor,
+	serializeInventoryStockBalanceCursor,
+} from "@meridian/persistence-inventory-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import { createTenancyRepository } from "@meridian/persistence-platform-tenancy-postgres";
 
@@ -28,10 +32,20 @@ const STOCK_BALANCE_CURSOR_PATTERN = /^sb1_[A-Za-z0-9_-]+$/;
 
 export const encodeStockBalanceCursor = (
 	cursor: string | null
-): string | null =>
-	cursor === null
-		? null
-		: `${STOCK_BALANCE_CURSOR_PREFIX}${Buffer.from(cursor, "utf8").toString("base64url")}`;
+): string | null => {
+	if (cursor === null) {
+		return null;
+	}
+	const value = parseInventoryStockBalanceCursor(cursor);
+	if (!value) {
+		throw new InventoryError(
+			"invalid_reference",
+			"Stock balance cursor is invalid"
+		);
+	}
+	const canonical = serializeInventoryStockBalanceCursor(value);
+	return `${STOCK_BALANCE_CURSOR_PREFIX}${Buffer.from(canonical, "utf8").toString("base64url")}`;
+};
 
 export const decodeStockBalanceCursor = (
 	cursor: string | undefined
@@ -47,17 +61,17 @@ export const decodeStockBalanceCursor = (
 	}
 	const encoded = cursor.slice(STOCK_BALANCE_CURSOR_PREFIX.length);
 	const decoded = Buffer.from(encoded, "base64url").toString("utf8");
+	const value = parseInventoryStockBalanceCursor(decoded);
 	if (
 		Buffer.from(decoded, "utf8").toString("base64url") !== encoded ||
-		decoded.split("\u001f").length !== 3 ||
-		decoded.split("\u001f").some((part) => part.length === 0)
+		!value
 	) {
 		throw new InventoryError(
 			"invalid_reference",
 			"Stock balance cursor is invalid"
 		);
 	}
-	return decoded;
+	return serializeInventoryStockBalanceCursor(value);
 };
 
 const unitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({

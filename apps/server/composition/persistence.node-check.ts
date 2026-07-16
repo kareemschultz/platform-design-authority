@@ -264,6 +264,8 @@ try {
 		tenantId: "tenant_catalog_node",
 	});
 	assert.equal(product.state, "Draft");
+	assert.equal(product.createdAt, "2026-07-14T12:00:00.000Z");
+	assert.equal(product.updatedAt, "2026-07-14T12:00:00.000Z");
 	assert.equal(
 		(await catalog.getProduct("tenant_catalog_node", product.id)).name,
 		"Node Catalog Product"
@@ -319,6 +321,9 @@ try {
 		version: 1,
 	});
 	assert.equal(posted.state, "Posted");
+	assert.equal(posted.createdByUserId, "user_inventory_node_creator");
+	assert.equal(posted.approvedByUserId, "user_inventory_node_approver");
+	assert.equal(posted.postedAt, "2026-07-15T12:00:00.000Z");
 	assert.equal(
 		(
 			await inventory.listBalances({
@@ -335,6 +340,35 @@ try {
 			error !== null &&
 			"code" in error &&
 			error.code === "not_found"
+	);
+	const count = await inventory.createCount({
+		actorUserId: "user_inventory_node_counter",
+		body: { blind: true, locationId: "location_inventory_node" },
+		idempotencyKey: "idempotency_inventory_node_count_create",
+		organizationId: "organization_catalog_node",
+		tenantId: "tenant_catalog_node",
+	});
+	const savedDraft = await inventory.saveCountDraft({
+		actorUserId: "user_inventory_node_counter",
+		body: {
+			lines: [
+				{
+					observedQuantity: "3.000001",
+					productId: product.id,
+					unit: "each",
+				},
+			],
+		},
+		countId: count.id,
+		idempotencyKey: "idempotency_inventory_node_count_draft",
+		tenantId: "tenant_catalog_node",
+		version: 1,
+	});
+	assert.equal(savedDraft.state, "InProgress");
+	assert.equal(savedDraft.version, 2);
+	assert.deepEqual(
+		(await inventory.getCount("tenant_catalog_node", count.id)).lines,
+		savedDraft.lines
 	);
 } finally {
 	await pool.end();

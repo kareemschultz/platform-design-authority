@@ -91,7 +91,7 @@ function context(input?: {
 			listParties: async () => ({ items: [], nextCursor: null }),
 			listProducts: async () => ({ items: [], nextCursor: null }),
 			listRoles: async () => ({ items: [], nextCursor: null }),
-			listStockBalances: async () => [],
+			listStockBalances: async () => ({ items: [], nextCursor: null }),
 			listStockCounts: async () => ({ items: [], nextCursor: null }),
 			listStockTransfers: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
@@ -99,6 +99,7 @@ function context(input?: {
 			receiveStockTransfer: () => Promise.reject(new Error("not used")),
 			reverseInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			revokeCurrentUserSession: () => Promise.resolve(),
+			saveStockCountDraft: () => Promise.reject(new Error("not used")),
 			setActiveContext: async ({ authUserId, body }) => ({
 				authUserId,
 				contextId: "context_unit_test_0001",
@@ -299,9 +300,13 @@ describe("appRouter contract surface", () => {
 						createProduct(input) {
 							received = input;
 							return Promise.resolve({
+								archivedAt: null,
+								archiveReason: null,
+								createdAt: "2026-07-13T12:00:00.000Z",
 								id: "product_unit_test_0001",
 								name: input.body.name,
 								state: "Draft",
+								updatedAt: "2026-07-13T12:00:00.000Z",
 								variants: [
 									{
 										id: "variant_unit_test_0001",
@@ -408,10 +413,15 @@ describe("appRouter contract surface", () => {
 							received = input;
 							return Promise.resolve({
 								...input.body,
+								approvedByUserId: null,
+								createdAt: "2026-07-13T12:00:00.000Z",
+								createdByUserId: input.actorUserId,
 								id: "adjustment_unit_0001",
 								movementId: null,
+								postedAt: null,
 								reversalMovementId: null,
 								state: "PendingApproval",
+								updatedAt: "2026-07-13T12:00:00.000Z",
 								version: 1,
 							});
 						},
@@ -434,6 +444,128 @@ describe("appRouter contract surface", () => {
 			contextId: "context_unit_test_0001",
 			idempotencyKey: "idempotency-inventory-unit-0001",
 			sessionId: "session_unit_test_0001",
+		});
+	});
+
+	test("returns paged stock balances without exposing repository cursors", async () => {
+		let received:
+			| Parameters<Context["application"]["listStockBalances"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.inventory.balances.list,
+			{
+				headers: { "x-active-context-id": "context_unit_test_0001" },
+				query: {
+					cursor: "sb1_b3BhcXVlLWN1cnNvcg",
+					limit: 25,
+					locationId: "location_unit_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						listStockBalances(input) {
+							received = input;
+							return Promise.resolve({
+								items: [
+									{
+										asOf: "2026-07-16T12:00:00.000Z",
+										available: "8",
+										locationId: "location_unit_0001",
+										onHand: "10",
+										productId: "product_unit_0001",
+										reconciled: true,
+										reconciliationState: "Current",
+										reserved: "2",
+										source: "InventoryLedgerProjection",
+										unit: "EA",
+									},
+								],
+								nextCursor: "sb1_bmV4dC1jdXJzb3I",
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			items: [{ reconciled: true, source: "InventoryLedgerProjection" }],
+			nextCursor: "sb1_bmV4dC1jdXJzb3I",
+		});
+		expect(permission).toBe("inventory.balance.read");
+		expect(received?.query).toEqual({
+			cursor: "sb1_b3BhcXVlLWN1cnNvcg",
+			limit: 25,
+			locationId: "location_unit_0001",
+		});
+	});
+
+	test("dispatches versioned draft count lines through count-create authority", async () => {
+		let received:
+			| Parameters<Context["application"]["saveStockCountDraft"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.inventory.counts.saveDraft,
+			{
+				body: {
+					lines: [
+						{
+							observedQuantity: "4.500001",
+							productId: "product_unit_0001",
+							unit: "EA",
+						},
+					],
+				},
+				headers: {
+					"idempotency-key": "count-draft-save-unit-0001",
+					"if-match": "3",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { id: "count_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						saveStockCountDraft(input) {
+							received = input;
+							return Promise.resolve({
+								approvedByUserId: null,
+								blind: true,
+								createdAt: "2026-07-16T12:00:00.000Z",
+								createdByUserId: input.actorUserId,
+								id: input.countId,
+								lines: [],
+								locationId: "location_unit_0001",
+								postedAt: null,
+								state: "InProgress",
+								submittedByUserId: null,
+								updatedAt: "2026-07-16T12:05:00.000Z",
+								version: input.version + 1,
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ state: "InProgress", version: 4 });
+		expect(permission).toBe("inventory.count.create");
+		expect(received).toMatchObject({
+			actorUserId: "user_unit_test_000001",
+			countId: "count_unit_test_0001",
+			idempotencyKey: "count-draft-save-unit-0001",
+			version: 3,
 		});
 	});
 

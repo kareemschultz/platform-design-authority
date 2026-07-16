@@ -62,6 +62,7 @@
     {"method":"GET","path":"/v1/stock-counts","permission":"inventory.count.read"},
     {"method":"GET","path":"/v1/stock-counts/{id}","permission":"inventory.count.read"},
     {"method":"POST","path":"/v1/stock-counts","permission":"inventory.count.create"},
+    {"method":"PUT","path":"/v1/stock-counts/{id}/draft-lines","permission":"inventory.count.create"},
     {"method":"POST","path":"/v1/stock-counts/{id}/submit","permission":"inventory.count.submit"},
     {"method":"POST","path":"/v1/stock-counts/{id}/approve","permission":"inventory.count.approve"},
     {"method":"GET","path":"/v1/stock-transfers","permission":"inventory.transfer.read"},

@@ -32,6 +32,7 @@ import type {
 	ReceiveStockTransfer,
 	Role,
 	RoleAssignment,
+	SaveStockCountDraftLines,
 	SessionSummary,
 	StockBalance,
 	StockCount,
@@ -305,6 +306,8 @@ export interface CatalogApplication {
 			cursor?: string;
 			limit: number;
 			query?: string;
+			sku?: string;
+			state?: Product["state"];
 		};
 		sessionId: string;
 	}) => Promise<Page<Product>>;
@@ -403,9 +406,14 @@ export interface InventoryApplication {
 	listStockBalances: (input: {
 		authUserId: string;
 		contextId: string;
-		query: { locationId: string; productId?: string };
+		query: {
+			cursor?: string;
+			limit: number;
+			locationId: string;
+			productId?: string;
+		};
 		sessionId: string;
-	}) => Promise<StockBalance[]>;
+	}) => Promise<Page<StockBalance>>;
 	listStockCounts: (input: {
 		authUserId: string;
 		contextId: string;
@@ -448,6 +456,15 @@ export interface InventoryApplication {
 		sessionId: string;
 		version: number;
 	}) => Promise<InventoryAdjustment>;
+	saveStockCountDraft: (input: {
+		actorUserId: string;
+		body: SaveStockCountDraftLines;
+		contextId: string;
+		countId: string;
+		idempotencyKey: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<StockCount>;
 	submitStockCount: (input: {
 		actorUserId: string;
 		body: SubmitStockCount;

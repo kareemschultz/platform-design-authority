@@ -688,6 +688,12 @@ export const ENDPOINTS = [
 		permission: "inventory.count.approve",
 	},
 	{
+		method: "PUT",
+		operationId: "saveStockCountDraftLines",
+		path: "/v1/stock-counts/{id}/draft-lines",
+		permission: "inventory.count.create",
+	},
+	{
 		method: "POST",
 		operationId: "postStockCountsByIdSubmit",
 		path: "/v1/stock-counts/{id}/submit",

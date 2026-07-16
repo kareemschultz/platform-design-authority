@@ -220,6 +220,12 @@ paths:
         - name: barcode
           in: query
           schema: {type: string, maxLength: 64}
+        - name: sku
+          in: query
+          schema: {type: string, maxLength: 64}
+        - name: state
+          in: query
+          schema: {type: string, enum: [Draft, Active, Suspended, Discontinued, Archived]}
       responses:
         '200':
           description: Product results
@@ -254,6 +260,8 @@ paths:
       x-permission: inventory.balance.read
       parameters:
         - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
         - name: locationId
           in: query
           required: true
@@ -267,8 +275,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: {$ref: '#/components/schemas/StockBalance'}
+                $ref: '#/components/schemas/PagedStockBalances'
   /inventory-adjustments:
     get:
       tags: [Inventory]
@@ -1349,6 +1356,27 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/StockCount'}
+  /stock-counts/{id}/draft-lines:
+    put:
+      tags: [Inventory]
+      operationId: saveStockCountDraftLines
+      x-permission: inventory.count.create
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SaveStockCountDraftLines'}
+      responses:
+        '200':
+          description: Draft count lines durably replaced at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockCount'}
   /stock-counts/{id}:
     get:
       tags: [Inventory]
@@ -2260,7 +2288,7 @@ components:
           items: {$ref: '#/components/schemas/ProductIdentifier'}
     Product:
       type: object
-      required: [id, name, state, variants, version]
+      required: [id, name, state, variants, version, archiveReason, archivedAt, createdAt, updatedAt]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         name: {type: string, minLength: 1, maxLength: 300}
@@ -2271,6 +2299,10 @@ components:
           maxItems: 50
           items: {$ref: '#/components/schemas/ProductVariant'}
         version: {type: integer, minimum: 1}
+        archiveReason: {type: [string, 'null'], maxLength: 500}
+        archivedAt: {type: [string, 'null'], format: date-time}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
     CreateProduct:
       type: object
       additionalProperties: false
@@ -2301,15 +2333,27 @@ components:
         nextCursor: {type: [string, 'null']}
     StockBalance:
       type: object
-      required: [productId, locationId, unit, onHand, available, asOf]
+      additionalProperties: false
+      required: [productId, locationId, unit, onHand, reserved, available, asOf, reconciled, reconciliationState, source]
       properties:
         productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         locationId: {$ref: '#/components/schemas/Identifier'}
         unit: {type: string}
         onHand: {$ref: '#/components/schemas/DecimalQuantity'}
+        reserved: {$ref: '#/components/schemas/NonNegativeDecimalQuantity'}
         available: {$ref: '#/components/schemas/DecimalQuantity'}
         asOf: {type: string, format: date-time}
         reconciled: {type: boolean}
+        reconciliationState: {type: string, enum: [Current, RequiresReview]}
+        source: {type: string, enum: [InventoryLedgerProjection]}
+    PagedStockBalances:
+      type: object
+      additionalProperties: false
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/StockBalance'}}
+        nextCursor: {type: [string, 'null']}
     DecimalQuantity:
       type: string
       pattern: '^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
@@ -2461,13 +2505,18 @@ components:
       allOf:
         - $ref: '#/components/schemas/CreateInventoryAdjustment'
         - type: object
-          required: [id, state, version]
+          required: [id, state, version, approvedByUserId, createdAt, createdByUserId, postedAt, updatedAt]
           properties:
             id: {$ref: '#/components/schemas/Identifier'}
             state: {type: string, enum: [Draft, PendingApproval, Approved, Posted, Reversed, Rejected]}
             version: {type: integer, minimum: 1}
             movementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
             reversalMovementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+            approvedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+            createdAt: {type: string, format: date-time}
+            createdByUserId: {$ref: '#/components/schemas/Identifier'}
+            postedAt: {type: [string, 'null'], format: date-time}
+            updatedAt: {type: string, format: date-time}
     PagedInventoryAdjustments:
       type: object
       required: [items, nextCursor]
@@ -2497,6 +2546,12 @@ components:
       required: [lines]
       properties:
         lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/SubmitStockCountLine'}}
+    SaveStockCountDraftLines:
+      type: object
+      additionalProperties: false
+      required: [lines]
+      properties:
+        lines: {type: array, maxItems: 5000, items: {$ref: '#/components/schemas/SubmitStockCountLine'}}
     StockCountLine:
       type: object
       additionalProperties: false
@@ -2514,7 +2569,7 @@ components:
     StockCount:
       type: object
       additionalProperties: false
-      required: [id, locationId, blind, lines, state, version]
+      required: [id, locationId, blind, lines, state, version, approvedByUserId, createdAt, createdByUserId, postedAt, submittedByUserId, updatedAt]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         locationId: {$ref: '#/components/schemas/Identifier'}
@@ -2522,6 +2577,12 @@ components:
         lines: {type: array, items: {$ref: '#/components/schemas/StockCountLine'}}
         state: {type: string, enum: [Draft, InProgress, Submitted, Approved, Posted, Rejected]}
         version: {type: integer, minimum: 1}
+        approvedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        createdAt: {type: string, format: date-time}
+        createdByUserId: {$ref: '#/components/schemas/Identifier'}
+        postedAt: {type: [string, 'null'], format: date-time}
+        submittedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        updatedAt: {type: string, format: date-time}
     PagedStockCounts:
       type: object
       required: [items, nextCursor]
@@ -2569,7 +2630,7 @@ components:
     StockTransfer:
       type: object
       additionalProperties: false
-      required: [id, sourceLocationId, destinationLocationId, lines, state, version]
+      required: [id, sourceLocationId, destinationLocationId, lines, state, version, createdAt, createdByUserId, dispatchedAt, dispatchedByUserId, receivedAt, receivedByUserId, updatedAt]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         sourceLocationId: {$ref: '#/components/schemas/Identifier'}
@@ -2578,6 +2639,13 @@ components:
         state: {type: string, enum: [Draft, Dispatched, PartiallyReceived, Received, Exception, Cancelled]}
         version: {type: integer, minimum: 1}
         exceptionReason: {type: [string, 'null'], maxLength: 500}
+        createdAt: {type: string, format: date-time}
+        createdByUserId: {$ref: '#/components/schemas/Identifier'}
+        dispatchedAt: {type: [string, 'null'], format: date-time}
+        dispatchedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        receivedAt: {type: [string, 'null'], format: date-time}
+        receivedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        updatedAt: {type: string, format: date-time}
     PagedStockTransfers:
       type: object
       required: [items, nextCursor]

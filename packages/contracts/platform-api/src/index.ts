@@ -35,6 +35,7 @@ import {
 	PagedProductsSchema,
 	PagedRolesSchema,
 	PagedSessionsSchema,
+	PagedStockBalancesSchema,
 	PagedStockCountsSchema,
 	PagedStockTransfersSchema,
 	PagedUsersSchema,
@@ -42,9 +43,10 @@ import {
 	PlatformIdentityLinkSchema,
 	ProblemSchema,
 	ProductSchema,
+	ProductStateSchema,
 	ReceiveStockTransferSchema,
 	RoleAssignmentSchema,
-	StockBalanceSchema,
+	SaveStockCountDraftLinesSchema,
 	StockCountSchema,
 	StockTransferSchema,
 	SubmitStockCountSchema,
@@ -508,6 +510,8 @@ export const listProductsContract = base
 			query: PageQuerySchema.extend({
 				barcode: z.string().max(64).optional(),
 				query: z.string().max(200).optional(),
+				sku: z.string().max(64).optional(),
+				state: ProductStateSchema.optional(),
 			}),
 		})
 	)
@@ -795,19 +799,19 @@ export const listStockBalancesContract = base
 	.meta({
 		operationId: "listStockBalances",
 		permission: "inventory.balance.read",
-		responseRef: "#/components/schemas/StockBalance",
+		responseRef: "#/components/schemas/PagedStockBalances",
 		successStatus: 200,
 	})
 	.input(
 		z.object({
 			headers: RequiredActiveContextHeadersSchema,
-			query: z.object({
+			query: PageQuerySchema.extend({
 				locationId: IdentifierSchema,
 				productId: IdentifierSchema.optional(),
 			}),
 		})
 	)
-	.output(z.array(StockBalanceSchema));
+	.output(PagedStockBalancesSchema);
 
 export const listInventoryAdjustmentsContract = base
 	.route({
@@ -1151,6 +1155,28 @@ export const getStockCountContract = base
 	)
 	.output(StockCountSchema);
 
+export const saveStockCountDraftLinesContract = base
+	.route({
+		method: "PUT",
+		path: "/v1/stock-counts/{id}/draft-lines",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "saveStockCountDraftLines",
+		permission: "inventory.count.create",
+		requestRef: "#/components/schemas/SaveStockCountDraftLines",
+		responseRef: "#/components/schemas/StockCount",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: SaveStockCountDraftLinesSchema,
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ id: IdentifierSchema }),
+		})
+	)
+	.output(StockCountSchema);
+
 export const submitStockCountContract = base
 	.route({
 		method: "POST",
@@ -1327,6 +1353,7 @@ export const ws2CatalogInventoryApiContract = {
 			create: createStockCountContract,
 			get: getStockCountContract,
 			list: listStockCountsContract,
+			saveDraft: saveStockCountDraftLinesContract,
 			submit: submitStockCountContract,
 		},
 		imports: {

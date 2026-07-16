@@ -222,6 +222,48 @@ export function createCatalogRepository(
 		}
 	}
 
+	async function exactIdentifierProduct(
+		tenantId: string,
+		page: CatalogPageRequest
+	): Promise<CatalogPage<CatalogProductRecord> | null> {
+		const normalizedValue = page.barcode ?? page.sku;
+		if (!normalizedValue) {
+			return null;
+		}
+		const [identifier] = await database
+			.select({ productId: catalogIdentifiers.productId })
+			.from(catalogIdentifiers)
+			.where(
+				and(
+					eq(catalogIdentifiers.tenantId, tenantId),
+					eq(
+						catalogIdentifiers.uniquenessScope,
+						page.barcode ? "Barcode" : "SKU"
+					),
+					eq(catalogIdentifiers.normalizedValue, normalizedValue)
+				)
+			)
+			.limit(1);
+		if (!identifier) {
+			return { items: [], nextCursor: null };
+		}
+		const [productRow] = await database
+			.select()
+			.from(catalogProducts)
+			.where(
+				and(
+					eq(catalogProducts.tenantId, tenantId),
+					eq(catalogProducts.id, identifier.productId),
+					page.state ? eq(catalogProducts.state, page.state) : undefined
+				)
+			)
+			.limit(1);
+		return {
+			items: productRow ? [await loadProduct(productRow)] : [],
+			nextCursor: null,
+		};
+	}
+
 	return {
 		async createProduct(record) {
 			try {
@@ -275,23 +317,9 @@ export function createCatalogRepository(
 			tenantId: string,
 			page: CatalogPageRequest
 		): Promise<CatalogPage<CatalogProductRecord>> {
-			if (page.barcode) {
-				const [identifier] = await database
-					.select({ productId: catalogIdentifiers.productId })
-					.from(catalogIdentifiers)
-					.where(
-						and(
-							eq(catalogIdentifiers.tenantId, tenantId),
-							eq(catalogIdentifiers.uniquenessScope, "Barcode"),
-							eq(catalogIdentifiers.normalizedValue, page.barcode)
-						)
-					)
-					.limit(1);
-				if (!identifier) {
-					return { items: [], nextCursor: null };
-				}
-				const product = await this.getProduct(tenantId, identifier.productId);
-				return { items: product ? [product] : [], nextCursor: null };
+			const exact = await exactIdentifierProduct(tenantId, page);
+			if (exact) {
+				return exact;
 			}
 
 			const search = page.query?.trim();
@@ -315,6 +343,7 @@ export function createCatalogRepository(
 				.where(
 					and(
 						eq(catalogProducts.tenantId, tenantId),
+						page.state ? eq(catalogProducts.state, page.state) : undefined,
 						page.cursor ? gt(catalogProducts.id, page.cursor) : undefined,
 						search
 							? or(
@@ -328,9 +357,11 @@ export function createCatalogRepository(
 				)
 				.orderBy(asc(catalogProducts.id))
 				.limit(page.limit + 1);
-			const items = await Promise.all(
-				rows.slice(0, page.limit).map(loadProduct)
-			);
+			const items: CatalogProductRecord[] = [];
+			for (const row of rows.slice(0, page.limit)) {
+				// biome-ignore lint/performance/noAwaitInLoops: the repository may be bound to one transaction client, which cannot safely execute concurrent queries.
+				items.push(await loadProduct(row));
+			}
 			return {
 				items,
 				nextCursor:

@@ -381,6 +381,92 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 		).toEqual({ items: [], nextCursor: null });
 	});
 
+	test("does not disclose exact SKUs across tenants and filters by governed state", async () => {
+		const catalog = service();
+		const tenantB = "tenant_catalog_integration_b";
+		const tenantBProduct = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "Tenant B SKU Product",
+				variants: [
+					{
+						identifiers: [
+							{ scheme: "Tenant", type: "SKU", value: "TENANT-B-ONLY" },
+						],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_tenant_b_sku",
+			tenantId: tenantB,
+		});
+		expect(
+			await catalog.listProducts(tenantB, {
+				limit: 50,
+				sku: " tenant-b-only ",
+			})
+		).toHaveProperty("items.0.id", tenantBProduct.id);
+		expect(
+			await catalog.listProducts(productInput.tenantId, {
+				limit: 50,
+				sku: "TENANT-B-ONLY",
+			})
+		).toEqual({ items: [], nextCursor: null });
+
+		const draft = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "State Filter Draft",
+				variants: [
+					{
+						identifiers: [
+							{ scheme: "Tenant", type: "SKU", value: "STATE-DRAFT" },
+						],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_state_draft",
+		});
+		const activeCandidate = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "State Filter Active",
+				variants: [
+					{
+						identifiers: [
+							{ scheme: "Tenant", type: "SKU", value: "STATE-ACTIVE" },
+						],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_state_active_create",
+		});
+		const active = await catalog.activateProduct({
+			...productInput,
+			idempotencyKey: "idempotency_catalog_state_active",
+			productId: activeCandidate.id,
+			version: activeCandidate.version,
+		});
+		const activeResults = await catalog.listProducts(productInput.tenantId, {
+			limit: 50,
+			state: "Active",
+		});
+		expect(activeResults.items.map((item) => item.id)).toContain(active.id);
+		expect(activeResults.items.every((item) => item.state === "Active")).toBe(
+			true
+		);
+		const draftResults = await catalog.listProducts(productInput.tenantId, {
+			limit: 50,
+			state: "Draft",
+		});
+		expect(draftResults.items.map((item) => item.id)).toContain(draft.id);
+		expect(draftResults.items.every((item) => item.state === "Draft")).toBe(
+			true
+		);
+	});
+
 	test("rolls Product, receipt, and outbox state back together on append failure", async () => {
 		const before = await testPool.query<{ count: string }>(
 			"SELECT count(*)::text AS count FROM catalog_product"

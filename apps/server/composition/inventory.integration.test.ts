@@ -14,6 +14,10 @@ import {
 import { env } from "@meridian/tooling-env/server";
 import { Pool } from "pg";
 
+import {
+	decodeStockBalanceCursor,
+	encodeStockBalanceCursor,
+} from "./inventory";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
 const databaseName = `meridian_inventory_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -81,6 +85,19 @@ afterAll(async () => {
 });
 
 describe.serial("Inventory PostgreSQL controlled prototype", () => {
+	test("wraps owner cursors in a versioned opaque transport token", () => {
+		const raw = "product_a\u001flocation_a\u001feach";
+		const encoded = encodeStockBalanceCursor(raw);
+		expect(encoded).toStartWith("sb1_");
+		expect(encoded).not.toContain("product_a");
+		expect(decodeStockBalanceCursor(encoded ?? undefined)).toBe(raw);
+		expect(() => decodeStockBalanceCursor("sb2_future")).toThrow(
+			"Stock balance cursor is invalid"
+		);
+		expect(() =>
+			decodeStockBalanceCursor("sb1_bm90LWEtcHJvamVjdGlvbi1rZXk")
+		).toThrow("Stock balance cursor is invalid");
+	});
 	test("migrates idempotently through its isolated history and creates only nine owner tables", async () => {
 		await migrateInventory(testPool);
 		const tables = await testPool.query<{ table_name: string }>(
@@ -433,6 +450,65 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			expectedQuantity: "0.000000",
 			varianceQuantity: "5.000000",
 		});
+	});
+
+	test("persists draft Count lines atomically and replays a concurrent retry", async () => {
+		const first = service();
+		const second = service();
+		const count = await first.createCount({
+			actorUserId: "draft_counter",
+			body: { blind: true, locationId: "draft_location" },
+			idempotencyKey: "draft-count-create",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		const input = {
+			actorUserId: "draft_counter",
+			body: {
+				lines: [
+					{
+						observedQuantity: "12.000001",
+						productId: "draft_product",
+						unit: "each",
+					},
+				],
+			},
+			countId: count.id,
+			idempotencyKey: "draft-count-save",
+			tenantId: base.tenantId,
+			version: 1,
+		};
+		const [left, right] = await Promise.all([
+			first.saveCountDraft(input),
+			second.saveCountDraft(input),
+		]);
+		expect(right).toEqual(left);
+		expect(left).toMatchObject({ state: "InProgress", version: 2 });
+		expect((await second.getCount(base.tenantId, count.id)).lines).toEqual(
+			left.lines
+		);
+		const rows = await testPool.query<{ operation: string; result: unknown }>(
+			"SELECT operation, result FROM inventory_command_receipt WHERE tenant_id = $1 AND idempotency_key = $2",
+			[base.tenantId, input.idempotencyKey]
+		);
+		expect(rows.rows).toHaveLength(1);
+		expect(rows.rows[0]?.operation).toBe("inventory.count.draft.save");
+		expect(
+			await captureError(
+				second.saveCountDraft({
+					...input,
+					body: {
+						lines: [
+							{
+								observedQuantity: "13",
+								productId: "draft_product",
+								unit: "each",
+							},
+						],
+					},
+				})
+			)
+		).toMatchObject({ code: "idempotency_conflict" });
 	});
 
 	test("enforces maker/checker separation in the live owner transaction", async () => {

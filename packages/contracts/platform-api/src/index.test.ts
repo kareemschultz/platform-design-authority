@@ -6,11 +6,13 @@ import {
 	CreateProductSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
+	PagedStockBalancesSchema,
 	PLATFORM_OPENAPI_OPERATION_METADATA,
 	PositiveDecimalQuantitySchema,
 	ProductSchema,
 	platformApiContract,
 	ReceiveStockTransferSchema,
+	SaveStockCountDraftLinesSchema,
 	StockTransferSchema,
 	SubmitStockCountSchema,
 	UpdateProductSchema,
@@ -126,7 +128,7 @@ describe("WS2 Catalog and Inventory API contract", () => {
 		);
 
 		expect(actual).toEqual(expected);
-		expect(actual).toHaveLength(40);
+		expect(actual).toHaveLength(41);
 	});
 
 	test("requires positive directional quantities while signed adjustment quantities remain separate", () => {
@@ -159,9 +161,13 @@ describe("WS2 Catalog and Inventory API contract", () => {
 		).toBe(true);
 		expect(
 			ProductSchema.safeParse({
+				archivedAt: null,
+				archiveReason: null,
+				createdAt: "2026-07-16T12:00:00.000Z",
 				id: "product_catalog_01",
 				name: create.name,
 				state: "Draft",
+				updatedAt: "2026-07-16T12:00:00.000Z",
 				variants: [
 					{
 						id: "variant_catalog_01",
@@ -186,6 +192,42 @@ describe("WS2 Catalog and Inventory API contract", () => {
 			],
 		});
 		expect(parsed.success).toBe(false);
+		expect(
+			SaveStockCountDraftLinesSchema.safeParse({ lines: [] }).success
+		).toBe(true);
+		expect(
+			SaveStockCountDraftLinesSchema.safeParse({
+				lines: [
+					{
+						expectedQuantity: "99",
+						observedQuantity: "1",
+						productId: "product_inventory_01",
+						unit: "EA",
+					},
+				],
+			}).success
+		).toBe(false);
+	});
+
+	test("publishes paged balances with explicit projection evidence", () => {
+		const parsed = PagedStockBalancesSchema.safeParse({
+			items: [
+				{
+					asOf: "2026-07-16T12:00:00.000Z",
+					available: "8",
+					locationId: "location_inventory_01",
+					onHand: "10",
+					productId: "product_inventory_01",
+					reconciled: true,
+					reconciliationState: "Current",
+					reserved: "2",
+					source: "InventoryLedgerProjection",
+					unit: "EA",
+				},
+			],
+			nextCursor: "sb1_cHJvamVjdGlvbi1jdXJzb3I",
+		});
+		expect(parsed.success).toBe(true);
 	});
 
 	test("requires an explicit reason for transfer exception receipts", () => {
@@ -211,7 +253,11 @@ describe("WS2 Catalog and Inventory API contract", () => {
 	test("represents stable transfer lines and cumulative custody quantities", () => {
 		expect(
 			StockTransferSchema.safeParse({
+				createdAt: "2026-07-16T12:00:00.000Z",
+				createdByUserId: "user_inventory_creator_01",
 				destinationLocationId: "location_inventory_destination_01",
+				dispatchedAt: "2026-07-16T12:05:00.000Z",
+				dispatchedByUserId: "user_inventory_dispatcher_01",
 				exceptionReason: null,
 				id: "transfer_inventory_01",
 				lines: [
@@ -226,8 +272,11 @@ describe("WS2 Catalog and Inventory API contract", () => {
 						unit: "EA",
 					},
 				],
+				receivedAt: "2026-07-16T12:10:00.000Z",
+				receivedByUserId: "user_inventory_receiver_01",
 				sourceLocationId: "location_inventory_source_01",
 				state: "PartiallyReceived",
+				updatedAt: "2026-07-16T12:10:00.000Z",
 				version: 3,
 			}).success
 		).toBe(true);

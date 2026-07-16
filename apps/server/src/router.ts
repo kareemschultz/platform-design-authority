@@ -56,6 +56,7 @@ import {
 	receiveStockTransferContract,
 	reverseInventoryAdjustmentContract,
 	revokeCurrentUserSessionContract,
+	saveStockCountDraftLinesContract,
 	setActiveContextContract,
 	submitStockCountContract,
 	suspendTenantMembershipContract,
@@ -1606,6 +1607,33 @@ const createStockCount = implement(createStockCountContract)
 		}
 	});
 
+const saveStockCountDraft = implement(saveStockCountDraftLinesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.count.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.saveStockCountDraft({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				countId: input.params.id,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const submitStockCount = implement(submitStockCountContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -1948,6 +1976,7 @@ export const appRouter = {
 			create: createStockCount,
 			get: getStockCount,
 			list: listStockCounts,
+			saveDraft: saveStockCountDraft,
 			submit: submitStockCount,
 		},
 		imports: {

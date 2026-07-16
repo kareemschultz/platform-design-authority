@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import {
 	createPostgresDeliveryStore,
 	createPostgresOutbox,
+	migratePlatformEvents,
 } from "@meridian/persistence-platform-events-postgres";
 import {
 	createEventConsumerRegistry,
@@ -10,10 +11,24 @@ import {
 import { workerEnv } from "@meridian/tooling-env/worker";
 import { Pool } from "pg";
 
-const pool = new Pool({ connectionString: workerEnv.DATABASE_URL, max: 1 });
+const databaseName = `meridian_delivery_node_${randomUUID().replaceAll("-", "")}`;
+const adminUrl = new URL(workerEnv.DATABASE_URL);
+adminUrl.pathname = "/postgres";
+const testUrl = new URL(workerEnv.DATABASE_URL);
+testUrl.pathname = `/${databaseName}`;
+const adminPool = new Pool({ connectionString: adminUrl.toString(), max: 1 });
+const pool = new Pool({ connectionString: testUrl.toString(), max: 1 });
 const eventId = `event_node_${randomUUID()}`;
+let databaseCreated = false;
+
+function quoteIdentifier(value: string): string {
+	return `"${value.replaceAll('"', '""')}"`;
+}
 
 try {
+	await adminPool.query(`CREATE DATABASE ${quoteIdentifier(databaseName)}`);
+	databaseCreated = true;
+	await migratePlatformEvents(pool);
 	await createPostgresOutbox(pool).append({
 		aggregateId: `product_node_${randomUUID()}`,
 		classification: "Internal",
@@ -62,4 +77,10 @@ try {
 	}
 } finally {
 	await pool.end();
+	if (databaseCreated) {
+		await adminPool.query(
+			`DROP DATABASE ${quoteIdentifier(databaseName)} WITH (FORCE)`
+		);
+	}
+	await adminPool.end();
 }

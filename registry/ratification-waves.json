@@ -21,7 +21,7 @@
       "approval_authority": "Platform Design Authority with independent reviewer",
       "required_reviewer_roles": ["documentation-governance", "platform-architecture", "independent-review"],
       "scope_refs": ["docs/blueprint/00-Foundation/DOCUMENT_GOVERNANCE.md", "docs/blueprint/00-Foundation/NAMING_STANDARDS.md", "docs/blueprint/00-Foundation/DOCUMENT_DEPTH_AND_READINESS_STANDARD.md", "docs/blueprint/17-Roadmap/RATIFICATION_WAVES.md"],
-      "blocking_dependencies": ["Independent reviewer not assigned", "Candidate revision and exact version manifest not frozen", "DCA-006 and final governance audit remain open"],
+      "blocking_dependencies": ["Independent reviewer not assigned", "Candidate revision and exact version manifest not frozen", "DCA-006 independent review and final governance audit remain open"],
       "candidate_revision": null,
       "scope_manifest": [],
       "review_records": [],

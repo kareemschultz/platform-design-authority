@@ -6,6 +6,10 @@ status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0016, ADR-0025]
+document_class: plan-roadmap-register
+declared_depth: contract-specified
+evidence_state: implemented
+applicable_dimensions: [purpose, authority-and-scope, failure-and-recovery, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # Ratification Wave Manifest and Review Standard

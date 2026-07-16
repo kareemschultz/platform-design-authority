@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -36,7 +36,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 
 | Area | Current depth/evidence | Material gaps before the next claim |
 |---|---|---|
-| Foundation and governance | Architecture-specified; class/depth standard and ratification evidence gates exist; all material remains Draft | Independent class/depth review, actual ratification reviews/approvals, Constitution promotion evidence |
+| Foundation and governance | Architecture-specified; nine document classes and thirteen dimensions have an opt-in register, templates, author self-review, and seeded validation; ratification evidence gates exist; all material remains Draft | Independent class/depth review, measured legacy adoption, actual ratification reviews/approvals, Constitution promotion evidence |
 | ADR estate | Architecture decisions are Proposed and generally coherent | Zero Accepted ADRs; complete review records and ratification waves |
 | Platform Kernel / WS1 | Prototype-ready and verified at controlled-prototype depth for 11 first-slice capabilities | Production RLS/topology, external auth/provider evidence, security/accessibility/operations gates |
 | Catalog and Inventory / WS2 | Contract-specified and partially implemented through merged PR3; 13 partial rows/80 cells carry interim evidence while bulk import stays planned; PR4 open/green | PR4 merge, imports/numbering, web UX/accessibility, remaining planned cells, final audit and closeout |
@@ -79,7 +79,7 @@ These counts demonstrate inventory and internal parity, not enterprise implement
 - WS1: 11 capabilities and 143 of 1,294 currently required first-slice evidence cells are fully registered.
 - WS2: 13 capabilities have interim PR2/PR3 registration covering 80 cells; bulk import and all other unproven PR4–PR7 cells remain planned.
 - Operations: four merged service groups have bounded procedure drafts and zero pilot-ready claims; independent review, telemetry, alerts, escalation, restore/failover, and all dated exercises remain open.
-- Product documentation: build/type checks exist, but architecture governance does not yet validate MDX metadata and behavioral/release parity.
+- Product documentation: build/type checks, a nine-page manifest, metadata/link/release-evidence validation, and one class-adopted API sample exist; generated canonical OpenAPI parity and broader behavioral evidence remain open.
 - External: founder decisions, customer evidence, qualified Guyana review, providers, penetration testing, accessibility evidence, and operational exercises remain open.
 
 ## Honest Readiness Claims

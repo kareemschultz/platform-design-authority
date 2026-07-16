@@ -6,6 +6,7 @@ const productDocumentationSchema = pageSchema.extend({
 	api_reference_mode: z
 		.enum(["boundary-overview", "generated-canonical"])
 		.optional(),
+	applicable_dimensions: z.array(z.string()).optional(),
 	applicable_version: z.string().min(1),
 	audience: z
 		.array(
@@ -32,8 +33,32 @@ const productDocumentationSchema = pageSchema.extend({
 		"user-guide",
 	]),
 	contract_refs: z.array(z.string()).default([]),
+	declared_depth: z
+		.enum([
+			"indexed",
+			"ownership-defined",
+			"architecture-specified",
+			"contract-specified",
+			"prototype-ready",
+			"implementation-ready",
+			"operationally-evidenced",
+		])
+		.optional(),
+	document_class: z.enum(["product-documentation"]).optional(),
 	documentation_id: z.string().regex(/^PDOC-\d{4}$/),
 	evidence_revision: z.string().regex(/^[0-9a-f]{40}$/),
+	evidence_state: z
+		.enum([
+			"planned",
+			"documented",
+			"observed",
+			"implemented",
+			"verified",
+			"externally-gated",
+			"contradicted",
+			"superseded",
+		])
+		.optional(),
 	implementation_evidence: z.array(z.string()).min(1),
 	last_verified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 	openapi_operation_ids: z.array(z.string()).optional(),

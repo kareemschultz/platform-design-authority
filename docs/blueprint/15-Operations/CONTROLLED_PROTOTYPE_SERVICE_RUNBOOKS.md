@@ -6,6 +6,10 @@ status: Draft
 owner: Platform Operations
 last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0027]
+document_class: operations-runbook
+declared_depth: prototype-ready
+evidence_state: implemented
+applicable_dimensions: [authority-and-scope, data-and-integrity, contracts-and-compatibility, authority-controls, offline-and-degraded, failure-and-recovery, security-and-privacy, verification-and-evidence, references-and-traceability]
 ---
 
 # Controlled-Prototype Service Runbooks

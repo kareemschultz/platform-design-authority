@@ -6,6 +6,10 @@ status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-15
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0016, ADR-0022]
+document_class: research-review-evidence
+declared_depth: contract-specified
+evidence_state: documented
+applicable_dimensions: [purpose, authority-and-scope, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # Competitive Research Methodology

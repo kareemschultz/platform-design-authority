@@ -6,6 +6,10 @@ status: Draft
 owner: Developer Platform
 last_reviewed: 2026-07-16
 related_adrs: [ADR-0016, ADR-0021, ADR-0022]
+document_class: specification
+declared_depth: architecture-specified
+evidence_state: documented
+applicable_dimensions: [purpose, authority-and-scope, data-and-integrity, contracts-and-compatibility, authority-controls, experience-and-accessibility, offline-and-degraded, failure-and-recovery, security-and-privacy, migration-and-extensibility, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # Product Documentation and Knowledge Architecture

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-015
 title: Review Evidence and Disposition Index
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -26,6 +26,7 @@ This directory separates independent review evidence from the registrations and 
 - [Claude Code WS1 Consolidated Audit Disposition V1](CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_DISPOSITION_V1.md) — `PDA-REV-012` · Draft
 - [Meridian Documentation Completion Audit Registration](MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_REGISTRATION.md) — `PDA-REV-013` · Draft
 - [Meridian Documentation Completion Audit Disposition V1](MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_DISPOSITION_V1.md) — `PDA-REV-014` · Draft
+- [Document Class Adoption Sample Review](DOCUMENT_CLASS_ADOPTION_SAMPLE_REVIEW-2026-07-16.md) — `PDA-REV-016` · Draft · author self-review, not independent closure evidence
 
 ## Immutable and Supporting Evidence
 

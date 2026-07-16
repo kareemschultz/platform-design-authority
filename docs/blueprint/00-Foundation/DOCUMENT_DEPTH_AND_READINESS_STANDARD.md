@@ -1,11 +1,15 @@
 ---
 document_id: PDA-FND-017
 title: Document Depth and Readiness Standard
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
 related_adrs: [ADR-0025]
+document_class: foundation-authority
+declared_depth: contract-specified
+evidence_state: implemented
+applicable_dimensions: [purpose, authority-and-scope, migration-and-extensibility, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # Document Depth and Readiness Standard
@@ -42,6 +46,8 @@ The first-slice capability depths `full`, `prototype`, and `seam` remain capabil
 | Operations and runbook | service record, incident, recovery, migration, backup, repair | Can an authorized operator detect, contain, recover, verify, escalate, and preserve evidence safely? |
 | Product, administrator, developer, release, and in-app documentation | MDX guides, API reference, migration guide, release note | Does the content describe released behavior for a named audience/version with prerequisites, permissions, outcomes, errors, accessibility, and support boundaries? |
 | Index, template, generated artifact, and immutable evidence | section README, template, registry, independent audit | Is its non-authoritative or derived role explicit, discoverable, fresh, and protected from accidental promotion? |
+
+The canonical class identifiers, required dimensions, depth vocabulary, and evidence vocabulary are machine-readable in `registry/document-classes.json`. The class identifiers are `foundation-authority`, `architecture-decision`, `specification`, `machine-contract`, `plan-roadmap-register`, `research-review-evidence`, `operations-runbook`, `product-documentation`, and `index-template-derived-evidence`. A class describes the artifact's job; it does not change authority order or lifecycle.
 
 ## Depth Vocabulary
 
@@ -151,25 +157,27 @@ Machine checks should verify metadata, identifiers, indexes, links, generated fr
 
 Human review remains required for ownership, contradiction, correctness, evidence quality, accessibility, security, privacy, commercial, legal, regulatory, and operational judgments.
 
+`scripts/validate_document_classes.py` enforces the adopted subset recorded in `registry/document-class-adoption.json`. For each adopted artifact it checks that class, depth, evidence state, applicable dimensions, and mapped section evidence agree with the class policy. It accepts `not-applicable` only with a non-empty artifact-specific reason. It does not infer semantic completeness from a heading.
+
 ## Migration and Adoption
 
 1. Apply this standard first to new or materially changed documents.
-2. Record current depth honestly; do not bulk-promote old outlines.
-3. Prioritize first-slice and near-roadmap specifications, not speculative future detail.
-4. Add validator/schema fields only through reviewed governance changes with backward-compatible migration.
+2. Record each migrated artifact in `registry/document-class-adoption.json`; unregistered legacy artifacts remain governed by lifecycle and existing metadata but are not represented as class-contract conformant.
+3. Record current depth honestly; do not bulk-promote old outlines.
+4. Prioritize first-slice and near-roadmap specifications, not speculative future detail.
 5. Preserve historical evidence and superseded assessments.
+
+The optional front-matter fields `document_class`, `declared_depth`, `evidence_state`, and `applicable_dimensions` are now registry-compatible. They become mandatory only for an artifact admitted to the adoption register. This is a backward-compatible migration: the generated document registry preserves the fields when present and emits `null` or an empty list for unmigrated artifacts.
 
 ## Contract and Scope Impact
 
-This Draft standard creates no capability, event, permission, OpenAPI operation, schema, domain owner, entitlement, or first-slice scope. Its only immediate machine-readable effect is registration of this document and the dated PDA-APP-024 assessment. Any future required front-matter fields, registry schema changes, or blocking validator rules require their own reviewed change and migration evidence.
+This Draft standard creates no capability, event, permission, OpenAPI operation, schema, domain owner, entitlement, or first-slice scope. Its machine-readable effects are the class policy, opt-in adoption register, preserved registry metadata, templates, and bounded validator. It authorizes no lifecycle promotion.
 
 No ADR is triggered by this initial clarification because it does not change lifecycle states, authority order, public contracts, or implementation ownership. An ADR is required if adoption later changes platform-wide lifecycle semantics or public governance contracts.
 
-## Open Decisions
+## Adoption Decisions and Remaining Review
 
-- Whether `document_class`, `declared_depth`, and `evidence_state` become required front-matter and registry fields.
-- Which section-index and orphan exemptions are machine-readable.
-- Whether product MDX uses a separate manifest or extends the governed document registry.
-- Which checks are blocking versus advisory during migration.
-
-These decisions require Wave 0 documentation-governance review. This Draft standard does not change the current registry schema by itself.
+- Product MDX remains in the separate `registry/product-documentation.json` publication manifest and may participate in the class-adoption register without becoming a blueprint authority document.
+- Class validation is blocking only for explicitly adopted artifacts. Repository-wide mandatory adoption requires Wave 0 review and a measured migration plan.
+- Index/orphan exemptions remain governed by the canonical index validator; class adoption does not create a second exemption mechanism.
+- The initial sample review is author self-assessment, not independent approval. DCA-006 cannot be independently closed until a reviewer dispositions the sample and the Wave 0 candidate.

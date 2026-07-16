@@ -6,6 +6,10 @@ status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-15
 related_adrs: [ADR-0016, ADR-0017]
+document_class: machine-contract
+declared_depth: contract-specified
+evidence_state: implemented
+applicable_dimensions: [authority-and-scope, data-and-integrity, contracts-and-compatibility, authority-controls, security-and-privacy, migration-and-extensibility, verification-and-evidence, references-and-traceability]
 ---
 
 # First Slice Permission Catalog

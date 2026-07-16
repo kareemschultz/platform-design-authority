@@ -61,6 +61,11 @@ jobs:
           python -m unittest scripts/test_validate_document_indexes.py
           python scripts/validate_document_indexes.py
 
+      - name: Test and validate adopted document classes
+        run: |
+          python -m unittest scripts/test_validate_document_classes.py
+          python scripts/validate_document_classes.py
+
       - name: Test and validate product documentation
         run: |
           python -m unittest scripts/test_validate_product_docs.py

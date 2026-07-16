@@ -113,9 +113,13 @@ def build_documents_registry() -> dict[str, Any]:
             "last_reviewed": metadata.get("last_reviewed"),
             "related_adrs": metadata.get("related_adrs", []),
             "review_evidence": metadata.get("review_evidence"),
+            "document_class": metadata.get("document_class"),
+            "declared_depth": metadata.get("declared_depth"),
+            "evidence_state": metadata.get("evidence_state"),
+            "applicable_dimensions": metadata.get("applicable_dimensions", []),
         })
     records.sort(key=lambda item: item["document_id"])
-    return {"schema_version": "1.2.0", "documents": records}
+    return {"schema_version": "1.3.0", "documents": records}
 
 
 def load_namespaces() -> dict[str, dict[str, Any]]:

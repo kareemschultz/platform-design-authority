@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0.0",
+  "status": "Draft",
+  "policy_source": "registry/document-classes.json",
+  "review_evidence": "docs/reviews/DOCUMENT_CLASS_ADOPTION_SAMPLE_REVIEW-2026-07-16.md",
+  "adoption_rule": "Only listed artifacts claim class-contract adoption; absence from this register is not a completeness failure during migration.",
+  "artifacts": [
+    {
+      "artifact_id": "CLASS-SAMPLE-001",
+      "path": "docs/blueprint/00-Foundation/DOCUMENT_DEPTH_AND_READINESS_STANDARD.md",
+      "identity": "PDA-FND-017",
+      "class_id": "foundation-authority",
+      "declared_depth": "contract-specified",
+      "evidence_state": "implemented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "purpose": { "disposition": "addressed", "sections": ["Purpose", "Core Rule"] },
+        "authority-and-scope": { "disposition": "addressed", "sections": ["Core Rule", "Artifact Classes"] },
+        "migration-and-extensibility": { "disposition": "addressed", "sections": ["Migration and Adoption"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["Validation and Review"] },
+        "external-dependencies": { "disposition": "addressed", "sections": ["Adoption Decisions and Remaining Review"] },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["Discoverability and Cross-Reference Rules"] }
+      }
+    },
+    {
+      "artifact_id": "CLASS-SAMPLE-002",
+      "path": "docs/blueprint/18-Decisions/ADR-0021-REPOSITORY-OWNED-DOCUMENTATION-PORTAL.md",
+      "identity": "ADR-0021",
+      "class_id": "architecture-decision",
+      "declared_depth": "contract-specified",
+      "evidence_state": "documented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "purpose": { "disposition": "addressed", "sections": ["Context", "Decision"] },
+        "authority-and-scope": { "disposition": "addressed", "sections": ["Decision", "Required Controls"] },
+        "migration-and-extensibility": { "disposition": "addressed", "sections": ["Migration and Rollback"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["Validation", "Review Record"] },
+        "external-dependencies": { "disposition": "not-applicable", "reason": "The repository-owned documentation portal decision has no founder, jurisdiction, provider, or professional dependency; release evidence remains governed by its referenced controls." },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["References"] }
+      }
+    },
+    {
+      "artifact_id": "CLASS-SAMPLE-003",
+      "path": "docs/blueprint/07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md",
+      "identity": "PDA-DEV-010",
+      "class_id": "specification",
+      "declared_depth": "architecture-specified",
+      "evidence_state": "documented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "purpose": { "disposition": "addressed", "sections": ["Purpose"] },
+        "authority-and-scope": { "disposition": "addressed", "sections": ["Documentation Planes", "Ownership"] },
+        "data-and-integrity": { "disposition": "addressed", "sections": ["Content Rules", "Product Documentation Manifest"] },
+        "contracts-and-compatibility": { "disposition": "addressed", "sections": ["Documentation Planes", "Product Documentation Manifest"] },
+        "authority-controls": { "disposition": "addressed", "sections": ["Content Rules", "Ownership"] },
+        "experience-and-accessibility": { "disposition": "addressed", "sections": ["Content Rules", "Quality Gates"] },
+        "offline-and-degraded": { "disposition": "not-applicable", "reason": "This architecture governs documentation publication and help binding; it does not authorize an offline product-help cache or offline business command." },
+        "failure-and-recovery": { "disposition": "addressed", "sections": ["Change and Release Integration", "Quality Gates"] },
+        "security-and-privacy": { "disposition": "addressed", "sections": ["Content Rules", "Quality Gates"] },
+        "migration-and-extensibility": { "disposition": "addressed", "sections": ["Proposed Repository Shape", "Change and Release Integration"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["Quality Gates", "Product Documentation Manifest"] },
+        "external-dependencies": { "disposition": "addressed", "sections": ["Open Decisions"] },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["Product Documentation Manifest", "Ownership"] }
+      }
+    },
+    {
+      "artifact_id": "CLASS-SAMPLE-004",
+      "path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
+      "identity": "PDA-PLT-027",
+      "class_id": "machine-contract",
+      "declared_depth": "contract-specified",
+      "evidence_state": "implemented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "authority-and-scope": { "disposition": "addressed", "sections": ["Purpose", "Scope"] },
+        "data-and-integrity": { "disposition": "addressed", "sections": ["High-Risk Controls"] },
+        "contracts-and-compatibility": { "disposition": "addressed", "sections": ["Permission Pattern", "Endpoint Coverage"] },
+        "authority-controls": { "disposition": "addressed", "sections": ["Segregation of Duties", "High-Risk Controls"] },
+        "security-and-privacy": { "disposition": "addressed", "sections": ["Security and Privacy", "High-Risk Controls"] },
+        "migration-and-extensibility": { "disposition": "addressed", "sections": ["Quality Gates", "Fiscalization Permission Exemption"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["Endpoint Coverage", "Quality Gates"] },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["Endpoint Coverage", "Quality Gates"] }
+      }
+    },
+    {
+      "artifact_id": "CLASS-SAMPLE-005",
+      "path": "docs/blueprint/17-Roadmap/RATIFICATION_WAVE_MANIFEST_AND_REVIEW_STANDARD.md",
+      "identity": "PDA-RDM-010",
+      "class_id": "plan-roadmap-register",
+      "declared_depth": "contract-specified",
+      "evidence_state": "implemented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "purpose": { "disposition": "addressed", "sections": ["Purpose"] },
+        "authority-and-scope": { "disposition": "addressed", "sections": ["Authority", "Wave States"] },
+        "failure-and-recovery": { "disposition": "addressed", "sections": ["Finding Disposition", "Lifecycle Promotion Record"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["Review Records", "Validation"] },
+        "external-dependencies": { "disposition": "addressed", "sections": ["Current Wave Preparation"] },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["Frozen Scope Manifest", "Approval and Ratification Record"] }
+      }
+    },
+    {
+      "artifact_id": "CLASS-SAMPLE-006",
+      "path": "docs/blueprint/19-Competitive-Research/COMPETITIVE_RESEARCH_METHODOLOGY.md",
+      "identity": "PDA-CIR-002",
+      "class_id": "research-review-evidence",
+      "declared_depth": "contract-specified",
+      "evidence_state": "documented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "purpose": { "disposition": "addressed", "sections": ["1. Purpose", "2. Research Question Format"] },
+        "authority-and-scope": { "disposition": "addressed", "sections": ["3. Research Layers", "5. Sampling Rules"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["6. Evidence Labels", "7. Confidence Model", "14. Completion Criteria"] },
+        "external-dependencies": { "disposition": "addressed", "sections": ["11. Research with Subscription Tools", "13. Refresh Rules"] },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["4. Research Sequence", "8. Research Record Schema"] }
+      }
+    },
+    {
+      "artifact_id": "CLASS-SAMPLE-007",
+      "path": "docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md",
+      "identity": "PDA-OPS-018",
+      "class_id": "operations-runbook",
+      "declared_depth": "prototype-ready",
+      "evidence_state": "implemented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "authority-and-scope": { "disposition": "addressed", "sections": ["Purpose and Authority Boundary", "Universal Safety Rules"] },
+        "data-and-integrity": { "disposition": "addressed", "sections": ["Shared Evidence Record", "Runbook CP-RUN-003 — Catalog, Inventory, or Outbox Consistency Failure"] },
+        "contracts-and-compatibility": { "disposition": "addressed", "sections": ["Runbook CP-RUN-001 — Web, API, Authentication, or Authority Failure", "Runbook CP-RUN-003 — Catalog, Inventory, or Outbox Consistency Failure"] },
+        "authority-controls": { "disposition": "addressed", "sections": ["Universal Safety Rules", "Shared Evidence Record"] },
+        "offline-and-degraded": { "disposition": "not-applicable", "reason": "The currently implemented service groups are online controlled-prototype services; offline sync is explicitly deferred and has no executable service runbook yet." },
+        "failure-and-recovery": { "disposition": "addressed", "sections": ["Runbook CP-RUN-001 — Web, API, Authentication, or Authority Failure", "Runbook CP-RUN-002 — PostgreSQL Health or Migration Failure", "Runbook CP-RUN-003 — Catalog, Inventory, or Outbox Consistency Failure"] },
+        "security-and-privacy": { "disposition": "addressed", "sections": ["Universal Safety Rules", "Shared Evidence Record"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["Shared Evidence Record", "Known Missing Operational Evidence"] },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["Purpose and Authority Boundary", "Known Missing Operational Evidence"] }
+      }
+    },
+    {
+      "artifact_id": "CLASS-SAMPLE-008",
+      "path": "apps/docs/content/docs/api/index.mdx",
+      "identity": "PDOC-0005",
+      "class_id": "product-documentation",
+      "declared_depth": "prototype-ready",
+      "evidence_state": "implemented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "purpose": { "disposition": "addressed", "sections": ["Prototype API surfaces"] },
+        "authority-and-scope": { "disposition": "addressed", "sections": ["OpenAPI authority", "Governing sources"] },
+        "contracts-and-compatibility": { "disposition": "addressed", "sections": ["Implemented procedure families", "OpenAPI authority"] },
+        "authority-controls": { "disposition": "addressed", "sections": ["Base URL", "Error and security behavior"] },
+        "experience-and-accessibility": { "disposition": "not-applicable", "reason": "This internal API boundary overview is a developer reference, not an interactive workflow; documentation-portal accessibility remains governed by ADR-0021 and PDA-DEV-010." },
+        "offline-and-degraded": { "disposition": "not-applicable", "reason": "No offline API or sync contract is implemented at the declared evidence revision." },
+        "failure-and-recovery": { "disposition": "addressed", "sections": ["Error and security behavior", "Verification"] },
+        "security-and-privacy": { "disposition": "addressed", "sections": ["Error and security behavior"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["Verification"] },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["Governing sources"] }
+      }
+    },
+    {
+      "artifact_id": "CLASS-SAMPLE-009",
+      "path": "docs/blueprint/00-Foundation/README.md",
+      "identity": "PDA-FND-015",
+      "class_id": "index-template-derived-evidence",
+      "declared_depth": "indexed",
+      "evidence_state": "implemented",
+      "review_state": "author-self-reviewed",
+      "dimensions": {
+        "authority-and-scope": { "disposition": "addressed", "sections": ["Foundation"] },
+        "verification-and-evidence": { "disposition": "addressed", "sections": ["Artifact Catalog"] },
+        "references-and-traceability": { "disposition": "addressed", "sections": ["Foundation", "Artifact Catalog"] }
+      }
+    }
+  ]
+}

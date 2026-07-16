@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.10.0
+version: 0.11.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -29,7 +29,7 @@ No severity is downgraded merely because later files exist. File existence is no
 
 ## Live-Branch Verification
 
-The immutable audit cutoff remains `c9faa31`. This disposition was reverified on 2026-07-16 after the initial research synthesis (`b70b879`), qualified research closeout (`f98b1e2`), depth/status remediation (`87d995b`), canonical-navigation checkpoint (`c87b04a`), and product-documentation checkpoint (`6b76684`). The current generated registry contains 438 governed records: 409 Draft, 28 Proposed, and one Superseded. It contains all 86 competitive-research documents. The research ledger now records CIR-LED-0001 through CIR-LED-0010, while CIR-BACK-021 through CIR-BACK-025 preserve the comparator families and direct-observation work that remain open.
+The immutable audit cutoff remains `c9faa31`. This disposition was reverified on 2026-07-16 after the initial research synthesis (`b70b879`), qualified research closeout (`f98b1e2`), depth/status remediation (`87d995b`), canonical-navigation checkpoint (`c87b04a`), and product-documentation checkpoint (`6b76684`). The current generated registry contains 442 governed records: 412 Draft, 28 Proposed, and two Superseded. It contains all 86 competitive-research documents. The research ledger now records CIR-LED-0001 through CIR-LED-0010, while CIR-BACK-021 through CIR-BACK-025 preserve the comparator families and direct-observation work that remain open.
 
 PR #75 at `f98b1e2` has passing `meridian` and both `validate-docs` checks. Local commits are newer than that PR head and therefore require their own fresh CI run before merge. The branch still does not ratify authority, close remaining research families, supply founder/external decisions, or prove pilot/production readiness.
 
@@ -51,6 +51,8 @@ The WS2 interim-evidence checkpoint corrects the binary evidence model: required
 
 The operational-procedure checkpoint registers four actually merged controlled-prototype service groups and supplies bounded runtime/authentication, PostgreSQL/migration, and Catalog/Inventory/outbox-consistency procedures. Eight seeded tests reject unknown capabilities, missing artifacts, false review/exercise advancement, and pilot-ready claims without required evidence. All four services remain `procedure-draft`, with zero pilot-ready claims; dashboards, tested alerts, named on-call escalation, independent review, restore/failover, and dated exercises remain open. DCA-011 is therefore structurally reduced, not closed.
 
+The document-class checkpoint defines nine canonical classes over thirteen reusable dimensions, adds opt-in front-matter and generated-registry fields, registers one representative sample per class, updates specification/ADR/runbook/applicability templates, and records an adversarial author self-review. Eight seeded tests reject unknown classes, metadata drift, missing section mappings, weak non-applicability reasons, incomplete class coverage, and missing review identity. The validator passes nine samples but explicitly cannot establish semantic correctness or independent approval. DCA-006 is implemented in Draft and remains open for independent review.
+
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
@@ -60,7 +62,7 @@ The operational-procedure checkpoint registers four actually merged controlled-p
 | DCA-003 | Critical | Accepted | Reconciled to `main` `4045474`; independent and pre-merge refresh pending | Program status and first-slice plan match current main, issues, PRs, and evidence at a stated SHA |
 | DCA-004 | Critical | Accepted | Implemented at PR #75 head; newer local commits require fresh CI | Generated document registry current; PR #75 documentation jobs green in a fresh checkout |
 | DCA-005 | High | Accepted | Partially implemented: all families registered; admitted contract/evidence gaps remain | Every capability family has an explicit readiness depth and admission trigger; no speculative first-slice expansion |
-| DCA-006 | High | Accepted | Open | Governed artifact-class standard, templates, validator behavior, and sample review evidence agree |
+| DCA-006 | High | Accepted | Implemented in Draft; nine-class sample self-review passes, independent review open | Governed artifact-class standard, templates, validator behavior, and sample review evidence agree |
 | DCA-007 | High | Accepted | Initial waves registered; independent review and continuing backlog remain | Every research wave has a ledger record; affected backlog entries have honest states and exact output/source links |
 | DCA-008 | High | Partially Accepted | Workforce and platform-service gaps reduced after cutoff; ITSM/MSP/RMM, IAM, infrastructure/IPAM/DCIM, mobile/offline, and named-product depth remain | Reviewed matrices/workflows/findings and dated source ledger for each remaining research family |
 | DCA-009 | High | Accepted | Implemented; independent closure review pending | Root and section indexes match generated inventory; orphan check has zero unexplained governed documents |

@@ -5,6 +5,10 @@ version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
+document_class: index-template-derived-evidence
+declared_depth: indexed
+evidence_state: implemented
+applicable_dimensions: [authority-and-scope, verification-and-evidence, references-and-traceability]
 ---
 
 # Foundation

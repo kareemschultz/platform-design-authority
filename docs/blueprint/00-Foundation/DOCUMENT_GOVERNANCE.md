@@ -1,7 +1,7 @@
 ---
 document_id: PDA-FND-011
 title: Document Governance
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -40,6 +40,8 @@ Every authoritative document must include:
 - `superseded_by` where applicable
 
 Additional metadata may include reviewers, dependencies, effective date, review cadence, classification, and related ADRs.
+
+Artifacts admitted to the PDA-FND-017 class-adoption register additionally require `document_class`, `declared_depth`, `evidence_state`, and `applicable_dimensions`. These fields are opt-in during the backward-compatible migration and do not promote lifecycle.
 
 ## Lifecycle
 

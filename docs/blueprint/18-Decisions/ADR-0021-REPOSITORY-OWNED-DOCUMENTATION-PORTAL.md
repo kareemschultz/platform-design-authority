@@ -9,6 +9,10 @@ last_reviewed: 2026-07-12
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0005, ADR-0016, ADR-0022, ADR-0025]
+document_class: architecture-decision
+declared_depth: contract-specified
+evidence_state: documented
+applicable_dimensions: [purpose, authority-and-scope, migration-and-extensibility, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # ADR-0021 — Use a Repository-Owned Fumadocs Documentation Portal

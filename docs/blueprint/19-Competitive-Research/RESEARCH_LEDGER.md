@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-007
 title: Competitive Research Ledger
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -257,6 +257,28 @@ Confidence is not approval. A high-confidence observation may still be unsuitabl
 - Follow-up: independent review, role-based customer/technician evidence, lawful tenant/agent trials, provider/security/deployment evaluation, and roadmap authority.
 - Revalidate when: Service/MSP/RMM scope is proposed, a remote-action provider is evaluated, a cited edition changes materially, or 2027-07-16, whichever occurs first.
 
+### CIR-LED-0012 — IAM and identity-administration documented research transferred
+
+- Status: In Review
+- Completed: 2026-07-16
+- Researcher: Codex with Platform Identity, Security, Developer Platform, Operations, and independent review pending
+- Wave: Continuing study — IAM / identity administration
+- Question: Which isolation, federation, provisioning, service-identity, recovery, rotation, delegated-administration, audit and migration patterns transfer without displacing Better Auth or collapsing Party and authorization ownership?
+- Products: Keycloak, authentik, Better Auth, and Microsoft Entra as an adjacent enterprise directory/workload-identity reference
+- Sources: SRC-049 through SRC-056; page-level first-party citations in PDA-CIR-090
+- Evidence mode: documented public administration, product, security and protocol evidence; internal architectural synthesis
+- Access limitations: no configured production tenant, paid feature, protocol certification, source-code security review, upgrade/migration, scale test, accessibility review, support evidence or regional/provider review
+- Finding: retain Better Auth under ADR-0006; extend only through Platform Identity after PDA-PLT-028 and owner/security review; replace only for a named unmet requirement through an Accepted ADR and reversible migration evidence. Provider realms, tenants, organizations, groups, roles and claims remain adapter-local inputs rather than Meridian tenant, Party or authorization truth.
+- Contradictions: compared products deliberately combine authentication, directory and administration concepts for operator convenience, while Meridian ownership requires explicit separation; authentik documents multi-tenancy as alpha with cross-tenant cautions, and Better Auth plugin documentation exposes useful SSO/SCIM patterns without constituting Meridian adoption approval.
+- Confidence: Medium for documented concepts/control patterns; Low for defaults, effectiveness, edition parity, migration effort, accessibility and operational quality
+- Meridian impact:
+  - outputs: PDA-CIR-090 through PDA-CIR-092;
+  - capabilities: research input for `platform.authentication`, `platform.identity`, `platform.tenancy`, `platform.organizations`, `platform.authorization`, `platform.party`, `platform.audit`, `platform.secrets`, `developer.applications`, and `developer.api-keys`;
+  - contracts: no identifiers, endpoints, plugin enablement or owner changes introduced; capability/contract registration and ADR review remain required;
+  - implementation: no first-slice expansion and no provider selection.
+- Follow-up: independent Platform Identity/Security review, customer requirement evidence, configured-provider trials, protocol/security/tenant-isolation testing, operational exercises and roadmap authority.
+- Revalidate when: enterprise federation, SCIM, delegated identity administration, workload identity or authentication-owner change is proposed; a cited product behavior changes materially; or 2027-07-16, whichever occurs first.
+
 ## 6.1 Stable Research Result Index
 
 This index is the machine-checked registration boundary between backlog questions, durable outputs, ledger evidence, and stable source records. `Transferred` means the outputs are registered; it does not mean the Draft findings are approved or implementation-ready.
@@ -272,6 +294,7 @@ This index is the machine-checked registration boundary between backlog question
 | RES-007 | Platform services | Transferred | CIR-LED-0008 | CIR-BACK-017 through CIR-BACK-019 | PDA-CIR-070 through PDA-CIR-079 | SRC-026 through SRC-031 | Independent review and controlled prototype evidence pending |
 | RES-008 | Cross-domain synthesis | Transferred | CIR-LED-0009 | CIR-BACK-020 | PDA-CIR-080 through PDA-CIR-086 | SRC-001 through SRC-040 | Independent review; direct mobile/offline study remains CIR-BACK-025 |
 | RES-009 | ITSM/MSP/RMM | Transferred | CIR-LED-0011 | CIR-BACK-021 | PDA-CIR-087 through PDA-CIR-089 | SRC-041 through SRC-048 | Independent review, direct tenant/agent observation, provider evaluation and roadmap admission pending |
+| RES-010 | IAM/identity administration | Transferred | CIR-LED-0012 | CIR-BACK-022 | PDA-CIR-090 through PDA-CIR-092 | SRC-049 through SRC-056 | Independent review, configured-provider observation, protocol/security evaluation and roadmap admission pending |
 
 ## 6.2 Registration Invariants
 

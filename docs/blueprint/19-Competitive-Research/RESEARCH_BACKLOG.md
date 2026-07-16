@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-008
 title: Competitive Research Backlog
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -272,7 +272,7 @@ Each entry records:
 ### CIR-BACK-022 — IAM and identity-administration comparison
 
 - Priority: P2
-- Status: Planned
+- Status: Transferred
 - Domain: Platform Identity / Security / Developer Platform
 - Trigger: before enterprise federation, SCIM, delegated identity administration, or an authentication-owner change is proposed
 - Question: Which Keycloak, Authentik, Better Auth, and adjacent IAM patterns are useful for realms or organizations, federation, lifecycle provisioning, service accounts, recovery, key rotation, delegated administration, audit, and migration?
@@ -281,6 +281,7 @@ Each entry records:
 - Dependencies: Better Auth decision matrix, ADR-0003, Party boundaries, security architecture, and ADR review for any owner change.
 - Owner: Platform Identity and Security
 - Completion: evidence-backed comparison that does not displace Better Auth or collapse Party/authorization ownership without an ADR.
+- Transfer evidence: CIR-LED-0012, RES-010, PDA-CIR-090 through PDA-CIR-092, and SRC-049 through SRC-056. Independent review, configured-provider observation, protocol/security testing, customer evidence, and any roadmap admission remain open.
 
 ### CIR-BACK-023 — Infrastructure inventory, DCIM, IPAM, and network operations
 

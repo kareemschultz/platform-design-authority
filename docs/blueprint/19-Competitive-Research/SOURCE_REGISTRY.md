@@ -1,7 +1,7 @@
 ---
 document_id: PDA-CIR-006
 title: Competitive Research Source Registry
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -236,8 +236,16 @@ The page-level citations remain in their research documents. These stable record
 | SRC-046 | SuperOps | official help/developer documentation | https://support.superops.com/en/articles/7054997-using-scripts-in-superops | 2026-07-16 | documented | public help only; role defaults, execution evidence and client isolation untested |
 | SRC-047 | Datto RMM | official documentation | https://rmm.datto.com/help/en/Content/3NEWUI/Setup/SecurityLevels.htm | 2026-07-16 | documented | account/security-level configuration and agent modes vary; no provider environment tested |
 | SRC-048 | IT Glue | official security documentation | https://www.itglue.com/resources/itglue-security/ | 2026-07-16 | documented/vendor-asserted | security/control claims not independently verified; tenant and offboarding workflow unobserved |
+| SRC-049 | Keycloak | official server administration documentation | https://www.keycloak.org/docs/latest/server_admin/ | 2026-07-16 | documented | configured realms/organizations, delegated administration, migration and operational effectiveness untested |
+| SRC-050 | authentik multi-tenancy | official system-management documentation | https://docs.goauthentik.io/sys-mgmt/tenancy | 2026-07-16 | documented | Enterprise alpha; no deployment tested; documented cross-tenant expression-policy and recovery-key cautions remain material |
+| SRC-051 | authentik identity administration | official user/source/provider documentation | https://docs.goauthentik.io/users-sources/sources | 2026-07-16 | documented | representative locator; configured sources, providers, roles and paid features unobserved |
+| SRC-052 | authentik service identity, recovery and audit | official system-management documentation | https://docs.goauthentik.io/sys-mgmt/service-accounts/ | 2026-07-16 | documented | representative locator; service-account rotation, recovery flows/keys and event behavior untested |
+| SRC-053 | Better Auth SSO | official plugin documentation | https://better-auth.com/docs/plugins/sso | 2026-07-16 | documented | documentation is not Meridian feature approval; protocol behavior, security defaults, paid infrastructure and migration untested |
+| SRC-054 | Better Auth SCIM and Organization | official plugin documentation | https://better-auth.com/docs/plugins/scim | 2026-07-16 | documented | representative locator; organization-scoped token/admin behavior and directory convergence untested |
+| SRC-055 | Microsoft Entra SCIM | official product documentation | https://learn.microsoft.com/en-us/entra/identity/app-provisioning/scim-support-in-entra-id | 2026-07-16 | documented | provider configuration, edition/licensing, regional behavior and end-to-end provisioning untested |
+| SRC-056 | Microsoft Entra workload identity and certificate rotation | official architecture documentation | https://learn.microsoft.com/en-us/entra/architecture/service-accounts-managed-identities | 2026-07-16 | documented | Azure-specific managed-identity availability; workload and overlapping-certificate rotation not exercised |
 
-SRC-001 through SRC-048 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in these waves.
+SRC-001 through SRC-056 point only to first-party public collections. Rows that name several products are navigation indexes, not proof that the single representative locator supports claims about every named product. Load-bearing claims must cite the exact first-party page in the applicable research document, including product, edition, date, and access limitation. Secondary evidence was used only to discover questions and is not load-bearing in these waves.
 
 ## 12. Review and Maintenance
 

@@ -69,4 +69,28 @@ test("an authenticated operator creates and reads a tenant-scoped Product", asyn
 	await page.getByRole("link", { name: "Back to results" }).click();
 	await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
 	await expect(page.getByRole("link", { name: productName })).toBeVisible();
+
+	const performanceEvidence = await page.evaluate(() => {
+		const navigation = performance.getEntriesByType("navigation")[0] as
+			| PerformanceNavigationTiming
+			| undefined;
+		const resources = performance.getEntriesByType(
+			"resource"
+		) as PerformanceResourceTiming[];
+		return {
+			domContentLoadedMs: navigation
+				? navigation.domContentLoadedEventEnd - navigation.startTime
+				: null,
+			navigationDurationMs: navigation?.duration ?? null,
+			resourceCount: resources.length,
+			transferredBytes: resources.reduce(
+				(total, resource) => total + resource.transferSize,
+				0
+			),
+		};
+	});
+	await testInfo.attach("operations-performance.json", {
+		body: JSON.stringify(performanceEvidence, null, 2),
+		contentType: "application/json",
+	});
 });

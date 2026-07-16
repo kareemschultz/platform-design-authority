@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-025
 title: WS2 PR6 Product and Inventory Web Experience Evidence
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Frontend Platform
 last_reviewed: 2026-07-16
@@ -100,15 +100,28 @@ The target is WCAG 2.2 AA; no conformance claim is made. Automated checks can de
 
 `apps/docs/content/docs/inventory/index.mdx` is the stable `PDA-DOC-001` controlled-prototype guide. It records prerequisites, exact permissions, permission-versus-entitlement outcomes, Product lifecycle, projection freshness, reversal/compensation, count maker/checker flow, transfer exceptions, import retention, conflict recovery, offline limits, and prototype exclusions. The docs schema validates the ID format and a new content check rejects duplicate stable IDs. Troubleshooting and prototype release notes are reconciled so they no longer claim Catalog/Inventory are absent.
 
+## Production-build and bundle evidence
+
+An optimized Next.js 16.2.10 build succeeds with all 13 new Operations route patterns. The emitted `.next/static` comparison uses a clean detached `main` worktree at `9e66939a901fe664b2d2655dc258fddf88ffd3a8` and the PR6 branch after consequential-UX remediation, both with `NEXT_PUBLIC_SERVER_URL=http://localhost:3000`.
+
+| Measure | Merged-main baseline | PR6 measured state | Change |
+|---|---:|---:|---:|
+| Static files | 46 | 62 | +16 |
+| Total emitted static bytes | 1,883,011 | 2,225,038 | +342,027 (18.16%) |
+| JavaScript bytes | 1,427,096 | 1,766,161 | +339,065 (23.76%) |
+| CSS bytes | 64,632 | 67,594 | +2,962 (4.58%) |
+
+These are uncompressed build-artifact totals, not per-route transferred bytes or a contractual performance budget. The comparison prevents an unmeasured “thin UI” claim; route-level transfer, field-device latency, production cache behavior, and capacity/SLO evidence remain open. No new table, state-store, form, spreadsheet, chart, or visualization dependency was added for the workflows. Existing backend Catalog query budgets remain the separately governed 300 ms/800 ms p95 assertions; this build does not relabel them as end-user latency.
+
 ## Executable verification recorded before exact-head review
 
 | Lane | Reproduced result |
 |---|---|
 | Generated contract/API closure | Targeted contract, domain, router, and application tests: 65 passed; OpenAPI, permission, and generated-client parity clean |
 | Live Catalog/Inventory PostgreSQL | 25 passed with paged balances, Count draft persistence/idempotency, exact SKU/state filtering, tenant non-disclosure, and activity metadata |
-| Web unit/type/format | 23 tests / 64 expectations; TypeScript and affected-file Biome checks clean before final UX integration |
+| Web unit/type/format | 31 tests / 93 expectations after consequential-UX and browser-found remediation; TypeScript and 75-file Biome checks clean |
 | Product documentation | `check-content`, Fumadocs generation, TypeScript, and Biome clean; one stable documentation ID |
-| Public browser baseline | Desktop/mobile login keyboard, skip-link, reflow, and axe checks reproduced locally; protected/authenticated full-stack lane remains an exact-head exit condition |
+| Browser and real-authority workflow | 6/6 desktop/mobile Chromium tests: login keyboard/skip-link/reflow/axe, protected redirect, and authenticated Product create/read/list through Better Auth, tenant membership, tenant-scoped role, entitlements, active context, real oRPC, and Catalog persistence |
 
 Final exact-head repository checks, authenticated browser counts, bundle/build measures, direct-API denial tests, CI links, and independent-review disposition are added only after they are reproduced on the review head.
 
@@ -125,4 +138,5 @@ Final exact-head repository checks, authenticated browser counts, bundle/build m
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.0 | 2026-07-16 | Frontend Platform | Added reproduced authenticated desktop/mobile browser, real-authority fixture, CI orchestration, production-build, bundle-delta, and consequential-UX remediation evidence. |
 | 0.1.0 | 2026-07-16 | Frontend Platform | Recorded the initial PR6 controlled-prototype route, architecture, workflow, UI-pattern, accessibility-target, responsive, help, executable-evidence, and residual-risk disposition. |

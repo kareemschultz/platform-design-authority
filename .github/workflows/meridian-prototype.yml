@@ -214,3 +214,14 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:3001/ >/dev/null
           docker compose exec -T server bun run e2e:seed
           bun run --cwd apps/web test:e2e
+
+      - name: Retain browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-evidence
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+          retention-days: 14

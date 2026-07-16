@@ -1,3 +1,5 @@
+import type { Route } from "next";
+
 export type FreshnessState = "current" | "stale" | "unreconciled";
 
 export interface OperationsScope {
@@ -11,7 +13,7 @@ export function operationsHref(
 	pathname: string,
 	current: URLSearchParams,
 	updates: Record<string, string | null | undefined>
-): string {
+): Route {
 	const next = new URLSearchParams(current);
 	for (const [key, value] of Object.entries(updates)) {
 		if (value) {
@@ -21,7 +23,7 @@ export function operationsHref(
 		}
 	}
 	const query = next.toString();
-	return query ? `${pathname}?${query}` : pathname;
+	return (query ? `${pathname}?${query}` : pathname) as Route;
 }
 
 export function freshnessState(
@@ -72,10 +74,10 @@ export function safeDownloadName(value: string): string {
 
 export function safeOperationsReturn(
 	value: string | null | undefined,
-	fallback = "/operations"
-): string {
+	fallback: Route = "/operations"
+): Route {
 	if (!value?.startsWith("/operations") || value.startsWith("//")) {
 		return fallback;
 	}
-	return value;
+	return value as Route;
 }

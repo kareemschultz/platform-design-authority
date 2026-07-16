@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Meridian Documentation Completion Audit Disposition V1
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -45,6 +45,8 @@ The capability-readiness checkpoint registers all 32 namespaces with their autho
 
 The ratification-preparation checkpoint defines immutable candidate manifests, reviewer-role coverage, finding dispositions, approval records, and document-level promotion evidence. RW-00 is `preparation`; RW-01 through RW-08 are `not-started`; every candidate/review/approval/promotion field is empty. Seven seeded tests reject lifecycle advancement without evidence. DCA-013 remains open because no actual independent, founder, specialist, or approval-authority review has occurred.
 
+The active-placeholder checkpoint replaces the fictitious OpenAPI host with the bounded local controlled-prototype server and makes every unresolved infrastructure-cost category carry an accountable owner, required evidence, and decision trigger. The documentation validator rejects recurrence of the former OpenAPI filler or an unqualified cost `TBD`. This closes the repository defect while leaving all provider, topology, workload, and price decisions explicitly unresolved.
+
 ## Finding Matrix
 
 | ID | Priority | Classification | Live disposition | Exact closure evidence |
@@ -65,7 +67,7 @@ The ratification-preparation checkpoint defines immutable candidate manifests, r
 | DCA-014 | Medium | Accepted | Open monitoring obligation | Technology ledger separates available, assessed, pinned, and proven versions with dated evidence and compatibility results |
 | DCA-015 | Medium | Accepted | Open | GitHub issue #59 and the existing project are dispositioned into one consistent state |
 | DCA-016 | High | Accepted | Implemented; independent closure review pending | New bounded validation tests fail on seeded index/orphan/MDX/status/research defects and pass on corrected sources |
-| DCA-017 | Medium | Accepted | Open | Active OpenAPI filler removed; unresolved cost inputs carry owner, evidence need, and decision trigger |
+| DCA-017 | Medium | Accepted | Implemented; independent closure review pending | Active OpenAPI filler removed; unresolved cost inputs carry owner, evidence need, and decision trigger |
 | DCA-018 | High | Accepted | Open | WS2 evidence source resolves applicable capability-dimension cells to reviewed test evidence or explicit depth deferral |
 | DCA-019 | Blocker | Needs Founder/External Decision | Open; documentation may prepare but not close | Actual founder decisions, professional opinions, provider evidence, customer evidence, and security/accessibility/operations results linked at their gates |
 

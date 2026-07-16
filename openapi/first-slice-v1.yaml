@@ -8,8 +8,10 @@ info:
     Operations without detailed payload schemas are route and authority seams; their request and response
     schemas require completion before implementation review and generated SDK acceptance.
 servers:
-  - url: https://api.example.invalid/v1
-    description: Placeholder only
+  - url: http://localhost:3000/v1
+    description: >-
+      Local controlled-prototype server. Pilot and production hosts are intentionally absent until a
+      deployment topology is selected and its environment-specific security and availability evidence is reviewed.
 security:
   - sessionCookie: []
 tags:

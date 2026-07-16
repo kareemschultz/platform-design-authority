@@ -23,6 +23,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { isVersionConflict, operationsHref } from "@/lib/operations";
+import { workspaceWorkState } from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
 
 import {
@@ -33,7 +34,7 @@ import {
 	StateBadge,
 } from "./operations-shared";
 import { QueryFailure } from "./query-state";
-import { useWorkspace } from "./workspace-context";
+import { useWorkspace, useWorkspaceWorkGuard } from "./workspace-context";
 
 const COUNT_STATES = [
 	"Draft",
@@ -210,6 +211,12 @@ export function CountCreatePage() {
 	const [locationId, setLocationId] = useState(
 		workspace.identity?.activeContext?.locationId ?? ""
 	);
+	useWorkspaceWorkGuard(
+		workspaceWorkState(
+			create.isPending,
+			locationId !== (workspace.identity?.activeContext?.locationId ?? "")
+		)
+	);
 	return (
 		<OperationsPageFrame
 			actions={
@@ -295,6 +302,17 @@ function CountScanner({ count }: { count: StockCount }) {
 	const [variantId, setVariantId] = useState("");
 	const [observedQuantity, setObservedQuantity] = useState("");
 	const [unit, setUnit] = useState("each");
+	useWorkspaceWorkGuard(
+		workspaceWorkState(
+			save.isPending,
+			Boolean(
+				productId.trim() ||
+					variantId.trim() ||
+					observedQuantity.trim() ||
+					unit !== "each"
+			)
+		)
+	);
 	return (
 		<form
 			aria-labelledby="count-scanner-heading"
@@ -412,6 +430,9 @@ function CountActions({ count }: { count: StockCount }) {
 	const queryClient = useQueryClient();
 	const submit = useMutation(orpc.inventory.counts.submit.mutationOptions());
 	const approve = useMutation(orpc.inventory.counts.approve.mutationOptions());
+	useWorkspaceWorkGuard(
+		workspaceWorkState(submit.isPending || approve.isPending, false)
+	);
 	const refresh = async () =>
 		queryClient.invalidateQueries({ queryKey: orpc.inventory.counts.key() });
 	return (

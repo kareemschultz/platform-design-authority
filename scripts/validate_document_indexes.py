@@ -8,6 +8,7 @@ turn be linked once from their parent navigation plane.
 """
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -20,7 +21,16 @@ PRODUCT_DOCUMENTATION = REPO_ROOT / "registry" / "product-documentation.json"
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 PUBLIC_ROOT_FILES = ("AGENTS.md", "CLAUDE.md", "README.md")
 PUBLIC_DOCUMENT_ROOTS = ("docs", "apps/docs", "ops")
-IGNORED_DIRECTORY_NAMES = {".next", ".source", "dist", "node_modules"}
+AUXILIARY_DOCUMENT_ROOTS = (".agents/skills", ".claude/skills", ".changeset", ".github")
+IGNORED_DIRECTORY_NAMES = {
+    ".git",
+    ".next",
+    ".source",
+    ".turbo",
+    "coverage",
+    "dist",
+    "node_modules",
+}
 
 
 def link_targets(index_path: Path) -> list[tuple[Path, int, str]]:
@@ -75,6 +85,39 @@ def discover_public_artifacts(repo_root: Path) -> set[Path]:
     return artifacts
 
 
+def discover_auxiliary_artifacts(repo_root: Path) -> set[Path]:
+    """Return bounded tool, release, and contribution Markdown sources."""
+
+    artifacts: set[Path] = set()
+    for relative_root in AUXILIARY_DOCUMENT_ROOTS:
+        root = repo_root / relative_root
+        if not root.exists():
+            continue
+        artifacts.update(
+            candidate.resolve()
+            for candidate in root.rglob("*")
+            if candidate.is_file() and candidate.suffix.lower() in {".md", ".mdx"}
+        )
+    return artifacts
+
+
+def discover_repository_artifacts(repo_root: Path) -> set[Path]:
+    """Return all source Markdown/MDX while pruning generated/dependency trees."""
+
+    artifacts: set[Path] = set()
+    for directory, child_directories, filenames in os.walk(repo_root):
+        child_directories[:] = [
+            name for name in child_directories if name not in IGNORED_DIRECTORY_NAMES
+        ]
+        base = Path(directory)
+        artifacts.update(
+            (base / filename).resolve()
+            for filename in filenames
+            if Path(filename).suffix.lower() in {".md", ".mdx"}
+        )
+    return artifacts
+
+
 def validate_artifact_accounting(
     documents: list[dict[str, str]],
     exemptions: list[dict[str, str]],
@@ -102,6 +145,10 @@ def validate_artifact_accounting(
                     f"{path.relative_to(repo_root).as_posix()}: {category} path does not exist"
                 )
 
+    category_paths["auxiliary workflow source"] = discover_auxiliary_artifacts(
+        repo_root
+    )
+
     category_names = list(category_paths)
     for index, left_name in enumerate(category_names):
         for right_name in category_names[index + 1 :]:
@@ -112,10 +159,11 @@ def validate_artifact_accounting(
                 )
 
     accounted = set().union(*category_paths.values())
-    for path in sorted(discover_public_artifacts(repo_root) - accounted):
+    for path in sorted(discover_repository_artifacts(repo_root) - accounted):
         errors.append(
-            f"{path.relative_to(repo_root).as_posix()}: public Markdown/MDX artifact "
-            "is neither governed, explicitly exempt, nor product-manifested"
+            f"{path.relative_to(repo_root).as_posix()}: repository Markdown/MDX artifact "
+            "is neither governed, explicitly exempt, product-manifested, nor a bounded "
+            "auxiliary workflow source"
         )
     return errors
 
@@ -236,7 +284,7 @@ def main() -> int:
         return 1
     print(
         "Document-index validation passed: every governed artifact has one "
-        "canonical linked index entry and every public Markdown/MDX artifact "
+        "canonical linked index entry and every repository Markdown/MDX artifact "
         "has exactly one inventory route."
     )
     return 0

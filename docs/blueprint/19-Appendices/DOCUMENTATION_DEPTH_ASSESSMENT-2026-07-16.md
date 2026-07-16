@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: Documentation Depth and Readiness Assessment 2026-07-16
-version: 0.12.0
+version: 0.13.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -36,7 +36,7 @@ Where an area contains mixed depths, the result names the proven subset and does
 
 | Area | Current depth/evidence | Material gaps before the next claim |
 |---|---|---|
-| Foundation and governance | Architecture-specified; nine document classes and thirteen dimensions have an opt-in register, templates, author self-review, and seeded validation; all 493 public Markdown/MDX artifacts have exactly one governed, exempt, or product-manifested inventory route; ratification evidence gates exist; all material remains Draft | Independent class/depth review, measured legacy adoption, actual ratification reviews/approvals, Constitution promotion evidence |
+| Foundation and governance | Architecture-specified; nine document classes and thirteen dimensions have an opt-in register, templates, author self-review, and seeded validation; all 524 repository Markdown/MDX artifacts have exactly one governed, exempt, product-manifested, or bounded auxiliary inventory route; ratification evidence gates exist; all material remains Draft | Independent class/depth review, measured legacy adoption, actual ratification reviews/approvals, Constitution promotion evidence |
 | ADR estate | Architecture decisions are Proposed and generally coherent | Zero Accepted ADRs; complete review records and ratification waves |
 | Platform Kernel / WS1 | Prototype-ready and verified at controlled-prototype depth for 11 first-slice capabilities | Production RLS/topology, external auth/provider evidence, security/accessibility/operations gates |
 | Catalog and Inventory / WS2 | Contract-specified and partially implemented through merged PR4; PDA-APP-023 records bounded Event Backbone evidence; 13 partial rows/80 cells retain interim PR2/PR3 registration while bulk import stays planned | imports/numbering, web UX/accessibility, PR4–PR7 capability-evidence reconciliation, remaining planned cells, final audit and closeout |

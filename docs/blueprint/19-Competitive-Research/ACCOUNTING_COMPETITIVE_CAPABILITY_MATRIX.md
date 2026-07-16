@@ -4,7 +4,7 @@ title: Accounting and Bookkeeping Competitive Capability Matrix
 version: 0.1.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0013, ADR-0016, ADR-0022]
 ---
 
@@ -33,7 +33,7 @@ These products serve different segments and must not be scored as if they had id
 
 ## 3. Evidence Cutoff and Source Coverage
 
-Evidence cutoff: 2026-07-15.
+Evidence cutoff: 2026-07-16.
 
 Primary sources reviewed in the initial pass:
 
@@ -42,7 +42,21 @@ Primary sources reviewed in the initial pass:
 - Xero US accounting product and feature pages: `https://www.xero.com/us/accounting-software/`
 - QuickBooks accounting product page: `https://quickbooks.intuit.com/accounting/`
 
-The remaining products require deeper first-party workflow review before high-confidence comparative scoring. Their preliminary entries identify research scope rather than final conclusions.
+The remaining products require deeper authenticated workflow review before high-confidence comparative scoring. Their preliminary entries identify research scope rather than final conclusions. Current official workflow sources used to revalidate the matrix are recorded below; public documentation does not establish usability, reliability, regional availability, or plan parity.
+
+| Product | Official workflow evidence | Retrieved | Access/claim limit |
+|---|---|---|---|
+| Kick | [product and bookkeeping model](https://www.kick.co/) | 2026-07-16 | public product claims; no authenticated ledger tested |
+| Akaunting | [banking transactions](https://akaunting.com/hc/docs/banking/transactions/) | 2026-07-16 | public documentation/open-source surface; deployment variance |
+| Xero | [reconcile bank transactions](https://www.xero.com/us/accounting-software/reconcile-bank-transactions/) | 2026-07-16 | US public documentation; edition/region vary |
+| QuickBooks Online | [reconcile an account](https://quickbooks.intuit.com/learn-support/en-us/help-article/reconciliation/reconcile-account-quickbooks-online/L5rOz7Kew_US_en_US) | 2026-07-16 | US help; subscription/add-ons vary |
+| Wave | [account reconciliation](https://support.waveapps.com/hc/en-us/articles/208621656-How-to-reconcile-your-accounts) | 2026-07-16 | public help; regional availability varies |
+| FreshBooks | [bank reconciliation](https://support.freshbooks.com/hc/en-us/articles/360048900792-How-do-I-use-Bank-Reconciliation) | 2026-07-16 | public help; plan/region vary |
+| Zoho Books | [banking](https://www.zoho.com/books/help/banking/) | 2026-07-16 | public help; edition/region vary |
+| Odoo Accounting | [bank reconciliation](https://www.odoo.com/documentation/19.0/applications/finance/accounting/bank/reconciliation.html) | 2026-07-16 | Odoo 19 documented behavior; configured implementation untested |
+| ERPNext Accounting | [accounting](https://docs.frappe.io/erpnext/user/manual/en/accounting) | 2026-07-16 | public documentation; version/deployment vary |
+| Sage | [bank reconciliation](https://help.sbc.sage.com/en-us/accounting/banking/extra-bank-reconcile.html) | 2026-07-16 | one Sage product/help surface; no suite-wide parity claim |
+| NetSuite | [banking and reconciliation help](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_156820249909.html) | 2026-07-16 | public help; enterprise tenant/configuration untested |
 
 ## 4. Capability Status Vocabulary
 

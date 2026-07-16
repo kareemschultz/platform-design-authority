@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-009
 title: Common Failures and Pain Points Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0016, ADR-0022]
 ---
 
@@ -260,3 +260,18 @@ Anecdotes may seed entries but cannot establish prevalence alone.
 - Domain research waves add detailed entries and may refine cross-domain entries.
 - This register must not name individual customers or reproduce proprietary support material.
 - Repeated pain does not require Meridian to implement the same capability; intentional exclusion remains valid when explained.
+
+## 7. Cross-Domain Closeout Index
+
+The original CFP identifiers remain stable. The required FAIL identifiers below deduplicate them into cross-domain transfer clusters rather than replacing historical entries.
+
+| ID | Failure cluster | Status | Evidence | Transfer |
+|---|---|---|---|---|
+| FAIL-001 | module maze, configuration sprawl and consultant-dependent operations | Supported | ERP wave; CFP-001, CFP-002, CFP-015 | ERP_IMPLEMENTATION_FINDINGS.md |
+| FAIL-002 | false success, hidden offline/provider uncertainty and unsafe retry | Supported | POS/payment/offline waves; CFP-012, CFP-013 | CROSS_DOMAIN_FAILURE_AND_RECOVERY_PATTERNS.md |
+| FAIL-003 | destructive correction and current-state overwrite | Supported | accounting, inventory, manufacturing, payroll | ADOPT_IMPROVE_REJECT_REGISTER.md |
+| FAIL-004 | copied/duplicate identity and authority across domains | Supported | CRM, HR, service and ERP waves | CUSTOMER_AND_SERVICE_IMPLEMENTATION_FINDINGS.md |
+| FAIL-005 | automation or AI hides evidence, authority, cost or recovery | Supported | accounting/platform-services waves; CFP-003 | PLATFORM_SERVICES_IMPLEMENTATION_FINDINGS.md |
+| FAIL-006 | dashboards/search/inboxes present projections as current truth | Supported | analytics, search and inbox waves; CFP-007 | CROSS_DOMAIN_WORKFLOW_PATTERNS.md |
+| FAIL-007 | bulk/mobile/board interactions omit accessible and partial-failure paths | Supported | cross-wave UX; CFP-009 through CFP-011 | proposed UX/accessibility review |
+| FAIL-008 | notification, comment or status is mistaken for assignment, audit or completion | Supported | service/collaboration/inbox waves | CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md |

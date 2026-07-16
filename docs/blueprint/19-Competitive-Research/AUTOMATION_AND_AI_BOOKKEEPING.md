@@ -18,11 +18,11 @@ Automation is valuable when it reduces repetitive work, surfaces exceptions, and
 
 ## 2. Authority Boundary
 
-Accounting owns financial validity and posting. AI and automation may prepare, classify, match, explain, prioritize, or propose. They may not redefine accounting policy, bypass permissions, invent evidence, or become the system of financial record.
+Finance owns financial validity and posting. AI and automation may prepare, classify, match, explain, prioritize, or propose. They may not redefine accounting policy, bypass permissions, invent evidence, or become the system of financial record.
 
 The governing rule is:
 
-> Automation may accelerate a decision. The Accounting domain must validate and commit the decision.
+> Automation may accelerate a decision. The Finance domain must validate and commit the decision.
 
 Every automated or AI-assisted action remains subject to:
 
@@ -387,3 +387,9 @@ Refresh this document when:
 - pilot evidence contradicts the review-first model;
 - legal, privacy, tax, or audit requirements change;
 - the shared operational inbox receives an owning platform design.
+
+## 18. Current Evidence and Limitations
+
+Official public evidence was revalidated 2026-07-16 from [Kick](https://www.kick.co/), [QuickBooks Online advanced accounting](https://quickbooks.intuit.com/online/advanced-accounting/), [Xero bank reconciliation](https://www.xero.com/us/accounting-software/reconcile-bank-transactions/), [Odoo 19 reconciliation models](https://www.odoo.com/documentation/19.0/applications/finance/accounting/bank/reconciliation_models.html), and [OpenAI Codex security guidance](https://developers.openai.com/codex/security/). These sources document vendor-stated or intended behavior; they do not prove model accuracy, calibration, autonomous-posting safety, customer outcomes, regional coverage, or Meridian implementation quality.
+
+Confidence is high for the requirement that Finance validates and commits every consequential accounting action, and medium or low for cross-product AI feature parity because features, plans, models and policies are volatile. Revalidate quarterly and before any Finance AI prototype.

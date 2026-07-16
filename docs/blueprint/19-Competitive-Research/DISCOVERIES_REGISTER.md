@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-016
 title: Competitive Research Discoveries Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0016, ADR-0022]
 ---
 
@@ -151,3 +151,47 @@ The original discovery remains with a pointer to the destination so the reasonin
 ## 7. Review
 
 Review discoveries at the end of every research wave. Unsupported observations must not linger indefinitely as suggestive truths; assign follow-up, reject them, or mark them stale.
+
+## 8. Program Closeout Discoveries
+
+### DISC-009 — Uncertainty is a cross-domain product primitive
+
+- Status: Transferred
+- Observation: provider, offline, index, automation and AI workflows share an inability to prove immediate finality.
+- Confidence: High
+- Transferred to: CROSS_DOMAIN_FAILURE_AND_RECOVERY_PATTERNS.md and DIFF-012.
+
+### DISC-010 — Shared UI is safest when authority remains visibly local
+
+- Status: Transferred
+- Observation: search, inbox, analytics, collaboration and support benefit from aggregation only when they execute through owning-domain contracts.
+- Confidence: High
+- Transferred to: CROSS_DOMAIN_WORKFLOW_PATTERNS.md and CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md.
+
+### DISC-011 — Correction has a reusable experience but non-reusable invariants
+
+- Status: Transferred
+- Observation: reversal, compensation, effective dating and diff/history recur, while Finance, Inventory, Payroll and Payment conservation rules differ.
+- Confidence: High
+- Transferred to: ADOPT_IMPROVE_REJECT_REGISTER.md.
+
+### DISC-012 — Product breadth is often implementation burden in disguise
+
+- Status: Supported
+- Observation: edition, module, add-on, configuration and consultant prerequisites determine usable capability more than checklist presence.
+- Confidence: Medium
+- Next action: preserve implementation-cost dimensions in future scorecards.
+
+### DISC-013 — AI control quality is ordinary application control plus new failure dimensions
+
+- Status: Transferred
+- Observation: AI still needs normal permission, entitlement, validation and audit, plus provenance, model failure, prompt injection, cost and probabilistic correction.
+- Confidence: High
+- Transferred to: PLATFORM_SERVICES_IMPLEMENTATION_FINDINGS.md.
+
+### DISC-014 — Offline is a risk contract, not a connectivity feature
+
+- Status: Transferred
+- Observation: every credible offline workflow needs leases, limits, identity, conflicts, certainty and reconciliation.
+- Confidence: High
+- Transferred to: CROSS_DOMAIN_FAILURE_AND_RECOVERY_PATTERNS.md.

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-010
 title: Market Gap Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0022]
 ---
 
@@ -178,3 +178,41 @@ A gap may become planned Meridian scope only when:
 ## 7. Maintenance
 
 Review this register at each research-wave closeout and roadmap boundary. Market movement can close a gap without Meridian action; those entries must be superseded rather than preserved as convenient differentiation claims.
+
+## 8. Program Closeout Additions
+
+### GAP-011 — Authority and freshness visible at the point of action
+
+- Status: Prototype Required
+- Users: all cross-domain operators
+- Need: distinguish authoritative facts from stale projections and know which domain will execute an action.
+- Evidence: ERP, analytics, search, service and inbox waves.
+- Meridian opportunity: authority/freshness labels plus source-domain reauthorization.
+- Risk: excessive technical language; requires UX evidence.
+
+### GAP-012 — One honest uncertainty and recovery vocabulary
+
+- Status: Prototype Required
+- Users: cashiers, operations, finance, support and administrators
+- Need: distinguish pending, queued, unknown, stale, conflicted, partial and needs-review outcomes.
+- Evidence: POS, payments, offline, integration, automation and analytics waves.
+- Meridian opportunity: shared state grammar with domain-owned recovery.
+- Risk: common words may obscure domain-specific legal effects.
+
+### GAP-013 — Effective-dated correction across business operations
+
+- Status: Prototype Required
+- Users: finance, inventory, workforce, administrators
+- Need: understand original, correction, net effect and downstream impact.
+- Evidence: accounting, supply-chain and workforce waves.
+- Meridian opportunity: shared correction presentation with domain-specific compensation.
+- Risk: false reuse across non-equivalent invariants.
+
+### GAP-014 — Deterministic productivity when AI is unavailable
+
+- Status: Supported
+- Users: every operator in an essential workflow
+- Need: finish work under AI disablement, refusal, outage or budget exhaustion.
+- Evidence: AI, automation, accounting and service waves.
+- Meridian opportunity: optional assistive layer with normal-command fallback.
+- Risk: duplicated UX if assistance is not integrated carefully.

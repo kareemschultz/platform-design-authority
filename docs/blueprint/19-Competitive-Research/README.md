@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-001
 title: Competitive Intelligence and Product Research
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0016, ADR-0022]
 ---
 
@@ -214,3 +214,21 @@ A wave is complete only when:
 ## 12. Initial Priority
 
 The first domain wave is accounting and bookkeeping because it crosses bank feeds, reconciliation, journals, reporting, approvals, audit, tax, attachments, automation, and AI-assisted review. It will compare automation-first products, small-business accounting systems, open-source accounting systems, ERP accounting modules, and enterprise financial suites without treating any one category as the reference model.
+
+## 13. Initial Program Completion Index
+
+The initial research program was authored through 2026-07-16. All artifacts remain Draft pending independent review and governed disposition.
+
+| Wave | Governed documents | Result |
+|---|---|---|
+| Framework and living registers | PDA-CIR-001 through PDA-CIR-019 | methodology, evidence, backlog, failures, gaps, decisions and implementation-evidence controls |
+| Accounting/bookkeeping | PDA-CIR-020 through PDA-CIR-024 | Finance-bound capability, workflow, AI, teardown and implementation findings |
+| ERP administration | PDA-CIR-025 through PDA-CIR-028 | capability, cross-domain workflow, teardown and implementation findings |
+| Supply chain | PDA-CIR-029 through PDA-CIR-036 | catalog/inventory, procurement/warehouse, manufacturing, teardown and findings |
+| Commerce/payments | PDA-CIR-037 through PDA-CIR-047 | POS, commerce, payments, stored value, marketplace, teardown and findings |
+| Customer/service | PDA-CIR-048 through PDA-CIR-059 | CRM, projects, support, field service, rental/booking, teardown and findings |
+| Workforce | PDA-CIR-060 through PDA-CIR-069 | HR, payroll, scheduling, expenses, teardown and findings |
+| Platform services | PDA-CIR-070 through PDA-CIR-079 | AI, automation, analytics, search, inbox, collaboration, docs, teardown and findings |
+| Cross-domain synthesis | PDA-CIR-080 through PDA-CIR-086 | differentiation, advantage, dispositions, shared workflows/recovery/review and closeout |
+
+The section contains 86 uniquely identified Markdown documents. SOURCE_REGISTRY.md records stable source collections; page-level evidence remains in each domain document. COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md records access limits and continuing external evidence gates.

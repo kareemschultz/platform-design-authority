@@ -4,7 +4,7 @@ title: Bookkeeping Workflow Reference
 version: 0.1.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0013, ADR-0016, ADR-0022]
 ---
 
@@ -14,7 +14,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0013, ADR-0016, ADR-0022]
 
 This document defines the reference workflow set Meridian should use when designing bookkeeping and accounting implementation. It converts broad feature names into stateful, auditable, correctable user journeys.
 
-It is not the Accounting domain specification, API contract, or implementation plan. It identifies the workflows those authorities must support and the evidence later prototypes must produce.
+It is not the Finance domain specification, API contract, or implementation plan. It identifies the workflows those authorities must support and the evidence later prototypes must produce.
 
 ## 2. Governing Principles
 
@@ -559,7 +559,7 @@ Acquire or identify capitalizable cost
 → handle impairment, disposal, transfer, or correction
 ```
 
-Inventory quantity ownership remains outside Accounting. Accounting owns financial asset treatment once the appropriate domain event or approved entry exists.
+Inventory quantity ownership remains outside Finance. Finance owns financial asset treatment once the appropriate domain event or approved entry exists.
 
 ## 21. Budgeting and Forecasting
 
@@ -730,5 +730,17 @@ This workflow reference feeds:
 - `AUTOMATION_AND_AI_BOOKKEEPING.md`;
 - `ACCOUNTING_PRODUCT_TEARDOWNS.md`;
 - `ACCOUNTING_IMPLEMENTATION_FINDINGS.md`;
-- the future Accounting implementation playbook;
+- the future Finance implementation playbook;
 - future capability, permission, event, API, UX, and quality-budget changes.
+
+## 30. Research Sources and Limits
+
+The workflow is a Meridian synthesis, not a claim that one product implements it end to end. Official public sources were revalidated 2026-07-16:
+
+- [Xero reconcile bank transactions](https://www.xero.com/us/accounting-software/reconcile-bank-transactions/) — documented reconciliation pattern; region and edition vary.
+- [QuickBooks Online reconciliation](https://quickbooks.intuit.com/learn-support/en-us/help-article/reconciliation/reconcile-account-quickbooks-online/L5rOz7Kew_US_en_US) — documented reconciliation pattern; no usability claim.
+- [Odoo 19 bank reconciliation](https://www.odoo.com/documentation/19.0/applications/finance/accounting/bank/reconciliation.html) — documented ERP workflow; configured implementation untested.
+- [ERPNext accounting](https://docs.frappe.io/erpnext/user/manual/en/accounting) — documented open-source workflow; version and deployment vary.
+- [NetSuite banking and reconciliation](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_156820249909.html) — documented enterprise workflow; authenticated tenant unavailable.
+
+Pricing, bank-feed availability, tax, payroll, fixed assets, AI behavior, multi-company consolidation, country coverage and close policy remain volatile or incomplete. Confidence is high for Meridian control requirements and medium or low for product parity.

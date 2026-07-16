@@ -947,6 +947,1356 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-CIR-001",
+      "path": "docs/blueprint/19-Competitive-Research/README.md",
+      "title": "Competitive Intelligence and Product Research",
+      "version": "0.3.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-002",
+      "path": "docs/blueprint/19-Competitive-Research/COMPETITIVE_RESEARCH_METHODOLOGY.md",
+      "title": "Competitive Research Methodology",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-003",
+      "path": "docs/blueprint/19-Competitive-Research/SOURCE_TRUST_MODEL.md",
+      "title": "Competitive Research Source Trust Model",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-004",
+      "path": "docs/blueprint/19-Competitive-Research/COMPETITOR_EVALUATION_FRAMEWORK.md",
+      "title": "Competitor Evaluation Framework",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-005",
+      "path": "docs/blueprint/19-Competitive-Research/RESEARCH_STANDARDS.md",
+      "title": "Competitive Research Standards",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-006",
+      "path": "docs/blueprint/19-Competitive-Research/SOURCE_REGISTRY.md",
+      "title": "Competitive Research Source Registry",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-007",
+      "path": "docs/blueprint/19-Competitive-Research/RESEARCH_LEDGER.md",
+      "title": "Competitive Research Ledger",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-008",
+      "path": "docs/blueprint/19-Competitive-Research/RESEARCH_BACKLOG.md",
+      "title": "Competitive Research Backlog",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-009",
+      "path": "docs/blueprint/19-Competitive-Research/COMMON_FAILURES_AND_PAIN_POINTS.md",
+      "title": "Common Failures and Pain Points Register",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-010",
+      "path": "docs/blueprint/19-Competitive-Research/MARKET_GAP_REGISTER.md",
+      "title": "Market Gap Register",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-011",
+      "path": "docs/blueprint/19-Competitive-Research/DIFFERENTIATION_REGISTER.md",
+      "title": "Meridian Differentiation Register",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-012",
+      "path": "docs/blueprint/19-Competitive-Research/BEST_IN_CLASS_SCORECARD.md",
+      "title": "Best-in-Class Comparative Scorecard",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-013",
+      "path": "docs/blueprint/19-Competitive-Research/WORLD_CLASS_CRITERIA.md",
+      "title": "World-Class Capability Criteria",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-014",
+      "path": "docs/blueprint/19-Competitive-Research/PRODUCT_TEARDOWN_STANDARD.md",
+      "title": "Product Teardown Standard",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-015",
+      "path": "docs/blueprint/19-Competitive-Research/RESEARCH_REFRESH_SCHEDULE.md",
+      "title": "Competitive Research Refresh Schedule",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-016",
+      "path": "docs/blueprint/19-Competitive-Research/DISCOVERIES_REGISTER.md",
+      "title": "Competitive Research Discoveries Register",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-017",
+      "path": "docs/blueprint/19-Competitive-Research/PATTERN_DECISION_REGISTER.md",
+      "title": "Competitive Pattern Decision Register",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-018",
+      "path": "docs/blueprint/19-Competitive-Research/IMPLEMENTATION_PLAYBOOK_STANDARD.md",
+      "title": "Research-to-Implementation Playbook Standard",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-15",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-019",
+      "path": "docs/blueprint/19-Competitive-Research/IMPLEMENTATION_EVIDENCE_REGISTER.md",
+      "title": "Competitive Research Implementation Evidence Register",
+      "version": "0.2.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-020",
+      "path": "docs/blueprint/19-Competitive-Research/ACCOUNTING_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Accounting and Bookkeeping Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0013",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-021",
+      "path": "docs/blueprint/19-Competitive-Research/BOOKKEEPING_WORKFLOW_REFERENCE.md",
+      "title": "Bookkeeping Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0013",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-022",
+      "path": "docs/blueprint/19-Competitive-Research/AUTOMATION_AND_AI_BOOKKEEPING.md",
+      "title": "Automation and AI-Assisted Bookkeeping",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0013",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-023",
+      "path": "docs/blueprint/19-Competitive-Research/ACCOUNTING_PRODUCT_TEARDOWNS.md",
+      "title": "Accounting Product Teardown Synthesis",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0013",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-024",
+      "path": "docs/blueprint/19-Competitive-Research/ACCOUNTING_IMPLEMENTATION_FINDINGS.md",
+      "title": "Accounting Implementation Findings",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0005",
+        "ADR-0013",
+        "ADR-0016",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-025",
+      "path": "docs/blueprint/19-Competitive-Research/ERP_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "ERP Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0007",
+        "ADR-0016",
+        "ADR-0019",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-026",
+      "path": "docs/blueprint/19-Competitive-Research/ERP_CROSS_DOMAIN_WORKFLOW_REFERENCE.md",
+      "title": "ERP Cross-Domain Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0007",
+        "ADR-0016",
+        "ADR-0019"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-027",
+      "path": "docs/blueprint/19-Competitive-Research/ERP_PRODUCT_TEARDOWNS.md",
+      "title": "ERP Product Teardown Synthesis",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0007",
+        "ADR-0016",
+        "ADR-0019",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-028",
+      "path": "docs/blueprint/19-Competitive-Research/ERP_IMPLEMENTATION_FINDINGS.md",
+      "title": "ERP Implementation Findings",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0007",
+        "ADR-0016",
+        "ADR-0019",
+        "ADR-0022"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-029",
+      "path": "docs/blueprint/19-Competitive-Research/CATALOG_AND_INVENTORY_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Catalog and Inventory Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-030",
+      "path": "docs/blueprint/19-Competitive-Research/CATALOG_AND_INVENTORY_WORKFLOW_REFERENCE.md",
+      "title": "Catalog and Inventory Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-031",
+      "path": "docs/blueprint/19-Competitive-Research/PROCUREMENT_AND_WAREHOUSE_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Procurement and Warehouse Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-032",
+      "path": "docs/blueprint/19-Competitive-Research/PROCUREMENT_AND_WAREHOUSE_WORKFLOW_REFERENCE.md",
+      "title": "Procurement and Warehouse Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-033",
+      "path": "docs/blueprint/19-Competitive-Research/MANUFACTURING_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Manufacturing Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-034",
+      "path": "docs/blueprint/19-Competitive-Research/MANUFACTURING_WORKFLOW_REFERENCE.md",
+      "title": "Manufacturing Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-035",
+      "path": "docs/blueprint/19-Competitive-Research/SUPPLY_CHAIN_PRODUCT_TEARDOWNS.md",
+      "title": "Supply Chain Product Teardown Synthesis",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-036",
+      "path": "docs/blueprint/19-Competitive-Research/SUPPLY_CHAIN_IMPLEMENTATION_FINDINGS.md",
+      "title": "Supply Chain Implementation Findings",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0016"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-037",
+      "path": "docs/blueprint/19-Competitive-Research/POS_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "POS Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-038",
+      "path": "docs/blueprint/19-Competitive-Research/POS_WORKFLOW_REFERENCE.md",
+      "title": "POS Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-039",
+      "path": "docs/blueprint/19-Competitive-Research/COMMERCE_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Commerce Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-040",
+      "path": "docs/blueprint/19-Competitive-Research/COMMERCE_WORKFLOW_REFERENCE.md",
+      "title": "Commerce Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-041",
+      "path": "docs/blueprint/19-Competitive-Research/PAYMENTS_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Payments Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0017",
+        "ADR-0025"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-042",
+      "path": "docs/blueprint/19-Competitive-Research/PAYMENTS_PROVIDER_WORKFLOW_REFERENCE.md",
+      "title": "Payments Provider Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0017",
+        "ADR-0025"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-043",
+      "path": "docs/blueprint/19-Competitive-Research/STORED_VALUE_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Stored Value Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-044",
+      "path": "docs/blueprint/19-Competitive-Research/STORED_VALUE_WORKFLOW_REFERENCE.md",
+      "title": "Stored Value Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-045",
+      "path": "docs/blueprint/19-Competitive-Research/MARKETPLACE_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Marketplace Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0017",
+        "ADR-0019",
+        "ADR-0025"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-046",
+      "path": "docs/blueprint/19-Competitive-Research/COMMERCE_AND_PAYMENTS_PRODUCT_TEARDOWNS.md",
+      "title": "Commerce and Payments Product Teardowns",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0017",
+        "ADR-0019",
+        "ADR-0025"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-047",
+      "path": "docs/blueprint/19-Competitive-Research/COMMERCE_AND_PAYMENTS_IMPLEMENTATION_FINDINGS.md",
+      "title": "Commerce and Payments Implementation Findings",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0017",
+        "ADR-0019",
+        "ADR-0025"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-048",
+      "path": "docs/blueprint/19-Competitive-Research/CRM_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "CRM Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-049",
+      "path": "docs/blueprint/19-Competitive-Research/CRM_WORKFLOW_REFERENCE.md",
+      "title": "CRM Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-050",
+      "path": "docs/blueprint/19-Competitive-Research/PROJECTS_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Projects Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-051",
+      "path": "docs/blueprint/19-Competitive-Research/PROJECTS_WORKFLOW_REFERENCE.md",
+      "title": "Projects Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-052",
+      "path": "docs/blueprint/19-Competitive-Research/SERVICE_AND_SUPPORT_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Service and Support Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-053",
+      "path": "docs/blueprint/19-Competitive-Research/SERVICE_WORKFLOW_REFERENCE.md",
+      "title": "Service Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-054",
+      "path": "docs/blueprint/19-Competitive-Research/FIELD_SERVICE_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Field Service Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-055",
+      "path": "docs/blueprint/19-Competitive-Research/FIELD_SERVICE_WORKFLOW_REFERENCE.md",
+      "title": "Field Service Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-056",
+      "path": "docs/blueprint/19-Competitive-Research/RENTAL_AND_BOOKING_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Rental and Booking Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-057",
+      "path": "docs/blueprint/19-Competitive-Research/RENTAL_AND_BOOKING_WORKFLOW_REFERENCE.md",
+      "title": "Rental and Booking Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-058",
+      "path": "docs/blueprint/19-Competitive-Research/CUSTOMER_AND_SERVICE_PRODUCT_TEARDOWNS.md",
+      "title": "Customer and Service Product Teardowns",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-059",
+      "path": "docs/blueprint/19-Competitive-Research/CUSTOMER_AND_SERVICE_IMPLEMENTATION_FINDINGS.md",
+      "title": "Customer and Service Implementation Findings",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-060",
+      "path": "docs/blueprint/19-Competitive-Research/HR_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "HR Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-061",
+      "path": "docs/blueprint/19-Competitive-Research/HR_WORKFLOW_REFERENCE.md",
+      "title": "HR Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-062",
+      "path": "docs/blueprint/19-Competitive-Research/PAYROLL_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Payroll Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-063",
+      "path": "docs/blueprint/19-Competitive-Research/PAYROLL_WORKFLOW_REFERENCE.md",
+      "title": "Payroll Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-064",
+      "path": "docs/blueprint/19-Competitive-Research/WORKFORCE_AND_SCHEDULING_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Workforce and Scheduling Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-065",
+      "path": "docs/blueprint/19-Competitive-Research/WORKFORCE_WORKFLOW_REFERENCE.md",
+      "title": "Workforce Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-066",
+      "path": "docs/blueprint/19-Competitive-Research/EXPENSE_MANAGEMENT_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Expense Management Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-067",
+      "path": "docs/blueprint/19-Competitive-Research/EXPENSE_WORKFLOW_REFERENCE.md",
+      "title": "Expense Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-068",
+      "path": "docs/blueprint/19-Competitive-Research/WORKFORCE_PRODUCT_TEARDOWNS.md",
+      "title": "Workforce Product Teardowns",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-069",
+      "path": "docs/blueprint/19-Competitive-Research/WORKFORCE_IMPLEMENTATION_FINDINGS.md",
+      "title": "Workforce Implementation Findings",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-070",
+      "path": "docs/blueprint/19-Competitive-Research/AI_ASSISTED_PRODUCT_PATTERNS.md",
+      "title": "AI-Assisted Product Patterns",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-071",
+      "path": "docs/blueprint/19-Competitive-Research/AUTOMATION_COMPETITIVE_PATTERN_MATRIX.md",
+      "title": "Automation Competitive Pattern Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-072",
+      "path": "docs/blueprint/19-Competitive-Research/ANALYTICS_COMPETITIVE_CAPABILITY_MATRIX.md",
+      "title": "Analytics Competitive Capability Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-073",
+      "path": "docs/blueprint/19-Competitive-Research/ANALYTICS_WORKFLOW_REFERENCE.md",
+      "title": "Analytics Workflow Reference",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-074",
+      "path": "docs/blueprint/19-Competitive-Research/SEARCH_COMPETITIVE_PATTERN_MATRIX.md",
+      "title": "Search Competitive Pattern Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-075",
+      "path": "docs/blueprint/19-Competitive-Research/NOTIFICATIONS_AND_INBOX_PATTERN_MATRIX.md",
+      "title": "Notifications and Inbox Pattern Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-076",
+      "path": "docs/blueprint/19-Competitive-Research/COLLABORATION_COMPETITIVE_PATTERN_MATRIX.md",
+      "title": "Collaboration Competitive Pattern Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-077",
+      "path": "docs/blueprint/19-Competitive-Research/DOCUMENTATION_AND_CHANGELOG_PATTERN_MATRIX.md",
+      "title": "Documentation and Changelog Pattern Matrix",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-078",
+      "path": "docs/blueprint/19-Competitive-Research/CROSS_PLATFORM_PRODUCTIVITY_TEARDOWNS.md",
+      "title": "Cross-Platform Productivity Teardowns",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-079",
+      "path": "docs/blueprint/19-Competitive-Research/PLATFORM_SERVICES_IMPLEMENTATION_FINDINGS.md",
+      "title": "Platform Services Implementation Findings",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-080",
+      "path": "docs/blueprint/19-Competitive-Research/MERIDIAN_DIFFERENTIATION_MANIFEST.md",
+      "title": "Meridian Differentiation Manifest",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014",
+        "ADR-0017",
+        "ADR-0019"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-081",
+      "path": "docs/blueprint/19-Competitive-Research/PLATFORM_ADVANTAGE_REGISTER.md",
+      "title": "Platform Advantage Register",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014",
+        "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-082",
+      "path": "docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md",
+      "title": "Adopt Improve Reject Register",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014",
+        "ADR-0017",
+        "ADR-0019"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-083",
+      "path": "docs/blueprint/19-Competitive-Research/CROSS_DOMAIN_WORKFLOW_PATTERNS.md",
+      "title": "Cross-Domain Workflow Patterns",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-084",
+      "path": "docs/blueprint/19-Competitive-Research/CROSS_DOMAIN_FAILURE_AND_RECOVERY_PATTERNS.md",
+      "title": "Cross-Domain Failure and Recovery Patterns",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014",
+        "ADR-0017"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-085",
+      "path": "docs/blueprint/19-Competitive-Research/CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md",
+      "title": "Cross-Domain Review Queue Standard",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-CIR-086",
+      "path": "docs/blueprint/19-Competitive-Research/COMPETITIVE_RESEARCH_PROGRAM_CLOSEOUT.md",
+      "title": "Competitive Research Program Closeout",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0010",
+        "ADR-0014",
+        "ADR-0017",
+        "ADR-0019"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-COM-001",
       "path": "docs/blueprint/13-Commercial/COMMERCIAL_ARCHITECTURE_OVERVIEW.md",
       "title": "Commercial Architecture Overview",
@@ -3464,6 +4814,28 @@
       "last_reviewed": "2026-07-14",
       "related_adrs": [],
       "review_evidence": "docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-013",
+      "path": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_REGISTRATION.md",
+      "title": "Meridian Documentation Completion Audit Registration",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [],
+      "review_evidence": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-014",
+      "path": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_DISPOSITION_V1.md",
+      "title": "Meridian Documentation Completion Audit Disposition V1",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [],
+      "review_evidence": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_V1.md"
     },
     {
       "document_id": "PDA-SEC-001",

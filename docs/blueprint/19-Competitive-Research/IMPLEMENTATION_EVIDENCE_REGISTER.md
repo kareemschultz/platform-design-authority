@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-019
 title: Competitive Research Implementation Evidence Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0016, ADR-0022]
 ---
 
@@ -230,3 +230,20 @@ Review this register:
 - when customer or operational evidence contradicts a validated entry.
 
 The register should become more selective over time. Record material research-to-product transfers, not every minor UI decision.
+
+## 11. Program Closeout Evidence Requirements
+
+These EVID identifiers standardize the new program entries. None is implementation-complete based on research.
+
+| ID | Requirement | Status | Owning evidence destination |
+|---|---|---|---|
+| EVID-001 | cross-domain uncertainty and recovery | Prototype Required | Offline, Payment, Operations and UX tests |
+| EVID-002 | review queue with domain-owned commit | Prototype Required | accounting plus second-domain prototype |
+| EVID-003 | Party-safe role linking and mistaken-merge recovery | Prototype Required | Party/CRM/HR acceptance and privacy tests |
+| EVID-004 | append-only inventory/manufacturing correction and concurrency | Prototype Required | Inventory/Manufacturing invariant tests |
+| EVID-005 | payroll jurisdiction package, golden calculation and retro correction | Deferred | qualified Guyana/Finance/legal evidence |
+| EVID-006 | AI action preview, prompt-injection containment, budget and disabled fallback | Prototype Required | AI/security/domain acceptance tests |
+| EVID-007 | permission-aware search/analytics freshness and accessible alternatives | Prototype Required | security/data/accessibility/performance tests |
+| EVID-008 | audience-aware documentation and change communication | Prototype Required | public/in-app/developer/tenant-audit publishing test |
+
+Research citations may satisfy the “why test” field only. Advancement requires first-party Meridian evidence and independent review.

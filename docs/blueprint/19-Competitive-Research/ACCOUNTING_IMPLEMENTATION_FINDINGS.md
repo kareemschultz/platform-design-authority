@@ -14,7 +14,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0013, ADR-0016, ADR-0022]
 
 This document translates the accounting competitive-capability matrix, bookkeeping workflow reference, automation policy, and product teardown synthesis into bounded Meridian implementation findings.
 
-It does not replace the future Accounting domain specification or implementation plan. It identifies the capabilities, seams, prototypes, and quality evidence those authorities must address.
+It does not replace the Finance domain specification or implementation plan. It identifies the capabilities, seams, prototypes, and quality evidence those authorities must address.
 
 ## 2. Executive Findings
 
@@ -31,7 +31,7 @@ It does not replace the future Accounting domain specification or implementation
 
 ## 3. Required Domain Boundaries
 
-### Accounting owns
+### Finance owns
 
 - chart of accounts;
 - accounting periods and lock state;
@@ -65,7 +65,7 @@ They do not own ledger truth.
 - stable document identity;
 - extraction artifacts where appropriate.
 
-Accounting owns whether a document sufficiently supports an accounting decision.
+Finance owns whether a document sufficiently supports an accounting decision.
 
 ### Business domains own
 
@@ -83,7 +83,7 @@ Accounting consumes governed contracts and events to produce financial consequen
 - prompt/tool governance;
 - evaluation support.
 
-Accounting owns suggestion validity and posting.
+Finance owns suggestion validity and posting.
 
 ## 4. Proposed Capability Families
 
@@ -576,7 +576,7 @@ Seams may be planned without claiming implementation.
 
 Before Accounting implementation begins:
 
-- verify or create the canonical Accounting domain specification;
+- verify or amend the canonical Finance domain specification;
 - reconcile chart-of-accounts and ledger authorities;
 - define bank/integration ownership;
 - define period and reversal rules;
@@ -614,3 +614,5 @@ The accounting research wave may be marked complete when:
 - implementation findings receive independent accounting and architecture review;
 - registries and documentation validation pass;
 - no unsupported product-superiority claim remains.
+
+As of 2026-07-16, the source-date, revalidation, limitation, and teardown-disposition portions of these exit conditions are satisfied, with the named authenticated Level 3 teardowns explicitly **Deferred**, not silently treated as complete. The wave remains **In Review** until independent accounting and PDA review; qualified jurisdiction evidence, implementation prototypes, and user evidence remain later lifecycle gates. No implementation or competitive claim is advanced.

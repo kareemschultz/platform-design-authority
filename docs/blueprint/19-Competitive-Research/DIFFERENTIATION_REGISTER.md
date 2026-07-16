@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-011
 title: Meridian Differentiation Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0016, ADR-0022]
 ---
 
@@ -51,7 +51,7 @@ Every entry must include:
 
 ## 4. Initial Register
 
-### DIF-001 — Enterprise breadth without ERP-maze navigation
+### DIFF-001 — Enterprise breadth without ERP-maze navigation
 
 - Status: Validated Need
 - Confidence: High
@@ -76,7 +76,7 @@ Every entry must include:
   - mobile completion rate.
 - Prohibited claim: “easiest ERP” until comparative user evidence exists.
 
-### DIF-002 — Explainable, optional AI governed by domain truth
+### DIFF-002 — Explainable, optional AI governed by domain truth
 
 - Status: Validated Need
 - Confidence: High
@@ -96,7 +96,7 @@ Every entry must include:
 - Validation: suggestion acceptance accuracy, override rate, explanation comprehension, audit traceability, successful completion with AI disabled.
 - Prohibited claim: autonomous or error-free bookkeeping.
 
-### DIF-003 — Permission, entitlement, rollout, and context are separate
+### DIFF-003 — Permission, entitlement, rollout, and context are separate
 
 - Status: Implemented foundation
 - Confidence: High
@@ -109,7 +109,7 @@ Every entry must include:
 - Validation: comprehension testing and direct API enforcement.
 - Prohibited claim: production-ready access control until security and pilot gates pass.
 
-### DIF-004 — Human-readable audit connected to canonical events
+### DIFF-004 — Human-readable audit connected to canonical events
 
 - Status: Implemented foundation
 - Confidence: High
@@ -121,7 +121,7 @@ Every entry must include:
 - Risks: storage growth, noisy denial events, sensitive diff exposure.
 - Validation: investigation exercises, redaction tests, correlation coverage, retention controls.
 
-### DIF-005 — Honest offline, degraded, and uncertain states
+### DIFF-005 — Honest offline, degraded, and uncertain states
 
 - Status: Prototype Candidate
 - Confidence: High
@@ -133,7 +133,7 @@ Every entry must include:
 - Risks: complex UX and storage; not every workflow can be safely available offline.
 - Validation: deterministic failure injection, duplicate-command safety, user comprehension, recovery time.
 
-### DIF-006 — One Party model without collapsing domain identities
+### DIFF-006 — One Party model without collapsing domain identities
 
 - Status: Implemented foundation
 - Confidence: High
@@ -145,7 +145,7 @@ Every entry must include:
 - Risks: merge, privacy, and global-identity complexity.
 - Validation: cross-domain linkage, duplicate handling, privacy boundaries, tenant isolation.
 
-### DIF-007 — Reversal-first consequential record correction
+### DIFF-007 — Reversal-first consequential record correction
 
 - Status: Validated Need
 - Confidence: Medium
@@ -157,7 +157,7 @@ Every entry must include:
 - Risks: user confusion; some non-consequential metadata remains legitimately editable.
 - Validation: conservation tests, audit reconstruction, user correction tasks.
 
-### DIF-008 — Global core with governed regional capability packs
+### DIFF-008 — Global core with governed regional capability packs
 
 - Status: Hypothesis
 - Confidence: Medium
@@ -169,7 +169,7 @@ Every entry must include:
 - Risks: unsupported legal claims, maintenance burden, country-specific provider fragility.
 - Validation: one bounded regional pack with legal review, upgrade tests, and pilot evidence.
 
-### DIF-009 — Unified review queue with domain-owned decisions
+### DIFF-009 — Unified review queue with domain-owned decisions
 
 - Status: Hypothesis
 - Confidence: Medium
@@ -181,7 +181,7 @@ Every entry must include:
 - Risks: over-generalization and queue overload.
 - Validation: accounting prototype first, then cross-domain transferability.
 
-### DIF-010 — Capability lifecycle visible from research through production
+### DIFF-010 — Capability lifecycle visible from research through production
 
 - Status: Prototype Candidate
 - Confidence: Medium
@@ -222,3 +222,45 @@ External claims require evidence appropriate to the audience and must not be inf
 ## 7. Maintenance
 
 Research waves may add hypotheses. Implementation PRs may advance entries only with linked evidence. Customer or pilot validation is required before an entry becomes Market Validated. Entries that become ordinary market table stakes remain useful product requirements but should be removed from active differentiation claims.
+
+## 8. Program Closeout Additions
+
+### DIFF-011 — Authority-visible cross-domain productivity
+
+- Status: Prototype Required
+- Confidence: Medium
+- Market problem: shared search, dashboards and inboxes often hide the source owner and freshness.
+- Meridian response: authority/freshness context and source-domain command reauthorization.
+- Prohibited claim: do not call this an advantage until multi-domain usability and isolation evidence exists.
+
+### DIFF-012 — Shared uncertainty and recovery grammar
+
+- Status: Prototype Required
+- Confidence: Medium-High
+- Market problem: pending, offline, timeout, stale and partial states are inconsistently represented.
+- Meridian response: consistent vocabulary plus domain-owned reconciliation and compensation.
+- Prohibited claim: do not claim reliability from documented state names alone.
+
+### DIFF-013 — Deterministic AI-disabled essential workflows
+
+- Status: Prototype Required
+- Confidence: High for need, Low for delivered quality
+- Market problem: assistance can become a hidden dependency.
+- Meridian response: normal application commands remain available under provider/model/cost/policy failure.
+- Prohibited claim: do not claim safe AI without security, prompt-injection and failure evidence.
+
+### DIFF-014 — Source-linked release communication by audience
+
+- Status: Prototype Required
+- Confidence: Medium
+- Market problem: changelogs, in-app announcements, API changes and tenant history are mixed.
+- Meridian response: one governed source feeding distinct audience/availability surfaces.
+- Prohibited claim: do not infer adoption or comprehension without research.
+
+### DIFF-015 — Marketplace restraint as a risk boundary
+
+- Status: Deferred
+- Confidence: High
+- Market problem: marketplace UI can hide custody, payout, tax and compliance obligations.
+- Meridian response: paid billing, payout and facilitation stay disabled until named gates pass.
+- Prohibited claim: restraint is an architectural decision, not a competitive claim.

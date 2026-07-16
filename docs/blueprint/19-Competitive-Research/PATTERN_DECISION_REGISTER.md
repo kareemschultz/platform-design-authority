@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-017
 title: Competitive Pattern Decision Register
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0016, ADR-0022]
 ---
 
@@ -229,3 +229,16 @@ A pattern decision must be transferred into the appropriate UX standard, domain 
 ## 8. Maintenance
 
 Review entries after relevant prototypes and market refreshes. Promote no external component merely because the underlying pattern is accepted. A rejected expression may still contain a valid general principle, and an accepted principle may require completely original Meridian implementation.
+
+## 9. Program Closeout Decisions
+
+| ID | Pattern | Disposition | Status | Required evidence |
+|---|---|---|---|---|
+| PAT-013 | stable operation identity across retry and reconciliation | Adopt | Supported | provider timeout/idempotency/replay tests |
+| PAT-014 | visible pending/queued/unknown/stale/conflicted/partial states | Custom Meridian Required | Prototype Required | cross-domain recovery usability |
+| PAT-015 | shared review item with source-domain command | Combine | Prototype Required | accounting plus second-domain prototype |
+| PAT-016 | effective-date/reversal correction presentation | Combine | Prototype Required | invariant, audit and comprehension tests |
+| PAT-017 | permission-aware search with freshness watermark | Improve | Prototype Required | tenant isolation, deletion and lag tests |
+| PAT-018 | governed metric plus table/text alternative | Adopt | Prototype Required | reconciliation and WCAG evidence |
+| PAT-019 | AI action preview and deterministic fallback | Custom Meridian Required | Prototype Required | prompt-injection, disabled and budget-failure tests |
+| PAT-020 | audience-aware release state taxonomy | Improve | Prototype Required | public/in-app/API/audit separation test |

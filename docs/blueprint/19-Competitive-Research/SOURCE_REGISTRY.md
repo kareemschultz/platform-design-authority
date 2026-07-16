@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-006
 title: Competitive Research Source Registry
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0005, ADR-0016, ADR-0022]
 ---
 
@@ -147,7 +147,7 @@ A small-business bookkeeping product must not be penalized for lacking enterpris
 ## 9. Source Record Template
 
 ```yaml
-source_id: SRC-0001
+source_id: SRC-000
 publisher: Example Vendor
 product: Example Product
 source_class: official-product-documentation
@@ -182,7 +182,48 @@ Research agents must not:
 - count unavailable or roadmap-only features as shipped capability;
 - state legal conclusions beyond verified source language.
 
-## 11. Review and Maintenance
+## 11. Program Source Collections
+
+The page-level citations remain in their research documents. These stable records identify the official public collections used for the 2026-07-16 synthesis; one collection may support multiple cited pages.
+
+| Source ID | Publisher/product collection | Class | Public locator | Retrieved | Evidence mode | Limitations |
+|---|---|---|---|---|---|---|
+| SRC-001 | Odoo 19 | official documentation | https://www.odoo.com/documentation/19.0/ | 2026-07-16 | documented | configured/enterprise behavior not tested |
+| SRC-002 | ERPNext | official documentation | https://docs.frappe.io/erpnext/ | 2026-07-16 | documented/public source | version and deployment variation |
+| SRC-003 | Microsoft Dynamics 365 | official documentation | https://learn.microsoft.com/en-us/dynamics365/ | 2026-07-16 | documented | licensing and tenant configuration vary |
+| SRC-004 | Oracle NetSuite | official help/product | https://docs.oracle.com/en/cloud/saas/netsuite/ | 2026-07-16 | documented | some content/account flows inaccessible |
+| SRC-005 | SAP ERP/HCM | official documentation | https://help.sap.com/ | 2026-07-16 | documented | product/edition configuration is extensive |
+| SRC-006 | Shopify/Shopify POS | official help/developer | https://help.shopify.com/ | 2026-07-16 | documented | plan, geography and processor vary |
+| SRC-007 | Square | official help/developer | https://squareup.com/help/ | 2026-07-16 | documented | regional/hardware eligibility varies |
+| SRC-008 | Toast | official documentation | https://doc.toasttab.com/ | 2026-07-16 | documented | restaurant/processor ecosystem specific |
+| SRC-009 | Stripe | official developer documentation | https://docs.stripe.com/ | 2026-07-16 | documented | no Guyana availability/certification claim |
+| SRC-010 | Adyen | official developer documentation | https://docs.adyen.com/ | 2026-07-16 | documented | commercial/platform eligibility untested |
+| SRC-011 | PayPal/Braintree | official developer documentation | https://developer.paypal.com/braintree/docs/ | 2026-07-16 | documented | regional/product coverage varies |
+| SRC-012 | WooCommerce | official documentation | https://woocommerce.com/documentation/ | 2026-07-16 | documented | plugin ecosystem not normalized |
+| SRC-013 | Medusa | official documentation/public source | https://docs.medusajs.com/ | 2026-07-16 | documented/public source | implementation responsibility varies |
+| SRC-014 | Saleor | official documentation/public source | https://docs.saleor.io/ | 2026-07-16 | documented/public source | implementation responsibility varies |
+| SRC-015 | Salesforce | official help/product | https://help.salesforce.com/ | 2026-07-16 | documented | authenticated configuration unavailable |
+| SRC-016 | HubSpot | official knowledge base | https://knowledge.hubspot.com/ | 2026-07-16 | documented | tier/configuration variation |
+| SRC-017 | Linear | official documentation/changelog | https://linear.app/docs | 2026-07-16 | documented | no enterprise tenant tested |
+| SRC-018 | Atlassian Jira | official help | https://support.atlassian.com/jira-software-cloud/ | 2026-07-16 | documented | marketplace/configuration variation |
+| SRC-019 | ServiceNow | official product/documentation | https://www.servicenow.com/products/ | 2026-07-16 | documented | tenant flows inaccessible |
+| SRC-020 | Zendesk | official help | https://support.zendesk.com/ | 2026-07-16 | documented | tier and configuration variation |
+| SRC-021 | Dynamics/Salesforce Field Service | official documentation | https://learn.microsoft.com/en-us/dynamics365/field-service/ | 2026-07-16 | documented | technician/dispatch tenant not tested |
+| SRC-022 | Workday | official product/trust | https://www.workday.com/ | 2026-07-16 | documented | detailed tenant configuration inaccessible |
+| SRC-023 | SAP SuccessFactors | official documentation | https://help.sap.com/docs/SAP_SUCCESSFACTORS_HXM_SUITE | 2026-07-16 | documented | no jurisdiction implementation test |
+| SRC-024 | 7shifts/Deputy/When I Work | official product/help | https://help.wheniwork.com/ | 2026-07-16 | documented | union/jurisdiction policies untested |
+| SRC-025 | Ramp/Expensify/Brex/Concur | official product/help | https://support.ramp.com/ | 2026-07-16 | documented | cards, tax and reimbursement rails untested |
+| SRC-026 | OpenAI | official product/developer documentation | https://developers.openai.com/ | 2026-07-16 | documented | features and models volatile |
+| SRC-027 | Anthropic/Microsoft/GitHub AI | official documentation | https://docs.anthropic.com/ | 2026-07-16 | documented | enterprise controls not tested |
+| SRC-028 | Metabase/Grafana/Power BI/Looker/Tableau | official documentation | https://www.metabase.com/docs/latest/ | 2026-07-16 | documented | performance and accessibility not directly tested |
+| SRC-029 | Algolia/Elastic/OpenSearch | official documentation | https://www.algolia.com/doc/ | 2026-07-16 | documented | ranking/security implementation not tested |
+| SRC-030 | Slack/GitHub/Teams collaboration | official documentation | https://slack.com/help/ | 2026-07-16 | documented | tenant policies and external sharing untested |
+| SRC-031 | Stripe/GitHub/Vercel/Linear/shadcn changelogs | official changelogs | https://github.blog/changelog/ | 2026-07-16 | documented | current snapshots are volatile |
+| SRC-032 | Rental/booking products | official product/documentation | https://www.odoo.com/documentation/19.0/applications/sales/rental.html | 2026-07-16 | documented | authenticated operations and legal terms unavailable |
+
+All SRC-001 through SRC-032 are primary evidence. Secondary evidence was used only to discover questions and is not load-bearing in the completed waves.
+
+## 12. Review and Maintenance
 
 This registry is reviewed when:
 

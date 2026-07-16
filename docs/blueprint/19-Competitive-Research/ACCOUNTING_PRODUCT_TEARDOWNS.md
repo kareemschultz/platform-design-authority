@@ -468,7 +468,7 @@ The target promise is:
 
 This synthesis is an initial governed research artifact. Exact current features, regional availability, editions, pricing, AI autonomy, and implementation behavior are volatile and must be revalidated from first-party sources and direct product evidence before implementation decisions.
 
-Product-specific Level 3 teardowns remain backlog work for strategically important comparisons.
+Product-specific authenticated Level 3 teardowns are explicitly deferred until the related Finance implementation decision can justify paid or tenant access. The public-documentation synthesis is complete for this research wave; it must not be reused as direct usability, reliability, accessibility, regional-availability, or implementation evidence.
 
 ## 10. Required Follow-Up Teardowns
 
@@ -480,6 +480,17 @@ Priority deep teardowns:
 4. Odoo integrated accounting and implementation burden;
 5. ERPNext operational-to-ledger workflow;
 6. NetSuite multi-entity, close, and control depth.
+
+Disposition: **Deferred** for all six until a selected Finance workflow, target jurisdiction, edition, and reproducible access path exist. Reopening any item requires a RESEARCH_LEDGER entry and source dates.
+
+## 10.1 Current Official Workflow Sources
+
+- [Kick](https://www.kick.co/) — official public product evidence, retrieved 2026-07-16; authenticated automation and correction behavior unavailable.
+- [Xero bank reconciliation](https://www.xero.com/us/accounting-software/reconcile-bank-transactions/) — official workflow evidence, retrieved 2026-07-16; US/edition limits apply.
+- [QuickBooks Online reconciliation](https://quickbooks.intuit.com/learn-support/en-us/help-article/reconciliation/reconcile-account-quickbooks-online/L5rOz7Kew_US_en_US) — official help, retrieved 2026-07-16; subscription/region limits apply.
+- [Odoo 19 bank reconciliation](https://www.odoo.com/documentation/19.0/applications/finance/accounting/bank/reconciliation.html) — official documentation, retrieved 2026-07-16; configured usability untested.
+- [ERPNext Accounting](https://docs.frappe.io/erpnext/user/manual/en/accounting) — official documentation, retrieved 2026-07-16; deployment/version variance.
+- [NetSuite banking and reconciliation](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_156820249909.html) — official help, retrieved 2026-07-16; enterprise configuration inaccessible.
 
 ## 11. Revalidation Triggers
 

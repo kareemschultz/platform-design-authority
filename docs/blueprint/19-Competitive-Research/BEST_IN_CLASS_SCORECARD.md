@@ -1,10 +1,10 @@
 ---
 document_id: PDA-CIR-012
 title: Best-in-Class Comparative Scorecard
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 related_adrs: [ADR-0002, ADR-0003, ADR-0005, ADR-0016, ADR-0022]
 ---
 
@@ -233,3 +233,18 @@ Each target requires acceptance evidence and a responsible owner.
 ## 12. Review
 
 Scorecards are reviewed whenever a research wave completes, a major competitor release changes the comparison, or Meridian implementation evidence becomes available. Historical scores remain dated snapshots; they must not be silently overwritten as if the original research never existed.
+
+## 13. Initial Program Target Summary
+
+No cross-product numerical winner is declared because editions, segments, access and N/E coverage are not comparable. The completed waves establish these dated targets instead:
+
+| Domain | Table-stakes target | Improve/Invent target | Gate before claim |
+|---|---|---|---|
+| ERP administration | context, roles, import, audit, search | task-first breadth without module maze | representative administrator usability |
+| supply chain | explicit stock/reservation/receipt/task history | correction and offline concurrency clarity | invariant, performance and device tests |
+| POS/payment | fast sale, tender, return, closeout | honest uncertainty and recovery | terminal/provider certification and recovery exercise |
+| customer/service | pipeline, queue, SLA, dispatch | Party-safe links and domain-owned remediation | privacy, merge and offline evidence |
+| workforce | effective dates, self-service, approval, statements | correction and sensitive-data transparency | qualified jurisdiction and security evidence |
+| platform services | search, inbox, metrics, docs, assistance | authority/provenance/fallback across shared surfaces | accessibility, isolation and AI safety evidence |
+
+Meridian current implementation remains N/E for unimplemented capabilities; research targets must not be scored as shipped.

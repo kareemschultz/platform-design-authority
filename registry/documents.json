@@ -2192,10 +2192,10 @@
       "document_id": "PDA-ENGR-016",
       "path": "docs/blueprint/14-Engineering/ENGINEERING_NOTEBOOK.md",
       "title": "Engineering Notebook",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-12",
+      "last_reviewed": "2026-07-16",
       "related_adrs": [],
       "review_evidence": null
     },

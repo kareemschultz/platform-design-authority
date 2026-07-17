@@ -144,7 +144,15 @@ describe.serial("WS2 Event Backbone closeout measurements", () => {
 			);
 			const startedAt = performance.now();
 			await outbox.append(productCreatedEvent(eventId, productId, tenantId));
-			const now = new Date();
+			// Eligibility is persisted from the database clock; use that same authority
+			// so container clock skew cannot turn a delivery measurement into a retry.
+			const clock = await testPool.query<{ now: Date }>(
+				"SELECT clock_timestamp() AS now"
+			);
+			const now = clock.rows[0]?.now;
+			if (!now) {
+				throw new Error("database clock did not return an instant");
+			}
 			const claim = await store.claimNext({
 				claimToken: `claim_ws2_delivery_${index}`,
 				leaseExpiresAt: new Date(now.getTime() + 30_000).toISOString(),

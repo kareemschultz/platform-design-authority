@@ -13,7 +13,7 @@ import {
 	identityHttpHandler,
 	identitySessionService,
 } from "../composition/identity";
-import { closeDatabaseComposition } from "../composition/postgres";
+import { closeDatabaseComposition } from "../composition/lifecycle";
 import { createContext } from "./context";
 import { appRouter } from "./router";
 

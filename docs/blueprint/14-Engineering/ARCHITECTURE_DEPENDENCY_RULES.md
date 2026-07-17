@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.4.0
+version: 1.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027, ADR-0028]
 ---
 
@@ -168,6 +168,11 @@ The implementation must include tests that:
 - Verify each table and migration has one owner
 - Fail Bun-, Hono-, oRPC-, or database-adapter leakage into runtime-neutral packages
 - Build and run the critical server suite on Bun and the approved Node LTS fallback from the same commit
+- Fail any source file under `packages/` that does not belong to a registered workspace package (the same stray-source guard `apps/` already has)
+- Fail migrator-module imports (`drizzle-orm/*migrator*`, `drizzle-kit`) and persistence `migrate*` export imports from application paths outside the registered migration-invocation roots, regardless of call-site casing or aliasing
+- Fail relative imports of the process pool module (`*/composition/postgres`) from non-composition application paths; ordinary application code imports the shutdown-only lifecycle module
+
+Test-source scope: the migration-invocation/import and connection-lifecycle rules apply to non-test sources only. Colocated `*.test.*` and `*.spec.*` files inside application packages may migrate schemas and construct additional bounded pools as test harness — this exemption is part of the rule definition, is limited to test files, and never extends to runtime sources.
 
 ## Temporary Exceptions
 
@@ -215,6 +220,8 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 1.5.0 (2026-07-17): Closed fifth-audit findings F-B-001/002/003/004/005 — added the `packages/` stray-source guard, casing/alias-proof migration-import rule, and composition-internal pool-module rule (with a shutdown-only `lifecycle` module in the server composition root); documented the test-source exemption scope; probe teardown no longer leaves fixture directories behind.
 
 - 1.4.0 (2026-07-16): Registered the owner-specific Platform Import/Export persistence boundary and the concrete PR5 Numbering tables; import orchestration state remains separate from Catalog and Inventory authoritative tables.
 

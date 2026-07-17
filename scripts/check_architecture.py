@@ -58,6 +58,21 @@ SQL_TABLE_PATTERN = re.compile(
 MIGRATION_INVOCATION_PATTERN = re.compile(
     r"\b(?:await\s+)?migrate[A-Z][A-Za-z0-9_$]*\s*\("
 )
+# Fifth-audit F-B-002: catch migrator-module imports and aliased persistence
+# migrate-export imports regardless of call-site casing, so the ADR-0027
+# "worker never runs migrations" gate cannot be evaded by lowercase or
+# re-exported invocation.
+MIGRATOR_MODULE_IMPORT_PATTERN = re.compile(
+    r"""(?:from\s+|import\s*\(\s*)["'](?:drizzle-orm/[^"']*migrator[^"']*|drizzle-kit(?:/[^"']*)?)["']"""
+)
+PERSISTENCE_MIGRATE_IMPORT_PATTERN = re.compile(
+    r"""import\s*\{[^}]*\bmigrate[A-Za-z0-9_$]*\b[^}]*\}\s*from\s*["']@meridian/persistence-[^"']+["']"""
+)
+# Fifth-audit F-B-005: the raw process pool module is composition-internal;
+# ordinary application paths use the shutdown-only lifecycle module.
+COMPOSITION_POOL_IMPORT_PATTERN = re.compile(
+    r"""(?:from\s+|import\s*\(\s*)["']\.{1,2}(?:/[^"']*)?/composition/postgres["']"""
+)
 
 
 def load_json(path: Path) -> Any:
@@ -200,6 +215,14 @@ def main() -> int:
                 f"{posix(source)}: unregistered-application-source: "
                 "application source must belong to an app package"
             )
+    # Fifth-audit F-B-001: the same stray-source guard for packages/, so no
+    # unmanifested source file can bypass family, database, or ownership rules.
+    for source in source_files(ROOT / "packages"):
+        if not any(root in source.parents for root in roots):
+            errors.append(
+                f"{posix(source)}: unregistered-package-source: "
+                "package source must belong to a registered workspace package"
+            )
     package_by_name: dict[str, Path] = {}
     family_by_root: dict[Path, str] = {}
     manifest_dependencies: dict[Path, set[str]] = defaultdict(set)
@@ -259,6 +282,33 @@ def main() -> int:
                 errors.append(
                     f"{source_path}: migration-invocation-outside-authority: "
                     "application migration runners are server-composition-only"
+                )
+
+            if (
+                source_family == "applications"
+                and not is_test_source(source)
+                and not matches(source_path, migration_invocation_roots)
+                and (
+                    MIGRATOR_MODULE_IMPORT_PATTERN.search(text)
+                    or PERSISTENCE_MIGRATE_IMPORT_PATTERN.search(text)
+                )
+            ):
+                errors.append(
+                    f"{source_path}: migration-import-outside-authority: "
+                    "migration modules and persistence migrate exports may only "
+                    "be imported from registered migration-invocation roots"
+                )
+
+            if (
+                source_family == "applications"
+                and not is_test_source(source)
+                and not matches(source_path, composition_roots)
+                and COMPOSITION_POOL_IMPORT_PATTERN.search(text)
+            ):
+                errors.append(
+                    f"{source_path}: pool-import-outside-composition: "
+                    "the process pool module is composition-internal; import "
+                    "the shutdown-only lifecycle module instead"
                 )
 
             if source_family == "persistence":

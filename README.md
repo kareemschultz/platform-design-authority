@@ -16,11 +16,7 @@ The platform supports modular domains, role-based workspaces, reusable industry 
 
 ## Authority Model
 
-1. Ratified Constitution
-2. Accepted or Approved Architecture Decision Records
-3. Approved domain, engine, UX, data, security, commercial, deployment, operations, testing, roadmap, and strategy specifications
-4. Implementation and operational documentation
-5. Source code
+The governed authority order lives in [`AGENTS.md` §1](AGENTS.md): Constitution → Ratified/Accepted ADRs → Approved specifications with review evidence → Proposed ADRs → Draft specifications → the Founder Decision Register for unresolved business authority → templates, evidence, reviews, examples, and generated artifacts. Implementation documentation and source code are not authority tiers; they follow the governed documents.
 
 Conflicts are reported and dispositioned rather than resolved silently.
 

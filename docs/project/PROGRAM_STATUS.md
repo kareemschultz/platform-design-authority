@@ -108,6 +108,24 @@ Not yet complete:
 1. Complete issue #73 as one focused PR7: registry-derived evidence, exact-head independent concurrence, merge, exact-main verification, and the separate final whole-WS2 audit. Do not close issue #12 or start broad WS3 implementation before that audit disposition is recorded.
 2. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
 
+## Production-readiness gates (measure 4)
+
+Per `PROGRESS_MEASUREMENT_STANDARD.md` measure 4, all eleven gate families are enumerated with owner and current artifact state. "No artifact yet" is the honest status, not a placeholder. This table records gate state only; it cannot claim readiness.
+
+| Gate family | Status | Owner | Evidence pointer |
+|---|---|---|---|
+| Founder decisions | Open | Founder | `FOUNDER_DECISION_REGISTER.md` FDR-001–010 (all open; FDR-004 past its M0 checkpoint — fifth-audit F-L-003) |
+| Legal/tax validation (Guyana) | Not started | Founder + counsel | `GUYANA_REGULATORY_VERIFICATION-2026-07-11.md` (prototype pack only; TA-007) |
+| Customer evidence | Zero recorded | Founder | `MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md` evidence log (fifth-audit F-L-002) |
+| Provider certification | Not started | Founder + provider | SA-025/SA-026; blocked on FDR-002/FDR-007 |
+| Penetration testing | Not started | PDA + external firm | RR-009; after RR-007 RLS topology |
+| Privacy/retention validation | Design only | Privacy counsel | ADR-0014 + deletion journal designed; DPA commencement unverified; retention periods pending professional confirmation |
+| Accessibility audit | Internal evidence only | PDA + external reviewers | WS1/WS2 automated+manual evidence retained; independent assistive-technology review open (RR-009) |
+| Performance/capacity | Controlled-prototype samples only | PDA | Perf JSONs carry explicit limitation fields; no artifact for production topology |
+| Recovery exercises | No artifact yet | PDA/Ops | WS7 will execute the Draft runbooks (restore, deletion-journal replay) |
+| Operational readiness | Design only | Founder + PDA | 15-Operations runbooks Draft; support/staffing model undecided |
+| Pilot outcomes | Blocked | Founder | All above gates plus commercial offer (fifth-audit F-L-010) |
+
 ## Open risk summary
 
 The Architecture Risk Register remains authoritative. The most important current categories are:

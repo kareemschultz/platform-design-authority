@@ -30,6 +30,13 @@ def probe(
     expected_text: str = "",
     source: str = 'import { createIdentityAuth } from "@meridian/platform-identity";\nvoid createIdentityAuth;\n',
 ) -> None:
+    # Fifth-audit F-B-003: record directories this probe creates so teardown
+    # removes them and never leaves phantom app/package directories behind.
+    created_directories: list[Path] = []
+    ancestor = path.parent
+    while not ancestor.exists():
+        created_directories.append(ancestor)
+        ancestor = ancestor.parent
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(source, encoding="utf-8")
     try:
@@ -43,6 +50,11 @@ def probe(
             )
     finally:
         path.unlink(missing_ok=True)
+        for directory in created_directories:
+            try:
+                directory.rmdir()
+            except OSError:
+                break
 
 
 def main() -> int:
@@ -232,6 +244,63 @@ def main() -> int:
         expected_success=False,
         expected_text="connection-lifecycle-outside-composition",
         source='export const connectionName = "DATABASE_URL";\n',
+    )
+    probe(
+        ROOT
+        / "packages"
+        / "__architecture_stray__"
+        / "src"
+        / "__architecture_stray_package_fixture.ts",
+        expected_success=False,
+        expected_text="unregistered-package-source",
+        source='import { Pool } from "pg";\nexport const pool = new Pool();\n',
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_lowercase_migrator_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source=(
+            'import { migrate } from "drizzle-orm/node-postgres/migrator";\n'
+            'await migrate({} as never, { migrationsFolder: "x" });\n'
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_aliased_migration_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source=(
+            'import { migrateCatalog as run } from "@meridian/persistence-catalog-postgres";\n'
+            "await run({} as never);\n"
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "server"
+        / "composition"
+        / "__architecture_server_migrator_import_fixture.ts",
+        expected_success=True,
+        source=(
+            'import { migrateCatalog as run } from "@meridian/persistence-catalog-postgres";\n'
+            "await run({} as never);\n"
+        ),
+    )
+    probe(
+        ROOT / "apps" / "server" / "src" / "__architecture_pool_import_fixture.ts",
+        expected_success=False,
+        expected_text="pool-import-outside-composition",
+        source=(
+            'import { databasePool } from "../composition/postgres";\n'
+            "void databasePool;\n"
+        ),
     )
     print("architecture checker regression probes passed")
     return 0

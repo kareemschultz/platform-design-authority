@@ -193,7 +193,7 @@ Code conventions:
 - TypeScript strict everywhere; every workspace carries a working `check-types` script.
 - Core packages stay runtime-neutral per ADR-0020 and `ARCHITECTURE_DEPENDENCY_RULES.md`: no Bun globals, `bun:*` imports, Hono context types, oRPC transport objects, or database adapters in domain, application, contract, or authorization code.
 - All external input is validated with zod v4 schemas at the boundary; oRPC procedures declare typed errors.
-- Environment access goes only through `@meridian/tooling-env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed.
+- Environment access goes only through `@meridian/tooling-env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed. Colocated test files may set `process.env` fixtures to exercise env-dependent behavior; runtime sources may not.
 - Database changes go through Drizzle schema + `db:generate`; committed migrations are never hand-edited (CI enforces migration freshness).
 - Tests are colocated `*.test.ts` using `bun:test` and assert real behavior — no placeholder assertions.
 - No `console.log` in committed code; use the structured logger. No commented-out code blocks.
@@ -221,3 +221,32 @@ After editing:
 6. Do not claim readiness beyond evidence.
 7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
 8. Record documentation and release-note impact for user-visible, API, configuration, migration, permission, workflow, or troubleshooting changes.
+
+## 13. ADR Triggers
+
+Create or amend an ADR for ownership, boundaries, stack, persistence, offline semantics, public contracts, extension execution, deployment, security, privacy, payments, settlement, commercial runtime, or platform-wide lifecycle changes.
+
+Business facts architecture cannot infer belong in the Founder Decision Register.
+
+## 14. Prohibited Behavior
+
+- Silent contradiction resolution
+- Cross-domain persistence shortcuts
+- Business rules in UI, provider adapters, or prompts
+- Provider SDKs as platform abstractions
+- Unscoped administrator, support, extension, or AI authority
+- Secret or protected-data exposure
+- False lifecycle promotion
+- Scope expansion for feature count
+- Assumed provider capabilities
+- Unsupported legal, tax, privacy, fiscal, security, accessibility, or regulatory claims
+- Treating AI, search, cache, analytics, or offline projections as current authority
+- Editing independent audit evidence instead of writing a disposition
+
+## 15. Current Readiness
+
+The repository targets one constrained vertical-slice implementation after named blockers. Technical Prototypes 1–3 are cleared to proceed per the fourth audit (reviews family FA4) and its disposition; the monorepo scaffold under apps/ and packages/ is that prototype surface.
+
+Pilot and production remain blocked on founder decisions, customer evidence, qualified Guyana review, provider certification, implementation tests, penetration testing, accessibility evidence, and operational exercises.
+
+When uncertain, stop and record the missing decision or evidence rather than inventing it.

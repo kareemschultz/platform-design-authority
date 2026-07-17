@@ -709,6 +709,37 @@ def validate_skills() -> list[str]:
     return errors
 
 
+def validate_agent_contract_parity() -> list[str]:
+    """Fifth-audit F-A-003 (FA4-015/FA4-030 reopen): AGENTS.md and CLAUDE.md
+    must both carry every authority-bearing rule. Sentinel phrases below are
+    normative markers; a phrase present in one contract but not the other is a
+    parity break."""
+    errors: list[str] = []
+    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    claude = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    sentinels = [
+        "PREFERRED_COMPONENT_CATALOG.md",
+        "Better Auth plugins are deny-by-default",
+        "technology-evidence-maintainer",
+        "one issue, branch, worktree, and pull request",
+        "## 13. ADR Triggers",
+        "## 14. Prohibited Behavior",
+        "## 15. Current Readiness",
+        "Editing independent audit evidence instead of writing a disposition",
+        "never scattered `process.env` reads",
+        "Colocated test files may set `process.env` fixtures",
+    ]
+    for sentinel in sentinels:
+        in_agents = sentinel in agents
+        in_claude = sentinel in claude
+        if in_agents != in_claude:
+            missing = "CLAUDE.md" if in_agents else "AGENTS.md"
+            errors.append(
+                f"agent-contract parity: {sentinel!r} missing from {missing}"
+            )
+    return errors
+
+
 def main() -> int:
     document_errors, document_ids = validate_documents()
     namespace_errors, prefixes = load_namespace_registry()
@@ -730,6 +761,7 @@ def main() -> int:
         + validate_founder_decision_register()
         + validate_repository_layout()
         + validate_skills()
+        + validate_agent_contract_parity()
     )
     if errors:
         print("Documentation governance validation failed:", file=sys.stderr)

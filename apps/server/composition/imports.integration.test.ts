@@ -28,6 +28,7 @@ import {
 import { migratePlatformNumbering } from "@meridian/persistence-platform-numbering-postgres";
 import {
 	createImportService,
+	IMPORT_STAGING_RETENTION_MS,
 	ImportProcessInterruptedError,
 	type ImportTargetPort,
 } from "@meridian/platform-import-export";
@@ -560,7 +561,9 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 		const purgeCommand = {
 			idempotencyKey: "purge-recovery-staging",
 			importId: job.id,
-			purgedAt: new Date("2026-08-16T00:00:00Z"),
+			purgedAt: new Date(
+				completed.updatedAt.getTime() + IMPORT_STAGING_RETENTION_MS + 1000
+			),
 			target: "Product" as const,
 			tenantId: "tenant_recovery",
 		};

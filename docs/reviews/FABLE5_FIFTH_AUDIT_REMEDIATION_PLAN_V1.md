@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Fable 5 Fifth Audit Disposition and Remediation Plan
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -47,3 +47,13 @@ Every W2/W3 PR is independently revertable (no data migrations, no contract chan
 ## Independent review requirement
 
 Each wave PR requires exact-head independent concurrence before merge — including the tracking-sync PR that closes F-A-002. The fifth-audit report itself must never be edited by remediation; status changes happen in this plan and the risk register.
+
+## Implementation status (2026-07-17, same session as delivery)
+
+The founder authorized immediate remediation of all non-founder-gated findings. Implemented on branch `claude/platform-design-authority-audit-1587d8`:
+
+- **W2 implemented** (commit `7d6b05b`): F-A-003 (parity restored + executable `validate_agent_contract_parity` gate), F-A-004, F-B-001/002/003/004/005 (three new checker rules with negative probes; probe teardown fixed; residue dirs removed; shutdown-only lifecycle module), F-L-005 (11-family readiness gate table), F-L-008, F-I-001 (both invocation forms now work).
+- **W3 implemented** (commit `0841136`): F-H-001 (section-aware `QueryFailure` via `sectionOverviewPath`, unit-tested), F-H-002, F-H-004, F-H-005, F-H-006 fixed; F-H-003/007/008 and F-B-006 recorded (token-doc drift note, manifest seam note, TD-008, §11 test carve-out).
+- **Status:** implemented-pending-independent-review. Per this plan's review rule, none of these findings is *closed* until an independent exact-head review of the remediation PR reproduces the closure tests and records concurrence, and the PR merges green.
+- **Correction (F-I-001):** the audit's claim that `test_check_ws2_evidence.py` "has no direct CI step" is a **partial false positive** — CI runs it via `bun run ws2:evidence:check` (`meridian-prototype.yml:129`), which chains `python -m unittest scripts/test_check_ws2_evidence.py`. The invocation-inconsistency half of the finding was real and is fixed. Recorded here per evidence-immutability rules; the report is not edited.
+- **Still open (founder W1):** F-A-001, F-A-002 (gated on F-A-001), F-L-001/002/003/004/006/007/009/010.

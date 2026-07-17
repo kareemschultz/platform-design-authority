@@ -97,6 +97,7 @@ findings:
     wave: W2
 
   - id: F-A-003
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: A-governance
     severity: P2
     confidence: confirmed
@@ -115,6 +116,7 @@ findings:
     wave: W2
 
   - id: F-B-001
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: B-architecture
     severity: P2
     confidence: high
@@ -131,6 +133,7 @@ findings:
     wave: W2
 
   - id: F-B-002
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: B-architecture
     severity: P2
     confidence: high
@@ -147,6 +150,7 @@ findings:
     wave: W2
 
   - id: F-H-001
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: H-frontend
     severity: P2
     confidence: high
@@ -195,6 +199,7 @@ findings:
     wave: W2
 
   - id: F-L-005
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: L-roadmap
     severity: P2
     confidence: high
@@ -243,6 +248,7 @@ findings:
     wave: W2
 
   - id: F-B-003
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: B-architecture
     severity: P3
     confidence: confirmed
@@ -259,6 +265,7 @@ findings:
     wave: W2
 
   - id: F-B-004
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: B-architecture
     severity: P3
     confidence: high
@@ -275,6 +282,7 @@ findings:
     wave: W2
 
   - id: F-B-005
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: B-architecture
     severity: P3
     confidence: medium-high
@@ -291,6 +299,7 @@ findings:
     wave: W2
 
   - id: F-B-006
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: B-architecture
     severity: P3
     confidence: high
@@ -307,6 +316,7 @@ findings:
     wave: W3
 
   - id: F-H-002
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: H-frontend
     severity: P3
     confidence: high
@@ -323,6 +333,7 @@ findings:
     wave: W3
 
   - id: F-H-003
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: H-frontend
     severity: P3
     confidence: medium
@@ -339,6 +350,7 @@ findings:
     wave: W3
 
   - id: F-H-004
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: H-frontend
     severity: P3
     confidence: high
@@ -355,6 +367,7 @@ findings:
     wave: W3
 
   - id: F-H-005
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: H-frontend
     severity: P3
     confidence: medium
@@ -371,6 +384,7 @@ findings:
     wave: W3
 
   - id: F-H-006
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: H-frontend
     severity: P3
     confidence: medium
@@ -387,6 +401,7 @@ findings:
     wave: W3
 
   - id: F-H-007
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: H-frontend
     severity: P3
     confidence: high
@@ -403,6 +418,7 @@ findings:
     wave: W3
 
   - id: F-H-008
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: H-frontend
     severity: P3
     confidence: high
@@ -419,6 +435,7 @@ findings:
     wave: W3
 
   - id: F-L-008
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: L-roadmap
     severity: P3
     confidence: high
@@ -467,6 +484,7 @@ findings:
     wave: W4
 
   - id: F-A-004
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
     lens: A-governance
     severity: P3
     confidence: medium
@@ -483,6 +501,7 @@ findings:
     wave: W3
 
   - id: F-I-001
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136); CI-wiring half corrected as false positive in PDA-REV-014 — ws2 script test runs in CI via bun run ws2:evidence:check
     lens: I-ci-tests
     severity: P3
     confidence: confirmed

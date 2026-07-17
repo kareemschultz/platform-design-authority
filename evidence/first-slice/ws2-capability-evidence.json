@@ -31,9 +31,7 @@
         "preserves explicit child identities, emits only new assignments, and rejects implicit removal"
       ],
       "command": "bun test packages/domains/catalog/src/index.test.ts",
-      "runtimes": [
-        "Bun 1.3.14"
-      ],
+      "runtimes": ["Bun 1.3.14"],
       "capabilities": [
         "catalog.barcodes",
         "catalog.identifiers",
@@ -58,13 +56,8 @@
         "enforces optimistic concurrency and explicit lifecycle commands"
       ],
       "command": "bun test packages/domains/catalog/src/index.test.ts",
-      "runtimes": [
-        "Bun 1.3.14"
-      ],
-      "capabilities": [
-        "catalog.lifecycle",
-        "catalog.products"
-      ],
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["catalog.lifecycle", "catalog.products"],
       "dimensions": [
         "happy_path",
         "validation_and_denial",
@@ -83,9 +76,7 @@
         "enforces lifecycle permission and entitlement pairs at the application boundary"
       ],
       "command": "bun test packages/domains/catalog/src/index.test.ts",
-      "runtimes": [
-        "Bun 1.3.14"
-      ],
+      "runtimes": ["Bun 1.3.14"],
       "capabilities": [
         "catalog.barcodes",
         "catalog.identifiers",
@@ -93,9 +84,7 @@
         "catalog.products",
         "catalog.variants"
       ],
-      "dimensions": [
-        "permission_and_entitlement"
-      ]
+      "dimensions": ["permission_and_entitlement"]
     },
     {
       "id": "ws2-catalog-postgres-isolation-recovery",
@@ -107,10 +96,7 @@
         "rolls Product, receipt, and outbox state back together on append failure"
       ],
       "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "catalog.barcodes",
         "catalog.identifiers",
@@ -132,17 +118,9 @@
         "meets provisional warm barcode and text-query budgets on representative data"
       ],
       "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
-      "capabilities": [
-        "catalog.barcodes",
-        "catalog.products"
-      ],
-      "dimensions": [
-        "performance_and_capacity"
-      ]
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": ["catalog.barcodes", "catalog.products"],
+      "dimensions": ["performance_and_capacity"]
     },
     {
       "id": "ws2-catalog-aggregate-command-budgets",
@@ -152,18 +130,13 @@
         "records bounded aggregate command samples for Variant, Identifier, and lifecycle paths"
       ],
       "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "catalog.identifiers",
         "catalog.lifecycle",
         "catalog.variants"
       ],
-      "dimensions": [
-        "performance_and_capacity"
-      ]
+      "dimensions": ["performance_and_capacity"]
     },
     {
       "id": "ws2-import-workflow",
@@ -176,13 +149,8 @@
         "resumes after an owner effect/checkpoint crash and purges only terminal staging"
       ],
       "command": "bun test apps/server/composition/imports.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
-      "capabilities": [
-        "catalog.bulk-import"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": ["catalog.bulk-import"],
       "dimensions": [
         "happy_path",
         "validation_and_denial",
@@ -205,12 +173,8 @@
         "maps Import boundary failures to stable non-disclosing HTTP semantics"
       ],
       "command": "bun test apps/server/src/router.test.ts",
-      "runtimes": [
-        "Bun 1.3.14"
-      ],
-      "capabilities": [
-        "catalog.bulk-import"
-      ],
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["catalog.bulk-import"],
       "dimensions": [
         "validation_and_denial",
         "permission_and_entitlement",
@@ -227,10 +191,7 @@
         "rolls owner state, movement, receipt, and outbox back together on append failure"
       ],
       "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "inventory.adjustments",
         "inventory.availability",
@@ -257,10 +218,7 @@
         "enforces maker/checker separation in the live owner transaction"
       ],
       "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "inventory.availability",
         "inventory.counts",
@@ -286,10 +244,7 @@
         "conserves a Transfer across partial receipt and explained exception"
       ],
       "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "inventory.availability",
         "inventory.stock-balances",
@@ -316,14 +271,8 @@
         "expires a Reservation deterministically without physical movement and restores availability"
       ],
       "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
-      "capabilities": [
-        "inventory.availability",
-        "inventory.reservations"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": ["inventory.availability", "inventory.reservations"],
       "dimensions": [
         "happy_path",
         "validation_and_denial",
@@ -344,10 +293,7 @@
         "enforces tenant non-disclosure and database CHECK constraints"
       ],
       "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "inventory.availability",
         "inventory.offline-movements",
@@ -375,10 +321,7 @@
         "isolates balances, counts, transfers, reservations, offline receipts, and safe errors across two tenants"
       ],
       "command": "bun test apps/server/composition/ws2-closeout.inventory.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "inventory.adjustments",
         "inventory.availability",
@@ -389,10 +332,7 @@
         "inventory.stock-ledger",
         "inventory.transfers"
       ],
-      "dimensions": [
-        "tenant_isolation",
-        "privacy_and_classification"
-      ]
+      "dimensions": ["tenant_isolation", "privacy_and_classification"]
     },
     {
       "id": "ws2-inventory-application-authority",
@@ -404,9 +344,7 @@
         "authorizes draft-line persistence with count create authority"
       ],
       "command": "bun test packages/domains/inventory/src/index.test.ts",
-      "runtimes": [
-        "Bun 1.3.14"
-      ],
+      "runtimes": ["Bun 1.3.14"],
       "capabilities": [
         "inventory.adjustments",
         "inventory.availability",
@@ -414,9 +352,7 @@
         "inventory.stock-balances",
         "inventory.transfers"
       ],
-      "dimensions": [
-        "permission_and_entitlement"
-      ]
+      "dimensions": ["permission_and_entitlement"]
     },
     {
       "id": "ws2-catalog-delivery-observability",
@@ -429,13 +365,8 @@
         "rebuilds Catalog search projection without crossing tenant scope"
       ],
       "command": "bun test apps/worker/composition/delivery.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
-      "capabilities": [
-        "catalog.products"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": ["catalog.products"],
       "dimensions": [
         "tenant_isolation",
         "idempotency_and_duplicate",
@@ -454,10 +385,7 @@
         "marks an Inventory balance for review when it diverges from ledger facts"
       ],
       "command": "bun test apps/worker/composition/delivery.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "inventory.adjustments",
         "inventory.availability",
@@ -477,17 +405,12 @@
       "path": "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
       "contains": [
         "PR7 exact-stack accessibility and pattern re-audit",
-        "16/16",
+        "20/20",
         "automated Chromium/scanner-keyboard evidence, not representative-user task-time or assistive-technology conformance"
       ],
       "command": "bun run --cwd apps/web test:e2e",
-      "runtimes": [
-        "Chromium",
-        "Next.js 16.2.10",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
       "capabilities": [
-        "catalog.barcodes",
         "catalog.bulk-import",
         "catalog.identifiers",
         "catalog.lifecycle",
@@ -499,9 +422,19 @@
         "inventory.stock-balances",
         "inventory.transfers"
       ],
-      "dimensions": [
-        "accessibility_and_responsive"
-      ]
+      "dimensions": ["accessibility_and_responsive"]
+    },
+    {
+      "id": "ws2-barcode-browser-accessibility",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws2-closeout.spec.ts",
+      "contains": [
+        "Barcode entry and exact lookup preserve keyboard focus, reflow, and accessible Product evidence"
+      ],
+      "command": "bun run --cwd apps/web test:e2e",
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
+      "capabilities": ["catalog.barcodes"],
+      "dimensions": ["accessibility_and_responsive"]
     },
     {
       "id": "ws2-count-interaction-budget",
@@ -513,17 +446,9 @@
         "below the governed 5-second median target"
       ],
       "command": "bun run --cwd apps/web test:e2e",
-      "runtimes": [
-        "Chromium",
-        "Next.js 16.2.10",
-        "PostgreSQL 18"
-      ],
-      "capabilities": [
-        "inventory.counts"
-      ],
-      "dimensions": [
-        "performance_and_capacity"
-      ]
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
+      "capabilities": ["inventory.counts"],
+      "dimensions": ["performance_and_capacity"]
     },
     {
       "id": "ws2-inventory-closeout-budgets",
@@ -533,19 +458,14 @@
         "measures Adjustment posting and current availability visibility with retained samples"
       ],
       "command": "bun test apps/server/composition/ws2-closeout.inventory.integration.test.ts --timeout 30000",
-      "runtimes": [
-        "Bun 1.3.14",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
       "capabilities": [
         "inventory.adjustments",
         "inventory.availability",
         "inventory.stock-balances",
         "inventory.stock-ledger"
       ],
-      "dimensions": [
-        "performance_and_capacity"
-      ]
+      "dimensions": ["performance_and_capacity"]
     },
     {
       "id": "ws2-owner-data-classification",
@@ -558,10 +478,7 @@
         "classification is Confidential"
       ],
       "command": "python scripts/validate_docs.py",
-      "runtimes": [
-        "Python 3.12",
-        "GitHub Actions"
-      ],
+      "runtimes": ["Python 3.12", "GitHub Actions"],
       "capabilities": [
         "catalog.barcodes",
         "catalog.bulk-import",
@@ -578,9 +495,7 @@
         "inventory.stock-ledger",
         "inventory.transfers"
       ],
-      "dimensions": [
-        "privacy_and_classification"
-      ]
+      "dimensions": ["privacy_and_classification"]
     },
     {
       "id": "ws2-browser-offline-fail-closed",
@@ -590,25 +505,30 @@
         "online-only WS2 mutations fail closed and remain understandable when connectivity drops"
       ],
       "command": "bun run --cwd apps/web test:e2e",
-      "runtimes": [
-        "Chromium",
-        "Next.js 16.2.10",
-        "PostgreSQL 18"
-      ],
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
       "capabilities": [
         "catalog.barcodes",
         "catalog.bulk-import",
         "catalog.identifiers",
-        "catalog.lifecycle",
         "catalog.products",
         "catalog.variants",
         "inventory.adjustments",
         "inventory.counts",
         "inventory.transfers"
       ],
-      "dimensions": [
-        "offline_and_degraded"
-      ]
+      "dimensions": ["offline_and_degraded"]
+    },
+    {
+      "id": "ws2-lifecycle-offline-fail-closed",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws2-closeout.spec.ts",
+      "contains": [
+        "Product lifecycle activation and archival fail closed on the offline detail route"
+      ],
+      "command": "bun run --cwd apps/web test:e2e",
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
+      "capabilities": ["catalog.lifecycle"],
+      "dimensions": ["offline_and_degraded"]
     },
     {
       "id": "ws2-seam-only-public-authority-boundary",
@@ -618,18 +538,34 @@
         "keeps seam-only Reservation, offline movement, and raw ledger commands out of public transport"
       ],
       "command": "bun test packages/contracts/platform-api/src/index.test.ts",
-      "runtimes": [
-        "Bun 1.3.14"
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["inventory.offline-movements", "inventory.stock-ledger"],
+      "dimensions": ["permission_and_entitlement", "offline_and_degraded"]
+    },
+    {
+      "id": "ws2-reservation-public-transport-absence",
+      "kind": "automated-contract-test",
+      "path": "packages/contracts/platform-api/src/index.test.ts",
+      "contains": [
+        "keeps seam-only Reservation, offline movement, and raw ledger commands out of public transport"
       ],
-      "capabilities": [
-        "inventory.offline-movements",
-        "inventory.reservations",
-        "inventory.stock-ledger"
+      "command": "bun test packages/contracts/platform-api/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["inventory.reservations"],
+      "dimensions": ["offline_and_degraded"]
+    },
+    {
+      "id": "ws2-reservation-application-authority",
+      "kind": "automated-domain-test",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "contains": [
+        "authorizes internal Reservation create and release with separate permission and entitlement checks",
+        "fails Reservation commands closed before owner mutation on permission, entitlement, or context mismatch"
       ],
-      "dimensions": [
-        "permission_and_entitlement",
-        "offline_and_degraded"
-      ]
+      "command": "bun test packages/domains/inventory/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["inventory.reservations"],
+      "dimensions": ["permission_and_entitlement"]
     },
     {
       "id": "ws2-seam-only-navigation-accessibility",
@@ -639,17 +575,13 @@
         "does not render dead navigation for seam-only Inventory capabilities"
       ],
       "command": "bun test apps/web/src/lib/shell.test.ts",
-      "runtimes": [
-        "Bun 1.3.14"
-      ],
+      "runtimes": ["Bun 1.3.14"],
       "capabilities": [
         "inventory.offline-movements",
         "inventory.reservations",
         "inventory.stock-ledger"
       ],
-      "dimensions": [
-        "accessibility_and_responsive"
-      ]
+      "dimensions": ["accessibility_and_responsive"]
     }
   ]
 }

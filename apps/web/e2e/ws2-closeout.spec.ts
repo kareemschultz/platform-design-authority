@@ -102,6 +102,16 @@ async function createProduct(page: Page, testInfo: TestInfo) {
 	return created.json.id;
 }
 
+function createUniqueGtin13() {
+	const randomDigits = crypto.randomUUID().replace(/\D/gu, "").padEnd(9, "0");
+	const payload = `200${randomDigits.slice(0, 9)}`;
+	const weightedSum = [...payload].reduce(
+		(sum, digit, index) => sum + Number(digit) * (index % 2 === 0 ? 1 : 3),
+		0
+	);
+	return `${payload}${(10 - (weightedSum % 10)) % 10}`;
+}
+
 async function recordScannerObservation(
 	page: Page,
 	productId: string,
@@ -200,6 +210,55 @@ test("a Product import reaches governed review with keyboard, history, reflow, a
 		body: detailUrl,
 		contentType: "text/plain",
 	});
+});
+
+test("Barcode entry and exact lookup preserve keyboard focus, reflow, and accessible Product evidence", async ({
+	page,
+}, testInfo) => {
+	await signInOperator(page, "/operations/products/new");
+	const suffix = crypto.randomUUID().slice(0, 8);
+	const productName = `Barcode Product ${testInfo.project.name} ${suffix}`;
+	const barcode = createUniqueGtin13();
+	await page.getByLabel("Product name").fill(productName);
+	await page.getByLabel("Variant name").fill("Default");
+	await page
+		.getByLabel("Tenant SKU (optional)")
+		.fill(`BARCODE-${testInfo.project.name.toUpperCase()}-${suffix}`);
+	await page.getByLabel("GTIN scheme").selectOption("GTIN-13");
+	const barcodeEntry = page.getByLabel("Barcode (optional)");
+	await expect(barcodeEntry).toHaveAttribute("inputmode", "numeric");
+	await barcodeEntry.focus();
+	await barcodeEntry.pressSequentially(barcode);
+	await expect(barcodeEntry).toBeFocused();
+	const createResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/catalog/products/create")
+	);
+	await barcodeEntry.press("Enter");
+	expect((await createResponsePromise).ok()).toBe(true);
+	await expect(page.getByRole("heading", { name: productName })).toBeVisible();
+	await expect(
+		page.getByText(`GTIN: ${barcode}`, { exact: true })
+	).toBeVisible();
+	await expectAutomatedA11yClean(page);
+	await expectViewportReflow(page);
+
+	await page.goto("/operations/products");
+	await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+	// The workspace context hydrates after navigation and intentionally remounts
+	// context-bound filters. Exercise focus only after that authoritative load settles.
+	await page.waitForLoadState("networkidle");
+	const exactBarcode = page.getByLabel("Exact barcode");
+	await exactBarcode.focus();
+	await exactBarcode.pressSequentially(barcode);
+	await expect(exactBarcode).toHaveValue(barcode);
+	await expect(exactBarcode).toBeFocused();
+	await exactBarcode.press("Enter");
+	await expect(page).toHaveURL(new RegExp(`barcode=${barcode}`, "u"));
+	await expect(page.getByRole("link", { name: productName })).toBeVisible();
+	await expectAutomatedA11yClean(page);
+	await expectViewportReflow(page);
 });
 
 test("a blind Count preserves hidden expected quantity through submit and returns scanner focus", async ({
@@ -397,6 +456,47 @@ test("a permission-limited operator receives a distinct non-disclosing denial st
 	await expect(page.getByText(INVENTORY_PERMISSION_DETAIL)).not.toBeVisible();
 	await expectAutomatedA11yClean(page);
 	await expectViewportReflow(page);
+});
+
+test("Product lifecycle activation and archival fail closed on the offline detail route", async ({
+	page,
+}, testInfo) => {
+	test.slow();
+	await signInOperator(page, "/operations/products/new");
+	const productId = await createProduct(page, testInfo);
+	await page.goto(`/operations/products/${productId}`);
+	await expect(
+		page.getByRole("button", { name: "Activate Product" })
+	).toBeVisible();
+	await page.getByRole("button", { exact: true, name: "Archive" }).click();
+	await expect(
+		page.getByRole("dialog").getByRole("heading", {
+			name: "Archive this Product?",
+		})
+	).toBeVisible();
+	await page.getByLabel("Reason").fill("Offline lifecycle evidence");
+
+	await page.context().setOffline(true);
+	await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+	await expect(
+		page.getByText("Offline", { exact: true }).first()
+	).toBeVisible();
+	await expect(
+		page.getByRole("dialog").getByRole("button", { name: "Archive Product" })
+	).toBeDisabled();
+	await page.getByRole("button", { name: "Keep Product" }).click();
+	await expect(page.getByRole("dialog")).not.toBeVisible();
+	await expect(
+		page.getByRole("button", { name: "Activate Product" })
+	).toBeDisabled();
+	await expect(
+		page.getByRole("button", { exact: true, name: "Archive" })
+	).toBeDisabled();
+	await expectAutomatedA11yClean(page);
+	await expectViewportReflow(page);
+
+	await page.context().setOffline(false);
+	await page.evaluate(() => window.dispatchEvent(new Event("online")));
 });
 
 test("online-only WS2 mutations fail closed and remain understandable when connectivity drops", async ({

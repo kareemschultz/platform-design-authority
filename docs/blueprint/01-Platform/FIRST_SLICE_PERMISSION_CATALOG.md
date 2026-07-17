@@ -1,10 +1,10 @@
 ---
 document_id: PDA-PLT-027
 title: First Slice Permission Catalog
-version: 0.7.1
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-17
 related_adrs: [ADR-0016, ADR-0017]
 ---
 
@@ -81,6 +81,8 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 - `inventory.count.create`
 - `inventory.count.submit`
 - `inventory.count.approve`
+- `inventory.reservation.create`
+- `inventory.reservation.release`
 - `inventory.transfer.read`
 - `inventory.transfer.create`
 - `inventory.transfer.dispatch`
@@ -91,12 +93,13 @@ Permissions are actor-level authority and remain separate from tenant entitlemen
 - `inventory.import.download`
 - `inventory.import.purge`
 
-The read permissions are deliberately resource-specific so an assignment that may inspect balances does not silently gain access to adjustment reasons, count evidence, or transfer exceptions. Adjustment reversal is distinct from approval and always appends a linked inverse movement. Dispatch is distinct from create and receive, preserving transfer custody and segregation of duties.
+The read permissions are deliberately resource-specific so an assignment that may inspect balances does not silently gain access to adjustment reasons, count evidence, or transfer exceptions. Adjustment reversal is distinct from approval and always appends a linked inverse movement. Reservation create and release are separate internal-command authorities; neither permission creates a public Reservation endpoint. Dispatch is distinct from create and receive, preserving transfer custody and segregation of duties.
 
 Import create, read, approve, correction-report download, and retention purge are distinct authorities. A user who can upload or approve rows does not automatically gain access to findings, downloadable evidence, or destructive staging cleanup. Product and opening-stock approval remain separately scoped, and an approver may not approve an import they initiated. Purge is an operator action allowed only after the governed terminal-state retention window and remains subject to ADR-0014 deletion-journal and legal-hold controls.
 
 ## Change Log
 
+- 0.8.0 (2026-07-17): Added distinct internal-command permissions for the prototype Reservation create and release seams.
 - 0.7.1 (2026-07-16): Added distinct operator-only retention-purge permissions for Product and opening-stock staging evidence.
 - 0.7.0 (2026-07-16): Added distinct read, approve, and correction-report download permissions for the PR5 Product and opening-stock import lifecycle.
 

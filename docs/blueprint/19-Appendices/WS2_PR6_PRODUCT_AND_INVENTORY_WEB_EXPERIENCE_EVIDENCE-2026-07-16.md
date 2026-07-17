@@ -1,10 +1,10 @@
 ---
 document_id: PDA-APP-025
 title: WS2 PR6 Product and Inventory Web Experience Evidence
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Frontend Platform
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 related_adrs: [ADR-0005, ADR-0016, ADR-0020, ADR-0022]
 ---
 
@@ -102,12 +102,14 @@ PR7 extended the real-authentication Compose lane across Product import review, 
 | Destructive denial text and default Sonner description/action colors fell below the WCAG AA text-contrast target | High | Darkened the owned destructive semantic token and supplied explicit owned Sonner foreground/action classes; removed the incompatible rich-color shortcut | axe A/AA and visual contrast checks are clean on the denial route in both desktop and mobile projects |
 | Opaque Count, location, and Product identifiers widened the mobile document | High | Added intentional wrapping to the shared page title and Count/location/Product identifier surfaces | The mobile Count workflow passes the document-width reflow assertion after five durable observations and submission |
 
-The full Playwright regression passes **16/16** against the rebuilt web/server/PostgreSQL stack. The ten closeout cases verify:
+The full Playwright regression passes **20/20** against the rebuilt web/server/PostgreSQL stack. Seven closeout scenarios run in both desktop and mobile projects (fourteen closeout executions) and verify:
 
 - a Product import reaches `ReadyForApproval`, exposes the maker/checker boundary in a keyboard-operated dialog, and preserves detail/list browser history;
 - a blind Count persists five scanner-style Enter submissions, returns focus to Product input after each authoritative rerender, hides expected quantities before posting, reaches `Submitted`, and exposes the self-approval boundary;
 - balance filtering clears both cursor and cursor trail while Back/Forward preserves intentional URL state;
 - balance, Adjustment, and Transfer routes expose headings, landmarks, current context, projection/non-authority semantics, responsive transformation, reflow, and clean automated axe A/AA results; and
+- Product Barcode entry and exact lookup preserve keyboard focus, numeric input semantics, responsive reflow, and clean automated axe A/AA results;
+- Product activation and archive controls fail closed on the offline detail route, including the consequential archive dialog; and
 - a permission-limited operator receives a distinct non-disclosing denial without leaking the permission identifier.
 
 The Count interaction samples measure Enter through the real HTTP command, durable owner update, authoritative rerender, and Product-input refocus: desktop `n=5`, median `86.16 ms`, maximum `92.59 ms`; mobile `n=5`, median `83.32 ms`, maximum `133.14 ms`; zero failures. Both are below the governed 5-second median target. This is automated Chromium/scanner-keyboard evidence, not representative-user task-time or assistive-technology conformance.
@@ -167,6 +169,7 @@ Each authenticated browser lane attaches bounded Navigation Timing/resource-coun
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.9.0 | 2026-07-17 | Frontend Platform | Added exact-stack Barcode entry/lookup accessibility evidence and Product lifecycle offline fail-closed evidence; the complete desktop/mobile Playwright lane now reproduces 20/20 cases. |
 | 0.8.0 | 2026-07-16 | Frontend Platform | Recorded the PR7 exact-stack pattern/accessibility re-audit, remediated AA contrast and opaque-identifier mobile reflow defects, reproduced 16/16 desktop/mobile browser cases including online-only fail-closed mutation behavior, and retained measured Count interaction evidence without claiming screen-reader conformance. |
 | 0.7.0 | 2026-07-16 | Frontend Platform | Recorded exact-head independent concurrence and PR #78 merge, removed stale pending-review wording, and preserved PR7 plus RR-007/RR-009 and every pilot/production accessibility gate. |
 | 0.6.0 | 2026-07-16 | Frontend Platform | Closed the independent review finding by resetting both Balance cursor fields with handler-level regression proof; also closed the disclosed receipt-intent and persistence-adapter whitespace residuals so the recorded idempotency and exact-lookup boundary claims remain literal. |

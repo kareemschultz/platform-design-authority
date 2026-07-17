@@ -855,6 +855,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryReservations.tenantId, input.tenantId),
+						eq(inventoryReservations.organizationId, input.organizationId),
 						eq(inventoryReservations.id, input.id),
 						eq(inventoryReservations.state, "Active"),
 						eq(inventoryReservations.version, input.version),

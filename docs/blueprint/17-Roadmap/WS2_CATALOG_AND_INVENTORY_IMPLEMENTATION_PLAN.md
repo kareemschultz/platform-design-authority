@@ -121,7 +121,7 @@ WS2 owns exactly these 14 first-slice business capabilities.
 | `inventory.stock-ledger` | full | immutable, unit-aware, location-scoped movement facts with linked reversals |
 | `inventory.stock-balances` | full | rebuildable balance read model and reconciliation to ledger facts |
 | `inventory.availability` | full | clearly labeled availability projection with freshness and non-authority rules |
-| `inventory.reservations` | prototype | internal create/release seam, expiry policy, and no conflation with physical movement |
+| `inventory.reservations` | prototype | internal create/release application seam protected by `inventory.reservation.create` and `inventory.reservation.release`, expiry policy, and no conflation with physical movement; no public endpoint |
 | `inventory.adjustments` | full | create/approve/post, segregation of duties, reason/evidence, and reversal correction |
 | `inventory.transfers` | prototype | create, dispatch, in-transit, receive, exception, and linked transfer-out/transfer-in facts |
 | `inventory.counts` | full | draft/in-progress/submit/review/approve/post lifecycle and variance evidence |

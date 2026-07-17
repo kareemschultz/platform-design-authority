@@ -561,7 +561,9 @@ function ProductLifecycleActions({ product }: { product: Product }) {
 			) : null}
 			{product.state === "Archived" ? null : (
 				<Dialog>
-					<DialogTrigger render={<Button variant="outline" />}>
+					<DialogTrigger
+						render={<Button disabled={!workspace.isOnline} variant="outline" />}
+					>
 						Archive
 					</DialogTrigger>
 					<DialogContent>

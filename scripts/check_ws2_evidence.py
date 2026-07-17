@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -17,23 +19,20 @@ EXPECTED_DIMENSION_COUNT = 13
 AI_RUNTIME_MARKERS = ("@ai-sdk", "openai", "anthropic", "openrouter")
 SOURCE_SUFFIXES = {".cjs", ".js", ".json", ".mjs", ".ts", ".tsx"}
 IGNORED_PARTS = {".next", ".turbo", "dist", "node_modules", "playwright-report", "test-results"}
-IMPLEMENTATION_ROOTS = (
-    ROOT / "apps" / "server",
-    ROOT / "apps" / "web",
-    ROOT / "apps" / "worker",
-    ROOT / "packages" / "contracts" / "events",
-    ROOT / "packages" / "contracts" / "platform-api",
-    ROOT / "packages" / "domains" / "catalog",
-    ROOT / "packages" / "domains" / "inventory",
-    ROOT / "packages" / "persistence" / "catalog-postgres",
-    ROOT / "packages" / "persistence" / "inventory-postgres",
-    ROOT / "packages" / "persistence" / "platform-events-postgres",
-    ROOT / "packages" / "persistence" / "platform-import-export-postgres",
-    ROOT / "packages" / "persistence" / "platform-numbering-postgres",
-    ROOT / "packages" / "platform" / "events",
-    ROOT / "packages" / "platform" / "import-export",
-    ROOT / "packages" / "platform" / "numbering",
+ESSENTIAL_APPLICATION_PACKAGES = frozenset({"server", "web", "worker"})
+RUNTIME_DEPENDENCY_SECTIONS = (
+    "dependencies",
+    "optionalDependencies",
+    "peerDependencies",
 )
+
+
+@dataclass(frozen=True)
+class WorkspacePackage:
+    name: str
+    root: Path
+    runtime_dependencies: frozenset[str]
+    workspace_runtime_dependencies: frozenset[str]
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -208,26 +207,148 @@ def validate_workstream_rows(
     return required_cells
 
 
-def validate_ai_independence() -> None:
+def discover_workspace_packages(
+    repository_root: Path = ROOT,
+) -> dict[str, WorkspacePackage]:
+    root_manifest_path = repository_root / "package.json"
+    root_manifest = json.loads(root_manifest_path.read_text(encoding="utf-8"))
+    workspace_config = root_manifest.get("workspaces", {})
+    workspace_patterns = (
+        workspace_config
+        if isinstance(workspace_config, list)
+        else workspace_config.get("packages", [])
+        if isinstance(workspace_config, dict)
+        else []
+    )
+    if not isinstance(workspace_patterns, list) or not workspace_patterns:
+        raise AssertionError("root package.json requires workspace package patterns")
+
+    packages: dict[str, WorkspacePackage] = {}
+    for pattern_value in workspace_patterns:
+        pattern = str(pattern_value).strip().replace("\\", "/")
+        if not pattern or pattern.startswith("/") or ".." in Path(pattern).parts:
+            raise AssertionError(f"unsafe workspace package pattern: {pattern!r}")
+        manifest_pattern = f"{pattern.rstrip('/')}/package.json"
+        for manifest_path in sorted(repository_root.glob(manifest_pattern)):
+            try:
+                manifest_path.resolve().relative_to(repository_root.resolve())
+            except ValueError as exc:
+                raise AssertionError(
+                    f"workspace manifest is outside the repository: {manifest_path}"
+                ) from exc
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if not isinstance(manifest, dict):
+                raise AssertionError(
+                    f"workspace manifest must be an object: "
+                    f"{manifest_path.relative_to(repository_root)}"
+                )
+            name = str(manifest.get("name", "")).strip()
+            if not name:
+                raise AssertionError(
+                    f"workspace manifest requires a name: "
+                    f"{manifest_path.relative_to(repository_root)}"
+                )
+            if name in packages:
+                raise AssertionError(f"duplicate workspace package name: {name}")
+
+            runtime_dependencies: set[str] = set()
+            workspace_runtime_dependencies: set[str] = set()
+            for section_name in RUNTIME_DEPENDENCY_SECTIONS:
+                section = manifest.get(section_name, {})
+                if not isinstance(section, dict):
+                    raise AssertionError(
+                        f"{manifest_path.relative_to(repository_root)} "
+                        f"has a non-object {section_name} section"
+                    )
+                runtime_dependencies.update(str(value) for value in section)
+                workspace_runtime_dependencies.update(
+                    str(name)
+                    for name, version in section.items()
+                    if str(version).startswith("workspace:")
+                )
+
+            packages[name] = WorkspacePackage(
+                name=name,
+                root=manifest_path.parent,
+                runtime_dependencies=frozenset(runtime_dependencies),
+                workspace_runtime_dependencies=frozenset(
+                    workspace_runtime_dependencies
+                ),
+            )
+    return packages
+
+
+def derive_runtime_dependency_closure(
+    packages: dict[str, WorkspacePackage],
+    entry_package_names: frozenset[str] = ESSENTIAL_APPLICATION_PACKAGES,
+) -> tuple[WorkspacePackage, ...]:
+    missing_entries = entry_package_names - packages.keys()
+    if missing_entries:
+        raise AssertionError(
+            f"WS2 essential application packages are missing: {sorted(missing_entries)}"
+        )
+
+    pending = list(sorted(entry_package_names))
+    closure: dict[str, WorkspacePackage] = {}
+    while pending:
+        name = pending.pop()
+        if name in closure:
+            continue
+        package = packages[name]
+        missing_workspace_dependencies = (
+            package.workspace_runtime_dependencies - packages.keys()
+        )
+        if missing_workspace_dependencies:
+            raise AssertionError(
+                f"{package.name} has undiscovered workspace runtime dependencies: "
+                f"{sorted(missing_workspace_dependencies)}"
+            )
+        closure[name] = package
+        pending.extend(
+            dependency
+            for dependency in package.runtime_dependencies
+            if dependency in packages and dependency not in closure
+        )
+    return tuple(closure[name] for name in sorted(closure))
+
+
+def find_ai_runtime_violations(
+    packages: tuple[WorkspacePackage, ...], repository_root: Path = ROOT
+) -> list[str]:
     violations: list[str] = []
-    for root in IMPLEMENTATION_ROOTS:
-        if not root.is_dir():
-            raise AssertionError(f"WS2 implementation root is missing: {root.relative_to(ROOT)}")
-        for path in root.rglob("*"):
-            if (
-                not path.is_file()
-                or path.suffix not in SOURCE_SUFFIXES
-                or any(part in IGNORED_PARTS for part in path.parts)
-            ):
-                continue
-            content = path.read_text(encoding="utf-8").lower()
-            for marker in AI_RUNTIME_MARKERS:
-                if marker in content:
-                    violations.append(f"{path.relative_to(ROOT).as_posix()}: {marker}")
+    for package in packages:
+        if not package.root.is_dir():
+            raise AssertionError(
+                f"WS2 runtime package root is missing: "
+                f"{package.root.relative_to(repository_root)}"
+            )
+        for directory, child_directories, filenames in os.walk(package.root):
+            child_directories[:] = [
+                name for name in child_directories if name not in IGNORED_PARTS
+            ]
+            directory_path = Path(directory)
+            for filename in filenames:
+                path = directory_path / filename
+                if path.suffix not in SOURCE_SUFFIXES:
+                    continue
+                content = path.read_text(encoding="utf-8").lower()
+                for marker in AI_RUNTIME_MARKERS:
+                    if marker in content:
+                        violations.append(
+                            f"{path.relative_to(repository_root).as_posix()}: {marker}"
+                        )
+    return sorted(violations)
+
+
+def validate_ai_independence() -> int:
+    packages = discover_workspace_packages()
+    runtime_closure = derive_runtime_dependency_closure(packages)
+    violations = find_ai_runtime_violations(runtime_closure)
     if violations:
         raise AssertionError(
             "WS2 essential paths depend on an AI runtime:\n" + "\n".join(violations)
         )
+    return len(runtime_closure)
 
 
 def main() -> int:
@@ -238,11 +359,12 @@ def main() -> int:
     required_cells = validate_workstream_rows(
         registry, expected_capabilities, evidence_ids
     )
-    validate_ai_independence()
+    runtime_package_count = validate_ai_independence()
     print(
         "WS2 evidence verified: "
         f"{len(expected_capabilities)} capabilities, {required_cells} required cells, "
-        f"{marker_count} source markers, no AI runtime dependency"
+        f"{marker_count} source markers, no AI runtime dependency across "
+        f"{runtime_package_count} workspace packages"
     )
     return 0
 

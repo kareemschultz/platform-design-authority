@@ -816,6 +816,20 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			onHand: "5.000000",
 			reserved: "2.000000",
 		});
+		expect(
+			await captureError(
+				inventory.releaseReservation({
+					actorUserId: "reservation_releaser",
+					correlationId: base.correlationId,
+					idempotencyKey: "reservation-release-foreign-organization",
+					reason: "Cancelled",
+					reservation: {
+						...reservation,
+						organizationId: "organization_foreign",
+					},
+				})
+			)
+		).toMatchObject({ code: "version_conflict" });
 		await inventory.releaseReservation({
 			actorUserId: "reservation_releaser",
 			correlationId: base.correlationId,

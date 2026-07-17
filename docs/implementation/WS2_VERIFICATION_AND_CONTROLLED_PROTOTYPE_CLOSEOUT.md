@@ -38,7 +38,7 @@ All thirteen PDA-TST-013 dimensions remain required for all fourteen capabilitie
 
 ## 3. Machine-readable matrix
 
-`evidence/first-slice/ws2-capability-evidence.json` is the reviewed WS2 evidence source consumed by `scripts/generate_registries.py`. `scripts/check_ws2_evidence.py` derives the capability set from the live capability registry and fails on membership drift, a missing executable required dimension, absent paths or source markers, undeclared capabilities, unknown dimensions, missing commands/runtimes, generated-registry drift, blocking defects, or an AI runtime dependency in essential WS2 paths.
+`evidence/first-slice/ws2-capability-evidence.json` is the reviewed WS2 evidence source consumed by `scripts/generate_registries.py`. `scripts/check_ws2_evidence.py` derives the capability set from the live capability registry and fails on membership drift, a missing executable required dimension, absent paths or source markers, undeclared capabilities, unknown dimensions, missing commands/runtimes, generated-registry drift, blocking defects, or an AI runtime dependency anywhere in the runtime workspace closure derived from the `server`, `web`, and `worker` package manifests. Its regression suite proves that transitive workspace packages, including the API client, UI library, authorization, and entitlement packages, cannot escape that scan.
 
 After generation, `registry/first-slice-tests.json` records:
 
@@ -54,7 +54,7 @@ An `Evidenced` row means executable evidence exists at registered depth. Open sc
 | Gate | Result | Evidence and retained boundary |
 |---|---|---|
 | G1 independent plan review | Satisfied | PR #63 exact-head concurrence after four accepted/remediated findings |
-| G2 contract-first closure | Satisfied | PR #65; 116 OpenAPI operations equal 116 endpoint mappings; 107 registered permissions; generated contract freshness |
+| G2 contract-first closure | Satisfied | PR #65; 116 OpenAPI operations equal 116 endpoint mappings; 109 registered permissions after PR7 adds two internal Reservation application-command authorities; generated contract freshness |
 | G3 ledger/Drizzle suitability | Satisfied at controlled-prototype depth | PDA-APP-021 through PDA-APP-022; exact decimal, row locking, immutable reversal, balance rebuild, atomic outbox, migration, and 250k Product query-shape evidence; production scale remains open |
 | G4 owner persistence/composition | Satisfied at controlled-prototype depth | ADR-0027 v0.3.5; owner-specific adapters/migrations; literal server/worker roots; no cross-owner persistence import; Import/Export and Numbering exact-head sign-off |
 | G5 data/isolation/classification | Satisfied at controlled-prototype depth | PDA-DAT-019; composite ownership, tenant predicates, safe errors, two-tenant owner/job/event/projection/import/numbering proof; RR-007 stays open |
@@ -68,7 +68,7 @@ The closeout records each denominator rather than using an ambiguous "schema cou
 |---|---:|---|
 | OpenAPI operations | 116 | Equals endpoint-permission entries |
 | Endpoint-permission entries | 116 | Zero mapping drift |
-| Registered permissions | 107 | Every endpoint permission resolves |
+| Registered permissions | 109 | Every endpoint permission resolves; `inventory.reservation.create` and `inventory.reservation.release` protect internal commands without creating public endpoints |
 | Registered events | 208 | Global registry count; not all belong to WS2 |
 | JSON Schema files | 44 | Includes event and non-event schemas |
 | Event JSON Schema files | 38 | Includes the shared event envelope |
@@ -153,7 +153,7 @@ The live PR7 audit found and corrected two High defects:
 1. denial/destructive and Sonner description/action colors fell below AA text contrast; owned semantic/descriptive classes now pass automated axe A/AA on both viewports;
 2. opaque Count/location/Product identifiers caused mobile document overflow; shared title and identifier surfaces now wrap without losing identity.
 
-The rebuilt full Playwright suite passes 16/16 in 25.6 seconds. Keyboard, focus return, dialog entry/exit, landmarks/headings, semantic forms/tables/lists, error/denial copy, Back/Forward behavior, 390-by-844 reflow, touch-sized controls, reduced-motion inheritance, current context, projection freshness, explicit online-only fail-closed behavior, and automated axe A/AA are covered on the evaluated routes. Light/dark/system tokens and non-color state text remain platform-owned; no tenant-visible codename or premium source appears.
+The rebuilt full Playwright suite passes 20/20. Keyboard, Barcode entry and exact lookup, Product lifecycle offline denial, focus return, dialog entry/exit, landmarks/headings, semantic forms/tables/lists, error/denial copy, Back/Forward behavior, 390-by-844 reflow, touch-sized controls, reduced-motion inheritance, current context, projection freshness, explicit online-only fail-closed behavior, and automated axe A/AA are covered on the evaluated routes. Light/dark/system tokens and non-color state text remain platform-owned; no tenant-visible codename or premium source appears. The exact elapsed time is retained by the CI/Playwright artifact rather than promoted as a stable performance claim.
 
 This is not WCAG conformance. Manual screen-reader testing across multiple assistive technologies, 400% text-only zoom, forced-colors/representative devices, production content, native VoiceOver/TalkBack, and an independent qualified accessibility review remain RR-009 pilot/production gates.
 
@@ -173,9 +173,9 @@ This is not WCAG conformance. Manual screen-reader testing across multiple assis
 - Concrete PostgreSQL adapters remain owner-specific and bind only in registered server/worker composition roots. The worker cannot invoke migrations.
 - Ten owner migration streams have distinct histories and execute serially; clean/repeat/upgrade/failure/freshness checks remain in CI.
 - Bun runs workspace and PostgreSQL critical paths; Node 24 runs the approved persistence, event delivery, and API fallback checks.
-- The final branch gate reproduced 334 workspace tests / 1,545 expectations, 67 server PostgreSQL tests / 642 expectations, and 13 worker PostgreSQL tests / 132 expectations with zero failures; server and worker Node fallback checks passed. These are exact branch-run counts, not a frozen contractual denominator.
+- The final branch gate reproduced all 29 workspace test tasks with zero failures, 67 server PostgreSQL tests / 643 expectations, 13 worker PostgreSQL tests / 132 expectations, and 20 desktop/mobile browser cases; server and worker Node fallback checks passed. These are exact branch-run lane results, not a frozen contractual denominator.
 - Contract, OpenAPI, endpoint-permission, event, schema, generated-registry, architecture, TypeScript, formatting, build, Docker health, migration, and browser gates are executable.
-- Essential Product, Inventory, import, Numbering, event, and web paths contain no AI runtime dependency and remain deterministic with AI disabled.
+- The manifest-derived runtime workspace closure for the essential `server`, `web`, and `worker` paths contains no AI runtime dependency and remains deterministic with AI disabled; transitive platform clients, UI, authorization, and entitlement packages are included rather than trusted through a hand-maintained directory list.
 - RR-006 stays closed based on real PR4 worker evidence. Backup/PITR, multi-replica failover, production alerting, and full restore exercises remain WS7/production gates.
 
 ## 12. PDA-RDM-009 section 16.3 disposition

@@ -704,10 +704,10 @@
       "document_id": "PDA-APP-025",
       "path": "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
       "title": "WS2 PR6 Product and Inventory Web Experience Evidence",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "status": "Draft",
       "owner": "Frontend Platform",
-      "last_reviewed": "2026-07-16",
+      "last_reviewed": "2026-07-17",
       "related_adrs": [
         "ADR-0005",
         "ADR-0016",
@@ -3279,10 +3279,10 @@
       "document_id": "PDA-PLT-027",
       "path": "docs/blueprint/01-Platform/FIRST_SLICE_PERMISSION_CATALOG.md",
       "title": "First Slice Permission Catalog",
-      "version": "0.7.1",
+      "version": "0.8.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-15",
+      "last_reviewed": "2026-07-17",
       "related_adrs": [
         "ADR-0016",
         "ADR-0017"

@@ -405,7 +405,7 @@
       "path": "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
       "contains": [
         "PR7 exact-stack accessibility and pattern re-audit",
-        "20/20",
+        "22/22",
         "automated Chromium/scanner-keyboard evidence, not representative-user task-time or assistive-technology conformance"
       ],
       "command": "bun run --cwd apps/web test:e2e",

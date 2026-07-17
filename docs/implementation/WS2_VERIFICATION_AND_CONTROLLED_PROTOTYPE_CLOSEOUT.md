@@ -1,10 +1,10 @@
 ---
 document_id: PDA-IMPL-007
 title: WS2 Verification and Controlled-Prototype Closeout
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
 ---
 
@@ -153,7 +153,9 @@ The live PR7 audit found and corrected two High defects:
 1. denial/destructive and Sonner description/action colors fell below AA text contrast; owned semantic/descriptive classes now pass automated axe A/AA on both viewports;
 2. opaque Count/location/Product identifiers caused mobile document overflow; shared title and identifier surfaces now wrap without losing identity.
 
-The rebuilt full Playwright suite passes 20/20. Keyboard, Barcode entry and exact lookup, Product lifecycle offline denial, focus return, dialog entry/exit, landmarks/headings, semantic forms/tables/lists, error/denial copy, Back/Forward behavior, 390-by-844 reflow, touch-sized controls, reduced-motion inheritance, current context, projection freshness, explicit online-only fail-closed behavior, and automated axe A/AA are covered on the evaluated routes. Light/dark/system tokens and non-color state text remain platform-owned; no tenant-visible codename or premium source appears. The exact elapsed time is retained by the CI/Playwright artifact rather than promoted as a stable performance claim.
+The independent WS2 PR7 closeout audit found and corrected two further defects: Sonner's own unlayered `[data-title]` rule still resolved to a ~2.77:1 gray toast title, missed by the description/action-only correction above, since Tailwind's `@layer components` cannot out-rank Sonner's unlayered stylesheet regardless of specificity or `!important`; and Product archival had only pre-emptive offline-gating browser coverage, not a genuinely dropped in-flight request, so a mid-flight-failure scenario was added that aborts the archive request once in flight, asserts fail-closed behavior and unmutated Draft state after reload, then confirms clean recovery to `Archived` on retry.
+
+The rebuilt full Playwright suite passes 22/22. Keyboard, Barcode entry and exact lookup, Product lifecycle offline denial, mid-flight request-failure fail-closed and recovery, focus return, dialog entry/exit, landmarks/headings, semantic forms/tables/lists, error/denial copy, Back/Forward behavior, 390-by-844 reflow, touch-sized controls, reduced-motion inheritance, current context, projection freshness, explicit online-only fail-closed behavior, and automated axe A/AA are covered on the evaluated routes. Light/dark/system tokens and non-color state text remain platform-owned; no tenant-visible codename or premium source appears. The exact elapsed time is retained by the CI/Playwright artifact rather than promoted as a stable performance claim.
 
 This is not WCAG conformance. Manual screen-reader testing across multiple assistive technologies, 400% text-only zoom, forced-colors/representative devices, production content, native VoiceOver/TalkBack, and an independent qualified accessibility review remain RR-009 pilot/production gates.
 
@@ -228,4 +230,5 @@ After PR7 exact-head concurrence and merge, rerun exact-`main` governance, contr
 
 ## Change log
 
+- 2026-07-17 — v0.1.1 closed two findings from the independent WS2 PR7 closeout audit: a Sonner toast-title contrast defect the earlier description/action-only correction missed, and a Product archival mid-flight-request-failure gap where only pre-emptive offline gating had browser coverage. The complete desktop/mobile Playwright lane now reproduces 22/22 cases.
 - 2026-07-16 — v0.1.0 recorded the registry-derived closeout candidate, exact PR1-PR6 ledger, PR7 live database/browser measurements, G1-G6 and section 16.3 dispositions, formal pattern/accessibility and security/privacy reviews, explicit production deferrals, and retained independent-review/merge/exact-main/whole-WS2 gates.

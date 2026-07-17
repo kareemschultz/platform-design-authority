@@ -233,6 +233,7 @@ async function seedWebExperienceFixture(): Promise<void> {
 		(
 			[
 				"catalog.bulk-import",
+				"catalog.lifecycle",
 				"catalog.products",
 				"catalog.variants",
 				"catalog.identifiers",

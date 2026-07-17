@@ -192,6 +192,19 @@
 	}
 }
 
+/*
+ * Sonner injects its own stylesheet as an unlayered <style> tag, which the
+ * CSS Cascade Layers spec always ranks above any rule inside a Tailwind
+ * @layer block, regardless of specificity or !important. Its [data-title]
+ * rule sets `color: inherit`, which does not reliably resolve `--normal-text`
+ * through the portaled toast list and renders a WCAG-failing gray (~2.77:1)
+ * instead of the theme's real foreground color. This override must stay
+ * unlayered to actually win against Sonner's own CSS.
+ */
+[data-sonner-toast][data-styled="true"] [data-title] {
+	color: var(--popover-foreground) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,

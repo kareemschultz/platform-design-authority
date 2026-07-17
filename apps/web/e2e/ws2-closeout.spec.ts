@@ -555,3 +555,83 @@ test("online-only WS2 mutations fail closed and remain understandable when conne
 	await page.context().setOffline(false);
 	await page.evaluate(() => window.dispatchEvent(new Event("online")));
 });
+
+test("Product archival fails closed and recovers cleanly when the request drops mid-flight", async ({
+	page,
+}, testInfo) => {
+	test.slow();
+	await signInOperator(page, "/operations/products/new");
+	const productId = await createProduct(page, testInfo);
+	await page.goto(`/operations/products/${productId}`);
+	await expect(
+		page.getByRole("button", { name: "Activate Product" })
+	).toBeVisible();
+	await page.getByRole("button", { exact: true, name: "Archive" }).click();
+	await expect(
+		page.getByRole("dialog").getByRole("heading", {
+			name: "Archive this Product?",
+		})
+	).toBeVisible();
+	await page.getByLabel("Reason").fill("Mid-flight connectivity loss evidence");
+
+	// Unlike setOffline() before submit (proactive UI gating, already covered
+	// above), this drops the archive request itself once it is genuinely in
+	// flight -- proving the client fails closed on an ambiguous mid-request
+	// failure rather than silently corrupting state or claiming success.
+	let interceptedRequests = 0;
+	await page.route("**/rpc/catalog/products/archive", async (route) => {
+		interceptedRequests += 1;
+		await route.abort("connectionreset");
+	});
+	await page
+		.getByRole("dialog")
+		.getByRole("button", { name: "Archive Product" })
+		.click();
+	expect(interceptedRequests).toBe(1);
+	await expect(
+		page.getByRole("alert").getByText("Connection required")
+	).toBeVisible();
+	await expect(page.getByRole("dialog")).toBeVisible();
+	await expectAutomatedA11yClean(page);
+
+	// The dropped request must not leave a partial/corrupted lifecycle state:
+	// close the dialog and reload from the server to confirm the Product is
+	// still genuinely Draft, not silently archived and not stuck ambiguous.
+	await page
+		.getByRole("dialog")
+		.getByRole("button", { name: "Keep Product" })
+		.click();
+	await expect(page.getByRole("dialog")).not.toBeVisible();
+	await page.reload();
+	await expect(
+		page.getByRole("button", { name: "Activate Product" })
+	).toBeVisible();
+	await expect(
+		page.getByRole("button", { exact: true, name: "Archive" })
+	).toBeVisible();
+
+	// Retrying the identical intended change once the connection recovers
+	// must succeed cleanly -- proving the failed attempt was not silently
+	// applied and the same idempotency-key retry the client already uses
+	// genuinely reaches a real, correct terminal state end to end.
+	await page.unroute("**/rpc/catalog/products/archive");
+	await page.getByRole("button", { exact: true, name: "Archive" }).click();
+	await page
+		.getByLabel("Reason")
+		.fill("Mid-flight connectivity loss evidence, retried online");
+	await page
+		.getByRole("dialog")
+		.getByRole("button", { name: "Archive Product" })
+		.click();
+	await expect(page.getByRole("dialog")).not.toBeVisible();
+	await expect(
+		page.getByRole("button", { exact: true, name: "Archive" })
+	).not.toBeVisible();
+	// Sonner's success toast has a 300ms fade-in; let it settle to its
+	// steady-state color before an automated contrast scan, which would
+	// otherwise flag a transient mid-animation blend as a false violation.
+	await expect(page.getByText("Product archived")).toBeVisible();
+	await page.waitForTimeout(400);
+	await expectAutomatedA11yClean(page);
+	await expectViewportReflow(page);
+});

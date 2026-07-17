@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-025
 title: WS2 PR6 Product and Inventory Web Experience Evidence
-version: 0.9.0
+version: 0.9.1
 status: Draft
 owner: Frontend Platform
 last_reviewed: 2026-07-17
@@ -101,15 +101,18 @@ PR7 extended the real-authentication Compose lane across Product import review, 
 |---|---:|---|---|
 | Destructive denial text and default Sonner description/action colors fell below the WCAG AA text-contrast target | High | Darkened the owned destructive semantic token and supplied explicit owned Sonner foreground/action classes; removed the incompatible rich-color shortcut | axe A/AA and visual contrast checks are clean on the denial route in both desktop and mobile projects |
 | Opaque Count, location, and Product identifiers widened the mobile document | High | Added intentional wrapping to the shared page title and Count/location/Product identifier surfaces | The mobile Count workflow passes the document-width reflow assertion after five durable observations and submission |
+| Sonner's default `[data-title]` rule (`color: inherit`, unlayered library CSS) still resolved to a ~2.77:1 gray toast title, missed by the earlier description/action-only Sonner correction | High | Added an unlayered `[data-sonner-toast][data-styled="true"] [data-title]` override binding the toast title to the owned popover-foreground token, since Tailwind's `@layer components` cannot out-rank Sonner's own unlayered stylesheet regardless of specificity | A dedicated mid-flight archive scenario waits for the success toast's fade-in to settle, then asserts a clean automated axe A/AA scan on both desktop and mobile projects |
+| A dropped in-flight request during Product archival was untested; only pre-emptive offline gating (before submit) had browser coverage | High | Added a scenario that aborts the archive request once genuinely in flight, asserts the network-failure alert and unmutated Draft state after reload, then retries once connectivity recovers | Confirms fail-closed behavior on an ambiguous mid-request failure, no partial/corrupted lifecycle state, and a clean recovery to `Archived` on retry, on both desktop and mobile projects |
 
-The full Playwright regression passes **20/20** against the rebuilt web/server/PostgreSQL stack. Seven closeout scenarios run in both desktop and mobile projects (fourteen closeout executions) and verify:
+The full Playwright regression passes **22/22** against the rebuilt web/server/PostgreSQL stack. Eight closeout scenarios run in both desktop and mobile projects (sixteen closeout executions) and verify:
 
 - a Product import reaches `ReadyForApproval`, exposes the maker/checker boundary in a keyboard-operated dialog, and preserves detail/list browser history;
 - a blind Count persists five scanner-style Enter submissions, returns focus to Product input after each authoritative rerender, hides expected quantities before posting, reaches `Submitted`, and exposes the self-approval boundary;
 - balance filtering clears both cursor and cursor trail while Back/Forward preserves intentional URL state;
 - balance, Adjustment, and Transfer routes expose headings, landmarks, current context, projection/non-authority semantics, responsive transformation, reflow, and clean automated axe A/AA results; and
 - Product Barcode entry and exact lookup preserve keyboard focus, numeric input semantics, responsive reflow, and clean automated axe A/AA results;
-- Product activation and archive controls fail closed on the offline detail route, including the consequential archive dialog; and
+- Product activation and archive controls fail closed on the offline detail route, including the consequential archive dialog;
+- Product archival fails closed and does not corrupt lifecycle state when the request itself drops mid-flight, then recovers cleanly on retry with a clean automated axe A/AA scan of the settled success toast; and
 - a permission-limited operator receives a distinct non-disclosing denial without leaking the permission identifier.
 
 The Count interaction samples measure Enter through the real HTTP command, durable owner update, authoritative rerender, and Product-input refocus: desktop `n=5`, median `86.16 ms`, maximum `92.59 ms`; mobile `n=5`, median `83.32 ms`, maximum `133.14 ms`; zero failures. Both are below the governed 5-second median target. This is automated Chromium/scanner-keyboard evidence, not representative-user task-time or assistive-technology conformance.
@@ -169,6 +172,7 @@ Each authenticated browser lane attaches bounded Navigation Timing/resource-coun
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.9.1 | 2026-07-17 | Claude Code (independent audit remediation) | Closed two findings from the independent WS2 PR7 closeout audit: a Sonner toast-title contrast defect the earlier description/action-only correction missed, and a Product archival mid-flight-request-failure gap where only pre-emptive offline gating had browser coverage, not a genuinely dropped in-flight request. Added a dedicated mid-flight fail-closed-and-recover scenario; the complete desktop/mobile Playwright lane now reproduces 22/22 cases across eight closeout scenarios. |
 | 0.9.0 | 2026-07-17 | Frontend Platform | Added exact-stack Barcode entry/lookup accessibility evidence and Product lifecycle offline fail-closed evidence; the complete desktop/mobile Playwright lane now reproduces 20/20 cases. |
 | 0.8.0 | 2026-07-16 | Frontend Platform | Recorded the PR7 exact-stack pattern/accessibility re-audit, remediated AA contrast and opaque-identifier mobile reflow defects, reproduced 16/16 desktop/mobile browser cases including online-only fail-closed mutation behavior, and retained measured Count interaction evidence without claiming screen-reader conformance. |
 | 0.7.0 | 2026-07-16 | Frontend Platform | Recorded exact-head independent concurrence and PR #78 merge, removed stale pending-review wording, and preserved PR7 plus RR-007/RR-009 and every pilot/production accessibility gate. |

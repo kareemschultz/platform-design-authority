@@ -82,7 +82,16 @@ MIGRATOR_MODULE_IMPORT_PATTERN = re.compile(
 # already static named adapter imports, so this matches current legitimate code.
 # The migrator-module rule above and the direct-invocation rule remain as
 # defense in depth.
-PERSISTENCE_SPECIFIER = r"""["']@meridian/persistence-[^"']+["']"""
+# The specifier may be a single/double-quoted string or a no-substitution
+# template literal (backtick), which `import()` and `require()` accept. A
+# backtick literal containing an interpolation (`${...}`) is a runtime-computed
+# specifier and is explicitly out of scope for static text matching — the
+# backtick branch below excludes `$`, so an interpolated specifier does not
+# match and remains out of scope.
+PERSISTENCE_SPECIFIER = (
+    r"""(?:["']@meridian/persistence-[^"']+["']"""
+    r"""|`@meridian/persistence-[^`$]+`)"""
+)
 # Rule 2 — namespace import (optionally preceded by a default binding).
 PERSISTENCE_NAMESPACE_IMPORT_PATTERN = re.compile(
     r"""import\s+(?:[A-Za-z_$][\w$]*\s*,\s*)?\*\s+as\s+[A-Za-z_$][\w$]*\s+from\s+"""

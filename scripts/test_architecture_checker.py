@@ -561,6 +561,24 @@ def main() -> int:
             "await persistence.migrateCatalog({} as never);\n"
         ),
     )
+    # Fifth independent review (exact head 4acb743): a no-substitution template
+    # literal (backtick) specifier in `import()` — which `import()`/`require()`
+    # accept — evaded the quote-only specifier matcher. Runtime-interpolated
+    # (`${...}`) specifiers remain explicitly out of scope.
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_backtick_dynamic_import_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source=(
+            "const persistence = await import(`@meridian/persistence-catalog-postgres`);\n"
+            "const run = persistence.migrateCatalog;\n"
+            "await run({} as never);\n"
+        ),
+    )
     assert_test_source_exempt_rules_match_registry()
     print("architecture checker regression probes passed")
     return 0

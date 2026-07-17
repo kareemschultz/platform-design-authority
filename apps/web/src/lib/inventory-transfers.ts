@@ -3,6 +3,13 @@ export interface TransferLineRemainder {
 	remainingQuantity: string;
 }
 
+export function receiptIntentAfterDraftReset<T>(
+	current: T | null,
+	confirmedSuccess: boolean
+): T | null {
+	return confirmedSuccess ? null : current;
+}
+
 export function outstandingTransferLineId(
 	lines: readonly TransferLineRemainder[],
 	currentLineId: string

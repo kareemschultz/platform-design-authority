@@ -22,7 +22,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { outstandingTransferLineId } from "@/lib/inventory-transfers";
+import {
+	outstandingTransferLineId,
+	receiptIntentAfterDraftReset,
+} from "@/lib/inventory-transfers";
 import {
 	isVersionConflict,
 	operationsHref,
@@ -445,12 +448,15 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 			Boolean(receivedQuantity || exceptionReason || outcome !== "Accepted")
 		)
 	);
-	const resetReceiptDraft = () => {
+	const resetReceiptDraft = (confirmedSuccess = false) => {
 		setLineId(outstandingTransferLineId(transfer.lines, ""));
 		setReceivedQuantity("");
 		setOutcome("Accepted");
 		setExceptionReason("");
-		receiptIntentKey.current = null;
+		receiptIntentKey.current = receiptIntentAfterDraftReset(
+			receiptIntentKey.current,
+			confirmedSuccess
+		);
 	};
 	const refresh = async () =>
 		queryClient.invalidateQueries({ queryKey: orpc.inventory.transfers.key() });
@@ -624,7 +630,7 @@ function TransferActions({ transfer }: { transfer: StockTransfer }) {
 										params: { id: transfer.id },
 									});
 									await refresh();
-									resetReceiptDraft();
+									resetReceiptDraft(true);
 									setReceiveOpen(false);
 									toast.success("Receipt recorded");
 								}}

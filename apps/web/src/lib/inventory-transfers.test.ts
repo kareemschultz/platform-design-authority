@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { outstandingTransferLineId } from "./inventory-transfers";
+import {
+	outstandingTransferLineId,
+	receiptIntentAfterDraftReset,
+} from "./inventory-transfers";
 
 describe("transfer receipt selection", () => {
 	test("retains an outstanding selection across a data refresh", () => {
@@ -37,5 +40,12 @@ describe("transfer receipt selection", () => {
 				"line-a"
 			)
 		).toBe("");
+	});
+
+	test("retains ambiguous receipt intent until authoritative success", () => {
+		const intent = { key: "receipt-key", signature: "receipt-signature" };
+
+		expect(receiptIntentAfterDraftReset(intent, false)).toBe(intent);
+		expect(receiptIntentAfterDraftReset(intent, true)).toBeNull();
 	});
 });

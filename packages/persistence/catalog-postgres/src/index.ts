@@ -232,7 +232,7 @@ export function createCatalogRepository(
 			return null;
 		}
 		const normalizedValue = page.barcode ?? page.sku;
-		if (!normalizedValue) {
+		if (!normalizedValue?.trim()) {
 			return { items: [], nextCursor: null };
 		}
 		const [identifier] = await database

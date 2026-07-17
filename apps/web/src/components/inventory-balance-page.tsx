@@ -20,6 +20,20 @@ import {
 } from "./operations-shared";
 import { useWorkspace } from "./workspace-context";
 
+export function balanceFiltersHref(
+	pathname: string,
+	searchParams: URLSearchParams,
+	locationId: string,
+	productId: string
+) {
+	return operationsHref(pathname, searchParams, {
+		cursor: null,
+		cursorTrail: null,
+		locationId,
+		productId: productId.trim() || null,
+	});
+}
+
 function BalanceFilters() {
 	const workspace = useWorkspace();
 	const pathname = usePathname();
@@ -40,11 +54,7 @@ function BalanceFilters() {
 			onSubmit={(event) => {
 				event.preventDefault();
 				router.push(
-					operationsHref(pathname, searchParams, {
-						cursor: null,
-						locationId,
-						productId: productId.trim() || null,
-					})
+					balanceFiltersHref(pathname, searchParams, locationId, productId)
 				);
 			}}
 		>

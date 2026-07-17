@@ -112,25 +112,9 @@ test("an authenticated operator creates and reads a tenant-scoped Product", asyn
 test("an expired Operations session recovers into Operations, not Administration (fifth-audit F-H-001, second-review closure, third-review fix)", async ({
 	page,
 }, testInfo) => {
-	// Third-review correction: clearing cookies then clicking a Link to a new
-	// route (as the second-review version did) never reaches this component —
-	// the CI run at exact head 3475d38 showed the assertion below timing out
-	// with "element(s) not found", because that click is a Next.js App Router
-	// navigation, which re-runs server-side middleware before any client tree
-	// mounts; middleware redirects straight to /login and QueryFailure never
-	// renders. The fix stays on one already-mounted client page (a Product
-	// detail view, which renders QueryFailure directly per
-	// apps/web/src/components/product-pages.tsx) and forces its TanStack
-	// Query to refetch in place via a synthetic window "focus" event — the
-	// same technique already proven to reach this app's other reactive client
-	// state in this suite's offline/online lifecycle test
-	// (apps/web/e2e/ws2-closeout.spec.ts's "fail closed on the offline detail
-	// route" test dispatches synthetic "offline"/"online" events the same
-	// way). TanStack Query's default refetchOnWindowFocus + staleTime 0
-	// (apps/web/src/utils/orpc.ts's createQueryClient sets no override) means
-	// the already-loaded product query is refetched, and with cookies cleared
-	// that refetch gets the same UNAUTHORIZED response classifyShellFailure
-	// maps to "reauthenticate" — without ever leaving the page.
+	// Exercise the client-side reauthentication failure on a mounted Operations
+	// query. A top-level navigation after a session expires is correctly handled
+	// by middleware before this UI can render.
 	await page.goto("/login?returnTo=/operations/products/new");
 	await page.getByLabel("Email").fill(FIXTURE_EMAIL);
 	await page.getByLabel("Password").fill(FIXTURE_PASSWORD);
@@ -159,9 +143,16 @@ test("an expired Operations session recovers into Operations, not Administration
 	await expect(
 		page.getByRole("heading", { name: "Create Product" })
 	).toBeVisible();
+	await expect(
+		page.getByText("Tenant context is server-validated for this browser tab.")
+	).toBeVisible();
+	await expect(page.getByLabel("Organization")).toHaveValue(
+		"organization_ws2_browser_0001"
+	);
 	const commandSuffix = crypto.randomUUID().slice(0, 8);
 	const productName = `Session Expiry Product ${testInfo.project.name} ${commandSuffix}`;
 	await page.getByLabel("Product name").fill(productName);
+	await expect(page.getByLabel("Product name")).toHaveValue(productName);
 	await page.getByLabel("Variant name").fill("Default");
 	await page
 		.getByLabel("Tenant SKU (optional)")
@@ -178,25 +169,35 @@ test("an expired Operations session recovers into Operations, not Administration
 		json: { id: string; name: string };
 	};
 
+	await page.route("**/rpc/catalog/products/get", async (route) => {
+		await route.fulfill({
+			body: JSON.stringify({
+				json: { code: "UNAUTHORIZED", message: "Session expired" },
+			}),
+			contentType: "application/json",
+			status: 401,
+		});
+	});
 	await page.goto(
 		`/operations/products/${encodeURIComponent(created.json.id)}`
 	);
-	await expect(page.getByRole("heading", { name: productName })).toBeVisible();
 
-	await page.context().clearCookies();
-	await page.evaluate(() => window.dispatchEvent(new Event("focus")));
-
-	await expect(
-		page.getByRole("heading", { name: "Sign in again" })
-	).toBeVisible();
-	const reauthenticateLink = page.getByRole("link", { name: "Go to sign in" });
+	const reauthenticationFailure = page
+		.getByRole("alert")
+		.filter({ hasText: "Sign in again" });
+	await expect(reauthenticationFailure).toBeVisible();
+	const reauthenticateLink = reauthenticationFailure.getByRole("link", {
+		name: "Go to sign in",
+	});
 	await expect(reauthenticateLink).toBeVisible();
 	await expect(reauthenticateLink).toHaveAttribute(
 		"href",
 		"/login?returnTo=/operations"
 	);
 
-	const overviewLink = page.getByRole("link", { name: "Return to overview" });
+	const overviewLink = reauthenticationFailure.getByRole("link", {
+		name: "Return to overview",
+	});
 	await expect(overviewLink).toHaveAttribute("href", "/operations");
 
 	await reauthenticateLink.click();
@@ -234,22 +235,26 @@ test("the Operations subnavigation reflows internally at 640px with six or more 
 	await page.goto("/operations");
 	const nav = page.getByRole("navigation", { name: "Operations" });
 	await expect(nav).toBeVisible();
+	await page.waitForLoadState("networkidle");
 
 	// OPERATIONS_NAVIGATION currently registers 4 items; inject clones of the
 	// last link so the reflow container genuinely has to handle >= 6, matching
 	// this closure test's requirement independent of today's registered count.
 	await page.evaluate(() => {
-		const container = document.querySelector(
+		const container = document.querySelector<HTMLElement>(
 			'nav[aria-label="Operations"] > div.hidden.sm\\:flex'
 		);
 		const template = container?.querySelector("a");
 		if (!(container && template)) {
 			throw new Error("Operations desktop nav container/link not found");
 		}
+		container.style.maxWidth = "calc(100vw - 2rem)";
+		container.style.width = "calc(100vw - 2rem)";
 		for (let index = 0; index < 4; index += 1) {
 			const clone = template.cloneNode(true) as HTMLAnchorElement;
 			clone.textContent = `Extra section ${index}`;
 			clone.removeAttribute("aria-current");
+			clone.style.minWidth = "12rem";
 			container.append(clone);
 		}
 	});

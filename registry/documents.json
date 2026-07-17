@@ -3565,6 +3565,72 @@
       "review_evidence": "docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_V1.md"
     },
     {
+      "document_id": "PDA-REV-013",
+      "path": "docs/reviews/FABLE5_FIFTH_AUDIT_REGISTRATION.md",
+      "title": "Fable 5 Fifth Audit Registration",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-17",
+      "related_adrs": [],
+      "review_evidence": "docs/reviews/FABLE5_FIFTH_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-014",
+      "path": "docs/reviews/FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md",
+      "title": "Fable 5 Fifth Audit Disposition and Remediation Plan",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-17",
+      "related_adrs": [],
+      "review_evidence": "docs/reviews/FABLE5_FIFTH_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-015",
+      "path": "docs/reviews/FABLE5_FIFTH_AUDIT_COMPLETION_ROADMAP_V1.md",
+      "title": "Fable 5 Fifth Audit Project Completion Roadmap",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-17",
+      "related_adrs": [],
+      "review_evidence": "docs/reviews/FABLE5_FIFTH_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-016",
+      "path": "docs/reviews/FABLE5_FIFTH_AUDIT_QA_STRATEGY_V1.md",
+      "title": "Fable 5 Fifth Audit QA and Verification Strategy",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-17",
+      "related_adrs": [],
+      "review_evidence": "docs/reviews/FABLE5_FIFTH_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-017",
+      "path": "docs/reviews/FABLE5_FIFTH_AUDIT_RESTRUCTURING_ASSESSMENT_V1.md",
+      "title": "Fable 5 Fifth Audit Repository Restructuring Assessment",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-17",
+      "related_adrs": [],
+      "review_evidence": "docs/reviews/FABLE5_FIFTH_AUDIT_V1.md"
+    },
+    {
+      "document_id": "PDA-REV-018",
+      "path": "docs/reviews/FABLE5_FIFTH_AUDIT_EXECUTION_PROMPT_PACK_V1.md",
+      "title": "Fable 5 Fifth Audit Execution Prompt Pack",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-17",
+      "related_adrs": [],
+      "review_evidence": "docs/reviews/FABLE5_FIFTH_AUDIT_V1.md"
+    },
+    {
       "document_id": "PDA-SEC-001",
       "path": "docs/blueprint/11-Security/README.md",
       "title": "Security Section Index",

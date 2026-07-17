@@ -39,6 +39,10 @@
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
+	/* Non-status semantic aliases deliberately resolve to the governed shadcn
+	   preset values, not registry/design-tokens.json (status: draft) — the
+	   preset wins during the controlled prototype; reconcile or re-record when
+	   the token registry leaves draft (fifth-audit F-H-003, PDA-UX token doc). */
 	--action-primary: var(--primary);
 	--action-primary-foreground: var(--primary-foreground);
 	--surface-canvas: var(--background);

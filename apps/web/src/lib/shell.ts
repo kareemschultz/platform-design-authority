@@ -90,6 +90,16 @@ export function safeReturnPath(
 	return match ?? "/administration";
 }
 
+/** Section-aware failure return target: Operations routes recover into
+ * Operations, everything else into Administration (fifth-audit F-H-001). */
+export function sectionOverviewPath(
+	pathname: string | null | undefined
+): SafeReturnPath {
+	return safeReturnPath(
+		pathname?.startsWith("/operations") ? "/operations" : "/administration"
+	);
+}
+
 export function isNavigationCurrent(pathname: string, href: string): boolean {
 	return href === "/administration" || href === "/operations" || href === "/"
 		? pathname === href

@@ -15,8 +15,13 @@ import {
 	WifiOff,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { classifyShellFailure, type ShellFailure } from "@/lib/shell";
+import {
+	classifyShellFailure,
+	type ShellFailure,
+	sectionOverviewPath,
+} from "@/lib/shell";
 
 const copy: Record<ShellFailure, { description: string; title: string }> = {
 	"approval-required": {
@@ -66,6 +71,7 @@ export function QueryFailure({
 	onRetry: () => void;
 }) {
 	const kind = classifyShellFailure(error, isOnline);
+	const overviewHref = sectionOverviewPath(usePathname());
 	const iconByFailure: Record<ShellFailure, typeof CircleAlert> = {
 		"approval-required": CircleAlert,
 		"entitlement-unavailable": PackageX,
@@ -86,7 +92,7 @@ export function QueryFailure({
 					{kind === "reauthenticate" ? (
 						<Link
 							className={reauthenticateLinkClassName}
-							href="/login?returnTo=/administration"
+							href={`/login?returnTo=${overviewHref}`}
 						>
 							Go to sign in
 						</Link>
@@ -100,7 +106,7 @@ export function QueryFailure({
 							className: "min-h-10",
 							variant: "ghost",
 						})}
-						href="/administration"
+						href={overviewHref}
 					>
 						Return to overview
 					</Link>

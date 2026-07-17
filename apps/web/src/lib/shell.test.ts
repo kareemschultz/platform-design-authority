@@ -6,6 +6,7 @@ import {
 	isNavigationCurrent,
 	OPERATIONS_NAVIGATION,
 	safeReturnPath,
+	sectionOverviewPath,
 } from "./shell";
 
 describe("application shell", () => {
@@ -69,5 +70,22 @@ describe("application shell", () => {
 			false
 		);
 		expect(classifyShellFailure(new Error("offline"), false)).toBe("offline");
+	});
+});
+
+describe("sectionOverviewPath", () => {
+	test("Operations routes recover into the Operations overview", () => {
+		expect(sectionOverviewPath("/operations/inventory/counts")).toBe(
+			"/operations"
+		);
+		expect(sectionOverviewPath("/operations")).toBe("/operations");
+	});
+
+	test("non-Operations and unknown routes recover into Administration", () => {
+		expect(sectionOverviewPath("/administration/users")).toBe(
+			"/administration"
+		);
+		expect(sectionOverviewPath(null)).toBe("/administration");
+		expect(sectionOverviewPath(undefined)).toBe("/administration");
 	});
 });

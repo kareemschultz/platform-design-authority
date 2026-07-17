@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-17
 ---
 
 # Design Token Values and Breakpoints
@@ -235,3 +235,7 @@ Registry-backed groups are `space`, `radius`, `motion`, `screen`, `size`, and `c
 - Reduced motion
 - Text scaling
 - Touch and POS target measurement
+
+## Recorded prototype drift (fifth-audit F-H-003)
+
+The shipped theme (`packages/ui-web/core/src/styles/globals.css`) resolves the non-status semantic aliases (`--surface-*`, `--action-primary*`, `--text-*`, `--focus-ring`, borders) to the governed shadcn preset values, which differ from this registry's draft values; only the `status-*` roles are registry-synchronized. This is a deliberate controlled-prototype mapping — the governed preset wins until this token registry leaves draft. When it does, either reconcile the CSS aliases to registry values or re-record the exception here; a white-label or contrast change applied only to the registry does not reach the product until then.

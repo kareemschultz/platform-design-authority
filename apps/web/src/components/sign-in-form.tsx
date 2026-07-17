@@ -91,16 +91,18 @@ export default function SignInForm({
 									type="email"
 									value={field.state.value}
 								/>
-								{field.state.meta.errors.map((error) => (
-									<p
-										className="text-destructive text-sm"
-										id={`${field.name}-error`}
-										key={error?.message}
-										role="alert"
-									>
-										{error?.message}
-									</p>
-								))}
+								{field.state.meta.errors.length > 0 ? (
+									<div id={`${field.name}-error`} role="alert">
+										{field.state.meta.errors.map((error) => (
+											<p
+												className="text-destructive text-sm"
+												key={error?.message}
+											>
+												{error?.message}
+											</p>
+										))}
+									</div>
+								) : null}
 							</div>
 						)}
 					</form.Field>
@@ -126,16 +128,18 @@ export default function SignInForm({
 									type="password"
 									value={field.state.value}
 								/>
-								{field.state.meta.errors.map((error) => (
-									<p
-										className="text-destructive text-sm"
-										id={`${field.name}-error`}
-										key={error?.message}
-										role="alert"
-									>
-										{error?.message}
-									</p>
-								))}
+								{field.state.meta.errors.length > 0 ? (
+									<div id={`${field.name}-error`} role="alert">
+										{field.state.meta.errors.map((error) => (
+											<p
+												className="text-destructive text-sm"
+												key={error?.message}
+											>
+												{error?.message}
+											</p>
+										))}
+									</div>
+								) : null}
 							</div>
 						)}
 					</form.Field>

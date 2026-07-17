@@ -4,6 +4,7 @@ import {
 	ADMINISTRATION_NAVIGATION,
 	classifyShellFailure,
 	isNavigationCurrent,
+	OPERATIONS_NAVIGATION,
 	safeReturnPath,
 } from "./shell";
 
@@ -56,5 +57,17 @@ describe("application shell", () => {
 		expect(
 			isNavigationCurrent("/operations/products/new", "/operations/products")
 		).toBe(true);
+	});
+
+	test("does not render dead navigation for seam-only Inventory capabilities", () => {
+		const navigation = OPERATIONS_NAVIGATION.map((item) =>
+			`${item.label} ${item.href}`.toLowerCase()
+		);
+		expect(navigation.some((item) => item.includes("reservation"))).toBe(false);
+		expect(navigation.some((item) => item.includes("offline"))).toBe(false);
+		expect(navigation.some((item) => item.includes("stock-ledger"))).toBe(
+			false
+		);
+		expect(classifyShellFailure(new Error("offline"), false)).toBe("offline");
 	});
 });

@@ -378,6 +378,7 @@ export interface InventoryRepository {
 		id: string;
 		reason: string;
 		releasedAt: Date;
+		state: "Expired" | "Released";
 		tenantId: string;
 		version: number;
 	}) => Promise<InventoryReservationRecord | "version_conflict">;
@@ -1926,10 +1927,24 @@ export function createInventoryService(options: InventoryServiceOptions) {
 					);
 				}
 				const now = options.clock();
+				const expiryInstant =
+					input.reservation.expiresAt instanceof Date
+						? input.reservation.expiresAt.getTime()
+						: Date.parse(String(input.reservation.expiresAt));
+				if (
+					input.reason === "Expired" &&
+					(!Number.isFinite(expiryInstant) || expiryInstant > now.getTime())
+				) {
+					throw new InventoryError(
+						"invalid_state",
+						"Reservation cannot expire before its expiry instant"
+					);
+				}
 				const saved = await repository.releaseReservation({
 					id: input.reservation.id,
 					reason: input.reason,
 					releasedAt: now,
+					state: input.reason === "Expired" ? "Expired" : "Released",
 					tenantId: input.reservation.tenantId,
 					version: input.reservation.version,
 				});

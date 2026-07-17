@@ -283,6 +283,7 @@ class MemoryInventoryRepository implements InventoryRepository {
 		id: string;
 		reason: string;
 		releasedAt: Date;
+		state: "Expired" | "Released";
 		tenantId: string;
 		version: number;
 	}) {
@@ -294,7 +295,7 @@ class MemoryInventoryRepository implements InventoryRepository {
 			...current,
 			reason: input.reason,
 			releasedAt: input.releasedAt,
-			state: "Released" as const,
+			state: input.state,
 			updatedAt: input.releasedAt,
 			version: current.version + 1,
 		};

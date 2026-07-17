@@ -3,7 +3,8 @@
   "source_document": "docs/blueprint/16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
   "source_registry": "registry/first-slice.json",
   "evidence_sources": [
-    "evidence/first-slice/ws1-capability-evidence.json"
+    "evidence/first-slice/ws1-capability-evidence.json",
+    "evidence/first-slice/ws2-capability-evidence.json"
   ],
   "dimensions": [
     "happy_path",
@@ -200,12 +201,248 @@
         "Bun 1.3.14"
       ],
       "command": "bun test packages/platform/tenancy/src/index.test.ts"
+    },
+    {
+      "id": "ws2-adjustment-ledger",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-browser-offline-fail-closed",
+      "path": "apps/web/e2e/ws2-closeout.spec.ts",
+      "kind": "live-browser-test",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "command": "bun run --cwd apps/web test:e2e"
+    },
+    {
+      "id": "ws2-browser-workflow-accessibility",
+      "path": "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+      "kind": "live-browser-test-and-formal-review",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "command": "bun run --cwd apps/web test:e2e"
+    },
+    {
+      "id": "ws2-catalog-aggregate-command-budgets",
+      "path": "apps/server/composition/catalog.integration.test.ts",
+      "kind": "live-postgresql-performance-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-catalog-aggregate-core",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts"
+    },
+    {
+      "id": "ws2-catalog-application-authority",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts"
+    },
+    {
+      "id": "ws2-catalog-delivery-observability",
+      "path": "apps/worker/composition/delivery.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/worker/composition/delivery.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-catalog-lifecycle-core",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts"
+    },
+    {
+      "id": "ws2-catalog-postgres-isolation-recovery",
+      "path": "apps/server/composition/catalog.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-catalog-query-budgets",
+      "path": "apps/server/composition/catalog.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-count-interaction-budget",
+      "path": "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+      "kind": "live-browser-performance-test",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "command": "bun run --cwd apps/web test:e2e"
+    },
+    {
+      "id": "ws2-count-workflow",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-import-authority",
+      "path": "apps/server/src/router.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test apps/server/src/router.test.ts"
+    },
+    {
+      "id": "ws2-import-workflow",
+      "path": "apps/server/composition/imports.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/imports.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-inventory-application-authority",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts"
+    },
+    {
+      "id": "ws2-inventory-closeout-budgets",
+      "path": "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+      "kind": "live-postgresql-performance-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/ws2-closeout.inventory.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-inventory-reconciliation-observability",
+      "path": "apps/worker/composition/delivery.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/worker/composition/delivery.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-inventory-two-tenant",
+      "path": "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/ws2-closeout.inventory.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-offline-command-boundary",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-owner-data-classification",
+      "path": "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+      "kind": "governance-validation",
+      "runtimes": [
+        "Python 3.12",
+        "GitHub Actions"
+      ],
+      "command": "python scripts/validate_docs.py"
+    },
+    {
+      "id": "ws2-reservation-workflow-and-expiry",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-seam-only-navigation-accessibility",
+      "path": "apps/web/src/lib/shell.test.ts",
+      "kind": "automated-ui-policy-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test apps/web/src/lib/shell.test.ts"
+    },
+    {
+      "id": "ws2-seam-only-public-authority-boundary",
+      "path": "packages/contracts/platform-api/src/index.test.ts",
+      "kind": "automated-contract-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/contracts/platform-api/src/index.test.ts"
+    },
+    {
+      "id": "ws2-transfer-workflow",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000"
     }
   ],
   "coverage": {
-    "capabilities_evidenced": 11,
+    "capabilities_evidenced": 25,
     "capabilities_total": 103,
-    "required_cells_evidenced": 143,
+    "required_cells_evidenced": 325,
     "required_cells_total": 1294
   },
   "tests": [
@@ -230,23 +467,57 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "validation_and_denial": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "tenant_isolation": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-postgres-isolation-recovery"
+        ],
+        "permission_and_entitlement": [
+          "ws2-catalog-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "audit_and_observability": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "privacy_and_classification": [
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-catalog-query-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-catalog-postgres-isolation-recovery"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/catalog.integration.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/catalog/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -270,23 +541,58 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-import-workflow"
+        ],
+        "validation_and_denial": [
+          "ws2-import-workflow",
+          "ws2-import-authority"
+        ],
+        "tenant_isolation": [
+          "ws2-import-workflow"
+        ],
+        "permission_and_entitlement": [
+          "ws2-import-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-import-workflow"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-import-workflow"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-import-workflow"
+        ],
+        "audit_and_observability": [
+          "ws2-import-workflow"
+        ],
+        "privacy_and_classification": [
+          "ws2-import-workflow",
+          "ws2-import-authority",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-import-workflow"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-import-workflow"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/imports.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md"
+      ],
       "blocking_defects": []
     },
     {
@@ -310,23 +616,57 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "validation_and_denial": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "tenant_isolation": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-postgres-isolation-recovery"
+        ],
+        "permission_and_entitlement": [
+          "ws2-catalog-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "audit_and_observability": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "privacy_and_classification": [
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-catalog-aggregate-command-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-catalog-postgres-isolation-recovery"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/catalog.integration.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/catalog/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -350,23 +690,56 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-catalog-lifecycle-core"
+        ],
+        "validation_and_denial": [
+          "ws2-catalog-lifecycle-core"
+        ],
+        "tenant_isolation": [
+          "ws2-catalog-postgres-isolation-recovery"
+        ],
+        "permission_and_entitlement": [
+          "ws2-catalog-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-catalog-lifecycle-core"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-catalog-lifecycle-core"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-catalog-lifecycle-core"
+        ],
+        "audit_and_observability": [
+          "ws2-catalog-lifecycle-core"
+        ],
+        "privacy_and_classification": [
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-catalog-aggregate-command-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-catalog-postgres-isolation-recovery"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/catalog.integration.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/catalog/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -390,23 +763,71 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-lifecycle-core"
+        ],
+        "validation_and_denial": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-lifecycle-core"
+        ],
+        "tenant_isolation": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-delivery-observability"
+        ],
+        "permission_and_entitlement": [
+          "ws2-catalog-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-delivery-observability"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-delivery-observability"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-delivery-observability"
+        ],
+        "audit_and_observability": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-delivery-observability"
+        ],
+        "privacy_and_classification": [
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-delivery-observability",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-catalog-query-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-delivery-observability"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/catalog.integration.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "apps/worker/composition/delivery.integration.test.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/catalog/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -430,23 +851,57 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "validation_and_denial": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "tenant_isolation": [
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-postgres-isolation-recovery"
+        ],
+        "permission_and_entitlement": [
+          "ws2-catalog-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "audit_and_observability": [
+          "ws2-catalog-aggregate-core"
+        ],
+        "privacy_and_classification": [
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-catalog-aggregate-command-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-catalog-postgres-isolation-recovery"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/catalog.integration.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/catalog/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -2146,23 +2601,62 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-adjustment-ledger"
+        ],
+        "validation_and_denial": [
+          "ws2-adjustment-ledger"
+        ],
+        "tenant_isolation": [
+          "ws2-inventory-two-tenant"
+        ],
+        "permission_and_entitlement": [
+          "ws2-inventory-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-adjustment-ledger"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-adjustment-ledger"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-adjustment-ledger",
+          "ws2-inventory-reconciliation-observability"
+        ],
+        "audit_and_observability": [
+          "ws2-adjustment-ledger",
+          "ws2-inventory-reconciliation-observability"
+        ],
+        "privacy_and_classification": [
+          "ws2-inventory-two-tenant",
+          "ws2-inventory-reconciliation-observability",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-inventory-closeout-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-adjustment-ledger",
+          "ws2-inventory-reconciliation-observability"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "apps/worker/composition/delivery.integration.test.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/inventory/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -2186,23 +2680,93 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-offline-command-boundary"
+        ],
+        "validation_and_denial": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-offline-command-boundary"
+        ],
+        "tenant_isolation": [
+          "ws2-offline-command-boundary",
+          "ws2-inventory-two-tenant"
+        ],
+        "permission_and_entitlement": [
+          "ws2-inventory-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-offline-command-boundary"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-offline-command-boundary"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ],
+        "audit_and_observability": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ],
+        "privacy_and_classification": [
+          "ws2-inventory-two-tenant",
+          "ws2-inventory-reconciliation-observability",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-offline-command-boundary"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-transfer-workflow",
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-closeout-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/worker/composition/delivery.integration.test.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/inventory/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -2226,23 +2790,57 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-count-workflow"
+        ],
+        "validation_and_denial": [
+          "ws2-count-workflow"
+        ],
+        "tenant_isolation": [
+          "ws2-inventory-two-tenant"
+        ],
+        "permission_and_entitlement": [
+          "ws2-inventory-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-count-workflow"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-count-workflow"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-count-workflow"
+        ],
+        "audit_and_observability": [
+          "ws2-count-workflow"
+        ],
+        "privacy_and_classification": [
+          "ws2-inventory-two-tenant",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-count-interaction-budget"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-count-workflow"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/inventory/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -2266,23 +2864,58 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-offline-command-boundary"
+        ],
+        "validation_and_denial": [
+          "ws2-offline-command-boundary"
+        ],
+        "tenant_isolation": [
+          "ws2-offline-command-boundary",
+          "ws2-inventory-two-tenant"
+        ],
+        "permission_and_entitlement": [
+          "ws2-seam-only-public-authority-boundary"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-offline-command-boundary"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-offline-command-boundary"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-offline-command-boundary"
+        ],
+        "audit_and_observability": [
+          "ws2-offline-command-boundary"
+        ],
+        "privacy_and_classification": [
+          "ws2-inventory-two-tenant",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-offline-command-boundary",
+          "ws2-seam-only-public-authority-boundary"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-seam-only-navigation-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-offline-command-boundary"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-offline-command-boundary"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/web/src/lib/shell.test.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "packages/contracts/platform-api/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -2306,23 +2939,56 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-reservation-workflow-and-expiry"
+        ],
+        "validation_and_denial": [
+          "ws2-reservation-workflow-and-expiry"
+        ],
+        "tenant_isolation": [
+          "ws2-inventory-two-tenant"
+        ],
+        "permission_and_entitlement": [
+          "ws2-seam-only-public-authority-boundary"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-reservation-workflow-and-expiry"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-reservation-workflow-and-expiry"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-reservation-workflow-and-expiry"
+        ],
+        "audit_and_observability": [
+          "ws2-reservation-workflow-and-expiry"
+        ],
+        "privacy_and_classification": [
+          "ws2-inventory-two-tenant",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-seam-only-public-authority-boundary"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-seam-only-navigation-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-reservation-workflow-and-expiry"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-reservation-workflow-and-expiry"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/web/src/lib/shell.test.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "packages/contracts/platform-api/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -2346,23 +3012,85 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary"
+        ],
+        "validation_and_denial": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary"
+        ],
+        "tenant_isolation": [
+          "ws2-offline-command-boundary",
+          "ws2-inventory-two-tenant"
+        ],
+        "permission_and_entitlement": [
+          "ws2-inventory-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ],
+        "audit_and_observability": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ],
+        "privacy_and_classification": [
+          "ws2-inventory-two-tenant",
+          "ws2-inventory-reconciliation-observability",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-offline-command-boundary"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-closeout-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/worker/composition/delivery.integration.test.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/inventory/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -2386,23 +3114,86 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary"
+        ],
+        "validation_and_denial": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary"
+        ],
+        "tenant_isolation": [
+          "ws2-offline-command-boundary",
+          "ws2-inventory-two-tenant"
+        ],
+        "permission_and_entitlement": [
+          "ws2-seam-only-public-authority-boundary"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ],
+        "audit_and_observability": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ],
+        "privacy_and_classification": [
+          "ws2-inventory-two-tenant",
+          "ws2-inventory-reconciliation-observability",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-offline-command-boundary",
+          "ws2-seam-only-public-authority-boundary"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-seam-only-navigation-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-closeout-budgets"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-adjustment-ledger",
+          "ws2-count-workflow",
+          "ws2-transfer-workflow",
+          "ws2-offline-command-boundary",
+          "ws2-inventory-reconciliation-observability"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/web/src/lib/shell.test.ts",
+        "apps/worker/composition/delivery.integration.test.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "packages/contracts/platform-api/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {
@@ -2426,23 +3217,57 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws2-transfer-workflow"
+        ],
+        "validation_and_denial": [
+          "ws2-transfer-workflow"
+        ],
+        "tenant_isolation": [
+          "ws2-inventory-two-tenant"
+        ],
+        "permission_and_entitlement": [
+          "ws2-inventory-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws2-transfer-workflow"
+        ],
+        "concurrency_and_conflict": [
+          "ws2-transfer-workflow"
+        ],
+        "events_jobs_and_projections": [
+          "ws2-transfer-workflow"
+        ],
+        "audit_and_observability": [
+          "ws2-transfer-workflow"
+        ],
+        "privacy_and_classification": [
+          "ws2-inventory-two-tenant",
+          "ws2-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws2-browser-offline-fail-closed"
+        ],
+        "accessibility_and_responsive": [
+          "ws2-browser-workflow-accessibility"
+        ],
+        "performance_and_capacity": [
+          "ws2-transfer-workflow"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws2-transfer-workflow"
+        ]
       },
-      "evidence_paths": [],
+      "evidence_paths": [
+        "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/web/e2e/ws2-closeout.spec.ts",
+        "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/domains/inventory/src/index.test.ts"
+      ],
       "blocking_defects": []
     },
     {

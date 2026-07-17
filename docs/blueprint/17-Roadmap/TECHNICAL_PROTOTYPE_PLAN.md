@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-004
 title: Technical Prototype Plan
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-16
 ---
 
 # Technical Prototype Plan
@@ -24,6 +24,8 @@ Prove Better Auth, sessions, 2FA or passkey seam, tenant selection, Party link, 
 ## Prototype 2 — Catalog and Inventory Ledger
 
 Prove product search, stock ledger, balances, adjustments, counts, idempotency, tenant isolation, and event publication.
+
+**Current result:** a controlled-prototype closeout candidate is recorded in PDA-IMPL-007. PR1-PR6 are merged after exact-head independent concurrence; PR7 contains the registry-derived 14-capability/182-cell executable evidence matrix, live PostgreSQL and browser evidence, and explicit scale/accessibility/security deferrals. Prototype 2 is not closed by this draft statement: PR7 exact-head concurrence, merge, exact-`main` verification, and the separate whole-WS2 audit remain required. The result does not make this plan implementation-ready, authorize a pilot or production deployment, close RR-007/RR-009, or resolve founder/external gates.
 
 ## Prototype 3 — POS Cash Workflow
 

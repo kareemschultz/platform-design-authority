@@ -398,3 +398,60 @@ test("a permission-limited operator receives a distinct non-disclosing denial st
 	await expectAutomatedA11yClean(page);
 	await expectViewportReflow(page);
 });
+
+test("online-only WS2 mutations fail closed and remain understandable when connectivity drops", async ({
+	page,
+}) => {
+	test.slow();
+	await signInOperator(page, "/operations/products/new");
+	const cases = [
+		{
+			button: "Create Product draft",
+			heading: "Create Product",
+			route: "/operations/products/new",
+		},
+		{
+			button: "Upload CSV",
+			heading: "Start CSV import",
+			route: "/operations/imports/new?target=product",
+		},
+		{
+			button: "Submit for approval",
+			heading: "Create Inventory Adjustment",
+			route: "/operations/inventory/adjustments/new",
+		},
+		{
+			button: "Create blind Count",
+			heading: "Create Stock Count",
+			route: "/operations/inventory/counts/new",
+		},
+		{
+			button: "Create transfer draft",
+			heading: "Create stock transfer",
+			route: "/operations/inventory/transfers/new",
+		},
+	] as const;
+
+	async function expectOnlineOnlyCase(item: (typeof cases)[number]) {
+		await page.context().setOffline(false);
+		await page.goto(item.route);
+		await expect(
+			page.getByRole("heading", { name: item.heading })
+		).toBeVisible();
+		await page.context().setOffline(true);
+		await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+		await expect(
+			page.getByText("Offline", { exact: true }).first()
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: item.button })
+		).toBeDisabled();
+	}
+	await expectOnlineOnlyCase(cases[0]);
+	await expectOnlineOnlyCase(cases[1]);
+	await expectOnlineOnlyCase(cases[2]);
+	await expectOnlineOnlyCase(cases[3]);
+	await expectOnlineOnlyCase(cases[4]);
+	await page.context().setOffline(false);
+	await page.evaluate(() => window.dispatchEvent(new Event("online")));
+});

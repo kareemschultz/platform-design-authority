@@ -582,6 +582,72 @@ describe("Catalog service", () => {
 		]);
 	});
 
+	test("enforces lifecycle permission and entitlement pairs at the application boundary", async () => {
+		const harness = createMemoryHarness();
+		const calls: string[] = [];
+		const application = createCatalogApplication({
+			activeContexts: {
+				requireActiveContext: () =>
+					resolved({
+						organizationId: createInput.organizationId,
+						tenantId: createInput.tenantId,
+					}),
+			},
+			entitlements: {
+				requireEntitlement({ capabilityId }) {
+					calls.push(`entitlement:${capabilityId}`);
+					return resolved(undefined);
+				},
+			},
+			permissions: {
+				requirePermission({ permission }) {
+					calls.push(`permission:${permission}`);
+					return resolved(undefined);
+				},
+			},
+			service: harness.service,
+		});
+		const created = await application.create({
+			actorUserId: createInput.actorUserId,
+			body: createInput.body,
+			contextId: "context_catalog_lifecycle",
+			correlationId: createInput.correlationId,
+			idempotencyKey: "idempotency_catalog_lifecycle_create",
+			sessionId: "session_catalog_lifecycle",
+		});
+		calls.length = 0;
+		const active = await application.activate({
+			actorUserId: createInput.actorUserId,
+			contextId: "context_catalog_lifecycle",
+			correlationId: createInput.correlationId,
+			idempotencyKey: "idempotency_catalog_lifecycle_activate",
+			productId: created.id,
+			sessionId: "session_catalog_lifecycle",
+			version: created.version,
+		});
+		expect(calls).toEqual([
+			"permission:catalog.product.activate",
+			"entitlement:catalog.products",
+			"entitlement:catalog.lifecycle",
+		]);
+		calls.length = 0;
+		await application.archive({
+			actorUserId: createInput.actorUserId,
+			body: { reason: "Discontinued" },
+			contextId: "context_catalog_lifecycle",
+			correlationId: createInput.correlationId,
+			idempotencyKey: "idempotency_catalog_lifecycle_archive",
+			productId: active.id,
+			sessionId: "session_catalog_lifecycle",
+			version: active.version,
+		});
+		expect(calls).toEqual([
+			"permission:catalog.product.archive",
+			"entitlement:catalog.products",
+			"entitlement:catalog.lifecycle",
+		]);
+	});
+
 	test("preserves tenant SKU separators through the application list boundary", async () => {
 		const harness = createMemoryHarness();
 		const application = createCatalogApplication({

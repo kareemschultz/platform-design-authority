@@ -15,7 +15,7 @@ This dashboard is a non-authoritative program-control summary. It is subordinate
 | Measure | Current result | Interpretation |
 |---|---:|---|
 | Blueprint baseline completeness | **100% for controlled-prototype implementation commencement** | The bounded documentation baseline needed to continue the named prototypes exists. FA4-032, ratification waves, and production gates remain open. |
-| First-slice implementation | **38.6% provisional weighted completion** | WS0 and WS1 are complete at controlled-prototype depth. WS2 has four of five stage groups merged, including the real Product/Inventory web experience; only the automated evidence matrix and independent closeout stage remains. WS3–WS7 have not begun implementation. |
+| First-slice implementation | **37.8% provisional weighted completion** | WS0 and WS1 are complete at controlled-prototype depth. WS2 has four of six weighted stages merged (75%); automated test/quality-budget evidence and independent closeout remain open on merged `main`. WS3–WS7 have not begun implementation. |
 | WS1 progress | **100% stage-weighted** | PR1–PR9 implement contracts, persistence, identity/tenancy/Party, authorization, entitlements, Audit/revocation, the real shell, and governed closeout evidence. This is not pilot or production readiness. |
 | Capability evidence coverage | **11/103 capabilities; 143/1,294 required cells** | The generated registry now computes evidence coverage. The 11 WS1 capabilities are evidenced at registered first-slice depth; remaining workstreams stay Planned. |
 | Production readiness | **Not claimed** | Founder, legal, customer, provider, security, accessibility, operational, pilot, and other external gates remain authoritative. |
@@ -34,13 +34,15 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 |---|---:|---|---:|---:|---|
 | WS0 — Scaffold alignment and contracts | 8% | complete | 100% | 8.0% | PR #23, #31, #32; package families, foundation types, generated contracts, contract parity, and executable architecture gates are merged. |
 | WS1 — Identity, tenancy, Party, authorization | 17% | complete | 100% | 17.0% | PR #54 merged the PR1–PR9 controlled-prototype closeout; PDA-IMPL-005 and the generated matrix record evidence and residual gates. |
-| WS2 — Catalog and inventory ledger | 17% | in-progress | 80% | 13.6% | PR #63 (plan), #65 (PR1), #67 (PR2), #69 (PR3), #74 (PR4), #76 (PR5), and #78 (PR6 web experience) are merged and independently audited. Issue #73 owns the remaining automated evidence matrix, exact-head closeout review, exact-main verification, and final whole-WS2 audit. |
+| WS2 — Catalog and inventory ledger | 17% | in-progress | 75% | 12.8% | PR #63 (plan), #65 (PR1), #67 (PR2), #69 (PR3), #74 (PR4), #76 (PR5), and #78 (PR6 web experience) complete the plan, core, persistence/integration, and UI stages. Issue #73 owns the remaining 15% automated evidence/quality-budget stage and 10% independent closeout stage. |
 | WS3 — POS cash | 17% | planned | 0% | 0% | Blocked on WS2. |
 | WS4 — Stored value | 11% | planned | 0% | 0% | Blocked on WS3. |
 | WS5 — Offline sync | 12% | planned | 0% | 0% | Full workstream blocked on WS3; bounded client-engine research may begin after WS1 under the parallelism rule. |
 | WS6 — Provider adapter | 9% | planned | 0% | 0% | Engine work may follow WS1; provider sandbox and pilot path remain externally gated by founder/provider decisions. |
 | WS7 — Recovery and operations | 9% | planned | 0% | 0% | Starts after WS2 provides real ledgers/outbox; closes last. |
-| **Total** | **100%** |  |  | **38.6%** | Provisional weighted implementation completion at the merged-main cutoff: **38.6%**. WS2 reaches 100% / 17.0% contribution and the program reaches 42.0% only after PR7 merge plus the required final whole-workstream audit. |
+| **Total** | **100%** |  |  | **37.8%** | Provisional weighted implementation completion at the merged-main cutoff: exact arithmetic is **37.75%**, rounded to one decimal by the reporting standard. WS2 reaches 100% / 17.0% contribution and the program reaches 42.0% only after PR7 merge plus the required final whole-workstream audit. |
+
+**PR7 branch candidate (not merged-main progress):** PDA-IMPL-007 and `evidence/first-slice/ws2-capability-evidence.json` generate 25/103 evidenced capabilities and 325/1,294 executable required cells, including all 14 WS2 capabilities / 182 WS2 cells. The headline remains 11/103 and 143/1,294 until exact-head concurrence and merge; the WS2 percentage remains 75% until the separate whole-workstream audit also concurs.
 
 ## WS1 delivery detail
 
@@ -69,7 +71,7 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 | PR4 durable event delivery, worker topology, and projections | complete | issue #70 / PR #74 merged at `7202fc8`; independently audited across two rounds; PDA-REV-009 records RR-006 closed at controlled-prototype depth |
 | PR5 bounded imports and online numbering foundation | complete | issue #71 (closed) / PR #76 merged at `f7d2a6b`; independently audited across two rounds (round 1 withheld concurrence on 4 P1 findings including numbering never reaching a production code path; round 2 recorded concurrence after all 4 were independently reproduced fixed, including a 10-way live concurrency test proving no duplicate effects under retry) |
 | PR6 Product and Inventory web experience | complete | issue #72 closed; PR #78 exact head `c69e5fb` concurred and merged as `635fa3f`; PDA-APP-025 |
-| PR7 verification and controlled-prototype closeout | in-progress | issue #73; extends registry-derived evidence to 14 WS2 capabilities / 182 cells, then requires exact-head concurrence, merge, exact-main checks, and a final whole-WS2 audit |
+| PR7 verification and controlled-prototype closeout | closeout candidate | issue #73; PDA-IMPL-007 plus the machine-readable source generate 14 WS2 capabilities / 182 executable cells and retain reproduced database/browser evidence plus explicit production deferrals; exact-head concurrence, merge, exact-main checks, and final whole-WS2 audit remain open |
 
 ## Current implementation assets
 

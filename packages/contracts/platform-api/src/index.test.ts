@@ -140,6 +140,27 @@ describe("WS2 Catalog and Inventory API contract", () => {
 		expect(actual).toHaveLength(41);
 	});
 
+	test("keeps seam-only Reservation, offline movement, and raw ledger commands out of public transport", () => {
+		const exposed = WS2_OPENAPI_OPERATION_METADATA.map((operation) =>
+			`${operation.operationId} ${operation.path}`.toLowerCase()
+		);
+		expect(exposed.some((operation) => operation.includes("reservation"))).toBe(
+			false
+		);
+		expect(exposed.some((operation) => operation.includes("offline"))).toBe(
+			false
+		);
+		expect(
+			exposed.some((operation) => operation.includes("stock-ledger"))
+		).toBe(false);
+		expect(exposed.some((operation) => operation.includes("balances"))).toBe(
+			true
+		);
+		expect(exposed.some((operation) => operation.includes("adjustment"))).toBe(
+			true
+		);
+	});
+
 	test("requires positive directional quantities while signed adjustment quantities remain separate", () => {
 		expect(PositiveDecimalQuantitySchema.safeParse("0.000001").success).toBe(
 			true

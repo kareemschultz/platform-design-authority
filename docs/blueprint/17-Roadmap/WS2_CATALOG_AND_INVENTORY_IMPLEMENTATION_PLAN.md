@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -28,7 +28,7 @@ Issue #62 owns the merged plan; issues #64, #66, #68, #70, #71, and #72 own merg
 | PR4 — durable delivery and projections | Merged as PR #74 after exact-head Claude Code concurrence | Merge commit `7202fc819b70982c013e1ca11a4fcc136e01e2de`; PDA-APP-023 plus final re-audit comment `4991097241` close RR-006 at controlled-prototype depth. RR-007 and production delivery gates remain open. |
 | PR5 — bounded imports and online Numbering | Merged as PR #76 after exact-head Claude Code concurrence | Merge commit `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`; retain bounded CSV, owner-command, atomic import-reference, strict online Numbering, tenant, recovery, and disclosed residual evidence in PDA-APP-024. |
 | PR6 — Product and Inventory web experience | Merged as PR #78 after exact-head Claude Code concurrence | Exact head `c69e5fb4415083affc40dc52f2d0ada78846252e`; merge `635fa3f1618d5c880585fdd3e86de7a16d0993ac`; retain PDA-APP-025's bounded UI, accessibility-target, browser, help, performance, and direct-denial evidence. |
-| PR7 — verification and controlled-prototype closeout | Active on issue #73 | Execute the complete section 14 matrix and program/risk/roadmap propagation without pre-closing WS2; exact-head review, merge, exact-main checks, and final whole-WS2 audit remain mandatory. |
+| PR7 — verification and controlled-prototype closeout | Closeout candidate on issue #73 | PDA-IMPL-007 and the generated matrix record 14 capabilities / 182 executable required cells plus live database/browser evidence and explicit production deferrals. Exact-head review, merge, exact-main checks, and final whole-WS2 audit remain mandatory. |
 
 ### 1.2 Governing sources
 
@@ -541,6 +541,8 @@ The following are not WS2 exit blockers unless implementation falsely claims the
 
 WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype depth. It does not close RR-007, FDR-004, broader first-slice work, or pilot/production gates.
 
+PDA-IMPL-007 section 12 dispositions every item above as a PR7 candidate. The generated evidence gate must report exactly 14 WS2 capabilities and 182 executable required cells. Aggregate coverage must report 25 of 103 capabilities and 325 of 1,294 executable required cells. Those counts are branch evidence only until the reviewed head merges. Open scale, pilot, production, external-review, and assistive-technology targets remain explicit deferrals; they are not machine-evidence substitutes. No checklist row may substitute for exact-head independent concurrence or the separate post-merge whole-WS2 audit.
+
 ## 17. Review and Change Record
 
 | Reviewer | Perspective | Decision | Date | Notes |
@@ -559,6 +561,7 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.9.0 | 2026-07-16 | Platform Design Authority | Linked PDA-IMPL-007 and the registry-derived 14-capability/182-cell PR7 closeout candidate, reconciled every section 16.3 condition, and retained exact-head concurrence, merge, exact-main verification, whole-WS2 audit, RR-007/RR-009, external, pilot, and production gates. |
 | 0.8.0 | 2026-07-16 | Platform Design Authority | Recorded PR6 withheld-concurrence remediation, exact-head concurrence and merge; activated PR7 issue #73; corrected the Constitution ID; and retained exact-head, exact-main, whole-WS2, RR-007, external, pilot, and production gates. |
 | 0.7.0 | 2026-07-16 | Platform Design Authority | Recorded PR5 exact-head concurrence and merge, activated PR6 issue #72, linked PDA-APP-025, and retained PR7 plus every WS2 exit and production gate. |
 | 0.6.0 | 2026-07-16 | Platform Design Authority | Dispositioned the PR5 exact-head audit: bound real atomic import references, strict CSV defenses, guarded row receipts, reloadable lifecycle/reconciliation/purge APIs, ADR-0014 retention controls, explicit ADR-0027 owner sign-off, approver attribution, sequence-version/report provenance, and renewed exact-head evidence gates. |

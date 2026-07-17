@@ -2523,6 +2523,24 @@
       "review_evidence": []
     },
     {
+      "document_id": "PDA-IMPL-007",
+      "path": "docs/implementation/WS2_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md",
+      "title": "WS2 Verification and Controlled-Prototype Closeout",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-16",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0020",
+        "ADR-0027"
+      ],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-IND-001",
       "path": "docs/blueprint/05-Industry-Packs/INDUSTRY_PACKS_OVERVIEW.md",
       "title": "Industry Packs Overview",
@@ -3033,7 +3051,7 @@
       "document_id": "PDA-PLT-008",
       "path": "docs/blueprint/01-Platform/EVENT_BACKBONE.md",
       "title": "Event Backbone",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-16",
@@ -3339,10 +3357,10 @@
       "document_id": "PDA-RDM-004",
       "path": "docs/blueprint/17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md",
       "title": "Technical Prototype Plan",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-12",
+      "last_reviewed": "2026-07-16",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -3411,7 +3429,7 @@
       "document_id": "PDA-RDM-009",
       "path": "docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md",
       "title": "WS2 Implementation Plan: Catalog and Inventory Ledger",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-16",

@@ -102,7 +102,7 @@ PR7 extended the real-authentication Compose lane across Product import review, 
 | Destructive denial text and default Sonner description/action colors fell below the WCAG AA text-contrast target | High | Darkened the owned destructive semantic token and supplied explicit owned Sonner foreground/action classes; removed the incompatible rich-color shortcut | axe A/AA and visual contrast checks are clean on the denial route in both desktop and mobile projects |
 | Opaque Count, location, and Product identifiers widened the mobile document | High | Added intentional wrapping to the shared page title and Count/location/Product identifier surfaces | The mobile Count workflow passes the document-width reflow assertion after five durable observations and submission |
 
-The full Playwright regression passes **14/14** against the rebuilt web/server/PostgreSQL stack. The eight new closeout cases verify:
+The full Playwright regression passes **16/16** against the rebuilt web/server/PostgreSQL stack. The ten closeout cases verify:
 
 - a Product import reaches `ReadyForApproval`, exposes the maker/checker boundary in a keyboard-operated dialog, and preserves detail/list browser history;
 - a blind Count persists five scanner-style Enter submissions, returns focus to Product input after each authoritative rerender, hides expected quantities before posting, reaches `Submitted`, and exposes the self-approval boundary;
@@ -167,7 +167,7 @@ Each authenticated browser lane attaches bounded Navigation Timing/resource-coun
 
 | Version | Date | Author | Change |
 |---|---|---|---|
-| 0.8.0 | 2026-07-16 | Frontend Platform | Recorded the PR7 exact-stack pattern/accessibility re-audit, remediated AA contrast and opaque-identifier mobile reflow defects, reproduced 14/14 desktop/mobile browser cases, and retained measured Count interaction evidence without claiming screen-reader conformance. |
+| 0.8.0 | 2026-07-16 | Frontend Platform | Recorded the PR7 exact-stack pattern/accessibility re-audit, remediated AA contrast and opaque-identifier mobile reflow defects, reproduced 16/16 desktop/mobile browser cases including online-only fail-closed mutation behavior, and retained measured Count interaction evidence without claiming screen-reader conformance. |
 | 0.7.0 | 2026-07-16 | Frontend Platform | Recorded exact-head independent concurrence and PR #78 merge, removed stale pending-review wording, and preserved PR7 plus RR-007/RR-009 and every pilot/production accessibility gate. |
 | 0.6.0 | 2026-07-16 | Frontend Platform | Closed the independent review finding by resetting both Balance cursor fields with handler-level regression proof; also closed the disclosed receipt-intent and persistence-adapter whitespace residuals so the recorded idempotency and exact-lookup boundary claims remain literal. |
 | 0.5.0 | 2026-07-16 | Frontend Platform | Dispositioned the seven automated exact-head findings and follow-up edge audit through intent-bound idempotency, filter-trail reset, outstanding Transfer-line selection, failed-context query recovery, exact `If-Match` CORS proof, separator-preserving/empty-safe SKU lookup, closed versioned structural balance cursors, and reproducible evidence commands. |

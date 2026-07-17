@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-029
 title: Intellectual Property Licensing and Repository Policy
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-17
 ---
 
 # Intellectual Property, Licensing, and Repository Policy
@@ -32,7 +32,9 @@ Contracts must identify the entity owning platform IP, employee and contractor a
 
 Public content may support trust, recruiting, ecosystem growth, and thought leadership. Private content protects security details, commercial strategy, customer information, unreleased capabilities, and operational procedures.
 
-A visibility review classifies each repository or path before publication.
+FDR-005 records the current repository posture as **provisionally public**, not finally ratified. Issue [#83](https://github.com/kareemschultz/platform-design-authority/issues/83) must retain a path-level disclosure and redaction review before WS3 starts and before final public-visibility or documentation-license ratification.
+
+The review may allow architecture principles, approved public contracts, sanitized examples, non-sensitive implementation source, and public evidence summaries. It must exclude secrets and credentials, customer or provider confidential data, private negotiations, exploit-ready production security detail, protected premium assets or redistribution rights, and personal data without an approved basis. Moving a repository or path does not waive those prohibitions.
 
 ## Open Source
 

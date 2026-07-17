@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-001
 title: Blueprint and Delivery Roadmap
-version: 0.3.1
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -16,7 +16,7 @@ Sequence blueprint ratification, technical prototypes, implementation-ready spec
 
 ## Current Readiness
 
-The repository is ready for controlled technical prototypes only.
+The repository is ready for controlled technical prototypes only, subject to the workstream entry gates in PDA-RDM-004/007 and the approved WSX external-evidence track in PDA-REV-015.
 
 Production implementation is blocked until the governing documents for the selected vertical slice are approved and the audit remediation gates below are satisfied.
 
@@ -39,6 +39,7 @@ Completed or materially addressed:
 - Privacy erasure and append-only reconciliation
 - Initial direct tenant-merchant payment model
 - Event namespaces and registry generation
+- Founder ratification of the bounded first retail beachhead scope (FDR-004, 2026-07-17)
 
 Still open before broad ratification:
 
@@ -52,11 +53,19 @@ Exit criteria:
 - No unresolved blocker-level repository contradiction
 - Foundation and kernel review waves prepared
 - Machine-readable document, namespace, capability, event, and first-slice registries available
-- A constrained prototype slice selected and founder-ratified
+- A constrained prototype slice selected and founder-ratified — **satisfied on 2026-07-17 by FDR-004** for the scope and depth/deferral contract in PDA-RDM-003 and `registry/first-slice.json`
+
+M0 passed on 2026-07-13 while FDR-004 was still only provisionally adopted. The later ratification resolves the scope-authority gate prospectively; it does not rewrite that historical deviation, promote the Draft scope documents, or authorize pilot/production use. The separate P-W2a tracking synchronization records the historical sequence and review evidence.
 
 ## Phase 1 — Technical Foundation Prototype
 
 Execution note (2026-07-17, fifth-audit F-L-008): this phase is executed as the WS0–WS7 workstream decomposition in `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) and the prototype sequence in `TECHNICAL_PROTOTYPE_PLAN.md` (PDA-RDM-004); the single-slice content list below is the scope inventory, not the delivery order. Offline sync and backup/restore items land in WS5/WS7 after WS3, per those plans.
+
+Founder controls recorded on 2026-07-17 apply to that execution sequence:
+
+- WSX is the approved parallel external-evidence track, with accountable roles and start-by/finish-by milestone gates in PDA-REV-015 and PDA-RDM-007.
+- WS3 may not start until the repository disclosure/redaction review is complete and the market-evidence record contains at least 8 structured interviews plus 3 direct workflow observations across at least 3 distinct businesses. This is a hard gate; agent-generated, simulated, inferred, or waived evidence is not acceptable.
+- P1–P3 retain the FA4 controlled-prototype clearance. P4–P7 receive general entry clearance only at the M3 standing-charter checkpoint, after the checkpoint is recorded; every workstream-specific founder, ADR, provider, security, evidence, and sequencing gate remains binding.
 
 Build a non-production vertical slice that proves:
 
@@ -80,9 +89,9 @@ This phase validates architecture. It does not establish statutory compliance or
 
 ## Phase 2 — First Market Slice Decision
 
-### Selected Provisional Candidate
+### Selected Founder-Ratified Scope Candidate
 
-Guyana-first Caribbean small and medium retail operations:
+FDR-004 ratifies the bounded Guyana-first Caribbean small and medium retail scope candidate below. This is scope authority, not customer validation or an Approved lifecycle promotion:
 
 - POS and register control
 - Product catalog and search
@@ -113,15 +122,16 @@ The detailed scope is controlled by the First Slice Manifest. The native referen
 - Time to measurable value
 - Ability to become a reusable platform proof rather than a one-off product
 
-### Founder Gates
+### Remaining Founder and External Gates
 
-Before this candidate becomes Approved:
+Before this candidate package becomes Approved:
 
 - Confirm platform legal entity and contracting structure.
 - Confirm platform billing and settlement currencies.
 - Ratify direct tenant merchant contracts as the initial payment model.
-- Ratify storefront and Recurring Agreement deferral.
 - Approve named pilot-customer criteria and success metrics.
+
+FDR-004 already ratifies the production storefront and tenant Recurring Agreement deferrals for this first slice. Any reversal or expansion requires the manifest/registry change-control path and new Founder approval.
 
 ## Phase 3 — First Production Slice
 

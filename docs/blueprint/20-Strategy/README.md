@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-001
 title: Strategy Section Index
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-17
 ---
 
 # Strategy
@@ -47,25 +47,26 @@ Commercial specifications are authoritative over handbook summaries for editions
 
 ## Remaining Evidence and Decisions
 
-- Market interviews and willingness-to-pay evidence
+- Market interviews, workflow observations, and willingness-to-pay evidence; WS3's hard minimum is tracked in issue #82
 - Named design partners and pilot commitments
 - Completed competitor benchmarks
 - Platform Experience Index baseline studies
 - Business DNA prototype results
 - Legal entity, tax, banking, privacy, payment, and regulatory advice
-- Repository visibility and licensing decision
+- Repository disclosure/redaction review and final visibility/licensing ratification, tracked in FDR-005 and issue #83
 - Long-term financial and financing model
-- Founder ratification of current gates
+- Product-name and public package-scope availability evidence before FDR-011 can close
 
 ## Current Founder Gates
 
 1. Ratify direct tenant-provider merchant contracts.
 2. Decide the platform legal entity and contracting structure.
 3. Decide platform billing and settlement currencies.
-4. Ratify first-slice inclusion and deferrals.
-5. Decide repository visibility and documentation license.
+4. FDR-004 is ratified: retain its bounded first-slice inclusion and deferrals unless a later recorded decision changes them.
+5. FDR-005 is provisionally public: complete issue #83's disclosure/redaction review before WS3 and before final visibility or documentation-license ratification.
 6. Decide terminal and provider coverage.
 7. Decide whether and when a paid marketplace phase may begin.
 8. Verify premium UI license scope for the owning entity and products.
+9. Close FDR-011 only after product-name, trademark/domain, and provisional `@meridian/*` package-scope availability checks are retained as evidence; “Meridian” remains internal only.
 
 Strategy guides prioritization but does not bypass architecture, security, evidence, qualified advice, lifecycle governance, or customer validation.

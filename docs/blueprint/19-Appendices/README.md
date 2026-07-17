@@ -1,10 +1,10 @@
 ---
 document_id: PDA-APP-001
 title: Appendices Section Index
-version: 0.11.0
+version: 0.12.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 ---
 
 # Appendices
@@ -28,6 +28,7 @@ last_reviewed: 2026-07-16
 - `WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md`
 - `WS2_PR5_IMPORT_AND_NUMBERING_EVIDENCE-2026-07-16.md`
 - `WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md`
+- `PRODUCT_NAMING_AND_PACKAGE_SCOPE_AVAILABILITY-2026-07-17.md`
 
 ## Machine-Readable Evidence and Contracts
 

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-005
 title: Roadmap Section Index
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-17
 ---
 
 # Roadmap
@@ -29,13 +29,15 @@ last_reviewed: 2026-07-13
 
 ## Current Delivery Position
 
-Technical Prototypes 1–3 may begin after the final audit checkpoint: identity and tenant context, Catalog and Inventory ledger, and POS cash workflow.
+Technical Prototypes 1–3 retain their fourth-audit controlled-prototype clearance: identity and tenant context, Catalog and Inventory ledger, and POS cash workflow. P3/WS3 nevertheless remains blocked until the separate P-W2a closeout synchronization is merged, customer discovery issue [#82](https://github.com/kareemschultz/platform-design-authority/issues/82) retains 8 structured interviews and 3 direct workflow observations across at least 3 businesses, and repository disclosure review issue [#83](https://github.com/kareemschultz/platform-design-authority/issues/83) is complete.
 
-The broader first slice proceeds only after named blockers, founder gates, provider and jurisdiction evidence, and prototype results are dispositioned. Workstream sequencing, package targets, and per-milestone gates are defined in `FIRST_SLICE_IMPLEMENTATION_PLAN.md`.
+P4–P7 implementation receives no general clearance until the M3 standing-audit charter checkpoint records a disposition against completed P3 evidence; each prototype's stricter founder-decision, ADR, provider, security, and external-evidence gates still apply. The broader first slice proceeds only after named blockers, founder gates, provider and jurisdiction evidence, and prototype results are dispositioned. Workstream sequencing, package targets, and per-milestone gates are defined in `FIRST_SLICE_IMPLEMENTATION_PLAN.md`.
 
 ## Remaining Execution Evidence
 
-- Founder ratification
+- P-W2a closeout synchronization
+- Real customer interviews and workflow observations for WS3
+- Repository disclosure/redaction review
 - Prototype results
 - Named design partners and pilot commitments
 - Estimates, staffing, and financing

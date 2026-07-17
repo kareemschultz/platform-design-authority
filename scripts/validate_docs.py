@@ -678,6 +678,51 @@ def validate_contract_files() -> list[str]:
     return errors
 
 
+def validate_audit_finding_counts() -> list[str]:
+    """Third-review closure: evidence/audit/fable5-whole-project-findings.yaml's
+    audit.counts field must equal the actual severity distribution of the
+    findings list, so the machine-readable count cannot drift from the
+    register again. Uses a targeted regex scan, not a YAML parser — this repo
+    has no PyYAML dependency declared or verified available in CI, and the
+    register's structure (fixed 2-space `- id:` / 4-space `severity:`
+    indentation) is simple and controlled enough not to need one."""
+    path = ROOT / "evidence" / "audit" / "fable5-whole-project-findings.yaml"
+    if not path.exists():
+        return []
+    text = path.read_text(encoding="utf-8")
+    counts_match = re.search(
+        r"counts:\s*\{\s*P0:\s*(\d+),\s*P1:\s*(\d+),\s*P2:\s*(\d+),\s*P3:\s*(\d+)\s*\}",
+        text,
+    )
+    if counts_match is None:
+        return [f"{path.relative_to(ROOT)}: audit.counts field not found or malformed"]
+    declared = {
+        f"P{i}": int(counts_match.group(i + 1)) for i in range(4)
+    }
+    finding_ids = re.findall(r"(?m)^  - id: (F-[A-Za-z0-9-]+)", text)
+    severities = re.findall(r"(?m)^    severity: (P[0-3])\b", text)
+    errors: list[str] = []
+    if len(finding_ids) != len(severities):
+        errors.append(
+            f"{path.relative_to(ROOT)}: found {len(finding_ids)} finding ids but "
+            f"{len(severities)} severity fields at the expected indentation; "
+            "register structure may have drifted from what this check assumes"
+        )
+        return errors
+    actual = {"P0": 0, "P1": 0, "P2": 0, "P3": 0}
+    for severity in severities:
+        actual[severity] += 1
+    if declared != actual:
+        errors.append(
+            f"{path.relative_to(ROOT)}: audit.counts {declared} does not match the "
+            f"actual findings list {actual} ({len(finding_ids)} findings) — update "
+            "audit.counts to match (the immutable report's own summary line is not "
+            "editable; record any discrepancy with it in "
+            "FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md instead)"
+        )
+    return errors
+
+
 def validate_founder_decision_register() -> list[str]:
     path = ROOT / "docs" / "blueprint" / "20-Strategy" / "FOUNDER_DECISION_REGISTER.md"
     if not path.exists():
@@ -806,6 +851,7 @@ def main() -> int:
         + validate_architecture_rules()
         + validate_design_token_references()
         + validate_design_token_alias_exceptions()
+        + validate_audit_finding_counts()
         + validate_governance_exemptions()
         + validate_contract_files()
         + validate_founder_decision_register()

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-014
 title: Fable 5 Fifth Audit Disposition and Remediation Plan
-version: 0.2.1
+version: 0.2.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -23,7 +23,7 @@ Proposed dispositions for PDA-REV-013 findings. Normative finding fields (actual
 
 ## Per-finding disposition (proposed)
 
-All 27 findings: **accept** as stated in the YAML register, with dispositions `decide` (F-A-001, F-L-001/002/003/004/006/007/009/010 — founder), `fix` (F-A-002, F-B-001/002/003/005, F-H-001/002/004/005/006, F-L-005/008, F-A-004, F-I-001), `document` (F-B-004/006, F-H-003/007/008). No finding is rejected; no false positive identified. Severity accepted as assessed (no inflation found on lead re-verification of every P1/P2).
+All 29 findings (third-review correction: this line previously said "27" and its own disposition breakdown summed to 28, omitting F-A-003 entirely; both are fixed here — the register has always had 29 entries, see the finding-count-drift correction below): **accept** as stated in the YAML register, with dispositions `decide` (F-A-001, F-L-001/002/003/004/006/007/009/010 — founder), `fix` (F-A-002, F-A-003, F-B-001/002/003/005, F-H-001/002/004/005/006, F-L-005/008, F-A-004, F-I-001), `document` (F-B-004/006, F-H-003/007/008). No finding is rejected; no false positive identified. Severity accepted as assessed (no inflation found on lead re-verification of every P1/P2).
 
 ## Contradiction-resolution matrix
 
@@ -57,3 +57,4 @@ The founder authorized immediate remediation of all non-founder-gated findings. 
 - **Status:** implemented-pending-independent-review. Per this plan's review rule, none of these findings is *closed* until an independent exact-head review of the remediation PR reproduces the closure tests and records concurrence, and the PR merges green.
 - **Correction (F-I-001):** the audit's claim that `test_check_ws2_evidence.py` "has no direct CI step" is a **partial false positive** — CI runs it via `bun run ws2:evidence:check` (`meridian-prototype.yml:129`), which chains `python -m unittest scripts/test_check_ws2_evidence.py`. The invocation-inconsistency half of the finding was real and is fixed. This is the narrative record of the correction, kept here (not in the immutable report) per evidence-immutability rules. A one-line pointer to this section also lives in `evidence/audit/fable5-whole-project-findings.yaml`'s F-I-001 `status` field, since that file is the machine-readable finding index and every finding's status is expected to be discoverable there without cross-referencing this plan first; the two are not competing narratives, this plan is the authoritative prose and the YAML field is a pointer to it (second-review correction — a prior review found the YAML line restating the correction in full, which read as a second independent narrative; it now only points here).
 - **Still open (founder W1):** F-A-001, F-A-002 (gated on F-A-001), F-L-001/002/003/004/006/007/009/010.
+- **Correction (finding-count drift):** the immutable report's summary line (`FABLE5_FIFTH_AUDIT_V1.md:17`) states "0 P0 · 3 P1 · 9 P2 · 15 P3 (27 findings)"; the register (`evidence/audit/fable5-whole-project-findings.yaml`) has always contained 29 findings at 0 P0/3 P1/10 P2/16 P3 — the report's summary line undercounts by one P2 and one P3 finding, a drafting-time miscount not caused by any later edit (no finding was added, removed, or resevered by remediation; the id sequence F-A-001…004/F-B-001…006/F-H-001…008/F-I-001/F-L-001…010 has always been exactly 29 with no gaps). The report is not edited per evidence-immutability rules. The register's `audit.counts` field is corrected to the true 29-count and `scripts/validate_docs.py`'s `validate_audit_finding_counts()` mechanically enforces that field against the actual `findings` list going forward, so this specific drift cannot recur silently even though the report's own prose line is permanently frozen at the wrong number.

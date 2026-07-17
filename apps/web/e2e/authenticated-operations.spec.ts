@@ -109,10 +109,29 @@ test("an authenticated operator creates and reads a tenant-scoped Product", asyn
 	});
 });
 
-test("an expired Operations session recovers into Operations, not Administration (fifth-audit F-H-001, second-review closure)", async ({
+test("an expired Operations session recovers into Operations, not Administration (fifth-audit F-H-001, second-review closure, third-review fix)", async ({
 	page,
-}) => {
-	await page.goto("/login?returnTo=/operations/products");
+}, testInfo) => {
+	// Third-review correction: clearing cookies then clicking a Link to a new
+	// route (as the second-review version did) never reaches this component —
+	// the CI run at exact head 3475d38 showed the assertion below timing out
+	// with "element(s) not found", because that click is a Next.js App Router
+	// navigation, which re-runs server-side middleware before any client tree
+	// mounts; middleware redirects straight to /login and QueryFailure never
+	// renders. The fix stays on one already-mounted client page (a Product
+	// detail view, which renders QueryFailure directly per
+	// apps/web/src/components/product-pages.tsx) and forces its TanStack
+	// Query to refetch in place via a synthetic window "focus" event — the
+	// same technique already proven to reach this app's other reactive client
+	// state in this suite's offline/online lifecycle test
+	// (apps/web/e2e/ws2-closeout.spec.ts's "fail closed on the offline detail
+	// route" test dispatches synthetic "offline"/"online" events the same
+	// way). TanStack Query's default refetchOnWindowFocus + staleTime 0
+	// (apps/web/src/utils/orpc.ts's createQueryClient sets no override) means
+	// the already-loaded product query is refetched, and with cookies cleared
+	// that refetch gets the same UNAUTHORIZED response classifyShellFailure
+	// maps to "reauthenticate" — without ever leaving the page.
+	await page.goto("/login?returnTo=/operations/products/new");
 	await page.getByLabel("Email").fill(FIXTURE_EMAIL);
 	await page.getByLabel("Password").fill(FIXTURE_PASSWORD);
 	const signInResponsePromise = page.waitForResponse(
@@ -136,17 +155,36 @@ test("an expired Operations session recovers into Operations, not Administration
 		})
 		.toBe(FIXTURE_EMAIL);
 
-	await page.goto("/operations/products");
-	await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+	await page.goto("/operations/products/new");
+	await expect(
+		page.getByRole("heading", { name: "Create Product" })
+	).toBeVisible();
+	const commandSuffix = crypto.randomUUID().slice(0, 8);
+	const productName = `Session Expiry Product ${testInfo.project.name} ${commandSuffix}`;
+	await page.getByLabel("Product name").fill(productName);
+	await page.getByLabel("Variant name").fill("Default");
+	await page
+		.getByLabel("Tenant SKU (optional)")
+		.fill(`SESSION-${testInfo.project.name.toUpperCase()}-${commandSuffix}`);
+	const createResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/catalog/products/create")
+	);
+	await page.getByRole("button", { name: "Create Product draft" }).click();
+	const createResponse = await createResponsePromise;
+	expect(createResponse.ok()).toBe(true);
+	const created = (await createResponse.json()) as {
+		json: { id: string; name: string };
+	};
 
-	// Invalidate the session without a full navigation, so the already-mounted
-	// client page is the one that observes the failure, not server middleware.
+	await page.goto(
+		`/operations/products/${encodeURIComponent(created.json.id)}`
+	);
+	await expect(page.getByRole("heading", { name: productName })).toBeVisible();
+
 	await page.context().clearCookies();
-
-	// A client-side transition that re-fetches authenticated data is what
-	// surfaces QueryFailure inline; a full reload would hit server-side
-	// middleware and never exercise the component under test.
-	await page.getByRole("link", { name: "Create Product" }).click();
+	await page.evaluate(() => window.dispatchEvent(new Event("focus")));
 
 	await expect(
 		page.getByRole("heading", { name: "Sign in again" })

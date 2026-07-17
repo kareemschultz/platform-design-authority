@@ -26,7 +26,14 @@ audit:
     of WS2 is technically supported by reproduced evidence but its governed
     concurrence-before-merge gate was not satisfied for PR7. Pilot and production
     remain correctly blocked.
-  counts: { P0: 0, P1: 3, P2: 9, P3: 15 }
+  # Third-review correction: the immutable report's summary line (FABLE5_FIFTH_AUDIT_V1.md:17)
+  # states "0 P0 · 3 P1 · 9 P2 · 15 P3 (27 findings)", undercounting by one P2 and one P3 finding
+  # against this register's actual 29 entries. The report is frozen per evidence-immutability
+  # rules and is not edited; the correction narrative lives in
+  # FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md's Implementation status section. This field is the
+  # machine-readable count and must equal the actual findings list;
+  # scripts/validate_docs.py's validate_audit_finding_counts() enforces that mechanically.
+  counts: { P0: 0, P1: 3, P2: 10, P3: 16 }
 
 findings:
   - id: F-A-001

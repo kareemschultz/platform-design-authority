@@ -39,6 +39,17 @@
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
+	/* Non-status semantic aliases deliberately resolve to the governed shadcn
+	   preset values, not registry/design-tokens.json (status: draft) — the
+	   preset wins during the controlled prototype; reconcile or re-record when
+	   the token registry leaves draft (fifth-audit F-H-003, PDA-UX token doc).
+	   scripts/validate_docs.py's validate_design_token_alias_exceptions()
+	   asserts every alias between the BEGIN/END markers below is either an
+	   exact registry/design-tokens.json key or a recorded exception in
+	   DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md's Recorded Non-Status Alias
+	   Exceptions table — do not add a var here without updating one or the
+	   other. */
+	/* BEGIN non-status semantic aliases */
 	--action-primary: var(--primary);
 	--action-primary-foreground: var(--primary-foreground);
 	--surface-canvas: var(--background);
@@ -46,6 +57,7 @@
 	--text-default: var(--foreground);
 	--text-muted: var(--muted-foreground);
 	--focus-ring: var(--ring);
+	/* END non-status semantic aliases */
 	/* Status roles from registry/design-tokens.json (color.light.status-*) */
 	--status-info: #0369a1;
 	--status-success: #047857;

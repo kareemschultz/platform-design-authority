@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-001
 title: Blueprint and Delivery Roadmap
-version: 0.3.0
+version: 0.3.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-17
 related_adrs: [ADR-0013, ADR-0014, ADR-0015]
 ---
 
@@ -55,6 +55,8 @@ Exit criteria:
 - A constrained prototype slice selected and founder-ratified
 
 ## Phase 1 — Technical Foundation Prototype
+
+Execution note (2026-07-17, fifth-audit F-L-008): this phase is executed as the WS0–WS7 workstream decomposition in `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) and the prototype sequence in `TECHNICAL_PROTOTYPE_PLAN.md` (PDA-RDM-004); the single-slice content list below is the scope inventory, not the delivery order. Offline sync and backup/restore items land in WS5/WS7 after WS3, per those plans.
 
 Build a non-production vertical slice that proves:
 

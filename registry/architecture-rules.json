@@ -417,5 +417,13 @@
       "migration_directory": "packages/persistence/platform-numbering-postgres/src/migrations"
     }
   ],
-  "exceptions": []
+  "exceptions": [],
+  "test_source_exempt_rules": [
+    "bun-runtime-leak",
+    "connection-lifecycle-outside-composition",
+    "migration-import-outside-authority",
+    "migration-invocation-outside-authority",
+    "pool-import-outside-composition",
+    "transport-runtime-leak"
+  ]
 }

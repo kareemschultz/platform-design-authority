@@ -7,6 +7,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import sys
+from pathlib import Path
+
+# Fifth-audit F-I-001: allow both `python -m unittest scripts.test_x` and the
+# documented plain-script invocation `python scripts/test_x.py`.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from scripts import check_ws2_evidence as checker
 
 

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.8.0
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 ---
 
 # Architecture Risk Register
@@ -170,7 +170,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | FA4-012 | Superseded customer-account tender line unannotated | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | New contradicting evidence |
 | FA4-013 | Two live Business DNA specs; incomplete engine catalog | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | DNA authority split recurs |
 | FA4-014 | Marketplace payout surface not phase-gated at point of use | Closed architecturally; Founder decision | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | FDR-008 decision |
-| FA4-015 | AGENTS.md missing | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Agent contracts fall out of sync |
+| FA4-015 | AGENTS.md missing | Closed; reopened 2026-07-17 by fifth-audit F-A-003 (contract divergence) and re-closed the same day by the parity restoration plus the executable `validate_agent_contract_parity` gate in `scripts/validate_docs.py` | FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md; FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Parity gate fails or is removed |
 | FA4-016 | Four third-audit dispositions overclaimed | Closed honestly; External evidence | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Customer evidence or FDR-010 outcome |
 | FA4-017 | Identity doc softens deny-by-default plugin matrix | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | New method added without matrix disposition |
 | FA4-018 | pgvector wording bypasses ADR-0024 admission framing | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Admission trigger or prototype evidence |
@@ -185,7 +185,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | FA4-027 | Better Auth appendix refresh items; Bun cluster constraint | Recorded and propagated | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Vendor evidence changes at implementation lock |
 | FA4-028 | Bun preference override legitimate but rested on wrong arithmetic | Recorded note | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Prototype evidence or ADR review outcome |
 | FA4-029 | AMB-003 closure rationale superseded by ADR-0020 | Recorded rationale migration | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Prototype evidence changes ADR-0020 outcome |
-| FA4-030 | Three decision matrices ungated in CLAUDE.md lookups | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Agent-contract parity breaks |
+| FA4-030 | Three decision matrices ungated in CLAUDE.md lookups | Closed; reopened 2026-07-17 by fifth-audit F-A-003 and re-closed by the same parity restoration and executable gate as FA4-015 | FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md; FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Parity gate fails or is removed |
 | FA4-031 | ADR template drift (0017-0019 lack sections) | Closed for current material edit | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Material edit lands without required sections |
 | FA4-032 | All 24 ADRs Proposed and Constitution Draft; authority tiers empty | Recorded; ratification required | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Ratification waves complete or conflict unresolvable |
 | FA4-033 | Finance schema controlTotals lacked inventory fields | Closed architecturally | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Accountant/inventory prototype validation fails |
@@ -237,6 +237,7 @@ Distinct from risk: a debt entry records a deliberate suboptimal choice accepted
 | TD-003 | apps/native excluded from Biome linting | Better-T-Stack scaffold default; no native work is active yet | Native app work starts | Implementation |
 | TD-004 | Status-token CSS variables are hand-copied literals pending the token-generation pipeline | Pipeline (PDA-UX-023) not yet built; literals unblock UI work | Token-generation pipeline lands (PDA-UX-023) | Implementation |
 | TD-005 | Registry capability governance fields (packaging_class and similar) remain namespace defaults pending curation | Curated overlay exists but per-capability curation is deferred to workstream owners | Capability curation pass per workstream | PDA |
+| TD-008 | `apps/web/src/app/error.tsx` logs client errors to `console.error`; no structured client error-reporting sink exists | Prototype-only diagnostics; no reporting infrastructure is selected yet (fifth-audit F-H-008) | Client error-reporting decision at WS7 operational readiness, or first pilot-candidate build | Implementation |
 | TD-006 | 37 of 208 registered events currently resolve to owner JSON Schemas; WS2-family emitted events are covered, while later workstreams remain schema-deferred | Workstream-by-workstream schema completion preserves contract ownership without pretending future event payloads are designed | Expand and verify owner schemas as each later workstream enters implementation | Implementation |
 | TD-007 | **Closed 2026-07-13.** `packages/contracts/platform-api` now defines transport-neutral oRPC contracts derived from canonical OpenAPI metadata, a semantic-parity test compares route/method/operation/authority/schema metadata, and `packages/platform-clients/api-client` derives from that contract without importing `apps/server`. The former exception is removed and the path-aware architecture checker passes. Evidence: PDA-RDM-008 PR1 and PDA-IMPL-001. | Initial scaffold exposed only two procedures and accepted the temporary type-only import | WS1 PR1 contract-first closure | Implementation |
 

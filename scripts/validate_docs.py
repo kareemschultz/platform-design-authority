@@ -570,6 +570,55 @@ def validate_design_token_references() -> list[str]:
     return sorted(set(errors))
 
 
+def validate_design_token_alias_exceptions() -> list[str]:
+    """Fifth-audit F-H-003, second-review closure: every non-status semantic
+    alias in globals.css must either match a registry/design-tokens.json key
+    by name, or be recorded in the doc's exception table. Prevents silent
+    prose-only drift between the two."""
+    css_path = ROOT / "packages" / "ui-web" / "core" / "src" / "styles" / "globals.css"
+    doc_path = ROOT / "docs" / "blueprint" / "09-UX" / "DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md"
+    registry_path = ROOT / "registry" / "design-tokens.json"
+    if not (css_path.exists() and doc_path.exists() and registry_path.exists()):
+        return []
+
+    css_text = css_path.read_text(encoding="utf-8")
+    block_match = re.search(
+        r"/\* BEGIN non-status semantic aliases \*/(.*?)/\* END non-status semantic aliases \*/",
+        css_text,
+        re.DOTALL,
+    )
+    if block_match is None:
+        return [
+            f"{css_path.relative_to(ROOT)}: missing 'BEGIN/END non-status semantic aliases' markers "
+            "required by scripts/validate_docs.py's F-H-003 alias-exception assertion"
+        ]
+    aliases = sorted(set(re.findall(r"--([a-z0-9-]+)\s*:", block_match.group(1))))
+
+    doc_text = doc_path.read_text(encoding="utf-8")
+    table_match = re.search(
+        r"### Recorded Non-Status Alias Exceptions(.*?)(?:\n## |\Z)", doc_text, re.DOTALL
+    )
+    table_text = table_match.group(1) if table_match else ""
+    recorded_exceptions = {
+        match.strip("-") for match in re.findall(r"`--([a-z0-9-]+)`", table_text)
+    }
+
+    registry_color_keys = set(
+        load_json(registry_path).get("tokens", {}).get("color", {}).get("light", {}).keys()
+    )
+
+    errors: list[str] = []
+    for alias in aliases:
+        if alias in registry_color_keys or alias in recorded_exceptions:
+            continue
+        errors.append(
+            f"{css_path.relative_to(ROOT)}: --{alias} has no same-name key in "
+            f"registry/design-tokens.json and is not in {doc_path.relative_to(ROOT)}'s "
+            "Recorded Non-Status Alias Exceptions table"
+        )
+    return errors
+
+
 def validate_governance_exemptions() -> list[str]:
     path = ROOT / "registry" / "governance-exemptions.json"
     if not path.exists():
@@ -626,6 +675,51 @@ def validate_contract_files() -> list[str]:
     openapi = ROOT / "openapi" / "first-slice-v1.yaml"
     if openapi.exists() and "openapi: 3.1.0" not in openapi.read_text(encoding="utf-8"):
         errors.append("openapi/first-slice-v1.yaml: expected OpenAPI 3.1.0 marker")
+    return errors
+
+
+def validate_audit_finding_counts() -> list[str]:
+    """Third-review closure: evidence/audit/fable5-whole-project-findings.yaml's
+    audit.counts field must equal the actual severity distribution of the
+    findings list, so the machine-readable count cannot drift from the
+    register again. Uses a targeted regex scan, not a YAML parser — this repo
+    has no PyYAML dependency declared or verified available in CI, and the
+    register's structure (fixed 2-space `- id:` / 4-space `severity:`
+    indentation) is simple and controlled enough not to need one."""
+    path = ROOT / "evidence" / "audit" / "fable5-whole-project-findings.yaml"
+    if not path.exists():
+        return []
+    text = path.read_text(encoding="utf-8")
+    counts_match = re.search(
+        r"counts:\s*\{\s*P0:\s*(\d+),\s*P1:\s*(\d+),\s*P2:\s*(\d+),\s*P3:\s*(\d+)\s*\}",
+        text,
+    )
+    if counts_match is None:
+        return [f"{path.relative_to(ROOT)}: audit.counts field not found or malformed"]
+    declared = {
+        f"P{i}": int(counts_match.group(i + 1)) for i in range(4)
+    }
+    finding_ids = re.findall(r"(?m)^  - id: (F-[A-Za-z0-9-]+)", text)
+    severities = re.findall(r"(?m)^    severity: (P[0-3])\b", text)
+    errors: list[str] = []
+    if len(finding_ids) != len(severities):
+        errors.append(
+            f"{path.relative_to(ROOT)}: found {len(finding_ids)} finding ids but "
+            f"{len(severities)} severity fields at the expected indentation; "
+            "register structure may have drifted from what this check assumes"
+        )
+        return errors
+    actual = {"P0": 0, "P1": 0, "P2": 0, "P3": 0}
+    for severity in severities:
+        actual[severity] += 1
+    if declared != actual:
+        errors.append(
+            f"{path.relative_to(ROOT)}: audit.counts {declared} does not match the "
+            f"actual findings list {actual} ({len(finding_ids)} findings) — update "
+            "audit.counts to match (the immutable report's own summary line is not "
+            "editable; record any discrepancy with it in "
+            "FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md instead)"
+        )
     return errors
 
 
@@ -709,6 +803,37 @@ def validate_skills() -> list[str]:
     return errors
 
 
+def validate_agent_contract_parity() -> list[str]:
+    """Fifth-audit F-A-003 (FA4-015/FA4-030 reopen): AGENTS.md and CLAUDE.md
+    must both carry every authority-bearing rule. Sentinel phrases below are
+    normative markers; a phrase present in one contract but not the other is a
+    parity break."""
+    errors: list[str] = []
+    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    claude = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    sentinels = [
+        "PREFERRED_COMPONENT_CATALOG.md",
+        "Better Auth plugins are deny-by-default",
+        "technology-evidence-maintainer",
+        "one issue, branch, worktree, and pull request",
+        "## 13. ADR Triggers",
+        "## 14. Prohibited Behavior",
+        "## 15. Current Readiness",
+        "Editing independent audit evidence instead of writing a disposition",
+        "never scattered `process.env` reads",
+        "Colocated test files may set `process.env` fixtures",
+    ]
+    for sentinel in sentinels:
+        in_agents = sentinel in agents
+        in_claude = sentinel in claude
+        if in_agents != in_claude:
+            missing = "CLAUDE.md" if in_agents else "AGENTS.md"
+            errors.append(
+                f"agent-contract parity: {sentinel!r} missing from {missing}"
+            )
+    return errors
+
+
 def main() -> int:
     document_errors, document_ids = validate_documents()
     namespace_errors, prefixes = load_namespace_registry()
@@ -725,11 +850,14 @@ def main() -> int:
         + validate_json_schemas()
         + validate_architecture_rules()
         + validate_design_token_references()
+        + validate_design_token_alias_exceptions()
+        + validate_audit_finding_counts()
         + validate_governance_exemptions()
         + validate_contract_files()
         + validate_founder_decision_register()
         + validate_repository_layout()
         + validate_skills()
+        + validate_agent_contract_parity()
     )
     if errors:
         print("Documentation governance validation failed:", file=sys.stderr)

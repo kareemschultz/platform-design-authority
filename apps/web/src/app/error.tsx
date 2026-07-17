@@ -11,7 +11,8 @@ export default function ErrorPage({
 	reset: () => void;
 }) {
 	useEffect(() => {
-		// Prototype-only diagnostics; production error reporting is not wired yet.
+		// Prototype-only diagnostics; structured client error reporting is tracked
+		// as TD-008 in docs/reviews/ARCHITECTURE_RISK_REGISTER.md.
 		console.error(error);
 	}, [error]);
 

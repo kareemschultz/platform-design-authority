@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.4.0
+version: 1.7.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027, ADR-0028]
 ---
 
@@ -168,6 +168,24 @@ The implementation must include tests that:
 - Verify each table and migration has one owner
 - Fail Bun-, Hono-, oRPC-, or database-adapter leakage into runtime-neutral packages
 - Build and run the critical server suite on Bun and the approved Node LTS fallback from the same commit
+- Fail any source file under `packages/` that does not belong to a registered workspace package (the same stray-source guard `apps/` already has)
+- Fail migrator-module imports (`drizzle-orm/*migrator*`, `drizzle-kit`) from application paths outside the registered migration-invocation roots, and enforce a persistence-acquisition import-mode allowlist there: outside those roots a `@meridian/persistence-*` module may be acquired **only** by a static named import (`import { productAdapter } from "@meridian/persistence-catalog-postgres"`) whose imported names do not start with `migrate`. Namespace imports (`import * as`), default imports, dynamic `import()`, CommonJS `require()`/`import = require()`, and wildcard re-exports (`export *`/`export * as`) are all rejected at the point of acquisition, and named imports/re-exports of a `migrate`-prefixed binding are rejected by name. This restricts *how the module is obtained* rather than policing each call-site access syntax, so it also closes cross-file laundering (a file cannot acquire and re-export the persistence namespace for a second file to invoke) without cross-file symbol resolution. The direct `migrate*` runner-invocation rule remains as defense in depth. Legitimate worker runtime code already uses static named adapter imports, so this matches current code. The specifier matcher accepts single/double-quoted strings and no-substitution backtick literals (which `import()`/`require()` accept). Residual known limit: a specifier or migrate identifier assembled at runtime by string interpolation (a `${...}` template) or concatenation is outside the scope of static text matching.
+- Fail relative imports of the process pool module (`*/composition/postgres`) from non-composition application paths; ordinary application code imports the shutdown-only lifecycle module
+
+Test-source scope: colocated `*.test.*` and `*.spec.*` files inside application and runtime-neutral packages are exempt from the rules in the table below — this exemption is part of each rule's definition, is limited to test files, and never extends to runtime sources.
+
+### Registered Test-Source-Exempt Rules
+
+These are the only forbidden-pattern rules the checker skips for colocated `*.test.*`/`*.spec.*` sources (fifth-audit F-B-004; second-review correction — the original table and prose named only the migration-invocation/import and connection-lifecycle rules, but `assert_test_source_exempt_rules_match_registry()`'s AST-based scan of `check_architecture.py` found the checker also gates `bun-runtime-leak` and `transport-runtime-leak` on `is_test_source`, which was true before this PR and simply undocumented; both are added below rather than narrowing the assertion to hide them). `scripts/test_architecture_checker.py` asserts this table matches exactly the set of rule IDs `scripts/check_architecture.py` actually gates on `is_test_source`, so the two cannot drift silently.
+
+| Rule | Reason |
+|---|---|
+| `migration-invocation-outside-authority` | Colocated integration tests exercise the real migration runner outside the composition root. |
+| `migration-import-outside-authority` | Colocated integration tests acquire persistence modules (including via namespace import or `require`) and migrator modules directly to seed a test database. |
+| `pool-import-outside-composition` | Colocated integration tests construct additional bounded pools against the process pool module for isolated test fixtures. |
+| `connection-lifecycle-outside-composition` | Colocated integration tests read `DATABASE_URL`, construct pools, or close connections directly to set up and tear down test-only database state. |
+| `bun-runtime-leak` | Colocated tests for runtime-neutral packages run under Bun's own test runner and may use `bun:*` APIs to set up fixtures; the package's runtime sources still may not. |
+| `transport-runtime-leak` | Colocated tests for runtime-neutral packages may import Hono/oRPC transport types to build test doubles or assert contract shapes; the package's runtime sources still may not. |
 
 ## Temporary Exceptions
 
@@ -215,6 +233,12 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 1.7.1 (2026-07-17): Independent review of exact head `4acb743` remediation (F-B-002). A no-substitution template-literal (backtick) specifier in `import()` (e.g. ``await import(`@meridian/persistence-catalog-postgres`)``) evaded the quote-only specifier matcher and compiled. Extended the shared persistence-specifier matcher to accept backtick no-substitution literals, so dynamic `import()` and `require()` reject them outside migration-invocation roots; a failing worker probe was added and the allowed static named-import probe preserved. Runtime-interpolated (`${...}`) and concatenated specifiers remain explicitly out of scope. Full-tree checker still passes with no false positives.
+- 1.7.0 (2026-07-17): Fourth independent review remediation (F-B-002). Successive reviews proved that policing each call-site access syntax and re-export shape is non-convergent for a per-file text checker — bracket access (`p["migrateCatalog"]`), a wildcard re-export (`export *`), a `require()` acquisition, and a two-file namespace-laundering case (one file acquires `import * as p` and re-exports it under a local name, a second invokes it) each compiled and passed the checker at successive exact heads (`532a010`, `8b4ce85`). Replaced the syntax-enumeration approach with a persistence-acquisition **import-mode allowlist**: outside registered migration-invocation roots, `@meridian/persistence-*` may be acquired only by a static named import with no `migrate`-prefixed name; namespace, default, dynamic `import()`, `require()`/`import = require()`, and `export *`/`export * as` modes are rejected at the point of acquisition. This closes the cross-file laundering at its source (the acquiring file cannot take a namespace to re-export) without cross-file symbol resolution, preserves ADR-0027, and matches existing worker code (already static named adapter imports; full-tree checker still passes with no false positives). Direct `migrate*` invocation rule retained as defense in depth. Documented residual limit: runtime string-concatenated specifiers/identifiers are outside static text matching. Regression probes added for namespace-laundering, aliased `require`, default/dynamic/wildcard forms, an allowed worker static named import, and equivalent forms permitted inside `apps/server/composition`.
+- 1.6.0 (2026-07-17): Second independent review remediation. Registered the Test-Source-Exempt Rules table so `registry/architecture-rules.json` carries `test_source_exempt_rules` (F-B-004; prose alone previously had no registry representation) and added a checker self-assertion that the table matches the code's actual `is_test_source` gates. Closed the F-B-002 evasion vector live-confirmed against the real compiler at exact head `2cdfdcf`: a namespace or dynamic import of a `@meridian/persistence-*` module combined with an aliased call site (`const run = mod.migrateCatalog`) evaded both the pre-existing call-site rule and the static-named-import rule; the checker now also flags any import of a `@meridian/persistence-*` module that co-occurs with a `.migrate*` property access, regardless of import form. A second candidate evasion — a `@/*` tsconfig-path-alias import of the pool module for F-B-005 — was investigated with the same rigor and **retracted**: `apps/server`'s `@/*` maps only to `./src/*`, which does not reach `composition/postgres.ts`, so `tsc` correctly rejects that import (`TS2307: Cannot find module`) and no live bypass exists there. No change was made to `COMPOSITION_POOL_IMPORT_PATTERN`.
+
+- 1.5.0 (2026-07-17): Closed fifth-audit findings F-B-001/002/003/004/005 — added the `packages/` stray-source guard, casing/alias-proof migration-import rule, and composition-internal pool-module rule (with a shutdown-only `lifecycle` module in the server composition root); documented the test-source exemption scope; probe teardown no longer leaves fixture directories behind.
 
 - 1.4.0 (2026-07-16): Registered the owner-specific Platform Import/Export persistence boundary and the concrete PR5 Numbering tables; import orchestration state remains separate from Catalog and Inventory authoritative tables.
 

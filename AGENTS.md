@@ -52,11 +52,12 @@ Before inventing an identifier or boundary, consult:
 - `docs/blueprint/14-Engineering/ENGINEERING_NOTEBOOK.md` for accumulated working practice — including the multi-agent independent review discipline any reviewing agent should reproduce — that is not authority but is too valuable to rediscover from scratch
 - `docs/blueprint/07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` for user, developer, release, or in-app help changes
 - `docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
-- `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending Better Auth functionality
-- `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before changing the governed UI configuration
-- `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` before changing runtime, HTTP shell, transport, or fallback policy
-- `docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md` before changing workflow infrastructure
-- `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before changing documentation delivery
+- `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
+- `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before creating, applying, changing, or recommending a shadcn preset, style, base/theme/chart color, font, icon library, radius, menu treatment, RTL, or density default
+- `docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md` before searching, importing, generating, adapting, approving, or replacing reusable components, blocks, animations, page compositions, or progressive-disclosure patterns
+- `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` before changing runtime, HTTP shell, transport, or Node fallback policy
+- `docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md` before selecting or changing durable/background workflow infrastructure
+- `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before changing the documentation platform or content-delivery architecture
 - `docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
 
@@ -78,6 +79,7 @@ python scripts/generate_registries.py --check
 - Enforce tenant scope across data, cache, search, jobs, events, files, exports, webhooks, offline, extensions, and AI.
 - Evaluate entitlements and permissions separately. Feature flags are neither.
 - Better Auth owns authentication and sessions, not Party, business roles, permissions, entitlements, or tenant hierarchy.
+- Better Auth plugins are deny-by-default. Organization/Admin roles, payment/subscription plugins, Agent Auth, MCP, managed audit, and scaffold defaults do not transfer canonical platform ownership.
 - Party owns canonical real-world identity; domains own role records.
 - Corrections to financial, inventory, payroll, stored-value, cash, and audit facts use reversal or compensation.
 - Privacy follows ADR-0014 and the deletion journal.
@@ -121,9 +123,12 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 
 - Web styling uses the latest approved stable Tailwind CSS release.
 - shadcn/ui components are copied and normalized into platform-owned source.
+- New authenticated web scaffolds use the governed Base UI/Rhea/Neutral/Blue/Geist-Inter/Lucide/default-radius bootstrap, then normalize it into semantic tokens and accessible compact, comfortable, and touch variants. A preset is not design-system authority.
 - Ordinary charts use shadcn chart composition and Recharts.
 - Specialized visualization libraries require a justified requirement and review.
 - Magic UI Pro and shadcn/studio premium assets follow the premium source policy and provenance template.
+- External components, blocks, animations, and page compositions remain candidates until `PREFERRED_COMPONENT_CATALOG.md` promotion gates pass; MCP availability or paid access never grants approval.
+- Agents must search platform-owned components first, record provenance, review diffs, avoid duplicate primitive systems, and never let imported UI redefine domain, permission, entitlement, payment, privacy, or workflow semantics.
 - Never commit premium credentials, license keys, private download URLs, or prohibited redistributable source.
 - Every component and workflow covers canonical states, accessibility, responsive behavior, offline behavior, performance, and white label.
 - `ui-pattern-audit` reviews pattern selection; `accessibility-review` performs formal accessibility review.
@@ -188,12 +193,12 @@ Code conventions:
 - TypeScript strict everywhere; every workspace carries a working `check-types` script.
 - Core packages stay runtime-neutral per ADR-0020 and `ARCHITECTURE_DEPENDENCY_RULES.md`: no Bun globals, `bun:*` imports, Hono context types, oRPC transport objects, or database adapters in domain, application, contract, or authorization code.
 - All external input is validated with zod v4 schemas at the boundary; oRPC procedures declare typed errors.
-- Environment access goes only through `@meridian/tooling-env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed.
+- Environment access goes only through `@meridian/tooling-env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed. Colocated test files may set `process.env` fixtures to exercise env-dependent behavior; runtime sources may not.
 - Database changes go through Drizzle schema + `db:generate`; committed migrations are never hand-edited (CI enforces migration freshness).
 - Tests are colocated `*.test.ts` using `bun:test` and assert real behavior — no placeholder assertions.
 - No `console.log` in committed code; use the structured logger. No commented-out code blocks.
 - Line endings are LF, enforced by `.gitattributes` — Windows contributors should not fight the formatter.
-- New UI follows the governed shadcn bootstrap (§8) and semantic tokens; raw palette values in real components are lint-visible defects.
+- New UI follows the governed shadcn bootstrap (§8), preferred-component catalog, and semantic tokens; raw palette values in real components are lint-visible defects.
 
 ## 12. Change Process
 
@@ -203,6 +208,8 @@ Before editing:
 2. Identify owner and authority.
 3. Determine ADR or founder-decision needs.
 4. Check downstream impact across contracts, UI, security, privacy, offline, operations, testing, Commercial, and first-slice scope.
+5. For technology or version claims, invoke `technology-evidence-maintainer`, verify current primary sources, and consult the living technology ledger. Never rely solely on model memory.
+6. Claim one issue, branch, worktree, and pull request per independently mergeable change; record overlap and dependencies before parallel work.
 
 After editing:
 
@@ -212,6 +219,8 @@ After editing:
 4. Run governance checks.
 5. Update dispositions.
 6. Do not claim readiness beyond evidence.
+7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
+8. Record documentation and release-note impact for user-visible, API, configuration, migration, permission, workflow, or troubleshooting changes.
 
 ## 13. ADR Triggers
 

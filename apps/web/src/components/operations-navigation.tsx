@@ -41,7 +41,7 @@ export function OperationsNavigation() {
 					</select>
 				</label>
 			</div>
-			<div className="mx-auto hidden max-w-screen-2xl gap-1 px-4 py-2 sm:flex">
+			<div className="mx-auto hidden max-w-screen-2xl gap-1 overflow-x-auto px-4 py-2 sm:flex">
 				{OPERATIONS_NAVIGATION.map((item) => (
 					<Link
 						aria-current={

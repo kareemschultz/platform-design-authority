@@ -1,10 +1,10 @@
 ---
 document_id: PDA-APP-022
 title: WS2 PR3 Inventory Ledger Controlled-Prototype Evidence
-version: 0.1.2
+version: 0.2.0
 status: Draft
 owner: Platform Engineering
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 verified_as_of: 2026-07-15
 related_adrs: [ADR-0002, ADR-0003, ADR-0016, ADR-0020, ADR-0027]
 ---
@@ -13,7 +13,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0016, ADR-0020, ADR-0027]
 
 ## Purpose and boundary
 
-Record the executable evidence for PDA-RDM-009 PR3 and issue #68. This evidence covers the controlled-prototype Inventory owner, its nine PostgreSQL tables, application boundary, and canonical API/event seams. It does not claim production readiness, end-to-end offline synchronization, event delivery, PostgreSQL row-level security, lots/serials, valuation, or worker completion. RR-006 remains open for PR4 and RR-007 remains open.
+Record the executable evidence for PDA-RDM-009 PR3 and issue #68. This evidence covers the controlled-prototype Inventory owner, its nine PostgreSQL tables, application boundary, and canonical API/event seams. It does not claim production readiness, end-to-end offline synchronization, PostgreSQL row-level security, lots/serials, or valuation. At the PR3 checkpoint RR-006 and worker delivery were intentionally open for PR4; PR #74 subsequently supplied independently reviewed delivery evidence and PDA-REV-009 closed RR-006 at controlled-prototype depth. RR-007 remains open.
 
 ## Implemented owner surface
 
@@ -79,7 +79,7 @@ Drizzle migration freshness must report `No schema changes, nothing to migrate`.
 
 ## Explicit deferrals and residual risk
 
-- RR-006: event worker delivery, leases, retry, dead-letter, replay, ordering, and consumer idempotency remain open for PR4.
+- RR-006 was open at this historical PR3 boundary and was subsequently closed at controlled-prototype depth by PDA-APP-023, PR #74 exact-head concurrence, and merge `7202fc819b70982c013e1ca11a4fcc136e01e2de`.
 - RR-007: production PostgreSQL role topology and RLS evidence remain open.
 - Offline command transport, device trust, signature verification, and lease issuance remain WS5; PR3 consumes only already-verified facts.
 - Reservations remain the explicitly internal create/release prototype seam selected by PDA-RDM-009. They are exercised through the Inventory owner service and have canonical events, but no public application/router/OpenAPI surface or permission is claimed in PR3.

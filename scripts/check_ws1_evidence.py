@@ -122,9 +122,21 @@ def main() -> int:
                     f"{capability_id} references missing evidence path {path_value}"
                 )
 
+    # The generated registry is an aggregate across every completed workstream.
+    # Validate that aggregate on its own terms instead of assuming WS1 is the
+    # only evidence source, while retaining the WS1-local row checks above.
+    generated_evidenced_cells = sum(
+        sum(
+            1
+            for status in row.get("dimensions", {}).values()
+            if status == "required"
+        )
+        for row in registry.get("tests", [])
+        if row.get("evidence_status") == "Evidenced"
+    )
     coverage = registry.get("coverage", {})
-    if coverage.get("required_cells_evidenced") != required_cells:
-        raise AssertionError("generated WS1 evidence-cell total is inconsistent")
+    if coverage.get("required_cells_evidenced") != generated_evidenced_cells:
+        raise AssertionError("generated aggregate evidence-cell total is inconsistent")
 
     violations: list[str] = []
     for root in IMPLEMENTATION_ROOTS:

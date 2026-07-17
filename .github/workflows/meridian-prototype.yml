@@ -126,6 +126,7 @@ jobs:
         run: |
           python scripts/generate_registries.py --check
           bun run ws1:evidence:check
+          bun run ws2:evidence:check
 
       - name: Generated contract freshness
         run: python scripts/generate_contracts.py --check

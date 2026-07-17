@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-025
 title: WS2 PR6 Product and Inventory Web Experience Evidence
-version: 0.6.0
+version: 0.8.0
 status: Draft
 owner: Frontend Platform
 last_reviewed: 2026-07-16
@@ -12,7 +12,7 @@ related_adrs: [ADR-0005, ADR-0016, ADR-0020, ADR-0022]
 
 ## Evidence boundary
 
-This Draft record covers issue #72 at controlled-prototype depth. It records only reproduced Product, Inventory, and bounded-import web behavior over generated clients and current server authority. It does not establish WCAG 2.2 AA conformance, pilot or production readiness, production tenant-isolation defense in depth, native or broad offline execution, contractual service levels, or WS2/first-slice completion. RR-007 and RR-009 remain open. PR7 retains the 14-capability by 13-dimension closeout, scenarios 2 and 8, recovery/capacity evidence, and WS2 exit. Exact-head independent concurrence and merge remain required.
+This Draft record covers merged issue #72 / PR #78 at controlled-prototype depth. It records only reproduced Product, Inventory, and bounded-import web behavior over generated clients and current server authority. Claude Code independently concurred at exact head `c69e5fb4415083affc40dc52f2d0ada78846252e` in PR #78 comment `4998183817`; PR #78 merged as `635fa3f1618d5c880585fdd3e86de7a16d0993ac`. This does not establish WCAG 2.2 AA conformance, pilot or production readiness, production tenant-isolation defense in depth, native or broad offline execution, contractual service levels, or WS2/first-slice completion. RR-007 and RR-009 remain open. PR7 retains the registry-derived capability/dimension closeout, scenario-boundary reconciliation, recovery/capacity evidence, and WS2 exit.
 
 The implemented UI is deterministic with AI disabled. It never treats navigation visibility, cached queries, a balance projection, imported CSV content, Better Auth fields, or browser state as current permission, entitlement, tenant, version, or owner-state authority.
 
@@ -93,6 +93,25 @@ The target is WCAG 2.2 AA; no conformance claim is made. Automated checks can de
 | 3.3.1 / 3.3.3 errors | Adjacent validation, safe error summary/classification, preserved conflict input, corrective guidance | Server correlation-reference presentation is verified only for supported error shapes |
 | 4.1.2 name, role, value | Native inputs/selects, platform-owned Base UI primitives, one current navigation item | Browser/accessibility-tree and assistive-technology evidence remains bounded to evaluated routes |
 
+### PR7 exact-stack accessibility and pattern re-audit
+
+PR7 extended the real-authentication Compose lane across Product import review, blind Count capture/submission, balances, Adjustments, Transfers, browser history, and an explicit permission-denied state on desktop and mobile. The first live run found two substantive defects rather than converting the existing review prose into a pass:
+
+| Finding | Severity | Correction | Executable verification |
+|---|---:|---|---|
+| Destructive denial text and default Sonner description/action colors fell below the WCAG AA text-contrast target | High | Darkened the owned destructive semantic token and supplied explicit owned Sonner foreground/action classes; removed the incompatible rich-color shortcut | axe A/AA and visual contrast checks are clean on the denial route in both desktop and mobile projects |
+| Opaque Count, location, and Product identifiers widened the mobile document | High | Added intentional wrapping to the shared page title and Count/location/Product identifier surfaces | The mobile Count workflow passes the document-width reflow assertion after five durable observations and submission |
+
+The full Playwright regression passes **14/14** against the rebuilt web/server/PostgreSQL stack. The eight new closeout cases verify:
+
+- a Product import reaches `ReadyForApproval`, exposes the maker/checker boundary in a keyboard-operated dialog, and preserves detail/list browser history;
+- a blind Count persists five scanner-style Enter submissions, returns focus to Product input after each authoritative rerender, hides expected quantities before posting, reaches `Submitted`, and exposes the self-approval boundary;
+- balance filtering clears both cursor and cursor trail while Back/Forward preserves intentional URL state;
+- balance, Adjustment, and Transfer routes expose headings, landmarks, current context, projection/non-authority semantics, responsive transformation, reflow, and clean automated axe A/AA results; and
+- a permission-limited operator receives a distinct non-disclosing denial without leaking the permission identifier.
+
+The Count interaction samples measure Enter through the real HTTP command, durable owner update, authoritative rerender, and Product-input refocus: desktop `n=5`, median `86.16 ms`, maximum `92.59 ms`; mobile `n=5`, median `83.32 ms`, maximum `133.14 ms`; zero failures. Both are below the governed 5-second median target. This is automated Chromium/scanner-keyboard evidence, not representative-user task-time or assistive-technology conformance.
+
 ## Responsive, theme, white-label, and motion evidence
 
 - Layouts use semantic tokens and platform-owned `@meridian/ui-web` primitives; no raw tenant-visible codename, premium source, provider identity, or palette shortcut is introduced.
@@ -118,7 +137,7 @@ An optimized Next.js 16.2.10 build succeeds with all 13 new Operations route pat
 
 These are uncompressed build-artifact totals, not per-route transferred bytes or a contractual performance budget. The comparison prevents an unmeasured “thin UI” claim; route-level transfer, field-device latency, production cache behavior, and capacity/SLO evidence remain open. No new table, state-store, form, spreadsheet, chart, or visualization dependency was added for the workflows. Existing backend Catalog query budgets remain the separately governed 300 ms/800 ms p95 assertions; this build does not relabel them as end-user latency.
 
-## Executable verification recorded before exact-head review
+## Executable verification and exact-head disposition
 
 | Lane | Reproduced result |
 |---|---|
@@ -132,21 +151,24 @@ These are uncompressed build-artifact totals, not per-route transferred bytes or
 
 The browser lane was reproduced after review remediation against freshly built `web` and `server` images plus PostgreSQL 18 in one isolated Compose project. The sequence applied committed migrations, ran the server-owned `e2e:seed` fixture, and then executed `bun run --cwd apps/web test:e2e`; all six desktop/mobile tests passed in 10.6 seconds. The fixture creates only synthetic controlled-prototype identities and authority records and does not bypass authentication, current-context, permission, entitlement, oRPC, or owner persistence boundaries.
 
-Each authenticated browser lane attaches bounded Navigation Timing/resource-count JSON to its Playwright report. CI retains the report and failure evidence; these measurements are diagnostic artifacts, not an SLA. Final exact-head repository checks, CI links, and independent-review disposition are added only after they are reproduced on the review head.
+Each authenticated browser lane attaches bounded Navigation Timing/resource-count JSON to its Playwright report. CI retains the report and failure evidence; these measurements are diagnostic artifacts, not an SLA. Claude Code reproduced the final remediation lanes at exact head `c69e5fb4415083affc40dc52f2d0ada78846252e`, confirmed both required GitHub Actions workflows green on that SHA, and recorded concurrence before merge. PR7 retains whole-workstream exact-head and exact-main verification.
 
 ## Residual risks and PR7 handoff
 
 - Automated axe results are not WCAG conformance and do not replace screen-reader, zoom/reflow, forced-colors, device, or qualified accessibility review.
+- PR7 directly browser-proves permission denial; entitlement-unavailable remains covered by component/server boundary tests rather than a separate live browser case.
 - RLS, penetration testing, production roles, external provider evidence, production observability/SLOs, and RR-007/RR-009 remain open.
 - Browser support evidence is Chromium at controlled-prototype depth. Broader compatibility and native workflow evidence are not claimed.
 - Product edit covers selected aggregate fields; richer Variant/Identifier administration remains at the depth assigned by PDA-RDM-009 and PDA-DOM-002.
 - Transfer actor metadata is latest-action evidence, not an exhaustive receipt-history representation.
-- PR7 owns the complete 14-capability by 13-dimension evidence matrix, scenarios 2 and 8, whole-workstream security/recovery/capacity evidence, risk/roadmap/program propagation, and final WS2 controlled-prototype disposition.
+- PR7 owns the complete registry-derived 14-capability by 13-dimension evidence matrix; PDA-TST-013 scenarios 2 and 8; PDA-ARC-015 scenario 8 plus only WS2's precondition subpath of scenario 2; whole-workstream security/recovery/capacity evidence; risk/roadmap/program propagation; and final WS2 controlled-prototype disposition.
 
 ## Change history
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.8.0 | 2026-07-16 | Frontend Platform | Recorded the PR7 exact-stack pattern/accessibility re-audit, remediated AA contrast and opaque-identifier mobile reflow defects, reproduced 14/14 desktop/mobile browser cases, and retained measured Count interaction evidence without claiming screen-reader conformance. |
+| 0.7.0 | 2026-07-16 | Frontend Platform | Recorded exact-head independent concurrence and PR #78 merge, removed stale pending-review wording, and preserved PR7 plus RR-007/RR-009 and every pilot/production accessibility gate. |
 | 0.6.0 | 2026-07-16 | Frontend Platform | Closed the independent review finding by resetting both Balance cursor fields with handler-level regression proof; also closed the disclosed receipt-intent and persistence-adapter whitespace residuals so the recorded idempotency and exact-lookup boundary claims remain literal. |
 | 0.5.0 | 2026-07-16 | Frontend Platform | Dispositioned the seven automated exact-head findings and follow-up edge audit through intent-bound idempotency, filter-trail reset, outstanding Transfer-line selection, failed-context query recovery, exact `If-Match` CORS proof, separator-preserving/empty-safe SKU lookup, closed versioned structural balance cursors, and reproducible evidence commands. |
 | 0.4.0 | 2026-07-16 | Frontend Platform | Added the same-origin auth/oRPC proxy remediation, exact Compose 6/6 browser result, corrected integrated PostgreSQL and web-unit counts, and bounded browser-performance-artifact disposition. |

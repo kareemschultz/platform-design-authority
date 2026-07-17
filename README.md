@@ -119,7 +119,7 @@ bun run db:migrate              # apply reviewed Drizzle migrations
 bun run docker:up               # build and start the full Compose stack
 ```
 
-Environment variables are validated by `packages/env`; see `apps/docs/content/docs/getting-started/index.mdx` for the local `.env` shapes. "Meridian" is an internal codename and must not appear in tenant-visible product strings (ADR-0026).
+Environment variables are validated through `@meridian/tooling-env` in `packages/tooling/env`; see `apps/docs/content/docs/getting-started/index.mdx` for the local `.env` shapes. "Meridian" is an internal codename and must not appear in tenant-visible product strings (ADR-0026).
 
 ## UI Foundation
 

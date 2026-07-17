@@ -13,14 +13,18 @@ This implementation is controlled prototype evidence inside the Platform Design 
 apps/
     docs/       Fumadocs documentation portal on port 4000
     native/     Expo/React Native prototype
-    server/     Hono server with Bun and Node entries
+    server/     Hono/oRPC transport and the server composition root
     web/        Next.js web prototype on port 3001
+    worker/     event delivery and projection composition root
 packages/
-    api/        oRPC procedures and context
-    auth/       Better Auth configuration and security helpers
-    db/         Drizzle schema, client, and migrations
-    env/        runtime environment validation
-    ui/         platform-owned shadcn-derived UI source
+    contracts/  generated and published API, event, permission, and capability contracts
+    domains/    runtime-neutral Catalog, Inventory, and Party owners
+    foundation/ shared runtime-neutral primitives
+    persistence/ owner-specific PostgreSQL adapters, schemas, and migrations
+    platform/   runtime-neutral platform application/core packages
+    platform-clients/ generated API client surface
+    tooling/    shared configuration and validated environment access
+    ui-web/core/ platform-owned shadcn-derived web source
 ops/postgres/ local PostgreSQL prototype controls
 ```
 
@@ -35,6 +39,10 @@ bun run check-types
 bun run test
 bun run build
 bun audit
+python scripts/validate_docs.py
+python scripts/generate_registries.py --check
+python scripts/generate_contracts.py --check
+python scripts/check_architecture.py
 ```
 
 The CI workflow additionally verifies the Node fallback, registry freshness, prohibited surfaces, Compose configuration, PostgreSQL 18.4 baseline, and Docker images.
@@ -48,7 +56,7 @@ bun run dev:native
 bun run --filter docs dev
 ```
 
-Use `bun run dev` to start the Turbo development graph. Environment variables are validated by `packages/env`; do not bypass validation except in a narrowly controlled build step that cannot access runtime data.
+Use `bun run dev` to start the Turbo development graph. Environment variables are validated through `@meridian/tooling-env` in `packages/tooling/env`; applications import the appropriate `server`, `worker`, `web`, or `native` entry instead of reading environment variables ad hoc. Do not bypass validation except in a narrowly controlled build step that cannot access runtime data.
 
 ## Add an API procedure
 
@@ -60,11 +68,11 @@ Before implementation:
 4. Define tenant, actor, permission, entitlement, idempotency, audit, privacy, offline, and failure behavior.
 5. Use an application contract; never import another domain's private persistence.
 
-Prototype procedures belong in `packages/api`. The Hono application supplies request context and exposes the oRPC transport. Provider SDKs and UI components must not become business abstractions.
+Start with `openapi/first-slice-v1.yaml`, then regenerate `packages/contracts/platform-api/src/generated.ts` with `bun run contracts:generate`. Published schemas and runtime-neutral application contracts live under `packages/contracts`, `packages/domains`, and `packages/platform`; transport procedures, request context, and the oRPC router live in `apps/server/src`. Concrete PostgreSQL adapters are bound only in `apps/server/composition` or the registered `apps/worker/composition` root. Provider SDKs and UI components must not become business abstractions.
 
 ## Add database state
 
-The owning domain controls its schema and migrations. Do not create cross-domain foreign persistence shortcuts. Use PostgreSQL-native features first and consult ADR-0024 before adding any extension.
+Each owner controls its adapter, Drizzle schema, and migration history in `packages/persistence/*-postgres`. Do not create cross-owner foreign persistence shortcuts or run migrations from `apps/worker`; the server composition root applies every registered owner stream in deterministic serial order. Use PostgreSQL-native features first and consult ADR-0024 before adding any extension.
 
 Generate and review migrations:
 
@@ -82,10 +90,10 @@ See [Migrations](/docs/migrations) for rollback and evidence requirements.
 
 ## Add UI source
 
-Shared web primitives live in `packages/ui`. New shadcn source must use the pinned CLI, preserve Base UI/Rhea configuration, record provenance, and be normalized to platform tokens and state conventions.
+Shared web primitives live in `packages/ui-web/core` and are consumed through `@meridian/ui-web`. New shadcn source must use the pinned CLI, preserve the Base UI/Rhea configuration in both `packages/ui-web/core/components.json` and `apps/web/components.json`, record provenance, and be normalized to platform tokens and state conventions.
 
 ```bash
-bunx shadcn@4.13.0 add dialog popover -c packages/ui
+bunx shadcn@4.13.0 add dialog popover -c packages/ui-web/core
 ```
 
 Review generated code before keeping it. Cover loading, empty, error, denied, offline, conflict, and success states plus keyboard, focus, screen-reader, zoom, contrast, touch, responsive, motion, and white-label behavior.
@@ -99,7 +107,7 @@ Run from the repository root:
 ```bash
 python scripts/validate_docs.py
 python scripts/generate_registries.py --check
-bun run --filter docs types:check
+bun run --filter docs check-types
 bun run --filter docs build
 ```
 

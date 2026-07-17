@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.12.0
+version: 0.13.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -37,7 +37,7 @@ The governed sequence is:
 
 WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone; WS1's Exit criteria below fold in the specific frontend proof points that make this posture verifiable rather than aspirational.
 
-## 2. Baseline: Verified Code Reality (2026-07-14)
+## 2. Baseline: Verified Code Reality (2026-07-16)
 
 **Verified baseline through WS1 PR9:** Bun + Turborepo workspace (`@meridian/*`, ADR-0025/ADR-0026); contract-first Hono/oRPC/OpenAPI boundary; Better Auth behind runtime-neutral Platform Identity; owner-specific PostgreSQL adapters and deterministic migrations; minimum transactional outbox; Tenancy, Organizations, Party linkage, current Authorization, Entitlements, Audit, and session revocation; and the real Next.js Administration shell. PDA-IMPL-005 and the generated first-slice test registry record the controlled-prototype evidence. Exact-head CI is required before merge and does not broaden this baseline into pilot or production authority.
 
@@ -53,7 +53,7 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 
 The contract-first oRPC/client exception closed in WS1 PR1. The temporary embedded Identity persistence exception closed in PR2 through ADR-0027's owner-specific adapters and composition-owned pool. No exception may be silently recreated for later owners.
 
-**Current honesty anchor:** Catalog, Inventory, Event Backbone delivery/projections, bounded imports, and Strict Online Numbering now exist at the merged WS2 PR2-PR5 controlled-prototype depth recorded in PDA-RDM-009. PR5 merged as PR #76 after independent exact-head concurrence. PR6 Product and Inventory web experience is active on issue #72 pending exact-head concurrence and merge; PR7 closeout remains blocked on merged PR6. POS, stored value, general offline sync, provider integration, and broad recovery tooling do not yet exist at first-slice implementation depth. Production RLS, OTP/provider evidence, formal accessibility/penetration evidence, operational exercises, and external/founder gates remain open. No merged or active WS2 work is pilot or production authority.
+**Current honesty anchor:** Catalog, Inventory, Event Backbone delivery/projections, bounded imports, Strict Online Numbering, and the Product/Inventory web experience now exist at the merged WS2 PR2-PR6 controlled-prototype depth recorded in PDA-RDM-009. PR6 exact head `c69e5fb4415083affc40dc52f2d0ada78846252e` merged as PR #78 at `635fa3f1618d5c880585fdd3e86de7a16d0993ac` after independent concurrence. PR7 closeout is active on issue #73 and may record only reproduced evidence. POS, stored value, general offline sync, provider integration, and broad recovery tooling do not yet exist at first-slice implementation depth. Production RLS, OTP/provider evidence, independent assistive-technology conformance, penetration testing, operational exercises, and external/founder gates remain open. No merged or active WS2 work is pilot or production authority.
 
 ## 3. Package Architecture Target
 
@@ -141,11 +141,11 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Entry:** WS1 done.
 - **Proves:** PDA-RDM-004 §Prototype 2.
 - **Detailed plan:** `WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md` (PDA-RDM-009) — exact 14-capability depth, ADR-0027 package ownership, contract/schema closure, durable event delivery, WS2/WS5 offline boundary, PR sequence, evidence, and exit gates. This entry stays the authoritative summary; PDA-RDM-009 does not override it.
-- **Progress:** PR1-PR5 are merged with independent exact-head concurrence. PR5 exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be` closed its audit findings and merged as PR #76 at `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`. PR6 Product and Inventory web experience is active on issue #72 pending exact-head concurrence and merge; PR7 remains blocked in sequence.
-- **Packages:** Implemented runtime-neutral `domains/catalog` and `domains/inventory` cores with ports; owner-specific `persistence/catalog-postgres` and `persistence/inventory-postgres` concrete schemas/migrations under ADR-0027; extended `platform/events` into controlled-prototype publication/consumer infrastructure; merged `platform/import-export` and `platform/numbering` cores plus owner-specific Persistence adapters, with Numbering consumed by real import creation. PR6 composes the generated client into the Product and Inventory web experience. Receipt/fiscal/offline numbering remains later work.
+- **Progress:** PR1-PR6 are merged with independent exact-head concurrence. PR5 exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be` merged as PR #76 at `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`; PR6 exact head `c69e5fb4415083affc40dc52f2d0ada78846252e` merged as PR #78 at `635fa3f1618d5c880585fdd3e86de7a16d0993ac`. PR7 verification and controlled-prototype closeout is active on issue #73.
+- **Packages:** Implemented runtime-neutral `domains/catalog` and `domains/inventory` cores with ports; owner-specific `persistence/catalog-postgres` and `persistence/inventory-postgres` concrete schemas/migrations under ADR-0027; extended `platform/events` into controlled-prototype publication/consumer infrastructure; merged `platform/import-export` and `platform/numbering` cores plus owner-specific Persistence adapters, with Numbering consumed by real import creation; and composed the generated client into the Product and Inventory web experience. Receipt/fiscal/offline numbering remains later work.
 - **Contracts:** `/products*`, `/product-imports*`, `/opening-stock-imports*`, `/stock-balances`, `/inventory-adjustments*`, `/stock-counts*`, `/stock-transfers*`; `catalog.*`, `inventory.*`, bounded `platform.import.*`, and `platform.sequence.number-issued.v1` events (registered in `registry/events.json`).
 - **Tests:** dominant dimensions `idempotency_and_duplicate`, `concurrency_and_conflict`, `events_jobs_and_projections`; budgets: inventory ledger 99.95% correctness; barcode lookup 300ms p95; search 800ms p95; outbox 99.99% eventual publication.
-- **Exit:** scenarios 2 and 8 demonstrated; ledger corrections only by reversal; DoD §6.
+- **Exit:** PDA-ARC-015 scenario 8 is demonstrated end to end. WS2 proves only the Catalog, Inventory, Numbering, and Event Backbone preconditions/subpath of PDA-ARC-015 scenario 2; the complete Online Cash Sale remains WS3. PDA-TST-013 golden scenarios 2 and 8 are exercised at the WS2 boundary. Ledger corrections use linked reversal only; DoD §6 applies.
 - **Gates:** none external.
 
 ### WS3 — POS Cash Workflow (P3)
@@ -231,5 +231,5 @@ Scope changes route through PDA-RDM-003 §Change Control (doc + `registry/first-
 
 - **FDR-002 (platform legal entity)** — critical path for WS6 provider sandboxes and everything commercial; tracked in the Founder Decision Register.
 - **FDR-004** — first-slice scope remains provisionally adopted, not ratified; M0 is a natural ratification checkpoint.
-- **Drizzle ledger suitability** — per the technology ledger, verify complex ledger query/migration behavior at implementation lock (WS2 entry); Kysely remains the recorded alternative.
+- **Drizzle production-scale revalidation** — the bounded WS2 controlled-prototype spike passed exact-decimal, row-lock concurrency, reversal, rebuild, atomic-outbox, and 250k Product query-shape checks. Production-scale ledger/query latency, upgrade behavior, and provider topology remain open; Kysely remains the recorded alternative if later evidence invalidates the selected adapter.
 - **Windows contributor environment** — Turbopack MAX_PATH and long-path issues are recorded in the docs troubleshooting page; CI (Linux) is authoritative.

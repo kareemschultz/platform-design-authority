@@ -56,8 +56,10 @@ export function OperationsPageFrame({
 	return (
 		<div className="mx-auto max-w-screen-2xl px-4 py-6">
 			<header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-				<div className="max-w-3xl">
-					<h1 className="font-heading font-semibold text-2xl">{title}</h1>
+				<div className="min-w-0 max-w-3xl">
+					<h1 className="break-words font-heading font-semibold text-2xl">
+						{title}
+					</h1>
 					<p className="mt-1 text-muted-foreground">{description}</p>
 				</div>
 				{actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}

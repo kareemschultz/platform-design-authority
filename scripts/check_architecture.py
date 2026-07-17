@@ -68,8 +68,25 @@ MIGRATOR_MODULE_IMPORT_PATTERN = re.compile(
 PERSISTENCE_MIGRATE_IMPORT_PATTERN = re.compile(
     r"""import\s*\{[^}]*\bmigrate[A-Za-z0-9_$]*\b[^}]*\}\s*from\s*["']@meridian/persistence-[^"']+["']"""
 )
+# Second-review remediation (F-B-002 gap): a namespace import
+# (`import * as p from "@meridian/persistence-..."`) or a dynamic import
+# (`await import("@meridian/persistence-...")`) followed by an aliased
+# property-access call (`const run = p.migrateCatalog; run(...)`) evades both
+# MIGRATION_INVOCATION_PATTERN (call site isn't literally `migrate[A-Z](`) and
+# PERSISTENCE_MIGRATE_IMPORT_PATTERN (import isn't the static named form).
+# Live-confirmed at exact head 2cdfdcf: `tsc --noEmit` compiles both forms
+# clean, and the pre-fix checker passed with either fixture present.
+PERSISTENCE_MODULE_IMPORT_PATTERN = re.compile(
+    r"""(?:from\s+|import\s*\(\s*)["']@meridian/persistence-[^"']+["']"""
+)
+PERSISTENCE_MIGRATE_PROPERTY_ACCESS_PATTERN = re.compile(
+    r"""\.\s*migrate[A-Za-z0-9_$]*\b"""
+)
 # Fifth-audit F-B-005: the raw process pool module is composition-internal;
-# ordinary application paths use the shutdown-only lifecycle module.
+# ordinary application paths use the shutdown-only lifecycle module. The
+# pattern matches the import specifier, not the imported binding form, so
+# named, namespace, and dynamic imports of the same relative path are all
+# covered without a separate rule per import style.
 COMPOSITION_POOL_IMPORT_PATTERN = re.compile(
     r"""(?:from\s+|import\s*\(\s*)["']\.{1,2}(?:/[^"']*)?/composition/postgres["']"""
 )
@@ -291,6 +308,10 @@ def main() -> int:
                 and (
                     MIGRATOR_MODULE_IMPORT_PATTERN.search(text)
                     or PERSISTENCE_MIGRATE_IMPORT_PATTERN.search(text)
+                    or (
+                        PERSISTENCE_MODULE_IMPORT_PATTERN.search(text)
+                        and PERSISTENCE_MIGRATE_PROPERTY_ACCESS_PATTERN.search(text)
+                    )
                 )
             ):
                 errors.append(

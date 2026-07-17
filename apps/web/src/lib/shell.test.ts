@@ -88,4 +88,10 @@ describe("sectionOverviewPath", () => {
 		expect(sectionOverviewPath(null)).toBe("/administration");
 		expect(sectionOverviewPath(undefined)).toBe("/administration");
 	});
+
+	test("near-prefix routes that only share the literal string do not collide with Operations (second-review F-H-001)", () => {
+		expect(sectionOverviewPath("/operations-evil")).toBe("/administration");
+		expect(sectionOverviewPath("/operationsx")).toBe("/administration");
+		expect(sectionOverviewPath("/operations-export")).toBe("/administration");
+	});
 });

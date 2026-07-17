@@ -95,9 +95,10 @@ export function safeReturnPath(
 export function sectionOverviewPath(
 	pathname: string | null | undefined
 ): SafeReturnPath {
-	return safeReturnPath(
-		pathname?.startsWith("/operations") ? "/operations" : "/administration"
-	);
+	const isOperationsRoute =
+		pathname === "/operations" ||
+		(pathname?.startsWith("/operations/") ?? false);
+	return safeReturnPath(isOperationsRoute ? "/operations" : "/administration");
 }
 
 export function isNavigationCurrent(pathname: string, href: string): boolean {

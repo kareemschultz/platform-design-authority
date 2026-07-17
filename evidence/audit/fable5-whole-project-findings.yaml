@@ -133,11 +133,11 @@ findings:
     wave: W2
 
   - id: F-B-002
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136, second-review remediation); second-review correction below
     lens: B-architecture
     severity: P2
     confidence: high
-    title: "Worker cannot run migrations" enforced only by a camelCase regex; lowercase/aliased invocation evades it
+    title: '"Worker cannot run migrations" enforced only by a camelCase regex; lowercase/aliased invocation evades it'
     files: [scripts/check_architecture.py:58, scripts/check_architecture.py:253, registry/architecture-rules.json:257]
     governing: PDA-ENGR-012 worker row; ADR-0027 item 4
     actual: MIGRATION_INVOCATION_PATTERN matches only migrate[A-Z](; `import {migrate} from "drizzle-orm/.../migrator"; await migrate(db,...)` (lowercase) or aliased re-export evade it. Worker runtime is currently compliant
@@ -145,9 +145,10 @@ findings:
     impact: A worker-side migration could be introduced without tripping CI, undermining the ADR-0027 single-authority gate the registry calls executable
     disposition: fix
     remediation: Flag drizzle-orm/*migrator* / drizzle-kit imports and persistence migrate* export imports from application paths outside migration_invocation_roots; add probes
-    closure_test: apps/worker/composition fixture importing migrate fails; same in apps/server/composition passes
+    closure_test: apps/worker/composition fixture importing migrate fails; same in apps/server/composition passes; second-review addition — apps/worker/composition namespace-import and dynamic-import fixtures with an aliased call site (const run = mod.migrateCatalog) also fail, per PERSISTENCE_MODULE_IMPORT_PATTERN + PERSISTENCE_MIGRATE_PROPERTY_ACCESS_PATTERN in scripts/check_architecture.py and their probes in scripts/test_architecture_checker.py
     owner: PDA
     wave: W2
+    second_review_correction: "The first remediation pass's 'regardless of call-site casing or aliasing' claim did not hold for namespace imports (`import * as p from '@meridian/persistence-...'`) or dynamic imports (`await import('@meridian/persistence-...')`) combined with an aliased call site — live-confirmed at exact head 2cdfdcf via tsc --noEmit (compiles clean) and check_architecture.py (passed with the fixture present). Fixed in the second-review remediation PR; see ARCHITECTURE_DEPENDENCY_RULES.md changelog 1.6.0."
 
   - id: F-H-001
     status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
@@ -162,7 +163,7 @@ findings:
     impact: Disorienting cross-section navigation post-reauth; can land a permission-limited Operations user on an Administration denial
     disposition: fix
     remediation: Give QueryFailure a returnHref/sectionHref prop validated via safeReturnPath, defaulting from current pathname
-    closure_test: Unit test asserts /operations/* failure emits returnTo=/operations; Playwright expires an Operations session and verifies post-login landing in Operations
+    closure_test: 'Unit test asserts /operations/* failure emits returnTo=/operations (apps/web/src/lib/shell.test.ts); Playwright expires an Operations session and verifies post-login landing in Operations (apps/web/e2e/authenticated-operations.spec.ts, second-review addition, requires the live Docker/DB stack to execute — structurally verified via `playwright test --list`, not run locally). Second-review addition: shell.test.ts also covers the /operations-evil near-prefix boundary defect found by two independent second-review passes.'
     owner: PDA
     wave: W3
 
@@ -328,7 +329,7 @@ findings:
     impact: Silent loading at app-router level for screen readers
     disposition: fix
     remediation: Wrap spinner in role="status" aria-label; mark icon aria-hidden
-    closure_test: RTL asserts status role+name; axe/manual on a slow route
+    closure_test: 'Second-review closure delivered without introducing RTL infra (no component in this codebase uses RTL; the established pattern is bun:test for pure logic and Playwright for real-DOM assertions): apps/web/src/components/loader.test.tsx renders Loader via react-dom/server and asserts role="status", the accessible name, and aria-hidden on the icon (equivalent evidence to an RTL role+name assertion, verified passing locally); apps/web/e2e/public-shell.spec.ts adds an axe scan against the route-level loading state under artificial network delay (requires the live stack to execute, not run locally).'
     owner: PDA
     wave: W3
 
@@ -345,7 +346,7 @@ findings:
     impact: Two competing sources of truth for semantic color; a registry contrast/white-label fix silently fails to reach the product
     disposition: document
     remediation: Add provenance/decision note for non-status aliases (or reconcile); note in DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md
-    closure_test: A script/review asserts every --color-* alias matches the registry or is in a recorded exception table
+    closure_test: 'Second-review closure — a script asserts every non-status semantic alias matches the registry or is in a recorded exception table: scripts/validate_docs.py:validate_design_token_alias_exceptions() parses the BEGIN/END-marked alias block in globals.css against registry/design-tokens.json and DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md''s new Recorded Non-Status Alias Exceptions table; wired into the validate_docs gate and verified to fail on an injected unrecorded alias before being removed.'
     owner: PDA
     wave: W3
 
@@ -379,7 +380,7 @@ findings:
     impact: Latent invalid ARIA if validators grow
     disposition: fix
     remediation: Wrap errors in a single <div id role="alert">
-    closure_test: RTL asserts unique DOM ids with a multi-error validator
+    closure_test: 'Second-review closure delivered via Playwright (matching the codebase''s established test-authority split) instead of RTL: apps/web/e2e/public-shell.spec.ts submits the sign-up form empty, tripping all three field validators at once, and asserts the resulting role="alert" containers have unique DOM ids (requires the live stack to execute, not run locally).'
     owner: PDA
     wave: W3
 
@@ -396,7 +397,7 @@ findings:
     impact: Latent horizontal-scroll trap on first added Operations section
     disposition: fix
     remediation: Add overflow-x-auto to the desktop Operations nav container
-    closure_test: Playwright reflow (scrollWidth <= viewport) at 640px with >=6 items
+    closure_test: 'Playwright reflow (scrollWidth <= viewport) at 640px with >=6 items (apps/web/e2e/authenticated-operations.spec.ts, second-review addition). OPERATIONS_NAVIGATION currently registers only 4 items, so the test injects 4 cloned nav links via page.evaluate to reach >=6 and prove the container genuinely needs overflow-x-auto (container.scrollWidth > container.clientWidth) while the outer page still fits the viewport. Requires the live stack to execute, not run locally.'
     owner: PDA
     wave: W3
 
@@ -501,18 +502,18 @@ findings:
     wave: W3
 
   - id: F-I-001
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136); CI-wiring half corrected as false positive in PDA-REV-014 — ws2 script test runs in CI via bun run ws2:evidence:check
+    status: implemented-pending-independent-review (commits 7d6b05b, 0841136); see FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md §Implementation status for the F-I-001 correction narrative (single source, this field only points to it)
     lens: I-ci-tests
     severity: P3
     confidence: confirmed
     title: Script unit-test suites fail when run as documented plain scripts; only pass via -m unittest, and test_check_ws2_evidence has no direct CI step
     files: [scripts/test_validate_program_status.py:6, scripts/test_check_ws2_evidence.py:10, AGENTS.md:66]
     governing: AGENTS.md §4 invocation; CI workflows
-    actual: `python scripts/test_validate_program_status.py` and `python scripts/test_check_ws2_evidence.py` raise ImportError (package-relative import); both pass via `python -m unittest`. CI uses -m unittest for program-status; ws2 test runs only via the root ws2:evidence:check script, not a workflow step
+    actual: "`python scripts/test_validate_program_status.py` and `python scripts/test_check_ws2_evidence.py` raise ImportError (package-relative import); both pass via `python -m unittest`. CI uses -m unittest for program-status; ws2 test runs only via the root ws2:evidence:check script, not a workflow step"
     expected: Docs/scripts invoked consistently; ws2 script test wired into a workflow or documented as local-only
     impact: A contributor following the documented invocation sees a spurious failure; the ws2 script test is not a CI gate
     disposition: fix
-    remediation: Add `if __name__ == "__main__": unittest.main()` guards or update docs to -m unittest; wire ws2 script test into CI or document scope
+    remediation: 'Add `if __name__ == "__main__": unittest.main()` guards or update docs to -m unittest; wire ws2 script test into CI or document scope'
     closure_test: Documented invocation runs green; ws2 script-test coverage location is explicit
     owner: PDA
     wave: W2

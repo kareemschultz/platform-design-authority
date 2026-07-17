@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.5.0
+version: 1.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -172,7 +172,20 @@ The implementation must include tests that:
 - Fail migrator-module imports (`drizzle-orm/*migrator*`, `drizzle-kit`) and persistence `migrate*` export imports from application paths outside the registered migration-invocation roots, regardless of call-site casing or aliasing
 - Fail relative imports of the process pool module (`*/composition/postgres`) from non-composition application paths; ordinary application code imports the shutdown-only lifecycle module
 
-Test-source scope: the migration-invocation/import and connection-lifecycle rules apply to non-test sources only. Colocated `*.test.*` and `*.spec.*` files inside application packages may migrate schemas and construct additional bounded pools as test harness — this exemption is part of the rule definition, is limited to test files, and never extends to runtime sources.
+Test-source scope: colocated `*.test.*` and `*.spec.*` files inside application and runtime-neutral packages are exempt from the rules in the table below — this exemption is part of each rule's definition, is limited to test files, and never extends to runtime sources.
+
+### Registered Test-Source-Exempt Rules
+
+These are the only forbidden-pattern rules the checker skips for colocated `*.test.*`/`*.spec.*` sources (fifth-audit F-B-004; second-review correction — the original table and prose named only the migration-invocation/import and connection-lifecycle rules, but `assert_test_source_exempt_rules_match_registry()`'s AST-based scan of `check_architecture.py` found the checker also gates `bun-runtime-leak` and `transport-runtime-leak` on `is_test_source`, which was true before this PR and simply undocumented; both are added below rather than narrowing the assertion to hide them). `scripts/test_architecture_checker.py` asserts this table matches exactly the set of rule IDs `scripts/check_architecture.py` actually gates on `is_test_source`, so the two cannot drift silently.
+
+| Rule | Reason |
+|---|---|
+| `migration-invocation-outside-authority` | Colocated integration tests exercise the real migration runner outside the composition root. |
+| `migration-import-outside-authority` | Colocated integration tests import migrator modules and persistence `migrate*` exports directly to seed a test database. |
+| `pool-import-outside-composition` | Colocated integration tests construct additional bounded pools against the process pool module for isolated test fixtures. |
+| `connection-lifecycle-outside-composition` | Colocated integration tests read `DATABASE_URL`, construct pools, or close connections directly to set up and tear down test-only database state. |
+| `bun-runtime-leak` | Colocated tests for runtime-neutral packages run under Bun's own test runner and may use `bun:*` APIs to set up fixtures; the package's runtime sources still may not. |
+| `transport-runtime-leak` | Colocated tests for runtime-neutral packages may import Hono/oRPC transport types to build test doubles or assert contract shapes; the package's runtime sources still may not. |
 
 ## Temporary Exceptions
 
@@ -220,6 +233,8 @@ The generator derives each executable pattern's `except` list from this table. A
 - Generated scaffolds comply by default
 
 ## Change Log
+
+- 1.6.0 (2026-07-17): Second independent review remediation. Registered the Test-Source-Exempt Rules table so `registry/architecture-rules.json` carries `test_source_exempt_rules` (F-B-004; prose alone previously had no registry representation) and added a checker self-assertion that the table matches the code's actual `is_test_source` gates. Closed the F-B-002 evasion vector live-confirmed against the real compiler at exact head `2cdfdcf`: a namespace or dynamic import of a `@meridian/persistence-*` module combined with an aliased call site (`const run = mod.migrateCatalog`) evaded both the pre-existing call-site rule and the static-named-import rule; the checker now also flags any import of a `@meridian/persistence-*` module that co-occurs with a `.migrate*` property access, regardless of import form. A second candidate evasion — a `@/*` tsconfig-path-alias import of the pool module for F-B-005 — was investigated with the same rigor and **retracted**: `apps/server`'s `@/*` maps only to `./src/*`, which does not reach `composition/postgres.ts`, so `tsc` correctly rejects that import (`TS2307: Cannot find module`) and no live bypass exists there. No change was made to `COMPOSITION_POOL_IMPORT_PATTERN`.
 
 - 1.5.0 (2026-07-17): Closed fifth-audit findings F-B-001/002/003/004/005 — added the `packages/` stray-source guard, casing/alias-proof migration-import rule, and composition-internal pool-module rule (with a shutdown-only `lifecycle` module in the server composition root); documented the test-source exemption scope; probe teardown no longer leaves fixture directories behind.
 

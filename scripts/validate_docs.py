@@ -570,6 +570,55 @@ def validate_design_token_references() -> list[str]:
     return sorted(set(errors))
 
 
+def validate_design_token_alias_exceptions() -> list[str]:
+    """Fifth-audit F-H-003, second-review closure: every non-status semantic
+    alias in globals.css must either match a registry/design-tokens.json key
+    by name, or be recorded in the doc's exception table. Prevents silent
+    prose-only drift between the two."""
+    css_path = ROOT / "packages" / "ui-web" / "core" / "src" / "styles" / "globals.css"
+    doc_path = ROOT / "docs" / "blueprint" / "09-UX" / "DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md"
+    registry_path = ROOT / "registry" / "design-tokens.json"
+    if not (css_path.exists() and doc_path.exists() and registry_path.exists()):
+        return []
+
+    css_text = css_path.read_text(encoding="utf-8")
+    block_match = re.search(
+        r"/\* BEGIN non-status semantic aliases \*/(.*?)/\* END non-status semantic aliases \*/",
+        css_text,
+        re.DOTALL,
+    )
+    if block_match is None:
+        return [
+            f"{css_path.relative_to(ROOT)}: missing 'BEGIN/END non-status semantic aliases' markers "
+            "required by scripts/validate_docs.py's F-H-003 alias-exception assertion"
+        ]
+    aliases = sorted(set(re.findall(r"--([a-z0-9-]+)\s*:", block_match.group(1))))
+
+    doc_text = doc_path.read_text(encoding="utf-8")
+    table_match = re.search(
+        r"### Recorded Non-Status Alias Exceptions(.*?)(?:\n## |\Z)", doc_text, re.DOTALL
+    )
+    table_text = table_match.group(1) if table_match else ""
+    recorded_exceptions = {
+        match.strip("-") for match in re.findall(r"`--([a-z0-9-]+)`", table_text)
+    }
+
+    registry_color_keys = set(
+        load_json(registry_path).get("tokens", {}).get("color", {}).get("light", {}).keys()
+    )
+
+    errors: list[str] = []
+    for alias in aliases:
+        if alias in registry_color_keys or alias in recorded_exceptions:
+            continue
+        errors.append(
+            f"{css_path.relative_to(ROOT)}: --{alias} has no same-name key in "
+            f"registry/design-tokens.json and is not in {doc_path.relative_to(ROOT)}'s "
+            "Recorded Non-Status Alias Exceptions table"
+        )
+    return errors
+
+
 def validate_governance_exemptions() -> list[str]:
     path = ROOT / "registry" / "governance-exemptions.json"
     if not path.exists():
@@ -756,6 +805,7 @@ def main() -> int:
         + validate_json_schemas()
         + validate_architecture_rules()
         + validate_design_token_references()
+        + validate_design_token_alias_exceptions()
         + validate_governance_exemptions()
         + validate_contract_files()
         + validate_founder_decision_register()

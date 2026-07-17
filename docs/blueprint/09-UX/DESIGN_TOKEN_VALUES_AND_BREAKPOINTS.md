@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.2.1
+version: 0.2.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -239,3 +239,13 @@ Registry-backed groups are `space`, `radius`, `motion`, `screen`, `size`, and `c
 ## Recorded prototype drift (fifth-audit F-H-003)
 
 The shipped theme (`packages/ui-web/core/src/styles/globals.css`) resolves the non-status semantic aliases (`--surface-*`, `--action-primary*`, `--text-*`, `--focus-ring`, borders) to the governed shadcn preset values, which differ from this registry's draft values; only the `status-*` roles are registry-synchronized. This is a deliberate controlled-prototype mapping — the governed preset wins until this token registry leaves draft. When it does, either reconcile the CSS aliases to registry values or re-record the exception here; a white-label or contrast change applied only to the registry does not reach the product until then.
+
+### Recorded Non-Status Alias Exceptions
+
+Second-review closure for F-H-003: `scripts/validate_docs.py`'s `validate_design_token_alias_exceptions()` parses every alias between the `BEGIN non-status semantic aliases` / `END non-status semantic aliases` markers in `globals.css`'s `:root` block and fails the gate unless each one either (a) has an exact same-name key under `tokens.color.light` in `registry/design-tokens.json` (value drift is the already-recorded prototype behavior above, name presence is what this assertion checks), or (b) is listed in this table. `action-primary`, `surface-canvas`, `text-muted`, and `focus-ring` satisfy (a) by name. The three below have no same-name registry key at all and are recorded here under (b):
+
+| CSS alias | Nearest registry key | Reason |
+|---|---|---|
+| `--action-primary-foreground` | none (`registry/design-tokens.json` has `action-primary-hover`, no foreground variant) | The registry has not yet defined an on-`action-primary` text-contrast token; the shadcn preset's `--primary-foreground` is the controlled-prototype stand-in. |
+| `--surface-panel` | none (`registry/design-tokens.json` has `surface-default`/`surface-raised`/`surface-subtle`, no `panel`) | No registry surface tier maps directly to the shadcn `--card` role used for panel/dialog surfaces; reconcile naming when the registry leaves draft. |
+| `--text-default` | none (`registry/design-tokens.json` has `text-primary`, not `text-default`) | Naming divergence only; the shadcn `--foreground` role is the controlled-prototype stand-in for the registry's `text-primary`. |

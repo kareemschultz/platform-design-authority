@@ -62,6 +62,38 @@ function reportMetric(
 	);
 }
 
+async function claimExpectedEvent(
+	store: ReturnType<typeof createPostgresDeliveryStore>,
+	eventId: string,
+	index: number
+) {
+	for (let attempt = 0; attempt < 20; attempt += 1) {
+		// biome-ignore lint/performance/noAwaitInLoops: each poll must observe a fresh database eligibility instant.
+		const clock = await testPool.query<{ now: Date }>(
+			"SELECT clock_timestamp() AS now"
+		);
+		const now = clock.rows[0]?.now;
+		if (!now) {
+			throw new Error("database clock did not return an instant");
+		}
+		const claim = await store.claimNext({
+			claimToken: `claim_ws2_delivery_${index}_${attempt}`,
+			leaseExpiresAt: new Date(now.getTime() + 30_000).toISOString(),
+			now: now.toISOString(),
+		});
+		if (claim) {
+			if (claim.event.id !== eventId) {
+				throw new Error(
+					`claimed unexpected event ${claim.event.id}; expected ${eventId}`
+				);
+			}
+			return claim;
+		}
+		await new Promise((resolve) => setTimeout(resolve, 10));
+	}
+	throw new Error(`event ${eventId} was not eligible within 200 ms`);
+}
+
 function productCreatedEvent(
 	id: string,
 	productId: string,
@@ -144,24 +176,8 @@ describe.serial("WS2 Event Backbone closeout measurements", () => {
 			);
 			const startedAt = performance.now();
 			await outbox.append(productCreatedEvent(eventId, productId, tenantId));
-			// Eligibility is persisted from the database clock; use that same authority
-			// so container clock skew cannot turn a delivery measurement into a retry.
-			const clock = await testPool.query<{ now: Date }>(
-				"SELECT clock_timestamp() AS now"
-			);
-			const now = clock.rows[0]?.now;
-			if (!now) {
-				throw new Error("database clock did not return an instant");
-			}
-			const claim = await store.claimNext({
-				claimToken: `claim_ws2_delivery_${index}`,
-				leaseExpiresAt: new Date(now.getTime() + 30_000).toISOString(),
-				now: now.toISOString(),
-			});
-			expect(claim?.event.id).toBe(eventId);
-			if (!claim) {
-				throw new Error("closeout event was not claimed");
-			}
+			const claim = await claimExpectedEvent(store, eventId, index);
+			expect(claim.event.id).toBe(eventId);
 			expect(
 				await processClaimedEvent(claim, {
 					clock: { now: () => new Date() },

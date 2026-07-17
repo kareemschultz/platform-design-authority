@@ -286,6 +286,7 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 
 	test("dry-runs mixed Tenant A Product rows, commits accepted rows, and replays without duplicates", async () => {
 		const service = createServices();
+		const startedAt = performance.now();
 		const content =
 			"source_key,name,variant_name,sku,barcode,barcode_scheme\nvalid-1,Ground Coffee,500g,SKU-IMPORT-1,,\nwarning-1,Identifierless Tea,Default,,,\nrejected-1,,Default,SKU-REJECTED,,\nduplicate-1,First Duplicate,Default,SKU-DUP-1,,\nduplicate-1,Second Duplicate,Default,SKU-DUP-2,,";
 		const job = await service.create({
@@ -407,6 +408,7 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 				warningRows: 1,
 			},
 		});
+		expect(performance.now() - startedAt).toBeLessThan(10_000);
 	});
 
 	test("accepts a corrected Tenant B row without disclosing either tenant's import", async () => {

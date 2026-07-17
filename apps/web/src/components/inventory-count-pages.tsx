@@ -602,7 +602,7 @@ export function CountDetailPage({ countId }: { countId: string }) {
 			<dl className="mb-6 grid gap-3 rounded-2xl border p-4 sm:grid-cols-2 lg:grid-cols-4">
 				<div>
 					<dt className="text-muted-foreground text-sm">Location</dt>
-					<dd>{current.locationId}</dd>
+					<dd className="break-all">{current.locationId}</dd>
 				</div>
 				<div>
 					<dt className="text-muted-foreground text-sm">Created by</dt>
@@ -637,7 +637,7 @@ export function CountDetailPage({ countId }: { countId: string }) {
 					<ul className="mt-3 grid gap-3">
 						{current.lines.map((line) => (
 							<li className="rounded-2xl border p-4" key={line.id}>
-								<p className="font-medium">{line.productId}</p>
+								<p className="break-all font-medium">{line.productId}</p>
 								<p className="text-muted-foreground text-sm">
 									Observed {line.observedQuantity} {line.unit}
 								</p>

@@ -848,16 +848,20 @@ export function createInventoryRepository(
 				.set({
 					reason: input.reason,
 					releasedAt: input.releasedAt,
-					state: "Released",
+					state: input.state,
 					updatedAt: input.releasedAt,
 					version: input.version + 1,
 				})
 				.where(
 					and(
 						eq(inventoryReservations.tenantId, input.tenantId),
+						eq(inventoryReservations.organizationId, input.organizationId),
 						eq(inventoryReservations.id, input.id),
 						eq(inventoryReservations.state, "Active"),
-						eq(inventoryReservations.version, input.version)
+						eq(inventoryReservations.version, input.version),
+						input.state === "Expired"
+							? sql`${inventoryReservations.expiresAt} <= ${input.releasedAt}`
+							: undefined
 					)
 				)
 				.returning();

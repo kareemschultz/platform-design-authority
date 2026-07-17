@@ -376,8 +376,10 @@ export interface InventoryRepository {
 	) => Promise<{ inserted: boolean; record: InventoryCommandReceipt }>;
 	releaseReservation: (input: {
 		id: string;
+		organizationId: string;
 		reason: string;
 		releasedAt: Date;
+		state: "Expired" | "Released";
 		tenantId: string;
 		version: number;
 	}) => Promise<InventoryReservationRecord | "version_conflict">;
@@ -1926,10 +1928,25 @@ export function createInventoryService(options: InventoryServiceOptions) {
 					);
 				}
 				const now = options.clock();
+				const expiryInstant =
+					input.reservation.expiresAt instanceof Date
+						? input.reservation.expiresAt.getTime()
+						: Date.parse(String(input.reservation.expiresAt));
+				if (
+					input.reason === "Expired" &&
+					(!Number.isFinite(expiryInstant) || expiryInstant > now.getTime())
+				) {
+					throw new InventoryError(
+						"invalid_state",
+						"Reservation cannot expire before its expiry instant"
+					);
+				}
 				const saved = await repository.releaseReservation({
 					id: input.reservation.id,
+					organizationId: input.reservation.organizationId,
 					reason: input.reason,
 					releasedAt: now,
+					state: input.reason === "Expired" ? "Expired" : "Released",
 					tenantId: input.reservation.tenantId,
 					version: input.reservation.version,
 				});
@@ -2349,6 +2366,8 @@ export type InventoryPermission =
 	| "inventory.count.create"
 	| "inventory.count.submit"
 	| "inventory.count.approve"
+	| "inventory.reservation.create"
+	| "inventory.reservation.release"
 	| "inventory.transfer.read"
 	| "inventory.transfer.create"
 	| "inventory.transfer.dispatch"
@@ -2369,6 +2388,7 @@ export interface InventoryEntitlementPort {
 			| "inventory.stock-balances"
 			| "inventory.adjustments"
 			| "inventory.counts"
+			| "inventory.reservations"
 			| "inventory.transfers";
 		organizationId: string;
 		tenantId: string;
@@ -2491,6 +2511,34 @@ export function createInventoryApplication(options: {
 				sessionId: input.sessionId,
 			});
 			return options.service.createCount({
+				...input,
+				organizationId: context.organizationId,
+				tenantId: context.tenantId,
+			});
+		},
+		async createReservation(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			expiresAt: Date;
+			idempotencyKey: string;
+			locationId: string;
+			productId: string;
+			quantity: DecimalQuantity;
+			sessionId: string;
+			sourceId?: string;
+			unit: string;
+			variantId?: string | null;
+		}) {
+			const context = await authorize({
+				access: "Write",
+				authUserId: input.actorUserId,
+				capabilityId: "inventory.reservations",
+				contextId: input.contextId,
+				permission: "inventory.reservation.create",
+				sessionId: input.sessionId,
+			});
+			return options.service.createReservation({
 				...input,
 				organizationId: context.organizationId,
 				tenantId: context.tenantId,
@@ -2697,6 +2745,31 @@ export function createInventoryApplication(options: {
 				...input,
 				tenantId: context.tenantId,
 			});
+		},
+		async releaseReservation(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			reason: "Fulfilled" | "Cancelled" | "Expired" | "Superseded";
+			reservation: InventoryReservationRecord;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Write",
+				authUserId: input.actorUserId,
+				capabilityId: "inventory.reservations",
+				contextId: input.contextId,
+				permission: "inventory.reservation.release",
+				sessionId: input.sessionId,
+			});
+			if (
+				input.reservation.tenantId !== context.tenantId ||
+				input.reservation.organizationId !== context.organizationId
+			) {
+				throw new InventoryError("not_found", "Reservation was not found");
+			}
+			return options.service.releaseReservation(input);
 		},
 		async reverseAdjustment(input: {
 			actorUserId: string;

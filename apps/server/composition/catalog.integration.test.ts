@@ -574,4 +574,49 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 		expect(percentile(barcodeDurations, 0.95)).toBeLessThanOrEqual(300);
 		expect(percentile(searchDurations, 0.95)).toBeLessThanOrEqual(800);
 	});
+
+	test("records bounded aggregate command samples for Variant, Identifier, and lifecycle paths", async () => {
+		const catalog = service();
+		const durations: number[] = [];
+		for (let index = 0; index < 5; index += 1) {
+			const suffix = crypto.randomUUID().slice(0, 8);
+			const startedAt = performance.now();
+			// biome-ignore lint/performance/noAwaitInLoops: the diagnostic samples preserve command order and version preconditions.
+			const created = await catalog.createProduct({
+				...productInput,
+				body: {
+					name: `Closeout aggregate ${suffix}`,
+					variants: [
+						{
+							identifiers: [
+								{
+									scheme: "Tenant",
+									type: "SKU",
+									value: `CLOSEOUT-${suffix}`,
+								},
+							],
+							name: "Default",
+						},
+					],
+				},
+				idempotencyKey: `closeout-create-${suffix}`,
+			});
+			const active = await catalog.activateProduct({
+				...productInput,
+				idempotencyKey: `closeout-activate-${suffix}`,
+				productId: created.id,
+				version: created.version,
+			});
+			await catalog.archiveProduct({
+				...productInput,
+				body: { reason: "Controlled closeout diagnostic" },
+				idempotencyKey: `closeout-archive-${suffix}`,
+				productId: active.id,
+				version: active.version,
+			});
+			durations.push(performance.now() - startedAt);
+		}
+		expect(durations).toHaveLength(5);
+		expect(percentile(durations, 0.95)).toBeLessThan(5000);
+	});
 });

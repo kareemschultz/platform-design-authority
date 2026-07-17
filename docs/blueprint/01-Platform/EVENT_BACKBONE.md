@@ -1,7 +1,7 @@
 ---
 document_id: PDA-PLT-008
 title: Event Backbone
-version: 0.4.2
+version: 0.4.3
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -74,7 +74,7 @@ The controlled-prototype connection budget is one server replica with pool maxim
 
 `POST /v1/event-replays` is the only first-slice HTTP authority boundary for an internal Event Backbone replay. It requires `platform.event.replay`, a currently revalidated active tenant context, an idempotency key, a bounded inclusive outbox-sequence range, an allowlist of canonical event names, one registered consumer and consumer schema version, and a non-empty purpose. Tenant scope and approver identity come from the authenticated current principal and active context, never from request data. The application command verifies range size, consumer registration, producer/consumer schema compatibility, retention eligibility, current permission, and append-only Audit evidence before creating a replay request. Cross-tenant, unbounded, incompatible, unaudited, or repository-direct operator replay is denied without disclosing foreign event existence.
 
-PDA-APP-023 records local controlled-prototype proof for claim recovery, retry timing, poison-message isolation, tenant-scoped pause/recovery, replay controls, and duplicate-effect suppression. RR-006 remains open until the exact PR4 implementation head receives independent concurrence, all required CI is green, PR #74 merges, and the Architecture Risk Register is updated with those immutable references. The proof does not establish production topology, capacity, privacy-erasure execution, or service levels.
+PDA-APP-023 records local controlled-prototype proof for claim recovery, retry timing, poison-message isolation, tenant-scoped pause/recovery, replay controls, and duplicate-effect suppression. Exact head `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` received independent concurrence, required CI was green, PR #74 merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de`, and PDA-REV-009 closed RR-006 at controlled-prototype depth. The proof does not establish production topology, capacity, privacy-erasure execution, service levels, multi-replica behavior, or restore readiness; those gates remain open.
 
 ## Failure Handling
 
@@ -129,6 +129,7 @@ Measure publish failures, throughput, queue delay, consumer lag, retries, dead l
 
 ## Change Log
 
+- 0.4.3 (2026-07-16): Reconciled the stale PR4-pending statement with exact-head concurrence, green CI, merge `7202fc8`, and PDA-REV-009's controlled-prototype RR-006 closure while retaining production topology, capacity, privacy, service-level, multi-replica, and restore gates.
 - 0.4.2 (2026-07-16): Added replay-request-scoped consumer receipts and recovery deduplication while retaining the canonical consumer/event/version base identity and owner-command source-event idempotency.
 - 0.4.1 (2026-07-16): Linked PDA-APP-023 controlled-prototype delivery, replay, projection, recovery, and runtime evidence while retaining exact-head review, merge, RR-006, and every production gate.
 - 0.4.0 (2026-07-15): Reconciled consumer receipt identity, bound the two-process pool budget, specified monotonic ordering and claim-token/CAS retry state, defined per-consumer completion, established the authenticated internal replay command, and linked field-level delivery-state classification after the PR4 specialist review.

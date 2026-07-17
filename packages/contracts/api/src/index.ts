@@ -70,6 +70,8 @@ export const KNOWN_PERMISSION_IDS = [
 	"inventory.import.download",
 	"inventory.import.purge",
 	"inventory.import.read",
+	"inventory.reservation.create",
+	"inventory.reservation.release",
 	"inventory.transfer.create",
 	"inventory.transfer.dispatch",
 	"inventory.transfer.read",

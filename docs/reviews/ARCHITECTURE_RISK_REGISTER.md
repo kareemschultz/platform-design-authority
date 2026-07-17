@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.7.0
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -222,6 +222,8 @@ Consolidated list of every register entry not fully closed (status Partially clo
 
 **RR-006 — Closed at controlled-prototype depth.** PR #74 merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de` after exact-head concurrence at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` and green Documentation Governance plus Meridian Prototype workflows. PDA-APP-023 proves bounded claim/lease recovery, retry/dead-letter behavior, replay authority and replay-scoped receipts, consumer idempotency, safe observability, tenant isolation, and rebuildable Catalog/Inventory consumers. Claude Code's final independent re-audit recorded zero remaining actionable findings in PR #74 comment `4991097241`. This closes only the missing controlled-prototype delivery-runtime risk; RR-007, production capacity/SLO/alerting, multi-replica topology, production retention, restore exercises, and external webhook delivery remain open under their named owners. Reopen RR-006 only if new evidence invalidates the merged delivery or idempotency controls.
 
+**RR-007 — Open after the WS2 checkpoint.** WS2 extends the controlled-prototype evidence through tenant-scoped owner constraints, repository predicates, application-command revalidation, worker claims/receipts, projection/import/numbering scope, safe non-disclosure, and two-tenant tests. Those controls do not select or prove the production database-role topology, PostgreSQL Row-Level Security policies, pooler/session-variable behavior, migration/administration bypass roles, operational monitoring, or penetration evidence. Security and Data Platform retain ownership; pilot and production tenant-isolation defense in depth remains blocked until the separate topology and exercise are reviewed and evidenced.
+
 **RR-011 — Closed.** PDA-REV-011 audited exact merge `8f9d93f` and found 0 P0/1 P1/5 P2/4 P3. PDA-REV-012 accepted and remediated all ten findings; PR #57 merged at exact-head-green CI, closing issue #56. Removed from the not-fully-closed list above per Register Rule 4; reopens only on new evidence invalidating PDA-REV-012's disposition.
 
 ## Technical Debt Register
@@ -235,7 +237,7 @@ Distinct from risk: a debt entry records a deliberate suboptimal choice accepted
 | TD-003 | apps/native excluded from Biome linting | Better-T-Stack scaffold default; no native work is active yet | Native app work starts | Implementation |
 | TD-004 | Status-token CSS variables are hand-copied literals pending the token-generation pipeline | Pipeline (PDA-UX-023) not yet built; literals unblock UI work | Token-generation pipeline lands (PDA-UX-023) | Implementation |
 | TD-005 | Registry capability governance fields (packaging_class and similar) remain namespace defaults pending curation | Curated overlay exists but per-capability curation is deferred to workstream owners | Capability curation pass per workstream | PDA |
-| TD-006 | First-slice event schemas exist for only 4 of 197 events (schemas/ holds the finance/offline/events subset) | Representative-schema approach proves the envelope; full coverage deferred | Expand per workstream as events enter implementation | Implementation |
+| TD-006 | 37 of 208 registered events currently resolve to owner JSON Schemas; WS2-family emitted events are covered, while later workstreams remain schema-deferred | Workstream-by-workstream schema completion preserves contract ownership without pretending future event payloads are designed | Expand and verify owner schemas as each later workstream enters implementation | Implementation |
 | TD-007 | **Closed 2026-07-13.** `packages/contracts/platform-api` now defines transport-neutral oRPC contracts derived from canonical OpenAPI metadata, a semantic-parity test compares route/method/operation/authority/schema metadata, and `packages/platform-clients/api-client` derives from that contract without importing `apps/server`. The former exception is removed and the path-aware architecture checker passes. Evidence: PDA-RDM-008 PR1 and PDA-IMPL-001. | Initial scaffold exposed only two procedures and accepted the temporary type-only import | WS1 PR1 contract-first closure | Implementation |
 
 ## Maintenance

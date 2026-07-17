@@ -1,7 +1,7 @@
 ---
 document_id: PDA-APP-024
 title: WS2 PR5 Import and Online Numbering Evidence
-version: 0.4.1
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -23,7 +23,7 @@ This record covers issue #71 at controlled-prototype depth: bounded server-side 
 | Content safety | SHA-256 is verified before persistence; a fail-closed scanner port precedes parsing; controlled EICAR input is blocked; NUL/C0/DEL characters, malformed quoting, newline mismatch, and formula-capable prefixes in non-quantity fields are rejected without retaining the unsafe value. A qualified production scanner/provider remains open. Raw CSV is not persisted, logged, emitted, audited, or returned in errors. |
 | Dry run | Parsing, normalization, warning/error findings, duplicate source-key rejection, and staging complete before any Catalog Product or Inventory movement command runs. |
 | Authority | Transport and direct application boundaries revalidate active context, the target-specific permission, and the target entitlement. The owner-command adapter separately checks `catalog.product.create` or both `inventory.adjustment.create` and `inventory.adjustment.approve` before a wave mutates owner state. Uploaders cannot approve their own import. For opening stock, the uploader remains the staged Adjustment initiator and the current approver is the distinct approval/posting actor, preserving Inventory's maker/checker invariant. Correction-report download and staging purge have separate authority and Audit records. |
-| Domain ownership | Product rows call Catalog's idempotent Product application command. Opening-stock rows call Inventory's idempotent Adjustment create and approval commands; they never write owner tables directly. Import creation calls Platform Numbering through a published port; the server composition root binds both Platform adapters without exposing a database handle to either runtime-neutral core. ADR-0027 v0.3.4 exact-head review remains the owner sign-off gate. |
+| Domain ownership | Product rows call Catalog's idempotent Product application command. Opening-stock rows call Inventory's idempotent Adjustment create and approval commands; they never write owner tables directly. Import creation calls Platform Numbering through a published port; the server composition root binds both Platform adapters without exposing a database handle to either runtime-neutral core. ADR-0027 v0.3.5 records the completed prototype-scope owner sign-off at exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be`. |
 | Recovery | Create, approval, cancel, accept, and per-row commit commands persist tenant/operation/key receipts. Each row receipt stores the safe opaque target result, so a resume checks Import/Export's receipt before any owner invocation; owner idempotency remains a second boundary. The create fingerprint binds the complete parsing manifest as well as content and target. A late row checkpoint is state-guarded and cannot revive `Failed` or `Cancelled`. A deterministic owner-command rejection atomically records terminal job/row/wave failure, a safe code, the approval receipt, and `platform.import.failed.v1`; same-key replay does not invoke the owner again. |
 | Lifecycle and reconciliation | Tenant/organization-scoped lists and findings use cursor pagination. Cancellation is version-guarded and pre-commit only. Completion computes `Reconciled` or `Mismatch` from durable row outcomes. Acceptance is idempotent/version-guarded and succeeds only for a completed `Reconciled` job. |
 | Retention | The audited, receipt-idempotent tenant-scoped purge API accepts Completed, Failed, or Cancelled jobs only after 30 days from the most recent terminal update and uses an atomic cutoff/not-already-purged predicate. The authorized prototype operator must first verify ADR-0014 hold/deletion-journal policy because no executable Privacy-provider integration exists yet; that manual step is not production control evidence. Purge deletes normalized rows, findings, and waves; records `staging_purged_at`; and preserves the job/reference/reconciliation summary, command receipts, Numbering allocation, owner facts, immutable Inventory movements, and outbox/Audit evidence. Scheduling, policy-provider integration, and exercises remain gates. |
@@ -51,7 +51,7 @@ bun test ./apps/server/composition/imports.integration.test.ts
 bun test ./apps/server/composition/persistence.integration.test.ts
 ```
 
-Final exact-head CI, migration freshness for all ten owners, Bun tests, Node fallback checks, architecture probes, generated registries/contracts, and documentation validation remain mandatory before independent concurrence or merge.
+Claude Code independently reproduced the critical real-transaction, concurrency, CSV-safety, tenant, migration-freshness, Bun, Node, architecture, registry/contract, and documentation evidence at exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be`, recorded concurrence in PR #76 comment `4995579814`, and PR #76 merged as `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`. Production retention, malware-provider, offline numbering, capacity, and RR-007 gates remain open.
 
 ## Residual risks and deferrals
 
@@ -67,6 +67,7 @@ Final exact-head CI, migration freshness for all ten owners, Bun tests, Node fal
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.5.0 | 2026-07-16 | Platform Design Authority | Recorded exact-head independent concurrence, ADR-0027 owner sign-off, and PR #76 merge; removed stale pre-merge wording without closing production retention, provider, offline, capacity, or RR-007 gates. |
 | 0.4.1 | 2026-07-16 | Platform Design Authority | Replaced superseded counts with reproduced remediation results and clarified opening-stock maker/checker attribution without weakening Inventory's segregation invariant. |
 | 0.4.0 | 2026-07-16 | Platform Design Authority | Dispositioned the exact-head audit with real atomic import references, definition-version snapshots, strict CSV defenses, reloadable lifecycle/reconciliation/purge surfaces, per-row receipts and state guards, approver attribution, tenant/security evidence requirements, explicit ADR owner sign-off, and honest replacement of superseded pre-audit test counts. |
 | 0.3.0 | 2026-07-16 | Platform Design Authority | Remediated exact event-payload parity, manifest-bound create idempotency, deterministic terminal owner-rejection evidence, and the binding Numbering provenance/constraint model; recorded the exact post-remediation Bun, PostgreSQL, and Node evidence. |

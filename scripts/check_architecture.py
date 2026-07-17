@@ -79,22 +79,27 @@ PERSISTENCE_MIGRATE_IMPORT_PATTERN = re.compile(
 PERSISTENCE_MODULE_IMPORT_PATTERN = re.compile(
     r"""(?:from\s+|import\s*\(\s*)["']@meridian/persistence-[^"']+["']"""
 )
-PERSISTENCE_MIGRATE_PROPERTY_ACCESS_PATTERN = re.compile(
-    r"""\.\s*migrate[A-Za-z0-9_$]*\b"""
-)
-# Fourth-review remediation (F-B-002 gap): a destructured migrate binding
-# (`const { migrateCatalog: run } = p;` after `import * as p from
-# "@meridian/persistence-..."`) evades PERSISTENCE_MIGRATE_PROPERTY_ACCESS_PATTERN
-# because the binding is introduced with no `.migrate*` member access; and a
-# migrate-named re-export (`export { migrateCatalog as run } from
-# "@meridian/persistence-..."`) evades PERSISTENCE_MIGRATE_IMPORT_PATTERN because
-# it is an `export ... from`, not an `import`. Live-confirmed at exact head
-# a0bfe12: the pre-fix checker exited 0 with either fixture present.
-PERSISTENCE_MIGRATE_DESTRUCTURE_PATTERN = re.compile(
-    r"""\{[^{}]*\bmigrate[A-Za-z0-9_$]*\b[^{}]*\}\s*="""
+# Fourth-review remediation (F-B-002 gaps found across successive independent
+# reviews): enumerating each access syntax (dot access `p.migrateCatalog`,
+# destructure `const { migrateCatalog } = p`, bracket access
+# `p["migrateCatalog"]`) is whack-a-mole — every form still contains the
+# `migrate<Name>` token. So when a persistence module is imported at all, match
+# the token itself in any position rather than a specific member-access shape.
+# Two re-export launderings are handled separately because they carry no
+# migrate token in the importing/re-exporting file: a migrate-named re-export
+# (`export { migrateCatalog as run } from "@meridian/persistence-..."`) and a
+# wildcard re-export (`export * from "@meridian/persistence-..."`, which
+# re-exports the migrate runners wholesale). All forms were live-confirmed
+# passing (checker exit 0) at the heads a0bfe12 / 532a010 before this rule.
+PERSISTENCE_MIGRATE_REFERENCE_PATTERN = re.compile(
+    r"""\bmigrate[A-Z][A-Za-z0-9_$]*\b"""
 )
 PERSISTENCE_MIGRATE_REEXPORT_PATTERN = re.compile(
     r"""export\s*\{[^}]*\bmigrate[A-Za-z0-9_$]*\b[^}]*\}\s*from\s*"""
+    r"""["']@meridian/persistence-[^"']+["']"""
+)
+PERSISTENCE_WILDCARD_REEXPORT_PATTERN = re.compile(
+    r"""export\s*\*\s*(?:as\s+[A-Za-z0-9_$]+\s+)?from\s*"""
     r"""["']@meridian/persistence-[^"']+["']"""
 )
 # Fifth-audit F-B-005: the raw process pool module is composition-internal;
@@ -324,12 +329,10 @@ def main() -> int:
                     MIGRATOR_MODULE_IMPORT_PATTERN.search(text)
                     or PERSISTENCE_MIGRATE_IMPORT_PATTERN.search(text)
                     or PERSISTENCE_MIGRATE_REEXPORT_PATTERN.search(text)
+                    or PERSISTENCE_WILDCARD_REEXPORT_PATTERN.search(text)
                     or (
                         PERSISTENCE_MODULE_IMPORT_PATTERN.search(text)
-                        and (
-                            PERSISTENCE_MIGRATE_PROPERTY_ACCESS_PATTERN.search(text)
-                            or PERSISTENCE_MIGRATE_DESTRUCTURE_PATTERN.search(text)
-                        )
+                        and PERSISTENCE_MIGRATE_REFERENCE_PATTERN.search(text)
                     )
                 )
             ):

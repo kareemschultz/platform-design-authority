@@ -453,6 +453,35 @@ def main() -> int:
             "await run({} as never);\n"
         ),
     )
+    # Fourth-review remediation, second pass (independent review of 532a010):
+    # bracket access (`p["migrateCatalog"]`) evades any dot-access rule, and a
+    # wildcard re-export (`export * from "@meridian/persistence-..."`) re-exports
+    # the migrate runners with no migrate token in the file. Both live-confirmed
+    # passing (checker exit 0) at 532a010 before the token-reference and
+    # wildcard-re-export rules.
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_bracket_access_migration_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source=(
+            'import * as catalogPersistence from "@meridian/persistence-catalog-postgres";\n'
+            'await catalogPersistence["migrateCatalog"]({} as never);\n'
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_wildcard_reexport_migration_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source='export * from "@meridian/persistence-catalog-postgres";\n',
+    )
     assert_test_source_exempt_rules_match_registry()
     print("architecture checker regression probes passed")
     return 0

@@ -88,6 +88,18 @@ function createMemoryHarness() {
 		listProducts(tenantId, page) {
 			const items = [...products.values()]
 				.filter((product) => product.tenantId === tenantId)
+				.filter((product) => !page.state || product.state === page.state)
+				.filter(
+					(product) =>
+						!page.sku ||
+						product.variants.some((variant) =>
+							variant.identifiers.some(
+								(identifier) =>
+									identifier.uniquenessScope === "SKU" &&
+									identifier.normalizedValue === page.sku
+							)
+						)
+				)
 				.filter((product) => !page.cursor || product.id > page.cursor)
 				.filter(
 					(product) =>
@@ -281,6 +293,12 @@ describe("Catalog service", () => {
 		const replay = await harness.service.createProduct(createInput);
 
 		expect(replay).toEqual(first);
+		expect(first).toMatchObject({
+			archivedAt: null,
+			archiveReason: null,
+			createdAt: "2026-07-14T12:00:00.000Z",
+			updatedAt: "2026-07-14T12:00:00.000Z",
+		});
 		expect(harness.products).toHaveLength(1);
 		expect(harness.events.map((event) => event.name)).toEqual([
 			"catalog.product.created.v1",
@@ -327,6 +345,82 @@ describe("Catalog service", () => {
 		expect(
 			await harness.service.listProducts("tenant_catalog_1", { limit: 50 })
 		).toHaveProperty("items.length", 1);
+	});
+
+	test("applies exact normalized SKU lookup, tenant non-disclosure, and state filters", async () => {
+		const harness = createMemoryHarness();
+		const created = await harness.service.createProduct(createInput);
+		expect(
+			await harness.service.listProducts("tenant_catalog_1", {
+				limit: 50,
+				sku: " sku-001 ",
+			})
+		).toHaveProperty("items.0.id", created.id);
+		expect(
+			await harness.service.listProducts("tenant_catalog_2", {
+				limit: 50,
+				sku: "SKU-001",
+			})
+		).toEqual({ items: [], nextCursor: null });
+		expect(
+			await harness.service.listProducts("tenant_catalog_1", {
+				limit: 50,
+				state: "Active",
+			})
+		).toEqual({ items: [], nextCursor: null });
+		await harness.service.activateProduct({
+			actorUserId: createInput.actorUserId,
+			correlationId: createInput.correlationId,
+			idempotencyKey: "idempotency_catalog_activate_filter",
+			organizationId: createInput.organizationId,
+			productId: created.id,
+			tenantId: createInput.tenantId,
+			version: 1,
+		});
+		expect(
+			await harness.service.listProducts("tenant_catalog_1", {
+				limit: 50,
+				state: "Active",
+			})
+		).toHaveProperty("items.0.state", "Active");
+	});
+
+	test("preserves separators when normalizing exact tenant SKU lookups", async () => {
+		const harness = createMemoryHarness();
+		const created = await harness.service.createProduct({
+			...createInput,
+			body: {
+				...createInput.body,
+				variants: [
+					{
+						identifiers: [{ scheme: "Tenant", type: "SKU", value: "12-34" }],
+						name: "Numeric SKU",
+					},
+				],
+			},
+		});
+
+		expect(
+			await harness.service.listProducts(createInput.tenantId, {
+				limit: 50,
+				sku: " 12-34 ",
+			})
+		).toHaveProperty("items.0.id", created.id);
+		expect(
+			await harness.service.listProducts(createInput.tenantId, {
+				limit: 50,
+				sku: "1234",
+			})
+		).toEqual({ items: [], nextCursor: null });
+		await expect(
+			harness.service.listProducts(createInput.tenantId, {
+				limit: 50,
+				sku: "   ",
+			})
+		).rejects.toMatchObject({
+			code: "invalid_identifier",
+			message: "SKU lookup is empty",
+		});
 	});
 
 	test("preserves Variant and Identifier identity on a name-only update", async () => {
@@ -486,5 +580,64 @@ describe("Catalog service", () => {
 			"entitlement:catalog.identifiers",
 			"entitlement:catalog.barcodes",
 		]);
+	});
+
+	test("preserves tenant SKU separators through the application list boundary", async () => {
+		const harness = createMemoryHarness();
+		const application = createCatalogApplication({
+			activeContexts: {
+				requireActiveContext: () =>
+					resolved({
+						organizationId: createInput.organizationId,
+						tenantId: createInput.tenantId,
+					}),
+			},
+			entitlements: { requireEntitlement: () => resolved(undefined) },
+			permissions: { requirePermission: () => resolved(undefined) },
+			service: harness.service,
+		});
+		const created = await application.create({
+			actorUserId: createInput.actorUserId,
+			body: {
+				...createInput.body,
+				variants: [
+					{
+						identifiers: [{ scheme: "Tenant", type: "SKU", value: "12-34" }],
+						name: "Numeric SKU",
+					},
+				],
+			},
+			contextId: "context_catalog_sku",
+			correlationId: createInput.correlationId,
+			idempotencyKey: "idempotency_catalog_application_sku",
+			sessionId: "session_catalog_sku",
+		});
+		const request = {
+			authUserId: createInput.actorUserId,
+			contextId: "context_catalog_sku",
+			sessionId: "session_catalog_sku",
+		};
+
+		expect(
+			await application.list({
+				...request,
+				page: { limit: 50, sku: " 12-34 " },
+			})
+		).toHaveProperty("items.0.id", created.id);
+		expect(
+			await application.list({
+				...request,
+				page: { limit: 50, sku: "1234" },
+			})
+		).toEqual({ items: [], nextCursor: null });
+		await expect(
+			application.list({
+				...request,
+				page: { limit: 50, sku: "   " },
+			})
+		).rejects.toMatchObject({
+			code: "invalid_identifier",
+			message: "SKU lookup is empty",
+		});
 	});
 });

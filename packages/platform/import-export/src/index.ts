@@ -346,6 +346,7 @@ function hasForbiddenControlCharacter(value: string): boolean {
 function parseCsv(content: string, manifest: CsvImportManifest): string[][] {
 	if (
 		content.includes("\0") ||
+		content.includes("\uFFFD") ||
 		new TextEncoder().encode(content).length > CSV_IMPORT_LIMITS.bytes
 	) {
 		throw new ImportError(

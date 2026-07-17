@@ -73,6 +73,9 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Install Chromium browser
+        run: bun run --cwd apps/web test:e2e:install
+
       - name: Prepare Changesets base ref
         run: |
           git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
@@ -209,3 +212,16 @@ jobs:
           docker compose exec -T postgres dropdb -U postgres --force "$worker_node_database"
           curl --fail --silent --show-error http://127.0.0.1:3000/ | grep -qx OK
           curl --fail --silent --show-error http://127.0.0.1:3001/ >/dev/null
+          docker compose exec -T server bun run e2e:seed
+          bun run --cwd apps/web test:e2e
+
+      - name: Retain browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-evidence
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+          retention-days: 14

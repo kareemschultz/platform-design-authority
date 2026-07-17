@@ -5,11 +5,11 @@ description: Implemented Hono, oRPC, OpenAPI, and Better Auth surfaces
 
 # Prototype API surfaces
 
-This page documents only the implemented scaffold. The canonical first-slice contract remains `openapi/first-slice-v1.yaml`; the prototype does not claim to implement that business API.
+This page documents the implemented controlled-prototype API surface. The repository now implements the WS1 identity, tenancy, Party, authorization, entitlement, session, and Audit foundations plus the bounded WS2 Catalog, Inventory, Event Backbone, import, and Numbering operations described by their evidence records. Root `openapi/first-slice-v1.yaml` remains the canonical contract and includes later first-slice work that is not implemented yet.
 
 ## Base URL
 
-The local server listens at `http://localhost:3000` by default.
+The local server listens at `http://localhost:3000` by default. Browser code does not call that cross-origin address directly: the web application keeps cookies and application requests on its own origin and proxies `/api/auth/*` and `/rpc/*` to the API. In Compose and private-network rendering, `PLATFORM_API_INTERNAL_URL` supplies the server-only destination, normally `http://server:3000`; it is never a browser-visible authority or URL.
 
 | Surface | Path | Authentication | Purpose |
 |---|---|---|---|
@@ -18,7 +18,7 @@ The local server listens at `http://localhost:3000` by default.
 | oRPC transport | `/rpc/*` | Procedure-dependent | Type-safe application procedures |
 | oRPC OpenAPI handler | `/api-reference/*` | Procedure-dependent | Generated prototype schema/reference surface |
 
-The server allows `GET`, `POST`, and `OPTIONS` from the exact configured `CORS_ORIGIN`. Credentials are enabled for the approved browser origin.
+The HTTP shell allows the governed `DELETE`, `GET`, `PATCH`, `POST`, `PUT`, and `OPTIONS` methods from the exact configured `CORS_ORIGIN`. `PUT` and its `If-Match` precondition are required by the versioned Stock Count draft-line operation. Credentials are enabled only for the approved origin; the header allowlist remains exact and widening methods does not widen origins.
 
 ## Implemented procedures
 
@@ -40,16 +40,22 @@ The server allows `GET`, `POST`, and `OPTIONS` from the exact configured `CORS_O
 
 The returned user is an authentication identity. It is not a Party, employee, customer, tenant membership, business role, permission set, or entitlement.
 
+### Governed business procedures
+
+Implemented protected procedures cover the WS1 Administration surface and bounded WS2 Product, balance, adjustment, Count, transfer, import, replay, and projection workflows. Each procedure is defined by the published contract and declares its context, input validation, typed errors, permission or explicit authenticated-context rule, and success status. The server resolves the current membership and active context, evaluates business permission and entitlement separately, and then retains tenant predicates and owner-state checks inside the application and repository boundaries.
+
+Better Auth remains authentication/session authority only. It does not become Party, a business role, a permission catalog, an entitlement, or tenant hierarchy. A generated client type, visible control, cached query, or successful authentication never grants business authority.
+
 ## Typed client use
 
-Web clients consume the generated `AppRouterClient` through the repository oRPC/TanStack Query adapter. Do not duplicate request or response shapes manually. New procedures must declare ownership, authentication, tenant context, permission or explicit authenticated context, validation, error behavior, idempotency where applicable, audit, and tests.
+Web clients consume the generated `PlatformApiClient` through the repository oRPC/TanStack Query adapter. Browser requests use same-origin `/rpc`; server rendering uses the private API destination. Do not duplicate request or response shapes manually. New procedures must declare ownership, authentication, tenant context, permission or explicit authenticated context, validation, error behavior, idempotency where applicable, audit, and tests.
 
 ## OpenAPI authority
 
 There are two distinct artifacts:
 
-1. The scaffold-generated oRPC reference reflects only currently implemented prototype procedures.
-2. Root `openapi/first-slice-v1.yaml` is the governed draft contract for the planned vertical slice.
+1. The generated oRPC reference reflects the currently composed controlled-prototype procedures.
+2. Root `openapi/first-slice-v1.yaml` is the governed draft contract for the complete planned first slice; generated TypeScript contracts and endpoint-permission registries are checked against it.
 
 Neither artifact proves production implementation. Generated reference pages must identify their source revision and must not become a separately edited contract.
 
@@ -58,7 +64,9 @@ Neither artifact proves production implementation. Generated reference pages mus
 - Server errors pass through the oRPC error boundary and are logged in the prototype process.
 - Authentication cookies use hardened attributes according to environment.
 - Trusted origins must be exact URL origins.
-- The prototype does not yet implement tenant context, business permissions, entitlements, rate limits, audit records, idempotency, or production error redaction for domain procedures.
+- Implemented business procedures use server-issued active context, current membership, separate permission and entitlement decisions, tenant-scoped repositories, allowlisted Audit evidence, and command idempotency where required.
+- Foreign-tenant and nonexistent identifiers retain the same non-disclosing behavior on governed operations.
+- Production rate-limit topology, production support access, penetration evidence, production error-observability policy, and broader first-slice procedures remain open.
 
 Do not expose the prototype server to the public internet or use real tenant data.
 

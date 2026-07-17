@@ -510,6 +510,71 @@ describe("Inventory adjustment ledger", () => {
 });
 
 describe("Inventory blind counts", () => {
+	test("durably replaces open draft lines with version and idempotency guards", async () => {
+		const { repository, service } = harness();
+		const count = await service.createCount({
+			actorUserId: "counter_a",
+			body: { blind: true, locationId: "loc_a" },
+			idempotencyKey: "count-draft-create",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		const input = {
+			actorUserId: "counter_a",
+			body: {
+				lines: [
+					{ observedQuantity: "7.500001", productId: "prod_a", unit: "each" },
+				],
+			},
+			countId: count.id,
+			idempotencyKey: "count-draft-save",
+			tenantId: "tenant_a",
+			version: 1,
+		};
+		const saved = await service.saveCountDraft(input);
+		expect(saved).toMatchObject({ state: "InProgress", version: 2 });
+		expect(saved.lines[0]).toMatchObject({
+			expectedQuantity: null,
+			observedQuantity: "7.500001",
+			varianceQuantity: null,
+		});
+		expect(await service.getCount("tenant_a", count.id)).toEqual(saved);
+		expect(await service.saveCountDraft(input)).toEqual(saved);
+		expect(repository.counts.size).toBe(1);
+		await expect(
+			service.saveCountDraft({
+				...input,
+				body: {
+					lines: [{ observedQuantity: "8", productId: "prod_a", unit: "each" }],
+				},
+			})
+		).rejects.toMatchObject({ code: "idempotency_conflict" });
+		await expect(
+			service.saveCountDraft({
+				...input,
+				idempotencyKey: "count-draft-stale",
+			})
+		).rejects.toMatchObject({ code: "version_conflict" });
+		await expect(service.getCount("tenant_b", count.id)).rejects.toMatchObject({
+			code: "not_found",
+		});
+		const submitted = await service.submitCount({
+			actorUserId: "counter_a",
+			body: input.body,
+			countId: count.id,
+			idempotencyKey: "count-submit-after-draft",
+			tenantId: "tenant_a",
+			version: 2,
+		});
+		await expect(
+			service.saveCountDraft({
+				...input,
+				idempotencyKey: "count-draft-terminal",
+				version: submitted.version,
+			})
+		).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
 	test("captures observations without expected stock and derives exact variances only at independent approval", async () => {
 		const { repository, service } = harness();
 		const seed = await service.createAdjustment({
@@ -737,6 +802,110 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 			"context",
 			"permission:inventory.adjustment.create",
 			"entitlement:inventory.adjustments",
+		]);
+	});
+
+	test("fails closed at the application boundary for permission and entitlement denial", async () => {
+		await Promise.all(
+			(["permission", "entitlement"] as const).map(async (deniedAt) => {
+				const { repository, service } = harness();
+				const calls: string[] = [];
+				const application = createInventoryApplication({
+					activeContexts: {
+						async requireActiveContext() {
+							calls.push("context");
+							return { organizationId: "org_a", tenantId: "tenant_a" };
+						},
+					},
+					entitlements: {
+						async requireEntitlement() {
+							calls.push("entitlement");
+							if (deniedAt === "entitlement") {
+								throw Object.assign(new Error("commercial plan secret"), {
+									code: "entitlement_denied",
+								});
+							}
+						},
+					},
+					permissions: {
+						async requirePermission() {
+							calls.push("permission");
+							if (deniedAt === "permission") {
+								throw Object.assign(new Error("role assignment secret"), {
+									code: "authorization_denied",
+								});
+							}
+						},
+					},
+					service,
+				});
+				await expect(
+					application.createAdjustment({
+						actorUserId: "direct_api_actor",
+						body: adjustment,
+						contextId: "context",
+						correlationId: "direct_api_denial",
+						idempotencyKey: `direct-api-${deniedAt}`,
+						sessionId: "session",
+					})
+				).rejects.toMatchObject({
+					code:
+						deniedAt === "permission"
+							? "authorization_denied"
+							: "entitlement_denied",
+				});
+				expect(repository.adjustments.size).toBe(0);
+				expect(calls).toEqual(
+					deniedAt === "permission"
+						? ["context", "permission"]
+						: ["context", "permission", "entitlement"]
+				);
+			})
+		);
+	});
+
+	test("authorizes draft-line persistence with count create authority", async () => {
+		const { service } = harness();
+		const count = await service.createCount({
+			actorUserId: "counter_a",
+			body: { blind: true, locationId: "loc_a" },
+			idempotencyKey: "count-app-create",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		const calls: string[] = [];
+		const application = createInventoryApplication({
+			activeContexts: {
+				async requireActiveContext() {
+					calls.push("context");
+					return { organizationId: "org_a", tenantId: "tenant_a" };
+				},
+			},
+			entitlements: {
+				async requireEntitlement(input) {
+					calls.push(`entitlement:${input.capabilityId}`);
+				},
+			},
+			permissions: {
+				async requirePermission(input) {
+					calls.push(`permission:${input.permission}`);
+				},
+			},
+			service,
+		});
+		await application.saveCountDraft({
+			actorUserId: "counter_a",
+			body: { lines: [] },
+			contextId: "context",
+			countId: count.id,
+			idempotencyKey: "count-app-save",
+			sessionId: "session",
+			version: 1,
+		});
+		expect(calls).toEqual([
+			"context",
+			"permission:inventory.count.create",
+			"entitlement:inventory.counts",
 		]);
 	});
 

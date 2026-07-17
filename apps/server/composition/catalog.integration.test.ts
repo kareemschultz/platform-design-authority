@@ -381,6 +381,137 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 		).toEqual({ items: [], nextCursor: null });
 	});
 
+	test("does not disclose exact SKUs across tenants and filters by governed state", async () => {
+		const catalog = service();
+		const tenantB = "tenant_catalog_integration_b";
+		const tenantBProduct = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "Tenant B SKU Product",
+				variants: [
+					{
+						identifiers: [
+							{ scheme: "Tenant", type: "SKU", value: "TENANT-B-ONLY" },
+						],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_tenant_b_sku",
+			tenantId: tenantB,
+		});
+		expect(
+			await catalog.listProducts(tenantB, {
+				limit: 50,
+				sku: " tenant-b-only ",
+			})
+		).toHaveProperty("items.0.id", tenantBProduct.id);
+		expect(
+			await catalog.listProducts(productInput.tenantId, {
+				limit: 50,
+				sku: "TENANT-B-ONLY",
+			})
+		).toEqual({ items: [], nextCursor: null });
+
+		const draft = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "State Filter Draft",
+				variants: [
+					{
+						identifiers: [
+							{ scheme: "Tenant", type: "SKU", value: "STATE-DRAFT" },
+						],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_state_draft",
+		});
+		const activeCandidate = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "State Filter Active",
+				variants: [
+					{
+						identifiers: [
+							{ scheme: "Tenant", type: "SKU", value: "STATE-ACTIVE" },
+						],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_state_active_create",
+		});
+		const active = await catalog.activateProduct({
+			...productInput,
+			idempotencyKey: "idempotency_catalog_state_active",
+			productId: activeCandidate.id,
+			version: activeCandidate.version,
+		});
+		const activeResults = await catalog.listProducts(productInput.tenantId, {
+			limit: 50,
+			state: "Active",
+		});
+		expect(activeResults.items.map((item) => item.id)).toContain(active.id);
+		expect(activeResults.items.every((item) => item.state === "Active")).toBe(
+			true
+		);
+		const draftResults = await catalog.listProducts(productInput.tenantId, {
+			limit: 50,
+			state: "Draft",
+		});
+		expect(draftResults.items.map((item) => item.id)).toContain(draft.id);
+		expect(draftResults.items.every((item) => item.state === "Draft")).toBe(
+			true
+		);
+	});
+
+	test("stores and finds numeric tenant SKUs without removing separators", async () => {
+		const catalog = service();
+		const tenantId = "tenant_catalog_separator_sku";
+		const created = await catalog.createProduct({
+			...productInput,
+			body: {
+				name: "Separator SKU Product",
+				variants: [
+					{
+						identifiers: [{ scheme: "Tenant", type: "SKU", value: "12-34" }],
+						name: "Default",
+					},
+				],
+			},
+			idempotencyKey: "idempotency_catalog_separator_sku",
+			tenantId,
+		});
+		const stored = await testPool.query<{ normalized_value: string }>(
+			"SELECT normalized_value FROM catalog_identifier WHERE tenant_id = $1 AND type = 'SKU'",
+			[tenantId]
+		);
+
+		expect(stored.rows).toEqual([{ normalized_value: "12-34" }]);
+		expect(
+			await catalog.listProducts(tenantId, { limit: 50, sku: " 12-34 " })
+		).toHaveProperty("items.0.id", created.id);
+		expect(
+			await catalog.listProducts(tenantId, { limit: 50, sku: "1234" })
+		).toEqual({ items: [], nextCursor: null });
+		expect(
+			await captureError(
+				catalog.listProducts(tenantId, { limit: 50, sku: "   " })
+			)
+		).toMatchObject({
+			code: "invalid_identifier",
+			message: "SKU lookup is empty",
+		});
+		expect(
+			await createCatalogRepository(testPool).listProducts(tenantId, {
+				limit: 50,
+				sku: "",
+			})
+		).toEqual({ items: [], nextCursor: null });
+	});
+
 	test("rolls Product, receipt, and outbox state back together on append failure", async () => {
 		const before = await testPool.query<{ count: string }>(
 			"SELECT count(*)::text AS count FROM catalog_product"

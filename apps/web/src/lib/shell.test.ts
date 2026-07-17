@@ -40,6 +40,7 @@ describe("application shell", () => {
 			"step-up-required"
 		);
 		expect(classifyShellFailure(new Error("network"), false)).toBe("offline");
+		expect(classifyShellFailure(null)).toBe("unavailable");
 	});
 
 	test("marks only the matching administration branch as current", () => {
@@ -49,5 +50,11 @@ describe("application shell", () => {
 		expect(
 			isNavigationCurrent("/administration/users", "/administration")
 		).toBe(false);
+		expect(isNavigationCurrent("/operations/products", "/operations")).toBe(
+			false
+		);
+		expect(
+			isNavigationCurrent("/operations/products/new", "/operations/products")
+		).toBe(true);
 	});
 });

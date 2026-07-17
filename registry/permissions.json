@@ -648,7 +648,7 @@
       "source_heading": "Inventory",
       "source_line": 81,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "inventory.count.read",

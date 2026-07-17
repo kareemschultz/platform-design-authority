@@ -1,0 +1,103 @@
+---
+title: Operate Products and Inventory
+description: Complete controlled-prototype Catalog, Inventory, and import tasks without mistaking projections for authority
+documentationId: PDA-DOC-001
+---
+
+# Operate Products and Inventory
+
+Stable help ID: **PDA-DOC-001**. This guide describes the WS2 controlled prototype for developers and reviewers using synthetic data. It is not a pilot or production operating procedure.
+
+## Before you begin
+
+You need an authenticated session, an active tenant membership, a current organization context, and the permission and entitlement for the task. The server evaluates permission and entitlement separately on every protected request. A visible action is never evidence that the action will be authorized.
+
+Choose **Operations** in the primary navigation. The workspace banner always shows the server-validated organization and optional location. Changing either scope clears incompatible Catalog and Inventory browser state; it does not grant authority.
+
+When a page says **projection**, its quantities and timestamp are evidence for reading. They are not command authority. Inventory rechecks owner state, version, tenant, location, permission, and entitlement when a command is submitted.
+
+## Create and maintain a Product
+
+Required permissions depend on the action: `catalog.product.read`, `catalog.product.create`, `catalog.product.update`, `catalog.product.activate`, or `catalog.product.archive`. The tenant also needs the related Catalog entitlements.
+
+1. Open **Operations → Products**.
+2. Search by permitted text, exact tenant SKU, or exact barcode. Exact SKU preserves meaningful tenant separators, trims surrounding spaces, and rejects an empty filter. Filters and cursor position remain in the URL so browser Back returns to the same result set.
+3. Choose **Create Product**. Enter a Product name and at least one Variant. A Variant may intentionally have no identifier; otherwise enter a tenant SKU or valid GTIN.
+4. Save the draft, review the stable Variant and Identifier records, and activate it only when ready.
+5. To archive, enter a reason and confirm the consequence. Archive is a lifecycle transition, not deletion. Existing Inventory facts remain intact.
+
+If another operator changes the Product first, the server returns a version conflict. The form preserves the proposed value; refresh, compare the current version, then deliberately retry. Never overwrite a newer aggregate silently.
+
+## Read a balance projection
+
+Required permission: `inventory.balance.read`. Required entitlement: `inventory.stock-balances` read access.
+
+1. Open **Operations → Inventory → Balances**.
+2. Select one authorized location. Optionally enter an exact Product ID.
+3. Review on-hand, reserved, and available quantities with their unit.
+4. Check the projection source, timestamp, and reconciliation label. **Stale** or **Unreconciled** is not hidden by color alone.
+5. Use cursor controls for the next bounded result page. The interface does not promise random page-number access.
+
+Do not use the displayed balance to bypass a command check. A later adjustment, count, transfer, import, reservation, or concurrent posting may change current owner state.
+
+## Adjust Inventory
+
+Permissions are separate: `inventory.adjustment.create`, `inventory.adjustment.approve`, and `inventory.adjustment.reverse`. Required entitlement: `inventory.adjustments` write access.
+
+1. Open **Adjustments** and choose **Create adjustment**.
+2. Confirm location, Product, optional Variant, signed quantity, unit, and reason.
+3. A different authorized operator approves and posts the pending adjustment. The maker/checker rule is enforced by the server.
+4. To correct a posted adjustment, choose **Reverse**, enter a reason, and confirm. Inventory records a linked compensating movement; it does not edit the original ledger fact.
+
+A permission denial, entitlement absence, stale version, invalid reference, or invalid state leaves the command unapplied. Refresh current state before retrying a recoverable conflict.
+
+## Complete a blind Stock Count
+
+Permissions: `inventory.count.read`, `inventory.count.create`, `inventory.count.submit`, and `inventory.count.approve`. Required entitlement: `inventory.counts`.
+
+1. Create a blind Count for one location.
+2. In the Count record, scan or type a Product ID using a standard external keyboard/scanner, then enter the observed quantity and unit. Press Enter or choose **Save observation**.
+3. Each save writes the complete versioned draft through Inventory. Reloading the record restores saved observations; the browser does not keep a private Inventory dataset.
+4. Submit the saved draft for review. Expected quantities remain hidden while the Count is open or submitted.
+5. A different authorized operator chooses **Approve and post**. This is one atomic command: it compares observations, posts variances, and records Inventory movements.
+
+If a draft changes while an observation is being entered, the values remain visible. Refresh and compare before retrying. Do not treat the unused display state **Approved** as a separate recoverable server step; approval and posting are atomic in this prototype.
+
+## Transfer stock between locations
+
+Permissions: `inventory.transfer.read`, `inventory.transfer.create`, `inventory.transfer.dispatch`, and `inventory.transfer.receive`. Required entitlement: `inventory.transfers`.
+
+1. Create a transfer with different source and destination locations and a bounded set of Product, quantity, and unit lines.
+2. Review and dispatch. Dispatch records custody leaving the source and is not a destructive edit.
+3. At the destination, record an accepted receipt. A quantity below the remaining amount produces a partial receipt; repeat until fully received.
+4. If custody cannot be accepted normally, record an **Exception** with a reason. The exception is terminal for that transfer fact.
+5. Correct a transfer exception through a governed Inventory Adjustment. Do not mutate the transfer ledger record.
+
+Stable transfer-line IDs connect every receipt to the requested line. A stale transfer version must be refreshed before a retry.
+
+## Import Products or opening stock
+
+Import permissions are target-specific: `catalog.import.*` for Products and `inventory.import.*` for opening stock. Approval, download, and purge are separate authorities.
+
+1. Open **Operations → Imports** and choose the target.
+2. Select a UTF-8 CSV file no larger than 1 MiB. The browser computes SHA-256 and sends the bounded content and manifest directly to the server; it does not parse or retain an authoritative client dataset.
+3. Review the dry-run counts and paged row findings. A clean upload is not yet an applied import.
+4. An authorized approver starts commit. Reload the job to follow current progress and reconciliation.
+5. Accept only a completed, reconciled job. For failed or rejected rows, download the correction report. The browser creates a temporary download and immediately revokes it.
+
+Cancellation applies only before commit. Staging purge is a separate operator action and remains server-gated until at least 30 days after an eligible Completed, Failed, or Cancelled terminal-state timestamp plus the applicable hold and deletion-journal checks. The prototype does not automate legal-hold decisions or establish a production retention program.
+
+## Understand failure and offline states
+
+- **Permission denied** means the current principal lacks the required action authority.
+- **Capability unavailable** means the tenant or organization lacks the entitlement, even if the person has permission.
+- **Sign in again**, **Additional verification required**, and **Approval required** are distinct next actions.
+- **Conflict** means current owner state or version changed. Refresh and compare; do not silently resubmit stale values.
+- **Offline** pages may show previously loaded information labelled as stale, but changes and authority decisions require a connection.
+- A foreign-tenant, nonexistent, or undisclosed record produces the same safe not-found behavior. Do not use timing or result counts to infer another tenant's data.
+
+## Prototype limits
+
+The web workspace does not provide production support access, broad offline synchronization, production accessibility conformance, PostgreSQL Row-Level Security, arbitrary file formats, billing, storefront, POS, or AI-required operation. External assistive-technology review, production-scale performance, RR-007, penetration testing, operational exercises, and founder/provider gates remain open.
+
+Related architecture and implementation authority stays in PDA-RDM-009, PDA-DOM-002, PDA-DOM-003, ADR-0005, ADR-0016, ADR-0020, and the canonical OpenAPI. This help page describes the controlled prototype and does not replace those sources.

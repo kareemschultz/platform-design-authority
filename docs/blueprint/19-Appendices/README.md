@@ -1,10 +1,10 @@
 ---
 document_id: PDA-APP-001
 title: Appendices Section Index
-version: 0.10.0
+version: 0.11.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-16
 ---
 
 # Appendices
@@ -24,6 +24,10 @@ last_reviewed: 2026-07-12
 - `SHADCN_CONFIGURATION_VERIFICATION-2026-07-12.md`
 - `WS1_PERSISTENCE_TECHNOLOGY_VERIFICATION-2026-07-13.md`
 - `WS2_LEDGER_AND_QUERY_TECHNOLOGY_VERIFICATION-2026-07-14.md`
+- `WS2_PR3_INVENTORY_LEDGER_EVIDENCE-2026-07-15.md`
+- `WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md`
+- `WS2_PR5_IMPORT_AND_NUMBERING_EVIDENCE-2026-07-16.md`
+- `WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md`
 
 ## Machine-Readable Evidence and Contracts
 

@@ -19,6 +19,7 @@ import { auditApplication } from "./audit";
 import { permissionAuthorizer } from "./authorization";
 import { catalogApplication } from "./catalog";
 import { entitlementEvaluator } from "./entitlements";
+import { controlledPrototypeContentScanner } from "./import-scanner";
 import { inventoryService } from "./inventory";
 import { createImportReferenceAllocator } from "./numbering";
 import { databasePool } from "./postgres";
@@ -70,16 +71,7 @@ const importService = createImportService({
 	ids: {
 		create: (kind) => `import_${kind}_${randomUUID().replaceAll("-", "")}`,
 	},
-	scanner: {
-		scan(input) {
-			// Controlled-prototype scanner seam. Production remains blocked on a qualified scanner/provider.
-			return Promise.resolve(
-				input.content.includes("EICAR-STANDARD-ANTIVIRUS-TEST-FILE")
-					? "Blocked"
-					: "Clean"
-			);
-		},
-	},
+	scanner: controlledPrototypeContentScanner,
 	targets: {
 		OpeningStock: {
 			async commit(input) {

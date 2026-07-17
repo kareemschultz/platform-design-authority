@@ -28,11 +28,13 @@ import {
 import { migratePlatformNumbering } from "@meridian/persistence-platform-numbering-postgres";
 import {
 	createImportService,
+	IMPORT_STAGING_RETENTION_MS,
 	ImportProcessInterruptedError,
 	type ImportTargetPort,
 } from "@meridian/platform-import-export";
 import { env } from "@meridian/tooling-env/server";
 import { Pool } from "pg";
+import { controlledPrototypeContentScanner } from "./import-scanner";
 import { createImportReferenceAllocator } from "./numbering";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
@@ -236,6 +238,23 @@ afterAll(async () => {
 });
 
 describe.serial("WS2 bounded import PostgreSQL prototype", () => {
+	test("wires the canonical EICAR test signature into the controlled-prototype scanner", async () => {
+		const eicar =
+			"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
+		expect(
+			await controlledPrototypeContentScanner.scan({
+				content: eicar,
+				fileName: "eicar.com.txt",
+			})
+		).toBe("Blocked");
+		expect(
+			await controlledPrototypeContentScanner.scan({
+				content: "EICAR standard antivirus test documentation",
+				fileName: "readme.txt",
+			})
+		).toBe("Clean");
+	});
+
 	test("rolls back the Number allocation, Import job, and events when atomic create fails", async () => {
 		const service = createServices({ failValidatedEvent: true });
 		const content =
@@ -542,7 +561,9 @@ describe.serial("WS2 bounded import PostgreSQL prototype", () => {
 		const purgeCommand = {
 			idempotencyKey: "purge-recovery-staging",
 			importId: job.id,
-			purgedAt: new Date("2026-08-16T00:00:00Z"),
+			purgedAt: new Date(
+				completed.updatedAt.getTime() + IMPORT_STAGING_RETENTION_MS + 1000
+			),
 			target: "Product" as const,
 			tenantId: "tenant_recovery",
 		};

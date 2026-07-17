@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { Buffer } from "node:buffer";
 import {
 	createInventoryService,
 	type InventoryIdFactory,
@@ -6,6 +7,7 @@ import {
 import {
 	createInventoryRepository,
 	migrateInventory,
+	serializeInventoryStockBalanceCursor,
 } from "@meridian/persistence-inventory-postgres";
 import {
 	createPostgresOutbox,
@@ -14,6 +16,10 @@ import {
 import { env } from "@meridian/tooling-env/server";
 import { Pool } from "pg";
 
+import {
+	decodeStockBalanceCursor,
+	encodeStockBalanceCursor,
+} from "./inventory";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
 const databaseName = `meridian_inventory_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -81,6 +87,67 @@ afterAll(async () => {
 });
 
 describe.serial("Inventory PostgreSQL controlled prototype", () => {
+	test("wraps owner cursors in a versioned opaque transport token", () => {
+		const raw = serializeInventoryStockBalanceCursor({
+			itemKey: "product_a",
+			locationId: "location_a",
+			unit: "case\u001feach",
+		});
+		const publicToken = (payload: string) =>
+			`sb1_${Buffer.from(payload, "utf8").toString("base64url")}`;
+		const encoded = encodeStockBalanceCursor(raw);
+		expect(encoded).toStartWith("sb1_");
+		expect(encoded).not.toContain("product_a");
+		expect(decodeStockBalanceCursor(encoded ?? undefined)).toBe(raw);
+		expect(() => decodeStockBalanceCursor("sb2_future")).toThrow(
+			"Stock balance cursor is invalid"
+		);
+		expect(() =>
+			decodeStockBalanceCursor("sb1_bm90LWEtcHJvamVjdGlvbi1rZXk")
+		).toThrow("Stock balance cursor is invalid");
+		expect(() => decodeStockBalanceCursor(publicToken("{"))).toThrow(
+			"Stock balance cursor is invalid"
+		);
+		expect(() =>
+			decodeStockBalanceCursor(
+				publicToken(
+					JSON.stringify({
+						itemKey: "product_a",
+						locationId: "location_a",
+						unit: "each",
+						version: 2,
+					})
+				)
+			)
+		).toThrow("Stock balance cursor is invalid");
+		expect(() =>
+			decodeStockBalanceCursor(
+				publicToken(
+					JSON.stringify({
+						itemKey: "product_a",
+						locationId: "location_a",
+						tenantId: "tenant_smuggled",
+						unit: "each",
+						version: 1,
+					})
+				)
+			)
+		).toThrow("Stock balance cursor is invalid");
+		expect(
+			decodeStockBalanceCursor(
+				publicToken(
+					JSON.stringify(
+						Object.fromEntries([
+							["unit", "case\u001feach"],
+							["locationId", "location_a"],
+							["itemKey", "product_a"],
+							["version", 1],
+						])
+					)
+				)
+			)
+		).toBe(raw);
+	});
 	test("migrates idempotently through its isolated history and creates only nine owner tables", async () => {
 		await migrateInventory(testPool);
 		const tables = await testPool.query<{ table_name: string }>(
@@ -218,6 +285,56 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			balances.items.find((entry) => entry.locationId === "concurrent_location")
 				?.onHand
 		).toBe("3.000003");
+	});
+
+	test("paginates balances whose contract-valid unit contains the former delimiter", async () => {
+		const inventory = service();
+		const tenantId = "tenant_inventory_structural_cursor";
+		const delimiterUnit = "case\u001feach";
+		for (const [index, productId] of [
+			"cursor_product_a",
+			"cursor_product_z",
+		].entries()) {
+			// biome-ignore lint/performance/noAwaitInLoops: committed commands create deterministic cursor boundaries.
+			const adjustment = await inventory.createAdjustment({
+				...base,
+				body: {
+					locationId: "cursor_location",
+					productId,
+					quantity: "1",
+					reason: "structural cursor proof",
+					unit: index === 0 ? delimiterUnit : "each",
+				},
+				idempotencyKey: `cursor-adjustment-create-${index}`,
+				tenantId,
+			});
+			await inventory.approveAdjustment({
+				actorUserId: "cursor_approver",
+				adjustmentId: adjustment.id,
+				correlationId: base.correlationId,
+				idempotencyKey: `cursor-adjustment-approve-${index}`,
+				tenantId,
+				version: 1,
+			});
+		}
+
+		const firstPage = await inventory.listBalances({
+			page: { limit: 1 },
+			tenantId,
+		});
+		expect(firstPage.items).toHaveLength(1);
+		expect(firstPage.items[0]?.unit).toBe(delimiterUnit);
+		expect(firstPage.nextCursor).toContain('"version":1');
+		const secondPage = await inventory.listBalances({
+			page: { cursor: firstPage.nextCursor ?? undefined, limit: 1 },
+			tenantId,
+		});
+		expect(secondPage.items).toHaveLength(1);
+		expect(secondPage.items[0]).toMatchObject({
+			productId: "cursor_product_z",
+			unit: "each",
+		});
+		expect(secondPage.nextCursor).toBeNull();
 	});
 
 	test("serializes duplicate command identities before creating owner facts", async () => {
@@ -433,6 +550,65 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			expectedQuantity: "0.000000",
 			varianceQuantity: "5.000000",
 		});
+	});
+
+	test("persists draft Count lines atomically and replays a concurrent retry", async () => {
+		const first = service();
+		const second = service();
+		const count = await first.createCount({
+			actorUserId: "draft_counter",
+			body: { blind: true, locationId: "draft_location" },
+			idempotencyKey: "draft-count-create",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		const input = {
+			actorUserId: "draft_counter",
+			body: {
+				lines: [
+					{
+						observedQuantity: "12.000001",
+						productId: "draft_product",
+						unit: "each",
+					},
+				],
+			},
+			countId: count.id,
+			idempotencyKey: "draft-count-save",
+			tenantId: base.tenantId,
+			version: 1,
+		};
+		const [left, right] = await Promise.all([
+			first.saveCountDraft(input),
+			second.saveCountDraft(input),
+		]);
+		expect(right).toEqual(left);
+		expect(left).toMatchObject({ state: "InProgress", version: 2 });
+		expect((await second.getCount(base.tenantId, count.id)).lines).toEqual(
+			left.lines
+		);
+		const rows = await testPool.query<{ operation: string; result: unknown }>(
+			"SELECT operation, result FROM inventory_command_receipt WHERE tenant_id = $1 AND idempotency_key = $2",
+			[base.tenantId, input.idempotencyKey]
+		);
+		expect(rows.rows).toHaveLength(1);
+		expect(rows.rows[0]?.operation).toBe("inventory.count.draft.save");
+		expect(
+			await captureError(
+				second.saveCountDraft({
+					...input,
+					body: {
+						lines: [
+							{
+								observedQuantity: "13",
+								productId: "draft_product",
+								unit: "each",
+							},
+						],
+					},
+				})
+			)
+		).toMatchObject({ code: "idempotency_conflict" });
 	});
 
 	test("enforces maker/checker separation in the live owner transaction", async () => {

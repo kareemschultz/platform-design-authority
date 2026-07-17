@@ -11,6 +11,44 @@ import {
 	type ImportTarget,
 } from ".";
 
+function productCsvAtExactByteLength(targetBytes: number): string {
+	const header = "source_key,name,variant_name,sku,barcode,barcode_scheme";
+	const rowCount = 110;
+	const shells = Array.from({ length: rowCount }, (_, index) => ({
+		prefix: `row-${index},`,
+		suffix: `,Default,SKU-${index},,`,
+	}));
+	const fixedBytes =
+		header.length +
+		1 +
+		(rowCount - 1) +
+		shells.reduce(
+			(total, shell) => total + shell.prefix.length + shell.suffix.length,
+			0
+		);
+	const payloadBytes = targetBytes - fixedBytes;
+	const baseFieldLength = Math.floor(payloadBytes / rowCount);
+	const remainder = payloadBytes % rowCount;
+	if (
+		payloadBytes < 0 ||
+		baseFieldLength + (remainder > 0 ? 1 : 0) >
+			CSV_IMPORT_LIMITS.fieldCharacters
+	) {
+		throw new Error(
+			"Target byte length cannot satisfy the governed CSV bounds"
+		);
+	}
+	const rows = shells.map(
+		(shell, index) =>
+			`${shell.prefix}${"x".repeat(baseFieldLength + (index < remainder ? 1 : 0))}${shell.suffix}`
+	);
+	const content = `${header}\n${rows.join("\n")}`;
+	if (new TextEncoder().encode(content).length !== targetBytes) {
+		throw new Error("Exact-byte CSV fixture construction failed");
+	}
+	return content;
+}
+
 function harness(scanner: "Clean" | "Blocked" | "Unavailable" = "Clean") {
 	const jobs = new Map<string, ImportJobRecord>();
 	const rows = new Map<string, ImportRowRecord[]>();
@@ -315,6 +353,65 @@ describe("bounded CSV import", () => {
 			fieldCharacters: 10_000,
 			rows: 1000,
 		});
+	});
+
+	test("accepts the exact byte ceiling and rejects the first byte over it", async () => {
+		const testkit = harness();
+		const exact = productCsvAtExactByteLength(CSV_IMPORT_LIMITS.bytes);
+		const base = {
+			actorUserId: "uploader",
+			contentType: "text/csv" as const,
+			correlationId: "correlation_exact_bytes",
+			fileName: "exact-bytes.csv",
+			manifest: testkit.manifest,
+			organizationId: "org-1",
+			sha256: "a".repeat(64),
+			target: "Product" as const,
+			tenantId: "tenant-1",
+		};
+		const accepted = await testkit.service.create({
+			...base,
+			content: exact,
+			idempotencyKey: "exact-byte-ceiling",
+		});
+		expect(accepted.counts.total).toBe(110);
+		expect(new TextEncoder().encode(exact)).toHaveLength(
+			CSV_IMPORT_LIMITS.bytes
+		);
+		await expect(
+			testkit.service.create({
+				...base,
+				content: `${exact}x`,
+				idempotencyKey: "one-byte-over-ceiling",
+			})
+		).rejects.toMatchObject({
+			code: "invalid_csv",
+			message: "Import content is outside the governed CSV envelope",
+		});
+	});
+
+	test("rejects decoder replacement characters at the UTF-8 string boundary", async () => {
+		const testkit = harness();
+		await expect(
+			testkit.service.create({
+				actorUserId: "uploader",
+				content:
+					"source_key,name,variant_name,sku,barcode,barcode_scheme\nrow-1,Tea\uFFFDInjected,Default,SKU-1,,",
+				contentType: "text/csv",
+				correlationId: "correlation_malformed_utf8",
+				fileName: "malformed-utf8.csv",
+				idempotencyKey: "malformed-utf8",
+				manifest: testkit.manifest,
+				organizationId: "org-1",
+				sha256: "a".repeat(64),
+				target: "Product",
+				tenantId: "tenant-1",
+			})
+		).rejects.toMatchObject({
+			code: "invalid_csv",
+			message: "CSV content exceeds the governed bounds",
+		});
+		expect(testkit.jobs).toHaveLength(0);
 	});
 
 	test("dry-runs mixed Product rows without domain mutation, then commits only accepted rows", async () => {

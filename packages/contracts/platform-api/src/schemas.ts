@@ -449,9 +449,13 @@ export const ProductVariantSchema = z.object({
 });
 
 export const ProductSchema = z.object({
+	archivedAt: InstantSchema.nullable(),
+	archiveReason: z.string().max(500).nullable(),
+	createdAt: InstantSchema,
 	id: IdentifierSchema,
 	name: z.string().min(1).max(300),
 	state: ProductStateSchema,
+	updatedAt: InstantSchema,
 	variants: z.array(ProductVariantSchema).min(1).max(50),
 	version: z.number().int().min(1),
 });
@@ -500,8 +504,10 @@ export const StockBalanceSchema = z.object({
 	locationId: IdentifierSchema,
 	onHand: DecimalQuantitySchema,
 	productId: IdentifierSchema,
-	reconciled: z.boolean().optional(),
+	reconciled: z.boolean(),
+	reconciliationState: z.enum(["Current", "RequiresReview"]),
 	reserved: NonNegativeDecimalQuantitySchema,
+	source: z.literal("InventoryLedgerProjection"),
 	unit: z.string().min(1).max(50),
 	variantId: NullableIdentifierSchema.optional(),
 });
@@ -518,8 +524,12 @@ export const CreateInventoryAdjustmentSchema = z.object({
 
 export const InventoryAdjustmentSchema = CreateInventoryAdjustmentSchema.extend(
 	{
+		approvedByUserId: NullableIdentifierSchema,
+		createdAt: InstantSchema,
+		createdByUserId: IdentifierSchema,
 		id: IdentifierSchema,
 		movementId: NullableIdentifierSchema,
+		postedAt: InstantSchema.nullable(),
 		reversalMovementId: NullableIdentifierSchema,
 		state: z.enum([
 			"Draft",
@@ -529,6 +539,7 @@ export const InventoryAdjustmentSchema = CreateInventoryAdjustmentSchema.extend(
 			"Reversed",
 			"Rejected",
 		]),
+		updatedAt: InstantSchema,
 		version: z.number().int().min(1),
 	}
 );
@@ -554,6 +565,12 @@ export const SubmitStockCountSchema = z
 	})
 	.strict();
 
+export const SaveStockCountDraftLinesSchema = z
+	.object({
+		lines: z.array(SubmitStockCountLineSchema).max(5000),
+	})
+	.strict();
+
 export const StockCountLineSchema = SubmitStockCountLineSchema.extend({
 	expectedQuantity: DecimalQuantitySchema.nullable(),
 	id: IdentifierSchema,
@@ -562,8 +579,12 @@ export const StockCountLineSchema = SubmitStockCountLineSchema.extend({
 });
 
 export const StockCountSchema = CreateStockCountSchema.extend({
+	approvedByUserId: NullableIdentifierSchema,
+	createdAt: InstantSchema,
+	createdByUserId: IdentifierSchema,
 	id: IdentifierSchema,
 	lines: z.array(StockCountLineSchema),
+	postedAt: InstantSchema.nullable(),
 	state: z.enum([
 		"Draft",
 		"InProgress",
@@ -572,6 +593,8 @@ export const StockCountSchema = CreateStockCountSchema.extend({
 		"Posted",
 		"Rejected",
 	]),
+	submittedByUserId: NullableIdentifierSchema,
+	updatedAt: InstantSchema,
 	version: z.number().int().min(1),
 });
 
@@ -630,10 +653,16 @@ export const ReceiveStockTransferSchema = z
 	});
 
 export const StockTransferSchema = z.object({
+	createdAt: InstantSchema,
+	createdByUserId: IdentifierSchema,
 	destinationLocationId: IdentifierSchema,
+	dispatchedAt: InstantSchema.nullable(),
+	dispatchedByUserId: NullableIdentifierSchema,
 	exceptionReason: z.string().max(500).nullable(),
 	id: IdentifierSchema,
 	lines: z.array(StockTransferLineSchema).min(1),
+	receivedAt: InstantSchema.nullable(),
+	receivedByUserId: NullableIdentifierSchema,
 	sourceLocationId: IdentifierSchema,
 	state: z.enum([
 		"Draft",
@@ -643,6 +672,7 @@ export const StockTransferSchema = z.object({
 		"Exception",
 		"Cancelled",
 	]),
+	updatedAt: InstantSchema,
 	version: z.number().int().min(1),
 });
 
@@ -808,6 +838,7 @@ export const PagedEntitlementsSchema = pageOf(EntitlementSchema);
 export const PagedPartiesSchema = pageOf(PartySchema);
 export const PagedAuditRecordsSchema = pageOf(AuditRecordSchema);
 export const PagedProductsSchema = pageOf(ProductSchema);
+export const PagedStockBalancesSchema = pageOf(StockBalanceSchema);
 export const PagedInventoryAdjustmentsSchema = pageOf(
 	InventoryAdjustmentSchema
 );
@@ -883,6 +914,10 @@ export type CreateInventoryAdjustment = z.infer<
 >;
 export type CreateStockCount = z.infer<typeof CreateStockCountSchema>;
 export type CreateStockTransfer = z.infer<typeof CreateStockTransferSchema>;
+export type PagedStockBalances = z.infer<typeof PagedStockBalancesSchema>;
+export type SaveStockCountDraftLines = z.infer<
+	typeof SaveStockCountDraftLinesSchema
+>;
 export type StockBalance = z.infer<typeof StockBalanceSchema>;
 export type StockCount = z.infer<typeof StockCountSchema>;
 export type StockTransfer = z.infer<typeof StockTransferSchema>;

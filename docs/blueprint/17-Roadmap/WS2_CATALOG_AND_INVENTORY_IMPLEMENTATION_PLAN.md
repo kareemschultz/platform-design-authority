@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -16,7 +16,7 @@ This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section
 
 This is a **Draft plan for a controlled prototype**. It may guide only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, close FDR-004, establish a contractual service level, or claim the first slice is complete. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and WS2 stops for disposition.
 
-Issue #62 owns the merged plan; issues #64, #66, #68, and #70 own merged PR1-PR4 execution evidence; issue #71 owns active PR5 import and Numbering implementation; and issues #72-#73 own blocked PR6-PR7. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on every merged implementation head through PR #74. Every remaining implementation PR still requires exact-head independent review before merge.
+Issue #62 owns the merged plan; issues #64, #66, #68, #70, and #71 own merged PR1-PR5 execution evidence; issue #72 owns active PR6 web-experience implementation; and issue #73 owns blocked PR7 closeout. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on every merged implementation head through PR #76. Every remaining implementation PR still requires exact-head independent review before merge.
 
 ### 1.1 Implementation progress
 
@@ -26,8 +26,9 @@ Issue #62 owns the merged plan; issues #64, #66, #68, and #70 own merged PR1-PR4
 | PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
 | PR3 — Inventory ledger and workflows | Merged as PR #69 after exact-head Claude Code concurrence | Retain Inventory core/persistence/API, immutable ledger/reversal, workflow, rebuild, concurrency, tenant-isolation, offline-boundary, Bun/Node, and PostgreSQL evidence; no PR4 delivery claim |
 | PR4 — durable delivery and projections | Merged as PR #74 after exact-head Claude Code concurrence | Merge commit `7202fc819b70982c013e1ca11a4fcc136e01e2de`; PDA-APP-023 plus final re-audit comment `4991097241` close RR-006 at controlled-prototype depth. RR-007 and production delivery gates remain open. |
-| PR5 — bounded imports and online Numbering | Remediation active on issue #71 after exact-head review; concurrence withheld | Eighteen Product/opening-stock operations, bounded CSV dry run/approval/owner-command waves, list/findings/cancel/reconcile/accept/purge lifecycle, Audit/report evidence, atomic import references, owner migrations, and Strict Online Numbering must pass renewed exact-head review; PDA-APP-024 and PDA-OPS-019 record proof and recovery limits. |
-| PR6–PR7 | Not started; blocked on preceding merge | Execute in order; no later phase may be pre-closed by earlier evidence |
+| PR5 — bounded imports and online Numbering | Merged as PR #76 after exact-head Claude Code concurrence | Merge commit `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`; retain bounded CSV, owner-command, atomic import-reference, strict online Numbering, tenant, recovery, and disclosed residual evidence in PDA-APP-024. |
+| PR6 — Product and Inventory web experience | Active on issue #72; exact-head review and merge pending | Implement section 11 over generated clients; PDA-APP-025 records only reproduced UI-pattern, accessibility-target, browser, help, performance, and direct-denial evidence. |
+| PR7 — verification and controlled-prototype closeout | Blocked on merged PR6 | Execute the complete section 14 matrix and program/risk/roadmap propagation without pre-closing WS2. |
 
 ### 1.2 Governing sources
 
@@ -552,9 +553,11 @@ WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype 
 | Claude Code | PR4 implementation exact-head audit | Changes required — concurrence withheld | 2026-07-16 | Audited `ffadf60409111fba72a0829098cd0904e6e269c7` across six lenses. Confirmed topology, delivery mechanics, replay authorization, projection ownership, privacy, and most gates; required replay-request receipt/idempotency evidence, a real same-row concurrent claim, and executable server-only migration invocation. Remediated in v0.3.6 pending superseding exact-head review. Evidence: PR #74 comment `4989112444`. |
 | Claude Code | PR4 implementation re-audit | Concurred; no actionable finding | 2026-07-16 | Reproduced governance, 260/260 workspace tests, 12/48 live worker evidence, 36/91 event/replay evidence, same-row PostgreSQL contention, replay receipt constraints, and worker migration denial at exact head `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26`; PR #74 then merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de`. Evidence: comment `4991097241`. |
 | Claude Code | PR5 implementation exact-head audit | Changes required; concurrence withheld | 2026-07-16 | Audited exact head `26b70ab1e61bbf4877c5ba5b7c119e20b37fea1c`. Four P1 findings were accepted: Numbering was not on a real path, unsafe formula-prefix values could persist, CRLF declarations did not reject bare LF, and a late row checkpoint could revive a terminal failed job. P2/P3 dispositions require reloadable lifecycle APIs, complete wire fields, import-owner row receipts, reachable governed purge, security/tenant/race/stability evidence, explicit owner sign-off, sequence-version provenance, approver attribution, and report/BOM/control-character clarity. v0.6.0 assigns those closures without claiming concurrence. |
+| Claude Code | PR5 implementation exact-head re-audit | Concurred; residuals retained | 2026-07-16 | Re-audited exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be`, independently reproduced the four P1 closures and harder concurrent recovery, and recorded concurrence without merging. PR #76 then merged as `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`. The disclosed composition-timeout, Numbering database-isolation, security-coverage, attribution, shared-permission, and ADR-review residuals remain tracked rather than converted into production claims. Evidence: PR #76 comment `4995579814`. |
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.7.0 | 2026-07-16 | Platform Design Authority | Recorded PR5 exact-head concurrence and merge, activated PR6 issue #72, linked PDA-APP-025, and retained PR7 plus every WS2 exit and production gate. |
 | 0.6.0 | 2026-07-16 | Platform Design Authority | Dispositioned the PR5 exact-head audit: bound real atomic import references, strict CSV defenses, guarded row receipts, reloadable lifecycle/reconciliation/purge APIs, ADR-0014 retention controls, explicit ADR-0027 owner sign-off, approver attribution, sequence-version/report provenance, and renewed exact-head evidence gates. |
 | 0.5.1 | 2026-07-16 | Platform Design Authority | Dispositioned PR5 review findings through schema-shaped Import/Numbering events, manifest-bound create idempotency, atomic terminal owner-rejection evidence, and aligned Numbering provenance/constraints; retained exact-head gates, independent concurrence, merge, and RR-007 as open. |
 | 0.5.0 | 2026-07-16 | Platform Design Authority | Recorded implemented PR5 bounded import and Strict Online Numbering scope, PDA-APP-024 evidence, PDA-OPS-019 recovery guidance, and retained exact-head review/merge plus RR-007 as open gates. |

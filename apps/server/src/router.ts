@@ -56,6 +56,7 @@ import {
 	receiveStockTransferContract,
 	reverseInventoryAdjustmentContract,
 	revokeCurrentUserSessionContract,
+	saveStockCountDraftLinesContract,
 	setActiveContextContract,
 	submitStockCountContract,
 	suspendTenantMembershipContract,
@@ -188,6 +189,24 @@ async function requireActiveIdentity(context: Context, contextId: string) {
 	return { activeContext: identity.activeContext, identity, session };
 }
 
+function validationProblemTitle(code: string): string {
+	if (code === "invalid_reference") {
+		return "Resource reference is invalid";
+	}
+	if (code === "invalid_quantity") {
+		return "Quantity is invalid";
+	}
+	if (
+		code === "validation" ||
+		code === "invalid_csv" ||
+		code === "hash_mismatch" ||
+		code === "blocked_content"
+	) {
+		return "Request is invalid";
+	}
+	return "Identifier is invalid";
+}
+
 function mapApplicationError(context: Context, error: unknown): never {
 	if (error instanceof ORPCError) {
 		throw error;
@@ -229,21 +248,11 @@ function mapApplicationError(context: Context, error: unknown): never {
 		code === "invalid_reference" ||
 		code === "validation"
 	) {
-		let validationTitle = "Identifier is invalid";
-		if (code === "validation") {
-			validationTitle = "Request is invalid";
-		}
-		if (code === "invalid_reference") {
-			validationTitle = "Resource reference is invalid";
-		}
-		if (code === "invalid_quantity") {
-			validationTitle = "Quantity is invalid";
-		}
 		throw new ORPCError("BAD_REQUEST", {
 			data: problem(context, {
 				code: "validation",
 				status: 400,
-				title: validationTitle,
+				title: validationProblemTitle(code),
 			}),
 		});
 	}
@@ -1606,6 +1615,33 @@ const createStockCount = implement(createStockCountContract)
 		}
 	});
 
+const saveStockCountDraft = implement(saveStockCountDraftLinesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.count.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.saveStockCountDraft({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				countId: input.params.id,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const submitStockCount = implement(submitStockCountContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -1948,6 +1984,7 @@ export const appRouter = {
 			create: createStockCount,
 			get: getStockCount,
 			list: listStockCounts,
+			saveDraft: saveStockCountDraft,
 			submit: submitStockCount,
 		},
 		imports: {

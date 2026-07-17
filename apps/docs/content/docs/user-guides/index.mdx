@@ -5,7 +5,9 @@ description: Use the implemented prototype web authentication and dashboard surf
 
 # Use the current web prototype
 
-The current prototype demonstrates connectivity, email-and-password authentication, session-protected navigation, theme selection, and one protected oRPC response. It is not the first-slice retail application.
+The current prototype includes the WS1 administration shell and a controlled WS2 Product and Inventory workspace. These surfaces are implementation evidence, not a pilot or production retail application.
+
+For Product, balance, adjustment, count, transfer, and bounded-import procedures, use [Operate Products and Inventory](/docs/inventory) (stable help ID `PDA-DOC-001`).
 
 ## Available actions
 
@@ -45,7 +47,7 @@ The application opens `/dashboard` after a successful sign-in. A failed attempt 
 
 The dashboard requires a current session. It shows the signed-in name and calls the protected `privateData` prototype procedure. If the session is absent, the server redirects to `/login`.
 
-The dashboard does not yet provide sales, inventory, register, customer, reporting, administration, offline, or financial workflows. Those remain governed first-slice requirements, not implemented behavior.
+The dashboard links to implemented WS1 administration and controlled WS2 Product/Inventory workflows. Sales, register, customer, reporting, broad offline, and financial workflows remain governed first-slice requirements, not implemented behavior.
 
 ## Sign out
 
@@ -68,4 +70,4 @@ The forms use labels, native input types, inline validation text, disabled submi
 
 ## Data and support boundaries
 
-Use synthetic data only. This prototype has no customer-support workflow, account recovery, email verification, MFA, tenant administration, privacy request UI, or production retention policy. Reset disposable local data only through the operator procedure in [Administration](/docs/administration).
+Use synthetic data only. This prototype has no customer-support workflow, production account-recovery/provider evidence, privacy request UI, or production retention policy. Tenant administration and prototype factor/session controls are implemented only at the evidence-bounded depth described by the WS1 documentation. Reset disposable local data only through the operator procedure in [Administration](/docs/administration).

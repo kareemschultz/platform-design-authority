@@ -410,6 +410,49 @@ def main() -> int:
             "}\n"
         ),
     )
+    # Fourth-review remediation (Codex PR #80 finding): a destructured migrate
+    # binding after a namespace import evades the property-access rule, and a
+    # migrate-named re-export evades the static-named-import rule. Both were
+    # live-confirmed passing (exit 0) at exact head a0bfe12 before this fix.
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_destructured_migration_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source=(
+            'import * as catalogPersistence from "@meridian/persistence-catalog-postgres";\n'
+            "const { migrateCatalog: run } = catalogPersistence;\n"
+            "await run({} as never);\n"
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_reexported_migration_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source=(
+            'export { migrateCatalog as run } from "@meridian/persistence-catalog-postgres";\n'
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "server"
+        / "composition"
+        / "__architecture_server_destructured_migration_fixture.ts",
+        expected_success=True,
+        source=(
+            'import * as catalogPersistence from "@meridian/persistence-catalog-postgres";\n'
+            "const { migrateCatalog: run } = catalogPersistence;\n"
+            "await run({} as never);\n"
+        ),
+    )
     assert_test_source_exempt_rules_match_registry()
     print("architecture checker regression probes passed")
     return 0

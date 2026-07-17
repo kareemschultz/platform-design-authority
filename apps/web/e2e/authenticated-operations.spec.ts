@@ -6,6 +6,7 @@ const FIXTURE_PASSWORD = "WS2-browser-verification-password-0001";
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const OPERATIONS_LOGIN_URL = /\/login\?returnTo=(?:%2F|\/)operations$/u;
 const OPERATIONS_OVERVIEW_URL = /\/operations\/?$/u;
+const ADMINISTRATION_URL_PATTERN = /\/administration/u;
 
 test("an authenticated operator creates and reads a tenant-scoped Product", async ({
 	page,
@@ -109,12 +110,21 @@ test("an authenticated operator creates and reads a tenant-scoped Product", asyn
 	});
 });
 
-test("an expired Operations session recovers into Operations, not Administration (fifth-audit F-H-001, second-review closure, third-review fix)", async ({
+test("an in-session Operations authorization loss surfaces client reauthentication routed back into Operations, not Administration (fifth-audit F-H-001, client-contract lens, fourth-review clarification)", async ({
 	page,
 }, testInfo) => {
-	// Exercise the client-side reauthentication failure on a mounted Operations
-	// query. A top-level navigation after a session expires is correctly handled
-	// by middleware before this UI can render.
+	// Client-reauthentication-contract lens. When an already-mounted Operations
+	// query returns UNAUTHORIZED mid-session — e.g. the session is revoked
+	// between the server-component layout render and a later client data fetch —
+	// the QueryFailure surface must route recovery back into Operations, not
+	// Administration. A *full* session expiry is a distinct path: the Operations
+	// server-component layout (apps/web/src/app/operations/layout.tsx) validates
+	// the session on every navigation and redirects to the Operations sign-in
+	// before any client tree mounts, so QueryFailure can never render from a
+	// navigated full expiry — that genuine path is asserted deterministically in
+	// the next test. Here the 401 is injected on the already-loaded product
+	// detail query to exercise the client routing contract in isolation, without
+	// depending on window-focus refetch timing.
 	await page.goto("/login?returnTo=/operations/products/new");
 	await page.getByLabel("Email").fill(FIXTURE_EMAIL);
 	await page.getByLabel("Password").fill(FIXTURE_PASSWORD);
@@ -215,6 +225,51 @@ test("an expired Operations session recovers into Operations, not Administration
 
 	await expect(page).toHaveURL(OPERATIONS_OVERVIEW_URL);
 	await expect(page.getByRole("heading", { name: "Operations" })).toBeVisible();
+});
+
+test("a genuinely expired Operations session redirects to Operations sign-in, not Administration (fifth-audit F-H-001, genuine-expiry lens, fourth-review closure)", async ({
+	page,
+}) => {
+	// Genuine-expiry counterpart to the client-contract lens above: sign in for
+	// real, then remove the session credential outright (no mocked response) so
+	// the server presents an unauthenticated request, and navigate into
+	// Operations. The Operations server-component layout must redirect to the
+	// Operations sign-in (returnTo=/operations) and never into Administration.
+	// Deterministic — the redirect runs server-side during navigation, with no
+	// client-refetch timing involved.
+	await page.goto("/login?returnTo=/operations");
+	await page.getByLabel("Email").fill(FIXTURE_EMAIL);
+	await page.getByLabel("Password").fill(FIXTURE_PASSWORD);
+	const signInResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/api/auth/sign-in/email")
+	);
+	await page.getByRole("button", { name: "Sign In" }).click();
+	const signInResponse = await signInResponsePromise;
+	expect(signInResponse.ok()).toBe(true);
+	const authOrigin = new URL(signInResponse.url()).origin;
+	await expect(page).toHaveURL(OPERATIONS_OVERVIEW_URL);
+
+	// Genuinely expire the session by clearing its credential from the browser
+	// context, then confirm the server no longer resolves a session for this
+	// browser before asserting the redirect.
+	await page.context().clearCookies();
+	await expect
+		.poll(async () => {
+			const sessionResponse = await page.request.get(
+				`${authOrigin}/api/auth/get-session`
+			);
+			const session = (await sessionResponse.json().catch(() => null)) as {
+				user?: { email?: string };
+			} | null;
+			return session?.user?.email ?? null;
+		})
+		.toBeNull();
+
+	await page.goto("/operations/products/new");
+	await expect(page).toHaveURL(OPERATIONS_LOGIN_URL);
+	await expect(page).not.toHaveURL(ADMINISTRATION_URL_PATTERN);
 });
 
 test("the Operations subnavigation reflows internally at 640px with six or more items, without forcing page-level horizontal scroll (fifth-audit F-H-006, second-review closure)", async ({

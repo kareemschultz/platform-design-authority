@@ -482,6 +482,85 @@ def main() -> int:
         expected_text="migration-import-outside-authority",
         source='export * from "@meridian/persistence-catalog-postgres";\n',
     )
+    # Fourth-review remediation, import-mode allowlist (independent review of
+    # 8b4ce85). The reviewer's cross-file namespace laundering is closed at its
+    # source: the acquiring file cannot take a namespace of the persistence
+    # module to re-export, so no second-file symbol resolution is needed. These
+    # probes assert each rejected acquisition mode plus the one allowed mode, and
+    # that all modes remain permitted inside apps/server/composition.
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_namespace_reexport_launder_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source=(
+            'import * as persistence from "@meridian/persistence-catalog-postgres";\n'
+            "export const catalogPersistence = persistence;\n"
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_require_aliased_migration_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source=(
+            'const persistence = require("@meridian/persistence-catalog-postgres");\n'
+            "const run = persistence.migrateCatalog;\n"
+            "await run({} as never);\n"
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_default_import_migration_fixture.ts",
+        expected_success=False,
+        expected_text="migration-import-outside-authority",
+        source='import persistence from "@meridian/persistence-catalog-postgres";\nvoid persistence;\n',
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "worker"
+        / "composition"
+        / "__architecture_worker_static_named_adapter_fixture.ts",
+        expected_success=True,
+        source=(
+            'import { createCatalogRepository } from "@meridian/persistence-catalog-postgres";\n'
+            "void createCatalogRepository;\n"
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "server"
+        / "composition"
+        / "__architecture_server_namespace_import_fixture.ts",
+        expected_success=True,
+        source=(
+            'import * as persistence from "@meridian/persistence-catalog-postgres";\n'
+            "await persistence.migrateCatalog({} as never);\n"
+        ),
+    )
+    probe(
+        ROOT
+        / "apps"
+        / "server"
+        / "composition"
+        / "__architecture_server_require_fixture.ts",
+        expected_success=True,
+        source=(
+            'const persistence = require("@meridian/persistence-catalog-postgres");\n'
+            "await persistence.migrateCatalog({} as never);\n"
+        ),
+    )
     assert_test_source_exempt_rules_match_registry()
     print("architecture checker regression probes passed")
     return 0

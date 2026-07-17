@@ -65,42 +65,52 @@ MIGRATION_INVOCATION_PATTERN = re.compile(
 MIGRATOR_MODULE_IMPORT_PATTERN = re.compile(
     r"""(?:from\s+|import\s*\(\s*)["'](?:drizzle-orm/[^"']*migrator[^"']*|drizzle-kit(?:/[^"']*)?)["']"""
 )
-PERSISTENCE_MIGRATE_IMPORT_PATTERN = re.compile(
-    r"""import\s*\{[^}]*\bmigrate[A-Za-z0-9_$]*\b[^}]*\}\s*from\s*["']@meridian/persistence-[^"']+["']"""
+# Fourth-review remediation, import-mode allowlist (F-B-002). Successive
+# independent reviews proved that enumerating call-site access syntaxes
+# (dot/destructure/bracket) and re-export shapes is non-convergent whack-a-mole:
+# a per-file text checker cannot, for example, follow a namespace that one
+# worker file acquires and re-exports under a local name and a second file then
+# invokes (cross-file symbol resolution). So instead of policing how a migrate
+# runner is *reached*, this restricts how a non-authorized application may
+# *acquire* a persistence module at all. Outside migration_invocation_roots the
+# only permitted acquisition is a static named import
+# (`import { productAdapter } from "@meridian/persistence-catalog-postgres"`)
+# whose imported names do not start with `migrate`. Every other acquisition mode
+# can obtain the whole module (and therefore its migrate* runners) — including
+# by cross-file laundering — so each is rejected at the point of acquisition,
+# which needs no cross-file analysis. Existing worker runtime imports are
+# already static named adapter imports, so this matches current legitimate code.
+# The migrator-module rule above and the direct-invocation rule remain as
+# defense in depth.
+PERSISTENCE_SPECIFIER = r"""["']@meridian/persistence-[^"']+["']"""
+# Rule 2 — namespace import (optionally preceded by a default binding).
+PERSISTENCE_NAMESPACE_IMPORT_PATTERN = re.compile(
+    r"""import\s+(?:[A-Za-z_$][\w$]*\s*,\s*)?\*\s+as\s+[A-Za-z_$][\w$]*\s+from\s+"""
+    + PERSISTENCE_SPECIFIER
 )
-# Second-review remediation (F-B-002 gap): a namespace import
-# (`import * as p from "@meridian/persistence-..."`) or a dynamic import
-# (`await import("@meridian/persistence-...")`) followed by an aliased
-# property-access call (`const run = p.migrateCatalog; run(...)`) evades both
-# MIGRATION_INVOCATION_PATTERN (call site isn't literally `migrate[A-Z](`) and
-# PERSISTENCE_MIGRATE_IMPORT_PATTERN (import isn't the static named form).
-# Live-confirmed at exact head 2cdfdcf: `tsc --noEmit` compiles both forms
-# clean, and the pre-fix checker passed with either fixture present.
-PERSISTENCE_MODULE_IMPORT_PATTERN = re.compile(
-    r"""(?:from\s+|import\s*\(\s*)["']@meridian/persistence-[^"']+["']"""
+# Rule 3 — default import (identifier immediately after `import`, not `{`/`*`),
+# optionally with a following named or namespace binding.
+PERSISTENCE_DEFAULT_IMPORT_PATTERN = re.compile(
+    r"""import\s+(?:type\s+)?[A-Za-z_$][\w$]*\s*"""
+    r"""(?:,\s*(?:\{[^}]*\}|\*\s+as\s+[A-Za-z_$][\w$]*))?\s+from\s+"""
+    + PERSISTENCE_SPECIFIER
 )
-# Fourth-review remediation (F-B-002 gaps found across successive independent
-# reviews): enumerating each access syntax (dot access `p.migrateCatalog`,
-# destructure `const { migrateCatalog } = p`, bracket access
-# `p["migrateCatalog"]`) is whack-a-mole — every form still contains the
-# `migrate<Name>` token. So when a persistence module is imported at all, match
-# the token itself in any position rather than a specific member-access shape.
-# Two re-export launderings are handled separately because they carry no
-# migrate token in the importing/re-exporting file: a migrate-named re-export
-# (`export { migrateCatalog as run } from "@meridian/persistence-..."`) and a
-# wildcard re-export (`export * from "@meridian/persistence-..."`, which
-# re-exports the migrate runners wholesale). All forms were live-confirmed
-# passing (checker exit 0) at the heads a0bfe12 / 532a010 before this rule.
-PERSISTENCE_MIGRATE_REFERENCE_PATTERN = re.compile(
-    r"""\bmigrate[A-Z][A-Za-z0-9_$]*\b"""
+# Rule 4 — dynamic import().
+PERSISTENCE_DYNAMIC_IMPORT_PATTERN = re.compile(
+    r"""import\s*\(\s*""" + PERSISTENCE_SPECIFIER
 )
-PERSISTENCE_MIGRATE_REEXPORT_PATTERN = re.compile(
-    r"""export\s*\{[^}]*\bmigrate[A-Za-z0-9_$]*\b[^}]*\}\s*from\s*"""
-    r"""["']@meridian/persistence-[^"']+["']"""
+# Rule 5 — CommonJS require() and TypeScript `import x = require()`.
+PERSISTENCE_REQUIRE_PATTERN = re.compile(
+    r"""require\s*\(\s*""" + PERSISTENCE_SPECIFIER
 )
+# Rule 6 — wildcard re-export (`export *` / `export * as X`).
 PERSISTENCE_WILDCARD_REEXPORT_PATTERN = re.compile(
-    r"""export\s*\*\s*(?:as\s+[A-Za-z0-9_$]+\s+)?from\s*"""
-    r"""["']@meridian/persistence-[^"']+["']"""
+    r"""export\s*\*\s*(?:as\s+[A-Za-z_$][\w$]*\s+)?from\s+""" + PERSISTENCE_SPECIFIER
+)
+# Rule 7 — named import or re-export exposing a migrate-prefixed binding.
+PERSISTENCE_MIGRATE_NAMED_PATTERN = re.compile(
+    r"""(?:import|export)\s*(?:type\s+)?\{[^}]*\bmigrate[A-Za-z0-9_$]*\b[^}]*\}"""
+    r"""\s*from\s+""" + PERSISTENCE_SPECIFIER
 )
 # Fifth-audit F-B-005: the raw process pool module is composition-internal;
 # ordinary application paths use the shutdown-only lifecycle module. The
@@ -327,19 +337,21 @@ def main() -> int:
                 and not matches(source_path, migration_invocation_roots)
                 and (
                     MIGRATOR_MODULE_IMPORT_PATTERN.search(text)
-                    or PERSISTENCE_MIGRATE_IMPORT_PATTERN.search(text)
-                    or PERSISTENCE_MIGRATE_REEXPORT_PATTERN.search(text)
+                    or PERSISTENCE_NAMESPACE_IMPORT_PATTERN.search(text)
+                    or PERSISTENCE_DEFAULT_IMPORT_PATTERN.search(text)
+                    or PERSISTENCE_DYNAMIC_IMPORT_PATTERN.search(text)
+                    or PERSISTENCE_REQUIRE_PATTERN.search(text)
                     or PERSISTENCE_WILDCARD_REEXPORT_PATTERN.search(text)
-                    or (
-                        PERSISTENCE_MODULE_IMPORT_PATTERN.search(text)
-                        and PERSISTENCE_MIGRATE_REFERENCE_PATTERN.search(text)
-                    )
+                    or PERSISTENCE_MIGRATE_NAMED_PATTERN.search(text)
                 )
             ):
                 errors.append(
                     f"{source_path}: migration-import-outside-authority: "
-                    "migration modules and persistence migrate exports may only "
-                    "be imported from registered migration-invocation roots"
+                    "outside registered migration-invocation roots, "
+                    "@meridian/persistence-* may only be acquired via a static "
+                    "named import with no migrate-prefixed name; namespace, "
+                    "default, dynamic import(), require, and export * modes are "
+                    "rejected because they can obtain the migrate runners"
                 )
 
             if (

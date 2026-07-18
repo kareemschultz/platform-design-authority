@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-001
 title: Strategy Section Index
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -53,7 +53,7 @@ Commercial specifications are authoritative over handbook summaries for editions
 - Platform Experience Index baseline studies
 - Business DNA prototype results
 - Legal entity, tax, banking, privacy, payment, and regulatory advice
-- Repository disclosure/redaction review and final visibility/licensing ratification, tracked in FDR-005 and issue #83
+- Final repository visibility, licensing, contribution, security-scanning, and third-party-provenance decisions retained under FDR-005; PDA-REV-019 records the issue #83 disclosure/redaction review, while issues #92 and #93 track the remaining operational work
 - Long-term financial and financing model
 - Product-name and public package-scope availability evidence before FDR-011 can close
 
@@ -63,10 +63,14 @@ Commercial specifications are authoritative over handbook summaries for editions
 2. Decide the platform legal entity and contracting structure.
 3. Decide platform billing and settlement currencies.
 4. FDR-004 is ratified: retain its bounded first-slice inclusion and deferrals unless a later recorded decision changes them.
-5. FDR-005 is provisionally public: complete issue #83's disclosure/redaction review before WS3 and before final visibility or documentation-license ratification.
+5. FDR-005 remains provisionally public. PDA-REV-019 records issue #83's disclosure/redaction review subject to exact-head independent concurrence and merge; final visibility, licensing, contribution, security-scanning, and provenance decisions remain open separately. Before WS3 handles raw customer evidence, issue #94 must establish restricted evidence handling, and issue #82 must retain real customer evidence.
 6. Decide terminal and provider coverage.
 7. Decide whether and when a paid marketplace phase may begin.
 8. Verify premium UI license scope for the owning entity and products.
 9. Close FDR-011 only after product-name, trademark/domain, and provisional `@meridian/*` package-scope availability checks are retained as evidence; “Meridian” remains internal only.
 
 Strategy guides prioritization but does not bypass architecture, security, evidence, qualified advice, lifecycle governance, or customer validation.
+
+## Change log
+
+- 2026-07-17 — v0.7.0 recorded PDA-REV-019 as the issue #83 disclosure/redaction review subject to exact-head independent concurrence and merge; separated the remaining FDR-005 visibility, licensing, contribution, scanning, and provenance work; and named issues #94 and #82 as the remaining WS3-entry gates.

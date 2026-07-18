@@ -2,6 +2,10 @@ name: Bug report
 description: Report a defect in merged code, contracts, or generated registries.
 labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report suspected vulnerabilities or include exploit instructions, secrets, customer data, incident evidence, private URLs, or unredacted logs here. This public template is for non-sensitive defects only; follow `SECURITY.md` for the security-reporting boundary.
   - type: input
     id: main-sha
     attributes:

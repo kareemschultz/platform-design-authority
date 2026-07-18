@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-001
 title: Blueprint and Delivery Roadmap
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -64,7 +64,7 @@ Execution note (2026-07-17, fifth-audit F-L-008): this phase is executed as the 
 Founder controls recorded on 2026-07-17 apply to that execution sequence:
 
 - WSX is the approved parallel external-evidence track, with accountable roles and start-by/finish-by milestone gates in PDA-REV-015 and PDA-RDM-007.
-- WS3 may not start until the repository disclosure/redaction review is complete and the market-evidence record contains at least 8 structured interviews plus 3 direct workflow observations across at least 3 distinct businesses. This is a hard gate; agent-generated, simulated, inferred, or waived evidence is not acceptable.
+- PDA-REV-019 records the repository disclosure/redaction review from issue #83, subject to exact-head independent concurrence and merge. WS3 may not start until issue #94 establishes restricted raw-evidence handling and the issue #82 market-evidence record contains at least 8 structured interviews plus 3 direct workflow observations across at least 3 distinct businesses. These are hard gates; agent-generated, simulated, inferred, or waived evidence is not acceptable. Final FDR-005 visibility and licensing ratification remains separate and open.
 - P1–P3 retain the FA4 controlled-prototype clearance. P4–P7 receive general entry clearance only at the M3 standing-charter checkpoint, after the checkpoint is recorded; every workstream-specific founder, ADR, provider, security, evidence, and sequencing gate remains binding.
 
 Build a non-production vertical slice that proves:

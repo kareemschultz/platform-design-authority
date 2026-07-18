@@ -1,7 +1,7 @@
 ---
 document_id: PDA-IMPL-007
 title: WS2 Verification and Controlled-Prototype Closeout
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -16,7 +16,7 @@ WS2 implementation and repository-owned evidence are complete at the controlled-
 
 The actual closeout sequence is retained without rewriting history. PR #79 final head `22a3a38369d458d065d5fb2bc2216d09aec410de` merged as `81e903b27bf41785106775afb33f9f88738e39b9` without the required recorded pre-merge exact-head concurrence. PDA-REV-013 then independently audited that exact merged `main`, reproduced the WS2 evidence, and concurred with the implementation evidence while reporting the process deviation as F-A-001. The Founder accepted PDA-REV-013 as the superseding exact-`main` WS2 review in issue #81, comment `5008157609`; PR #89 merged the decision record as `7de0688d11a80de950f0e0639ade84b23e790e59`. That superseding disposition closes the WS2 controlled-prototype review condition while preserving the missed pre-merge concurrence as a governance deviation.
 
-This Draft records controlled-prototype closeout only. It does not approve a Draft or Proposed source, close RR-007 or RR-009, establish a contractual service level, claim pilot or production readiness, or treat FDR-004's separately recorded ratification as evidence that its customer, legal, provider, security, accessibility, operational, and disclosure gates are satisfied. This P-W2a tracking update itself still requires independent exact-head review and merge; that is a change-control gate for this synchronization, not an open WS2 implementation-evidence gate.
+This Draft records controlled-prototype closeout only. It does not approve a Draft or Proposed source, close RR-007 or RR-009, establish a contractual service level, claim pilot or production readiness, or treat FDR-004's separately recorded ratification as evidence that its customer, legal, provider, security, accessibility, operational, and disclosure gates are satisfied. PR #91 completed the independently reviewed P-W2a tracking synchronization: exact reviewed head `ff9816efa93efff6954708c025c8e8f70260108f` merged as `15417950925b78ad267e54fe6b3550010a46f60d`. That merge records the synchronization without converting any retained external or production gate into a pass.
 
 The registry-derived WS2 set is exactly:
 
@@ -200,7 +200,7 @@ This is not WCAG conformance. Manual screen-reader testing across multiple assis
 | Offline deterministic boundary / WS5 seam | Satisfied without claiming WS5 transport/lease/device behavior |
 | Real accessible responsive reloadable UI | Satisfied at controlled-prototype target; RR-009 conformance remains open |
 | Bun/Node critical paths | Satisfied by declared lanes and the exact-`main` whole-project audit evidence |
-| Evidence/risk/lessons/runbooks/docs/migrations/contracts/gates | PR #79 merged the evidence; PDA-REV-013 reverified it on exact merged `main`; this P-W2a change synchronizes the living tracking and risk records |
+| Evidence/risk/lessons/runbooks/docs/migrations/contracts/gates | PR #79 merged the evidence; PDA-REV-013 reverified it on exact merged `main`; independently reviewed PR #91 merged P-W2a and synchronized the living tracking and risk records |
 
 ## 13. Delete discipline and retired assumptions
 
@@ -220,7 +220,8 @@ PR7 removed or retired these stale claims and artifacts:
 
 Open after controlled-prototype closeout:
 
-- the issue #82 customer-evidence gate, issue #83 repository disclosure/redaction gate, and all remaining founder/legal/customer/provider/regulatory gates;
+- issue #94 restricted raw-evidence handling, issue #82 real customer evidence, and all remaining founder/legal/customer/provider/regulatory gates; PDA-REV-019 records the issue #83 repository disclosure/redaction review subject to exact-head independent concurrence and merge;
+- FDR-005's final repository visibility, licensing, contribution, security-scanning, and third-party-provenance decisions, which remain separate from the completed path review;
 - RR-007 production PostgreSQL role/RLS topology and RR-009 accessibility/security conformance;
 - 99.9%/99.95%/99.99% operational denominators, 2m movement/year and 50-tenant noisy-neighbor load;
 - production retention/legal-hold/deletion-journal integration, malware provider, secrets, SLO/alerting, multi-replica and restore exercises;
@@ -228,10 +229,11 @@ Open after controlled-prototype closeout:
 - full Online Cash Sale and all Commerce/POS/Pricing/Tax/Documents behavior in WS3;
 - pilot/production external assistive-technology, penetration, and qualified review.
 
-PR #79 merged the PR7 evidence, PDA-REV-013 supplied the superseding exact-`main` whole-WS2 review, and the Founder accepted that disposition in issue #81 while retaining the process deviation. This P-W2a synchronization records WS2 at 100% of its controlled-prototype target, a 17.0% weighted contribution, and the overall program at 42.0%. Issues #12 and #73 may close through the independently reviewed and merged P-W2a change. WS3 remains blocked until this synchronization merges and the real-world customer-evidence and repository-disclosure gates in issues #82 and #83 are satisfied.
+PR #79 merged the PR7 evidence, PDA-REV-013 supplied the superseding exact-`main` whole-WS2 review, and the Founder accepted that disposition in issue #81 while retaining the process deviation. Independently reviewed PR #91 merged P-W2a and records WS2 at 100% of its controlled-prototype target, a 17.0% weighted contribution, and the overall program at 42.0%; issues #12 and #73 are closed. PDA-REV-019 records the issue #83 repository disclosure/redaction review subject to exact-head independent concurrence and merge. WS3 remains blocked on issue #94's restricted raw-evidence handling and issue #82's retained real-world customer evidence; the final FDR-005 visibility, licensing, contribution, scanning, and provenance work remains separately open and does not become satisfied by this controlled-prototype closeout.
 
 ## Change log
 
+- 2026-07-17 — v0.3.0 recorded the independently reviewed PR #91 P-W2a merge and closure of issues #12 and #73; recorded PDA-REV-019 as the issue #83 disclosure review subject to exact-head concurrence and merge; and replaced the stale WS3 gate statement with issues #94 and #82 while retaining the separate open FDR-005 work.
 - 2026-07-17 — v0.2.0 recorded the actual PR #79 history, PDA-REV-013's superseding exact-`main` review, and the Founder disposition in issue #81; finalized the 14/14 capability and 182/182 WS2-cell closeout at controlled-prototype depth; and retained RR-007, RR-009, WS3-entry, external-evidence, pilot, and production gates.
 - 2026-07-17 — v0.1.1 closed two findings from the independent WS2 PR7 closeout audit: a Sonner toast-title contrast defect the earlier description/action-only correction missed, and a Product archival mid-flight-request-failure gap where only pre-emptive offline gating had browser coverage. The complete desktop/mobile Playwright lane now reproduces 22/22 cases.
 - 2026-07-16 — v0.1.0 recorded the registry-derived closeout candidate, exact PR1-PR6 ledger, PR7 live database/browser measurements, G1-G6 and section 16.3 dispositions, formal pattern/accessibility and security/privacy reviews, explicit production deferrals, and retained independent-review/merge/exact-main/whole-WS2 gates.

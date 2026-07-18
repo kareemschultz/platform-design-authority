@@ -37,7 +37,13 @@ const minorAmount = (name: string) => bigint(name, { mode: "number" });
  * `Closed` row. The partial unique index below is the one invariant that
  * genuinely IS expressible as a CHECK-equivalent constraint (a Postgres
  * unique index), and it is the authoritative double-open guard under
- * concurrency, not the application-level pre-check.
+ * concurrency, not the application-level pre-check. Its predicate covers
+ * both `Open` and `Closing`: a `Closing` session still holds an
+ * unreconciled custody position (no `commerce.register.closed.v1` yet, cash
+ * movements already refused) pending `commerce.cash-variance.approve`, so a
+ * register may not be opened again until that prior session reaches
+ * `Closed` — otherwise two live custody sessions could coexist on the same
+ * register.
  */
 export const posRegisterSessions = pgTable(
 	"pos_register_session",
@@ -105,7 +111,7 @@ export const posRegisterSessions = pgTable(
 		}),
 		uniqueIndex("pos_register_session_open_register_uidx")
 			.on(table.tenantId, table.registerId)
-			.where(sql`${table.state} = 'Open'`),
+			.where(sql`${table.state} in ('Open', 'Closing')`),
 		index("pos_register_session_tenant_register_idx").on(
 			table.tenantId,
 			table.registerId,

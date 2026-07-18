@@ -87,13 +87,18 @@ function createInMemoryRepository() {
 			});
 		},
 		openRegister: (record) => {
-			const existingOpen = [...sessions.values()].find(
+			// Mirrors the Postgres partial unique index
+			// (pos_register_session_open_register_uidx) predicate: a `Closing`
+			// session still holds an unreconciled custody position pending
+			// commerce.cash-variance.approve, so it blocks a new open exactly
+			// like an `Open` session does — not just `Open` itself.
+			const existingLive = [...sessions.values()].find(
 				(session) =>
 					session.tenantId === record.tenantId &&
 					session.registerId === record.registerId &&
-					session.state === "Open"
+					(session.state === "Open" || session.state === "Closing")
 			);
-			if (existingOpen) {
+			if (existingLive) {
 				return Promise.resolve("already_open" as const);
 			}
 			sessions.set(record.id, record);
@@ -188,6 +193,33 @@ describe("POS domain: RegisterSession lifecycle", () => {
 		});
 		await expect(secondOpen).rejects.toMatchObject({ code: "invalid_state" });
 		await expect(secondOpen).rejects.toBeInstanceOf(PosError);
+	});
+
+	test("rejects opening a register while a prior session on it is Closing, pending variance approval", async () => {
+		const { service } = createHarness();
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "closing-race-open-1",
+			openingFloat: { amountMinor: 10_000, currency: "GYD" },
+		});
+		const closing = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 9500, currency: "GYD" },
+			idempotencyKey: "closing-race-close-1",
+		});
+		expect(closing.state).toBe("Closing");
+
+		const openWhileClosing = service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "closing-race-open-2",
+			openingFloat: { amountMinor: 5000, currency: "GYD" },
+		});
+		await expect(openWhileClosing).rejects.toMatchObject({
+			code: "invalid_state",
+		});
+		await expect(openWhileClosing).rejects.toBeInstanceOf(PosError);
 	});
 
 	test("opens a new session after a prior session on the same register closed", async () => {

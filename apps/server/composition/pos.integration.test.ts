@@ -132,6 +132,76 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 		expect(rows.rows[0]?.count).toBe("1");
 	});
 
+	test("rejects opening a register while a prior session on it is Closing (DB partial unique index covers Open and Closing, not just Open)", async () => {
+		const pos = service();
+		const raceRegisterId = "register_closing_open_race";
+		await pos.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "closing-race-open-1",
+			openingFloat: { amountMinor: 10_000, currency: "GYD" },
+			registerId: raceRegisterId,
+		});
+		const closing = await pos.closeRegister({
+			...base,
+			countedCash: { amountMinor: 9500, currency: "GYD" },
+			idempotencyKey: "closing-race-close-1",
+			registerId: raceRegisterId,
+		});
+		expect(closing.state).toBe("Closing");
+
+		// Sequential attempt: the domain-level pre-check (already_open) must
+		// reject an open while the prior session is merely Closing, not just
+		// Open.
+		const sequentialOpen = await captureError(
+			pos.openRegister({
+				...base,
+				currency: "GYD",
+				idempotencyKey: "closing-race-open-2",
+				openingFloat: { amountMinor: 5000, currency: "GYD" },
+				registerId: raceRegisterId,
+			})
+		);
+		expect(sequentialOpen).toMatchObject({ code: "invalid_state" });
+
+		// Genuine concurrent race against the same Closing row: the DB partial
+		// unique index (pos_register_session_open_register_uidx), not just the
+		// application pre-check, must be the backstop under real concurrency.
+		const raceResults = await Promise.allSettled([
+			pos.openRegister({
+				...base,
+				currency: "GYD",
+				idempotencyKey: "closing-race-open-3",
+				openingFloat: { amountMinor: 6000, currency: "GYD" },
+				registerId: raceRegisterId,
+			}),
+			pos.openRegister({
+				...base,
+				currency: "GYD",
+				idempotencyKey: "closing-race-open-4",
+				openingFloat: { amountMinor: 7000, currency: "GYD" },
+				registerId: raceRegisterId,
+			}),
+		]);
+		for (const result of raceResults) {
+			expect(result.status).toBe("rejected");
+			expect(result.status === "rejected" ? result.reason : null).toMatchObject(
+				{ code: "invalid_state" }
+			);
+		}
+
+		const liveRows = await testPool.query<{ count: string }>(
+			"SELECT count(*)::text AS count FROM pos_register_session WHERE tenant_id = $1 AND register_id = $2 AND state IN ('Open', 'Closing')",
+			[base.tenantId, raceRegisterId]
+		);
+		expect(liveRows.rows[0]?.count).toBe("1");
+		const stillClosingRow = await testPool.query<{ state: string }>(
+			"SELECT state FROM pos_register_session WHERE tenant_id = $1 AND id = $2",
+			[base.tenantId, closing.id]
+		);
+		expect(stillClosingRow.rows[0]?.state).toBe("Closing");
+	});
+
 	test("writes the opened-register outbox row atomically in the owning transaction (raw SQL)", async () => {
 		const pos = service();
 		const registerId = "register_atomic_outbox";

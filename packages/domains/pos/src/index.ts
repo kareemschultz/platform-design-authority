@@ -295,9 +295,13 @@ export interface PosRepository {
 		sessionId: string
 	) => Promise<CashMovementNetTotals>;
 	/** Inserts the session row; the owning schema's partial unique index
-	 * (tenant_id, register_id) WHERE state = 'Open' is the authoritative
-	 * double-open guard under genuine concurrency — this return value
-	 * reports that constraint's outcome, it does not itself enforce it. */
+	 * (tenant_id, register_id) WHERE state IN ('Open', 'Closing') is the
+	 * authoritative double-open guard under genuine concurrency — this
+	 * return value reports that constraint's outcome, it does not itself
+	 * enforce it. A `Closing` session (non-zero variance, pending
+	 * `commerce.cash-variance.approve`) still holds an unreconciled custody
+	 * position, so it blocks a new open on the same register exactly like an
+	 * `Open` one does. */
 	openRegister: (
 		record: RegisterSessionRecord
 	) => Promise<RegisterSessionRecord | "already_open">;

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.9.0
+version: 0.10.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -92,7 +92,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | ID | Title | Status | Evidence | Re-open trigger |
 |---|---|---|---|---|
 | TA-001 | First-slice event contract evades the event registry | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | Event registry drift recurs |
-| TA-002 | first-slice.json encodes a bigger slice than the manifest | Closed architecturally; Founder decision | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | FDR-004 decision |
+| TA-002 | first-slice.json encodes a bigger slice than the manifest | Closed architecturally; Founder decision recorded — FDR-004 Ratified; historical M0 provisional-adoption deviation retained | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical; FDR-004; issue #81 comment `5008157609`; PR #89 concurrence comment `5008646684` and merge `7de0688` | FDR-004 is superseded or implementation exceeds its bounded first-slice scope |
 | TA-003 | API contracts cover roughly half the flows | Closed architecturally | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | Implementation review finds contract gaps |
 | TA-004 | Permission catalog covers neither APIs nor capability set | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | Permission parity CI regresses |
 | TA-005 | Quality-gate system has zero numeric values | Closed architecturally | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | Measured evidence contradicts provisional budgets |
@@ -106,7 +106,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | TA-013 | Project skills: wrong portfolio; tool-restriction misunderstood | Closed architecturally | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §High Findings | Skill trigger/safety regressions |
 | TA-014 | AI guardrails real, mechanisms not | Closed architecturally | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §High Findings | SDK/multi-agent prototype contradicts controls |
 | TA-015 | Marketplace AI packs bypass AI governance pipeline | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §High Findings | Marketplace implementation bypasses registries |
-| TA-016 | Zero customer evidence behind present-tense beachhead | External evidence | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Corrections to Third-Audit Closure Claims | Customer discovery evidence recorded |
+| TA-016 | Zero customer evidence behind present-tense beachhead | External evidence — zero recorded; WS3 entry blocked by issue #82 | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Corrections to Third-Audit Closure Claims; MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md; issue #82 | Issue #82's real-customer evidence bar is met and independently accepted |
 | TA-017 | Permission-naming example violates 3-segment rule | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Medium Findings | New contradicting evidence |
 | TA-018 | Payments engine has no registered prefix | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Medium Findings | Namespace drift recurs |
 | TA-019 | Party capability id splits the Party namespace | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Medium Findings | Deprecated alias reappears in implementation |
@@ -191,6 +191,16 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | FA4-033 | Finance schema controlTotals lacked inventory fields | Closed architecturally | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Accountant/inventory prototype validation fails |
 | FA4-034 | Marketing/status/analytics docs lacked slice-boundary declarations | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Scope admitted without scope-change process |
 
+## Fifth Audit (FA5) — checkpoint `81e903b` (P-W2a status pointers)
+
+The immutable finding set and closure tests remain in `evidence/audit/fable5-whole-project-findings.yaml`. These rows record only the P-W2a findings whose status changes in issue #90; the FA4-015/FA4-030 reopen-and-reclose history remains recorded once in the Fourth Audit table above.
+
+| ID | Title | Status | Evidence | Re-open trigger |
+|---|---|---|---|---|
+| F-A-001 | WS2 PR7 merged without its required pre-merge exact-head concurrence | Founder decision recorded; P-W2a implemented pending independent review | PDA-REV-013 exact-`main` audit at `81e903b`; issue #81 comment `5008157609`; PR #89 concurrence comment `5008646684` and merge `7de0688`; issue #90 | P-W2a fails independent review, the superseding-review decision is changed, or a governed source again claims PR #79 had pre-merge concurrence |
+| F-A-002 | Post-PR7 tracking sources contradict merged state and registry-derived counts | Implemented pending independent review | FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md §Implementation status; issue #90 | P-W2a fails independent review or merged tracking sources drift from the registry-derived evidence |
+| F-L-005 | Eleven production-readiness gate families were not individually tracked | Closed | PROGRAM_STATUS.md §Production-readiness gates; PR #80 concurrence comment `5008076728` and merge `24d28e6` | The eleven-family table loses a family, owner, status, or evidence pointer |
+
 ## Currently Open Risks
 
 Consolidated list of every register entry not fully closed (status Partially closed, External evidence, Founder decision, or Open), plus implementation risks that remain after WS1 controlled-prototype closeout.
@@ -199,17 +209,18 @@ Consolidated list of every register entry not fully closed (status Partially clo
 |---|---|---|---|
 | SA-025 | Provider-certified refund/reversal/dispute matrices | External evidence | Provider selection and pilot payment scope |
 | SA-026 | Authoritative Guyana regulator and MMG review | External evidence | Pilot and production claims |
-| TA-002 | First-slice scope ratification (FDR-004) | Founder | First-slice specification ratification |
 | TA-007 | Qualified tax/accounting verification of the prototype tax pack | External evidence | Pilot |
 | TA-008 | Authoritative Guyana commencement/FX/tax/payment advice | External evidence | Pilot |
-| TA-016 | Customer discovery evidence (currently zero interviews) | External evidence | Hardening prototype investment into pilot commitments |
+| TA-016 | Customer discovery evidence (currently zero interviews; issue #82) | External evidence | WS3 entry and hardening prototype investment into pilot commitments |
 | TA-031 | Competitor baseline execution (Odoo, ERPNext, specialists) | External evidence | Experience-budget freeze |
 | TA-044 | Marketplace paid-phase settlement decision (FDR-008) | Founder | Paid marketplace phase |
 | TA-054 | Platform-SaaS cash receivables policy (FDR-010) | Founder | Platform Subscription cash collection |
-| TA-055 | FDR-001 through FDR-010 ratification | Founder | Pilot and production |
+| TA-055 | Remaining FDR-001–003 and FDR-005–010 ratification (FDR-004 is Ratified) | Founder | Pilot and production |
 | FA4-014 | Marketplace payout gating (FDR-008 plus legal/tax/provider review) | Founder | Paid marketplace phase |
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
 | FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |
+| F-A-001 | Superseding WS2 exact-`main` review tracking propagation | PDA + independent reviewer | P-W2a exact-head review and merge |
+| F-A-002 | Post-PR7 tracking synchronization | PDA + independent reviewer | P-W2a exact-head review and merge |
 | RR-001 | Expo auth plugin approval per the BETTER_AUTH plugin matrix | PDA | Native app authentication implementation |
 | RR-002 | PWA manifest theme-color tokens decision | PDA | Web app shell and PWA manifest implementation |
 | RR-003 | apps/native Biome lint exclusion | Implementation | Uniform lint enforcement across workspaces |
@@ -244,3 +255,7 @@ Distinct from risk: a debt entry records a deliberate suboptimal choice accepted
 ## Maintenance
 
 This register is updated in the same pull request as any disposition change: a status may not change in a disposition document without the corresponding row changing here, and every row change must carry its evidence pointer. The file is validated by the standard document-governance checks (front matter fields and internal link resolution); the audit reports and dispositions it indexes remain immutable, and corrections to them are recorded as new dated evidence rather than edits.
+
+## Change Log
+
+- **0.10.0 (2026-07-17):** Added the P-W2a fifth-audit status pointers for F-A-001, F-A-002, and F-L-005; recorded FDR-004 ratification on TA-002 while retaining the historical M0 deviation; preserved all external, pilot, and production blockers.

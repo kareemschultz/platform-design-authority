@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.14.0
+version: 0.15.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -22,7 +22,7 @@ This plan maps the governed planning inputs into concrete engineering workstream
 
 Where this plan and those documents conflict, they win. All work scheduled here proceeds under the ratification-wave **prototype exception**: Draft/Proposed documents guide non-production prototypes that name the decisions they test (chiefly ADR-0020 runtime, ADR-0002/0003 boundaries, ADR-0013 stored-value ownership).
 
-**Founder decision record (2026-07-17):** issue #81, comment `5008157609`, ratifies FDR-004's bounded first-slice scope, approves WSX, gates WS3 on real customer evidence and repository disclosure review, and selects the M3 standing-audit charter checkpoint as the general P4–P7 entry clearance. Scope ratification does not promote this Draft plan, convert target depth into implementation evidence, validate the market hypothesis, or authorize pilot/production use. M0 passed under provisional adoption before this ratification; the separate P-W2a tracking synchronization retains that historical sequence.
+**Founder decision record (2026-07-17):** issue #81, comment `5008157609`, ratifies FDR-004's bounded first-slice scope, approves WSX, gates WS3 on real customer evidence and repository disclosure review, and selects the M3 standing-audit charter checkpoint as the general P4–P7 entry clearance. Scope ratification does not promote this Draft plan, convert target depth into implementation evidence, validate the market hypothesis, or authorize pilot/production use. M0 passed under provisional adoption before this ratification; P-W2a issue #90 records that historical sequence and the superseding exact-`main` WS2 review.
 
 ### 1.1 Implementation Posture: Backend Foundation First, Not Entire Backend First
 
@@ -55,7 +55,7 @@ WS0 and WS1 (Prototype 1) must not be declared exited on backend evidence alone;
 
 The contract-first oRPC/client exception closed in WS1 PR1. The temporary embedded Identity persistence exception closed in PR2 through ADR-0027's owner-specific adapters and composition-owned pool. No exception may be silently recreated for later owners.
 
-**Pre-P-W2a honesty anchor:** Catalog, Inventory, Event Backbone delivery/projections, bounded imports, Strict Online Numbering, and the Product/Inventory web experience exist at the merged WS2 controlled-prototype depth. PR7/#79 is merged, but PDA-RDM-009, PROGRAM_STATUS, release notes, and the risk register intentionally retain their pre-synchronization state until the separate P-W2a PR records the actual review sequence and evidence pointers; this P-W1 decision-recording PR does not claim that synchronization. POS, stored value, general offline sync, provider integration, and broad recovery tooling do not yet exist at first-slice implementation depth. Production RLS, OTP/provider evidence, independent assistive-technology conformance, penetration testing, operational exercises, and external/founder gates remain open. No merged WS2 work is pilot or production authority.
+**Current controlled-prototype honesty anchor:** Catalog, Inventory, Event Backbone delivery/projections, bounded imports, Strict Online Numbering, and the Product/Inventory web experience are complete at the merged WS2 controlled-prototype depth. PR #79 merged without the required pre-merge concurrence; PDA-REV-013 subsequently reviewed exact merged `main`, and the Founder accepted that audit as the superseding WS2 review. P-W2a issue #90 synchronizes PDA-RDM-009, PDA-IMPL-007, PROGRAM_STATUS, release notes, and the risk register to that actual sequence. POS, stored value, general offline sync, provider integration, and broad recovery tooling do not yet exist at first-slice implementation depth. Production RLS, OTP/provider evidence, independent assistive-technology conformance, penetration testing, operational exercises, and external/founder gates remain open. No merged WS2 work is pilot or production authority.
 
 ## 3. Package Architecture Target
 
@@ -96,7 +96,7 @@ graph LR
 | WS0 | — | Single lane; everything depends on it | — |
 | WS1 (P1) | WS0 | — | — |
 | WS2 (P2) | WS1 | — | — |
-| WS3 (P3) | WS2 closeout recorded through P-W2a | — | #82 retained real-world customer threshold; #83 disclosure review complete |
+| WS3 (P3) | WS2 controlled-prototype closeout recorded | — | #82 retained real-world customer threshold; #83 disclosure review complete |
 | WS4 (P4) | Recorded M3 charter checkpoint; WS3 | May run beside WS5 | FDR-003 before PR1 schema freeze |
 | WS5 (P5) | Recorded M3 charter checkpoint; WS3 | Preparatory client-sync design may run earlier; P5 implementation may not | Device-trust/key-management ADR and device/browser matrix before PR1 |
 | WS6 (P6) | Recorded M3 charter checkpoint | Provider-neutral preparatory analysis may run earlier; P6 implementation may not | Real-provider work gated on FDR-002/FDR-007 and WSX #84/#85 |
@@ -161,13 +161,13 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 - **Exit disposition:** satisfied for the controlled prototype by PDA-IMPL-005, PDA-UX-038, `evidence/first-slice/ws1-capability-evidence.json`, and `registry/first-slice-tests.json` (11 capabilities, 143 required cells). The residual production/external gates remain explicit; no ADR or Draft specification is self-ratified by implementation.
 - **Gates:** Better Auth plugin matrix deny-by-default honored (no new plugins without matrix disposition).
 
-### WS2 — Catalog and Inventory Ledger (P2)
+### WS2 — Catalog and Inventory Ledger (P2) — **complete at controlled-prototype depth (2026-07-17)**
 
 - **Why:** Inventory is the first append-only business ledger — it proves the platform's correction-by-reversal doctrine, outbox eventing, and domain data ownership on the least regulated ledger before money is at stake.
 - **Entry:** WS1 done.
 - **Proves:** PDA-RDM-004 §Prototype 2.
 - **Detailed plan:** `WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md` (PDA-RDM-009) — exact 14-capability depth, ADR-0027 package ownership, contract/schema closure, durable event delivery, WS2/WS5 offline boundary, PR sequence, evidence, and exit gates. This entry stays the authoritative summary; PDA-RDM-009 does not override it.
-- **Progress:** PR1-PR6 are merged with independent exact-head concurrence. PR5 exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be` merged as PR #76 at `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`; PR6 exact head `c69e5fb4415083affc40dc52f2d0ada78846252e` merged as PR #78 at `635fa3f1618d5c880585fdd3e86de7a16d0993ac`. PR7 verification and controlled-prototype closeout is active on issue #73.
+- **Progress:** PR1-PR6 merged with independent exact-head concurrence. PR #79 exact head `22a3a38369d458d065d5fb2bc2216d09aec410de` merged as `81e903b27bf41785106775afb33f9f88738e39b9` without the required pre-merge concurrence; PDA-REV-013 later independently reviewed that exact merged `main`, and issue #81 accepted it as the superseding review while retaining the deviation. PDA-IMPL-007 and P-W2a issue #90 record 14/14 WS2 capabilities and 182/182 required cells at controlled-prototype depth.
 - **Packages:** Implemented runtime-neutral `domains/catalog` and `domains/inventory` cores with ports; owner-specific `persistence/catalog-postgres` and `persistence/inventory-postgres` concrete schemas/migrations under ADR-0027; extended `platform/events` into controlled-prototype publication/consumer infrastructure; merged `platform/import-export` and `platform/numbering` cores plus owner-specific Persistence adapters, with Numbering consumed by real import creation; and composed the generated client into the Product and Inventory web experience. Receipt/fiscal/offline numbering remains later work.
 - **Contracts:** `/products*`, `/product-imports*`, `/opening-stock-imports*`, `/stock-balances`, `/inventory-adjustments*`, `/stock-counts*`, `/stock-transfers*`; `catalog.*`, `inventory.*`, bounded `platform.import.*`, and `platform.sequence.number-issued.v1` events (registered in `registry/events.json`).
 - **Tests:** dominant dimensions `idempotency_and_duplicate`, `concurrency_and_conflict`, `events_jobs_and_projections`; budgets: inventory ledger 99.95% correctness; barcode lookup 300ms p95; search 800ms p95; outbox 99.99% eventual publication.
@@ -177,7 +177,7 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 ### WS3 — POS Cash Workflow (P3)
 
 - **Why:** The cash sale is the beachhead's economic heartbeat and the platform's first legally meaningful artifact chain (receipt numbering, register custody, accountant handoff) — cash-first matches Guyana reality and defers all provider risk.
-- **Entry:** WS2 closeout recorded through the separate P-W2a tracking synchronization; customer discovery #82 records at least 8 structured interviews and 3 direct workflow observations across at least 3 businesses as retained real-world evidence; repository disclosure/redaction review #83 is complete. No agent-generated, simulated, inferred, or waived substitute satisfies the customer-evidence gate. FA4's P1–P3 controlled-prototype clearance remains the authority for P3.
+- **Entry:** WS2 controlled-prototype closeout is recorded through P-W2a issue #90; customer discovery #82 records at least 8 structured interviews and 3 direct workflow observations across at least 3 businesses as retained real-world evidence; repository disclosure/redaction review #83 is complete. No agent-generated, simulated, inferred, or waived substitute satisfies the customer-evidence gate. FA4's P1–P3 controlled-prototype clearance remains the authority for P3.
 - **Proves:** PDA-RDM-004 §Prototype 3.
 - **Packages:** NEW `domains/pos`; `engines/pricing`, `engines/tax` (prototype depth, values from `GUYANA_RETAIL_PROTOTYPE_TAX_PACK.md` — explicitly non-statutory).
 - **Contracts:** `/registers/*` (open/close/cash-movements/safe-drops), `/sales*`, `/receipts/*` (reissue/void), `/deposits*`, `/refunds*`, `/returns*`, `/exports/accountant-handoff` (+ `FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`, `schemas/finance/finance-handoff-v1.schema.json`); `commerce.*` sale/register/return events.

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-IMPL-007
 title: WS2 Verification and Controlled-Prototype Closeout
-version: 0.1.1
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -12,9 +12,11 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
 
 ## 1. Decision boundary
 
-WS2 implementation and repository-owned evidence are complete enough to enter exact-head independent review at the controlled-prototype depth governed by PDA-RDM-004, PDA-RDM-007, and PDA-RDM-009. The evidence implementation commit is `c0ed1bc` on issue #73's PR7 branch, based on merged `main` at `635fa3f1618d5c880585fdd3e86de7a16d0993ac`.
+WS2 implementation and repository-owned evidence are complete at the controlled-prototype depth governed by PDA-RDM-004, PDA-RDM-007, and PDA-RDM-009. The generated matrix records all 14 WS2 capabilities and all 182 required evidence cells; whole-first-slice coverage is 25 of 103 capabilities and 325 of 1,294 required cells.
 
-This is a closeout candidate, not a self-approved exit. WS2 closes only after the PR7 exact head has green required CI, Claude Code independently concurs, PR7 merges, exact-`main` checks pass, and the separate whole-WS2 audit is dispositioned. This document does not accept a Proposed ADR, approve a Draft specification, ratify FDR-004, close RR-007 or RR-009, establish a contractual service level, or claim pilot or production readiness.
+The actual closeout sequence is retained without rewriting history. PR #79 final head `22a3a38369d458d065d5fb2bc2216d09aec410de` merged as `81e903b27bf41785106775afb33f9f88738e39b9` without the required recorded pre-merge exact-head concurrence. PDA-REV-013 then independently audited that exact merged `main`, reproduced the WS2 evidence, and concurred with the implementation evidence while reporting the process deviation as F-A-001. The Founder accepted PDA-REV-013 as the superseding exact-`main` WS2 review in issue #81, comment `5008157609`; PR #89 merged the decision record as `7de0688d11a80de950f0e0639ade84b23e790e59`. That superseding disposition closes the WS2 controlled-prototype review condition while preserving the missed pre-merge concurrence as a governance deviation.
+
+This Draft records controlled-prototype closeout only. It does not approve a Draft or Proposed source, close RR-007 or RR-009, establish a contractual service level, claim pilot or production readiness, or treat FDR-004's separately recorded ratification as evidence that its customer, legal, provider, security, accessibility, operational, and disclosure gates are satisfied. This P-W2a tracking update itself still requires independent exact-head review and merge; that is a change-control gate for this synchronization, not an open WS2 implementation-evidence gate.
 
 The registry-derived WS2 set is exactly:
 
@@ -34,7 +36,7 @@ All thirteen PDA-TST-013 dimensions remain required for all fourteen capabilitie
 | PR4 delivery/projections | `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` | PR #74 `7202fc819b70982c013e1ca11a4fcc136e01e2de` | Exact-head concurrence; PR comment `4991097241`; RR-006 closed at controlled-prototype depth |
 | PR5 import/numbering | `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be` | PR #76 `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5` | Exact-head concurrence; PR comment `4995579814` |
 | PR6 web experience | `c69e5fb4415083affc40dc52f2d0ada78846252e` | PR #78 `635fa3f1618d5c880585fdd3e86de7a16d0993ac` | Exact-head concurrence; PR comment `4998183817` |
-| PR7 verification/closeout | implementation evidence `c0ed1bc`; final head pending | Pending | Exact-head concurrence, merge, exact-main verification, and whole-WS2 audit remain required |
+| PR7 verification/closeout | final PR head `22a3a38369d458d065d5fb2bc2216d09aec410de`; superseding reviewed exact-`main` `81e903b27bf41785106775afb33f9f88738e39b9` | PR #79 `81e903b27bf41785106775afb33f9f88738e39b9` | No pre-merge concurrence was recorded. PDA-REV-013 independently audited the exact merge, reproduced the evidence, and the Founder accepted it in issue #81 as the superseding WS2 review; the deviation remains recorded as F-A-001. |
 
 ## 3. Machine-readable matrix
 
@@ -54,7 +56,7 @@ An `Evidenced` row means executable evidence exists at registered depth. Open sc
 | Gate | Result | Evidence and retained boundary |
 |---|---|---|
 | G1 independent plan review | Satisfied | PR #63 exact-head concurrence after four accepted/remediated findings |
-| G2 contract-first closure | Satisfied | PR #65; 116 OpenAPI operations equal 116 endpoint mappings; 109 registered permissions after PR7 adds two internal Reservation application-command authorities; generated contract freshness |
+| G2 contract-first closure | Satisfied | PR #65; 116 OpenAPI operations equal 116 endpoint mappings; 109 registered permissions after PR7 added two internal Reservation application-command authorities; generated contract freshness |
 | G3 ledger/Drizzle suitability | Satisfied at controlled-prototype depth | PDA-APP-021 through PDA-APP-022; exact decimal, row locking, immutable reversal, balance rebuild, atomic outbox, migration, and 250k Product query-shape evidence; production scale remains open |
 | G4 owner persistence/composition | Satisfied at controlled-prototype depth | ADR-0027 v0.3.5; owner-specific adapters/migrations; literal server/worker roots; no cross-owner persistence import; Import/Export and Numbering exact-head sign-off |
 | G5 data/isolation/classification | Satisfied at controlled-prototype depth | PDA-DAT-019; composite ownership, tenant predicates, safe errors, two-tenant owner/job/event/projection/import/numbering proof; RR-007 stays open |
@@ -180,12 +182,12 @@ This is not WCAG conformance. Manual screen-reader testing across multiple assis
 - The manifest-derived runtime workspace closure for the essential `server`, `web`, and `worker` paths contains no AI runtime dependency and remains deterministic with AI disabled; transitive platform clients, UI, authorization, and entitlement packages are included rather than trusted through a hand-maintained directory list.
 - RR-006 stays closed based on real PR4 worker evidence. Backup/PITR, multi-replica failover, production alerting, and full restore exercises remain WS7/production gates.
 
-## 12. PDA-RDM-009 section 16.3 disposition
+## 12. PDA-RDM-009 section 16.3 final disposition
 
-| Exit condition | Candidate result before independent PR7 review |
+| Exit condition | Final controlled-prototype result |
 |---|---|
 | G1-G6 | Satisfied at controlled-prototype depth; section 4 |
-| 14 capabilities x 13 dimensions | 182/182 linked to executable evidence by the generated matrix; exact-head review pending |
+| 14 capabilities x 13 dimensions | 182/182 linked to executable evidence by the generated matrix and independently reproduced by PDA-REV-013 on exact merged `main` |
 | Contract/permission/event/schema counts | Exact denominators reconciled; section 5 |
 | Emitted event schema/append/delivery/consumer evidence | Satisfied for 19 emitted events; future registered facts are not claimed |
 | RR-006 real worker evidence | Closed by PDA-APP-023 / PR #74; revalidated, not re-closed |
@@ -197,12 +199,12 @@ This is not WCAG conformance. Manual screen-reader testing across multiple assis
 | Permission/entitlement separation | Satisfied at transport/application boundaries; browser + server evidence |
 | Offline deterministic boundary / WS5 seam | Satisfied without claiming WS5 transport/lease/device behavior |
 | Real accessible responsive reloadable UI | Satisfied at controlled-prototype target; RR-009 conformance remains open |
-| Bun/Node critical paths | Satisfied by declared lanes; final CI pending |
-| Evidence/risk/lessons/runbooks/docs/migrations/contracts/gates | Repository propagation complete; exact-head CI and independent review pending |
+| Bun/Node critical paths | Satisfied by declared lanes and the exact-`main` whole-project audit evidence |
+| Evidence/risk/lessons/runbooks/docs/migrations/contracts/gates | PR #79 merged the evidence; PDA-REV-013 reverified it on exact merged `main`; this P-W2a change synchronizes the living tracking and risk records |
 
 ## 13. Delete discipline and retired assumptions
 
-PR7 removes or retires these stale claims and artifacts:
+PR7 removed or retired these stale claims and artifacts:
 
 - PR6 is no longer described as active or unmerged;
 - RR-006 is no longer described as open pending PR7;
@@ -218,7 +220,7 @@ PR7 removes or retires these stale claims and artifacts:
 
 Open after controlled-prototype closeout:
 
-- FDR-004 and all founder/legal/customer/provider/regulatory gates;
+- the issue #82 customer-evidence gate, issue #83 repository disclosure/redaction gate, and all remaining founder/legal/customer/provider/regulatory gates;
 - RR-007 production PostgreSQL role/RLS topology and RR-009 accessibility/security conformance;
 - 99.9%/99.95%/99.99% operational denominators, 2m movement/year and 50-tenant noisy-neighbor load;
 - production retention/legal-hold/deletion-journal integration, malware provider, secrets, SLO/alerting, multi-replica and restore exercises;
@@ -226,9 +228,10 @@ Open after controlled-prototype closeout:
 - full Online Cash Sale and all Commerce/POS/Pricing/Tax/Documents behavior in WS3;
 - pilot/production external assistive-technology, penetration, and qualified review.
 
-After PR7 exact-head concurrence and merge, rerun exact-`main` governance, contracts, architecture, types, tests, migrations, Docker health, Node, worker, docs, build, and Playwright lanes. Then request the separate whole-WS2 audit across PR1-PR7. Only a concurred or fully remediated final disposition may close issue #12/#73 and move WS2 to 100% / 17.0% weighted contribution and the overall program to 42.0%.
+PR #79 merged the PR7 evidence, PDA-REV-013 supplied the superseding exact-`main` whole-WS2 review, and the Founder accepted that disposition in issue #81 while retaining the process deviation. This P-W2a synchronization records WS2 at 100% of its controlled-prototype target, a 17.0% weighted contribution, and the overall program at 42.0%. Issues #12 and #73 may close through the independently reviewed and merged P-W2a change. WS3 remains blocked until this synchronization merges and the real-world customer-evidence and repository-disclosure gates in issues #82 and #83 are satisfied.
 
 ## Change log
 
+- 2026-07-17 — v0.2.0 recorded the actual PR #79 history, PDA-REV-013's superseding exact-`main` review, and the Founder disposition in issue #81; finalized the 14/14 capability and 182/182 WS2-cell closeout at controlled-prototype depth; and retained RR-007, RR-009, WS3-entry, external-evidence, pilot, and production gates.
 - 2026-07-17 — v0.1.1 closed two findings from the independent WS2 PR7 closeout audit: a Sonner toast-title contrast defect the earlier description/action-only correction missed, and a Product archival mid-flight-request-failure gap where only pre-emptive offline gating had browser coverage. The complete desktop/mobile Playwright lane now reproduces 22/22 cases.
 - 2026-07-16 — v0.1.0 recorded the registry-derived closeout candidate, exact PR1-PR6 ledger, PR7 live database/browser measurements, G1-G6 and section 16.3 dispositions, formal pattern/accessibility and security/privacy reviews, explicit production deferrals, and retained independent-review/merge/exact-main/whole-WS2 gates.

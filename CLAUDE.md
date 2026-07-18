@@ -245,7 +245,7 @@ Business facts architecture cannot infer belong in the Founder Decision Register
 
 ## 15. Current Readiness
 
-The repository targets one constrained vertical-slice implementation after named blockers. Technical Prototypes 1–3 retain the controlled-prototype clearance recorded by the fourth audit (reviews family FA4) and its disposition; the monorepo scaffold under `apps/` and `packages/` is that prototype surface. WS3 may not start until the separate P-W2a closeout synchronization is merged, issue #82 retains at least 8 structured interviews and 3 direct workflow observations across at least 3 distinct businesses, and issue #83's repository disclosure/redaction review is complete. Agents cannot substitute for the real-world evidence in #82.
+The repository targets one constrained vertical-slice implementation after named blockers. Technical Prototypes 1–3 retain the controlled-prototype clearance recorded by the fourth audit (reviews family FA4) and its disposition; the monorepo scaffold under `apps/` and `packages/` is that prototype surface. WS2 is complete at controlled-prototype depth through the P-W2a synchronization in issue #90. WS3 may not start until issue #82 retains at least 8 structured interviews and 3 direct workflow observations across at least 3 distinct businesses and issue #83's repository disclosure/redaction review is complete. Agents cannot substitute for the real-world evidence in #82.
 
 P4–P7 implementation is not cleared until the M3 standing-audit charter checkpoint records the general entry disposition against completed P3 evidence. Each prototype's stricter founder-decision, ADR, provider, security, and external-evidence gates continue to apply.
 

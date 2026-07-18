@@ -3799,7 +3799,7 @@
       "document_id": "PDA-STR-001",
       "path": "docs/blueprint/20-Strategy/README.md",
       "title": "Strategy Section Index",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-18",
@@ -4008,10 +4008,10 @@
       "document_id": "PDA-STR-027",
       "path": "docs/blueprint/20-Strategy/MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md",
       "title": "Market Segmentation and Beachhead Evidence",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-17",
+      "last_reviewed": "2026-07-18",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -4045,7 +4045,9 @@
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-18",
-      "related_adrs": [],
+      "related_adrs": [
+        "ADR-0014"
+      ],
       "review_evidence": null
     },
     {

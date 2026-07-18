@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-035
 title: Shadcn Studio Evaluation
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-18
@@ -91,7 +91,7 @@ Candidate dispositions from this delta:
 
 | Candidate | Disposition | Meridian boundary |
 |---|---|---|
-| Autocomplete 10 | Researching | Compare visual and interaction ideas only against the official shadcn Command/Combobox and the platform-owned searchable-select direction. New owned work remains Base UI-backed under ADR-0022; the Studio Radix view is comparison/fallback evidence only and does not authorize mixing primitive families. Because the Radix-selected page contains mixed Base UI/Radix prose, require item-level source and dependency evidence before assigning a primitive family. Any prototype must preserve tenant and permission filtering, cancellable/debounced remote search, no-results, stale, degraded, offline, large-data, keyboard, focus, announcement, and custom-option semantics. |
+| Autocomplete 10 | Researching | Compare visual and interaction ideas only against the official shadcn Command/Combobox and the platform-owned searchable-select direction. New owned work remains Base UI-backed under ADR-0022; the Studio Radix view is comparison/fallback evidence only and does not authorize mixing primitive families. Because rendered rechecks at `?base=radix` produced conflicting component-library labels while retaining the Radix preview link and Base UI-specific prose, require item-level source and dependency evidence before assigning a primitive family. Any prototype must preserve tenant and permission filtering, cancellable/debounced remote search, no-results, stale, degraded, offline, large-data, keyboard, focus, announcement, and custom-option semantics. |
 | Onboarding Feed 01 | Preferred Candidate | Bounded composition inspiration for an optional first-run or operational-readiness checklist. Completion state must come from governed application contracts; support skip, resume, recovery, and non-coercive disclosure. |
 | Onboarding Feed 02 | Researching | Multi-step setup reference only. `@stepperize/react` is a new dependency requiring separate review; external step state must not become business authority. |
 | Onboarding Feed 03 | Researching | Progress-and-dialog composition reference only. Dialog actions must expose consequence, cancellation, validation, and authoritative completion rather than treating presentation state as success. |

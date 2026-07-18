@@ -47,7 +47,7 @@ A candidate beachhead must demonstrate:
 
 ## Required Research
 
-- Interviews and workflow observation
+- Interviews and workflow observation — instrument: `BEACHHEAD_CUSTOMER_EVIDENCE_COLLECTION_KIT.md` (PDA-STR-030), governed by issue #82
 - Current-system inventory
 - Implementation and migration analysis
 - Competitor and pricing research

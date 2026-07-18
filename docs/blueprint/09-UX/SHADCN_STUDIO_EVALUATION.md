@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-035
 title: Shadcn Studio Evaluation
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-18
@@ -74,6 +74,8 @@ The complete family and variant names, plus the full per-family authenticated/Pr
 ## 2026-07-18 catalog delta review
 
 This delta is deliberately narrower than the 2026-07-13 exhaustive inventory. It records newly advertised candidates and the boundary between Studio's public website and its pinned MCP metadata interface. No source, installation payload, private URL, or premium asset was retrieved.
+
+Website evidence was verified in a rendered Chrome session with the browser's Playwright-backed DOM inspection and viewport screenshots, not inferred only from static page extraction or URL parameters. On the Radix-selected Autocomplete URL, the live DOM exposed the `Radix UI` component-library control and `/preview/components/radix/autocomplete?index=0` link while also rendering `Base UI Autocomplete Support`, `Radix UI Autocomplete Support`, and Base UI-specific implementation prose. Screenshots are ephemeral review evidence and are not committed because they reproduce third-party presentation content; the durable repository evidence is the bounded observation and source URL below.
 
 | Evidence | Verified result | Interpretation |
 |---|---|---|

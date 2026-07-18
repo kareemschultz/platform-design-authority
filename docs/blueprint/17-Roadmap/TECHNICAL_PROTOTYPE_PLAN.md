@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-004
 title: Technical Prototype Plan
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 ---
 
 # Technical Prototype Plan
@@ -25,7 +25,7 @@ P1–P3 retain the controlled-prototype clearance recorded by the fourth audit. 
 
 | Prototype | General clearance | Additional entry conditions |
 |---|---|---|
-| P3 | Existing FA4 P1–P3 clearance | WS2 controlled-prototype closeout is recorded through P-W2a issue [#90](https://github.com/kareemschultz/platform-design-authority/issues/90); PDA-REV-019 records repository disclosure review [#83](https://github.com/kareemschultz/platform-design-authority/issues/83), subject to exact-head independent concurrence and merge; issue [#94](https://github.com/kareemschultz/platform-design-authority/issues/94) establishes restricted raw-evidence handling; and customer discovery [#82](https://github.com/kareemschultz/platform-design-authority/issues/82) satisfies 8 structured interviews plus 3 direct workflow observations across at least 3 businesses with retained real-world evidence. Final FDR-005 visibility/licensing ratification remains separate and open. |
+| P3 | Existing FA4 P1–P3 clearance | WS2 controlled-prototype closeout is recorded through P-W2a issue [#90](https://github.com/kareemschultz/platform-design-authority/issues/90); PDA-REV-019 records repository disclosure review [#83](https://github.com/kareemschultz/platform-design-authority/issues/83), subject to exact-head independent concurrence and merge; issue [#94](https://github.com/kareemschultz/platform-design-authority/issues/94) establishes restricted raw-evidence handling; and customer discovery [#82](https://github.com/kareemschultz/platform-design-authority/issues/82) satisfies 8 structured interviews plus 3 direct workflow observations across at least 3 businesses with retained real-world evidence. Final FDR-005 visibility/licensing ratification remains separate and open. Under FDR-012, P3 implementation may proceed ahead of the #94/#82 clearances only as a controlled prototype on isolated branch `claude/ws3-integration`; this row continues to bind P3 entry recording and any merge to `main`. |
 | P4 | Recorded M3 charter checkpoint | P3 complete; FDR-003 dispositioned before the first schema freeze; ledger target remains a target until measured. |
 | P5 | Recorded M3 charter checkpoint | P3 complete; offline device-trust/key-management ADR and device/browser support matrix completed before the first signing-contract freeze. |
 | P6 | Recorded M3 charter checkpoint | Provider-neutral preparatory analysis may continue before M3, but P6 implementation entry waits for the checkpoint; real-provider work additionally requires FDR-002/FDR-007 and WSX issues [#84](https://github.com/kareemschultz/platform-design-authority/issues/84) and [#85](https://github.com/kareemschultz/platform-design-authority/issues/85). |

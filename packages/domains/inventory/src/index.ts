@@ -87,7 +87,8 @@ export type InventoryMovementType =
 	| "TransferOut"
 	| "TransferIn"
 	| "Reversal"
-	| "Offline";
+	| "Offline"
+	| "Sale";
 
 export interface InventoryMovementRecord {
 	actorUserId: string;
@@ -107,7 +108,7 @@ export interface InventoryMovementRecord {
 	quantity: DecimalQuantity;
 	reversalOfMovementId: string | null;
 	sourceId: string;
-	sourceType: "Adjustment" | "Count" | "Transfer" | "OfflineCommand";
+	sourceType: "Adjustment" | "Count" | "Transfer" | "OfflineCommand" | "Sale";
 	tenantId: string;
 	unit: string;
 	variantId: string | null;
@@ -1898,6 +1899,70 @@ export function createInventoryService(options: InventoryServiceOptions) {
 					now
 				);
 			});
+		},
+		/**
+		 * WS3 PR2's mandated synchronous stock effect (frozen control plan §6.3,
+		 * "Read first"): a completed cash sale posts an immediate,
+		 * single-actor `Sale` movement decrementing on-hand stock, run inside
+		 * the SAME transaction as the sale commit, receipt numbering, and
+		 * outbox write. This is deliberately NOT the `Adjustment`
+		 * maker/checker pair (creator cannot approve their own Adjustment —
+		 * wrong fit for a single cashier completing one sale) and NOT
+		 * `applyOfflineMovement` (WS5 lease-facts only). It also does not run
+		 * Inventory's own idempotency wrapper (`replay`/`recordResult`): the
+		 * caller (POS `sale.complete`) already claims idempotency once for
+		 * the whole sale before this runs, inside the same transaction, so a
+		 * retried or concurrently-raced command rolls back the entire
+		 * transaction (including this movement) rather than needing a second
+		 * command-receipt here. No dedicated Inventory event is registered
+		 * for a sale movement (`registry/events.json` has no
+		 * `inventory.stock-movement.sale.*` entry); the movement ledger row
+		 * itself is the durable record, and `commerce.sale.completed.v1` is
+		 * the outbox fact downstream consumers observe.
+		 */
+		async recordSaleMovement(input: {
+			actorUserId: string;
+			correlationId: string;
+			locationId: string;
+			organizationId: string;
+			productId: string;
+			quantity: DecimalQuantity;
+			saleId: string;
+			tenantId: string;
+			unit: string;
+			variantId?: string | null;
+		}): Promise<InventoryMovementRecord | "negative_stock"> {
+			requirePositive(input.quantity);
+			await Promise.all([
+				options.references.requireLocation({
+					locationId: input.locationId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				}),
+				options.references.requireProduct({
+					productId: input.productId,
+					tenantId: input.tenantId,
+					variantId: input.variantId,
+				}),
+			]);
+			const posted = movement({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				locationId: input.locationId,
+				movementType: "Sale",
+				organizationId: input.organizationId,
+				productId: input.productId,
+				quantity: negateQuantity(input.quantity),
+				sourceId: input.saleId,
+				sourceType: "Sale",
+				tenantId: input.tenantId,
+				unit: input.unit,
+				variantId: input.variantId,
+			});
+			const applied = await options.unitOfWork.execute(({ repository }) =>
+				repository.applyMovement(posted)
+			);
+			return applied === "negative_stock" ? applied : applied.movement;
 		},
 		async releaseReservation(input: {
 			actorUserId: string;

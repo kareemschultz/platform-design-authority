@@ -8,6 +8,13 @@
       "when": 1784124411732,
       "tag": "0000_thick_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784368420369,
+      "tag": "0001_luxuriant_chamber",
+      "breakpoints": true
     }
   ]
 }

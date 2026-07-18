@@ -425,7 +425,11 @@
       "tables": [
         "pos_register_session",
         "pos_cash_movement",
-        "pos_command_receipt"
+        "pos_command_receipt",
+        "pos_sale",
+        "pos_sale_line",
+        "pos_price_override",
+        "pos_receipt"
       ],
       "migration_directory": "packages/persistence/pos-postgres/src/migrations"
     }

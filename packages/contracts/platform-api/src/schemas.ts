@@ -750,6 +750,126 @@ export const CashMovementSchema = z.object({
 	sessionId: IdentifierSchema,
 });
 
+// ---------------------------------------------------------------------------
+// WS3 PR2: Sale, PriceOverride, Receipt (commerce.order-management,
+// commerce.receipts). Quantity follows the same PositiveDecimalQuantity
+// convention Inventory already uses; money stays integer-minor-unit per
+// CLAUDE.md §7.
+// ---------------------------------------------------------------------------
+
+export const SaleTaxCategorySchema = z.enum([
+	"GY_STANDARD_14",
+	"GY_ZERO_RATED",
+	"GY_EXEMPT",
+	"GY_OUT_OF_SCOPE",
+]);
+
+export const SaleLineInputSchema = z.object({
+	discountAmount: MoneySchema.nullable().optional(),
+	productId: IdentifierSchema,
+	quantity: PositiveDecimalQuantitySchema,
+	taxCategory: SaleTaxCategorySchema.optional(),
+	unit: z.string().min(1).max(40),
+	unitPrice: MoneySchema,
+	variantId: NullableIdentifierSchema.optional(),
+});
+
+export const CreateSaleSchema = z
+	.object({
+		currency: z.string().regex(/^[A-Z]{3}$/),
+		customerPartyId: NullableIdentifierSchema.optional(),
+		lines: z.array(SaleLineInputSchema).min(1),
+		registerId: IdentifierSchema,
+	})
+	.strict();
+
+export const TenderReferenceSchema = z.object({
+	amount: MoneySchema,
+	referenceId: NullableIdentifierSchema.optional(),
+	type: z.enum(["Cash", "PaymentIntent", "StoredValue"]),
+});
+
+export const CompleteSaleRequestSchema = z
+	.object({
+		tenders: z.array(TenderReferenceSchema).min(1),
+	})
+	.strict();
+
+export const RequestPriceOverrideSchema = z
+	.object({
+		lineId: IdentifierSchema,
+		reason: z.string().min(1).max(500),
+		requestedPrice: MoneySchema,
+	})
+	.strict();
+
+export const SaleLineSchema = z.object({
+	discount: MoneySchema,
+	gross: MoneySchema,
+	id: IdentifierSchema,
+	lineTotal: MoneySchema,
+	priceOverrideId: NullableIdentifierSchema,
+	priceOverrideState: z.enum(["Pending", "Approved"]).nullable(),
+	productId: IdentifierSchema,
+	productName: z.string(),
+	quantity: PositiveDecimalQuantitySchema,
+	tax: MoneySchema,
+	taxableBase: MoneySchema,
+	taxCategory: SaleTaxCategorySchema,
+	unit: z.string(),
+	unitPrice: MoneySchema,
+	variantId: NullableIdentifierSchema,
+});
+
+export const SaleSchema = z.object({
+	change: MoneySchema.nullable(),
+	completedAt: InstantSchema.nullable(),
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	customerPartyId: NullableIdentifierSchema,
+	discount: MoneySchema,
+	gross: MoneySchema,
+	heldAt: InstantSchema.nullable(),
+	id: IdentifierSchema,
+	lines: z.array(SaleLineSchema),
+	receiptId: NullableIdentifierSchema,
+	registerId: IdentifierSchema,
+	sessionId: IdentifierSchema,
+	state: z.enum(["Open", "Held", "Completed"]),
+	tax: MoneySchema,
+	tendered: MoneySchema.nullable(),
+	total: MoneySchema,
+	version: z.number().int().min(1),
+});
+
+export const ReceiptLineSchema = z.object({
+	discount: MoneySchema,
+	lineTotal: MoneySchema,
+	productName: z.string(),
+	quantity: PositiveDecimalQuantitySchema,
+	tax: MoneySchema,
+	taxableBase: MoneySchema,
+	taxCategory: SaleTaxCategorySchema,
+	unit: z.string(),
+	unitPrice: MoneySchema,
+});
+
+export const ReceiptSchema = z.object({
+	cashierPartyId: IdentifierSchema,
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	id: IdentifierSchema,
+	issuedAt: InstantSchema,
+	kind: z.enum(["Sale", "Return", "Reissue"]),
+	lines: z.array(ReceiptLineSchema),
+	originalReceiptId: NullableIdentifierSchema,
+	priceSuppressed: z.boolean(),
+	receiptNumber: z.string(),
+	registerId: IdentifierSchema,
+	returnId: NullableIdentifierSchema,
+	saleId: NullableIdentifierSchema,
+	tenders: z.array(TenderReferenceSchema),
+	total: MoneySchema.nullable(),
+});
+
 export const CsvImportManifestSchema = z.object({
 	decimalSeparator: z.enum([".", ","]),
 	defaultUnit: z.string().min(1).max(50).optional(),
@@ -1006,3 +1126,13 @@ export type CreateCashMovementRequest = z.infer<
 >;
 export type CreateSafeDropRequest = z.infer<typeof CreateSafeDropRequestSchema>;
 export type CashMovement = z.infer<typeof CashMovementSchema>;
+export type SaleTaxCategory = z.infer<typeof SaleTaxCategorySchema>;
+export type SaleLineInput = z.infer<typeof SaleLineInputSchema>;
+export type CreateSale = z.infer<typeof CreateSaleSchema>;
+export type TenderReference = z.infer<typeof TenderReferenceSchema>;
+export type CompleteSaleRequest = z.infer<typeof CompleteSaleRequestSchema>;
+export type RequestPriceOverride = z.infer<typeof RequestPriceOverrideSchema>;
+export type SaleLine = z.infer<typeof SaleLineSchema>;
+export type Sale = z.infer<typeof SaleSchema>;
+export type ReceiptLine = z.infer<typeof ReceiptLineSchema>;
+export type Receipt = z.infer<typeof ReceiptSchema>;

@@ -5,7 +5,11 @@ import type {
 	CashMovementRecord,
 	PosCommandReceipt,
 	PosRepository,
+	PriceOverrideRecord,
+	ReceiptRecord,
 	RegisterSessionRecord,
+	SaleLineRecord,
+	SaleRecord,
 } from "@meridian/domain-pos";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -15,7 +19,11 @@ import type { Pool, PoolClient } from "pg";
 import {
 	posCashMovements,
 	posCommandReceipts,
+	posPriceOverrides,
+	posReceipts,
 	posRegisterSessions,
+	posSaleLines,
+	posSales,
 } from "./schema";
 
 export type PosPostgresConnection = Pool | PoolClient;
@@ -116,10 +124,225 @@ function movementValues(
 	return record;
 }
 
+// ---------------------------------------------------------------------------
+// WS3 PR2: Sale, PriceOverride, Receipt mappers and value builders.
+// ---------------------------------------------------------------------------
+
+function mapSaleLine(row: typeof posSaleLines.$inferSelect): SaleLineRecord {
+	return {
+		discountMinor: row.discountMinor,
+		grossMinor: row.grossMinor,
+		id: row.id,
+		lineTotalMinor: row.lineTotalMinor,
+		priceOverrideId: row.priceOverrideId,
+		priceOverrideState:
+			row.priceOverrideState as SaleLineRecord["priceOverrideState"],
+		productId: row.productId,
+		productName: row.productName,
+		quantity: row.quantity,
+		taxAmountMinor: row.taxAmountMinor,
+		taxableBaseMinor: row.taxableBaseMinor,
+		taxCategory: row.taxCategory as SaleLineRecord["taxCategory"],
+		unit: row.unit,
+		unitPriceMinor: row.unitPriceMinor,
+		variantId: row.variantId,
+	};
+}
+
+function saleLineValues(
+	line: SaleLineRecord,
+	tenantId: string,
+	saleId: string
+): typeof posSaleLines.$inferInsert {
+	return {
+		discountMinor: line.discountMinor,
+		grossMinor: line.grossMinor,
+		id: line.id,
+		lineTotalMinor: line.lineTotalMinor,
+		priceOverrideId: line.priceOverrideId,
+		priceOverrideState: line.priceOverrideState,
+		productId: line.productId,
+		productName: line.productName,
+		quantity: line.quantity,
+		saleId,
+		taxAmountMinor: line.taxAmountMinor,
+		taxableBaseMinor: line.taxableBaseMinor,
+		taxCategory: line.taxCategory,
+		tenantId,
+		unit: line.unit,
+		unitPriceMinor: line.unitPriceMinor,
+		variantId: line.variantId,
+	};
+}
+
+function mapSaleHeader(
+	row: typeof posSales.$inferSelect,
+	lines: SaleLineRecord[]
+): SaleRecord {
+	return {
+		changeMinor: row.changeMinor,
+		completedAt: row.completedAt,
+		createdAt: row.createdAt,
+		createdByActorUserId: row.createdByActorUserId,
+		createdByPartyId: row.createdByPartyId,
+		currency: row.currency,
+		customerPartyId: row.customerPartyId,
+		discountMinor: row.discountMinor,
+		grossMinor: row.grossMinor,
+		heldAt: row.heldAt,
+		id: row.id,
+		lines,
+		locationId: row.locationId,
+		organizationId: row.organizationId,
+		receiptId: row.receiptId,
+		registerId: row.registerId,
+		sessionId: row.sessionId,
+		state: row.state as SaleRecord["state"],
+		taxMinor: row.taxMinor,
+		tenantId: row.tenantId,
+		tenderedMinor: row.tenderedMinor,
+		tendersMinor: row.tendersMinor as SaleRecord["tendersMinor"],
+		totalMinor: row.totalMinor,
+		updatedAt: row.updatedAt,
+		version: row.version,
+	};
+}
+
+function saleHeaderValues(record: SaleRecord): typeof posSales.$inferInsert {
+	return {
+		changeMinor: record.changeMinor,
+		completedAt: record.completedAt,
+		createdAt: record.createdAt,
+		createdByActorUserId: record.createdByActorUserId,
+		createdByPartyId: record.createdByPartyId,
+		currency: record.currency,
+		customerPartyId: record.customerPartyId,
+		discountMinor: record.discountMinor,
+		grossMinor: record.grossMinor,
+		heldAt: record.heldAt,
+		id: record.id,
+		locationId: record.locationId,
+		organizationId: record.organizationId,
+		receiptId: record.receiptId,
+		registerId: record.registerId,
+		sessionId: record.sessionId,
+		state: record.state,
+		taxMinor: record.taxMinor,
+		tenantId: record.tenantId,
+		tenderedMinor: record.tenderedMinor,
+		tendersMinor: record.tendersMinor,
+		totalMinor: record.totalMinor,
+		updatedAt: record.updatedAt,
+		version: record.version,
+	};
+}
+
+function mapPriceOverride(
+	row: typeof posPriceOverrides.$inferSelect
+): PriceOverrideRecord {
+	return {
+		approvedAt: row.approvedAt,
+		approvedByActorUserId: row.approvedByActorUserId,
+		approvedByPartyId: row.approvedByPartyId,
+		currency: row.currency,
+		id: row.id,
+		lineId: row.lineId,
+		organizationId: row.organizationId,
+		reason: row.reason,
+		requestedAt: row.requestedAt,
+		requestedByActorUserId: row.requestedByActorUserId,
+		requestedByPartyId: row.requestedByPartyId,
+		requestedPriceMinor: row.requestedPriceMinor,
+		saleId: row.saleId,
+		state: row.state as PriceOverrideRecord["state"],
+		tenantId: row.tenantId,
+		version: row.version,
+	};
+}
+
+function priceOverrideValues(
+	record: PriceOverrideRecord
+): typeof posPriceOverrides.$inferInsert {
+	return record;
+}
+
+function mapSaleReceipt(row: typeof posReceipts.$inferSelect): ReceiptRecord {
+	return {
+		cashierPartyId: row.cashierPartyId,
+		createdAt: row.createdAt,
+		currency: row.currency,
+		id: row.id,
+		issuedAt: row.issuedAt,
+		kind: row.kind as ReceiptRecord["kind"],
+		lines: row.lines as unknown as ReceiptRecord["lines"],
+		organizationId: row.organizationId,
+		originalReceiptId: row.originalReceiptId,
+		priceSuppressed: row.priceSuppressed,
+		receiptNumber: row.receiptNumber,
+		registerId: row.registerId,
+		returnId: row.returnId,
+		saleId: row.saleId,
+		tenantId: row.tenantId,
+		tenders: row.tenders as unknown as ReceiptRecord["tenders"],
+		totalMinor: row.totalMinor,
+	};
+}
+
+function saleReceiptValues(
+	record: ReceiptRecord
+): typeof posReceipts.$inferInsert {
+	return {
+		...record,
+		lines: record.lines as unknown as Record<string, unknown>[],
+		tenders: record.tenders as unknown as Record<string, unknown>[],
+	};
+}
+
 export function createPosRepository(
 	connection: PosPostgresConnection
 ): PosRepository {
 	const database = drizzle(connection);
+
+	async function loadSaleLines(
+		tenantId: string,
+		saleId: string
+	): Promise<SaleLineRecord[]> {
+		const rows = await database
+			.select()
+			.from(posSaleLines)
+			.where(
+				and(
+					eq(posSaleLines.tenantId, tenantId),
+					eq(posSaleLines.saleId, saleId)
+				)
+			)
+			.orderBy(posSaleLines.createdAt, posSaleLines.id);
+		return rows.map(mapSaleLine);
+	}
+
+	/** Replaces every line row for a Sale, mirroring
+	 * `@meridian/persistence-inventory-postgres`'s `replaceCountLines`
+	 * (delete-then-reinsert inside the same transaction) -- the sale's
+	 * lines never mutate independently of the sale itself. */
+	async function replaceSaleLines(record: SaleRecord): Promise<void> {
+		await database
+			.delete(posSaleLines)
+			.where(
+				and(
+					eq(posSaleLines.tenantId, record.tenantId),
+					eq(posSaleLines.saleId, record.id)
+				)
+			);
+		if (record.lines.length > 0) {
+			await database
+				.insert(posSaleLines)
+				.values(
+					record.lines.map((line) =>
+						saleLineValues(line, record.tenantId, record.id)
+					)
+				);
+		}
+	}
 
 	return {
 		async acquireCommandLock(tenantId, operation, idempotencyKey) {
@@ -127,6 +350,19 @@ export function createPosRepository(
 			await database.execute(
 				sql`SELECT pg_advisory_xact_lock(hashtextextended(${lockIdentity}, 0))`
 			);
+		},
+		async countPendingPriceOverrides(tenantId, saleId) {
+			const rows = await database
+				.select({ count: sql<string>`count(*)::text` })
+				.from(posPriceOverrides)
+				.where(
+					and(
+						eq(posPriceOverrides.tenantId, tenantId),
+						eq(posPriceOverrides.saleId, saleId),
+						eq(posPriceOverrides.state, "Pending")
+					)
+				);
+			return Number(rows[0]?.count ?? "0");
 		},
 		async createCashMovement(record) {
 			const rows = await database
@@ -138,6 +374,40 @@ export function createPosRepository(
 				throw new Error("POS cash movement insert returned no row");
 			}
 			return mapMovement(row);
+		},
+		async createPriceOverride(record) {
+			const rows = await database
+				.insert(posPriceOverrides)
+				.values(priceOverrideValues(record))
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				throw new Error("POS price override insert returned no row");
+			}
+			return mapPriceOverride(row);
+		},
+		async createReceipt(record) {
+			const rows = await database
+				.insert(posReceipts)
+				.values(saleReceiptValues(record))
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				throw new Error("POS receipt insert returned no row");
+			}
+			return mapSaleReceipt(row);
+		},
+		async createSale(record) {
+			const rows = await database
+				.insert(posSales)
+				.values(saleHeaderValues(record))
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				throw new Error("POS sale insert returned no row");
+			}
+			await replaceSaleLines(record);
+			return mapSaleHeader(row, record.lines);
 		},
 		async getCommandReceipt(tenantId, operation, idempotencyKey) {
 			const rows = await database
@@ -167,6 +437,41 @@ export function createPosRepository(
 				.limit(1)
 				.for("update");
 			return rows[0] ? mapSession(rows[0]) : null;
+		},
+		async getPriceOverride(tenantId, id) {
+			const rows = await database
+				.select()
+				.from(posPriceOverrides)
+				.where(
+					and(
+						eq(posPriceOverrides.tenantId, tenantId),
+						eq(posPriceOverrides.id, id)
+					)
+				)
+				.limit(1);
+			return rows[0] ? mapPriceOverride(rows[0]) : null;
+		},
+		async getReceipt(tenantId, id) {
+			const rows = await database
+				.select()
+				.from(posReceipts)
+				.where(and(eq(posReceipts.tenantId, tenantId), eq(posReceipts.id, id)))
+				.limit(1);
+			return rows[0] ? mapSaleReceipt(rows[0]) : null;
+		},
+		async getSale(tenantId, saleId) {
+			const rows = await database
+				.select()
+				.from(posSales)
+				.where(and(eq(posSales.tenantId, tenantId), eq(posSales.id, saleId)))
+				.limit(1)
+				.for("update");
+			const [row] = rows;
+			if (!row) {
+				return null;
+			}
+			const lines = await loadSaleLines(tenantId, saleId);
+			return mapSaleHeader(row, lines);
 		},
 		async getSession(tenantId, sessionId) {
 			const rows = await database
@@ -241,6 +546,39 @@ export function createPosRepository(
 				throw new Error("POS command receipt conflict could not be loaded");
 			}
 			return { inserted: false, record: existing };
+		},
+		async updatePriceOverride(record, expectedVersion) {
+			const rows = await database
+				.update(posPriceOverrides)
+				.set(priceOverrideValues(record))
+				.where(
+					and(
+						eq(posPriceOverrides.tenantId, record.tenantId),
+						eq(posPriceOverrides.id, record.id),
+						eq(posPriceOverrides.version, expectedVersion)
+					)
+				)
+				.returning();
+			return rows[0] ? mapPriceOverride(rows[0]) : "version_conflict";
+		},
+		async updateSale(record, expectedVersion) {
+			const rows = await database
+				.update(posSales)
+				.set(saleHeaderValues(record))
+				.where(
+					and(
+						eq(posSales.tenantId, record.tenantId),
+						eq(posSales.id, record.id),
+						eq(posSales.version, expectedVersion)
+					)
+				)
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				return "version_conflict" as const;
+			}
+			await replaceSaleLines(record);
+			return mapSaleHeader(row, record.lines);
 		},
 		async updateSession(record, expectedVersion) {
 			const rows = await database

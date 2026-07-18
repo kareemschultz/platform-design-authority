@@ -1480,7 +1480,10 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Sale parked to Held
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
   /sales/{saleId}/price-overrides:
     post:
       tags: [Commerce]
@@ -1497,6 +1500,9 @@ paths:
       responses:
         '201':
           description: Price override requested and pending approval
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
   /sales/{saleId}/price-overrides/{overrideId}/approve:
     post:
       tags: [Commerce]
@@ -1508,7 +1514,10 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Price override approved and the requested price applied
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
   /returns/{returnId}/approve:
     post:
       tags: [Commerce]
@@ -1614,7 +1623,10 @@ paths:
         - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Receipt found
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Receipt'}
   /receipts/{receiptId}/reissue:
     post:
       tags: [Commerce]
@@ -2785,12 +2797,21 @@ components:
         customerPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         currency: {type: string, pattern: '^[A-Z]{3}$'}
         lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/SaleLineInput'}}
+    SaleTaxCategory:
+      type: string
+      enum: [GY_STANDARD_14, GY_ZERO_RATED, GY_EXEMPT, GY_OUT_OF_SCOPE]
+      description: Prototype, non-statutory Guyana tax pack category (PDA-IND-090). Defaults to GY_STANDARD_14 when omitted.
     SaleLineInput:
       type: object
-      required: [productId, quantity]
+      required: [productId, quantity, unit, unitPrice]
       properties:
         productId: {$ref: '#/components/schemas/Identifier'}
-        quantity: {type: number, exclusiveMinimum: 0}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        unit: {type: string, minLength: 1, maxLength: 40}
+        unitPrice: {$ref: '#/components/schemas/Money'}
+        discountAmount: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
     CompleteSaleRequest:
       type: object
       required: [tenders]
@@ -2802,7 +2823,7 @@ components:
       properties:
         lineId: {$ref: '#/components/schemas/Identifier'}
         requestedPrice: {$ref: '#/components/schemas/Money'}
-        reason: {type: string, maxLength: 500}
+        reason: {type: string, minLength: 1, maxLength: 500}
     TenderReference:
       type: object
       required: [type, amount]
@@ -2810,15 +2831,77 @@ components:
         type: {type: string, enum: [Cash, PaymentIntent, StoredValue]}
         amount: {$ref: '#/components/schemas/Money'}
         referenceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
-    Sale:
+    SaleLine:
       type: object
-      required: [id, state, currency, total]
+      required: [id, productId, productName, quantity, unit, unitPrice, gross, discount, taxableBase, taxCategory, tax, lineTotal, priceOverrideId, priceOverrideState]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
-        state: {type: string}
-        currency: {type: string}
+        productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        productName: {type: string}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        unit: {type: string}
+        unitPrice: {$ref: '#/components/schemas/Money'}
+        gross: {$ref: '#/components/schemas/Money'}
+        discount: {$ref: '#/components/schemas/Money'}
+        taxableBase: {$ref: '#/components/schemas/Money'}
+        taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
+        tax: {$ref: '#/components/schemas/Money'}
+        lineTotal: {$ref: '#/components/schemas/Money'}
+        priceOverrideId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        priceOverrideState: {oneOf: [{type: string, enum: [Pending, Approved]}, {type: 'null'}]}
+    Sale:
+      type: object
+      required: [id, registerId, sessionId, currency, state, lines, gross, discount, tax, total, receiptId, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        sessionId: {$ref: '#/components/schemas/Identifier'}
+        customerPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        state: {type: string, enum: [Open, Held, Completed]}
+        lines: {type: array, items: {$ref: '#/components/schemas/SaleLine'}}
+        gross: {$ref: '#/components/schemas/Money'}
+        discount: {$ref: '#/components/schemas/Money'}
+        tax: {$ref: '#/components/schemas/Money'}
         total: {$ref: '#/components/schemas/Money'}
+        tendered: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        change: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
         receiptId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        heldAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        completedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    ReceiptLine:
+      type: object
+      required: [productName, quantity, unit, unitPrice, discount, taxableBase, taxCategory, tax, lineTotal]
+      properties:
+        productName: {type: string}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        unit: {type: string}
+        unitPrice: {$ref: '#/components/schemas/Money'}
+        discount: {$ref: '#/components/schemas/Money'}
+        taxableBase: {$ref: '#/components/schemas/Money'}
+        taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
+        tax: {$ref: '#/components/schemas/Money'}
+        lineTotal: {$ref: '#/components/schemas/Money'}
+    Receipt:
+      type: object
+      required: [id, receiptNumber, kind, registerId, currency, priceSuppressed, issuedAt, lines, tenders, total]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        receiptNumber: {type: string}
+        kind: {type: string, enum: [Sale, Return, Reissue]}
+        saleId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        returnId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        originalReceiptId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        cashierPartyId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        priceSuppressed: {type: boolean}
+        issuedAt: {type: string, format: date-time}
+        lines: {type: array, items: {$ref: '#/components/schemas/ReceiptLine'}}
+        tenders: {type: array, items: {$ref: '#/components/schemas/TenderReference'}}
+        total: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
     CreateReturn:
       type: object
       required: [saleId, lines, reason]

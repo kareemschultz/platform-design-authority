@@ -92,11 +92,11 @@ export const inventoryStockMovements = pgTable(
 	(table) => [
 		check(
 			"inventory_stock_movement_type_check",
-			sql`${table.movementType} in ('Adjustment', 'CountVariance', 'TransferOut', 'TransferIn', 'Reversal', 'Offline')`
+			sql`${table.movementType} in ('Adjustment', 'CountVariance', 'TransferOut', 'TransferIn', 'Reversal', 'Offline', 'Sale')`
 		),
 		check(
 			"inventory_stock_movement_source_type_check",
-			sql`${table.sourceType} in ('Adjustment', 'Count', 'Transfer', 'OfflineCommand')`
+			sql`${table.sourceType} in ('Adjustment', 'Count', 'Transfer', 'OfflineCommand', 'Sale')`
 		),
 		check(
 			"inventory_stock_movement_reversal_check",

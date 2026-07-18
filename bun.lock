@@ -105,6 +105,8 @@
         "@meridian/domain-inventory": "workspace:*",
         "@meridian/domain-party": "workspace:*",
         "@meridian/domain-pos": "workspace:*",
+        "@meridian/engine-pricing": "workspace:*",
+        "@meridian/engine-tax": "workspace:*",
         "@meridian/persistence-catalog-postgres": "workspace:*",
         "@meridian/persistence-inventory-postgres": "workspace:*",
         "@meridian/persistence-party-postgres": "workspace:*",
@@ -293,6 +295,8 @@
       "dependencies": {
         "@meridian/contracts-events": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
+        "@meridian/engine-pricing": "workspace:*",
+        "@meridian/engine-tax": "workspace:*",
       },
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",

@@ -7,11 +7,13 @@ import {
 	approveInventoryAdjustmentContract,
 	approveOpeningStockImportContract,
 	approveProductImportContract,
+	approveSalePriceOverrideContract,
 	approveStockCountContract,
 	archiveProductContract,
 	cancelOpeningStockImportContract,
 	cancelProductImportContract,
 	closeRegisterContract,
+	completeSaleContract,
 	createCashMovementContract,
 	createEventReplayContract,
 	createInventoryAdjustmentContract,
@@ -23,6 +25,7 @@ import {
 	createProductImportContract,
 	createRoleAssignmentContract,
 	createSafeDropContract,
+	createSaleContract,
 	createStockCountContract,
 	createStockTransferContract,
 	createUserInvitationContract,
@@ -36,8 +39,10 @@ import {
 	getProductContract,
 	getProductImportContract,
 	getProductImportCorrectionReportContract,
+	getReceiptContract,
 	getStockCountContract,
 	getStockTransferContract,
+	holdSaleContract,
 	listAuditRecordsContract,
 	listCurrentUserSessionsContract,
 	listEntitlementsContract,
@@ -59,6 +64,7 @@ import {
 	purgeOpeningStockImportStagingContract,
 	purgeProductImportStagingContract,
 	receiveStockTransferContract,
+	requestSalePriceOverrideContract,
 	reverseInventoryAdjustmentContract,
 	revokeCurrentUserSessionContract,
 	saveStockCountDraftLinesContract,
@@ -1651,6 +1657,180 @@ const approveCashVariance = implement(approveCashVarianceContract)
 		}
 	});
 
+// ---------------------------------------------------------------------------
+// WS3 PR2: sales, receipts, price overrides. Every procedure revalidates
+// active context and enforces its declared permission BEFORE application
+// dispatch (WS1/WS2 pattern, matching PR1 above); the POS application
+// layer independently re-enforces the same checks in depth.
+// ---------------------------------------------------------------------------
+
+const createSale = implement(createSaleContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.sale.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createSale({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				currency: input.body.currency,
+				customerPartyId: input.body.customerPartyId,
+				idempotencyKey: input.headers["idempotency-key"],
+				lines: input.body.lines,
+				registerId: input.body.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const completeSale = implement(completeSaleContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.sale.complete",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.completeSale({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				saleId: input.params.saleId,
+				sessionId: session.session.id,
+				tenders: input.body.tenders.map((tender) => ({
+					amountMinor: tender.amount.amountMinor,
+					currency: tender.amount.currency,
+					referenceId: tender.referenceId,
+					type: tender.type,
+				})),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const holdSale = implement(holdSaleContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.sale.hold",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.holdSale({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				saleId: input.params.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const requestSalePriceOverride = implement(requestSalePriceOverrideContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.price-override.request",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.requestSalePriceOverride({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				lineId: input.body.lineId,
+				reason: input.body.reason,
+				requestedPrice: input.body.requestedPrice,
+				saleId: input.params.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveSalePriceOverride = implement(approveSalePriceOverrideContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.price-override.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveSalePriceOverride({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				overrideId: input.params.overrideId,
+				saleId: input.params.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getReceipt = implement(getReceiptContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.receipt.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getReceipt({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				receiptId: input.params.receiptId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const approveInventoryAdjustment = implement(approveInventoryAdjustmentContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -2130,11 +2310,21 @@ export const appRouter = {
 	commerce: {
 		cashMovements: { create: createCashMovement },
 		cashVariances: { approve: approveCashVariance },
+		priceOverrides: {
+			approve: approveSalePriceOverride,
+			request: requestSalePriceOverride,
+		},
+		receipts: { get: getReceipt },
 		registers: {
 			close: closeRegister,
 			open: openRegister,
 		},
 		safeDrops: { create: createSafeDrop },
+		sales: {
+			complete: completeSale,
+			create: createSale,
+			hold: holdSale,
+		},
 	},
 	entitlements: { list: listEntitlements },
 	events: { createReplay: createEventReplay },

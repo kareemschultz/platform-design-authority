@@ -540,6 +540,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "getReceiptsByReceiptId",
 		path: "/v1/receipts/{receiptId}",
 		permission: "commerce.receipt.read",
+		responseRef: "#/components/schemas/Receipt",
 		successStatus: 200,
 	},
 	{
@@ -661,6 +662,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postSalesBySaleIdHold",
 		path: "/v1/sales/{saleId}/hold",
 		permission: "commerce.sale.hold",
+		responseRef: "#/components/schemas/Sale",
 		successStatus: 200,
 	},
 	{
@@ -669,6 +671,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		path: "/v1/sales/{saleId}/price-overrides",
 		permission: "commerce.price-override.request",
 		requestRef: "#/components/schemas/RequestPriceOverride",
+		responseRef: "#/components/schemas/Sale",
 		successStatus: 201,
 	},
 	{
@@ -676,6 +679,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "approveSalePriceOverride",
 		path: "/v1/sales/{saleId}/price-overrides/{overrideId}/approve",
 		permission: "commerce.price-override.approve",
+		responseRef: "#/components/schemas/Sale",
 		successStatus: 200,
 	},
 	{

@@ -15,6 +15,13 @@
       "when": 1784363292911,
       "tag": "0001_fancy_human_cannonball",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784368421494,
+      "tag": "0002_awesome_rictor",
+      "breakpoints": true
     }
   ]
 }

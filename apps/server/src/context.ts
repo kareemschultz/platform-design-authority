@@ -31,10 +31,12 @@ import type {
 	Party,
 	PlatformIdentityLink,
 	Product,
+	Receipt,
 	ReceiveStockTransfer,
 	RegisterSession,
 	Role,
 	RoleAssignment,
+	Sale,
 	SaveStockCountDraftLines,
 	SessionSummary,
 	StockBalance,
@@ -489,6 +491,17 @@ export interface PosApplication {
 		sessionId: string;
 		version: number;
 	}) => Promise<RegisterSession>;
+
+	// -- WS3 PR2: Sale, PriceOverride, Receipt -------------------------------
+	approveSalePriceOverride: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		overrideId: string;
+		saleId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
 	closeRegister: (input: {
 		actorUserId: string;
 		contextId: string;
@@ -499,6 +512,20 @@ export interface PosApplication {
 		registerId: string;
 		sessionId: string;
 	}) => Promise<RegisterSession>;
+	completeSale: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		saleId: string;
+		sessionId: string;
+		tenders: Array<{
+			amountMinor: number;
+			currency: string;
+			referenceId?: string | null;
+			type: "Cash" | "PaymentIntent" | "StoredValue";
+		}>;
+	}) => Promise<Sale>;
 	createCashMovement: (input: {
 		actorUserId: string;
 		amount: Money;
@@ -522,6 +549,44 @@ export interface PosApplication {
 		registerId: string;
 		sessionId: string;
 	}) => Promise<CashMovement>;
+	createSale: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		currency: string;
+		customerPartyId?: string | null;
+		idempotencyKey: string;
+		lines: Array<{
+			discountAmount?: Money | null;
+			productId: string;
+			quantity: string;
+			taxCategory?:
+				| "GY_STANDARD_14"
+				| "GY_ZERO_RATED"
+				| "GY_EXEMPT"
+				| "GY_OUT_OF_SCOPE";
+			unit: string;
+			unitPrice: Money;
+			variantId?: string | null;
+		}>;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
+	getReceipt: (input: {
+		actorUserId: string;
+		contextId: string;
+		receiptId: string;
+		sessionId: string;
+	}) => Promise<Receipt>;
+	holdSale: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		reason?: string | null;
+		saleId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
 	openRegister: (input: {
 		actorUserId: string;
 		contextId: string;
@@ -533,6 +598,17 @@ export interface PosApplication {
 		registerId: string;
 		sessionId: string;
 	}) => Promise<RegisterSession>;
+	requestSalePriceOverride: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		lineId: string;
+		reason: string;
+		requestedPrice: Money;
+		saleId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
 }
 
 export interface ImportApplication {

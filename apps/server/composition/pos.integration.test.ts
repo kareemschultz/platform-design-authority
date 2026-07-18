@@ -1,20 +1,33 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import {
+	createInventoryService,
+	type InventoryIdFactory,
+} from "@meridian/domain-inventory";
+import {
 	createPosApplication,
 	createPosService,
 	type PosIdFactory,
+	type SaleInventoryMovementPort,
 } from "@meridian/domain-pos";
+import { createPricingEngine } from "@meridian/engine-pricing";
+import { createTaxEngine } from "@meridian/engine-tax";
+import {
+	createInventoryRepository,
+	migrateInventory,
+} from "@meridian/persistence-inventory-postgres";
 import {
 	createPostgresOutbox,
 	migratePlatformEvents,
 } from "@meridian/persistence-platform-events-postgres";
+import { migratePlatformNumbering } from "@meridian/persistence-platform-numbering-postgres";
 import {
 	createPosRepository,
 	migratePos,
 } from "@meridian/persistence-pos-postgres";
 import { env } from "@meridian/tooling-env/server";
-import { Pool } from "pg";
+import { Pool, type PoolClient } from "pg";
 
+import { createReceiptNumberAllocator } from "./numbering";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
 const databaseName = `meridian_pos_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -44,6 +57,11 @@ const ids: PosIdFactory = {
 	},
 };
 
+// PR1's live-PG lane exercises only RegisterSession/CashMovement commands
+// (never sale.complete, which is PR2's own live-PG lane in a separate
+// describe block below). `pricing`/`tax` are the real, I/O-free engines;
+// `products` and `saleUnitOfWork` are structural stubs never invoked by
+// these tests.
 function service(failEvents = false) {
 	return createPosService({
 		clock: () => new Date(),
@@ -52,6 +70,20 @@ function service(failEvents = false) {
 			requireActorPartyId: ({ authUserId }) =>
 				Promise.resolve(`party_${authUserId}`),
 		},
+		pricing: createPricingEngine(),
+		products: {
+			requireProduct: () =>
+				Promise.reject(
+					new Error("products port is not exercised by the PR1 live-PG lane")
+				),
+		},
+		saleUnitOfWork: {
+			execute: () =>
+				Promise.reject(
+					new Error("saleUnitOfWork is not exercised by the PR1 live-PG lane")
+				),
+		},
+		tax: createTaxEngine(),
 		unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
 			events: failEvents
 				? { append: () => Promise.reject(new Error("injected outbox failure")) }
@@ -61,10 +93,160 @@ function service(failEvents = false) {
 	});
 }
 
+const inventoryIds: InventoryIdFactory = {
+	create(kind) {
+		return `${kind}_${crypto.randomUUID().replaceAll("-", "")}`;
+	},
+};
+
+/**
+ * PR2's mandated seam (frozen control plan §6.3, "Read first"), rebuilt here
+ * against the ISOLATED test database rather than importing
+ * `./inventory`'s `createSaleInventoryMovementAdapter` — that composition
+ * function's `references` port reads the real `databasePool`/
+ * `catalogService`, which would leak this test onto the shared dev
+ * database. `references` are stubbed exactly as WS2's own
+ * `imports.integration.test.ts` and `ws2-closeout.inventory.integration.
+ * test.ts` already stub them for isolated-DB Inventory exercises.
+ */
+function createTestSaleInventoryAdapter(
+	client: PoolClient
+): SaleInventoryMovementPort {
+	const inventory = createInventoryService({
+		clock: () => new Date(),
+		ids: inventoryIds,
+		references: {
+			requireLocation: () => Promise.resolve(),
+			requireProduct: () => Promise.resolve(),
+		},
+		unitOfWork: {
+			execute: (operation) =>
+				operation({
+					events: createPostgresOutbox(client),
+					repository: createInventoryRepository(client),
+				}),
+		},
+	});
+	return {
+		async recordSaleMovement(input) {
+			const result = await inventory.recordSaleMovement(input);
+			if (result === "negative_stock") {
+				return "negative_stock";
+			}
+			return { movementId: result.id };
+		},
+	};
+}
+
+/**
+ * PR2's live-PG lane: a POS service wired to a REAL `saleUnitOfWork` (one
+ * shared `PoolClient`/transaction spanning the sale commit, receipt
+ * numbering via the reused `createReceiptNumberAllocator` from
+ * `./numbering`, and the synchronous Inventory movement via the adapter
+ * above) — the frozen control plan's "ONE `createPostgresUnitOfWork`, one
+ * client, one transaction" discipline this whole stage exists to prove.
+ * `failEventName` injects a rejection at a named outbox append to exercise
+ * the triple-atomicity rollback path.
+ */
+function saleService(options: { failEventName?: string } = {}) {
+	return createPosService({
+		clock: () => new Date(),
+		ids,
+		parties: {
+			requireActorPartyId: ({ authUserId }) =>
+				Promise.resolve(`party_${authUserId}`),
+		},
+		pricing: createPricingEngine(),
+		products: {
+			requireProduct: ({ productId }) =>
+				Promise.resolve({ productName: `Product ${productId}` }),
+		},
+		saleUnitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+			events: {
+				append: (pendingEvent) => {
+					if (
+						options.failEventName &&
+						pendingEvent.name === options.failEventName
+					) {
+						return Promise.reject(
+							new Error(`injected pre-commit failure at ${pendingEvent.name}`)
+						);
+					}
+					return createPostgresOutbox(client).append(pendingEvent);
+				},
+			},
+			inventory: createTestSaleInventoryAdapter(client),
+			numbering: createReceiptNumberAllocator(client),
+			repository: createPosRepository(client),
+		})),
+		tax: createTaxEngine(),
+		unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+			events: createPostgresOutbox(client),
+			repository: createPosRepository(client),
+		})),
+	});
+}
+
+function percentile(samples: readonly number[], quantile: number): number {
+	const sorted = [...samples].sort((left, right) => left - right);
+	return sorted[Math.max(0, Math.ceil(sorted.length * quantile) - 1)] ?? 0;
+}
+
+function metrics(samples: readonly number[]) {
+	return {
+		count: samples.length,
+		maximum: Math.max(...samples),
+		p50: percentile(samples, 0.5),
+		p95: percentile(samples, 0.95),
+		p99: percentile(samples, 0.99),
+	};
+}
+
+function reportBudgetDisposition(input: {
+	limitation: string;
+	metric: string;
+	samples: readonly number[];
+	targetP95Ms: number;
+	targetP99Ms?: number;
+}): ReturnType<typeof metrics> & {
+	disposition: "PASS" | "MISS";
+	target: string;
+} {
+	const computed = metrics(input.samples);
+	const p95Pass = computed.p95 <= input.targetP95Ms;
+	const p99Pass =
+		input.targetP99Ms === undefined || computed.p99 <= input.targetP99Ms;
+	const disposition: "PASS" | "MISS" = p95Pass && p99Pass ? "PASS" : "MISS";
+	const target =
+		input.targetP99Ms === undefined
+			? `p95<=${input.targetP95Ms}ms`
+			: `p95<=${input.targetP95Ms}ms / p99<=${input.targetP99Ms}ms`;
+	// Retained-raw-numbers evidence line for the PR2 quality-budget
+	// disposition (frozen control plan §12, stage file's MEASURED-not-
+	// asserted requirement) — matches the established `reportMetric`
+	// pattern in `ws2-closeout.inventory.integration.test.ts`.
+	process.stdout.write(
+		`${JSON.stringify({
+			disposition,
+			environment:
+				"isolated local PostgreSQL 18 database; warm bun:test process; Windows dev host (not representative production hardware)",
+			limitation: input.limitation,
+			metric: input.metric,
+			samples: input.samples.map((value) => Math.round(value * 100) / 100),
+			target,
+			unit: "milliseconds",
+			...computed,
+		})}\n`
+	);
+	return { ...computed, disposition, target };
+}
+
 beforeAll(async () => {
 	await adminPool.query(`CREATE DATABASE ${quoteIdentifier(databaseName)}`);
 	testPool = new Pool({ connectionString: testUrl.toString(), max: 8 });
 	await migratePlatformEvents(testPool);
+	await migratePlatformNumbering(testPool);
+	await migrateInventory(testPool);
 	await migratePos(testPool);
 });
 
@@ -86,7 +268,7 @@ const base = {
 };
 
 describe.serial("POS PostgreSQL controlled prototype", () => {
-	test("migrates idempotently and creates only the three registered POS-owned tables", async () => {
+	test("migrates idempotently and creates only the seven registered POS-owned tables (PR1 register/cash + PR2 sale/receipt/price-override)", async () => {
 		await migratePos(testPool);
 		const tables = await testPool.query<{ table_name: string }>(
 			"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name LIKE 'pos_%' ORDER BY table_name"
@@ -94,7 +276,11 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 		expect(tables.rows.map((row) => row.table_name)).toEqual([
 			"pos_cash_movement",
 			"pos_command_receipt",
+			"pos_price_override",
+			"pos_receipt",
 			"pos_register_session",
+			"pos_sale",
+			"pos_sale_line",
 		]);
 	});
 
@@ -473,3 +659,606 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 		expect(closedEventRows.rows[0]?.count).toBe("1");
 	});
 });
+
+// -----------------------------------------------------------------------
+// WS3 PR2 live-PG lane: the sale/receipt/price-override PostgreSQL
+// prototype. The frozen control plan's "Read first" pattern under real
+// test — one `createPostgresUnitOfWork`, one `PoolClient`, one transaction
+// spanning the sale commit, receipt numbering, and the synchronous
+// Inventory movement. HONESTY BOUNDARY (stage packet, Codex packet-review
+// P1-7): this lane exercises the ONLINE receipt-numbering path only; the
+// offline-safe allocation path is explicitly PENDING WS5 (see
+// `packages/domains/pos/src/index.ts`'s `ReceiptNumberAllocatorPort` doc
+// comment) and no test or assertion below claims otherwise.
+// -----------------------------------------------------------------------
+
+function saleTestInventoryService() {
+	return createInventoryService({
+		clock: () => new Date(),
+		ids: inventoryIds,
+		references: {
+			requireLocation: () => Promise.resolve(),
+			requireProduct: () => Promise.resolve(),
+		},
+		unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+			events: createPostgresOutbox(client),
+			repository: createInventoryRepository(client),
+		})),
+	});
+}
+
+/** Seeds enough on-hand stock (via the ordinary Adjustment maker/checker
+ * pair) for a location+product pair to absorb every `Sale` movement a test
+ * below posts against it — `recordSaleMovement` enforces the real
+ * non-negative-stock constraint through Inventory's own `applyMovement`,
+ * exactly as production would. */
+async function seedStock(input: {
+	locationId: string;
+	organizationId: string;
+	productId: string;
+	quantity: string;
+	tenantId: string;
+}) {
+	const inventory = saleTestInventoryService();
+	const key = crypto.randomUUID().replaceAll("-", "");
+	const adjustment = await inventory.createAdjustment({
+		actorUserId: "sale_stock_seeder",
+		body: {
+			locationId: input.locationId,
+			productId: input.productId,
+			quantity: input.quantity,
+			reason: "WS3 PR2 live-PG lane stock seed",
+			unit: "each",
+		},
+		correlationId: `seed_correlation_${key}`,
+		idempotencyKey: `seed_create_${key}`,
+		organizationId: input.organizationId,
+		tenantId: input.tenantId,
+	});
+	await inventory.approveAdjustment({
+		actorUserId: "sale_stock_seeder_approver",
+		adjustmentId: adjustment.id,
+		correlationId: `seed_correlation_${key}`,
+		idempotencyKey: `seed_approve_${key}`,
+		tenantId: input.tenantId,
+		version: adjustment.version,
+	});
+}
+
+const saleBase = {
+	actorUserId: "sale_cashier",
+	correlationId: "correlation_pos_sale",
+	organizationId: "organization_pos_sale",
+};
+
+function locationFor(registerId: string): string {
+	return `location_${registerId}`;
+}
+
+async function openSaleRegister(
+	pos: ReturnType<typeof saleService>,
+	registerId: string,
+	tenantId: string,
+	stockQuantity = "100000"
+) {
+	await pos.openRegister({
+		actorUserId: saleBase.actorUserId,
+		correlationId: saleBase.correlationId,
+		currency: "GYD",
+		idempotencyKey: `open_${registerId}`,
+		locationId: locationFor(registerId),
+		openingFloat: { amountMinor: 100_000, currency: "GYD" },
+		organizationId: saleBase.organizationId,
+		registerId,
+		tenantId,
+	});
+	await seedStock({
+		locationId: locationFor(registerId),
+		organizationId: saleBase.organizationId,
+		productId: "product_pr2_cola_500ml",
+		quantity: stockQuantity,
+		tenantId,
+	});
+}
+
+function saleLine() {
+	return {
+		productId: "product_pr2_cola_500ml",
+		quantity: "2",
+		unit: "each",
+		unitPrice: { amountMinor: 500, currency: "GYD" },
+	};
+}
+
+/** A `saleLine()` sale always totals 1140 minor units (1000 gross + 140
+ * tax at the fixed GY_STANDARD_14 prototype rate) — tendering exactly this
+ * amount keeps every test's change at zero and its assertions simple. */
+const EXACT_SALE_TOTAL_MINOR = 1140;
+
+describe.serial(
+	"WS3 PR2 sale, receipt, and price-override PostgreSQL controlled prototype",
+	() => {
+		test("completes a cash sale atomically: sale row, numbered receipt, synchronous Inventory movement, and both outbox events commit together (raw SQL)", async () => {
+			const tenantId = "tenant_pos_sale_atomicity_commit";
+			const registerId = "register_sale_atomicity_commit";
+			const pos = saleService();
+			await openSaleRegister(pos, registerId, tenantId);
+			const created = await pos.createSale({
+				...saleBase,
+				currency: "GYD",
+				idempotencyKey: "atomic-sale-create",
+				lines: [saleLine()],
+				registerId,
+				tenantId,
+			});
+			expect(created.state).toBe("Open");
+			const completed = await pos.completeSale({
+				...saleBase,
+				idempotencyKey: "atomic-sale-complete",
+				saleId: created.id,
+				tenantId,
+				tenders: [
+					{
+						amountMinor: EXACT_SALE_TOTAL_MINOR,
+						currency: "GYD",
+						type: "Cash",
+					},
+				],
+			});
+			expect(completed.state).toBe("Completed");
+			expect(completed.total.amountMinor).toBe(EXACT_SALE_TOTAL_MINOR);
+			expect(completed.change?.amountMinor).toBe(0);
+			expect(completed.receiptId).not.toBeNull();
+
+			const saleRow = await testPool.query<{
+				receipt_id: string | null;
+				state: string;
+			}>(
+				"SELECT state, receipt_id FROM pos_sale WHERE tenant_id = $1 AND id = $2",
+				[tenantId, created.id]
+			);
+			expect(saleRow.rows[0]).toEqual({
+				receipt_id: completed.receiptId,
+				state: "Completed",
+			});
+
+			const receiptRows = await testPool.query<{
+				receipt_number: string;
+				total_minor: string;
+			}>(
+				"SELECT receipt_number, total_minor::text AS total_minor FROM pos_receipt WHERE tenant_id = $1 AND sale_id = $2",
+				[tenantId, created.id]
+			);
+			expect(receiptRows.rows).toHaveLength(1);
+			expect(receiptRows.rows[0]?.total_minor).toBe(
+				String(EXACT_SALE_TOTAL_MINOR)
+			);
+			expect(receiptRows.rows[0]?.receipt_number).toBe(
+				`R-${registerId}-000001`
+			);
+
+			const movementRows = await testPool.query<{
+				quantity: string;
+				source_type: string;
+			}>(
+				"SELECT source_type, quantity::text AS quantity FROM inventory_stock_movement WHERE tenant_id = $1 AND source_id = $2",
+				[tenantId, created.id]
+			);
+			expect(movementRows.rows).toHaveLength(1);
+			expect(movementRows.rows[0]?.source_type).toBe("Sale");
+			expect(movementRows.rows[0]?.quantity).toBe("-2.000000");
+
+			const outboxRows = await testPool.query<{ name: string }>(
+				"SELECT name FROM platform_event_outbox WHERE tenant_id = $1 AND aggregate_id IN ($2, $3) ORDER BY name",
+				[tenantId, created.id, completed.receiptId]
+			);
+			expect(outboxRows.rows.map((row) => row.name)).toEqual([
+				"commerce.receipt.issued.v1",
+				"commerce.sale.completed.v1",
+			]);
+
+			const allocationRows = await testPool.query<{ count: string }>(
+				"SELECT count(*)::text AS count FROM platform_number_allocation WHERE tenant_id = $1 AND business_record_id = $2",
+				[tenantId, created.id]
+			);
+			expect(allocationRows.rows[0]?.count).toBe("1");
+		});
+
+		test("rolls back the sale, receipt, receipt-number allocation, and Inventory movement together when an injected failure occurs before commit (raw SQL)", async () => {
+			const tenantId = "tenant_pos_sale_atomicity_rollback";
+			const registerId = "register_sale_atomicity_rollback";
+			const pos = saleService({ failEventName: "commerce.sale.completed.v1" });
+			await openSaleRegister(pos, registerId, tenantId);
+			const created = await pos.createSale({
+				...saleBase,
+				currency: "GYD",
+				idempotencyKey: "rollback-sale-create",
+				lines: [saleLine()],
+				registerId,
+				tenantId,
+			});
+			const failure = await captureError(
+				pos.completeSale({
+					...saleBase,
+					idempotencyKey: "rollback-sale-complete",
+					saleId: created.id,
+					tenantId,
+					tenders: [
+						{
+							amountMinor: EXACT_SALE_TOTAL_MINOR,
+							currency: "GYD",
+							type: "Cash",
+						},
+					],
+				})
+			);
+			expect((failure as Error).message).toContain(
+				"injected pre-commit failure"
+			);
+
+			const saleRow = await testPool.query<{ state: string }>(
+				"SELECT state FROM pos_sale WHERE tenant_id = $1 AND id = $2",
+				[tenantId, created.id]
+			);
+			expect(saleRow.rows[0]?.state).toBe("Open");
+
+			const facts = await testPool.query<{
+				allocations: string;
+				events: string;
+				movements: string;
+				receipts: string;
+			}>(
+				`SELECT
+					(SELECT count(*)::text FROM pos_receipt WHERE tenant_id = $1 AND sale_id = $2) AS receipts,
+					(SELECT count(*)::text FROM inventory_stock_movement WHERE tenant_id = $1 AND source_id = $2) AS movements,
+					(SELECT count(*)::text FROM platform_number_allocation WHERE tenant_id = $1 AND business_record_id = $2) AS allocations,
+					(SELECT count(*)::text FROM platform_event_outbox WHERE tenant_id = $1 AND aggregate_id = $2) AS events`,
+				[tenantId, created.id]
+			);
+			expect(facts.rows[0]).toEqual({
+				allocations: "0",
+				events: "0",
+				movements: "0",
+				receipts: "0",
+			});
+		});
+
+		test("completes a sale exactly once under a genuine 10-way concurrent idempotent replay race", async () => {
+			const tenantId = "tenant_pos_sale_race";
+			const registerId = "register_sale_race";
+			const pos = saleService();
+			await openSaleRegister(pos, registerId, tenantId);
+			const created = await pos.createSale({
+				...saleBase,
+				currency: "GYD",
+				idempotencyKey: "race-sale-create",
+				lines: [saleLine()],
+				registerId,
+				tenantId,
+			});
+			const completeInput = {
+				...saleBase,
+				idempotencyKey: "race-sale-complete",
+				saleId: created.id,
+				tenantId,
+				tenders: [
+					{
+						amountMinor: EXACT_SALE_TOTAL_MINOR,
+						currency: "GYD",
+						type: "Cash" as const,
+					},
+				],
+			};
+			const results = await Promise.all(
+				Array.from({ length: 10 }, () => pos.completeSale(completeInput))
+			);
+			const [winner] = results;
+			expect(winner).toBeDefined();
+			for (const result of results) {
+				expect(result.id).toBe(created.id);
+				expect(result.state).toBe("Completed");
+				expect(result.receiptId).toBe(winner?.receiptId ?? null);
+			}
+
+			const facts = await testPool.query<{
+				allocations: string;
+				completed_sales: string;
+				movements: string;
+				receipts: string;
+			}>(
+				`SELECT
+					(SELECT count(*)::text FROM pos_sale WHERE tenant_id = $1 AND id = $2 AND state = 'Completed') AS completed_sales,
+					(SELECT count(*)::text FROM pos_receipt WHERE tenant_id = $1 AND sale_id = $2) AS receipts,
+					(SELECT count(*)::text FROM inventory_stock_movement WHERE tenant_id = $1 AND source_id = $2) AS movements,
+					(SELECT count(*)::text FROM platform_number_allocation WHERE tenant_id = $1 AND business_record_id = $2) AS allocations`,
+				[tenantId, created.id]
+			);
+			expect(facts.rows[0]).toEqual({
+				allocations: "1",
+				completed_sales: "1",
+				movements: "1",
+				receipts: "1",
+			});
+		});
+
+		test("issues monotonic, non-duplicate receipt numbers per register under genuine concurrent sale completions", async () => {
+			const tenantId = "tenant_pos_sale_monotonic";
+			const registerId = "register_sale_monotonic";
+			const pos = saleService();
+			await openSaleRegister(pos, registerId, tenantId);
+			const saleCount = 5;
+			const sales: Array<{ id: string }> = [];
+			for (let index = 0; index < saleCount; index += 1) {
+				// biome-ignore lint/performance/noAwaitInLoops: sales must exist before the concurrent completion race below.
+				const sale = await pos.createSale({
+					...saleBase,
+					currency: "GYD",
+					idempotencyKey: `monotonic-create-${index}`,
+					lines: [saleLine()],
+					registerId,
+					tenantId,
+				});
+				sales.push(sale);
+			}
+			const completed = await Promise.all(
+				sales.map((sale, index) =>
+					pos.completeSale({
+						...saleBase,
+						idempotencyKey: `monotonic-complete-${index}`,
+						saleId: sale.id,
+						tenantId,
+						tenders: [
+							{
+								amountMinor: EXACT_SALE_TOTAL_MINOR,
+								currency: "GYD",
+								type: "Cash" as const,
+							},
+						],
+					})
+				)
+			);
+			expect(completed.every((sale) => sale.state === "Completed")).toBe(true);
+
+			const receiptRows = await testPool.query<{ receipt_number: string }>(
+				"SELECT receipt_number FROM pos_receipt WHERE tenant_id = $1 AND register_id = $2 ORDER BY receipt_number",
+				[tenantId, registerId]
+			);
+			const numbers = receiptRows.rows.map((row) => row.receipt_number);
+			expect(numbers).toHaveLength(saleCount);
+			expect(new Set(numbers).size).toBe(saleCount);
+			expect(numbers).toEqual([...numbers].sort());
+			expect(numbers).toEqual([
+				`R-${registerId}-000001`,
+				`R-${registerId}-000002`,
+				`R-${registerId}-000003`,
+				`R-${registerId}-000004`,
+				`R-${registerId}-000005`,
+			]);
+		});
+
+		test("isolates two tenants sharing the same register id: cannot read each other's sale or receipt, and receipt numbering never leaks across tenants", async () => {
+			const tenantA = "tenant_pos_sale_isolation_a";
+			const tenantB = "tenant_pos_sale_isolation_b";
+			const registerId = "register_sale_isolation_shared";
+			const pos = saleService();
+			await openSaleRegister(pos, registerId, tenantA);
+			await openSaleRegister(pos, registerId, tenantB);
+
+			const saleA = await pos.createSale({
+				...saleBase,
+				currency: "GYD",
+				idempotencyKey: "isolation-create-a",
+				lines: [saleLine()],
+				registerId,
+				tenantId: tenantA,
+			});
+			const completedA = await pos.completeSale({
+				...saleBase,
+				idempotencyKey: "isolation-complete-a",
+				saleId: saleA.id,
+				tenantId: tenantA,
+				tenders: [
+					{
+						amountMinor: EXACT_SALE_TOTAL_MINOR,
+						currency: "GYD",
+						type: "Cash",
+					},
+				],
+			});
+
+			const repository = createPosRepository(testPool);
+			expect(await repository.getSale(tenantB, saleA.id)).toBeNull();
+			expect(
+				await repository.getReceipt(tenantB, completedA.receiptId as string)
+			).toBeNull();
+
+			const saleB = await pos.createSale({
+				...saleBase,
+				currency: "GYD",
+				idempotencyKey: "isolation-create-b",
+				lines: [saleLine()],
+				registerId,
+				tenantId: tenantB,
+			});
+			const completedB = await pos.completeSale({
+				...saleBase,
+				idempotencyKey: "isolation-complete-b",
+				saleId: saleB.id,
+				tenantId: tenantB,
+				tenders: [
+					{
+						amountMinor: EXACT_SALE_TOTAL_MINOR,
+						currency: "GYD",
+						type: "Cash",
+					},
+				],
+			});
+			// Tenant B's own sequence on the SAME shared registerId starts fresh
+			// at 000001 — numbering never leaks or continues across tenants.
+			const receiptBRow = await testPool.query<{ receipt_number: string }>(
+				"SELECT receipt_number FROM pos_receipt WHERE tenant_id = $1 AND id = $2",
+				[tenantB, completedB.receiptId]
+			);
+			expect(receiptBRow.rows[0]?.receipt_number).toBe(
+				`R-${registerId}-000001`
+			);
+
+			const crossTenantRows = await testPool.query<{ count: string }>(
+				"SELECT count(*)::text AS count FROM pos_sale WHERE tenant_id = $1 AND id = $2",
+				[tenantA, saleB.id]
+			);
+			expect(crossTenantRows.rows[0]?.count).toBe("0");
+		});
+
+		test("denies sale completion before dispatch when permission is not granted, and dispatches once granted", async () => {
+			const tenantId = "tenant_pos_sale_permission";
+			const registerId = "register_sale_permission";
+			const pos = saleService();
+			await openSaleRegister(pos, registerId, tenantId);
+			const sale = await pos.createSale({
+				...saleBase,
+				currency: "GYD",
+				idempotencyKey: "permission-sale-create",
+				lines: [saleLine()],
+				registerId,
+				tenantId,
+			});
+			let permissionCalls = 0;
+			let dispatched = false;
+			const application = createPosApplication({
+				activeContexts: {
+					requireActiveContext: () =>
+						Promise.resolve({
+							organizationId: saleBase.organizationId,
+							tenantId,
+						}),
+				},
+				entitlements: { requireEntitlement: () => Promise.resolve() },
+				permissions: {
+					requirePermission: () => {
+						permissionCalls += 1;
+						return Promise.reject(
+							Object.assign(new Error("permission denied"), {
+								code: "authorization_denied",
+							})
+						);
+					},
+				},
+				service: {
+					...pos,
+					completeSale: (input: Parameters<typeof pos.completeSale>[0]) => {
+						dispatched = true;
+						return pos.completeSale(input);
+					},
+				},
+			});
+			const denied = await captureError(
+				application.completeSale({
+					actorUserId: saleBase.actorUserId,
+					contextId: "context_pos_sale_denied",
+					correlationId: saleBase.correlationId,
+					idempotencyKey: "permission-sale-complete-denied",
+					saleId: sale.id,
+					sessionId: "session_pos_sale_denied",
+					tenders: [
+						{
+							amountMinor: EXACT_SALE_TOTAL_MINOR,
+							currency: "GYD",
+							type: "Cash",
+						},
+					],
+				})
+			);
+			expect(denied).toMatchObject({ code: "authorization_denied" });
+			expect(permissionCalls).toBe(1);
+			expect(dispatched).toBe(false);
+			const saleRow = await testPool.query<{ state: string }>(
+				"SELECT state FROM pos_sale WHERE tenant_id = $1 AND id = $2",
+				[tenantId, sale.id]
+			);
+			expect(saleRow.rows[0]?.state).toBe("Open");
+		});
+
+		// -- Performance budgets (frozen control plan §12; stage file's
+		// MEASURED-not-asserted requirement): >=50 warm iterations after >=5
+		// warmup, p50/p95/p99, explicit PASS/MISS-with-disposition against the
+		// NAMED governing targets, environment metadata, and retained raw
+		// numbers. A dev-machine local measurement is disclosed as
+		// non-representative-of-production, per stage file's MEASURED-LOCAL-
+		// ONLY allowance; the test never fabricates a PASS.
+		test("measures add-scanned-item lookup and platform sale-processing latency against the named governing targets, with retained samples and an explicit disposition", async () => {
+			const tenantId = "tenant_pos_sale_performance";
+			const registerId = "register_sale_performance";
+			const pos = saleService();
+			await openSaleRegister(pos, registerId, tenantId, "1000000");
+
+			const WARMUP_ITERATIONS = 5;
+			const SAMPLE_ITERATIONS = 50;
+			const createDurations: number[] = [];
+			const completeDurations: number[] = [];
+
+			for (
+				let index = 0;
+				index < WARMUP_ITERATIONS + SAMPLE_ITERATIONS;
+				index += 1
+			) {
+				const iterationKey = `perf-${index}`;
+				const createStartedAt = performance.now();
+				// biome-ignore lint/performance/noAwaitInLoops: representative single-operator latency sampling (not a throughput benchmark) per the frozen control plan §12 methodology.
+				const sale = await pos.createSale({
+					...saleBase,
+					currency: "GYD",
+					idempotencyKey: `${iterationKey}-create`,
+					lines: [saleLine()],
+					registerId,
+					tenantId,
+				});
+				const createDuration = performance.now() - createStartedAt;
+				const completeStartedAt = performance.now();
+				await pos.completeSale({
+					...saleBase,
+					idempotencyKey: `${iterationKey}-complete`,
+					saleId: sale.id,
+					tenantId,
+					tenders: [
+						{
+							amountMinor: EXACT_SALE_TOTAL_MINOR,
+							currency: "GYD",
+							type: "Cash",
+						},
+					],
+				});
+				const completeDuration = performance.now() - completeStartedAt;
+				if (index >= WARMUP_ITERATIONS) {
+					createDurations.push(createDuration);
+					completeDurations.push(completeDuration);
+				}
+			}
+
+			expect(createDurations).toHaveLength(SAMPLE_ITERATIONS);
+			expect(completeDurations).toHaveLength(SAMPLE_ITERATIONS);
+
+			const addScannedItem = reportBudgetDisposition({
+				limitation:
+					"service-to-owner-transaction timing; 'add-scanned-item' is realized here as CreateSale line pricing/tax (this backend stage has no barcode-scan or UI surface — PR5 scope); excludes browser, network, and scan-hardware latency",
+				metric: "pos-add-scanned-item-lookup",
+				samples: createDurations,
+				targetP95Ms: 100,
+			});
+			const saleProcessing = reportBudgetDisposition({
+				limitation:
+					"service-to-owner-transaction timing for CompleteSale (pricing/tax already applied at CreateSale, matching the named 'platform sale processing' governing target's completion-path scope); excludes browser and network latency",
+				metric: "pos-platform-sale-processing",
+				samples: completeDurations,
+				targetP95Ms: 750,
+				targetP99Ms: 1500,
+			});
+
+			// The measurement always carries a target comparison (never a bare
+			// number) — this is the conformance requirement itself, independent
+			// of which way the comparison lands on this local dev host.
+			expect(["PASS", "MISS"]).toContain(addScannedItem.disposition);
+			expect(["PASS", "MISS"]).toContain(saleProcessing.disposition);
+		});
+	}
+);

@@ -6,6 +6,7 @@ import {
 	InventoryError,
 	type InventoryIdFactory,
 } from "@meridian/domain-inventory";
+import type { SaleInventoryMovementPort } from "@meridian/domain-pos";
 import {
 	createInventoryRepository,
 	parseInventoryStockBalanceCursor,
@@ -13,6 +14,7 @@ import {
 } from "@meridian/persistence-inventory-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import { createTenancyRepository } from "@meridian/persistence-platform-tenancy-postgres";
+import type { PoolClient } from "pg";
 
 import { permissionAuthorizer } from "./authorization";
 import { catalogService } from "./catalog";
@@ -79,40 +81,92 @@ const unitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({
 	repository: createInventoryRepository(client),
 }));
 
+/** Read-only reference checks against the same top-level pools every other
+ * Inventory command already uses (not the sale's transactional client —
+ * these are cross-domain reads, not writes participating in the sale's
+ * atomicity). Shared by `inventoryService` and
+ * `createSaleInventoryMovementAdapter` below. */
+const references = {
+	async requireLocation(input: {
+		locationId: string;
+		organizationId: string;
+		tenantId: string;
+	}) {
+		const location = await createTenancyRepository(databasePool).getLocation(
+			input.tenantId,
+			input.locationId
+		);
+		if (!location || location.organizationId !== input.organizationId) {
+			throw new InventoryError(
+				"invalid_reference",
+				"Location is outside the active tenant and organization"
+			);
+		}
+	},
+	async requireProduct(input: {
+		productId: string;
+		tenantId: string;
+		variantId?: string | null;
+	}) {
+		const product = await catalogService.getProduct(
+			input.tenantId,
+			input.productId
+		);
+		if (
+			input.variantId &&
+			!product.variants.some((variant) => variant.id === input.variantId)
+		) {
+			throw new InventoryError(
+				"invalid_reference",
+				"Variant does not belong to the Product"
+			);
+		}
+	},
+};
+
 export const inventoryService = createInventoryService({
 	clock: () => new Date(),
 	ids,
-	references: {
-		async requireLocation(input) {
-			const location = await createTenancyRepository(databasePool).getLocation(
-				input.tenantId,
-				input.locationId
-			);
-			if (!location || location.organizationId !== input.organizationId) {
-				throw new InventoryError(
-					"invalid_reference",
-					"Location is outside the active tenant and organization"
-				);
-			}
-		},
-		async requireProduct(input) {
-			const product = await catalogService.getProduct(
-				input.tenantId,
-				input.productId
-			);
-			if (
-				input.variantId &&
-				!product.variants.some((variant) => variant.id === input.variantId)
-			) {
-				throw new InventoryError(
-					"invalid_reference",
-					"Variant does not belong to the Product"
-				);
-			}
-		},
-	},
+	references,
 	unitOfWork,
 });
+
+/**
+ * WS3 PR2's mandated seam (frozen control plan §6.3, "Read first"): builds
+ * an Inventory service instance bound to the SAME transactional
+ * `PoolClient` as the sale's own unit of work — mirroring
+ * `createImportReferenceAllocator` (numbering.ts), never the `imports.ts`
+ * `OpeningStock` target's separate-transaction pattern. Only
+ * `recordSaleMovement` is exposed; POS's domain package never imports
+ * `@meridian/domain-inventory` directly (composition-only, per
+ * `registry/architecture-rules.json`'s `domains` family, which does not
+ * list `domains` among its own allowed dependencies).
+ */
+export function createSaleInventoryMovementAdapter(
+	client: PoolClient
+): SaleInventoryMovementPort {
+	const service = createInventoryService({
+		clock: () => new Date(),
+		ids,
+		references,
+		unitOfWork: {
+			execute: (operation) =>
+				operation({
+					events: createPostgresOutbox(client),
+					repository: createInventoryRepository(client),
+				}),
+		},
+	});
+	return {
+		async recordSaleMovement(input) {
+			const result = await service.recordSaleMovement(input);
+			if (result === "negative_stock") {
+				return "negative_stock";
+			}
+			return { movementId: result.id };
+		},
+	};
+}
 
 export const inventoryApplication = createInventoryApplication({
 	activeContexts: {

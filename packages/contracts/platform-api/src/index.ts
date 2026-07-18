@@ -7,6 +7,7 @@ import {
 	ActiveContextSchema,
 	CashMovementSchema,
 	CloseRegisterRequestSchema,
+	CompleteSaleRequestSchema,
 	CreateCashMovementRequestSchema,
 	CreateCsvImportSchema,
 	CreateEventReplayRequestSchema,
@@ -17,6 +18,7 @@ import {
 	CreateProductSchema,
 	CreateRoleAssignmentRequestSchema,
 	CreateSafeDropRequestSchema,
+	CreateSaleSchema,
 	CreateStockCountSchema,
 	CreateStockTransferSchema,
 	CreateUserInvitationRequestSchema,
@@ -49,9 +51,12 @@ import {
 	ProblemSchema,
 	ProductSchema,
 	ProductStateSchema,
+	ReceiptSchema,
 	ReceiveStockTransferSchema,
 	RegisterSessionSchema,
+	RequestPriceOverrideSchema,
 	RoleAssignmentSchema,
+	SaleSchema,
 	SaveStockCountDraftLinesSchema,
 	StockCountSchema,
 	StockTransferSchema,
@@ -1038,6 +1043,138 @@ export const approveCashVarianceContract = base
 	)
 	.output(RegisterSessionSchema);
 
+// ---------------------------------------------------------------------------
+// WS3 PR2: Sale, PriceOverride, Receipt.
+// ---------------------------------------------------------------------------
+
+export const createSaleContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales",
+		successStatus: 201,
+	})
+	.meta({
+		operationId: "createSale",
+		permission: "commerce.sale.create",
+		requestRef: "#/components/schemas/CreateSale",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateSaleSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(SaleSchema);
+
+export const completeSaleContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales/{saleId}/complete",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "completeSale",
+		permission: "commerce.sale.complete",
+		requestRef: "#/components/schemas/CompleteSaleRequest",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CompleteSaleRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ saleId: IdentifierSchema }),
+		})
+	)
+	.output(SaleSchema);
+
+export const holdSaleContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales/{saleId}/hold",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postSalesBySaleIdHold",
+		permission: "commerce.sale.hold",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ saleId: IdentifierSchema }),
+		})
+	)
+	.output(SaleSchema);
+
+export const requestSalePriceOverrideContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales/{saleId}/price-overrides",
+		successStatus: 201,
+	})
+	.meta({
+		operationId: "requestSalePriceOverride",
+		permission: "commerce.price-override.request",
+		requestRef: "#/components/schemas/RequestPriceOverride",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: RequestPriceOverrideSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ saleId: IdentifierSchema }),
+		})
+	)
+	.output(SaleSchema);
+
+export const approveSalePriceOverrideContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales/{saleId}/price-overrides/{overrideId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "approveSalePriceOverride",
+		permission: "commerce.price-override.approve",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({
+				overrideId: IdentifierSchema,
+				saleId: IdentifierSchema,
+			}),
+		})
+	)
+	.output(SaleSchema);
+
+export const getReceiptContract = base
+	.route({
+		method: "GET",
+		path: "/v1/receipts/{receiptId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getReceiptsByReceiptId",
+		permission: "commerce.receipt.read",
+		responseRef: "#/components/schemas/Receipt",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ receiptId: IdentifierSchema }),
+		})
+	)
+	.output(ReceiptSchema);
+
 export const createOpeningStockImportContract = base
 	.route({
 		method: "POST",
@@ -1501,11 +1638,21 @@ export const ws3PosApiContract = {
 	commerce: {
 		cashMovements: { create: createCashMovementContract },
 		cashVariances: { approve: approveCashVarianceContract },
+		priceOverrides: {
+			approve: approveSalePriceOverrideContract,
+			request: requestSalePriceOverrideContract,
+		},
+		receipts: { get: getReceiptContract },
 		registers: {
 			close: closeRegisterContract,
 			open: openRegisterContract,
 		},
 		safeDrops: { create: createSafeDropContract },
+		sales: {
+			complete: completeSaleContract,
+			create: createSaleContract,
+			hold: holdSaleContract,
+		},
 	},
 };
 

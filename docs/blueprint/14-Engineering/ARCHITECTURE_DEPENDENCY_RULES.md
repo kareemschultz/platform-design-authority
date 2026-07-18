@@ -1,7 +1,7 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.9.0
+version: 1.10.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-18
@@ -95,7 +95,7 @@ The executable registry maps every concrete package, table, and migration stream
 | `packages/persistence/catalog-postgres` | `catalog` | `@meridian/domain-catalog` | `catalog_product`, `catalog_variant`, `catalog_identifier`, `catalog_product_command_receipt`, `catalog_product_search_projection` | `packages/persistence/catalog-postgres/src/migrations` |
 | `packages/persistence/inventory-postgres` | `inventory` | `@meridian/domain-inventory` | `inventory_stock_movement`, `inventory_stock_balance`, `inventory_reservation`, `inventory_adjustment`, `inventory_count`, `inventory_count_line`, `inventory_transfer`, `inventory_transfer_line`, `inventory_command_receipt` | `packages/persistence/inventory-postgres/src/migrations` |
 | `packages/persistence/platform-numbering-postgres` | `platform.numbering` | `@meridian/platform-numbering` | `platform_number_sequence`, `platform_number_allocation` | `packages/persistence/platform-numbering-postgres/src/migrations` |
-| `packages/persistence/pos-postgres` | `pos` | `@meridian/domain-pos` | `pos_register_session`, `pos_cash_movement`, `pos_command_receipt` | `packages/persistence/pos-postgres/src/migrations` |
+| `packages/persistence/pos-postgres` | `pos` | `@meridian/domain-pos` | `pos_register_session`, `pos_cash_movement`, `pos_command_receipt`, `pos_sale`, `pos_sale_line`, `pos_price_override`, `pos_receipt` | `packages/persistence/pos-postgres/src/migrations` |
 
 ### UI Packages
 
@@ -235,6 +235,7 @@ The generator derives each executable pattern's `except` list from this table. A
 
 ## Change Log
 
+- 1.10.0 (2026-07-18): WS3 PR2 (controlled prototype, `claude/ws3-integration`) adds `pos_sale`, `pos_sale_line`, `pos_price_override`, and `pos_receipt` to `packages/persistence/pos-postgres`'s owned tables (Sale, PriceOverride, Receipt — commerce.sale.create/.complete/.hold, commerce.price-override.request/.approve, commerce.receipt.read). Separately, `packages/persistence/inventory-postgres`'s existing `inventory_stock_movement` table gains a `Sale`/`Sale` value on its `movement_type`/`source_type` CHECK constraints (no new table, no new migration-owned table row) — the frozen WS3 control plan's mandated synchronous stock effect (`recordSaleMovement`), added to Inventory's own domain package and called only from `apps/server/composition` (a registered composition root), never imported cross-domain from `packages/domains/pos`.
 - 1.9.0 (2026-07-18): WS3 PR1 (controlled prototype, `claude/ws3-integration`) gives `packages/persistence/pos-postgres` its first real schema — `pos_register_session`, `pos_cash_movement`, `pos_command_receipt` — under logical owner `pos` (`@meridian/domain-pos`), replacing PR0's empty owner-stream placeholder row.
 - 1.8.0 (2026-07-18): WS3 PR0 (controlled prototype, `claude/ws3-integration`) registers `packages/persistence/pos-postgres` to logical owner `pos` (`@meridian/domain-pos`) with an empty owner migration stream; RegisterSession/CashMovement tables and their migrations arrive in WS3 PR1 per `docs/blueprint/17-Roadmap/WS3_POS_CASH_IMPLEMENTATION_PLAN.md`.
 - 1.7.1 (2026-07-17): Independent review of exact head `4acb743` remediation (F-B-002). A no-substitution template-literal (backtick) specifier in `import()` (e.g. ``await import(`@meridian/persistence-catalog-postgres`)``) evaded the quote-only specifier matcher and compiled. Extended the shared persistence-specifier matcher to accept backtick no-substitution literals, so dynamic `import()` and `require()` reject them outside migration-invocation roots; a failing worker probe was added and the allowed static named-import probe preserved. Runtime-interpolated (`${...}`) and concatenated specifiers remain explicitly out of scope. Full-tree checker still passes with no false positives.

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import type { Sale } from "@meridian/contracts-platform-api";
 import { call, ORPCError } from "@orpc/server";
 import type { Context } from "./context";
 import { appRouter } from "./router";
@@ -37,10 +38,12 @@ function context(input?: {
 			approveCashVariance: () => Promise.reject(new Error("not used")),
 			approveImport: () => Promise.reject(new Error("not used")),
 			approveInventoryAdjustment: () => Promise.reject(new Error("not used")),
+			approveSalePriceOverride: () => Promise.reject(new Error("not used")),
 			approveStockCount: () => Promise.reject(new Error("not used")),
 			archiveProduct: () => Promise.reject(new Error("not used")),
 			cancelImport: () => Promise.reject(new Error("not used")),
 			closeRegister: () => Promise.reject(new Error("not used")),
+			completeSale: () => Promise.reject(new Error("not used")),
 			createCashMovement: () => Promise.reject(new Error("not used")),
 			createEventReplay: () => Promise.reject(new Error("not used")),
 			createIdentityLink: () => Promise.reject(new Error("not used")),
@@ -51,6 +54,7 @@ function context(input?: {
 			createProduct: () => Promise.reject(new Error("not used")),
 			createRoleAssignment: () => Promise.reject(new Error("not used")),
 			createSafeDrop: () => Promise.reject(new Error("not used")),
+			createSale: () => Promise.reject(new Error("not used")),
 			createStockCount: () => Promise.reject(new Error("not used")),
 			createStockTransfer: () => Promise.reject(new Error("not used")),
 			dispatchStockTransfer: () => Promise.reject(new Error("not used")),
@@ -81,8 +85,10 @@ function context(input?: {
 			getOrganization: () => Promise.reject(new Error("not used")),
 			getParty: () => Promise.reject(new Error("not used")),
 			getProduct: () => Promise.reject(new Error("not used")),
+			getReceipt: () => Promise.reject(new Error("not used")),
 			getStockCount: () => Promise.reject(new Error("not used")),
 			getStockTransfer: () => Promise.reject(new Error("not used")),
+			holdSale: () => Promise.reject(new Error("not used")),
 			inviteUser: () => Promise.reject(new Error("not used")),
 			listAuditRecords: async () => ({ items: [], nextCursor: null }),
 			listCurrentUserSessions: async () => ({ items: [], nextCursor: null }),
@@ -102,6 +108,7 @@ function context(input?: {
 			openRegister: () => Promise.reject(new Error("not used")),
 			purgeImportStaging: async () => ({ findings: 0, rows: 0, waves: 0 }),
 			receiveStockTransfer: () => Promise.reject(new Error("not used")),
+			requestSalePriceOverride: () => Promise.reject(new Error("not used")),
 			reverseInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			revokeCurrentUserSession: () => Promise.resolve(),
 			saveStockCountDraft: () => Promise.reject(new Error("not used")),
@@ -182,8 +189,11 @@ describe("appRouter contract surface", () => {
 		expect(Object.keys(appRouter.commerce).sort()).toEqual([
 			"cashMovements",
 			"cashVariances",
+			"priceOverrides",
+			"receipts",
 			"registers",
 			"safeDrops",
+			"sales",
 		]);
 		expect(Object.keys(appRouter.commerce.registers).sort()).toEqual([
 			"close",
@@ -198,6 +208,16 @@ describe("appRouter contract surface", () => {
 		expect(Object.keys(appRouter.commerce.cashVariances).sort()).toEqual([
 			"approve",
 		]);
+		expect(Object.keys(appRouter.commerce.sales).sort()).toEqual([
+			"complete",
+			"create",
+			"hold",
+		]);
+		expect(Object.keys(appRouter.commerce.priceOverrides).sort()).toEqual([
+			"approve",
+			"request",
+		]);
+		expect(Object.keys(appRouter.commerce.receipts).sort()).toEqual(["get"]);
 		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
 			"activate",
 			"archive",
@@ -1066,6 +1086,517 @@ describe("appRouter contract surface", () => {
 					context: context({
 						application: {
 							approveCashVariance: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	// -- WS3 PR2: sales, price overrides, receipts --------------------------
+
+	function fakeSale(overrides: Partial<Sale> = {}) {
+		return {
+			change: null,
+			completedAt: null,
+			currency: "GYD",
+			customerPartyId: null,
+			discount: { amountMinor: 0, currency: "GYD" },
+			gross: { amountMinor: 100_000, currency: "GYD" },
+			heldAt: null,
+			id: "sale_unit_test_0001",
+			lines: [],
+			receiptId: null,
+			registerId: "register_unit_test_0001",
+			sessionId: "session_unit_test_0001",
+			state: "Open" as const,
+			tax: { amountMinor: 14_000, currency: "GYD" },
+			tendered: null,
+			total: { amountMinor: 114_000, currency: "GYD" },
+			version: 1,
+			...overrides,
+		};
+	}
+
+	test("dispatches sale creation with the register, currency, and lines from the request body", async () => {
+		let received:
+			| Parameters<Context["application"]["createSale"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.sales.create,
+			{
+				body: {
+					currency: "GYD",
+					lines: [
+						{
+							productId: "product_unit_test_0001",
+							quantity: "2",
+							unit: "each",
+							unitPrice: { amountMinor: 50_000, currency: "GYD" },
+						},
+					],
+					registerId: "register_unit_test_0001",
+				},
+				headers: {
+					"idempotency-key": "idempotency-sale-create-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						createSale(input) {
+							received = input;
+							return Promise.resolve(fakeSale());
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ id: "sale_unit_test_0001", state: "Open" });
+		expect(permission).toBe("commerce.sale.create");
+		expect(received).toMatchObject({
+			currency: "GYD",
+			lines: [
+				{
+					productId: "product_unit_test_0001",
+					quantity: "2",
+					unit: "each",
+					unitPrice: { amountMinor: 50_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_unit_test_0001",
+		});
+	});
+
+	test("denies sale creation before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.sales.create,
+				{
+					body: {
+						currency: "GYD",
+						lines: [
+							{
+								productId: "product_unit_test_0001",
+								quantity: "1",
+								unit: "each",
+								unitPrice: { amountMinor: 10_000, currency: "GYD" },
+							},
+						],
+						registerId: "register_hidden_unit_0001",
+					},
+					headers: {
+						"idempotency-key": "idempotency-sale-create-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+				},
+				{
+					context: context({
+						application: {
+							createSale: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("dispatches sale completion with the saleId and flattened cash tenders from the request", async () => {
+		let received:
+			| Parameters<Context["application"]["completeSale"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.sales.complete,
+			{
+				body: {
+					tenders: [
+						{
+							amount: { amountMinor: 114_000, currency: "GYD" },
+							type: "Cash" as const,
+						},
+					],
+				},
+				headers: {
+					"idempotency-key": "idempotency-sale-complete-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { saleId: "sale_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						completeSale(input) {
+							received = input;
+							return Promise.resolve(
+								fakeSale({
+									change: { amountMinor: 0, currency: "GYD" },
+									completedAt: "2026-07-13T12:30:00.000Z",
+									receiptId: "receipt_unit_test_0001",
+									state: "Completed",
+									tendered: { amountMinor: 114_000, currency: "GYD" },
+								})
+							);
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			receiptId: "receipt_unit_test_0001",
+			state: "Completed",
+		});
+		expect(permission).toBe("commerce.sale.complete");
+		expect(received).toMatchObject({
+			saleId: "sale_unit_test_0001",
+			tenders: [{ amountMinor: 114_000, currency: "GYD", type: "Cash" }],
+		});
+	});
+
+	test("denies sale completion before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.sales.complete,
+				{
+					body: {
+						tenders: [
+							{
+								amount: { amountMinor: 1000, currency: "GYD" },
+								type: "Cash" as const,
+							},
+						],
+					},
+					headers: {
+						"idempotency-key": "idempotency-sale-complete-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { saleId: "sale_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							completeSale: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("dispatches sale hold with the saleId from the request path", async () => {
+		let received: Parameters<Context["application"]["holdSale"]>[0] | undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.sales.hold,
+			{
+				headers: {
+					"idempotency-key": "idempotency-sale-hold-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { saleId: "sale_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						holdSale(input) {
+							received = input;
+							return Promise.resolve(
+								fakeSale({
+									heldAt: "2026-07-13T12:15:00.000Z",
+									state: "Held",
+								})
+							);
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ state: "Held" });
+		expect(permission).toBe("commerce.sale.hold");
+		expect(received).toMatchObject({ saleId: "sale_unit_test_0001" });
+	});
+
+	test("denies sale hold before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.sales.hold,
+				{
+					headers: {
+						"idempotency-key": "idempotency-sale-hold-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { saleId: "sale_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							holdSale: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("dispatches a price-override request with the lineId, requestedPrice, and reason from the request body", async () => {
+		let received:
+			| Parameters<Context["application"]["requestSalePriceOverride"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.priceOverrides.request,
+			{
+				body: {
+					lineId: "sale_line_unit_test_0001",
+					reason: "Manager-approved discount",
+					requestedPrice: { amountMinor: 40_000, currency: "GYD" },
+				},
+				headers: {
+					"idempotency-key": "idempotency-price-override-request-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { saleId: "sale_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						requestSalePriceOverride(input) {
+							received = input;
+							return Promise.resolve(fakeSale());
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ id: "sale_unit_test_0001" });
+		expect(permission).toBe("commerce.price-override.request");
+		expect(received).toMatchObject({
+			lineId: "sale_line_unit_test_0001",
+			reason: "Manager-approved discount",
+			requestedPrice: { amountMinor: 40_000, currency: "GYD" },
+			saleId: "sale_unit_test_0001",
+		});
+	});
+
+	test("denies a price-override request before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.priceOverrides.request,
+				{
+					body: {
+						lineId: "sale_line_unit_test_0001",
+						reason: "Manager-approved discount",
+						requestedPrice: { amountMinor: 40_000, currency: "GYD" },
+					},
+					headers: {
+						"idempotency-key": "idempotency-price-override-request-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { saleId: "sale_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							requestSalePriceOverride: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("dispatches a price-override approval with the saleId and overrideId from the request path", async () => {
+		let received:
+			| Parameters<Context["application"]["approveSalePriceOverride"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.priceOverrides.approve,
+			{
+				headers: {
+					"idempotency-key": "idempotency-price-override-approve-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: {
+					overrideId: "price_override_unit_test_0001",
+					saleId: "sale_unit_test_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						approveSalePriceOverride(input) {
+							received = input;
+							return Promise.resolve(fakeSale());
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ id: "sale_unit_test_0001" });
+		expect(permission).toBe("commerce.price-override.approve");
+		expect(received).toMatchObject({
+			overrideId: "price_override_unit_test_0001",
+			saleId: "sale_unit_test_0001",
+		});
+	});
+
+	test("denies a price-override approval before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.priceOverrides.approve,
+				{
+					headers: {
+						"idempotency-key": "idempotency-price-override-approve-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: {
+						overrideId: "price_override_hidden_unit_0001",
+						saleId: "sale_hidden_unit_0001",
+					},
+				},
+				{
+					context: context({
+						application: {
+							approveSalePriceOverride: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("dispatches a receipt read with the receiptId from the request path", async () => {
+		let received:
+			| Parameters<Context["application"]["getReceipt"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.receipts.get,
+			{
+				headers: { "x-active-context-id": "context_unit_test_0001" },
+				params: { receiptId: "receipt_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						getReceipt(input) {
+							received = input;
+							return Promise.resolve({
+								cashierPartyId: "party_unit_test_cashier",
+								currency: "GYD",
+								id: input.receiptId,
+								issuedAt: "2026-07-13T12:30:00.000Z",
+								kind: "Sale" as const,
+								lines: [],
+								originalReceiptId: null,
+								priceSuppressed: false,
+								receiptNumber: "R-register_unit_test_0001-000001",
+								registerId: "register_unit_test_0001",
+								returnId: null,
+								saleId: "sale_unit_test_0001",
+								tenders: [],
+								total: { amountMinor: 114_000, currency: "GYD" },
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			id: "receipt_unit_test_0001",
+			receiptNumber: "R-register_unit_test_0001-000001",
+		});
+		expect(permission).toBe("commerce.receipt.read");
+		expect(received).toMatchObject({ receiptId: "receipt_unit_test_0001" });
+	});
+
+	test("denies a receipt read before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.receipts.get,
+				{
+					headers: { "x-active-context-id": "context_unit_test_0001" },
+					params: { receiptId: "receipt_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							getReceipt: () => {
 								dispatched = true;
 								return Promise.reject(new Error("must not dispatch"));
 							},

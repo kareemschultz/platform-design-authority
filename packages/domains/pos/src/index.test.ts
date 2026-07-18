@@ -9,11 +9,116 @@ import {
 	PosError,
 	type PosIdFactory,
 	type PosPermission,
+	type PosPricingPort,
 	type PosRepository,
+	type PosTaxPort,
+	type PriceOverrideRecord,
 	REGISTER_SESSION_STATES,
+	type ReceiptRecord,
 	type RegisterSessionRecord,
+	SALE_LINE_TAX_CATEGORIES,
 	SALE_STATES,
+	type SaleRecord,
 } from ".";
+
+// Test-local reimplementation of `@meridian/engine-pricing`/
+// `@meridian/engine-tax`'s exact formulas (PDA-IND-090's exclusive-rate
+// math and the pricing engine's round-half-up cent rounding) — NOT an
+// import of either engine package. `packages/domains/pos` (and its
+// colocated tests) cannot import `packages/engines/*` directly:
+// `registry/architecture-rules.json`'s `family_grants_are_contract_only`
+// forbids a `domains` -> `engines` edge without a published
+// `packages/contracts/engine-*` package, which neither engine has.
+// `scripts/check_architecture.py` enforces this on every source file,
+// test files included. The engines' own formula correctness is
+// independently asserted by their own colocated test files
+// (`packages/engines/pricing/src/index.test.ts`,
+// `packages/engines/tax/src/index.test.ts`); this fixture exists only to
+// exercise the DOMAIN's own orchestration of a `PosPricingPort`/
+// `PosTaxPort` adapter's output.
+const TEST_MONEY_SCALE = 100n;
+const TEST_QUANTITY_SCALE = 1_000_000n;
+const TEST_CATEGORY_RATES: Record<string, string> = {
+	GY_EXEMPT: "0.00",
+	GY_OUT_OF_SCOPE: "0.00",
+	GY_STANDARD_14: "0.14",
+	GY_ZERO_RATED: "0.00",
+};
+
+function testMoneyToMinor(value: string): bigint {
+	const [whole = "0", fraction = "00"] = value.split(".");
+	return BigInt(whole) * TEST_MONEY_SCALE + BigInt(fraction);
+}
+function testMinorToMoney(value: bigint): string {
+	const whole = value / TEST_MONEY_SCALE;
+	const fraction = (value % TEST_MONEY_SCALE).toString().padStart(2, "0");
+	return `${whole}.${fraction}`;
+}
+function testQuantityToScaled(value: string): bigint {
+	const [whole = "0", fraction = ""] = value.split(".");
+	return BigInt(whole) * TEST_QUANTITY_SCALE + BigInt(fraction.padEnd(6, "0"));
+}
+function testRoundHalfUp(numerator: bigint, denominator: bigint): bigint {
+	return (numerator + denominator / 2n) / denominator;
+}
+
+function createTestPricingEngine(): PosPricingPort {
+	return {
+		priceLine: (input) => {
+			const unitPriceMinor = testMoneyToMinor(input.unitPrice);
+			const quantityScaled = testQuantityToScaled(input.quantity);
+			const grossMinor = testRoundHalfUp(
+				unitPriceMinor * quantityScaled,
+				TEST_QUANTITY_SCALE
+			);
+			const discountMinor = input.discountAmount
+				? testMoneyToMinor(input.discountAmount)
+				: 0n;
+			const netMinor = grossMinor - discountMinor;
+			return Promise.resolve({
+				discountAmount: testMinorToMoney(discountMinor),
+				grossAmount: testMinorToMoney(grossMinor),
+				netAmount: testMinorToMoney(netMinor),
+			});
+		},
+	};
+}
+
+function createTestTaxEngine(): PosTaxPort {
+	return {
+		calculateLine: (input) => {
+			const rate = TEST_CATEGORY_RATES[input.category] ?? "0.00";
+			const rateScaled = testMoneyToMinor(rate);
+			const inputMinor = testMoneyToMinor(input.taxableBase);
+			if (input.inclusive) {
+				const denominatorScaled = TEST_MONEY_SCALE + rateScaled;
+				const taxableBaseMinor = testRoundHalfUp(
+					inputMinor * TEST_MONEY_SCALE,
+					denominatorScaled
+				);
+				const taxAmountMinor = inputMinor - taxableBaseMinor;
+				return Promise.resolve({
+					category: input.category,
+					nonStatutory: true as const,
+					rate,
+					taxAmount: testMinorToMoney(taxAmountMinor),
+					taxableBase: testMinorToMoney(taxableBaseMinor),
+				});
+			}
+			const taxAmountMinor = testRoundHalfUp(
+				inputMinor * rateScaled,
+				TEST_MONEY_SCALE
+			);
+			return Promise.resolve({
+				category: input.category,
+				nonStatutory: true as const,
+				rate,
+				taxAmount: testMinorToMoney(taxAmountMinor),
+				taxableBase: testMinorToMoney(inputMinor),
+			});
+		},
+	};
+}
 
 describe("POS contract scaffold", () => {
 	test("register sessions have no reopen transition", () => {
@@ -45,17 +150,41 @@ describe("POS contract scaffold", () => {
 function createInMemoryRepository() {
 	const sessions = new Map<string, RegisterSessionRecord>();
 	const movements: CashMovementRecord[] = [];
-	const receipts = new Map<string, PosCommandReceipt>();
+	const commandReceipts = new Map<string, PosCommandReceipt>();
+	const sales = new Map<string, SaleRecord>();
+	const priceOverrides = new Map<string, PriceOverrideRecord>();
+	const saleReceipts = new Map<string, ReceiptRecord>();
 
 	const repository: PosRepository = {
 		acquireCommandLock: () => Promise.resolve(),
+		countPendingPriceOverrides: (tenantId, saleId) =>
+			Promise.resolve(
+				[...priceOverrides.values()].filter(
+					(override) =>
+						override.tenantId === tenantId &&
+						override.saleId === saleId &&
+						override.state === "Pending"
+				).length
+			),
 		createCashMovement: (record) => {
 			movements.push(record);
 			return Promise.resolve(record);
 		},
+		createPriceOverride: (record) => {
+			priceOverrides.set(record.id, record);
+			return Promise.resolve(record);
+		},
+		createReceipt: (record) => {
+			saleReceipts.set(record.id, record);
+			return Promise.resolve(record);
+		},
+		createSale: (record) => {
+			sales.set(record.id, record);
+			return Promise.resolve(record);
+		},
 		getCommandReceipt: (tenantId, operation, idempotencyKey) =>
 			Promise.resolve(
-				receipts.get(`${tenantId}${operation}${idempotencyKey}`) ?? null
+				commandReceipts.get(`${tenantId}${operation}${idempotencyKey}`) ?? null
 			),
 		getOpenSession: (tenantId, registerId) =>
 			Promise.resolve(
@@ -66,6 +195,24 @@ function createInMemoryRepository() {
 						session.state === "Open"
 				) ?? null
 			),
+		getPriceOverride: (tenantId, id) => {
+			const record = priceOverrides.get(id);
+			return Promise.resolve(
+				record && record.tenantId === tenantId ? record : null
+			);
+		},
+		getReceipt: (tenantId, id) => {
+			const record = saleReceipts.get(id);
+			return Promise.resolve(
+				record && record.tenantId === tenantId ? record : null
+			);
+		},
+		getSale: (tenantId, saleId) => {
+			const record = sales.get(saleId);
+			return Promise.resolve(
+				record && record.tenantId === tenantId ? record : null
+			);
+		},
 		getSession: (tenantId, sessionId) => {
 			const record = sessions.get(sessionId);
 			return Promise.resolve(
@@ -106,12 +253,28 @@ function createInMemoryRepository() {
 		},
 		recordCommandReceipt: (receipt) => {
 			const key = `${receipt.tenantId}${receipt.operation}${receipt.idempotencyKey}`;
-			const existing = receipts.get(key);
+			const existing = commandReceipts.get(key);
 			if (existing) {
 				return Promise.resolve({ inserted: false, record: existing });
 			}
-			receipts.set(key, receipt);
+			commandReceipts.set(key, receipt);
 			return Promise.resolve({ inserted: true, record: receipt });
+		},
+		updatePriceOverride: (record, expectedVersion) => {
+			const current = priceOverrides.get(record.id);
+			if (!current || current.version !== expectedVersion) {
+				return Promise.resolve("version_conflict" as const);
+			}
+			priceOverrides.set(record.id, record);
+			return Promise.resolve(record);
+		},
+		updateSale: (record, expectedVersion) => {
+			const current = sales.get(record.id);
+			if (!current || current.version !== expectedVersion) {
+				return Promise.resolve("version_conflict" as const);
+			}
+			sales.set(record.id, record);
+			return Promise.resolve(record);
 		},
 		updateSession: (record, expectedVersion) => {
 			const current = sessions.get(record.id);
@@ -123,11 +286,25 @@ function createInMemoryRepository() {
 		},
 	};
 
-	return { movements, receipts, repository, sessions };
+	return {
+		movements,
+		priceOverrides,
+		repository,
+		saleReceipts,
+		sales,
+		sessions,
+	};
 }
 
 function createHarness() {
-	const { movements, repository, sessions } = createInMemoryRepository();
+	const {
+		movements,
+		priceOverrides,
+		repository,
+		saleReceipts,
+		sales,
+		sessions,
+	} = createInMemoryRepository();
 	const events: PendingPosEvent[] = [];
 	let sequence = 0;
 	const ids: PosIdFactory = {
@@ -137,6 +314,22 @@ function createHarness() {
 		},
 	};
 	const seenEventIds = new Set<string>();
+	const stockMovements: Array<{ productId: string; quantity: string }> = [];
+	const negativeStockProductIds = new Set<string>();
+	const scope = {
+		events: {
+			append: (envelope: PendingPosEvent) => {
+				if (seenEventIds.has(envelope.id)) {
+					return Promise.resolve("duplicate" as const);
+				}
+				seenEventIds.add(envelope.id);
+				events.push(envelope);
+				return Promise.resolve("inserted" as const);
+			},
+		},
+		repository,
+	};
+	let receiptCounter = 0;
 	const service = createPosService({
 		clock: () => new Date("2026-07-18T12:00:00.000Z"),
 		ids,
@@ -144,25 +337,58 @@ function createHarness() {
 			requireActorPartyId: ({ authUserId }) =>
 				Promise.resolve(`party_${authUserId}`),
 		},
-		unitOfWork: {
+		pricing: createTestPricingEngine(),
+		products: {
+			requireProduct: ({ productId }) =>
+				Promise.resolve({ productName: `Product ${productId}` }),
+		},
+		saleUnitOfWork: {
 			execute: (operation) =>
 				operation({
-					events: {
-						append: (envelope) => {
-							if (seenEventIds.has(envelope.id)) {
-								return Promise.resolve("duplicate" as const);
+					...scope,
+					inventory: {
+						recordSaleMovement: (input) => {
+							stockMovements.push({
+								productId: input.productId,
+								quantity: input.quantity,
+							});
+							if (negativeStockProductIds.has(input.productId)) {
+								return Promise.resolve("negative_stock" as const);
 							}
-							seenEventIds.add(envelope.id);
-							events.push(envelope);
-							return Promise.resolve("inserted" as const);
+							return Promise.resolve({
+								movementId: `movement_${input.productId}`,
+							});
 						},
 					},
-					repository,
+					numbering: {
+						allocate: (input) => {
+							receiptCounter += 1;
+							return Promise.resolve({
+								value: `R-${input.registerId}-${receiptCounter.toString().padStart(6, "0")}`,
+							});
+						},
+					},
 				}),
 		},
+		tax: createTestTaxEngine(),
+		unitOfWork: { execute: (operation) => operation(scope) },
 	});
-	return { events, ids, movements, service, sessions };
+	return {
+		events,
+		ids,
+		movements,
+		negativeStockProductIds,
+		priceOverrides,
+		saleReceipts,
+		sales,
+		service,
+		sessions,
+		stockMovements,
+	};
 }
+
+const RECEIPT_NUMBER_PATTERN_SALE = /^R-register_sale-\d{6}$/;
+const RECEIPT_NUMBER_PATTERN_RECEIPT_READ = /^R-register_receipt_read-\d{6}$/;
 
 const base = {
 	actorUserId: "user_maker",
@@ -583,6 +809,506 @@ describe("POS domain: RegisterSession lifecycle", () => {
 				registerId: "register_validation",
 			})
 		).rejects.toMatchObject({ code: "validation" });
+	});
+});
+
+describe("POS domain: Sale, PriceOverride, Receipt", () => {
+	function openSaleRegister(
+		service: ReturnType<typeof createHarness>["service"],
+		registerId = "register_sale"
+	) {
+		return service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-open`,
+			openingFloat: { amountMinor: 0, currency: "GYD" },
+			registerId,
+		});
+	}
+
+	test("creates a sale, prices and taxes lines against the tax pack, and completes it with cash tender, change, receipt, and inventory movement", async () => {
+		const { service, sales, saleReceipts, stockMovements, events } =
+			createHarness();
+		await openSaleRegister(service);
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-create-1",
+			lines: [
+				{
+					productId: "prod_standard",
+					quantity: "2",
+					unit: "each",
+					unitPrice: { amountMinor: 100_000, currency: "GYD" }, // 1000.00 GYD
+				},
+				{
+					productId: "prod_zero_rated",
+					quantity: "1",
+					taxCategory: "GY_ZERO_RATED",
+					unit: "each",
+					unitPrice: { amountMinor: 50_000, currency: "GYD" }, // 500.00 GYD
+				},
+			],
+			registerId: "register_sale",
+		});
+		expect(sale.state).toBe("Open");
+		expect(sale.lines).toHaveLength(2);
+		// 2 x 1000.00 = 2000.00 gross, 14% VAT = 280.00
+		expect(sale.lines[0]?.gross).toEqual({
+			amountMinor: 200_000,
+			currency: "GYD",
+		});
+		expect(sale.lines[0]?.tax).toEqual({
+			amountMinor: 28_000,
+			currency: "GYD",
+		});
+		expect(sale.lines[0]?.taxCategory).toBe("GY_STANDARD_14");
+		// zero-rated line has no tax
+		expect(sale.lines[1]?.tax).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(sale.gross).toEqual({ amountMinor: 250_000, currency: "GYD" });
+		expect(sale.tax).toEqual({ amountMinor: 28_000, currency: "GYD" });
+		expect(sale.total).toEqual({ amountMinor: 278_000, currency: "GYD" });
+		expect(sales.get(sale.id)?.state).toBe("Open");
+
+		const completed = await service.completeSale({
+			...base,
+			idempotencyKey: "sale-complete-1",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 300_000, currency: "GYD", type: "Cash" }],
+		});
+		expect(completed.state).toBe("Completed");
+		expect(completed.tendered).toEqual({
+			amountMinor: 300_000,
+			currency: "GYD",
+		});
+		expect(completed.change).toEqual({ amountMinor: 22_000, currency: "GYD" });
+		expect(completed.receiptId).not.toBeNull();
+
+		// Synchronous Inventory stock movement, one per line, positive
+		// (sold) quantity — the sign flip to a decrement happens inside
+		// Inventory's own `recordSaleMovement`, not here.
+		expect(stockMovements).toEqual([
+			{ productId: "prod_standard", quantity: "2" },
+			{ productId: "prod_zero_rated", quantity: "1" },
+		]);
+
+		const receipt = saleReceipts.get(completed.receiptId as string);
+		expect(receipt?.receiptNumber).toMatch(RECEIPT_NUMBER_PATTERN_SALE);
+		expect(receipt?.kind).toBe("Sale");
+		expect(receipt?.totalMinor).toBe(278_000);
+
+		const completedEvent = events.find(
+			(envelope) => envelope.name === "commerce.sale.completed.v1"
+		);
+		expect(completedEvent?.data).toMatchObject({
+			completionMode: "Online",
+			currency: "GYD",
+			discountMinor: 0,
+			grossMinor: 250_000,
+			receiptId: completed.receiptId,
+			registerId: "register_sale",
+			saleId: sale.id,
+			taxMinor: 28_000,
+			totalMinor: 278_000,
+		});
+		expect(completedEvent?.data.tenders).toEqual([
+			{ amountMinor: 300_000, referenceId: null, type: "Cash" },
+		]);
+		const receiptEvent = events.find(
+			(envelope) => envelope.name === "commerce.receipt.issued.v1"
+		);
+		expect(receiptEvent?.data).toMatchObject({
+			kind: "Sale",
+			priceSuppressed: false,
+			receiptId: completed.receiptId,
+			registerId: "register_sale",
+			saleId: sale.id,
+			totalMinor: 278_000,
+		});
+	});
+
+	test("applies a per-line discount before computing tax", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_discount");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-discount-1",
+			lines: [
+				{
+					discountAmount: { amountMinor: 20_000, currency: "GYD" }, // 200.00 off
+					productId: "prod_discounted",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 100_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_discount",
+		});
+		expect(sale.lines[0]?.discount).toEqual({
+			amountMinor: 20_000,
+			currency: "GYD",
+		});
+		// taxable base = 1000.00 - 200.00 = 800.00; VAT 14% = 112.00
+		expect(sale.lines[0]?.taxableBase).toEqual({
+			amountMinor: 80_000,
+			currency: "GYD",
+		});
+		expect(sale.lines[0]?.tax).toEqual({
+			amountMinor: 11_200,
+			currency: "GYD",
+		});
+	});
+
+	test("rejects sale creation when the register has no open session", async () => {
+		const { service } = createHarness();
+		const attempt = service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-no-register",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 10_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_never_opened",
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
+	test("rejects a sale with no lines", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_empty");
+		const attempt = service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-empty",
+			lines: [],
+			registerId: "register_empty",
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "validation" });
+	});
+
+	test("rejects a non-Cash tender politely at the completion boundary (WS4/WS6 scope)", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_noncash");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-noncash-1",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 10_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_noncash",
+		});
+		const attempt = service.completeSale({
+			...base,
+			idempotencyKey: "sale-noncash-complete",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 20_000, currency: "GYD", type: "StoredValue" }],
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "validation" });
+	});
+
+	test("rejects completion when tendered cash is less than the sale total", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_shorttender");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-shorttender-1",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 100_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_shorttender",
+		});
+		const attempt = service.completeSale({
+			...base,
+			idempotencyKey: "sale-shorttender-complete",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 50_000, currency: "GYD", type: "Cash" }],
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "validation" });
+	});
+
+	test("rejects completion when a line's stock movement reports negative stock", async () => {
+		const { negativeStockProductIds, service } = createHarness();
+		await openSaleRegister(service, "register_negativestock");
+		negativeStockProductIds.add("prod_out_of_stock");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-negstock-1",
+			lines: [
+				{
+					productId: "prod_out_of_stock",
+					quantity: "5",
+					unit: "each",
+					unitPrice: { amountMinor: 10_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_negativestock",
+		});
+		const attempt = service.completeSale({
+			...base,
+			idempotencyKey: "sale-negstock-complete",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 100_000, currency: "GYD", type: "Cash" }],
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "negative_stock" });
+	});
+
+	test("holds an Open sale and completes it after hold via implicit resume", async () => {
+		const { service, events } = createHarness();
+		await openSaleRegister(service, "register_hold");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-hold-1",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 50_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_hold",
+		});
+		const held = await service.holdSale({
+			...base,
+			idempotencyKey: "sale-hold-op",
+			saleId: sale.id,
+		});
+		expect(held.state).toBe("Held");
+		expect(held.heldAt).not.toBeNull();
+		expect(
+			events.some((envelope) => envelope.name === "commerce.sale.held.v1")
+		).toBe(true);
+
+		const completed = await service.completeSale({
+			...base,
+			idempotencyKey: "sale-hold-complete",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 60_000, currency: "GYD", type: "Cash" }],
+		});
+		expect(completed.state).toBe("Completed");
+	});
+
+	test("rejects holding a sale that is not Open", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_hold_twice");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-hold-twice-1",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 50_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_hold_twice",
+		});
+		await service.holdSale({
+			...base,
+			idempotencyKey: "sale-hold-twice-op1",
+			saleId: sale.id,
+		});
+		const secondHold = service.holdSale({
+			...base,
+			idempotencyKey: "sale-hold-twice-op2",
+			saleId: sale.id,
+		});
+		await expect(secondHold).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
+	test("price override maker/checker: requester cannot self-approve; a different approver applies the requested price and unblocks completion", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_override");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-override-1",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 100_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_override",
+		});
+		const lineId = sale.lines[0]?.id as string;
+
+		const requested = await service.requestPriceOverride({
+			...base,
+			idempotencyKey: "override-request-1",
+			lineId,
+			reason: "Manager-approved discount for damaged packaging",
+			requestedPrice: { amountMinor: 80_000, currency: "GYD" },
+			saleId: sale.id,
+		});
+		expect(requested.lines[0]?.priceOverrideState).toBe("Pending");
+		const overrideId = requested.lines[0]?.priceOverrideId as string;
+		expect(overrideId).toBeTruthy();
+		// Unit price is unchanged until approval.
+		expect(requested.lines[0]?.unitPrice).toEqual({
+			amountMinor: 100_000,
+			currency: "GYD",
+		});
+
+		// Sale cannot complete while the override is Pending.
+		const blockedCompletion = service.completeSale({
+			...base,
+			idempotencyKey: "override-blocked-complete",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 200_000, currency: "GYD", type: "Cash" }],
+		});
+		await expect(blockedCompletion).rejects.toMatchObject({
+			code: "invalid_state",
+		});
+
+		const selfApproval = service.approvePriceOverride({
+			...base,
+			idempotencyKey: "override-self-approve",
+			overrideId,
+			saleId: sale.id,
+		});
+		await expect(selfApproval).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+
+		const approved = await service.approvePriceOverride({
+			actorUserId: "user_checker",
+			correlationId: base.correlationId,
+			idempotencyKey: "override-approve-1",
+			organizationId: base.organizationId,
+			overrideId,
+			saleId: sale.id,
+			tenantId: base.tenantId,
+		});
+		expect(approved.lines[0]?.priceOverrideState).toBe("Approved");
+		expect(approved.lines[0]?.unitPrice).toEqual({
+			amountMinor: 80_000,
+			currency: "GYD",
+		});
+		// 800.00 x 14% = 112.00
+		expect(approved.lines[0]?.tax).toEqual({
+			amountMinor: 11_200,
+			currency: "GYD",
+		});
+		expect(approved.total).toEqual({ amountMinor: 91_200, currency: "GYD" });
+
+		const completed = await service.completeSale({
+			...base,
+			idempotencyKey: "override-complete-1",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 91_200, currency: "GYD", type: "Cash" }],
+		});
+		expect(completed.state).toBe("Completed");
+		expect(completed.change).toEqual({ amountMinor: 0, currency: "GYD" });
+	});
+
+	test("replays an idempotent sale.create and sale.complete without duplicating a receipt or stock movement", async () => {
+		const { service, saleReceipts, stockMovements } = createHarness();
+		await openSaleRegister(service, "register_sale_replay");
+		const createInput = {
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-replay-create",
+			lines: [
+				{
+					productId: "prod_replay",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 25_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_sale_replay",
+		};
+		const [first, replayed] = await Promise.all([
+			service.createSale(createInput),
+			service.createSale(createInput),
+		]);
+		expect(replayed).toEqual(first);
+
+		const completeInput = {
+			...base,
+			idempotencyKey: "sale-replay-complete",
+			saleId: first.id,
+			tenders: [
+				{
+					amountMinor: 30_000,
+					currency: "GYD" as const,
+					type: "Cash" as const,
+				},
+			],
+		};
+		const [firstComplete, replayedComplete] = await Promise.all([
+			service.completeSale(completeInput),
+			service.completeSale(completeInput),
+		]);
+		expect(replayedComplete).toEqual(firstComplete);
+		expect(saleReceipts.size).toBe(1);
+		expect(stockMovements).toHaveLength(1);
+	});
+
+	test("reads back a persisted receipt by id", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_receipt_read");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-receipt-read-1",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 10_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_receipt_read",
+		});
+		const completed = await service.completeSale({
+			...base,
+			idempotencyKey: "sale-receipt-read-complete",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 20_000, currency: "GYD", type: "Cash" }],
+		});
+		const receipt = await service.getReceipt(
+			base.tenantId,
+			completed.receiptId as string
+		);
+		expect(receipt.receiptNumber).toMatch(RECEIPT_NUMBER_PATTERN_RECEIPT_READ);
+		expect(receipt.kind).toBe("Sale");
+		expect(receipt.saleId).toBe(sale.id);
+	});
+
+	test("uses only the registered prototype tax categories", () => {
+		expect(SALE_LINE_TAX_CATEGORIES).toEqual([
+			"GY_STANDARD_14",
+			"GY_ZERO_RATED",
+			"GY_EXEMPT",
+			"GY_OUT_OF_SCOPE",
+		]);
 	});
 });
 

@@ -979,6 +979,41 @@ describe("POS domain: Sale, PriceOverride, Receipt", () => {
 		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
 	});
 
+	test("rejects completion once the sale's register session has been closed (custody link)", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_closed_complete");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-closedcomplete-1",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 10_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_closed_complete",
+		});
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 0, currency: "GYD" },
+			idempotencyKey: "sale-closedcomplete-close",
+			registerId: "register_closed_complete",
+		});
+		expect(closed.state).toBe("Closed");
+
+		const attempt = service.completeSale({
+			...base,
+			idempotencyKey: "sale-closedcomplete-complete",
+			saleId: sale.id,
+			tenders: [{ amountMinor: 10_000, currency: "GYD", type: "Cash" }],
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+		await expect(attempt).rejects.toBeInstanceOf(PosError);
+	});
+
 	test("rejects a sale with no lines", async () => {
 		const { service } = createHarness();
 		await openSaleRegister(service, "register_empty");

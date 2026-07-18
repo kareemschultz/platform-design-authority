@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.7.0
+version: 0.7.1
 status: Draft
 owner: Founder
 last_reviewed: 2026-07-18
@@ -184,7 +184,7 @@ Until ratified, public packages must not be published under `@meridian/*`; a ver
 
 **Decision owner:** Founder.
 
-**Decision evidence:** this register entry and the governed pull request that records it; the WS3 unblock plan on [issue #13](https://github.com/kareemschultz/platform-design-authority/issues/13) records the surrounding sequencing context.
+**Decision evidence:** [Founder approval comment on PR #101](https://github.com/kareemschultz/platform-design-authority/pull/101#issuecomment-5010116100) (2026-07-18) together with the governed pull request recording this entry; the WS3 unblock plan on [issue #13](https://github.com/kareemschultz/platform-design-authority/issues/13) records the surrounding sequencing context.
 
 **Decision:** WS3 (POS cash workflow) implementation may proceed ahead of the issue #94 and issue #82 entry gates only as a controlled prototype on the isolated branch `claude/ws3-integration`, under all of the following recorded conditions:
 
@@ -211,3 +211,4 @@ Architecture documents reference this register rather than inventing business fa
 ## Change Log
 
 - 2026-07-18 — v0.7.0 added FDR-012 (WS3 controlled-prototype implementation ahead of evidence gates, five recorded conditions) and cross-referenced it from FDR-004's WS3 entry condition.
+- 2026-07-18 — v0.7.1 cited the dedicated Founder approval comment on PR #101 as FDR-012's decision evidence and mirrored the FDR-012 review-process carve-out into CLAUDE.md/AGENTS.md §12 (Codex bot review P1/P2).

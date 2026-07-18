@@ -209,7 +209,7 @@ Before editing:
 3. Determine ADR or founder-decision needs.
 4. Check downstream impact across contracts, UI, security, privacy, offline, operations, testing, Commercial, and first-slice scope.
 5. For technology or version claims, invoke `technology-evidence-maintainer`, verify current primary sources, and consult the living technology ledger. Never rely solely on model memory.
-6. Claim one issue, branch, worktree, and pull request per independently mergeable change; record overlap and dependencies before parallel work.
+6. Claim one issue, branch, worktree, and pull request per independently mergeable change; record overlap and dependencies before parallel work. Exception: work on FDR-012's WS3 controlled-prototype branch follows that decision's recorded consolidated-review deviation (one integration branch, one consolidated review before any merge to `main`) instead of per-change pull requests.
 
 After editing:
 

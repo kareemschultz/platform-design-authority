@@ -8,6 +8,7 @@ import { migratePlatformIdentity } from "@meridian/persistence-platform-identity
 import { migratePlatformImportExport } from "@meridian/persistence-platform-import-export-postgres";
 import { migratePlatformNumbering } from "@meridian/persistence-platform-numbering-postgres";
 import { migratePlatformTenancy } from "@meridian/persistence-platform-tenancy-postgres";
+import { migratePos } from "@meridian/persistence-pos-postgres";
 import type { Pool } from "pg";
 
 export interface MigrationStream {
@@ -36,9 +37,20 @@ export const WS2_MIGRATION_STREAMS: readonly MigrationStream[] = [
 	{ id: "inventory", migrate: migrateInventory },
 ];
 
+/**
+ * WS3 PR0 registers the POS owner stream empty (no tables) so migration
+ * history ordering and CI freshness coverage are executable ahead of PR1's
+ * RegisterSession/CashMovement schema. Controlled prototype per FDR-012;
+ * this branch is not merged to main.
+ */
+export const WS3_MIGRATION_STREAMS: readonly MigrationStream[] = [
+	{ id: "pos", migrate: migratePos },
+];
+
 export const ALL_MIGRATION_STREAMS: readonly MigrationStream[] = [
 	...WS1_MIGRATION_STREAMS,
 	...WS2_MIGRATION_STREAMS,
+	...WS3_MIGRATION_STREAMS,
 ];
 
 export async function runMigrationStreams(

@@ -233,7 +233,7 @@
       "source_heading": "Events",
       "source_line": 64,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.cash-movement.posted.v1.schema.json"
     },
     {
       "name": "commerce.deposit.prepared.v1",
@@ -246,7 +246,7 @@
       "source_heading": "Events",
       "source_line": 65,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.deposit.prepared.v1.schema.json"
     },
     {
       "name": "commerce.deposit.reconciled.v1",
@@ -259,7 +259,7 @@
       "source_heading": "Events",
       "source_line": 66,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.deposit.reconciled.v1.schema.json"
     },
     {
       "name": "commerce.exchange.completed.v1",
@@ -272,7 +272,7 @@
       "source_heading": "Events",
       "source_line": 61,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.exchange.completed.v1.schema.json"
     },
     {
       "name": "commerce.receipt.issued.v1",
@@ -285,7 +285,7 @@
       "source_heading": "Events",
       "source_line": 67,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.receipt.issued.v1.schema.json"
     },
     {
       "name": "commerce.refund.requested.v1",
@@ -298,7 +298,7 @@
       "source_heading": "Events",
       "source_line": 60,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.refund.requested.v1.schema.json"
     },
     {
       "name": "commerce.register.closed.v1",
@@ -311,7 +311,7 @@
       "source_heading": "Events",
       "source_line": 63,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.register.closed.v1.schema.json"
     },
     {
       "name": "commerce.register.opened.v1",
@@ -324,7 +324,7 @@
       "source_heading": "Events",
       "source_line": 62,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.register.opened.v1.schema.json"
     },
     {
       "name": "commerce.return.completed.v1",
@@ -337,7 +337,7 @@
       "source_heading": "Events",
       "source_line": 59,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.return.completed.v1.schema.json"
     },
     {
       "name": "commerce.sale.completed.v1",
@@ -363,7 +363,7 @@
       "source_heading": "Events",
       "source_line": 58,
       "document_status": "Draft",
-      "schema_path": null
+      "schema_path": "schemas/events/commerce.sale.held.v1.schema.json"
     },
     {
       "name": "commerce.stored-value-balance.expired.v1",

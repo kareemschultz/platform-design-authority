@@ -2175,10 +2175,10 @@
       "document_id": "PDA-ENGR-012",
       "path": "docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md",
       "title": "Architecture Dependency Rules",
-      "version": "1.7.1",
+      "version": "1.8.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-17",
+      "last_reviewed": "2026-07-18",
       "related_adrs": [
         "ADR-0002",
         "ADR-0003",
@@ -3403,7 +3403,7 @@
       "document_id": "PDA-RDM-007",
       "path": "docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md",
       "title": "Meridian First-Slice Implementation Plan",
-      "version": "0.17.0",
+      "version": "0.17.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-18",
@@ -3452,6 +3452,27 @@
         "ADR-0014",
         "ADR-0016",
         "ADR-0020",
+        "ADR-0027"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-RDM-010",
+      "path": "docs/blueprint/17-Roadmap/WS3_POS_CASH_IMPLEMENTATION_PLAN.md",
+      "title": "WS3 Implementation Plan: POS Cash Workflow",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-18",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0017",
+        "ADR-0020",
+        "ADR-0026",
         "ADR-0027"
       ],
       "review_evidence": null

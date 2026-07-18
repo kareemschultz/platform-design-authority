@@ -72,6 +72,8 @@
     {"method":"POST","path":"/v1/stock-transfers/{id}/receive","permission":"inventory.transfer.receive"},
     {"method":"POST","path":"/v1/sales","permission":"commerce.sale.create"},
     {"method":"POST","path":"/v1/sales/{saleId}/hold","permission":"commerce.sale.hold"},
+    {"method":"POST","path":"/v1/sales/{saleId}/price-overrides","permission":"commerce.price-override.request"},
+    {"method":"POST","path":"/v1/sales/{saleId}/price-overrides/{overrideId}/approve","permission":"commerce.price-override.approve"},
     {"method":"POST","path":"/v1/sales/{saleId}/complete","permission":"commerce.sale.complete"},
     {"method":"POST","path":"/v1/returns","permission":"commerce.return.create"},
     {"method":"POST","path":"/v1/returns/{returnId}/approve","permission":"commerce.return.approve"},

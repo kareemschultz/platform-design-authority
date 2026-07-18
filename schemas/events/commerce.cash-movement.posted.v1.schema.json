@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/commerce.cash-movement.posted.v1.schema.json",
+  "title": "commerce.cash-movement.posted.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "commerce.cash-movement.posted.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["movementId", "registerId", "currency", "amountMinor", "direction", "reasonCode", "actorPartyId"],
+          "properties": {
+            "movementId": {"type": "string"},
+            "registerId": {"type": "string"},
+            "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+            "amountMinor": {"type": "integer", "exclusiveMinimum": 0},
+            "direction": {"type": "string", "enum": ["PaidIn", "PaidOut"]},
+            "reasonCode": {"type": "string", "enum": ["PaidIn", "PaidOut", "SafeDrop", "Refund", "Other"]},
+            "referenceId": {"type": ["string", "null"]},
+            "actorPartyId": {"type": "string"}
+          }
+        }
+      }
+    }
+  ]
+}

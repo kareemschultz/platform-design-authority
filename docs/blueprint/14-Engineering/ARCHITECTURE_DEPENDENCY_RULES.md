@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-012
 title: Architecture Dependency Rules
-version: 1.7.1
+version: 1.8.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0027, ADR-0028]
 ---
 
@@ -95,6 +95,7 @@ The executable registry maps every concrete package, table, and migration stream
 | `packages/persistence/catalog-postgres` | `catalog` | `@meridian/domain-catalog` | `catalog_product`, `catalog_variant`, `catalog_identifier`, `catalog_product_command_receipt`, `catalog_product_search_projection` | `packages/persistence/catalog-postgres/src/migrations` |
 | `packages/persistence/inventory-postgres` | `inventory` | `@meridian/domain-inventory` | `inventory_stock_movement`, `inventory_stock_balance`, `inventory_reservation`, `inventory_adjustment`, `inventory_count`, `inventory_count_line`, `inventory_transfer`, `inventory_transfer_line`, `inventory_command_receipt` | `packages/persistence/inventory-postgres/src/migrations` |
 | `packages/persistence/platform-numbering-postgres` | `platform.numbering` | `@meridian/platform-numbering` | `platform_number_sequence`, `platform_number_allocation` | `packages/persistence/platform-numbering-postgres/src/migrations` |
+| `packages/persistence/pos-postgres` | `pos` | `@meridian/domain-pos` | — (WS3 PR0 registers an empty owner stream; RegisterSession/CashMovement tables arrive in WS3 PR1) | `packages/persistence/pos-postgres/src/migrations` |
 
 ### UI Packages
 
@@ -234,6 +235,7 @@ The generator derives each executable pattern's `except` list from this table. A
 
 ## Change Log
 
+- 1.8.0 (2026-07-18): WS3 PR0 (controlled prototype, `claude/ws3-integration`) registers `packages/persistence/pos-postgres` to logical owner `pos` (`@meridian/domain-pos`) with an empty owner migration stream; RegisterSession/CashMovement tables and their migrations arrive in WS3 PR1 per `docs/blueprint/17-Roadmap/WS3_POS_CASH_IMPLEMENTATION_PLAN.md`.
 - 1.7.1 (2026-07-17): Independent review of exact head `4acb743` remediation (F-B-002). A no-substitution template-literal (backtick) specifier in `import()` (e.g. ``await import(`@meridian/persistence-catalog-postgres`)``) evaded the quote-only specifier matcher and compiled. Extended the shared persistence-specifier matcher to accept backtick no-substitution literals, so dynamic `import()` and `require()` reject them outside migration-invocation roots; a failing worker probe was added and the allowed static named-import probe preserved. Runtime-interpolated (`${...}`) and concatenated specifiers remain explicitly out of scope. Full-tree checker still passes with no false positives.
 - 1.7.0 (2026-07-17): Fourth independent review remediation (F-B-002). Successive reviews proved that policing each call-site access syntax and re-export shape is non-convergent for a per-file text checker — bracket access (`p["migrateCatalog"]`), a wildcard re-export (`export *`), a `require()` acquisition, and a two-file namespace-laundering case (one file acquires `import * as p` and re-exports it under a local name, a second invokes it) each compiled and passed the checker at successive exact heads (`532a010`, `8b4ce85`). Replaced the syntax-enumeration approach with a persistence-acquisition **import-mode allowlist**: outside registered migration-invocation roots, `@meridian/persistence-*` may be acquired only by a static named import with no `migrate`-prefixed name; namespace, default, dynamic `import()`, `require()`/`import = require()`, and `export *`/`export * as` modes are rejected at the point of acquisition. This closes the cross-file laundering at its source (the acquiring file cannot take a namespace to re-export) without cross-file symbol resolution, preserves ADR-0027, and matches existing worker code (already static named adapter imports; full-tree checker still passes with no false positives). Direct `migrate*` invocation rule retained as defense in depth. Documented residual limit: runtime string-concatenated specifiers/identifiers are outside static text matching. Regression probes added for namespace-laundering, aliased `require`, default/dynamic/wildcard forms, an allowed worker static named import, and equivalent forms permitted inside `apps/server/composition`.
 - 1.6.0 (2026-07-17): Second independent review remediation. Registered the Test-Source-Exempt Rules table so `registry/architecture-rules.json` carries `test_source_exempt_rules` (F-B-004; prose alone previously had no registry representation) and added a checker self-assertion that the table matches the code's actual `is_test_source` gates. Closed the F-B-002 evasion vector live-confirmed against the real compiler at exact head `2cdfdcf`: a namespace or dynamic import of a `@meridian/persistence-*` module combined with an aliased call site (`const run = mod.migrateCatalog`) evaded both the pre-existing call-site rule and the static-named-import rule; the checker now also flags any import of a `@meridian/persistence-*` module that co-occurs with a `.migrate*` property access, regardless of import form. A second candidate evasion — a `@/*` tsconfig-path-alias import of the pool module for F-B-005 — was investigated with the same rigor and **retracted**: `apps/server`'s `@/*` maps only to `./src/*`, which does not reach `composition/postgres.ts`, so `tsc` correctly rejects that import (`TS2307: Cannot find module`) and no live bypass exists there. No change was made to `COMPOSITION_POOL_IMPORT_PATTERN`.

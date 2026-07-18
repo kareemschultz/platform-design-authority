@@ -415,6 +415,15 @@
         "platform_number_allocation"
       ],
       "migration_directory": "packages/persistence/platform-numbering-postgres/src/migrations"
+    },
+    {
+      "id": "pos-postgres",
+      "package": "packages/persistence/pos-postgres",
+      "package_name": "@meridian/persistence-pos-postgres",
+      "owner": "pos",
+      "owner_package": "@meridian/domain-pos",
+      "tables": [],
+      "migration_directory": "packages/persistence/pos-postgres/src/migrations"
     }
   ],
   "exceptions": [],

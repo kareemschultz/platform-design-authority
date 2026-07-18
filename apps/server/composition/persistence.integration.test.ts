@@ -42,6 +42,7 @@ import {
 	runMigrationStreams,
 	WS1_MIGRATION_STREAMS,
 	WS2_MIGRATION_STREAMS,
+	WS3_MIGRATION_STREAMS,
 } from "./migrations";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
@@ -117,9 +118,11 @@ describe.serial("WS1 persistence orchestration", () => {
 			"catalog",
 			"inventory",
 		]);
+		expect(WS3_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual(["pos"]);
 		expect(ALL_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual([
 			...WS1_MIGRATION_STREAMS.map((stream) => stream.id),
 			...WS2_MIGRATION_STREAMS.map((stream) => stream.id),
+			...WS3_MIGRATION_STREAMS.map((stream) => stream.id),
 		]);
 	});
 

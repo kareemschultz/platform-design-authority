@@ -657,6 +657,21 @@ export const OPENAPI_OPERATION_METADATA = [
 		successStatus: 200,
 	},
 	{
+		method: "POST",
+		operationId: "requestSalePriceOverride",
+		path: "/v1/sales/{saleId}/price-overrides",
+		permission: "commerce.price-override.request",
+		requestRef: "#/components/schemas/RequestPriceOverride",
+		successStatus: 201,
+	},
+	{
+		method: "POST",
+		operationId: "approveSalePriceOverride",
+		path: "/v1/sales/{saleId}/price-overrides/{overrideId}/approve",
+		permission: "commerce.price-override.approve",
+		successStatus: 200,
+	},
+	{
 		authorization: "authenticated_membership",
 		method: "POST",
 		operationId: "setActiveContext",

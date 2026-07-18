@@ -642,6 +642,18 @@ export const ENDPOINTS = [
 		permission: "commerce.sale.hold",
 	},
 	{
+		method: "POST",
+		operationId: "requestSalePriceOverride",
+		path: "/v1/sales/{saleId}/price-overrides",
+		permission: "commerce.price-override.request",
+	},
+	{
+		method: "POST",
+		operationId: "approveSalePriceOverride",
+		path: "/v1/sales/{saleId}/price-overrides/{overrideId}/approve",
+		permission: "commerce.price-override.approve",
+	},
+	{
 		authorization: "authenticated_membership",
 		method: "POST",
 		operationId: "setActiveContext",

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/commerce.refund.requested.v1.schema.json",
+  "title": "commerce.refund.requested.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "commerce.refund.requested.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["refundId", "returnId", "currency", "amountMinor", "requesterPartyId", "reason"],
+          "properties": {
+            "refundId": {"type": "string"},
+            "returnId": {"type": "string"},
+            "saleId": {"type": ["string", "null"]},
+            "registerId": {"type": ["string", "null"]},
+            "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+            "amountMinor": {"type": "integer", "exclusiveMinimum": 0},
+            "requesterPartyId": {"type": "string"},
+            "reason": {"type": "string", "maxLength": 500}
+          }
+        }
+      }
+    }
+  ]
+}

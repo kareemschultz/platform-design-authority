@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/commerce.receipt.issued.v1.schema.json",
+  "title": "commerce.receipt.issued.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "commerce.receipt.issued.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["receiptId", "receiptNumber", "kind", "registerId", "currency", "priceSuppressed"],
+          "properties": {
+            "receiptId": {"type": "string"},
+            "receiptNumber": {"type": "string"},
+            "kind": {"type": "string", "enum": ["Sale", "Return", "Reissue"]},
+            "saleId": {"type": ["string", "null"]},
+            "returnId": {"type": ["string", "null"]},
+            "originalReceiptId": {"type": ["string", "null"]},
+            "registerId": {"type": "string"},
+            "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+            "totalMinor": {"type": ["integer", "null"]},
+            "priceSuppressed": {"type": "boolean"}
+          }
+        }
+      }
+    }
+  ]
+}

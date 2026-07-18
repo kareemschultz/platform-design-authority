@@ -34,11 +34,14 @@ function context(input?: {
 		application: {
 			acceptImport: () => Promise.reject(new Error("not used")),
 			activateProduct: () => Promise.reject(new Error("not used")),
+			approveCashVariance: () => Promise.reject(new Error("not used")),
 			approveImport: () => Promise.reject(new Error("not used")),
 			approveInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			approveStockCount: () => Promise.reject(new Error("not used")),
 			archiveProduct: () => Promise.reject(new Error("not used")),
 			cancelImport: () => Promise.reject(new Error("not used")),
+			closeRegister: () => Promise.reject(new Error("not used")),
+			createCashMovement: () => Promise.reject(new Error("not used")),
 			createEventReplay: () => Promise.reject(new Error("not used")),
 			createIdentityLink: () => Promise.reject(new Error("not used")),
 			createImport: () => Promise.reject(new Error("not used")),
@@ -47,6 +50,7 @@ function context(input?: {
 			createPersonParty: () => Promise.reject(new Error("not used")),
 			createProduct: () => Promise.reject(new Error("not used")),
 			createRoleAssignment: () => Promise.reject(new Error("not used")),
+			createSafeDrop: () => Promise.reject(new Error("not used")),
 			createStockCount: () => Promise.reject(new Error("not used")),
 			createStockTransfer: () => Promise.reject(new Error("not used")),
 			dispatchStockTransfer: () => Promise.reject(new Error("not used")),
@@ -95,6 +99,7 @@ function context(input?: {
 			listStockCounts: async () => ({ items: [], nextCursor: null }),
 			listStockTransfers: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
+			openRegister: () => Promise.reject(new Error("not used")),
 			purgeImportStaging: async () => ({ findings: 0, rows: 0, waves: 0 }),
 			receiveStockTransfer: () => Promise.reject(new Error("not used")),
 			reverseInventoryAdjustment: () => Promise.reject(new Error("not used")),
@@ -157,6 +162,7 @@ describe("appRouter contract surface", () => {
 		expect(Object.keys(appRouter).sort()).toEqual([
 			"audit",
 			"catalog",
+			"commerce",
 			"entitlements",
 			"events",
 			"healthCheck",
@@ -172,6 +178,25 @@ describe("appRouter contract surface", () => {
 		expect(Object.keys(appRouter.catalog).sort()).toEqual([
 			"imports",
 			"products",
+		]);
+		expect(Object.keys(appRouter.commerce).sort()).toEqual([
+			"cashMovements",
+			"cashVariances",
+			"registers",
+			"safeDrops",
+		]);
+		expect(Object.keys(appRouter.commerce.registers).sort()).toEqual([
+			"close",
+			"open",
+		]);
+		expect(Object.keys(appRouter.commerce.cashMovements).sort()).toEqual([
+			"create",
+		]);
+		expect(Object.keys(appRouter.commerce.safeDrops).sort()).toEqual([
+			"create",
+		]);
+		expect(Object.keys(appRouter.commerce.cashVariances).sort()).toEqual([
+			"approve",
 		]);
 		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
 			"activate",
@@ -545,6 +570,513 @@ describe("appRouter contract surface", () => {
 		expect(serialized).not.toContain("tenant_secret_42");
 		expect(serialized).not.toContain("premium-secret");
 		expect(serialized).not.toContain("inventory.adjustments");
+	});
+
+	test("dispatches openRegister only after permission enforcement, deriving locationId from the active context", async () => {
+		let received:
+			| Parameters<Context["application"]["openRegister"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.registers.open,
+			{
+				body: {
+					currency: "GYD",
+					openingFloat: { amountMinor: 50_000, currency: "GYD" },
+				},
+				headers: {
+					"idempotency-key": "idempotency-register-open-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { registerId: "register_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						getCurrentIdentity: async ({
+							activeContextId,
+							authUserId,
+							sessionId,
+						}) => ({
+							activeContext: activeContextId
+								? {
+										authUserId,
+										contextId: activeContextId,
+										expiresAt: "2026-07-13T13:00:00.000Z",
+										issuedAt: "2026-07-13T12:00:00.000Z",
+										locationId: "location_unit_test_0001",
+										organizationId: "organization_unit_0001",
+										tenantId: "tenant_unit_test_0001",
+									}
+								: null,
+							assuranceLevel: "aal1",
+							authUserId,
+							memberships: [],
+							partyId: null,
+							sessionId,
+						}),
+						openRegister(input) {
+							received = input;
+							return Promise.resolve({
+								closedAt: null,
+								closeReason: null,
+								countedCash: null,
+								currency: "GYD",
+								expectedCash: null,
+								id: "session_unit_test_0001",
+								locationId: "location_unit_test_0001",
+								openedAt: "2026-07-13T12:00:00.000Z",
+								openerPartyId: "party_unit_test_0001",
+								openingFloat: input.openingFloat,
+								registerId: input.registerId,
+								state: "Open" as const,
+								variance: null,
+								varianceApprovalRequired: false,
+								varianceApprovedAt: null,
+								varianceApproverPartyId: null,
+								version: 1,
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			id: "session_unit_test_0001",
+			registerId: "register_unit_test_0001",
+			state: "Open",
+		});
+		expect(permission).toBe("commerce.register.open");
+		expect(received).toMatchObject({
+			actorUserId: "user_unit_test_000001",
+			contextId: "context_unit_test_0001",
+			currency: "GYD",
+			idempotencyKey: "idempotency-register-open-unit-0001",
+			locationId: "location_unit_test_0001",
+			openingFloat: { amountMinor: 50_000, currency: "GYD" },
+			registerId: "register_unit_test_0001",
+			sessionId: "session_unit_test_0001",
+		});
+	});
+
+	test("denies register open before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.registers.open,
+				{
+					body: {
+						currency: "GYD",
+						openingFloat: { amountMinor: 0, currency: "GYD" },
+					},
+					headers: {
+						"idempotency-key": "idempotency-register-open-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { registerId: "register_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							openRegister: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({
+			code: "FORBIDDEN",
+			data: {
+				code: "authorization",
+				status: 403,
+				title: "Permission denied",
+			},
+		});
+	});
+
+	test("rejects register open when the active context carries no location, before application dispatch", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.registers.open,
+				{
+					body: {
+						currency: "GYD",
+						openingFloat: { amountMinor: 0, currency: "GYD" },
+					},
+					headers: {
+						"idempotency-key": "idempotency-register-open-no-location",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { registerId: "register_no_location_unit_0001" },
+				},
+				{
+					context: context({
+						allowed: true,
+						application: {
+							openRegister: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({
+			code: "BAD_REQUEST",
+			data: {
+				code: "validation",
+				status: 400,
+			},
+		});
+	});
+
+	test("dispatches closeRegister with the counted cash and reason from the request body", async () => {
+		let received:
+			| Parameters<Context["application"]["closeRegister"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.registers.close,
+			{
+				body: {
+					countedCash: { amountMinor: 9500, currency: "GYD" },
+					reason: "end of shift count",
+				},
+				headers: {
+					"idempotency-key": "idempotency-register-close-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { registerId: "register_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						closeRegister(input) {
+							received = input;
+							return Promise.resolve({
+								closedAt: "2026-07-13T18:00:00.000Z",
+								closeReason: input.reason ?? null,
+								countedCash: input.countedCash,
+								currency: "GYD",
+								expectedCash: { amountMinor: 9500, currency: "GYD" },
+								id: "session_unit_test_0001",
+								locationId: "location_unit_test_0001",
+								openedAt: "2026-07-13T12:00:00.000Z",
+								openerPartyId: "party_unit_test_0001",
+								openingFloat: { amountMinor: 10_000, currency: "GYD" },
+								registerId: input.registerId,
+								state: "Closed" as const,
+								variance: { amountMinor: 0, currency: "GYD" },
+								varianceApprovalRequired: false,
+								varianceApprovedAt: null,
+								varianceApproverPartyId: null,
+								version: 2,
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			id: "session_unit_test_0001",
+			state: "Closed",
+		});
+		expect(permission).toBe("commerce.register.close");
+		expect(received).toMatchObject({
+			countedCash: { amountMinor: 9500, currency: "GYD" },
+			reason: "end of shift count",
+			registerId: "register_unit_test_0001",
+		});
+	});
+
+	test("denies register close before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.registers.close,
+				{
+					body: { countedCash: { amountMinor: 0, currency: "GYD" } },
+					headers: {
+						"idempotency-key": "idempotency-register-close-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { registerId: "register_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							closeRegister: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("dispatches a cash movement with the direction, reason code, and amount from the request body", async () => {
+		let received:
+			| Parameters<Context["application"]["createCashMovement"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.cashMovements.create,
+			{
+				body: {
+					amount: { amountMinor: 2500, currency: "GYD" },
+					direction: "PaidOut",
+					reasonCode: "PaidOut",
+				},
+				headers: {
+					"idempotency-key": "idempotency-cash-movement-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { registerId: "register_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						createCashMovement(input) {
+							received = input;
+							return Promise.resolve({
+								amount: input.amount,
+								createdAt: "2026-07-13T12:30:00.000Z",
+								direction: input.direction,
+								id: "movement_unit_test_0001",
+								note: input.note ?? null,
+								reasonCode: input.reasonCode,
+								referenceId: input.referenceId ?? null,
+								registerId: input.registerId,
+								sessionId: "session_unit_test_0001",
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			amount: { amountMinor: 2500, currency: "GYD" },
+			direction: "PaidOut",
+			id: "movement_unit_test_0001",
+		});
+		expect(permission).toBe("commerce.cash-movement.create");
+		expect(received).toMatchObject({
+			amount: { amountMinor: 2500, currency: "GYD" },
+			direction: "PaidOut",
+			reasonCode: "PaidOut",
+			registerId: "register_unit_test_0001",
+		});
+	});
+
+	test("denies a cash movement before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.cashMovements.create,
+				{
+					body: {
+						amount: { amountMinor: 100, currency: "GYD" },
+						direction: "PaidIn",
+						reasonCode: "PaidIn",
+					},
+					headers: {
+						"idempotency-key": "idempotency-cash-movement-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { registerId: "register_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							createCashMovement: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("dispatches a safe drop through the dedicated transport method, not the general cash-movement one", async () => {
+		let receivedSafeDrop:
+			| Parameters<Context["application"]["createSafeDrop"]>[0]
+			| undefined;
+		let generalMovementCalled = false;
+		const result = await call(
+			appRouter.commerce.safeDrops.create,
+			{
+				body: {
+					amount: { amountMinor: 15_000, currency: "GYD" },
+					note: "midday safe drop",
+				},
+				headers: {
+					"idempotency-key": "idempotency-safe-drop-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { registerId: "register_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						createCashMovement: () => {
+							generalMovementCalled = true;
+							return Promise.reject(new Error("must not be called"));
+						},
+						createSafeDrop(input) {
+							receivedSafeDrop = input;
+							return Promise.resolve({
+								amount: input.amount,
+								createdAt: "2026-07-13T12:45:00.000Z",
+								direction: "PaidOut" as const,
+								id: "movement_unit_test_safe_drop",
+								note: input.note ?? null,
+								reasonCode: "SafeDrop" as const,
+								referenceId: null,
+								registerId: input.registerId,
+								sessionId: "session_unit_test_0001",
+							});
+						},
+					},
+					onDecide: () => undefined,
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			direction: "PaidOut",
+			reasonCode: "SafeDrop",
+		});
+		expect(generalMovementCalled).toBe(false);
+		expect(receivedSafeDrop).toMatchObject({
+			amount: { amountMinor: 15_000, currency: "GYD" },
+			note: "midday safe drop",
+			registerId: "register_unit_test_0001",
+		});
+	});
+
+	test("dispatches cash-variance approval with the varianceId and If-Match version from the request", async () => {
+		let received:
+			| Parameters<Context["application"]["approveCashVariance"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.cashVariances.approve,
+			{
+				headers: {
+					"idempotency-key": "idempotency-cash-variance-unit-0001",
+					"if-match": "2",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { varianceId: "session_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						approveCashVariance(input) {
+							received = input;
+							return Promise.resolve({
+								closedAt: "2026-07-13T18:05:00.000Z",
+								closeReason: "end of shift count",
+								countedCash: { amountMinor: 9500, currency: "GYD" },
+								currency: "GYD",
+								expectedCash: { amountMinor: 10_000, currency: "GYD" },
+								id: input.registerSessionId,
+								locationId: "location_unit_test_0001",
+								openedAt: "2026-07-13T12:00:00.000Z",
+								openerPartyId: "party_unit_test_0001",
+								openingFloat: { amountMinor: 10_000, currency: "GYD" },
+								registerId: "register_unit_test_0001",
+								state: "Closed" as const,
+								variance: { amountMinor: -500, currency: "GYD" },
+								varianceApprovalRequired: true,
+								varianceApprovedAt: "2026-07-13T18:05:00.000Z",
+								varianceApproverPartyId: "party_unit_test_checker",
+								version: input.version + 1,
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			id: "session_unit_test_0001",
+			state: "Closed",
+		});
+		expect(permission).toBe("commerce.cash-variance.approve");
+		expect(received).toMatchObject({
+			registerSessionId: "session_unit_test_0001",
+			version: 2,
+		});
+	});
+
+	test("denies cash-variance approval before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.cashVariances.approve,
+				{
+					headers: {
+						"idempotency-key": "idempotency-cash-variance-denied",
+						"if-match": "1",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { varianceId: "session_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							approveCashVariance: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
 	});
 
 	test("maps Import boundary failures to stable non-disclosing HTTP semantics", async () => {

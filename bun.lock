@@ -500,6 +500,7 @@
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
         "typescript": "^6",
       },
     },

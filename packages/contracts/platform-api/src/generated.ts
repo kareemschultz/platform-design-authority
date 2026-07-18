@@ -15,6 +15,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postCashVariancesByVarianceIdApprove",
 		path: "/v1/cash-variances/{varianceId}/approve",
 		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/RegisterSession",
 		successStatus: 200,
 	},
 	{
@@ -574,6 +575,8 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postRegistersByRegisterIdCashMovements",
 		path: "/v1/registers/{registerId}/cash-movements",
 		permission: "commerce.cash-movement.create",
+		requestRef: "#/components/schemas/CreateCashMovementRequest",
+		responseRef: "#/components/schemas/CashMovement",
 		successStatus: 200,
 	},
 	{
@@ -582,6 +585,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		path: "/v1/registers/{registerId}/close",
 		permission: "commerce.register.close",
 		requestRef: "#/components/schemas/CloseRegisterRequest",
+		responseRef: "#/components/schemas/RegisterSession",
 		successStatus: 200,
 	},
 	{
@@ -590,6 +594,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		path: "/v1/registers/{registerId}/open",
 		permission: "commerce.register.open",
 		requestRef: "#/components/schemas/OpenRegisterRequest",
+		responseRef: "#/components/schemas/RegisterSession",
 		successStatus: 200,
 	},
 	{
@@ -597,6 +602,8 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postRegistersByRegisterIdSafeDrops",
 		path: "/v1/registers/{registerId}/safe-drops",
 		permission: "commerce.cash-movement.create",
+		requestRef: "#/components/schemas/CreateSafeDropRequest",
+		responseRef: "#/components/schemas/CashMovement",
 		successStatus: 200,
 	},
 	{

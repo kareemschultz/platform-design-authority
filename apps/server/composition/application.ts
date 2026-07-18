@@ -10,6 +10,7 @@ import { identitySessionTransportApplication } from "./identity";
 import { importTransportApplication } from "./imports";
 import { inventoryTransportApplication } from "./inventory";
 import { partyIdentityLinkDirectory, partyTransportApplication } from "./party";
+import { posTransportApplication } from "./pos";
 import {
 	identityDirectory,
 	identityOrganizationProjection,
@@ -38,5 +39,6 @@ export const serverApplication = {
 	...inventoryTransportApplication,
 	...tenancyApplication,
 	...partyTransportApplication,
+	...posTransportApplication,
 	getCurrentIdentity,
 };

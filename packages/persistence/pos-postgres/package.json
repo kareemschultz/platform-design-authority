@@ -8,6 +8,7 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
     "test": "bun test src/*.test.ts"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@meridian/tooling-config": "workspace:*",
     "@types/bun": "catalog:",
     "@types/pg": "catalog:",
+    "drizzle-kit": "0.31.10",
     "typescript": "^6"
   }
 }

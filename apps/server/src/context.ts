@@ -4,6 +4,7 @@ import type {
 	ActiveContextRequest,
 	AuditRecord,
 	AuthorizationDecision,
+	CashMovement,
 	CreateCsvImport,
 	CreateEventReplayRequest,
 	CreateInventoryAdjustment,
@@ -24,12 +25,14 @@ import type {
 	ImportPurgeResult,
 	InventoryAdjustment,
 	Location,
+	Money,
 	Organization,
 	PagedImports,
 	Party,
 	PlatformIdentityLink,
 	Product,
 	ReceiveStockTransfer,
+	RegisterSession,
 	Role,
 	RoleAssignment,
 	SaveStockCountDraftLines,
@@ -476,6 +479,62 @@ export interface InventoryApplication {
 	}) => Promise<StockCount>;
 }
 
+export interface PosApplication {
+	approveCashVariance: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		registerSessionId: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<RegisterSession>;
+	closeRegister: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		countedCash: Money;
+		idempotencyKey: string;
+		reason?: string | null;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<RegisterSession>;
+	createCashMovement: (input: {
+		actorUserId: string;
+		amount: Money;
+		contextId: string;
+		correlationId: string;
+		direction: "PaidIn" | "PaidOut";
+		idempotencyKey: string;
+		note?: string | null;
+		reasonCode: "Other" | "PaidIn" | "PaidOut";
+		referenceId?: string | null;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<CashMovement>;
+	createSafeDrop: (input: {
+		actorUserId: string;
+		amount: Money;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		note?: string | null;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<CashMovement>;
+	openRegister: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		currency: string;
+		idempotencyKey: string;
+		locationId: string;
+		openingFloat: Money;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<RegisterSession>;
+}
+
 export interface ImportApplication {
 	acceptImport: (input: {
 		actorUserId: string;
@@ -569,6 +628,7 @@ export interface ServerApplication
 		ImportApplication,
 		InventoryApplication,
 		PartyApplication,
+		PosApplication,
 		TenancyApplication {}
 
 export interface PermissionAuthorizer {

@@ -3,6 +3,7 @@ import {
 	acceptOpeningStockImportContract,
 	acceptProductImportContract,
 	activateProductContract,
+	approveCashVarianceContract,
 	approveInventoryAdjustmentContract,
 	approveOpeningStockImportContract,
 	approveProductImportContract,
@@ -10,6 +11,8 @@ import {
 	archiveProductContract,
 	cancelOpeningStockImportContract,
 	cancelProductImportContract,
+	closeRegisterContract,
+	createCashMovementContract,
 	createEventReplayContract,
 	createInventoryAdjustmentContract,
 	createOpeningStockImportContract,
@@ -19,6 +22,7 @@ import {
 	createProductContract,
 	createProductImportContract,
 	createRoleAssignmentContract,
+	createSafeDropContract,
 	createStockCountContract,
 	createStockTransferContract,
 	createUserInvitationContract,
@@ -51,6 +55,7 @@ import {
 	listStockCountsContract,
 	listStockTransfersContract,
 	listUsersContract,
+	openRegisterContract,
 	purgeOpeningStockImportStagingContract,
 	purgeProductImportStagingContract,
 	receiveStockTransferContract,
@@ -1487,6 +1492,165 @@ const createInventoryAdjustment = implement(createInventoryAdjustmentContract)
 		}
 	});
 
+// ---------------------------------------------------------------------------
+// WS3 PR1: registers, cash movements, safe drops, cash-variance approval.
+// Every procedure revalidates active context and enforces its declared
+// permission BEFORE application dispatch (WS1/WS2 pattern); the POS
+// application layer independently re-enforces the same checks in depth.
+// ---------------------------------------------------------------------------
+
+const openRegister = implement(openRegisterContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.register.open",
+			input.headers["x-active-context-id"]
+		);
+		if (!activeContext.locationId) {
+			throw new ORPCError("BAD_REQUEST", {
+				data: problem(context, {
+					code: "validation",
+					status: 400,
+					title: "Register open requires a location-scoped active context",
+				}),
+			});
+		}
+		try {
+			return await context.application.openRegister({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				currency: input.body.currency,
+				idempotencyKey: input.headers["idempotency-key"],
+				locationId: activeContext.locationId,
+				openingFloat: input.body.openingFloat,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const closeRegister = implement(closeRegisterContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.register.close",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.closeRegister({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				countedCash: input.body.countedCash,
+				idempotencyKey: input.headers["idempotency-key"],
+				reason: input.body.reason ?? null,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createCashMovement = implement(createCashMovementContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-movement.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createCashMovement({
+				actorUserId: session.user.id,
+				amount: input.body.amount,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				direction: input.body.direction,
+				idempotencyKey: input.headers["idempotency-key"],
+				note: input.body.note ?? null,
+				reasonCode: input.body.reasonCode,
+				referenceId: input.body.referenceId ?? null,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createSafeDrop = implement(createSafeDropContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-movement.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createSafeDrop({
+				actorUserId: session.user.id,
+				amount: input.body.amount,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				note: input.body.note ?? null,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveCashVariance = implement(approveCashVarianceContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-variance.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveCashVariance({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				registerSessionId: input.params.varianceId,
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const approveInventoryAdjustment = implement(approveInventoryAdjustmentContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -1962,6 +2126,15 @@ export const appRouter = {
 			list: listProducts,
 			update: updateProduct,
 		},
+	},
+	commerce: {
+		cashMovements: { create: createCashMovement },
+		cashVariances: { approve: approveCashVariance },
+		registers: {
+			close: closeRegister,
+			open: openRegister,
+		},
+		safeDrops: { create: createSafeDrop },
 	},
 	entitlements: { list: listEntitlements },
 	events: { createReplay: createEventReplay },

@@ -676,6 +676,80 @@ export const StockTransferSchema = z.object({
 	version: z.number().int().min(1),
 });
 
+// ---------------------------------------------------------------------------
+// WS3 PR1: RegisterSession and CashMovement (commerce.register-management,
+// commerce.cash-management). Money uses explicit currency and integer
+// minor-unit semantics per CLAUDE.md §7 — never binary floating point.
+// ---------------------------------------------------------------------------
+
+export const MoneySchema = z.object({
+	amountMinor: z.number().int(),
+	currency: z.string().regex(/^[A-Z]{3}$/),
+});
+
+export const OpenRegisterRequestSchema = z
+	.object({
+		currency: z.string().regex(/^[A-Z]{3}$/),
+		openingFloat: MoneySchema,
+	})
+	.strict();
+
+export const CloseRegisterRequestSchema = z
+	.object({
+		countedCash: MoneySchema,
+		reason: z.string().min(1).max(500).optional(),
+	})
+	.strict();
+
+export const RegisterSessionSchema = z.object({
+	closedAt: InstantSchema.nullable(),
+	closeReason: z.string().max(500).nullable(),
+	countedCash: MoneySchema.nullable(),
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	expectedCash: MoneySchema.nullable(),
+	id: IdentifierSchema,
+	locationId: IdentifierSchema,
+	openedAt: InstantSchema,
+	openerPartyId: IdentifierSchema,
+	openingFloat: MoneySchema,
+	registerId: IdentifierSchema,
+	state: z.enum(["Open", "Closing", "Closed"]),
+	variance: MoneySchema.nullable(),
+	varianceApprovalRequired: z.boolean(),
+	varianceApprovedAt: InstantSchema.nullable(),
+	varianceApproverPartyId: NullableIdentifierSchema,
+	version: z.number().int().min(1),
+});
+
+export const CreateCashMovementRequestSchema = z
+	.object({
+		amount: MoneySchema,
+		direction: z.enum(["PaidIn", "PaidOut"]),
+		note: z.string().min(1).max(500).optional(),
+		reasonCode: z.enum(["PaidIn", "PaidOut", "Other"]),
+		referenceId: NullableIdentifierSchema.optional(),
+	})
+	.strict();
+
+export const CreateSafeDropRequestSchema = z
+	.object({
+		amount: MoneySchema,
+		note: z.string().min(1).max(500).optional(),
+	})
+	.strict();
+
+export const CashMovementSchema = z.object({
+	amount: MoneySchema,
+	createdAt: InstantSchema,
+	direction: z.enum(["PaidIn", "PaidOut"]),
+	id: IdentifierSchema,
+	note: z.string().max(500).nullable(),
+	reasonCode: z.enum(["PaidIn", "PaidOut", "SafeDrop", "Refund", "Other"]),
+	referenceId: NullableIdentifierSchema,
+	registerId: IdentifierSchema,
+	sessionId: IdentifierSchema,
+});
+
 export const CsvImportManifestSchema = z.object({
 	decimalSeparator: z.enum([".", ","]),
 	defaultUnit: z.string().min(1).max(50).optional(),
@@ -923,3 +997,12 @@ export type StockCount = z.infer<typeof StockCountSchema>;
 export type StockTransfer = z.infer<typeof StockTransferSchema>;
 export type ReceiveStockTransfer = z.infer<typeof ReceiveStockTransferSchema>;
 export type SubmitStockCount = z.infer<typeof SubmitStockCountSchema>;
+export type Money = z.infer<typeof MoneySchema>;
+export type OpenRegisterRequest = z.infer<typeof OpenRegisterRequestSchema>;
+export type CloseRegisterRequest = z.infer<typeof CloseRegisterRequestSchema>;
+export type RegisterSession = z.infer<typeof RegisterSessionSchema>;
+export type CreateCashMovementRequest = z.infer<
+	typeof CreateCashMovementRequestSchema
+>;
+export type CreateSafeDropRequest = z.infer<typeof CreateSafeDropRequestSchema>;
+export type CashMovement = z.infer<typeof CashMovementSchema>;

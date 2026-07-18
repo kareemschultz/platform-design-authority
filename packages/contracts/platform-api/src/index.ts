@@ -5,6 +5,9 @@ import { OPENAPI_OPERATION_METADATA } from "./generated";
 import {
 	ActiveContextRequestSchema,
 	ActiveContextSchema,
+	CashMovementSchema,
+	CloseRegisterRequestSchema,
+	CreateCashMovementRequestSchema,
 	CreateCsvImportSchema,
 	CreateEventReplayRequestSchema,
 	CreateInventoryAdjustmentSchema,
@@ -13,6 +16,7 @@ import {
 	CreatePersonPartySchema,
 	CreateProductSchema,
 	CreateRoleAssignmentRequestSchema,
+	CreateSafeDropRequestSchema,
 	CreateStockCountSchema,
 	CreateStockTransferSchema,
 	CreateUserInvitationRequestSchema,
@@ -24,6 +28,7 @@ import {
 	ImportJobSchema,
 	ImportPurgeResultSchema,
 	InventoryAdjustmentSchema,
+	OpenRegisterRequestSchema,
 	OrganizationSchema,
 	PagedAuditRecordsSchema,
 	PagedEntitlementsSchema,
@@ -45,6 +50,7 @@ import {
 	ProductSchema,
 	ProductStateSchema,
 	ReceiveStockTransferSchema,
+	RegisterSessionSchema,
 	RoleAssignmentSchema,
 	SaveStockCountDraftLinesSchema,
 	StockCountSchema,
@@ -920,6 +926,118 @@ export const reverseInventoryAdjustmentContract = base
 	)
 	.output(InventoryAdjustmentSchema);
 
+// ---------------------------------------------------------------------------
+// WS3 PR1: registers, cash movements, safe drops, cash-variance approval.
+// ---------------------------------------------------------------------------
+
+export const openRegisterContract = base
+	.route({
+		method: "POST",
+		path: "/v1/registers/{registerId}/open",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "openRegister",
+		permission: "commerce.register.open",
+		requestRef: "#/components/schemas/OpenRegisterRequest",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: OpenRegisterRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ registerId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
+export const closeRegisterContract = base
+	.route({
+		method: "POST",
+		path: "/v1/registers/{registerId}/close",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "closeRegister",
+		permission: "commerce.register.close",
+		requestRef: "#/components/schemas/CloseRegisterRequest",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CloseRegisterRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ registerId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
+export const createCashMovementContract = base
+	.route({
+		method: "POST",
+		path: "/v1/registers/{registerId}/cash-movements",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postRegistersByRegisterIdCashMovements",
+		permission: "commerce.cash-movement.create",
+		requestRef: "#/components/schemas/CreateCashMovementRequest",
+		responseRef: "#/components/schemas/CashMovement",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CreateCashMovementRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ registerId: IdentifierSchema }),
+		})
+	)
+	.output(CashMovementSchema);
+
+export const createSafeDropContract = base
+	.route({
+		method: "POST",
+		path: "/v1/registers/{registerId}/safe-drops",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postRegistersByRegisterIdSafeDrops",
+		permission: "commerce.cash-movement.create",
+		requestRef: "#/components/schemas/CreateSafeDropRequest",
+		responseRef: "#/components/schemas/CashMovement",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CreateSafeDropRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ registerId: IdentifierSchema }),
+		})
+	)
+	.output(CashMovementSchema);
+
+export const approveCashVarianceContract = base
+	.route({
+		method: "POST",
+		path: "/v1/cash-variances/{varianceId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postCashVariancesByVarianceIdApprove",
+		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ varianceId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
 export const createOpeningStockImportContract = base
 	.route({
 		method: "POST",
@@ -1379,6 +1497,18 @@ export const ws2CatalogInventoryApiContract = {
 	},
 };
 
+export const ws3PosApiContract = {
+	commerce: {
+		cashMovements: { create: createCashMovementContract },
+		cashVariances: { approve: approveCashVarianceContract },
+		registers: {
+			close: closeRegisterContract,
+			open: openRegisterContract,
+		},
+		safeDrops: { create: createSafeDropContract },
+	},
+};
+
 export const platformApiContract = {
 	audit: { list: listAuditRecordsContract },
 	entitlements: { list: listEntitlementsContract },
@@ -1426,6 +1556,7 @@ export const appApiContract = {
 	),
 	...platformApiContract,
 	...ws2CatalogInventoryApiContract,
+	...ws3PosApiContract,
 };
 
 export const WS1_OPERATION_IDS = [
@@ -1475,4 +1606,20 @@ export const WS2_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(
 export const WS2_EVENT_OPENAPI_OPERATION_METADATA =
 	OPENAPI_OPERATION_METADATA.filter(
 		(operation) => operation.operationId === "createEventReplay"
+	);
+
+/** WS3 PR1 scope only (registers/cash-movements/safe-drops/cash-variance
+ * approval); PR2-PR4 add the remaining `commerce.*` operations in later
+ * stages and are not yet implemented behind this branch's router. */
+export const WS3_PR1_OPERATION_IDS = [
+	"openRegister",
+	"closeRegister",
+	"postRegistersByRegisterIdCashMovements",
+	"postRegistersByRegisterIdSafeDrops",
+	"postCashVariancesByVarianceIdApprove",
+] as const;
+
+export const WS3_PR1_OPENAPI_OPERATION_METADATA =
+	OPENAPI_OPERATION_METADATA.filter((operation) =>
+		(WS3_PR1_OPERATION_IDS as readonly string[]).includes(operation.operationId)
 	);

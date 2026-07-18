@@ -397,6 +397,9 @@ paths:
       responses:
         '200':
           description: Register opened
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
   /registers/{registerId}/close:
     post:
       tags: [Commerce]
@@ -413,6 +416,9 @@ paths:
       responses:
         '200':
           description: Register closed or variance review required
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
   /sales:
     post:
       tags: [Commerce]
@@ -1543,9 +1549,17 @@ paths:
       parameters:
         - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateCashMovementRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Cash movement posted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CashMovement'}
   /registers/{registerId}/safe-drops:
     post:
       tags: [Commerce]
@@ -1554,9 +1568,17 @@ paths:
       parameters:
         - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateSafeDropRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Safe drop posted as a paid-out cash movement
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CashMovement'}
   /deposits/{depositId}/confirm:
     post:
       tags: [Commerce]
@@ -1575,10 +1597,14 @@ paths:
       x-permission: commerce.cash-variance.approve
       parameters:
         - {name: varianceId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/ExpectedVersion'
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Cash variance approved; the register session is now Closed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
   /receipts/{receiptId}:
     get:
       tags: [Commerce]
@@ -2702,6 +2728,55 @@ components:
       properties:
         countedCash: {$ref: '#/components/schemas/Money'}
         reason: {type: string, maxLength: 500}
+    RegisterSession:
+      type: object
+      required: [id, registerId, locationId, currency, openingFloat, state, openedAt, openerPartyId, varianceApprovalRequired, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        locationId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        openingFloat: {$ref: '#/components/schemas/Money'}
+        state: {type: string, enum: [Open, Closing, Closed]}
+        openedAt: {type: string, format: date-time}
+        openerPartyId: {$ref: '#/components/schemas/Identifier'}
+        closedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        closeReason: {oneOf: [{type: string, maxLength: 500}, {type: 'null'}]}
+        countedCash: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        expectedCash: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        variance: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        varianceApprovalRequired: {type: boolean}
+        varianceApprovedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        varianceApproverPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    CreateCashMovementRequest:
+      type: object
+      required: [amount, direction, reasonCode]
+      properties:
+        amount: {$ref: '#/components/schemas/Money'}
+        direction: {type: string, enum: [PaidIn, PaidOut]}
+        reasonCode: {type: string, enum: [PaidIn, PaidOut, Other]}
+        note: {type: string, maxLength: 500}
+        referenceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    CreateSafeDropRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {$ref: '#/components/schemas/Money'}
+        note: {type: string, maxLength: 500}
+    CashMovement:
+      type: object
+      required: [id, registerId, sessionId, amount, direction, reasonCode, createdAt]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        sessionId: {$ref: '#/components/schemas/Identifier'}
+        amount: {$ref: '#/components/schemas/Money'}
+        direction: {type: string, enum: [PaidIn, PaidOut]}
+        reasonCode: {type: string, enum: [PaidIn, PaidOut, SafeDrop, Refund, Other]}
+        note: {oneOf: [{type: string, maxLength: 500}, {type: 'null'}]}
+        referenceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        createdAt: {type: string, format: date-time}
     CreateSale:
       type: object
       required: [registerId, currency, lines]

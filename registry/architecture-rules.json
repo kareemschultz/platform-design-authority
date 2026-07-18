@@ -422,7 +422,11 @@
       "package_name": "@meridian/persistence-pos-postgres",
       "owner": "pos",
       "owner_package": "@meridian/domain-pos",
-      "tables": [],
+      "tables": [
+        "pos_register_session",
+        "pos_cash_movement",
+        "pos_command_receipt"
+      ],
       "migration_directory": "packages/persistence/pos-postgres/src/migrations"
     }
   ],

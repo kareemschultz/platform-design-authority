@@ -187,6 +187,9 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_role_assignment",
 			"platform_tenancy_command_receipt",
 			"platform_tenant",
+			"pos_cash_movement",
+			"pos_command_receipt",
+			"pos_register_session",
 			"session",
 			"two_factor",
 			"user",
@@ -207,6 +210,7 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_import_export_migrations",
 			"platform_numbering_migrations",
 			"platform_tenancy_migrations",
+			"pos_migrations",
 		]);
 	});
 

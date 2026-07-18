@@ -36,7 +36,7 @@ FDR-005 records the current repository posture as **provisionally public**, not 
 
 The review may allow architecture principles, approved public contracts, sanitized examples, non-sensitive implementation source, and public evidence summaries. It must exclude secrets and credentials, customer or provider confidential data, private negotiations, exploit-ready production security detail, protected premium assets or redistribution rights, and personal data without an approved basis. Moving a repository or path does not waive those prohibitions.
 
-PDA-REV-019 is the current classification ledger. Raw customer/external evidence uses the restricted system selected by issue #94; private security intake and native scanning remain tracked by issue #92; dependency notices, SBOM, copied-source provenance, and asset rights remain tracked by issue #93. Public/source-visible material carries no reuse license meanwhile.
+PDA-REV-019 is the current classification ledger. Raw customer/external evidence uses the restricted system selected by issue #94; private security intake and native scanning remain tracked by issue #92; dependency notices, SBOM, copied-source provenance, and asset rights remain tracked by issue #93, with a baseline inventory recorded in `THIRD_PARTY_NOTICES_SBOM_AND_ASSET_PROVENANCE.md` (PDA-STR-031). Public/source-visible material carries no reuse license meanwhile.
 
 ## Open Source
 

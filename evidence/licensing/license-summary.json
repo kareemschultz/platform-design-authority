@@ -1,0 +1,154 @@
+{
+  "generated_by": "scripts/generate_sbom.py",
+  "license_counts": {
+    "0BSD": 3,
+    "Apache-2.0": 42,
+    "BSD-2-Clause": 16,
+    "BSD-3-Clause": 18,
+    "BlueOak-1.0.0": 7,
+    "CC-BY-4.0": 1,
+    "CHOICE: (BSD-3-Clause OR GPL-2.0)": 1,
+    "CHOICE: (MIT OR Apache-2.0)": 1,
+    "CHOICE: (MIT OR CC0-1.0)": 3,
+    "CHOICE: Apache-2.0 AND LGPL-3.0-or-later": 1,
+    "CHOICE: MIT AND Apache-2.0": 1,
+    "CHOICE: MIT OR Apache-2.0": 4,
+    "ISC": 41,
+    "MISSING": 2,
+    "MIT": 1106,
+    "MPL-2.0": 4,
+    "Python-2.0": 1,
+    "SEE LICENSE IN LICENSE": 1,
+    "Unlicense": 2
+  },
+  "needs_manual_review": [
+    {
+      "license": "MIT OR Apache-2.0",
+      "license_kind": "choice",
+      "name": "@biomejs/biome",
+      "path": ".bun\\@biomejs+biome@2.5.2\\node_modules\\@biomejs\\biome",
+      "reason": "combined/choice license expression",
+      "repository": "git+https://github.com/biomejs/biome.git",
+      "version": "2.5.2"
+    },
+    {
+      "license": "MIT OR Apache-2.0",
+      "license_kind": "choice",
+      "name": "@biomejs/biome",
+      "path": ".bun\\@biomejs+biome@2.5.3\\node_modules\\@biomejs\\biome",
+      "reason": "combined/choice license expression",
+      "repository": "git+https://github.com/biomejs/biome.git",
+      "version": "2.5.3"
+    },
+    {
+      "license": "MIT OR Apache-2.0",
+      "license_kind": "choice",
+      "name": "@biomejs/cli-win32-x64",
+      "path": ".bun\\@biomejs+biome@2.5.2\\node_modules\\@biomejs\\cli-win32-x64",
+      "reason": "combined/choice license expression",
+      "repository": "git+https://github.com/biomejs/biome.git",
+      "version": "2.5.2"
+    },
+    {
+      "license": "MIT OR Apache-2.0",
+      "license_kind": "choice",
+      "name": "@biomejs/cli-win32-x64",
+      "path": ".bun\\@biomejs+biome@2.5.3\\node_modules\\@biomejs\\cli-win32-x64",
+      "reason": "combined/choice license expression",
+      "repository": "git+https://github.com/biomejs/biome.git",
+      "version": "2.5.3"
+    },
+    {
+      "license": "MIT AND Apache-2.0",
+      "license_kind": "choice",
+      "name": "@expo-google-fonts/material-symbols",
+      "path": ".bun\\@expo-google-fonts+material-symbols@0.4.38\\node_modules\\@expo-google-fonts\\material-symbols",
+      "reason": "combined/choice license expression",
+      "repository": "git+https://github.com/expo/google-fonts.git",
+      "version": "0.4.38"
+    },
+    {
+      "license": "Apache-2.0 AND LGPL-3.0-or-later",
+      "license_kind": "choice",
+      "name": "@img/sharp-win32-x64",
+      "path": ".bun\\@img+sharp-win32-x64@0.34.5\\node_modules\\@img\\sharp-win32-x64",
+      "reason": "combined/choice license expression",
+      "repository": "git+https://github.com/lovell/sharp.git",
+      "version": "0.34.5"
+    },
+    {
+      "license": "(MIT OR Apache-2.0)",
+      "license_kind": "choice",
+      "name": "fb-dotslash",
+      "path": ".bun\\@react-native+debugger-shell@0.86.0+759ce506b1ed1a42\\node_modules\\fb-dotslash",
+      "reason": "combined/choice license expression",
+      "repository": "git+https://github.com/facebook/dotslash.git",
+      "version": "0.5.8"
+    },
+    {
+      "license": "(BSD-3-Clause OR GPL-2.0)",
+      "license_kind": "choice",
+      "name": "node-forge",
+      "path": ".bun\\@expo+cli@57.0.6+6fdaaeae8c344e63\\node_modules\\node-forge",
+      "reason": "combined/choice license expression",
+      "repository": "https://github.com/digitalbazaar/forge",
+      "version": "1.4.0"
+    },
+    {
+      "license": "(MIT OR CC0-1.0)",
+      "license_kind": "choice",
+      "name": "type-fest",
+      "path": ".bun\\ansi-escapes@4.3.2\\node_modules\\type-fest",
+      "reason": "combined/choice license expression",
+      "repository": "sindresorhus/type-fest",
+      "version": "0.21.3"
+    },
+    {
+      "license": "(MIT OR CC0-1.0)",
+      "license_kind": "choice",
+      "name": "type-fest",
+      "path": ".bun\\stacktrace-parser@0.1.11\\node_modules\\type-fest",
+      "reason": "combined/choice license expression",
+      "repository": "sindresorhus/type-fest",
+      "version": "0.7.1"
+    },
+    {
+      "license": "(MIT OR CC0-1.0)",
+      "license_kind": "choice",
+      "name": "type-fest",
+      "path": ".bun\\@orpc+shared@1.14.7\\node_modules\\type-fest",
+      "reason": "combined/choice license expression",
+      "repository": "sindresorhus/type-fest",
+      "version": "5.8.0"
+    },
+    {
+      "license": null,
+      "license_kind": "missing",
+      "name": "@yuku-codegen/binding-win32-x64",
+      "path": ".bun\\@yuku-codegen+binding-win32-x64@0.6.1\\node_modules\\@yuku-codegen\\binding-win32-x64",
+      "reason": "missing license metadata",
+      "repository": "https://github.com/yuku-toolchain/yuku",
+      "version": "0.6.1"
+    },
+    {
+      "license": null,
+      "license_kind": "missing",
+      "name": "@yuku-parser/binding-win32-x64",
+      "path": ".bun\\@yuku-parser+binding-win32-x64@0.6.1\\node_modules\\@yuku-parser\\binding-win32-x64",
+      "reason": "missing license metadata",
+      "repository": "https://github.com/yuku-toolchain/yuku",
+      "version": "0.6.1"
+    },
+    {
+      "license": "SEE LICENSE IN LICENSE",
+      "license_kind": "spdx",
+      "name": "spawndamnit",
+      "path": ".bun\\@changesets+cli@2.31.0+e154a6929a67600d\\node_modules\\spawndamnit",
+      "reason": "unrecognized license identifier",
+      "repository": "https://github.com/thejameskyle/spawndamnit",
+      "version": "3.0.1"
+    }
+  ],
+  "needs_manual_review_count": 14,
+  "package_count": 1255
+}

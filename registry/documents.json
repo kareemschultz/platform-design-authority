@@ -4027,6 +4027,17 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-STR-031",
+      "path": "docs/blueprint/20-Strategy/THIRD_PARTY_NOTICES_SBOM_AND_ASSET_PROVENANCE.md",
+      "title": "Third-Party Notices, SBOM, and Asset Provenance Baseline",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-18",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-TST-001",
       "path": "docs/blueprint/16-Testing/README.md",
       "title": "Testing Section Index",

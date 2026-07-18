@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-027
 title: Market Segmentation and Beachhead Evidence
-version: 0.3.0
+version: 0.3.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 ---
 
 # Market Segmentation and Beachhead Evidence
@@ -47,7 +47,7 @@ A candidate beachhead must demonstrate:
 
 ## Required Research
 
-- Interviews and workflow observation
+- Interviews and workflow observation — instrument: `BEACHHEAD_CUSTOMER_EVIDENCE_COLLECTION_KIT.md` (PDA-STR-030), governed by issue #82
 - Current-system inventory
 - Implementation and migration analysis
 - Competitor and pricing research
@@ -70,3 +70,7 @@ Interview coverage, evidence confidence, pilot conversion, time to value, implem
 |---|---|---:|---|---|---|
 | 2026-07-12 | Repository baseline | 0 | No customer or design-partner evidence recorded | None | Keep FDR-004 open and all beachhead advantages provisional |
 | 2026-07-17 | Founder scope decision and WS3 evidence gate | 0 | FDR-004 ratified the bounded first-slice scope; no interview, observation, willingness-to-pay, or design-partner evidence was added | None | Keep the beachhead hypothesis provisional and block WS3 until issue #82's real-world threshold is satisfied |
+
+## Change Log
+
+- 2026-07-18 — v0.3.1 linked Draft instrument PDA-STR-030 to issue #82 without adding evidence, confirming a hypothesis, or changing the WS3 entry threshold.

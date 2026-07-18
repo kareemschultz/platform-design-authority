@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-001
 title: Strategy Section Index
-version: 0.7.1
+version: 0.7.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-18
@@ -14,6 +14,7 @@ last_reviewed: 2026-07-18
 - `COMPANY_AND_PLATFORM_STRATEGY.md`
 - `FOUNDER_DECISION_REGISTER.md`
 - `MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md`
+- `BEACHHEAD_CUSTOMER_EVIDENCE_COLLECTION_KIT.md`
 - `COMPETITIVE_INTELLIGENCE_AND_BENCHMARKING.md`
 - `COMPETITOR_BENCHMARK_SCORECARD.md`
 - `PLATFORM_EXPERIENCE_INDEX.md`
@@ -74,5 +75,6 @@ Strategy guides prioritization but does not bypass architecture, security, evide
 
 ## Change log
 
+- 2026-07-18 — v0.7.2 registered PDA-STR-030 as a Draft collection instrument for issue #82; the kit adds no customer evidence and preserves the #84/#94 pre-collection gates.
 - 2026-07-18 — v0.7.1 corrected current security-control routing from closed issue #92 to retained follow-up issue #96; issue #93 continues to own third-party provenance follow-up.
 - 2026-07-17 — v0.7.0 recorded PDA-REV-019 as the issue #83 disclosure/redaction review subject to exact-head independent concurrence and merge; separated the remaining FDR-005 visibility, licensing, contribution, scanning, and provenance work; and named issues #94 and #82 as the remaining WS3-entry gates.

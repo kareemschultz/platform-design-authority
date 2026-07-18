@@ -1901,6 +1901,83 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			});
 		},
 		/**
+		 * WS3 PR3's compensating stock effect (frozen control plan §6.3, "Read
+		 * first" — "via the same Inventory contract path PR2 chose"). Mirrors
+		 * `recordSaleMovement` exactly, except the posted quantity is
+		 * POSITIVE (stock comes back in) and the movement is typed
+		 * `Reversal` with a mandatory `reversalOfMovementId` pointing at the
+		 * ORIGINAL `Sale` movement it compensates — required by this table's
+		 * own `inventory_stock_movement_reversal_check` CHECK constraint
+		 * (`movementType = 'Reversal'` requires a non-null
+		 * `reversalOfMovementId`; see `@meridian/persistence-inventory-postgres`'s
+		 * schema). `sourceType` stays `"Sale"` (no dedicated "Return" source
+		 * type is registered on this table, and none is invented — the
+		 * compensating fact is still "about" the original Sale). Like
+		 * `recordSaleMovement`, this runs INSIDE the caller's own
+		 * transaction and does not use Inventory's own idempotency wrapper:
+		 * POS's `return.approve` already claims idempotency once for the
+		 * whole Return before this runs.
+		 */
+		async recordReturnMovement(input: {
+			actorUserId: string;
+			correlationId: string;
+			locationId: string;
+			organizationId: string;
+			productId: string;
+			quantity: DecimalQuantity;
+			returnId: string;
+			reversalOfMovementId: string;
+			tenantId: string;
+			unit: string;
+			variantId?: string | null;
+		}): Promise<InventoryMovementRecord> {
+			requirePositive(input.quantity);
+			await Promise.all([
+				options.references.requireLocation({
+					locationId: input.locationId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				}),
+				options.references.requireProduct({
+					productId: input.productId,
+					tenantId: input.tenantId,
+					variantId: input.variantId,
+				}),
+			]);
+			const posted = movement({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				locationId: input.locationId,
+				movementType: "Reversal",
+				organizationId: input.organizationId,
+				productId: input.productId,
+				quantity: input.quantity,
+				reversalOfMovementId: input.reversalOfMovementId,
+				sourceId: input.returnId,
+				sourceType: "Sale",
+				tenantId: input.tenantId,
+				unit: input.unit,
+				variantId: input.variantId,
+			});
+			const applied = await options.unitOfWork.execute(({ repository }) =>
+				repository.applyMovement(posted)
+			);
+			if (applied === "negative_stock") {
+				// Unreachable in practice — the posted quantity is always
+				// positive, and `applyMovement` only ever returns
+				// `"negative_stock"` on the negative-quantity branch. Guarded
+				// explicitly rather than asserted away, so a future change to
+				// `applyMovement`'s balance semantics fails loudly here
+				// instead of silently returning a malformed
+				// `InventoryMovementRecord`.
+				throw new InventoryError(
+					"invalid_state",
+					"Return movement unexpectedly reported negative stock"
+				);
+			}
+			return applied.movement;
+		},
+		/**
 		 * WS3 PR2's mandated synchronous stock effect (frozen control plan §6.3,
 		 * "Read first"): a completed cash sale posts an immediate,
 		 * single-actor `Sale` movement decrementing on-hand stock, run inside

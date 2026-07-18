@@ -7,6 +7,8 @@ import {
 	approveInventoryAdjustmentContract,
 	approveOpeningStockImportContract,
 	approveProductImportContract,
+	approveRefundContract,
+	approveReturnContract,
 	approveSalePriceOverrideContract,
 	approveStockCountContract,
 	archiveProductContract,
@@ -23,6 +25,8 @@ import {
 	createPersonPartyContract,
 	createProductContract,
 	createProductImportContract,
+	createRefundContract,
+	createReturnContract,
 	createRoleAssignmentContract,
 	createSafeDropContract,
 	createSaleContract,
@@ -64,6 +68,7 @@ import {
 	purgeOpeningStockImportStagingContract,
 	purgeProductImportStagingContract,
 	receiveStockTransferContract,
+	reissueReceiptContract,
 	requestSalePriceOverrideContract,
 	reverseInventoryAdjustmentContract,
 	revokeCurrentUserSessionContract,
@@ -74,6 +79,7 @@ import {
 	updateOrganizationContract,
 	updatePartyContract,
 	updateProductContract,
+	voidReceiptContract,
 } from "@meridian/contracts-platform-api";
 import type { RouterClient } from "@orpc/server";
 import { implement, ORPCError } from "@orpc/server";
@@ -1710,6 +1716,7 @@ const completeSale = implement(completeSaleContract)
 				actorUserId: session.user.id,
 				contextId: input.headers["x-active-context-id"],
 				correlationId: context.correlationId,
+				exchangeOfReturnId: input.body.exchangeOfReturnId,
 				idempotencyKey: input.headers["idempotency-key"],
 				saleId: input.params.saleId,
 				sessionId: session.session.id,
@@ -1823,6 +1830,171 @@ const getReceipt = implement(getReceiptContract)
 			return await context.application.getReceipt({
 				actorUserId: session.user.id,
 				contextId: input.headers["x-active-context-id"],
+				receiptId: input.params.receiptId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+// ---------------------------------------------------------------------------
+// WS3 PR3: Return, Refund, Void, Reissue. Exchange has no dedicated
+// procedure — it rides `completeSale`'s `exchangeOfReturnId` above.
+// ---------------------------------------------------------------------------
+
+const createReturn = implement(createReturnContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createReturn({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				lines: input.body.lines,
+				reason: input.body.reason,
+				saleId: input.body.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveReturn = implement(approveReturnContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveReturn({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				returnId: input.params.returnId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createRefund = implement(createRefundContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.refund.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createRefund({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				returnId: input.body.returnId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveRefund = implement(approveRefundContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.refund.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveRefund({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				refundId: input.params.refundId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const reissueReceipt = implement(reissueReceiptContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.receipt.reissue",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.reissueReceipt({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				priceSuppressed: input.body.priceSuppressed,
+				receiptId: input.params.receiptId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const voidReceipt = implement(voidReceiptContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.receipt.void",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.voidReceipt({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				reason: input.body.reason,
 				receiptId: input.params.receiptId,
 				sessionId: session.session.id,
 			});
@@ -2314,10 +2486,22 @@ export const appRouter = {
 			approve: approveSalePriceOverride,
 			request: requestSalePriceOverride,
 		},
-		receipts: { get: getReceipt },
+		receipts: {
+			get: getReceipt,
+			reissue: reissueReceipt,
+			void: voidReceipt,
+		},
+		refunds: {
+			approve: approveRefund,
+			create: createRefund,
+		},
 		registers: {
 			close: closeRegister,
 			open: openRegister,
+		},
+		returns: {
+			approve: approveReturn,
+			create: createReturn,
 		},
 		safeDrops: { create: createSafeDrop },
 		sales: {

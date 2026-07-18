@@ -6,7 +6,10 @@ import {
 	InventoryError,
 	type InventoryIdFactory,
 } from "@meridian/domain-inventory";
-import type { SaleInventoryMovementPort } from "@meridian/domain-pos";
+import type {
+	ReturnInventoryMovementPort,
+	SaleInventoryMovementPort,
+} from "@meridian/domain-pos";
 import {
 	createInventoryRepository,
 	parseInventoryStockBalanceCursor,
@@ -163,6 +166,38 @@ export function createSaleInventoryMovementAdapter(
 			if (result === "negative_stock") {
 				return "negative_stock";
 			}
+			return { movementId: result.id };
+		},
+	};
+}
+
+/**
+ * WS3 PR3's compensating-movement mirror of
+ * `createSaleInventoryMovementAdapter` immediately above: an Inventory
+ * service instance bound to the SAME transactional `PoolClient` as the
+ * Return's own unit of work (`return.approve`/`voidReceipt`). Only
+ * `recordReturnMovement` is exposed, for the same composition-only,
+ * cross-domain-import discipline `SaleInventoryMovementPort` already
+ * documents.
+ */
+export function createReturnInventoryMovementAdapter(
+	client: PoolClient
+): ReturnInventoryMovementPort {
+	const service = createInventoryService({
+		clock: () => new Date(),
+		ids,
+		references,
+		unitOfWork: {
+			execute: (operation) =>
+				operation({
+					events: createPostgresOutbox(client),
+					repository: createInventoryRepository(client),
+				}),
+		},
+	});
+	return {
+		async recordReturnMovement(input) {
+			const result = await service.recordReturnMovement(input);
 			return { movementId: result.id };
 		},
 	};

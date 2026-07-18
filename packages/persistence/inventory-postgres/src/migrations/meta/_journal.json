@@ -15,6 +15,13 @@
       "when": 1784368420369,
       "tag": "0001_luxuriant_chamber",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784383517664,
+      "tag": "0002_lame_trish_tilby",
+      "breakpoints": true
     }
   ]
 }

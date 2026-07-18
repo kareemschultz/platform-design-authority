@@ -283,6 +283,12 @@ export const posSaleLines = pgTable(
 		discountMinor: minorAmount("discount_minor").notNull(),
 		grossMinor: minorAmount("gross_minor").notNull(),
 		id: text("id").notNull(),
+		/** The Inventory `Sale` movement id `sale.complete` posted for this
+		 * line (WS3 PR3, frozen control plan §6.3). No foreign key: Inventory
+		 * owns `inventory_stock_movement`, and a domain may not reference
+		 * another domain's tables (ADR-0002/0003). `null` only while the sale
+		 * has not yet completed. */
+		inventoryMovementId: text("inventory_movement_id"),
 		lineTotalMinor: minorAmount("line_total_minor").notNull(),
 		nonStatutory: boolean("non_statutory").default(true).notNull(),
 		priceOverrideId: text("price_override_id"),
@@ -446,5 +452,205 @@ export const posReceipts = pgTable(
 			table.receiptNumber
 		),
 		index("pos_receipt_tenant_sale_idx").on(table.tenantId, table.saleId),
+	]
+);
+
+/**
+ * `pos_return` is the Return maker/checker aggregate (WS3 PR3, frozen
+ * control plan §6.3). `mode` distinguishes an ordinary partial/full return
+ * from a same-day/open-session Void (own permission `commerce.receipt.void`,
+ * no maker/checker separation — a Void row's `createdBy*`/`approvedBy*` MAY
+ * be the same actor, never a `Return` row's; enforced at the application
+ * boundary the same way the price-override/cash-variance pairs are, not by
+ * a CHECK that cannot see which permission was invoked). `registerId` is
+ * always inherited from the referenced Sale — there is no caller-supplied
+ * register on `return.create`, which structurally forecloses a
+ * cross-register return rather than validating one after the fact.
+ * `exchangeSaleId` links a Return later consumed as the compensating leg of
+ * an Exchange (frozen control plan §6.5) to its replacement Sale —
+ * populated by `sale.complete`'s `exchangeOfReturnId` input, never by
+ * `return.approve` itself, since the replacement sale does not exist yet at
+ * that point (see the domain package's `commerce.exchange.completed.v1`
+ * emission comment for the full disposition of why this column's value is
+ * never mirrored onto the frozen `commerce.return.completed.v1` payload).
+ */
+export const posReturns = pgTable(
+	"pos_return",
+	{
+		approvedAt: timestamp("approved_at", { withTimezone: true }),
+		approvedByActorUserId: text("approved_by_actor_user_id"),
+		approvedByPartyId: text("approved_by_party_id"),
+		classification: classification(),
+		createdAt: createdAt(),
+		createdByActorUserId: text("created_by_actor_user_id").notNull(),
+		createdByPartyId: text("created_by_party_id").notNull(),
+		currency: text("currency").notNull(),
+		exchangeSaleId: text("exchange_sale_id"),
+		id: text("id").notNull(),
+		mode: text("mode").default("Return").notNull(),
+		organizationId: text("organization_id").notNull(),
+		reason: text("reason").notNull(),
+		receiptId: text("receipt_id"),
+		registerId: text("register_id").notNull(),
+		saleId: text("sale_id").notNull(),
+		state: text("state").default("Pending").notNull(),
+		tenantId: text("tenant_id").notNull(),
+		totalRefundableMinor: minorAmount("total_refundable_minor").notNull(),
+		updatedAt: updatedAt(),
+		version: integer("version").default(1).notNull(),
+	},
+	(table) => [
+		check("pos_return_currency_check", sql`${table.currency} ~ '^[A-Z]{3}$'`),
+		check("pos_return_mode_check", sql`${table.mode} in ('Return', 'Void')`),
+		check(
+			"pos_return_state_check",
+			sql`${table.state} in ('Pending', 'Completed')`
+		),
+		check(
+			"pos_return_completed_check",
+			sql`(${table.state} = 'Completed') = (${table.approvedAt} is not null and ${table.approvedByActorUserId} is not null and ${table.approvedByPartyId} is not null and ${table.receiptId} is not null)`
+		),
+		check(
+			"pos_return_total_refundable_check",
+			sql`${table.totalRefundableMinor} >= 0`
+		),
+		primaryKey({ columns: [table.tenantId, table.id], name: "pos_return_pk" }),
+		foreignKey({
+			columns: [table.tenantId, table.saleId],
+			foreignColumns: [posSales.tenantId, posSales.id],
+			name: "pos_return_sale_fk",
+		}),
+		index("pos_return_tenant_sale_idx").on(
+			table.tenantId,
+			table.saleId,
+			table.state
+		),
+	]
+);
+
+export const posReturnLines = pgTable(
+	"pos_return_line",
+	{
+		classification: classification(),
+		createdAt: createdAt(),
+		discountMinor: minorAmount("discount_minor").notNull(),
+		grossMinor: minorAmount("gross_minor").notNull(),
+		id: text("id").notNull(),
+		lineTotalMinor: minorAmount("line_total_minor").notNull(),
+		nonStatutory: boolean("non_statutory").default(true).notNull(),
+		productId: text("product_id").notNull(),
+		productName: text("product_name").notNull(),
+		quantity: numeric("quantity", { precision: 38, scale: 6 }).notNull(),
+		returnId: text("return_id").notNull(),
+		saleLineId: text("sale_line_id").notNull(),
+		taxAmountMinor: minorAmount("tax_amount_minor").notNull(),
+		taxableBaseMinor: minorAmount("taxable_base_minor").notNull(),
+		taxCategory: text("tax_category").notNull(),
+		tenantId: text("tenant_id").notNull(),
+		unit: text("unit").notNull(),
+		unitPriceMinor: minorAmount("unit_price_minor").notNull(),
+		variantId: text("variant_id"),
+	},
+	(table) => [
+		check("pos_return_line_quantity_check", sql`${table.quantity} > 0`),
+		check(
+			"pos_return_line_tax_category_check",
+			sql`${table.taxCategory} in ('GY_STANDARD_14', 'GY_ZERO_RATED', 'GY_EXEMPT', 'GY_OUT_OF_SCOPE')`
+		),
+		check(
+			"pos_return_line_non_statutory_check",
+			sql`${table.nonStatutory} = true`
+		),
+		primaryKey({
+			columns: [table.tenantId, table.id],
+			name: "pos_return_line_pk",
+		}),
+		foreignKey({
+			columns: [table.tenantId, table.returnId],
+			foreignColumns: [posReturns.tenantId, posReturns.id],
+			name: "pos_return_line_return_fk",
+		}),
+		foreignKey({
+			columns: [table.tenantId, table.saleLineId],
+			foreignColumns: [posSaleLines.tenantId, posSaleLines.id],
+			name: "pos_return_line_sale_line_fk",
+		}),
+		index("pos_return_line_tenant_return_idx").on(
+			table.tenantId,
+			table.returnId
+		),
+		// Query-performance backstop for the cumulative-returned-quantity sum
+		// (frozen control plan Tests requirement: "over-return prevention ...
+		// concurrent double-return race ... exactly one succeeds or
+		// cumulative cap holds"). The authoritative concurrency guard is
+		// `return.create` locking the parent Sale row (`SELECT ... FOR
+		// UPDATE`, `PosRepository.getSale`) for the whole transaction BEFORE
+		// summing prior returned quantity against this table, which
+		// serializes concurrent `return.create` calls against the SAME sale
+		// — no single-row uniqueness can express a cumulative-quantity cap,
+		// so this index is not itself a uniqueness backstop the way the
+		// register/receipt tables' unique indexes are.
+		index("pos_return_line_tenant_sale_line_idx").on(
+			table.tenantId,
+			table.saleLineId
+		),
+	]
+);
+
+/**
+ * `pos_refund` is the Refund maker/checker aggregate (WS3 PR3, frozen
+ * control plan §6.4). `registerId` is inherited from the referenced
+ * Return's `registerId` (itself inherited from the original Sale) — there
+ * is no caller-supplied register on `refund.create`, structurally
+ * foreclosing a cross-register refund. The unique index on `returnId`
+ * caps a Return at exactly one Refund ever (its full refundable amount,
+ * frozen control plan §6.4 — `refund.create` derives `amountMinor` from
+ * the Return, never from caller input, so there is no partial-refund
+ * amount to reconcile against repeat requests).
+ */
+export const posRefunds = pgTable(
+	"pos_refund",
+	{
+		amountMinor: minorAmount("amount_minor").notNull(),
+		approvedAt: timestamp("approved_at", { withTimezone: true }),
+		approvedByActorUserId: text("approved_by_actor_user_id"),
+		approvedByPartyId: text("approved_by_party_id"),
+		cashMovementId: text("cash_movement_id"),
+		classification: classification(),
+		createdAt: createdAt(),
+		currency: text("currency").notNull(),
+		id: text("id").notNull(),
+		organizationId: text("organization_id").notNull(),
+		registerId: text("register_id").notNull(),
+		requestedAt: timestamp("requested_at", { withTimezone: true }).notNull(),
+		requestedByActorUserId: text("requested_by_actor_user_id").notNull(),
+		requestedByPartyId: text("requested_by_party_id").notNull(),
+		returnId: text("return_id").notNull(),
+		state: text("state").default("Requested").notNull(),
+		tenantId: text("tenant_id").notNull(),
+		updatedAt: updatedAt(),
+		version: integer("version").default(1).notNull(),
+	},
+	(table) => [
+		check("pos_refund_currency_check", sql`${table.currency} ~ '^[A-Z]{3}$'`),
+		check("pos_refund_amount_check", sql`${table.amountMinor} > 0`),
+		check(
+			"pos_refund_state_check",
+			sql`${table.state} in ('Requested', 'Posted')`
+		),
+		check(
+			"pos_refund_posted_check",
+			sql`(${table.state} = 'Posted') = (${table.approvedAt} is not null and ${table.approvedByActorUserId} is not null and ${table.approvedByPartyId} is not null and ${table.cashMovementId} is not null)`
+		),
+		primaryKey({ columns: [table.tenantId, table.id], name: "pos_refund_pk" }),
+		foreignKey({
+			columns: [table.tenantId, table.returnId],
+			foreignColumns: [posReturns.tenantId, posReturns.id],
+			name: "pos_refund_return_fk",
+		}),
+		uniqueIndex("pos_refund_tenant_return_uidx").on(
+			table.tenantId,
+			table.returnId
+		),
 	]
 );

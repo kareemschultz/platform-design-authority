@@ -429,7 +429,10 @@
         "pos_sale",
         "pos_sale_line",
         "pos_price_override",
-        "pos_receipt"
+        "pos_receipt",
+        "pos_return",
+        "pos_return_line",
+        "pos_refund"
       ],
       "migration_directory": "packages/persistence/pos-postgres/src/migrations"
     }

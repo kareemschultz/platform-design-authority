@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import type { Sale } from "@meridian/contracts-platform-api";
+import type {
+	Receipt,
+	Refund,
+	Return,
+	Sale,
+} from "@meridian/contracts-platform-api";
 import { call, ORPCError } from "@orpc/server";
 import type { Context } from "./context";
 import { appRouter } from "./router";
@@ -38,6 +43,8 @@ function context(input?: {
 			approveCashVariance: () => Promise.reject(new Error("not used")),
 			approveImport: () => Promise.reject(new Error("not used")),
 			approveInventoryAdjustment: () => Promise.reject(new Error("not used")),
+			approveRefund: () => Promise.reject(new Error("not used")),
+			approveReturn: () => Promise.reject(new Error("not used")),
 			approveSalePriceOverride: () => Promise.reject(new Error("not used")),
 			approveStockCount: () => Promise.reject(new Error("not used")),
 			archiveProduct: () => Promise.reject(new Error("not used")),
@@ -52,6 +59,8 @@ function context(input?: {
 			createOrganizationParty: () => Promise.reject(new Error("not used")),
 			createPersonParty: () => Promise.reject(new Error("not used")),
 			createProduct: () => Promise.reject(new Error("not used")),
+			createRefund: () => Promise.reject(new Error("not used")),
+			createReturn: () => Promise.reject(new Error("not used")),
 			createRoleAssignment: () => Promise.reject(new Error("not used")),
 			createSafeDrop: () => Promise.reject(new Error("not used")),
 			createSale: () => Promise.reject(new Error("not used")),
@@ -108,6 +117,7 @@ function context(input?: {
 			openRegister: () => Promise.reject(new Error("not used")),
 			purgeImportStaging: async () => ({ findings: 0, rows: 0, waves: 0 }),
 			receiveStockTransfer: () => Promise.reject(new Error("not used")),
+			reissueReceipt: () => Promise.reject(new Error("not used")),
 			requestSalePriceOverride: () => Promise.reject(new Error("not used")),
 			reverseInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			revokeCurrentUserSession: () => Promise.resolve(),
@@ -125,6 +135,7 @@ function context(input?: {
 			updateOrganization: () => Promise.reject(new Error("not used")),
 			updateParty: () => Promise.reject(new Error("not used")),
 			updateProduct: () => Promise.reject(new Error("not used")),
+			voidReceipt: () => Promise.reject(new Error("not used")),
 			...input?.application,
 		},
 		authorizer: {
@@ -191,7 +202,9 @@ describe("appRouter contract surface", () => {
 			"cashVariances",
 			"priceOverrides",
 			"receipts",
+			"refunds",
 			"registers",
+			"returns",
 			"safeDrops",
 			"sales",
 		]);
@@ -217,7 +230,19 @@ describe("appRouter contract surface", () => {
 			"approve",
 			"request",
 		]);
-		expect(Object.keys(appRouter.commerce.receipts).sort()).toEqual(["get"]);
+		expect(Object.keys(appRouter.commerce.receipts).sort()).toEqual([
+			"get",
+			"reissue",
+			"void",
+		]);
+		expect(Object.keys(appRouter.commerce.refunds).sort()).toEqual([
+			"approve",
+			"create",
+		]);
+		expect(Object.keys(appRouter.commerce.returns).sort()).toEqual([
+			"approve",
+			"create",
+		]);
 		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
 			"activate",
 			"archive",
@@ -2270,5 +2295,396 @@ describe("appRouter contract surface", () => {
 		});
 		expect(result.user?.id).toBe("user_unit_test_000001");
 		expect(result.user?.email).toBe("test.user@example.com");
+	});
+
+	// -- WS3 PR3: Return, Refund, Void, Reissue, Exchange ----------------------
+
+	function fakeReturn(overrides: Partial<Return> = {}): Return {
+		return {
+			approvedAt: null,
+			createdAt: "2026-07-18T12:00:00.000Z",
+			currency: "GYD",
+			exchangeSaleId: null,
+			id: "return_unit_test_0001",
+			lines: [],
+			mode: "Return",
+			reason: "Customer changed mind",
+			receiptId: null,
+			registerId: "register_unit_test_0001",
+			saleId: "sale_unit_test_0001",
+			state: "Pending",
+			totalRefundable: { amountMinor: 10_000, currency: "GYD" },
+			version: 1,
+			...overrides,
+		};
+	}
+
+	function fakeRefund(overrides: Partial<Refund> = {}): Refund {
+		return {
+			amount: { amountMinor: 10_000, currency: "GYD" },
+			approvedAt: null,
+			cashMovementId: null,
+			id: "refund_unit_test_0001",
+			registerId: "register_unit_test_0001",
+			requestedAt: "2026-07-18T12:00:00.000Z",
+			returnId: "return_unit_test_0001",
+			state: "Requested",
+			version: 1,
+			...overrides,
+		};
+	}
+
+	function fakeReceipt(overrides: Partial<Receipt> = {}): Receipt {
+		return {
+			cashierPartyId: "party_unit_test_0001",
+			currency: "GYD",
+			id: "receipt_unit_test_0001",
+			issuedAt: "2026-07-18T12:00:00.000Z",
+			kind: "Sale",
+			lines: [],
+			originalReceiptId: null,
+			priceSuppressed: false,
+			receiptNumber: "R-register_unit_test_0001-000001",
+			registerId: "register_unit_test_0001",
+			returnId: null,
+			saleId: "sale_unit_test_0001",
+			tenders: [],
+			total: { amountMinor: 10_000, currency: "GYD" },
+			...overrides,
+		};
+	}
+
+	test("dispatches return creation with the sale, lines, and reason from the request body", async () => {
+		let received:
+			| Parameters<Context["application"]["createReturn"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.returns.create,
+			{
+				body: {
+					lines: [{ quantity: "1", saleLineId: "sale_line_unit_test_0001" }],
+					reason: "Customer changed mind",
+					saleId: "sale_unit_test_0001",
+				},
+				headers: {
+					"idempotency-key": "idempotency-return-create-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						createReturn(input) {
+							received = input;
+							return Promise.resolve(fakeReturn());
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ state: "Pending" });
+		expect(permission).toBe("commerce.return.create");
+		expect(received).toMatchObject({
+			lines: [{ quantity: "1", saleLineId: "sale_line_unit_test_0001" }],
+			reason: "Customer changed mind",
+			saleId: "sale_unit_test_0001",
+		});
+	});
+
+	test("denies return creation before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.returns.create,
+				{
+					body: {
+						lines: [{ quantity: "1", saleLineId: "sale_line_hidden_0001" }],
+						reason: "Denied",
+						saleId: "sale_hidden_unit_0001",
+					},
+					headers: {
+						"idempotency-key": "idempotency-return-create-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+				},
+				{
+					context: context({
+						application: {
+							createReturn: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("dispatches return approval with the returnId from the request path", async () => {
+		let received:
+			| Parameters<Context["application"]["approveReturn"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.returns.approve,
+			{
+				headers: {
+					"idempotency-key": "idempotency-return-approve-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { returnId: "return_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						approveReturn(input) {
+							received = input;
+							return Promise.resolve(fakeReturn({ state: "Completed" }));
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ state: "Completed" });
+		expect(permission).toBe("commerce.return.approve");
+		expect(received).toMatchObject({ returnId: "return_unit_test_0001" });
+	});
+
+	test("dispatches refund creation with the returnId from the request body", async () => {
+		let received:
+			| Parameters<Context["application"]["createRefund"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.refunds.create,
+			{
+				body: { returnId: "return_unit_test_0001" },
+				headers: {
+					"idempotency-key": "idempotency-refund-create-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						createRefund(input) {
+							received = input;
+							return Promise.resolve(fakeRefund());
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ state: "Requested" });
+		expect(permission).toBe("commerce.refund.create");
+		expect(received).toMatchObject({ returnId: "return_unit_test_0001" });
+	});
+
+	test("dispatches refund approval with the refundId from the request path", async () => {
+		let received:
+			| Parameters<Context["application"]["approveRefund"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.refunds.approve,
+			{
+				headers: {
+					"idempotency-key": "idempotency-refund-approve-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { refundId: "refund_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						approveRefund(input) {
+							received = input;
+							return Promise.resolve(fakeRefund({ state: "Posted" }));
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ state: "Posted" });
+		expect(permission).toBe("commerce.refund.approve");
+		expect(received).toMatchObject({ refundId: "refund_unit_test_0001" });
+	});
+
+	test("dispatches receipt reissue with priceSuppressed from the request body (gift-receipt variant)", async () => {
+		let received:
+			| Parameters<Context["application"]["reissueReceipt"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.receipts.reissue,
+			{
+				body: { priceSuppressed: true },
+				headers: {
+					"idempotency-key": "idempotency-reissue-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { receiptId: "receipt_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						reissueReceipt(input) {
+							received = input;
+							return Promise.resolve(
+								fakeReceipt({ kind: "Reissue", priceSuppressed: true })
+							);
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ kind: "Reissue", priceSuppressed: true });
+		expect(permission).toBe("commerce.receipt.reissue");
+		expect(received).toMatchObject({
+			priceSuppressed: true,
+			receiptId: "receipt_unit_test_0001",
+		});
+	});
+
+	test("dispatches receipt void with the reason from the request body and the receiptId from the path", async () => {
+		let received:
+			| Parameters<Context["application"]["voidReceipt"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.commerce.receipts.void,
+			{
+				body: { reason: "Cashier error" },
+				headers: {
+					"idempotency-key": "idempotency-void-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { receiptId: "receipt_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						voidReceipt(input) {
+							received = input;
+							return Promise.resolve(
+								fakeReturn({ mode: "Void", state: "Completed" })
+							);
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ mode: "Void", state: "Completed" });
+		expect(permission).toBe("commerce.receipt.void");
+		expect(received).toMatchObject({
+			reason: "Cashier error",
+			receiptId: "receipt_unit_test_0001",
+		});
+	});
+
+	test("denies receipt void before application dispatch when permission fails", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.commerce.receipts.void,
+				{
+					body: {},
+					headers: {
+						"idempotency-key": "idempotency-void-denied",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { receiptId: "receipt_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							voidReceipt: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	test("realizes commerce.exchanges by threading exchangeOfReturnId from completeSale's request body (frozen control plan §6.5)", async () => {
+		let received:
+			| Parameters<Context["application"]["completeSale"]>[0]
+			| undefined;
+		const result = await call(
+			appRouter.commerce.sales.complete,
+			{
+				body: {
+					exchangeOfReturnId: "return_unit_test_0001",
+					tenders: [
+						{ amount: { amountMinor: 114_000, currency: "GYD" }, type: "Cash" },
+					],
+				},
+				headers: {
+					"idempotency-key": "idempotency-sale-complete-exchange-unit-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { saleId: "sale_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						completeSale(input) {
+							received = input;
+							return Promise.resolve(
+								fakeSale({ state: "Completed", version: 2 })
+							);
+						},
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ state: "Completed" });
+		expect(received).toMatchObject({
+			exchangeOfReturnId: "return_unit_test_0001",
+			saleId: "sale_unit_test_0001",
+		});
 	});
 });

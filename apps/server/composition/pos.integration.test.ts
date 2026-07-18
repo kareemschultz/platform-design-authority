@@ -60,8 +60,8 @@ const ids: PosIdFactory = {
 // PR1's live-PG lane exercises only RegisterSession/CashMovement commands
 // (never sale.complete, which is PR2's own live-PG lane in a separate
 // describe block below). `pricing`/`tax` are the real, I/O-free engines;
-// `products` and `saleUnitOfWork` are structural stubs never invoked by
-// these tests.
+// `products`, `saleUnitOfWork`, and `returnUnitOfWork` are structural stubs
+// never invoked by these tests.
 function service(failEvents = false) {
 	return createPosService({
 		clock: () => new Date(),
@@ -75,6 +75,12 @@ function service(failEvents = false) {
 			requireProduct: () =>
 				Promise.reject(
 					new Error("products port is not exercised by the PR1 live-PG lane")
+				),
+		},
+		returnUnitOfWork: {
+			execute: () =>
+				Promise.reject(
+					new Error("returnUnitOfWork is not exercised by the PR1 live-PG lane")
 				),
 		},
 		saleUnitOfWork: {
@@ -160,6 +166,14 @@ function saleService(options: { failEventName?: string } = {}) {
 		products: {
 			requireProduct: ({ productId }) =>
 				Promise.resolve({ productName: `Product ${productId}` }),
+		},
+		returnUnitOfWork: {
+			execute: () =>
+				Promise.reject(
+					new Error(
+						"returnUnitOfWork is not exercised by the PR2 live-PG lane — see returns.integration.test.ts for PR3's own lane"
+					)
+				),
 		},
 		saleUnitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
 			events: {
@@ -268,7 +282,7 @@ const base = {
 };
 
 describe.serial("POS PostgreSQL controlled prototype", () => {
-	test("migrates idempotently and creates only the seven registered POS-owned tables (PR1 register/cash + PR2 sale/receipt/price-override)", async () => {
+	test("migrates idempotently and creates the ten registered POS-owned tables (PR1 register/cash + PR2 sale/receipt/price-override + PR3 return/refund)", async () => {
 		await migratePos(testPool);
 		const tables = await testPool.query<{ table_name: string }>(
 			"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name LIKE 'pos_%' ORDER BY table_name"
@@ -278,7 +292,10 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 			"pos_command_receipt",
 			"pos_price_override",
 			"pos_receipt",
+			"pos_refund",
 			"pos_register_session",
+			"pos_return",
+			"pos_return_line",
 			"pos_sale",
 			"pos_sale_line",
 		]);

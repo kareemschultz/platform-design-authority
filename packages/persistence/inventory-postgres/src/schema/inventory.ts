@@ -106,9 +106,21 @@ export const inventoryStockMovements = pgTable(
 			columns: [table.tenantId, table.id],
 			name: "inventory_stock_movement_pk",
 		}),
+		// Caps an Adjustment's posted movement at exactly one reversal ever
+		// (`reverseAdjustment`'s "full reversal only, once" semantics, WS2).
+		// WS3 PR3 deliberately EXEMPTS `sourceType = 'Sale'` from this cap:
+		// a Sale's single posted movement legitimately gets MULTIPLE,
+		// separate compensating `Reversal` movements over time — one per
+		// partial Return that references the same original sale line,
+		// cumulatively bounded by the quantity check in
+		// `@meridian/domain-pos`'s `buildReturnLines`, not by a one-shot DB
+		// constraint designed for Adjustment's different (single, full)
+		// reversal shape.
 		uniqueIndex("inventory_stock_movement_tenant_reversal_uidx")
 			.on(table.tenantId, table.reversalOfMovementId)
-			.where(sql`${table.reversalOfMovementId} is not null`),
+			.where(
+				sql`${table.reversalOfMovementId} is not null and ${table.sourceType} <> 'Sale'`
+			),
 		index("inventory_stock_movement_tenant_item_time_idx").on(
 			table.tenantId,
 			table.locationId,

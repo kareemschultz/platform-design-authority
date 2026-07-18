@@ -13,9 +13,14 @@ import {
 	type PosRepository,
 	type PosTaxPort,
 	type PriceOverrideRecord,
+	REFUND_STATES,
 	REGISTER_SESSION_STATES,
+	RETURN_MODES,
+	RETURN_STATES,
 	type ReceiptRecord,
+	type RefundRecord,
 	type RegisterSessionRecord,
+	type ReturnRecord,
 	SALE_LINE_TAX_CATEGORIES,
 	SALE_STATES,
 	type SaleRecord,
@@ -154,6 +159,8 @@ function createInMemoryRepository() {
 	const sales = new Map<string, SaleRecord>();
 	const priceOverrides = new Map<string, PriceOverrideRecord>();
 	const saleReceipts = new Map<string, ReceiptRecord>();
+	const returns = new Map<string, ReturnRecord>();
+	const refunds = new Map<string, RefundRecord>();
 
 	const repository: PosRepository = {
 		acquireCommandLock: () => Promise.resolve(),
@@ -176,6 +183,16 @@ function createInMemoryRepository() {
 		},
 		createReceipt: (record) => {
 			saleReceipts.set(record.id, record);
+			return Promise.resolve(record);
+		},
+
+		// -- WS3 PR3: Return, Refund ----------------------------------------------
+		createRefund: (record) => {
+			refunds.set(record.id, record);
+			return Promise.resolve(record);
+		},
+		createReturn: (record) => {
+			returns.set(record.id, record);
 			return Promise.resolve(record);
 		},
 		createSale: (record) => {
@@ -203,6 +220,18 @@ function createInMemoryRepository() {
 		},
 		getReceipt: (tenantId, id) => {
 			const record = saleReceipts.get(id);
+			return Promise.resolve(
+				record && record.tenantId === tenantId ? record : null
+			);
+		},
+		getRefund: (tenantId, id) => {
+			const record = refunds.get(id);
+			return Promise.resolve(
+				record && record.tenantId === tenantId ? record : null
+			);
+		},
+		getReturn: (tenantId, id) => {
+			const record = returns.get(id);
 			return Promise.resolve(
 				record && record.tenantId === tenantId ? record : null
 			);
@@ -260,12 +289,36 @@ function createInMemoryRepository() {
 			commandReceipts.set(key, receipt);
 			return Promise.resolve({ inserted: true, record: receipt });
 		},
+		sumReturnedQuantity: (tenantId, saleLineId) => {
+			const total = [...returns.values()]
+				.filter((candidate) => candidate.tenantId === tenantId)
+				.flatMap((candidate) => candidate.lines)
+				.filter((line) => line.saleLineId === saleLineId)
+				.reduce((sum, line) => sum + Number(line.quantity), 0);
+			return Promise.resolve(total.toString());
+		},
 		updatePriceOverride: (record, expectedVersion) => {
 			const current = priceOverrides.get(record.id);
 			if (!current || current.version !== expectedVersion) {
 				return Promise.resolve("version_conflict" as const);
 			}
 			priceOverrides.set(record.id, record);
+			return Promise.resolve(record);
+		},
+		updateRefund: (record, expectedVersion) => {
+			const current = refunds.get(record.id);
+			if (!current || current.version !== expectedVersion) {
+				return Promise.resolve("version_conflict" as const);
+			}
+			refunds.set(record.id, record);
+			return Promise.resolve(record);
+		},
+		updateReturn: (record, expectedVersion) => {
+			const current = returns.get(record.id);
+			if (!current || current.version !== expectedVersion) {
+				return Promise.resolve("version_conflict" as const);
+			}
+			returns.set(record.id, record);
 			return Promise.resolve(record);
 		},
 		updateSale: (record, expectedVersion) => {
@@ -289,7 +342,9 @@ function createInMemoryRepository() {
 	return {
 		movements,
 		priceOverrides,
+		refunds,
 		repository,
+		returns,
 		saleReceipts,
 		sales,
 		sessions,
@@ -300,7 +355,9 @@ function createHarness() {
 	const {
 		movements,
 		priceOverrides,
+		refunds,
 		repository,
+		returns,
 		saleReceipts,
 		sales,
 		sessions,
@@ -315,6 +372,11 @@ function createHarness() {
 	};
 	const seenEventIds = new Set<string>();
 	const stockMovements: Array<{ productId: string; quantity: string }> = [];
+	const returnMovements: Array<{
+		productId: string;
+		quantity: string;
+		reversalOfMovementId: string;
+	}> = [];
 	const negativeStockProductIds = new Set<string>();
 	const scope = {
 		events: {
@@ -341,6 +403,32 @@ function createHarness() {
 		products: {
 			requireProduct: ({ productId }) =>
 				Promise.resolve({ productName: `Product ${productId}` }),
+		},
+		returnUnitOfWork: {
+			execute: (operation) =>
+				operation({
+					...scope,
+					inventory: {
+						recordReturnMovement: (input) => {
+							returnMovements.push({
+								productId: input.productId,
+								quantity: input.quantity,
+								reversalOfMovementId: input.reversalOfMovementId,
+							});
+							return Promise.resolve({
+								movementId: `return_movement_${input.productId}`,
+							});
+						},
+					},
+					numbering: {
+						allocate: (input) => {
+							receiptCounter += 1;
+							return Promise.resolve({
+								value: `R-${input.registerId}-${receiptCounter.toString().padStart(6, "0")}`,
+							});
+						},
+					},
+				}),
 		},
 		saleUnitOfWork: {
 			execute: (operation) =>
@@ -379,6 +467,9 @@ function createHarness() {
 		movements,
 		negativeStockProductIds,
 		priceOverrides,
+		refunds,
+		returnMovements,
+		returns,
 		saleReceipts,
 		sales,
 		service,
@@ -1389,6 +1480,676 @@ describe("POS domain: Sale, PriceOverride, Receipt", () => {
 			"GY_EXEMPT",
 			"GY_OUT_OF_SCOPE",
 		]);
+	});
+});
+
+describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
+	async function completedSale(
+		harness: ReturnType<typeof createHarness>,
+		registerId: string,
+		options?: { quantity?: string; unitPriceMinor?: number }
+	) {
+		const { service } = harness;
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-open`,
+			openingFloat: { amountMinor: 0, currency: "GYD" },
+			registerId,
+		});
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-sale-create`,
+			lines: [
+				{
+					productId: "prod_returnable",
+					quantity: options?.quantity ?? "4",
+					unit: "each",
+					unitPrice: {
+						amountMinor: options?.unitPriceMinor ?? 100_000,
+						currency: "GYD",
+					}, // 1000.00 GYD, 14% VAT
+				},
+			],
+			registerId,
+		});
+		const completed = await service.completeSale({
+			...base,
+			idempotencyKey: `${registerId}-sale-complete`,
+			saleId: sale.id,
+			tenders: [
+				{ amountMinor: sale.total.amountMinor, currency: "GYD", type: "Cash" },
+			],
+		});
+		const lineId = completed.lines[0]?.id as string;
+		return { completed, lineId, registerId, saleId: sale.id };
+	}
+
+	test("uses Pending -> Completed for a return and Requested -> Posted for a refund, never pre-approved", () => {
+		expect(RETURN_STATES).toEqual(["Pending", "Completed"]);
+		expect(RETURN_MODES).toEqual(["Return", "Void"]);
+		expect(REFUND_STATES).toEqual(["Requested", "Posted"]);
+	});
+
+	test("creates a Pending return, rejects self-approval, and approving it by another actor posts the compensating Inventory movement, links a Return receipt, and emits commerce.return.completed.v1", async () => {
+		const harness = createHarness();
+		const { service, events, returnMovements, saleReceipts } = harness;
+		const { completed, lineId, registerId, saleId } = await completedSale(
+			harness,
+			"register_return_happy"
+		);
+
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "return-create-1",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Customer changed mind",
+			saleId,
+		});
+		expect(created.state).toBe("Pending");
+		expect(created.mode).toBe("Return");
+		expect(created.registerId).toBe(registerId);
+		// 1 of 4 units: unit price 1000.00 -> 1000.00 gross + 140.00 (14%)
+		// tax = 1140.00 -> 114_000 minor, apportioned from the original
+		// line's 4-unit total (4560.00 -> 456_000 minor) at 1/4.
+		expect(created.totalRefundable).toEqual({
+			amountMinor: 114_000,
+			currency: "GYD",
+		});
+
+		const selfApprove = service.approveReturn({
+			...base,
+			idempotencyKey: "return-approve-self",
+			returnId: created.id,
+		});
+		await expect(selfApprove).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+
+		const approved = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "return-approve-1",
+			returnId: created.id,
+		});
+		expect(approved.state).toBe("Completed");
+		expect(approved.receiptId).not.toBeNull();
+		expect(returnMovements).toEqual([
+			{
+				productId: "prod_returnable",
+				quantity: "1",
+				reversalOfMovementId: "movement_prod_returnable",
+			},
+		]);
+		const returnReceipt = saleReceipts.get(approved.receiptId as string);
+		expect(returnReceipt?.kind).toBe("Return");
+		expect(returnReceipt?.originalReceiptId).toBe(completed.receiptId);
+		expect(returnReceipt?.returnId).toBe(created.id);
+
+		const returnEvent = events.find(
+			(envelope) => envelope.name === "commerce.return.completed.v1"
+		);
+		expect(returnEvent?.data).toMatchObject({
+			mode: "Return",
+			registerId,
+			returnId: created.id,
+			saleId,
+		});
+	});
+
+	test("prevents an over-return, cumulative across two partial returns", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const { lineId, saleId } = await completedSale(
+			harness,
+			"register_over_return",
+			{ quantity: "4" }
+		);
+
+		const firstReturn = await service.createReturn({
+			...base,
+			idempotencyKey: "over-return-1",
+			lines: [{ quantity: "2", saleLineId: lineId }],
+			reason: "Partial return 1",
+			saleId,
+		});
+		expect(firstReturn.state).toBe("Pending");
+
+		const secondReturn = await service.createReturn({
+			...base,
+			idempotencyKey: "over-return-2",
+			lines: [{ quantity: "2", saleLineId: lineId }],
+			reason: "Partial return 2 - exactly the remainder",
+			saleId,
+		});
+		expect(secondReturn.state).toBe("Pending");
+
+		// A third return for even one more unit now exceeds the original
+		// quantity of 4, cumulative across the two PENDING returns above
+		// (frozen control plan §6.3: the check counts Pending too, not only
+		// Completed).
+		const thirdReturn = service.createReturn({
+			...base,
+			idempotencyKey: "over-return-3",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Should be rejected",
+			saleId,
+		});
+		await expect(thirdReturn).rejects.toMatchObject({ code: "validation" });
+	});
+
+	test("rejects a return referencing a sale that has not yet completed", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "register_open_sale_return-open",
+			openingFloat: { amountMinor: 0, currency: "GYD" },
+			registerId: "register_open_sale_return",
+		});
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "register_open_sale_return-sale",
+			lines: [
+				{
+					productId: "prod_x",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 1000, currency: "GYD" },
+				},
+			],
+			registerId: "register_open_sale_return",
+		});
+		const attempt = service.createReturn({
+			...base,
+			idempotencyKey: "register_open_sale_return-return",
+			lines: [{ quantity: "1", saleLineId: sale.lines[0]?.id as string }],
+			reason: "Sale still open",
+			saleId: sale.id,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
+	test("creates a refund referencing an approved return, rejects self-approval, and approving posts a paid-out cash movement referencing the refund", async () => {
+		const harness = createHarness();
+		const { service, events, movements } = harness;
+		const { lineId, registerId, saleId } = await completedSale(
+			harness,
+			"register_refund_happy"
+		);
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "refund-happy-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Refund path",
+			saleId,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "refund-happy-return-approve",
+			returnId: created.id,
+		});
+
+		const refund = await service.createRefund({
+			...base,
+			idempotencyKey: "refund-create-1",
+			returnId: approvedReturn.id,
+		});
+		expect(refund.state).toBe("Requested");
+		expect(refund.amount).toEqual(approvedReturn.totalRefundable);
+
+		const selfApprove = service.approveRefund({
+			...base,
+			idempotencyKey: "refund-approve-self",
+			refundId: refund.id,
+		});
+		await expect(selfApprove).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+
+		const posted = await service.approveRefund({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "refund-approve-1",
+			refundId: refund.id,
+		});
+		expect(posted.state).toBe("Posted");
+		expect(posted.cashMovementId).not.toBeNull();
+
+		const cashMovement = movements.find(
+			(movement) => movement.id === posted.cashMovementId
+		);
+		expect(cashMovement).toMatchObject({
+			amountMinor: refund.amount.amountMinor,
+			direction: "PaidOut",
+			reasonCode: "Refund",
+			referenceId: refund.id,
+			registerId,
+		});
+		const requestedEvent = events.find(
+			(envelope) => envelope.name === "commerce.refund.requested.v1"
+		);
+		expect(requestedEvent?.data).toMatchObject({
+			refundId: refund.id,
+			returnId: approvedReturn.id,
+		});
+		const cashEvent = events.find(
+			(envelope) =>
+				envelope.name === "commerce.cash-movement.posted.v1" &&
+				(envelope.data as { reasonCode?: string }).reasonCode === "Refund"
+		);
+		expect(cashEvent?.data).toMatchObject({ referenceId: refund.id });
+	});
+
+	test("posts a refund even when it would exceed the register's counted cash — records the shortfall as an ordinary close variance rather than rejecting (frozen control plan Tests: record variance vs reject)", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const registerId = "register_refund_exceeds_cash";
+		const { lineId, saleId } = await completedSale(harness, registerId, {
+			quantity: "1",
+			unitPriceMinor: 1_000_000, // 10,000.00 GYD — a refund larger than any float this session ever held in cash.
+		});
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "exceeds-cash-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Large refund",
+			saleId,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "exceeds-cash-return-approve",
+			returnId: created.id,
+		});
+		const refund = await service.createRefund({
+			...base,
+			idempotencyKey: "exceeds-cash-refund-create",
+			returnId: approvedReturn.id,
+		});
+
+		// This register's session never received any cash beyond the sale
+		// tender itself (which is not a paid-in movement); the refund still
+		// posts — no "insufficient register cash" rejection code exists on
+		// this branch's PosError union.
+		const posted = await service.approveRefund({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "exceeds-cash-refund-approve",
+			refundId: refund.id,
+		});
+		expect(posted.state).toBe("Posted");
+
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 0, currency: "GYD" },
+			idempotencyKey: "exceeds-cash-close",
+			registerId,
+		});
+		// expected = opening float (0) + paidIn (0) - paidOut (refund amount);
+		// a negative expected cash surfaces as a non-zero variance requiring
+		// commerce.cash-variance.approve, never a refund-time rejection.
+		expect(closed.state).toBe("Closing");
+		expect(closed.varianceApprovalRequired).toBe(true);
+	});
+
+	test("rejects a refund approval once the referenced register's session is no longer open", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const registerId = "register_refund_closed";
+		const { lineId, saleId } = await completedSale(harness, registerId);
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "refund-closed-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Register closes before refund approval",
+			saleId,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "refund-closed-return-approve",
+			returnId: created.id,
+		});
+		const refund = await service.createRefund({
+			...base,
+			idempotencyKey: "refund-closed-refund-create",
+			returnId: approvedReturn.id,
+		});
+		await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 0, currency: "GYD" },
+			idempotencyKey: "refund-closed-close",
+			registerId,
+		});
+
+		const attempt = service.approveRefund({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "refund-closed-approve",
+			refundId: refund.id,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
+	test("reissues a receipt as a new numbered Reissue artifact linked to the original, with no monetary effect", async () => {
+		const harness = createHarness();
+		const { service, events, saleReceipts } = harness;
+		const { completed } = await completedSale(
+			harness,
+			"register_reissue_happy"
+		);
+
+		const reissued = await service.reissueReceipt({
+			...base,
+			idempotencyKey: "reissue-1",
+			receiptId: completed.receiptId as string,
+		});
+		const original = saleReceipts.get(completed.receiptId as string);
+		expect(reissued.kind).toBe("Reissue");
+		expect(reissued.originalReceiptId).toBe(completed.receiptId);
+		expect(reissued.priceSuppressed).toBe(false);
+		expect(reissued.total).toEqual({
+			amountMinor: original?.totalMinor as number,
+			currency: "GYD",
+		});
+		expect(reissued.receiptNumber).not.toBe(original?.receiptNumber);
+
+		const reissueEvent = events.find(
+			(envelope) =>
+				envelope.name === "commerce.receipt.issued.v1" &&
+				(envelope.data as { kind?: string }).kind === "Reissue"
+		);
+		expect(reissueEvent?.data).toMatchObject({
+			originalReceiptId: completed.receiptId,
+			priceSuppressed: false,
+		});
+	});
+
+	test("realizes a gift receipt as reissueReceipt's priceSuppressed variant — same command, no separate capability implementation", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const { completed } = await completedSale(harness, "register_gift_receipt");
+
+		const gift = await service.reissueReceipt({
+			...base,
+			idempotencyKey: "gift-receipt-1",
+			priceSuppressed: true,
+			receiptId: completed.receiptId as string,
+		});
+		expect(gift.kind).toBe("Reissue");
+		expect(gift.priceSuppressed).toBe(true);
+		expect(gift.total).toBeNull();
+		expect(gift.tenders).toEqual([]);
+		for (const line of gift.lines) {
+			expect(line.unitPrice.amountMinor).toBe(0);
+			expect(line.lineTotal.amountMinor).toBe(0);
+			expect(line.tax.amountMinor).toBe(0);
+		}
+	});
+
+	test("rejects reissuing a Reissue receipt", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const { completed } = await completedSale(
+			harness,
+			"register_reissue_of_reissue"
+		);
+		const reissued = await service.reissueReceipt({
+			...base,
+			idempotencyKey: "reissue-of-reissue-1",
+			receiptId: completed.receiptId as string,
+		});
+		const attempt = service.reissueReceipt({
+			...base,
+			idempotencyKey: "reissue-of-reissue-2",
+			receiptId: reissued.id,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
+	test("voids a completed sale on an open session as a full compensation with its own permission, not a maker/checker pair", async () => {
+		const harness = createHarness();
+		const { service, events, returnMovements } = harness;
+		const { completed, registerId, saleId } = await completedSale(
+			harness,
+			"register_void_happy",
+			{ quantity: "3" }
+		);
+
+		const voided = await service.voidReceipt({
+			...base,
+			idempotencyKey: "void-1",
+			reason: "Cashier error",
+			receiptId: completed.receiptId as string,
+		});
+		expect(voided.state).toBe("Completed");
+		expect(voided.mode).toBe("Void");
+		expect(voided.saleId).toBe(saleId);
+		expect(returnMovements).toEqual([
+			{
+				productId: "prod_returnable",
+				quantity: "3",
+				reversalOfMovementId: "movement_prod_returnable",
+			},
+		]);
+		const voidEvent = events.find(
+			(envelope) => envelope.name === "commerce.return.completed.v1"
+		);
+		expect(voidEvent?.data).toMatchObject({ mode: "Void", registerId, saleId });
+	});
+
+	test("rejects a void once the sale's register session has closed (void-after-close rejection)", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const registerId = "register_void_after_close";
+		const { completed } = await completedSale(harness, registerId);
+
+		await service.closeRegister({
+			...base,
+			countedCash: {
+				amountMinor: completed.total.amountMinor,
+				currency: "GYD",
+			},
+			idempotencyKey: "void-after-close-close",
+			registerId,
+		});
+
+		const attempt = service.voidReceipt({
+			...base,
+			idempotencyKey: "void-after-close-1",
+			receiptId: completed.receiptId as string,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
+	test("rejects voiding a non-Sale receipt", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const { completed } = await completedSale(harness, "register_void_kind");
+		const reissued = await service.reissueReceipt({
+			...base,
+			idempotencyKey: "void-kind-reissue",
+			receiptId: completed.receiptId as string,
+		});
+		const attempt = service.voidReceipt({
+			...base,
+			idempotencyKey: "void-kind-1",
+			receiptId: reissued.id,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
+	test("realizes an exchange by composing an approved return with a new sale.complete call sharing the register, emitting commerce.exchange.completed.v1 without mutating the return's own already-emitted event", async () => {
+		const harness = createHarness();
+		const { service, events } = harness;
+		const registerId = "register_exchange_happy";
+		const { lineId, saleId } = await completedSale(harness, registerId, {
+			quantity: "2",
+			unitPriceMinor: 100_000,
+		});
+
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "exchange-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Exchange for a different item",
+			saleId,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "exchange-return-approve",
+			returnId: created.id,
+		});
+
+		const replacementSale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "exchange-replacement-sale-create",
+			lines: [
+				{
+					productId: "prod_replacement",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 150_000, currency: "GYD" },
+				},
+			],
+			registerId,
+		});
+		const completedReplacement = await service.completeSale({
+			...base,
+			exchangeOfReturnId: approvedReturn.id,
+			idempotencyKey: "exchange-replacement-sale-complete",
+			saleId: replacementSale.id,
+			tenders: [
+				{
+					amountMinor: replacementSale.total.amountMinor,
+					currency: "GYD",
+					type: "Cash",
+				},
+			],
+		});
+		expect(completedReplacement.state).toBe("Completed");
+
+		const exchangeEvent = events.find(
+			(envelope) => envelope.name === "commerce.exchange.completed.v1"
+		);
+		expect(exchangeEvent?.data).toMatchObject({
+			currency: "GYD",
+			newSaleId: replacementSale.id,
+			registerId,
+			returnId: approvedReturn.id,
+		});
+
+		// The return leg's OWN event, already emitted at approve time, is
+		// never amended once the exchange's replacement sale exists (§6.5
+		// ordering — see completeSale's exchange-linking comment).
+		const returnEvents = events.filter(
+			(envelope) => envelope.name === "commerce.return.completed.v1"
+		);
+		expect(returnEvents).toHaveLength(1);
+		expect(returnEvents[0]?.data).toMatchObject({
+			exchangeSaleId: null,
+			mode: "Return",
+		});
+
+		// The Return cannot be consumed by a second exchange.
+		const anotherSale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "exchange-second-sale-create",
+			lines: [
+				{
+					productId: "prod_replacement_2",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 1000, currency: "GYD" },
+				},
+			],
+			registerId,
+		});
+		const secondAttempt = service.completeSale({
+			...base,
+			exchangeOfReturnId: approvedReturn.id,
+			idempotencyKey: "exchange-second-sale-complete",
+			saleId: anotherSale.id,
+			tenders: [{ amountMinor: 1000, currency: "GYD", type: "Cash" }],
+		});
+		await expect(secondAttempt).rejects.toMatchObject({
+			code: "invalid_state",
+		});
+	});
+
+	test("rejects an exchange whose return is still Pending", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const registerId = "register_exchange_pending";
+		const { lineId, saleId } = await completedSale(harness, registerId);
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "exchange-pending-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Not yet approved",
+			saleId,
+		});
+		const replacementSale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "exchange-pending-sale-create",
+			lines: [
+				{
+					productId: "prod_replacement_pending",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 1000, currency: "GYD" },
+				},
+			],
+			registerId,
+		});
+		const attempt = service.completeSale({
+			...base,
+			exchangeOfReturnId: created.id,
+			idempotencyKey: "exchange-pending-sale-complete",
+			saleId: replacementSale.id,
+			tenders: [{ amountMinor: 1000, currency: "GYD", type: "Cash" }],
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_reference" });
+	});
+
+	test("derives a refund's amount solely from the Return, never from caller input", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		const { lineId, saleId } = await completedSale(
+			harness,
+			"register_refund_amount_derivation"
+		);
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "refund-amount-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Amount derivation",
+			saleId,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "refund-amount-return-approve",
+			returnId: created.id,
+		});
+		const refund = await service.createRefund({
+			...base,
+			idempotencyKey: "refund-amount-create",
+			returnId: approvedReturn.id,
+		});
+		// No amount field exists on `createRefund`'s input at all — this
+		// assertion is really a type-level guarantee, restated at runtime:
+		// the persisted refund always equals the Return's own total.
+		expect(refund.amount).toEqual(approvedReturn.totalRefundable);
 	});
 });
 

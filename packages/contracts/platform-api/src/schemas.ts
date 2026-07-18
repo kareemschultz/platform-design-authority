@@ -791,6 +791,11 @@ export const TenderReferenceSchema = z.object({
 
 export const CompleteSaleRequestSchema = z
 	.object({
+		/** Realizes `commerce.exchanges` (frozen control plan §6.5): names
+		 * an ALREADY-`Completed` Return this sale replaces, sharing the
+		 * same register. No dedicated exchange permission or endpoint
+		 * exists; omitting this field is an ordinary sale completion. */
+		exchangeOfReturnId: NullableIdentifierSchema.optional(),
 		tenders: z.array(TenderReferenceSchema).min(1),
 	})
 	.strict();
@@ -871,6 +876,94 @@ export const ReceiptSchema = z.object({
 	tenders: z.array(TenderReferenceSchema),
 	total: MoneySchema.nullable(),
 });
+
+// ---------------------------------------------------------------------------
+// WS3 PR3: Return, Refund, Void, Reissue, Exchange (commerce.returns,
+// commerce.refunds, commerce.receipts). Exchange has no dedicated schema:
+// it rides `CompleteSaleRequestSchema`'s optional `exchangeOfReturnId` and
+// surfaces on the ordinary `SaleSchema` response, per frozen control plan
+// §6.5 (no new permission or endpoint is invented for it).
+// ---------------------------------------------------------------------------
+
+export const ReturnLineInputSchema = z
+	.object({
+		quantity: PositiveDecimalQuantitySchema,
+		saleLineId: IdentifierSchema,
+	})
+	.strict();
+
+export const CreateReturnSchema = z
+	.object({
+		lines: z.array(ReturnLineInputSchema).min(1),
+		reason: z.string().min(1).max(500),
+		saleId: IdentifierSchema,
+	})
+	.strict();
+
+export const ReturnLineSchema = z.object({
+	discount: MoneySchema,
+	gross: MoneySchema,
+	id: IdentifierSchema,
+	lineTotal: MoneySchema,
+	nonStatutory: z.literal(true),
+	productId: IdentifierSchema,
+	productName: z.string(),
+	quantity: PositiveDecimalQuantitySchema,
+	saleLineId: IdentifierSchema,
+	tax: MoneySchema,
+	taxableBase: MoneySchema,
+	taxCategory: SaleTaxCategorySchema,
+	unit: z.string(),
+	unitPrice: MoneySchema,
+	variantId: NullableIdentifierSchema,
+});
+
+export const ReturnSchema = z.object({
+	approvedAt: InstantSchema.nullable(),
+	createdAt: InstantSchema,
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	exchangeSaleId: NullableIdentifierSchema,
+	id: IdentifierSchema,
+	lines: z.array(ReturnLineSchema),
+	mode: z.enum(["Return", "Void"]),
+	reason: z.string(),
+	receiptId: NullableIdentifierSchema,
+	registerId: IdentifierSchema,
+	saleId: IdentifierSchema,
+	state: z.enum(["Pending", "Completed"]),
+	totalRefundable: MoneySchema,
+	version: z.number().int().min(1),
+});
+
+export const CreateRefundSchema = z
+	.object({
+		returnId: IdentifierSchema,
+	})
+	.strict();
+
+export const RefundSchema = z.object({
+	amount: MoneySchema,
+	approvedAt: InstantSchema.nullable(),
+	cashMovementId: NullableIdentifierSchema,
+	id: IdentifierSchema,
+	registerId: IdentifierSchema,
+	requestedAt: InstantSchema,
+	returnId: IdentifierSchema,
+	state: z.enum(["Requested", "Posted"]),
+	version: z.number().int().min(1),
+});
+
+export const ReissueReceiptRequestSchema = z
+	.object({
+		priceSuppressed: z.boolean().optional(),
+	})
+	.strict();
+
+export const VoidReceiptRequestSchema = z
+	.object({
+		reason: z.string().min(1).max(500).optional(),
+	})
+	.strict();
 
 export const CsvImportManifestSchema = z.object({
 	decimalSeparator: z.enum([".", ","]),
@@ -1138,3 +1231,11 @@ export type SaleLine = z.infer<typeof SaleLineSchema>;
 export type Sale = z.infer<typeof SaleSchema>;
 export type ReceiptLine = z.infer<typeof ReceiptLineSchema>;
 export type Receipt = z.infer<typeof ReceiptSchema>;
+export type ReturnLineInput = z.infer<typeof ReturnLineInputSchema>;
+export type CreateReturn = z.infer<typeof CreateReturnSchema>;
+export type ReturnLine = z.infer<typeof ReturnLineSchema>;
+export type Return = z.infer<typeof ReturnSchema>;
+export type CreateRefund = z.infer<typeof CreateRefundSchema>;
+export type Refund = z.infer<typeof RefundSchema>;
+export type ReissueReceiptRequest = z.infer<typeof ReissueReceiptRequestSchema>;
+export type VoidReceiptRequest = z.infer<typeof VoidReceiptRequestSchema>;

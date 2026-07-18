@@ -470,7 +470,10 @@ paths:
             schema: {$ref: '#/components/schemas/CreateReturn'}
       responses:
         '201':
-          description: Return created
+          description: Return created, Pending checker approval
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Return'}
   /deposits:
     post:
       tags: [Commerce]
@@ -1528,7 +1531,10 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Return approved by a checker other than its creator; posts the compensating Inventory movement
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Return'}
   /refunds:
     post:
       tags: [Commerce]
@@ -1536,9 +1542,17 @@ paths:
       x-permission: commerce.refund.create
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateRefund'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Refund Requested against an approved Return; amount derived from the Return, no register cash effect yet
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Refund'}
   /refunds/{refundId}/approve:
     post:
       tags: [Commerce]
@@ -1549,7 +1563,10 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Refund approved by a checker other than its requester; posts a paid-out cash movement (reason Refund) on the referenced open register
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Refund'}
   /registers/{registerId}/cash-movements:
     post:
       tags: [Commerce]
@@ -1635,9 +1652,17 @@ paths:
       parameters:
         - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReissueReceiptRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: New numbered Reissue-kind receipt linked to the original; no monetary effect. priceSuppressed realizes the gift-receipt variant
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Receipt'}
   /receipts/{receiptId}/void:
     post:
       tags: [Commerce]
@@ -1646,9 +1671,17 @@ paths:
       parameters:
         - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/VoidReceiptRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Same-day/open-session full compensating reversal of the original Sale; own permission, not a maker/checker pair, not a delete
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Return'}
   /payment-intents/{id}:
     get:
       tags: [Payment]
@@ -2814,9 +2847,11 @@ components:
         taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
     CompleteSaleRequest:
       type: object
+      additionalProperties: false
       required: [tenders]
       properties:
         tenders: {type: array, minItems: 1, items: {$ref: '#/components/schemas/TenderReference'}}
+        exchangeOfReturnId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}], description: 'Realizes commerce.exchanges (frozen control plan §6.5): names an already-Completed Return this sale replaces, sharing the same register. No dedicated exchange permission or endpoint exists.'}
     RequestPriceOverride:
       type: object
       required: [lineId, requestedPrice, reason]
@@ -2904,13 +2939,87 @@ components:
         lines: {type: array, items: {$ref: '#/components/schemas/ReceiptLine'}}
         tenders: {type: array, items: {$ref: '#/components/schemas/TenderReference'}}
         total: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+    ReturnLineInput:
+      type: object
+      additionalProperties: false
+      required: [saleLineId, quantity]
+      properties:
+        saleLineId: {$ref: '#/components/schemas/Identifier'}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
     CreateReturn:
       type: object
+      additionalProperties: false
       required: [saleId, lines, reason]
       properties:
         saleId: {$ref: '#/components/schemas/Identifier'}
-        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/QuantityLine'}}
-        reason: {type: string, maxLength: 500}
+        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/ReturnLineInput'}}
+        reason: {type: string, minLength: 1, maxLength: 500}
+    ReturnLine:
+      type: object
+      required: [id, saleLineId, productId, productName, quantity, unit, unitPrice, gross, discount, taxableBase, taxCategory, tax, lineTotal, nonStatutory]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        saleLineId: {$ref: '#/components/schemas/Identifier'}
+        productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        productName: {type: string}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        unit: {type: string}
+        unitPrice: {$ref: '#/components/schemas/Money'}
+        gross: {$ref: '#/components/schemas/Money'}
+        discount: {$ref: '#/components/schemas/Money'}
+        taxableBase: {$ref: '#/components/schemas/Money'}
+        taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
+        tax: {$ref: '#/components/schemas/Money'}
+        lineTotal: {$ref: '#/components/schemas/Money'}
+        nonStatutory: {type: boolean, enum: [true], description: 'Always true — this line was priced by apportioning the prototype, non-statutory Guyana tax pack (PDA-IND-090) amounts already locked on the original sale line. Never verified for statutory filing or production use.'}
+    Return:
+      type: object
+      required: [id, saleId, registerId, currency, mode, state, reason, lines, totalRefundable, receiptId, exchangeSaleId, createdAt, approvedAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        saleId: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        mode: {type: string, enum: [Return, Void], description: 'Void realizes the same-day/open-session administrative reversal permission (commerce.receipt.void) on this same Return shape — see frozen control plan §6.3 Scope.'}
+        state: {type: string, enum: [Pending, Completed]}
+        reason: {type: string}
+        lines: {type: array, items: {$ref: '#/components/schemas/ReturnLine'}}
+        totalRefundable: {$ref: '#/components/schemas/Money'}
+        receiptId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        exchangeSaleId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}], description: 'Set once this Return has been consumed as the compensating leg of an Exchange via sale.complete''s exchangeOfReturnId (frozen control plan §6.5). No dedicated exchange permission or endpoint exists.'}
+        createdAt: {type: string, format: date-time}
+        approvedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    CreateRefund:
+      type: object
+      additionalProperties: false
+      required: [returnId]
+      properties:
+        returnId: {$ref: '#/components/schemas/Identifier'}
+    Refund:
+      type: object
+      required: [id, returnId, registerId, amount, state, cashMovementId, requestedAt, approvedAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        returnId: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        amount: {$ref: '#/components/schemas/Money', description: 'Always derived from the referenced Return''s totalRefundable — never caller-supplied.'}
+        state: {type: string, enum: [Requested, Posted]}
+        cashMovementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        requestedAt: {type: string, format: date-time}
+        approvedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    ReissueReceiptRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        priceSuppressed: {type: boolean, description: 'true realizes the commerce.gift-receipts capability as a price-suppressed variant of this same reissue command — no separate gift-receipt endpoint exists (frozen control plan §5).'}
+    VoidReceiptRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        reason: {type: string, minLength: 1, maxLength: 500}
     CreateDeposit:
       type: object
       required: [currency, sourceShiftIds, countedAmount]

@@ -14,7 +14,10 @@ import { createPosRepository } from "@meridian/persistence-pos-postgres";
 import { permissionAuthorizer } from "./authorization";
 import { catalogService } from "./catalog";
 import { entitlementEvaluator } from "./entitlements";
-import { createSaleInventoryMovementAdapter } from "./inventory";
+import {
+	createReturnInventoryMovementAdapter,
+	createSaleInventoryMovementAdapter,
+} from "./inventory";
 import { createReceiptNumberAllocator } from "./numbering";
 import { partyIdentityLinkDirectory } from "./party";
 import { databasePool } from "./postgres";
@@ -44,6 +47,24 @@ const unitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({
 const saleUnitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({
 	events: createPostgresOutbox(client),
 	inventory: createSaleInventoryMovementAdapter(client),
+	numbering: createReceiptNumberAllocator(client),
+	repository: createPosRepository(client),
+}));
+
+/**
+ * WS3 PR3's shared unit of work for `return.approve`, `voidReceipt`, and
+ * `reissueReceipt` (frozen control plan §6.3, "Read first" — mirrors
+ * `saleUnitOfWork` exactly): one `createPostgresUnitOfWork`, one
+ * `PoolClient`, one transaction spanning the Return/Void commit, receipt
+ * numbering, and the synchronous compensating Inventory movement.
+ * `reissueReceipt` never invokes `inventory`; it shares this unit of work
+ * anyway rather than standing up a third transactional wiring point purely
+ * to omit one unused port (see the domain package's `PosServiceOptions.
+ * returnUnitOfWork` doc comment).
+ */
+const returnUnitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({
+	events: createPostgresOutbox(client),
+	inventory: createReturnInventoryMovementAdapter(client),
 	numbering: createReceiptNumberAllocator(client),
 	repository: createPosRepository(client),
 }));
@@ -97,6 +118,7 @@ export const posService = createPosService({
 	parties,
 	pricing: createPricingEngine(),
 	products,
+	returnUnitOfWork,
 	saleUnitOfWork,
 	tax: createTaxEngine(),
 	unitOfWork,
@@ -126,10 +148,14 @@ export const posApplication = createPosApplication({
  */
 export const posTransportApplication = {
 	approveCashVariance: posApplication.approveCashVariance,
+	approveRefund: posApplication.approveRefund,
+	approveReturn: posApplication.approveReturn,
 	approveSalePriceOverride: posApplication.approvePriceOverride,
 	closeRegister: posApplication.closeRegister,
 	completeSale: posApplication.completeSale,
 	createCashMovement: posApplication.createCashMovement,
+	createRefund: posApplication.createRefund,
+	createReturn: posApplication.createReturn,
 	createSafeDrop: (
 		input: Omit<
 			Parameters<typeof posApplication.createCashMovement>[0],
@@ -145,5 +171,7 @@ export const posTransportApplication = {
 	getReceipt: posApplication.getReceipt,
 	holdSale: posApplication.holdSale,
 	openRegister: posApplication.openRegister,
+	reissueReceipt: posApplication.reissueReceipt,
 	requestSalePriceOverride: posApplication.requestPriceOverride,
+	voidReceipt: posApplication.voidReceipt,
 };

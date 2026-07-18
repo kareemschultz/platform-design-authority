@@ -548,6 +548,8 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postReceiptsByReceiptIdReissue",
 		path: "/v1/receipts/{receiptId}/reissue",
 		permission: "commerce.receipt.reissue",
+		requestRef: "#/components/schemas/ReissueReceiptRequest",
+		responseRef: "#/components/schemas/Receipt",
 		successStatus: 200,
 	},
 	{
@@ -555,6 +557,8 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postReceiptsByReceiptIdVoid",
 		path: "/v1/receipts/{receiptId}/void",
 		permission: "commerce.receipt.void",
+		requestRef: "#/components/schemas/VoidReceiptRequest",
+		responseRef: "#/components/schemas/Return",
 		successStatus: 200,
 	},
 	{
@@ -562,6 +566,8 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postRefunds",
 		path: "/v1/refunds",
 		permission: "commerce.refund.create",
+		requestRef: "#/components/schemas/CreateRefund",
+		responseRef: "#/components/schemas/Refund",
 		successStatus: 200,
 	},
 	{
@@ -569,6 +575,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postRefundsByRefundIdApprove",
 		path: "/v1/refunds/{refundId}/approve",
 		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/Refund",
 		successStatus: 200,
 	},
 	{
@@ -613,6 +620,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		path: "/v1/returns",
 		permission: "commerce.return.create",
 		requestRef: "#/components/schemas/CreateReturn",
+		responseRef: "#/components/schemas/Return",
 		successStatus: 201,
 	},
 	{
@@ -620,6 +628,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postReturnsByReturnIdApprove",
 		path: "/v1/returns/{returnId}/approve",
 		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/Return",
 		successStatus: 200,
 	},
 	{

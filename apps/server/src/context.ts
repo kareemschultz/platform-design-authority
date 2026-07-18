@@ -33,7 +33,9 @@ import type {
 	Product,
 	Receipt,
 	ReceiveStockTransfer,
+	Refund,
 	RegisterSession,
+	Return,
 	Role,
 	RoleAssignment,
 	Sale,
@@ -492,6 +494,24 @@ export interface PosApplication {
 		version: number;
 	}) => Promise<RegisterSession>;
 
+	// -- WS3 PR3: Return, Refund, Void, Reissue ------------------------------
+	approveRefund: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		refundId: string;
+		sessionId: string;
+	}) => Promise<Refund>;
+	approveReturn: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		returnId: string;
+		sessionId: string;
+	}) => Promise<Return>;
+
 	// -- WS3 PR2: Sale, PriceOverride, Receipt -------------------------------
 	approveSalePriceOverride: (input: {
 		actorUserId: string;
@@ -516,6 +536,9 @@ export interface PosApplication {
 		actorUserId: string;
 		contextId: string;
 		correlationId: string;
+		/** Realizes `commerce.exchanges` (frozen control plan §6.5) — see
+		 * `CompleteSaleRequestSchema`'s doc comment. */
+		exchangeOfReturnId?: string | null;
 		idempotencyKey: string;
 		saleId: string;
 		sessionId: string;
@@ -539,6 +562,24 @@ export interface PosApplication {
 		registerId: string;
 		sessionId: string;
 	}) => Promise<CashMovement>;
+	createRefund: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		returnId: string;
+		sessionId: string;
+	}) => Promise<Refund>;
+	createReturn: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		lines: Array<{ quantity: string; saleLineId: string }>;
+		reason: string;
+		saleId: string;
+		sessionId: string;
+	}) => Promise<Return>;
 	createSafeDrop: (input: {
 		actorUserId: string;
 		amount: Money;
@@ -598,6 +639,15 @@ export interface PosApplication {
 		registerId: string;
 		sessionId: string;
 	}) => Promise<RegisterSession>;
+	reissueReceipt: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		priceSuppressed?: boolean;
+		receiptId: string;
+		sessionId: string;
+	}) => Promise<Receipt>;
 	requestSalePriceOverride: (input: {
 		actorUserId: string;
 		contextId: string;
@@ -609,6 +659,15 @@ export interface PosApplication {
 		saleId: string;
 		sessionId: string;
 	}) => Promise<Sale>;
+	voidReceipt: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		reason?: string | null;
+		receiptId: string;
+		sessionId: string;
+	}) => Promise<Return>;
 }
 
 export interface ImportApplication {

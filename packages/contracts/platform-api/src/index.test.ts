@@ -19,7 +19,9 @@ import {
 	UpdateProductSchema,
 	WS2_EVENT_OPENAPI_OPERATION_METADATA,
 	WS2_OPENAPI_OPERATION_METADATA,
+	WS3_OPENAPI_OPERATION_METADATA,
 	ws2CatalogInventoryApiContract,
+	ws3PosApiContract,
 } from "./index";
 
 interface ContractProcedureShape {
@@ -328,5 +330,70 @@ describe("WS2 Event Backbone API contract", () => {
 			);
 		expect(actual).toEqual(WS2_EVENT_OPENAPI_OPERATION_METADATA);
 		expect(actual).toHaveLength(1);
+	});
+});
+
+const PR3_PERMISSION_NAMESPACE_PATTERN = /^commerce\.(receipt|refund|return)\./;
+
+describe("WS3 POS Cash Workflow API contract", () => {
+	test("is semantically aligned with every generated commerce.* operation implemented through PR3", () => {
+		const actual = collectProcedures(ws3PosApiContract)
+			.map((procedure) => ({
+				...procedure["~orpc"].meta,
+				method: procedure["~orpc"].route.method,
+				path: procedure["~orpc"].route.path,
+			}))
+			.sort((left, right) =>
+				String((left as Record<string, unknown>).operationId).localeCompare(
+					String((right as Record<string, unknown>).operationId)
+				)
+			);
+		const expected = [...WS3_OPENAPI_OPERATION_METADATA].sort((left, right) =>
+			left.operationId.localeCompare(right.operationId)
+		);
+
+		expect(actual).toEqual(expected);
+		expect(actual).toHaveLength(17);
+	});
+
+	test("every PR3 operation declares a commerce.return/refund/receipt permission, never a bare authenticated-session read", () => {
+		const pr3OperationIds = [
+			"createReturn",
+			"postReturnsByReturnIdApprove",
+			"postRefunds",
+			"postRefundsByRefundIdApprove",
+			"postReceiptsByReceiptIdReissue",
+			"postReceiptsByReceiptIdVoid",
+		];
+		const pr3Operations = WS3_OPENAPI_OPERATION_METADATA.filter((operation) =>
+			pr3OperationIds.includes(operation.operationId)
+		);
+		expect(pr3Operations).toHaveLength(pr3OperationIds.length);
+		for (const operation of pr3Operations) {
+			expect("permission" in operation).toBe(true);
+			expect((operation as { permission: string }).permission).toMatch(
+				PR3_PERMISSION_NAMESPACE_PATTERN
+			);
+		}
+	});
+
+	test("realizes maker/checker self-approval separation as an application-layer rule, not a distinct deny permission (frozen control plan §6)", () => {
+		const operationIds = WS3_OPENAPI_OPERATION_METADATA.map(
+			(operation) => operation.operationId
+		);
+		expect(operationIds).toContain("createReturn");
+		expect(operationIds).toContain("postReturnsByReturnIdApprove");
+		expect(operationIds).not.toContain("commerce.return.reject");
+		expect(operationIds).toContain("postRefunds");
+		expect(operationIds).toContain("postRefundsByRefundIdApprove");
+		expect(operationIds).not.toContain("commerce.refund.reject");
+	});
+
+	test("realizes exchange composition and gift receipts without inventing a dedicated permission or endpoint (frozen control plan §5, §6.5)", () => {
+		const paths = WS3_OPENAPI_OPERATION_METADATA.map(
+			(operation) => operation.path
+		);
+		expect(paths.some((path) => path.includes("exchange"))).toBe(false);
+		expect(paths.some((path) => path.includes("gift"))).toBe(false);
 	});
 });

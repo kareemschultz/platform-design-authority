@@ -257,8 +257,14 @@ export type PosCommandOperation =
 	| "commerce.cash-variance.approve"
 	| "commerce.price-override.approve"
 	| "commerce.price-override.request"
+	| "commerce.receipt.reissue"
+	| "commerce.receipt.void"
+	| "commerce.refund.approve"
+	| "commerce.refund.create"
 	| "commerce.register.close"
 	| "commerce.register.open"
+	| "commerce.return.approve"
+	| "commerce.return.create"
 	| "commerce.sale.complete"
 	| "commerce.sale.create"
 	| "commerce.sale.hold";
@@ -292,6 +298,10 @@ export interface PosRepository {
 		record: PriceOverrideRecord
 	) => Promise<PriceOverrideRecord>;
 	createReceipt: (record: ReceiptRecord) => Promise<ReceiptRecord>;
+
+	// -- WS3 PR3: Return, Refund ----------------------------------------------
+	createRefund: (record: RefundRecord) => Promise<RefundRecord>;
+	createReturn: (record: ReturnRecord) => Promise<ReturnRecord>;
 	createSale: (record: SaleRecord) => Promise<SaleRecord>;
 	getCommandReceipt: (
 		tenantId: string,
@@ -308,6 +318,10 @@ export interface PosRepository {
 		id: string
 	) => Promise<PriceOverrideRecord | null>;
 	getReceipt: (tenantId: string, id: string) => Promise<ReceiptRecord | null>;
+	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
+	getRefund: (tenantId: string, id: string) => Promise<RefundRecord | null>;
+	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
+	getReturn: (tenantId: string, id: string) => Promise<ReturnRecord | null>;
 	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
 	getSale: (tenantId: string, saleId: string) => Promise<SaleRecord | null>;
 	getSession: (
@@ -332,10 +346,33 @@ export interface PosRepository {
 	recordCommandReceipt: (
 		receipt: PosCommandReceipt
 	) => Promise<{ inserted: boolean; record: PosCommandReceipt }>;
+	/** Sums every prior return line's quantity against one Sale line, across
+	 * BOTH `Pending` and `Completed` Return rows (frozen control plan §6.3:
+	 * "cumulative-returned-quantity check performed at create time"; a
+	 * `Pending` return already reserves against the cap even though it has
+	 * no inventory/cash effect yet — otherwise two concurrent `Pending`
+	 * creates could each pass the check and later both approve, over-
+	 * returning the line). Callers MUST call this only after locking the
+	 * owning Sale row (`getSale`) in the same transaction, which is what
+	 * makes the check race-free under concurrency (`return.create` from a
+	 * second actor on the same sale blocks until the first transaction
+	 * commits or rolls back). */
+	sumReturnedQuantity: (
+		tenantId: string,
+		saleLineId: string
+	) => Promise<string>;
 	updatePriceOverride: (
 		record: PriceOverrideRecord,
 		expectedVersion: number
 	) => Promise<PriceOverrideRecord | "version_conflict">;
+	updateRefund: (
+		record: RefundRecord,
+		expectedVersion: number
+	) => Promise<RefundRecord | "version_conflict">;
+	updateReturn: (
+		record: ReturnRecord,
+		expectedVersion: number
+	) => Promise<ReturnRecord | "version_conflict">;
 	updateSale: (
 		record: SaleRecord,
 		expectedVersion: number
@@ -369,6 +406,14 @@ export interface SaleLineRecord {
 	discountMinor: number;
 	grossMinor: number;
 	id: string;
+	/** The Inventory `Sale` movement id `sale.complete` posted for this line
+	 * (frozen control plan §6.3). Never exposed on `SaleLineView` — it is
+	 * purely an internal cross-domain traceability pointer WS3 PR3's Return
+	 * compensation uses to satisfy Inventory's `reversalOfMovementId`
+	 * CHECK constraint, not a client-facing fact. `null` only ever appears
+	 * transiently before `sale.complete` has posted movements (an Open or
+	 * Held sale's lines); every Completed sale line has one. */
+	inventoryMovementId: string | null;
 	lineTotalMinor: number;
 	/** Propagated verbatim from `PosTaxPort.calculateLine`'s `TaxLineResult.
 	 * nonStatutory` (stage file: "every computed tax line carries a
@@ -688,9 +733,13 @@ export interface PosIdFactory {
 	create: (
 		kind:
 			| "event"
+			| "exchange"
 			| "movement"
 			| "price-override"
 			| "receipt"
+			| "refund"
+			| "return"
+			| "return-line"
 			| "sale"
 			| "sale-line"
 			| "session"
@@ -930,7 +979,12 @@ function receiptView(record: ReceiptRecord): ReceiptView {
 function saleEvent(input: {
 	actorUserId: string;
 	aggregateId: string;
-	capabilityId: "commerce.order-management" | "commerce.receipts";
+	capabilityId:
+		| "commerce.exchanges"
+		| "commerce.order-management"
+		| "commerce.receipts"
+		| "commerce.refunds"
+		| "commerce.returns";
 	correlationId: string;
 	data: Record<string, unknown>;
 	eventId: string;
@@ -1159,6 +1213,7 @@ async function priceSaleLine(
 		discountMinor: decimalToMoneyMinor(priced.discountAmount, "discountAmount"),
 		grossMinor: decimalToMoneyMinor(priced.grossAmount, "grossAmount"),
 		id: options.ids.create("sale-line"),
+		inventoryMovementId: null,
 		lineTotalMinor: taxableBaseMinor + taxAmountMinor,
 		nonStatutory: taxed.nonStatutory,
 		priceOverrideId: null,
@@ -1303,13 +1358,20 @@ async function requireApprovableOverride(
  * sale's own shared transaction (frozen control plan §6.3). Deliberately
  * sequential, not `Promise.all`: every call shares the sale's single
  * transactional `PoolClient`, and node-postgres does not support
- * concurrent queries on one client. */
+ * concurrent queries on one client. Returns the sale's lines with
+ * `inventoryMovementId` populated from each posted movement — WS3 PR3
+ * needs this traceability to satisfy Inventory's own
+ * `inventory_stock_movement_reversal_check` CHECK constraint (a `Reversal`
+ * movement REQUIRES a non-null `reversalOfMovementId`), so a Return's
+ * compensating movement can reference exactly the Sale movement it
+ * reverses instead of inventing an untraceable one. */
 async function postSaleLineMovements(
 	inventory: SaleInventoryMovementPort,
 	sale: SaleRecord,
 	actorUserId: string,
 	correlationId: string
-): Promise<void> {
+): Promise<SaleLineRecord[]> {
+	const updatedLines: SaleLineRecord[] = [];
 	for (const line of sale.lines) {
 		// biome-ignore lint/performance/noAwaitInLoops: sequential by necessity — see doc comment above.
 		const movement = await inventory.recordSaleMovement({
@@ -1330,7 +1392,787 @@ async function postSaleLineMovements(
 				`Insufficient stock for product ${line.productId}`
 			);
 		}
+		updatedLines.push({ ...line, inventoryMovementId: movement.movementId });
 	}
+	return updatedLines;
+}
+
+// ---------------------------------------------------------------------------
+// WS3 PR3: Return, Refund, Void, Reissue, Exchange (frozen control plan
+// §6.3-§6.5). Return posts the INVENTORY compensation only; Refund posts
+// the CASH compensation only (§6.3: "this keeps the two maker/checker pairs
+// from conflating an inventory approval with a cash approval"). Void is a
+// same-day/open-session administrative reversal realized as a full Return
+// with its own permission (`commerce.receipt.void`) and no maker/checker
+// separation — it is `mode: "Void"` on the SAME `ReturnRecord` shape, never
+// a distinct aggregate (the frozen `commerce.return.completed.v1` event
+// schema's `mode` enum already anticipates this). Exchange is not a
+// create/approve pair of its own (§6.5): it is realized by `completeSale`
+// accepting an optional `exchangeOfReturnId`, once the compensating Return
+// leg is already `Completed`. Gift receipt (`commerce.gift-receipts`) is
+// realized as `reissueReceipt`'s `priceSuppressed: true` variant, not a
+// separate command.
+// ---------------------------------------------------------------------------
+
+export const RETURN_STATES = ["Pending", "Completed"] as const;
+export type ReturnState = (typeof RETURN_STATES)[number];
+
+export const RETURN_MODES = ["Return", "Void"] as const;
+export type ReturnMode = (typeof RETURN_MODES)[number];
+
+export const REFUND_STATES = ["Requested", "Posted"] as const;
+export type RefundState = (typeof REFUND_STATES)[number];
+
+export interface ReturnLineRecord {
+	discountMinor: number;
+	grossMinor: number;
+	id: string;
+	lineTotalMinor: number;
+	nonStatutory: true;
+	productId: string;
+	productName: string;
+	quantity: string;
+	saleLineId: string;
+	taxAmountMinor: number;
+	taxableBaseMinor: number;
+	taxCategory: SaleLineTaxCategory;
+	unit: string;
+	unitPriceMinor: number;
+	variantId: string | null;
+}
+
+export interface ReturnRecord {
+	approvedAt: Date | null;
+	approvedByActorUserId: string | null;
+	approvedByPartyId: string | null;
+	createdAt: Date;
+	createdByActorUserId: string;
+	createdByPartyId: string;
+	currency: string;
+	/** Set only once this Return has been consumed as the compensating leg
+	 * of an Exchange (frozen control plan §6.5), by `sale.complete`'s
+	 * `exchangeOfReturnId` input — never by `return.approve` itself, since
+	 * the replacement sale does not exist yet at that point. Purely an
+	 * internal idempotency/cross-link fact; it is NOT mirrored onto the
+	 * already-emitted `commerce.return.completed.v1` event (see
+	 * `completeSale`'s exchange-linking comment for the full disposition of
+	 * why `mode`/`exchangeSaleId` stay `"Return"`/`null` on that event). */
+	exchangeSaleId: string | null;
+	id: string;
+	lines: ReturnLineRecord[];
+	mode: ReturnMode;
+	organizationId: string;
+	reason: string;
+	receiptId: string | null;
+	registerId: string;
+	saleId: string;
+	state: ReturnState;
+	tenantId: string;
+	totalRefundableMinor: number;
+	updatedAt: Date;
+	version: number;
+}
+
+export interface RefundRecord {
+	amountMinor: number;
+	approvedAt: Date | null;
+	approvedByActorUserId: string | null;
+	approvedByPartyId: string | null;
+	cashMovementId: string | null;
+	createdAt: Date;
+	currency: string;
+	id: string;
+	organizationId: string;
+	registerId: string;
+	requestedAt: Date;
+	requestedByActorUserId: string;
+	requestedByPartyId: string;
+	returnId: string;
+	state: RefundState;
+	tenantId: string;
+	updatedAt: Date;
+	version: number;
+}
+
+export interface ReturnLineView {
+	discount: { amountMinor: number; currency: string };
+	gross: { amountMinor: number; currency: string };
+	id: string;
+	lineTotal: { amountMinor: number; currency: string };
+	nonStatutory: true;
+	productId: string;
+	productName: string;
+	quantity: string;
+	saleLineId: string;
+	tax: { amountMinor: number; currency: string };
+	taxableBase: { amountMinor: number; currency: string };
+	taxCategory: SaleLineTaxCategory;
+	unit: string;
+	unitPrice: { amountMinor: number; currency: string };
+	variantId: string | null;
+}
+
+export interface ReturnView {
+	approvedAt: string | null;
+	createdAt: string;
+	currency: string;
+	exchangeSaleId: string | null;
+	id: string;
+	lines: ReturnLineView[];
+	mode: ReturnMode;
+	reason: string;
+	receiptId: string | null;
+	registerId: string;
+	saleId: string;
+	state: ReturnState;
+	totalRefundable: { amountMinor: number; currency: string };
+	version: number;
+}
+
+export interface RefundView {
+	amount: { amountMinor: number; currency: string };
+	approvedAt: string | null;
+	cashMovementId: string | null;
+	id: string;
+	registerId: string;
+	requestedAt: string;
+	returnId: string;
+	state: RefundState;
+	version: number;
+}
+
+/**
+ * WS3 PR3's compensating stock effect (frozen control plan §6.3, "Read
+ * first" — "via the same Inventory contract path PR2 chose"). Mirrors
+ * `SaleInventoryMovementPort` exactly: composition binds an Inventory
+ * service instance to the SAME transactional `PoolClient` as the return's
+ * own unit of work. Unlike `recordSaleMovement`, this can never observe
+ * `"negative_stock"` (the posted quantity always adds stock back IN), so
+ * the port has no failure variant to thread through.
+ */
+export interface ReturnInventoryMovementPort {
+	recordReturnMovement: (input: {
+		actorUserId: string;
+		correlationId: string;
+		locationId: string;
+		organizationId: string;
+		productId: string;
+		quantity: string;
+		/** The ORIGINAL Sale movement this compensates — required by
+		 * Inventory's own `inventory_stock_movement_reversal_check` CHECK
+		 * constraint on `movementType = 'Reversal'`. Sourced from
+		 * `SaleLineRecord.inventoryMovementId`. */
+		reversalOfMovementId: string;
+		returnId: string;
+		tenantId: string;
+		unit: string;
+		variantId: string | null;
+	}) => Promise<{ movementId: string }>;
+}
+
+export interface PosReturnTransactionScope extends PosTransactionScope {
+	inventory: ReturnInventoryMovementPort;
+	numbering: ReceiptNumberAllocatorPort;
+}
+export interface PosReturnUnitOfWork {
+	execute: <T>(
+		operation: (scope: PosReturnTransactionScope) => Promise<T>
+	) => Promise<T>;
+}
+
+function returnView(record: ReturnRecord): ReturnView {
+	return {
+		approvedAt: record.approvedAt?.toISOString() ?? null,
+		createdAt: record.createdAt.toISOString(),
+		currency: record.currency,
+		exchangeSaleId: record.exchangeSaleId,
+		id: record.id,
+		lines: record.lines.map((line) => ({
+			discount: { amountMinor: line.discountMinor, currency: record.currency },
+			gross: { amountMinor: line.grossMinor, currency: record.currency },
+			id: line.id,
+			lineTotal: {
+				amountMinor: line.lineTotalMinor,
+				currency: record.currency,
+			},
+			nonStatutory: line.nonStatutory,
+			productId: line.productId,
+			productName: line.productName,
+			quantity: line.quantity,
+			saleLineId: line.saleLineId,
+			tax: { amountMinor: line.taxAmountMinor, currency: record.currency },
+			taxableBase: {
+				amountMinor: line.taxableBaseMinor,
+				currency: record.currency,
+			},
+			taxCategory: line.taxCategory,
+			unit: line.unit,
+			unitPrice: {
+				amountMinor: line.unitPriceMinor,
+				currency: record.currency,
+			},
+			variantId: line.variantId,
+		})),
+		mode: record.mode,
+		reason: record.reason,
+		receiptId: record.receiptId,
+		registerId: record.registerId,
+		saleId: record.saleId,
+		state: record.state,
+		totalRefundable: {
+			amountMinor: record.totalRefundableMinor,
+			currency: record.currency,
+		},
+		version: record.version,
+	};
+}
+
+function refundView(record: RefundRecord): RefundView {
+	return {
+		amount: { amountMinor: record.amountMinor, currency: record.currency },
+		approvedAt: record.approvedAt?.toISOString() ?? null,
+		cashMovementId: record.cashMovementId,
+		id: record.id,
+		registerId: record.registerId,
+		requestedAt: record.requestedAt.toISOString(),
+		returnId: record.returnId,
+		state: record.state,
+		version: record.version,
+	};
+}
+
+const RETURN_QUANTITY_SCALE = 1_000_000n;
+const RETURN_QUANTITY_TRAILING_ZERO_PATTERN = /0+$/;
+
+/** Converts a Sale-line quantity decimal string into the same fixed-point
+ * scale `@meridian/domain-inventory`'s `quantityToMinor` uses, purely so
+ * this local proportion helper can do exact integer arithmetic — NOT an
+ * import of that function. `packages/domains/pos` may not import
+ * `@meridian/domain-inventory` (a `domains -> domains` cross-package
+ * import is as forbidden as the `domains -> engines` edge this file's
+ * `PosPricingPort`/`PosTaxPort` doc comment already documents). */
+function returnQuantityToScaled(value: string): bigint {
+	const [whole = "0", fraction = ""] = value.split(".");
+	return (
+		BigInt(whole) * RETURN_QUANTITY_SCALE + BigInt(fraction.padEnd(6, "0"))
+	);
+}
+
+function scaledToReturnQuantity(value: bigint): string {
+	const whole = value / RETURN_QUANTITY_SCALE;
+	const fraction = (value % RETURN_QUANTITY_SCALE)
+		.toString()
+		.padStart(6, "0")
+		.replace(RETURN_QUANTITY_TRAILING_ZERO_PATTERN, "");
+	return `${whole}${fraction ? `.${fraction}` : ""}`;
+}
+
+/** Prices one returned line proportionally to how much of the ORIGINAL
+ * sale line's quantity it returns (round-half-up on integer minor units,
+ * matching this file's other money arithmetic) — a return never re-runs
+ * `engine.pricing`/`engine.tax`, it apportions the already-locked sale-line
+ * amounts, so a return can never disagree with what the customer was
+ * actually charged. */
+function proportionalMinor(
+	originalAmountMinor: number,
+	returnedQuantity: string,
+	originalQuantity: string
+): number {
+	const part = returnQuantityToScaled(returnedQuantity);
+	const whole = returnQuantityToScaled(originalQuantity);
+	if (whole === 0n) {
+		return 0;
+	}
+	const numerator = BigInt(originalAmountMinor) * part;
+	return Number((numerator + whole / 2n) / whole);
+}
+
+function priceReturnLine(
+	saleLine: SaleLineRecord,
+	returnedQuantity: string,
+	ids: PosIdFactory
+): ReturnLineRecord {
+	return {
+		discountMinor: proportionalMinor(
+			saleLine.discountMinor,
+			returnedQuantity,
+			saleLine.quantity
+		),
+		grossMinor: proportionalMinor(
+			saleLine.grossMinor,
+			returnedQuantity,
+			saleLine.quantity
+		),
+		id: ids.create("return-line"),
+		lineTotalMinor: proportionalMinor(
+			saleLine.lineTotalMinor,
+			returnedQuantity,
+			saleLine.quantity
+		),
+		nonStatutory: true,
+		productId: saleLine.productId,
+		productName: saleLine.productName,
+		quantity: returnedQuantity,
+		saleLineId: saleLine.id,
+		taxAmountMinor: proportionalMinor(
+			saleLine.taxAmountMinor,
+			returnedQuantity,
+			saleLine.quantity
+		),
+		taxableBaseMinor: proportionalMinor(
+			saleLine.taxableBaseMinor,
+			returnedQuantity,
+			saleLine.quantity
+		),
+		taxCategory: saleLine.taxCategory,
+		unit: saleLine.unit,
+		unitPriceMinor: saleLine.unitPriceMinor,
+		variantId: saleLine.variantId,
+	};
+}
+
+/** How much of one Sale line remains unreturned, cumulative across every
+ * prior `Pending`/`Completed` return (see `PosRepository.sumReturnedQuantity`'s
+ * doc comment for the concurrency discipline this depends on). Returns
+ * `"0"` (never negative) once fully returned. */
+async function remainingReturnableQuantity(
+	repository: PosRepository,
+	tenantId: string,
+	saleLine: SaleLineRecord
+): Promise<string> {
+	const priorReturned = await repository.sumReturnedQuantity(
+		tenantId,
+		saleLine.id
+	);
+	const remainingScaled =
+		returnQuantityToScaled(saleLine.quantity) -
+		returnQuantityToScaled(priorReturned);
+	return remainingScaled > 0n ? scaledToReturnQuantity(remainingScaled) : "0";
+}
+
+/** Validates and prices every requested line for a NEW return, cumulative
+ * against every prior return (`Pending` or `Completed`) on the SAME sale
+ * line. Callers MUST already hold the owning Sale row's lock (`getSale`'s
+ * `SELECT ... FOR UPDATE`) — see `PosRepository.sumReturnedQuantity`'s doc
+ * comment for why that lock is what makes this race-free. Shared by
+ * `createReturn` (partial/full, caller-chosen lines) and `voidReceipt`
+ * (every line's full REMAINING quantity). */
+async function buildReturnLines(
+	repository: PosRepository,
+	ids: PosIdFactory,
+	sale: SaleRecord,
+	requestedLines: Array<{ quantity: string; saleLineId: string }>
+): Promise<ReturnLineRecord[]> {
+	const lines: ReturnLineRecord[] = [];
+	for (const requested of requestedLines) {
+		const saleLine = sale.lines.find(
+			(candidate) => candidate.id === requested.saleLineId
+		);
+		if (!saleLine) {
+			throw new PosError("invalid_reference", "Sale line was not found");
+		}
+		requireSaleQuantity(requested.quantity);
+		if (!saleLine.inventoryMovementId) {
+			throw new PosError(
+				"invalid_state",
+				"Sale line has no recorded stock movement to compensate"
+			);
+		}
+		// biome-ignore lint/performance/noAwaitInLoops: each sum depends on the Sale row lock already held by the caller; sequential is required for correctness, not merely convenient.
+		const priorReturned = await repository.sumReturnedQuantity(
+			sale.tenantId,
+			saleLine.id
+		);
+		const priorReturnedScaled = returnQuantityToScaled(priorReturned);
+		const requestedScaled = returnQuantityToScaled(requested.quantity);
+		const originalScaled = returnQuantityToScaled(saleLine.quantity);
+		if (priorReturnedScaled + requestedScaled > originalScaled) {
+			throw new PosError(
+				"validation",
+				`Return quantity for product ${saleLine.productId} exceeds what remains unreturned on the original sale line`
+			);
+		}
+		lines.push(priceReturnLine(saleLine, requested.quantity, ids));
+	}
+	if (lines.length === 0) {
+		throw new PosError("validation", "A return requires at least one line");
+	}
+	return lines;
+}
+
+/** Loads and validates a Pending return before it may be approved: exists,
+ * still Pending, the approver differs from the creator (self-approval
+ * denial, frozen control plan §6), and its original Sale still exists.
+ * Mirrors `requireApprovableOverride`'s discipline for the price-override
+ * pair. */
+async function requireApprovableReturn(
+	repository: PosRepository,
+	tenantId: string,
+	returnId: string,
+	actorUserId: string
+): Promise<{ current: ReturnRecord; sale: SaleRecord }> {
+	const current = await repository.getReturn(tenantId, returnId);
+	if (!current) {
+		throw new PosError("not_found", "Return was not found");
+	}
+	if (current.state !== "Pending") {
+		throw new PosError(
+			"invalid_state",
+			"Only a Pending return can be approved"
+		);
+	}
+	if (current.createdByActorUserId === actorUserId) {
+		throw new PosError(
+			"approval_separation",
+			"The creator cannot approve their own return"
+		);
+	}
+	const sale = await repository.getSale(tenantId, current.saleId);
+	if (!sale) {
+		throw new PosError("not_found", "Original sale was not found");
+	}
+	return { current, sale };
+}
+
+/** Loads and validates the original Sale a `receipt.void` targets: the
+ * receipt must be a Sale-kind receipt, its Sale must be Completed, and the
+ * Sale's register session must still be the currently open one (the
+ * open-session realization of "same-day/open-session", per `voidReceipt`'s
+ * own doc comment). `getSale` locks the row for the rest of the caller's
+ * transaction — the same concurrency guard `createReturn` relies on. */
+async function requireVoidableSale(
+	repository: PosRepository,
+	tenantId: string,
+	receiptId: string
+): Promise<{ receipt: ReceiptRecord; sale: SaleRecord }> {
+	const receipt = await repository.getReceipt(tenantId, receiptId);
+	if (!receipt) {
+		throw new PosError("not_found", "Receipt was not found");
+	}
+	if (receipt.kind !== "Sale" || !receipt.saleId) {
+		throw new PosError("invalid_state", "Only a Sale receipt can be voided");
+	}
+	const sale = await repository.getSale(tenantId, receipt.saleId);
+	if (!sale) {
+		throw new PosError("not_found", "Sale was not found");
+	}
+	if (sale.state !== "Completed") {
+		throw new PosError("invalid_state", "Only a completed sale can be voided");
+	}
+	const session = await repository.getOpenSession(tenantId, sale.registerId);
+	if (!session || session.id !== sale.sessionId) {
+		throw new PosError(
+			"invalid_state",
+			"A sale can only be voided while its register session is still open"
+		);
+	}
+	return { receipt, sale };
+}
+
+/** Every sale line's REMAINING (unreturned) quantity, priced through
+ * `buildReturnLines` exactly as a caller-chosen partial return would be —
+ * `voidReceipt` always voids the full remainder, never double-compensating
+ * whatever was already returned earlier in the same session. Throws if
+ * nothing remains (the sale has already been fully returned). */
+async function buildVoidLines(
+	repository: PosRepository,
+	ids: PosIdFactory,
+	sale: SaleRecord
+): Promise<ReturnLineRecord[]> {
+	const remaining: Array<{ quantity: string; saleLineId: string }> = [];
+	for (const line of sale.lines) {
+		// biome-ignore lint/performance/noAwaitInLoops: each sum depends on the Sale row lock the caller already holds; sequential is required for correctness.
+		const quantity = await remainingReturnableQuantity(
+			repository,
+			sale.tenantId,
+			line
+		);
+		if (quantity !== "0") {
+			remaining.push({ quantity, saleLineId: line.id });
+		}
+	}
+	if (remaining.length === 0) {
+		throw new PosError(
+			"invalid_state",
+			"Sale has already been fully returned; nothing remains to void"
+		);
+	}
+	return buildReturnLines(repository, ids, sale, remaining);
+}
+
+/** Posts one compensating `Reversal` movement per Return line, inside the
+ * Return's own shared transaction — the mirror of `postSaleLineMovements`
+ * for the compensating direction. Shared by `approveReturn` and
+ * `voidReceipt`, the two places a Return's lines ever get their Inventory
+ * effect posted. Deliberately sequential (shares one transactional
+ * `PoolClient`), matching `postSaleLineMovements`'s own discipline. */
+async function postReturnCompensatingMovements(
+	inventory: ReturnInventoryMovementPort,
+	sale: SaleRecord,
+	lines: ReturnLineRecord[],
+	input: {
+		actorUserId: string;
+		correlationId: string;
+		returnId: string;
+		tenantId: string;
+	}
+): Promise<void> {
+	for (const line of lines) {
+		const saleLine = sale.lines.find(
+			(candidate) => candidate.id === line.saleLineId
+		);
+		if (!saleLine?.inventoryMovementId) {
+			throw new PosError(
+				"invalid_state",
+				"Original sale line's stock movement could not be located"
+			);
+		}
+		// biome-ignore lint/performance/noAwaitInLoops: sequential by necessity, shares one transactional PoolClient.
+		await inventory.recordReturnMovement({
+			actorUserId: input.actorUserId,
+			correlationId: input.correlationId,
+			locationId: sale.locationId,
+			organizationId: sale.organizationId,
+			productId: line.productId,
+			quantity: line.quantity,
+			returnId: input.returnId,
+			reversalOfMovementId: saleLine.inventoryMovementId,
+			tenantId: input.tenantId,
+			unit: line.unit,
+			variantId: line.variantId,
+		});
+	}
+}
+
+/** Builds the immutable Return-kind receipt snapshot shared by
+ * `approveReturn` and `voidReceipt` — both post a compensating receipt
+ * with the same line-snapshot shape (discount/tax/total per line, no
+ * tenders, `kind: "Return"`), differing only in which original receipt and
+ * return metadata they reference. */
+function buildReturnReceiptRecord(input: {
+	cashierPartyId: string;
+	currency: string;
+	id: string;
+	issuedAt: Date;
+	lines: ReturnLineRecord[];
+	organizationId: string;
+	originalReceiptId: string;
+	receiptNumber: string;
+	registerId: string;
+	returnId: string;
+	saleId: string;
+	tenantId: string;
+	totalMinor: number;
+}): ReceiptRecord {
+	return {
+		cashierPartyId: input.cashierPartyId,
+		createdAt: input.issuedAt,
+		currency: input.currency,
+		id: input.id,
+		issuedAt: input.issuedAt,
+		kind: "Return",
+		lines: input.lines.map((line) => ({
+			discountMinor: line.discountMinor,
+			lineTotalMinor: line.lineTotalMinor,
+			nonStatutory: line.nonStatutory,
+			productName: line.productName,
+			quantity: line.quantity,
+			taxAmountMinor: line.taxAmountMinor,
+			taxableBaseMinor: line.taxableBaseMinor,
+			taxCategory: line.taxCategory,
+			unit: line.unit,
+			unitPriceMinor: line.unitPriceMinor,
+		})),
+		organizationId: input.organizationId,
+		originalReceiptId: input.originalReceiptId,
+		priceSuppressed: false,
+		receiptNumber: input.receiptNumber,
+		registerId: input.registerId,
+		returnId: input.returnId,
+		saleId: input.saleId,
+		tenantId: input.tenantId,
+		tenders: [],
+		totalMinor: input.totalMinor,
+	};
+}
+
+/** Emits the `commerce.return.completed.v1` + `commerce.receipt.issued.v1`
+ * event pair shared by `approveReturn` and `voidReceipt` — the exact two
+ * facts §6.3's Completed transition requires, atomic with the state
+ * change/receipt insert already committed earlier in the same transaction. */
+async function emitReturnCompletionEvents(
+	events: PosEventAppendPort,
+	ids: PosIdFactory,
+	savedReturn: ReturnRecord,
+	receiptRecord: ReceiptRecord,
+	input: {
+		actorUserId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		now: Date;
+	}
+): Promise<void> {
+	await events.append(
+		saleEvent({
+			actorUserId: input.actorUserId,
+			aggregateId: savedReturn.id,
+			capabilityId: "commerce.returns",
+			correlationId: input.correlationId,
+			data: {
+				approverPartyId: savedReturn.approvedByPartyId,
+				exchangeSaleId: null,
+				lines: savedReturn.lines.map((line) => ({
+					productId: line.productId,
+					quantity: line.quantity,
+					variantId: line.variantId,
+				})),
+				mode: savedReturn.mode,
+				registerId: savedReturn.registerId,
+				returnId: savedReturn.id,
+				saleId: savedReturn.saleId,
+			},
+			eventId: ids.create("event"),
+			idempotencyKey: input.idempotencyKey,
+			name: "commerce.return.completed.v1",
+			now: input.now,
+			organizationId: savedReturn.organizationId,
+			schemaRef: "schemas/events/commerce.return.completed.v1.schema.json",
+			tenantId: savedReturn.tenantId,
+		})
+	);
+	await events.append(
+		saleEvent({
+			actorUserId: input.actorUserId,
+			aggregateId: receiptRecord.id,
+			capabilityId: "commerce.receipts",
+			correlationId: input.correlationId,
+			data: {
+				currency: receiptRecord.currency,
+				kind: "Return",
+				originalReceiptId: receiptRecord.originalReceiptId,
+				priceSuppressed: false,
+				receiptId: receiptRecord.id,
+				receiptNumber: receiptRecord.receiptNumber,
+				registerId: receiptRecord.registerId,
+				returnId: savedReturn.id,
+				saleId: savedReturn.saleId,
+				totalMinor: receiptRecord.totalMinor,
+			},
+			eventId: ids.create("event"),
+			idempotencyKey: `${input.idempotencyKey}:receipt`,
+			name: "commerce.receipt.issued.v1",
+			now: input.now,
+			organizationId: receiptRecord.organizationId,
+			schemaRef: "schemas/events/commerce.receipt.issued.v1.schema.json",
+			tenantId: receiptRecord.tenantId,
+		})
+	);
+}
+
+/** Validates a `completeSale` caller's optional `exchangeOfReturnId`
+ * (frozen control plan §6.5): the referenced Return must be a Completed,
+ * unconsumed `"Return"`-mode Return sharing this sale's register and
+ * currency. Returns `null` when no exchange was requested (the ordinary
+ * `sale.complete` path). */
+async function requireExchangeReturn(
+	repository: PosRepository,
+	tenantId: string,
+	exchangeOfReturnId: string,
+	sale: SaleRecord
+): Promise<ReturnRecord> {
+	const exchangeReturn = await repository.getReturn(
+		tenantId,
+		exchangeOfReturnId
+	);
+	if (
+		exchangeReturn?.state !== "Completed" ||
+		exchangeReturn.mode !== "Return"
+	) {
+		throw new PosError(
+			"invalid_reference",
+			"Exchange requires a Completed return"
+		);
+	}
+	if (exchangeReturn.exchangeSaleId) {
+		throw new PosError(
+			"invalid_state",
+			"Return has already been consumed by an exchange"
+		);
+	}
+	if (exchangeReturn.registerId !== sale.registerId) {
+		throw new PosError(
+			"invalid_state",
+			"Exchange requires the replacement sale to share the return's register"
+		);
+	}
+	requireMatchingCurrency(exchangeReturn.currency, sale.currency);
+	return exchangeReturn;
+}
+
+/** Marks the exchanged Return consumed and emits the correlating
+ * `commerce.exchange.completed.v1` fact, once the replacement Sale has
+ * already committed within the SAME `completeSale` transaction. `mode`/
+ * `exchangeSaleId` deliberately stay `"Return"`/`null` on the ALREADY-
+ * EMITTED `commerce.return.completed.v1` event from `return.approve` — that
+ * event cannot be amended after the fact, and at the time it was emitted
+ * this replacement sale did not exist yet (§6.5's ordering: the return leg
+ * completes BEFORE the replacement sale does). The correlating fact lives
+ * ENTIRELY on `commerce.exchange.completed.v1`, the registered event for
+ * exactly this purpose. */
+async function linkExchange(
+	repository: PosRepository,
+	events: PosEventAppendPort,
+	ids: PosIdFactory,
+	exchangeReturn: ReturnRecord,
+	savedSale: SaleRecord,
+	input: {
+		actorUserId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		now: Date;
+	}
+): Promise<void> {
+	const updatedReturn: ReturnRecord = {
+		...exchangeReturn,
+		exchangeSaleId: savedSale.id,
+		updatedAt: input.now,
+		version: exchangeReturn.version + 1,
+	};
+	const savedReturn = await repository.updateReturn(
+		updatedReturn,
+		exchangeReturn.version
+	);
+	if (savedReturn === "version_conflict") {
+		throw new PosError(
+			"version_conflict",
+			"Return was consumed by another exchange concurrently"
+		);
+	}
+	const exchangeId = ids.create("exchange");
+	await events.append(
+		saleEvent({
+			actorUserId: input.actorUserId,
+			aggregateId: exchangeId,
+			capabilityId: "commerce.exchanges",
+			correlationId: input.correlationId,
+			data: {
+				balanceDueMinor:
+					savedSale.totalMinor - savedReturn.totalRefundableMinor,
+				currency: savedSale.currency,
+				exchangeId,
+				newSaleId: savedSale.id,
+				registerId: savedSale.registerId,
+				returnId: savedReturn.id,
+			},
+			eventId: ids.create("event"),
+			idempotencyKey: `${input.idempotencyKey}:exchange`,
+			name: "commerce.exchange.completed.v1",
+			now: input.now,
+			organizationId: savedSale.organizationId,
+			schemaRef: "schemas/events/commerce.exchange.completed.v1.schema.json",
+			tenantId: savedSale.tenantId,
+		})
+	);
 }
 
 export interface PosServiceOptions {
@@ -1339,6 +2181,15 @@ export interface PosServiceOptions {
 	parties: PosPartyPort;
 	pricing: PosPricingPort;
 	products: PosCatalogPort;
+	/** Used by `approveReturn`, `voidReceipt`, and `reissueReceipt`: the
+	 * compensating-Inventory-movement and receipt-numbering seam WS3 PR3's
+	 * frozen control plan §6.3 requires, mirroring `saleUnitOfWork`'s "one
+	 * shared unit of work" discipline exactly. `reissueReceipt` never
+	 * touches `inventory` (only `numbering`); the port is still present on
+	 * every call because splitting a third unit-of-work shape purely to
+	 * omit one unused port would duplicate composition wiring for no
+	 * behavioral gain. */
+	returnUnitOfWork: PosReturnUnitOfWork;
 	/** Used ONLY by `completeSale`: the frozen control plan's ONE shared
 	 * unit of work spanning the sale commit, receipt numbering, and the
 	 * synchronous Inventory stock movement (§ "Read first" — one
@@ -1550,6 +2401,280 @@ export function createPosService(options: PosServiceOptions) {
 			});
 		},
 
+		// -- WS3 PR3: Return, Refund ----------------------------------------------
+
+		async approveRefund(input: {
+			actorUserId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			refundId: string;
+			tenantId: string;
+		}): Promise<RefundView> {
+			const requestFingerprint = await fingerprint({
+				refundId: input.refundId,
+			});
+			return options.unitOfWork.execute(async ({ events, repository }) => {
+				const prior = await replay<RefundView>(repository, {
+					idempotencyKey: input.idempotencyKey,
+					operation: "commerce.refund.approve",
+					requestFingerprint,
+					tenantId: input.tenantId,
+				});
+				if (prior) {
+					return prior;
+				}
+				const current = await repository.getRefund(
+					input.tenantId,
+					input.refundId
+				);
+				if (!current) {
+					throw new PosError("not_found", "Refund was not found");
+				}
+				if (current.state !== "Requested") {
+					throw new PosError(
+						"invalid_state",
+						"Only a Requested refund can be approved"
+					);
+				}
+				if (current.requestedByActorUserId === input.actorUserId) {
+					throw new PosError(
+						"approval_separation",
+						"The requester cannot approve their own refund"
+					);
+				}
+				// Cross-register denial by construction (Scope: cross-register
+				// refunds are rejected at the boundary unless PR0 explicitly
+				// scoped otherwise, which it does not): `refund.create` never
+				// accepted a caller-supplied register, so `current.registerId`
+				// IS the original sale's register; the only thing left to
+				// validate is that THAT register's session is still open
+				// (frozen control plan §6.4: "posts ... on the referenced open
+				// register").
+				const session = await repository.getOpenSession(
+					input.tenantId,
+					current.registerId
+				);
+				if (!session) {
+					throw new PosError(
+						"invalid_state",
+						"Refund requires its register session to still be open"
+					);
+				}
+				const now = options.clock();
+				const approverPartyId = await options.parties.requireActorPartyId({
+					authUserId: input.actorUserId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				});
+
+				// Refund-exceeds-register-cash (frozen control plan Tests:
+				// "record variance vs reject — whichever PR0 declared"). PR1's
+				// `createCashMovement` never checks cash sufficiency for any
+				// PaidOut reason code (paid-out, safe-drop); a shortfall only
+				// ever surfaces as a counted-vs-expected variance at
+				// `register.close` (`cash-variance.approve`). This refund
+				// posting follows that SAME established semantics rather than
+				// inventing a reject path PR1 never had: it always posts, and
+				// any resulting shortfall is recorded — never rejected —
+				// through the ordinary close/variance flow.
+				const movementId = options.ids.create("movement");
+				const movement: CashMovementRecord = {
+					actorPartyId: approverPartyId,
+					actorUserId: input.actorUserId,
+					amountMinor: current.amountMinor,
+					createdAt: now,
+					currency: current.currency,
+					direction: "PaidOut",
+					id: movementId,
+					note: null,
+					organizationId: input.organizationId,
+					reasonCode: "Refund",
+					referenceId: current.id,
+					registerId: current.registerId,
+					sessionId: session.id,
+					tenantId: input.tenantId,
+				};
+				const savedMovement = await repository.createCashMovement(movement);
+				await events.append(
+					event({
+						actorUserId: input.actorUserId,
+						aggregateId: savedMovement.id,
+						capabilityId: "commerce.cash-management",
+						correlationId: input.correlationId,
+						data: {
+							actorPartyId: approverPartyId,
+							amountMinor: savedMovement.amountMinor,
+							currency: savedMovement.currency,
+							direction: savedMovement.direction,
+							movementId: savedMovement.id,
+							reasonCode: savedMovement.reasonCode,
+							referenceId: savedMovement.referenceId,
+							registerId: savedMovement.registerId,
+						},
+						eventId: options.ids.create("event"),
+						idempotencyKey: `${input.idempotencyKey}:cash-movement`,
+						name: "commerce.cash-movement.posted.v1",
+						now,
+						organizationId: input.organizationId,
+						schemaRef:
+							"schemas/events/commerce.cash-movement.posted.v1.schema.json",
+						tenantId: input.tenantId,
+					})
+				);
+
+				const updated: RefundRecord = {
+					...current,
+					approvedAt: now,
+					approvedByActorUserId: input.actorUserId,
+					approvedByPartyId: approverPartyId,
+					cashMovementId: savedMovement.id,
+					state: "Posted",
+					updatedAt: now,
+					version: current.version + 1,
+				};
+				const saved = await repository.updateRefund(updated, current.version);
+				if (saved === "version_conflict") {
+					throw new PosError("version_conflict", "Refund version is stale");
+				}
+				const result = refundView(saved);
+				return recordResult(
+					repository,
+					{
+						idempotencyKey: input.idempotencyKey,
+						operation: "commerce.refund.approve",
+						requestFingerprint,
+						resourceId: saved.id,
+						tenantId: saved.tenantId,
+					},
+					result,
+					now
+				);
+			});
+		},
+
+		async approveReturn(input: {
+			actorUserId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			returnId: string;
+			tenantId: string;
+		}): Promise<ReturnView> {
+			const requestFingerprint = await fingerprint({
+				returnId: input.returnId,
+			});
+			return options.returnUnitOfWork.execute(
+				async ({ events, inventory, numbering, repository }) => {
+					const prior = await replay<ReturnView>(repository, {
+						idempotencyKey: input.idempotencyKey,
+						operation: "commerce.return.approve",
+						requestFingerprint,
+						tenantId: input.tenantId,
+					});
+					if (prior) {
+						return prior;
+					}
+					const { current, sale } = await requireApprovableReturn(
+						repository,
+						input.tenantId,
+						input.returnId,
+						input.actorUserId
+					);
+					const now = options.clock();
+					const approverPartyId = await options.parties.requireActorPartyId({
+						authUserId: input.actorUserId,
+						organizationId: input.organizationId,
+						tenantId: input.tenantId,
+					});
+
+					await postReturnCompensatingMovements(
+						inventory,
+						sale,
+						current.lines,
+						{
+							actorUserId: input.actorUserId,
+							correlationId: input.correlationId,
+							returnId: current.id,
+							tenantId: current.tenantId,
+						}
+					);
+
+					const allocation = await numbering.allocate({
+						actorUserId: input.actorUserId,
+						correlationId: input.correlationId,
+						idempotencyKey: input.idempotencyKey,
+						organizationId: current.organizationId,
+						registerId: current.registerId,
+						saleId: current.id,
+						tenantId: current.tenantId,
+					});
+					const receiptId = options.ids.create("receipt");
+					const receiptRecord = buildReturnReceiptRecord({
+						cashierPartyId: approverPartyId,
+						currency: current.currency,
+						id: receiptId,
+						issuedAt: now,
+						lines: current.lines,
+						organizationId: current.organizationId,
+						originalReceiptId: sale.receiptId as string,
+						receiptNumber: allocation.value,
+						registerId: current.registerId,
+						returnId: current.id,
+						saleId: current.saleId,
+						tenantId: current.tenantId,
+						totalMinor: current.totalRefundableMinor,
+					});
+					await repository.createReceipt(receiptRecord);
+
+					const updated: ReturnRecord = {
+						...current,
+						approvedAt: now,
+						approvedByActorUserId: input.actorUserId,
+						approvedByPartyId: approverPartyId,
+						receiptId,
+						state: "Completed",
+						updatedAt: now,
+						version: current.version + 1,
+					};
+					const savedReturn = await repository.updateReturn(
+						updated,
+						current.version
+					);
+					if (savedReturn === "version_conflict") {
+						throw new PosError("version_conflict", "Return version is stale");
+					}
+
+					await emitReturnCompletionEvents(
+						events,
+						options.ids,
+						savedReturn,
+						receiptRecord,
+						{
+							actorUserId: input.actorUserId,
+							correlationId: input.correlationId,
+							idempotencyKey: input.idempotencyKey,
+							now,
+						}
+					);
+
+					const result = returnView(savedReturn);
+					return recordResult(
+						repository,
+						{
+							idempotencyKey: input.idempotencyKey,
+							operation: "commerce.return.approve",
+							requestFingerprint,
+							resourceId: savedReturn.id,
+							tenantId: savedReturn.tenantId,
+						},
+						result,
+						now
+					);
+				}
+			);
+		},
+
 		async closeRegister(input: {
 			actorUserId: string;
 			correlationId: string;
@@ -1673,6 +2798,15 @@ export function createPosService(options: PosServiceOptions) {
 		async completeSale(input: {
 			actorUserId: string;
 			correlationId: string;
+			/** Realizes `commerce.exchanges` (frozen control plan §6.5): NOT a
+			 * new permission or endpoint — an ordinary `sale.complete` whose
+			 * caller additionally names the ALREADY-`Completed` compensating
+			 * Return it replaces. Both legs keep their own maker/checker
+			 * discipline (the return's own approver ≠ creator rule already
+			 * ran at `return.approve` time; this replacement sale needs no
+			 * approval beyond ordinary `sale.complete` authority, exactly as
+			 * §6.5 specifies). */
+			exchangeOfReturnId?: string | null;
 			idempotencyKey: string;
 			organizationId: string;
 			saleId: string;
@@ -1686,6 +2820,7 @@ export function createPosService(options: PosServiceOptions) {
 		}): Promise<SaleView> {
 			requireCashOnlyTenders(input.tenders);
 			const requestFingerprint = await fingerprint({
+				exchangeOfReturnId: input.exchangeOfReturnId ?? null,
 				saleId: input.saleId,
 				tenders: input.tenders,
 			});
@@ -1706,6 +2841,15 @@ export function createPosService(options: PosServiceOptions) {
 						input.saleId
 					);
 					requireMatchingTenderCurrencies(sale.currency, input.tenders);
+
+					const exchangeReturn = input.exchangeOfReturnId
+						? await requireExchangeReturn(
+								repository,
+								input.tenantId,
+								input.exchangeOfReturnId,
+								sale
+							)
+						: null;
 					const tenderedMinor = input.tenders.reduce(
 						(sum, tender) => sum + tender.amountMinor,
 						0
@@ -1724,12 +2868,13 @@ export function createPosService(options: PosServiceOptions) {
 						tenantId: input.tenantId,
 					});
 
-					await postSaleLineMovements(
+					const linesWithMovements = await postSaleLineMovements(
 						inventory,
 						sale,
 						input.actorUserId,
 						input.correlationId
 					);
+					sale.lines = linesWithMovements;
 
 					const allocation = await numbering.allocate({
 						actorUserId: input.actorUserId,
@@ -1888,6 +3033,22 @@ export function createPosService(options: PosServiceOptions) {
 						})
 					);
 
+					if (exchangeReturn) {
+						await linkExchange(
+							repository,
+							events,
+							options.ids,
+							exchangeReturn,
+							savedSale,
+							{
+								actorUserId: input.actorUserId,
+								correlationId: input.correlationId,
+								idempotencyKey: input.idempotencyKey,
+								now,
+							}
+						);
+					}
+
 					const result = saleView(savedSale);
 					return recordResult(
 						repository,
@@ -2004,6 +3165,225 @@ export function createPosService(options: PosServiceOptions) {
 					{
 						idempotencyKey: input.idempotencyKey,
 						operation: "commerce.cash-movement.create",
+						requestFingerprint,
+						resourceId: saved.id,
+						tenantId: saved.tenantId,
+					},
+					result,
+					now
+				);
+			});
+		},
+
+		async createRefund(input: {
+			actorUserId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			returnId: string;
+			tenantId: string;
+		}): Promise<RefundView> {
+			const requestFingerprint = await fingerprint({
+				returnId: input.returnId,
+			});
+			return options.unitOfWork.execute(async ({ events, repository }) => {
+				const prior = await replay<RefundView>(repository, {
+					idempotencyKey: input.idempotencyKey,
+					operation: "commerce.refund.create",
+					requestFingerprint,
+					tenantId: input.tenantId,
+				});
+				if (prior) {
+					return prior;
+				}
+				const returnRecord = await repository.getReturn(
+					input.tenantId,
+					input.returnId
+				);
+				if (!returnRecord) {
+					throw new PosError("not_found", "Return was not found");
+				}
+				if (returnRecord.state !== "Completed") {
+					throw new PosError(
+						"invalid_state",
+						"Only a Completed return can be refunded"
+					);
+				}
+				if (!returnRecord.receiptId) {
+					// Structural refund-without-receipt boundary (Scope: rejected
+					// unless PR0 scoped otherwise, which it does not). A
+					// Completed return always has a receiptId; this is a
+					// defensive backstop, not a reachable path.
+					throw new PosError(
+						"invalid_reference",
+						"Return has no associated receipt"
+					);
+				}
+				const now = options.clock();
+				const requesterPartyId = await options.parties.requireActorPartyId({
+					authUserId: input.actorUserId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				});
+				const id = options.ids.create("refund");
+				// `amountMinor` is ALWAYS derived from the Return itself, never
+				// caller input (frozen control plan §6.4: "requests a cash
+				// refund referencing an approved return") — there is no
+				// partial-refund amount to validate, and `pos_refund_tenant_
+				// return_uidx` caps a Return at exactly one Refund ever, so a
+				// second `refund.create` against the same Return fails at the
+				// persistence layer rather than silently double-paying.
+				const record: RefundRecord = {
+					amountMinor: returnRecord.totalRefundableMinor,
+					approvedAt: null,
+					approvedByActorUserId: null,
+					approvedByPartyId: null,
+					cashMovementId: null,
+					createdAt: now,
+					currency: returnRecord.currency,
+					id,
+					organizationId: input.organizationId,
+					registerId: returnRecord.registerId,
+					requestedAt: now,
+					requestedByActorUserId: input.actorUserId,
+					requestedByPartyId: requesterPartyId,
+					returnId: returnRecord.id,
+					state: "Requested",
+					tenantId: input.tenantId,
+					updatedAt: now,
+					version: 1,
+				};
+				const saved = await repository.createRefund(record);
+				await events.append(
+					saleEvent({
+						actorUserId: input.actorUserId,
+						aggregateId: saved.id,
+						capabilityId: "commerce.refunds",
+						correlationId: input.correlationId,
+						data: {
+							amountMinor: saved.amountMinor,
+							currency: saved.currency,
+							reason: returnRecord.reason,
+							refundId: saved.id,
+							registerId: saved.registerId,
+							requesterPartyId,
+							returnId: saved.returnId,
+							saleId: returnRecord.saleId,
+						},
+						eventId: options.ids.create("event"),
+						idempotencyKey: input.idempotencyKey,
+						name: "commerce.refund.requested.v1",
+						now,
+						organizationId: input.organizationId,
+						schemaRef:
+							"schemas/events/commerce.refund.requested.v1.schema.json",
+						tenantId: input.tenantId,
+					})
+				);
+				const result = refundView(saved);
+				return recordResult(
+					repository,
+					{
+						idempotencyKey: input.idempotencyKey,
+						operation: "commerce.refund.create",
+						requestFingerprint,
+						resourceId: saved.id,
+						tenantId: saved.tenantId,
+					},
+					result,
+					now
+				);
+			});
+		},
+
+		async createReturn(input: {
+			actorUserId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			lines: Array<{ quantity: string; saleLineId: string }>;
+			organizationId: string;
+			reason: string;
+			saleId: string;
+			tenantId: string;
+		}): Promise<ReturnView> {
+			if (input.reason.trim().length === 0) {
+				throw new PosError("validation", "A return requires a reason");
+			}
+			const requestFingerprint = await fingerprint({
+				lines: input.lines,
+				reason: input.reason,
+				saleId: input.saleId,
+			});
+			return options.unitOfWork.execute(async ({ repository }) => {
+				const prior = await replay<ReturnView>(repository, {
+					idempotencyKey: input.idempotencyKey,
+					operation: "commerce.return.create",
+					requestFingerprint,
+					tenantId: input.tenantId,
+				});
+				if (prior) {
+					return prior;
+				}
+				// `getSale` locks the row (`SELECT ... FOR UPDATE`) for the rest
+				// of this transaction — the concurrency guard `buildReturnLines`'
+				// cumulative-quantity check depends on (see its doc comment and
+				// `PosRepository.sumReturnedQuantity`'s).
+				const sale = await repository.getSale(input.tenantId, input.saleId);
+				if (!sale) {
+					throw new PosError("not_found", "Sale was not found");
+				}
+				if (sale.state !== "Completed") {
+					throw new PosError(
+						"invalid_state",
+						"Only a completed sale can be returned"
+					);
+				}
+				const lines = await buildReturnLines(
+					repository,
+					options.ids,
+					sale,
+					input.lines
+				);
+				const now = options.clock();
+				const creatorPartyId = await options.parties.requireActorPartyId({
+					authUserId: input.actorUserId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				});
+				const id = options.ids.create("return");
+				const record: ReturnRecord = {
+					approvedAt: null,
+					approvedByActorUserId: null,
+					approvedByPartyId: null,
+					createdAt: now,
+					createdByActorUserId: input.actorUserId,
+					createdByPartyId: creatorPartyId,
+					currency: sale.currency,
+					exchangeSaleId: null,
+					id,
+					lines,
+					mode: "Return",
+					organizationId: input.organizationId,
+					reason: input.reason,
+					receiptId: null,
+					registerId: sale.registerId,
+					saleId: sale.id,
+					state: "Pending",
+					tenantId: input.tenantId,
+					totalRefundableMinor: lines.reduce(
+						(sum, line) => sum + line.lineTotalMinor,
+						0
+					),
+					updatedAt: now,
+					version: 1,
+				};
+				const saved = await repository.createReturn(record);
+				const result = returnView(saved);
+				return recordResult(
+					repository,
+					{
+						idempotencyKey: input.idempotencyKey,
+						operation: "commerce.return.create",
 						requestFingerprint,
 						resourceId: saved.id,
 						tenantId: saved.tenantId,
@@ -2353,6 +3733,147 @@ export function createPosService(options: PosServiceOptions) {
 			});
 		},
 
+		// -- WS3 PR3: Receipt reissue and gift receipt ---------------------------
+
+		/** Reprints an existing receipt as a new numbered `Reissue`-kind
+		 * artifact linked to the original — own permission
+		 * (`commerce.receipt.reissue`), no monetary effect on the Sale/Return
+		 * it references. `priceSuppressed: true` realizes `commerce.gift-
+		 * receipts` (frozen control plan §5 capability table): the SAME
+		 * command, with the reissued copy's monetary line fields zeroed and
+		 * its `totalMinor`/`tenders` suppressed, per the stage file's "price-
+		 * suppressed receipt variant" framing — no separate gift-receipt
+		 * command exists, and none is invented. */
+		async reissueReceipt(input: {
+			actorUserId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			priceSuppressed?: boolean;
+			receiptId: string;
+			tenantId: string;
+		}): Promise<ReceiptView> {
+			const priceSuppressed = input.priceSuppressed ?? false;
+			const requestFingerprint = await fingerprint({
+				priceSuppressed,
+				receiptId: input.receiptId,
+			});
+			return options.returnUnitOfWork.execute(
+				async ({ events, numbering, repository }) => {
+					const prior = await replay<ReceiptView>(repository, {
+						idempotencyKey: input.idempotencyKey,
+						operation: "commerce.receipt.reissue",
+						requestFingerprint,
+						tenantId: input.tenantId,
+					});
+					if (prior) {
+						return prior;
+					}
+					const original = await repository.getReceipt(
+						input.tenantId,
+						input.receiptId
+					);
+					if (!original) {
+						throw new PosError("not_found", "Receipt was not found");
+					}
+					if (original.kind === "Reissue") {
+						throw new PosError(
+							"invalid_state",
+							"A Reissue receipt cannot itself be reissued; reissue the original"
+						);
+					}
+					const now = options.clock();
+					const actorPartyId = await options.parties.requireActorPartyId({
+						authUserId: input.actorUserId,
+						organizationId: input.organizationId,
+						tenantId: input.tenantId,
+					});
+					const allocation = await numbering.allocate({
+						actorUserId: input.actorUserId,
+						correlationId: input.correlationId,
+						idempotencyKey: input.idempotencyKey,
+						organizationId: input.organizationId,
+						registerId: original.registerId,
+						saleId: original.id,
+						tenantId: input.tenantId,
+					});
+					const receiptId = options.ids.create("receipt");
+					const record: ReceiptRecord = {
+						cashierPartyId: actorPartyId,
+						createdAt: now,
+						currency: original.currency,
+						id: receiptId,
+						issuedAt: now,
+						kind: "Reissue",
+						lines: original.lines.map((line) =>
+							priceSuppressed
+								? {
+										...line,
+										discountMinor: 0,
+										lineTotalMinor: 0,
+										taxAmountMinor: 0,
+										taxableBaseMinor: 0,
+										unitPriceMinor: 0,
+									}
+								: line
+						),
+						organizationId: input.organizationId,
+						originalReceiptId: original.id,
+						priceSuppressed,
+						receiptNumber: allocation.value,
+						registerId: original.registerId,
+						returnId: original.returnId,
+						saleId: original.saleId,
+						tenantId: input.tenantId,
+						tenders: priceSuppressed ? [] : original.tenders,
+						totalMinor: priceSuppressed ? null : original.totalMinor,
+					};
+					const saved = await repository.createReceipt(record);
+					await events.append(
+						saleEvent({
+							actorUserId: input.actorUserId,
+							aggregateId: saved.id,
+							capabilityId: "commerce.receipts",
+							correlationId: input.correlationId,
+							data: {
+								currency: saved.currency,
+								kind: "Reissue",
+								originalReceiptId: original.id,
+								priceSuppressed,
+								receiptId: saved.id,
+								receiptNumber: saved.receiptNumber,
+								registerId: saved.registerId,
+								returnId: saved.returnId,
+								saleId: saved.saleId,
+								totalMinor: saved.totalMinor,
+							},
+							eventId: options.ids.create("event"),
+							idempotencyKey: input.idempotencyKey,
+							name: "commerce.receipt.issued.v1",
+							now,
+							organizationId: input.organizationId,
+							schemaRef:
+								"schemas/events/commerce.receipt.issued.v1.schema.json",
+							tenantId: input.tenantId,
+						})
+					);
+					const result = receiptView(saved);
+					return recordResult(
+						repository,
+						{
+							idempotencyKey: input.idempotencyKey,
+							operation: "commerce.receipt.reissue",
+							requestFingerprint,
+							resourceId: saved.id,
+							tenantId: saved.tenantId,
+						},
+						result,
+						now
+					);
+				}
+			);
+		},
+
 		async requestPriceOverride(input: {
 			actorUserId: string;
 			correlationId: string;
@@ -2458,6 +3979,157 @@ export function createPosService(options: PosServiceOptions) {
 				);
 			});
 		},
+
+		// -- WS3 PR3: Void ---------------------------------------------------------
+
+		/** Same-day/open-session administrative reversal of a Sale (frozen
+		 * control plan Scope) — a full compensation with its own permission
+		 * (`commerce.receipt.void`), NOT a maker/checker pair and NOT a
+		 * delete: the original Sale row is untouched, and this posts exactly
+		 * the same Inventory-compensation + Return-receipt shape
+		 * `approveReturn` does, atomically, in one call. "Same-day" is
+		 * realized as the open-session boundary (no timezone port exists on
+		 * this branch — a disclosed prototype-depth decision, not an
+		 * invented one: in practice a register session never spans more than
+		 * one business day, so requiring the ORIGINAL sale's register
+		 * session to still be open is the same custody-linked boundary
+		 * `sale.complete` itself already enforces via
+		 * `requireCompletableSale`, reused here rather than inventing a
+		 * separate calendar-date comparison this branch cannot honor
+		 * correctly across timezones). Voids whatever quantity REMAINS
+		 * unreturned per line (so a sale partially returned earlier in the
+		 * same session voids only its remainder, never double-compensating
+		 * the portion already returned). */
+		async voidReceipt(input: {
+			actorUserId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			reason?: string | null;
+			receiptId: string;
+			tenantId: string;
+		}): Promise<ReturnView> {
+			const requestFingerprint = await fingerprint({
+				reason: input.reason ?? null,
+				receiptId: input.receiptId,
+			});
+			return options.returnUnitOfWork.execute(
+				async ({ events, inventory, numbering, repository }) => {
+					const prior = await replay<ReturnView>(repository, {
+						idempotencyKey: input.idempotencyKey,
+						operation: "commerce.receipt.void",
+						requestFingerprint,
+						tenantId: input.tenantId,
+					});
+					if (prior) {
+						return prior;
+					}
+					const { receipt, sale } = await requireVoidableSale(
+						repository,
+						input.tenantId,
+						input.receiptId
+					);
+					const lines = await buildVoidLines(repository, options.ids, sale);
+					const now = options.clock();
+					const actorPartyId = await options.parties.requireActorPartyId({
+						authUserId: input.actorUserId,
+						organizationId: input.organizationId,
+						tenantId: input.tenantId,
+					});
+					const returnId = options.ids.create("return");
+
+					await postReturnCompensatingMovements(inventory, sale, lines, {
+						actorUserId: input.actorUserId,
+						correlationId: input.correlationId,
+						returnId,
+						tenantId: input.tenantId,
+					});
+
+					const allocation = await numbering.allocate({
+						actorUserId: input.actorUserId,
+						correlationId: input.correlationId,
+						idempotencyKey: input.idempotencyKey,
+						organizationId: input.organizationId,
+						registerId: sale.registerId,
+						saleId: returnId,
+						tenantId: input.tenantId,
+					});
+					const totalRefundableMinor = lines.reduce(
+						(sum, line) => sum + line.lineTotalMinor,
+						0
+					);
+					const receiptId = options.ids.create("receipt");
+					const voidReceiptRecord = buildReturnReceiptRecord({
+						cashierPartyId: actorPartyId,
+						currency: sale.currency,
+						id: receiptId,
+						issuedAt: now,
+						lines,
+						organizationId: input.organizationId,
+						originalReceiptId: receipt.id,
+						receiptNumber: allocation.value,
+						registerId: sale.registerId,
+						returnId,
+						saleId: sale.id,
+						tenantId: input.tenantId,
+						totalMinor: totalRefundableMinor,
+					});
+					await repository.createReceipt(voidReceiptRecord);
+
+					const returnRecord: ReturnRecord = {
+						approvedAt: now,
+						approvedByActorUserId: input.actorUserId,
+						approvedByPartyId: actorPartyId,
+						createdAt: now,
+						createdByActorUserId: input.actorUserId,
+						createdByPartyId: actorPartyId,
+						currency: sale.currency,
+						exchangeSaleId: null,
+						id: returnId,
+						lines,
+						mode: "Void",
+						organizationId: input.organizationId,
+						reason: (input.reason ?? "").trim() || "Void",
+						receiptId,
+						registerId: sale.registerId,
+						saleId: sale.id,
+						state: "Completed",
+						tenantId: input.tenantId,
+						totalRefundableMinor,
+						updatedAt: now,
+						version: 1,
+					};
+					const savedReturn = await repository.createReturn(returnRecord);
+
+					await emitReturnCompletionEvents(
+						events,
+						options.ids,
+						savedReturn,
+						voidReceiptRecord,
+						{
+							actorUserId: input.actorUserId,
+							correlationId: input.correlationId,
+							idempotencyKey: input.idempotencyKey,
+							now,
+						}
+					);
+
+					const result = returnView(savedReturn);
+					return recordResult(
+						repository,
+						{
+							idempotencyKey: input.idempotencyKey,
+							operation: "commerce.receipt.void",
+							requestFingerprint,
+							resourceId: savedReturn.id,
+							tenantId: savedReturn.tenantId,
+						},
+						result,
+						now
+					);
+				}
+			);
+		},
 	};
 }
 
@@ -2480,8 +4152,14 @@ export type PosPermission =
 	| "commerce.price-override.approve"
 	| "commerce.price-override.request"
 	| "commerce.receipt.read"
+	| "commerce.receipt.reissue"
+	| "commerce.receipt.void"
+	| "commerce.refund.approve"
+	| "commerce.refund.create"
 	| "commerce.register.close"
 	| "commerce.register.open"
+	| "commerce.return.approve"
+	| "commerce.return.create"
 	| "commerce.sale.complete"
 	| "commerce.sale.create"
 	| "commerce.sale.hold";
@@ -2503,7 +4181,9 @@ export interface PosEntitlementPort {
 			| "commerce.cash-management"
 			| "commerce.order-management"
 			| "commerce.receipts"
-			| "commerce.register-management";
+			| "commerce.refunds"
+			| "commerce.register-management"
+			| "commerce.returns";
 		organizationId: string;
 		tenantId: string;
 	}) => Promise<unknown>;
@@ -2599,6 +4279,54 @@ export function createPosApplication(options: {
 				tenantId: context.tenantId,
 			});
 		},
+		async approveRefund(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			refundId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.refunds",
+				contextId: input.contextId,
+				permission: "commerce.refund.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.approveRefund({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: context.organizationId,
+				refundId: input.refundId,
+				tenantId: context.tenantId,
+			});
+		},
+		async approveReturn(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			returnId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.returns",
+				contextId: input.contextId,
+				permission: "commerce.return.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.approveReturn({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: context.organizationId,
+				returnId: input.returnId,
+				tenantId: context.tenantId,
+			});
+		},
 		async closeRegister(input: {
 			actorUserId: string;
 			contextId: string;
@@ -2631,6 +4359,7 @@ export function createPosApplication(options: {
 			actorUserId: string;
 			contextId: string;
 			correlationId: string;
+			exchangeOfReturnId?: string | null;
 			idempotencyKey: string;
 			saleId: string;
 			sessionId: string;
@@ -2651,6 +4380,7 @@ export function createPosApplication(options: {
 			return options.service.completeSale({
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
+				exchangeOfReturnId: input.exchangeOfReturnId,
 				idempotencyKey: input.idempotencyKey,
 				organizationId: context.organizationId,
 				saleId: input.saleId,
@@ -2689,6 +4419,58 @@ export function createPosApplication(options: {
 				reasonCode: input.reasonCode,
 				referenceId: input.referenceId,
 				registerId: input.registerId,
+				tenantId: context.tenantId,
+			});
+		},
+		async createRefund(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			returnId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.refunds",
+				contextId: input.contextId,
+				permission: "commerce.refund.create",
+				sessionId: input.sessionId,
+			});
+			return options.service.createRefund({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: context.organizationId,
+				returnId: input.returnId,
+				tenantId: context.tenantId,
+			});
+		},
+		async createReturn(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			lines: Array<{ quantity: string; saleLineId: string }>;
+			reason: string;
+			saleId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.returns",
+				contextId: input.contextId,
+				permission: "commerce.return.create",
+				sessionId: input.sessionId,
+			});
+			return options.service.createReturn({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				lines: input.lines,
+				organizationId: context.organizationId,
+				reason: input.reason,
+				saleId: input.saleId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2802,6 +4584,32 @@ export function createPosApplication(options: {
 				tenantId: context.tenantId,
 			});
 		},
+		async reissueReceipt(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			priceSuppressed?: boolean;
+			receiptId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.receipts",
+				contextId: input.contextId,
+				permission: "commerce.receipt.reissue",
+				sessionId: input.sessionId,
+			});
+			return options.service.reissueReceipt({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: context.organizationId,
+				priceSuppressed: input.priceSuppressed,
+				receiptId: input.receiptId,
+				tenantId: context.tenantId,
+			});
+		},
 		async requestPriceOverride(input: {
 			actorUserId: string;
 			contextId: string;
@@ -2829,6 +4637,32 @@ export function createPosApplication(options: {
 				reason: input.reason,
 				requestedPrice: input.requestedPrice,
 				saleId: input.saleId,
+				tenantId: context.tenantId,
+			});
+		},
+		async voidReceipt(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			reason?: string | null;
+			receiptId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.receipts",
+				contextId: input.contextId,
+				permission: "commerce.receipt.void",
+				sessionId: input.sessionId,
+			});
+			return options.service.voidReceipt({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: context.organizationId,
+				reason: input.reason,
+				receiptId: input.receiptId,
 				tenantId: context.tenantId,
 			});
 		},

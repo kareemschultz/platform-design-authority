@@ -515,6 +515,87 @@ describe("Inventory adjustment ledger", () => {
 	});
 });
 
+describe("Inventory Return compensating movement (WS3 PR3)", () => {
+	test("posts a positive Reversal movement referencing the original Sale movement, restoring on-hand stock", async () => {
+		const { repository, service } = harness();
+		// Seed positive on-hand stock via an ordinary Adjustment (a Sale
+		// movement itself only ever decrements) so the subsequent Sale
+		// movement below has stock to draw down without crossing negative.
+		const openingAdjustment = await service.createAdjustment({
+			...command,
+			body: adjustment,
+		});
+		await service.approveAdjustment({
+			actorUserId: "user_approver",
+			adjustmentId: openingAdjustment.id,
+			correlationId: command.correlationId,
+			idempotencyKey: "approve-opening",
+			tenantId: command.tenantId,
+			version: 1,
+		});
+		expect([...repository.balances.values()][0]?.onHand).toBe("10.125");
+
+		const sale = await service.recordSaleMovement({
+			actorUserId: "user_cashier",
+			correlationId: "correlation_sale",
+			locationId: "loc_a",
+			organizationId: "org_a",
+			productId: "prod_a",
+			quantity: "3",
+			saleId: "sale_1",
+			tenantId: "tenant_a",
+			unit: "each",
+		});
+		if (sale === "negative_stock") {
+			throw new Error("unexpected negative_stock");
+		}
+		expect([...repository.balances.values()][0]?.onHand).toBe("7.125");
+
+		const reversal = await service.recordReturnMovement({
+			actorUserId: "user_checker",
+			correlationId: "correlation_return",
+			locationId: "loc_a",
+			organizationId: "org_a",
+			productId: "prod_a",
+			quantity: "1",
+			returnId: "return_1",
+			reversalOfMovementId: sale.id,
+			tenantId: "tenant_a",
+			unit: "each",
+		});
+		expect(reversal).toMatchObject({
+			movementType: "Reversal",
+			quantity: "1",
+			reversalOfMovementId: sale.id,
+			sourceId: "return_1",
+			sourceType: "Sale",
+		});
+		expect([...repository.balances.values()][0]?.onHand).toBe("8.125");
+		expect(repository.movements.at(-1)).toMatchObject({
+			movementType: "Reversal",
+			reversalOfMovementId: sale.id,
+		});
+	});
+
+	test("requires a positive quantity", async () => {
+		const { service } = harness();
+		await expect(
+			service.recordReturnMovement({
+				actorUserId: "user_checker",
+				correlationId: "correlation_return",
+				locationId: "loc_a",
+				organizationId: "org_a",
+				productId: "prod_a",
+				quantity: "0",
+				returnId: "return_1",
+				reversalOfMovementId: "movement_x",
+				tenantId: "tenant_a",
+				unit: "each",
+			})
+		).rejects.toMatchObject({ code: "invalid_quantity" });
+	});
+});
+
 describe("Inventory blind counts", () => {
 	test("durably replaces open draft lines with version and idempotency guards", async () => {
 		const { repository, service } = harness();

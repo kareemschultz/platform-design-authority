@@ -16,6 +16,8 @@ import {
 	CreatePartyIdentityLinkRequestSchema,
 	CreatePersonPartySchema,
 	CreateProductSchema,
+	CreateRefundSchema,
+	CreateReturnSchema,
 	CreateRoleAssignmentRequestSchema,
 	CreateSafeDropRequestSchema,
 	CreateSaleSchema,
@@ -53,8 +55,11 @@ import {
 	ProductStateSchema,
 	ReceiptSchema,
 	ReceiveStockTransferSchema,
+	RefundSchema,
 	RegisterSessionSchema,
+	ReissueReceiptRequestSchema,
 	RequestPriceOverrideSchema,
+	ReturnSchema,
 	RoleAssignmentSchema,
 	SaleSchema,
 	SaveStockCountDraftLinesSchema,
@@ -68,6 +73,7 @@ import {
 	UpdateProductSchema,
 	UserInvitationSchema,
 	UserSummarySchema,
+	VoidReceiptRequestSchema,
 } from "./schemas";
 
 // biome-ignore lint/performance/noBarrelFile: this is the deliberate public contract-package entry point.
@@ -1175,6 +1181,137 @@ export const getReceiptContract = base
 	)
 	.output(ReceiptSchema);
 
+// ---------------------------------------------------------------------------
+// WS3 PR3: Return, Refund, Void, Reissue. Exchange has no dedicated
+// contract — it rides `completeSaleContract`'s `exchangeOfReturnId` (§6.5).
+// ---------------------------------------------------------------------------
+
+export const createReturnContract = base
+	.route({
+		method: "POST",
+		path: "/v1/returns",
+		successStatus: 201,
+	})
+	.meta({
+		operationId: "createReturn",
+		permission: "commerce.return.create",
+		requestRef: "#/components/schemas/CreateReturn",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateReturnSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(ReturnSchema);
+
+export const approveReturnContract = base
+	.route({
+		method: "POST",
+		path: "/v1/returns/{returnId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postReturnsByReturnIdApprove",
+		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ returnId: IdentifierSchema }),
+		})
+	)
+	.output(ReturnSchema);
+
+export const createRefundContract = base
+	.route({
+		method: "POST",
+		path: "/v1/refunds",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postRefunds",
+		permission: "commerce.refund.create",
+		requestRef: "#/components/schemas/CreateRefund",
+		responseRef: "#/components/schemas/Refund",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CreateRefundSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(RefundSchema);
+
+export const approveRefundContract = base
+	.route({
+		method: "POST",
+		path: "/v1/refunds/{refundId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postRefundsByRefundIdApprove",
+		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/Refund",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ refundId: IdentifierSchema }),
+		})
+	)
+	.output(RefundSchema);
+
+export const reissueReceiptContract = base
+	.route({
+		method: "POST",
+		path: "/v1/receipts/{receiptId}/reissue",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postReceiptsByReceiptIdReissue",
+		permission: "commerce.receipt.reissue",
+		requestRef: "#/components/schemas/ReissueReceiptRequest",
+		responseRef: "#/components/schemas/Receipt",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: ReissueReceiptRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ receiptId: IdentifierSchema }),
+		})
+	)
+	.output(ReceiptSchema);
+
+export const voidReceiptContract = base
+	.route({
+		method: "POST",
+		path: "/v1/receipts/{receiptId}/void",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postReceiptsByReceiptIdVoid",
+		permission: "commerce.receipt.void",
+		requestRef: "#/components/schemas/VoidReceiptRequest",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: VoidReceiptRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ receiptId: IdentifierSchema }),
+		})
+	)
+	.output(ReturnSchema);
+
 export const createOpeningStockImportContract = base
 	.route({
 		method: "POST",
@@ -1642,10 +1779,22 @@ export const ws3PosApiContract = {
 			approve: approveSalePriceOverrideContract,
 			request: requestSalePriceOverrideContract,
 		},
-		receipts: { get: getReceiptContract },
+		receipts: {
+			get: getReceiptContract,
+			reissue: reissueReceiptContract,
+			void: voidReceiptContract,
+		},
+		refunds: {
+			approve: approveRefundContract,
+			create: createRefundContract,
+		},
 		registers: {
 			close: closeRegisterContract,
 			open: openRegisterContract,
+		},
+		returns: {
+			approve: approveReturnContract,
+			create: createReturnContract,
 		},
 		safeDrops: { create: createSafeDropContract },
 		sales: {
@@ -1770,3 +1919,32 @@ export const WS3_PR1_OPENAPI_OPERATION_METADATA =
 	OPENAPI_OPERATION_METADATA.filter((operation) =>
 		(WS3_PR1_OPERATION_IDS as readonly string[]).includes(operation.operationId)
 	);
+
+/** WS3 PR1-PR3 scope: every `commerce.*` operation implemented behind this
+ * branch's router as of PR3 (registers/cash/sale/receipt/return/refund/
+ * void/reissue). PR4's deposit/export operations are not yet implemented
+ * and are intentionally excluded — matching `WS3_PR1_OPERATION_IDS`' own
+ * "not yet implemented" discipline above. `ws3PosApiContract`'s procedure
+ * tree is asserted against exactly this set (see `index.test.ts`), the
+ * same parity discipline `PLATFORM_OPENAPI_OPERATION_METADATA` and
+ * `WS2_OPENAPI_OPERATION_METADATA` already use. */
+export const WS3_OPERATION_IDS = [
+	...WS3_PR1_OPERATION_IDS,
+	"createSale",
+	"completeSale",
+	"postSalesBySaleIdHold",
+	"requestSalePriceOverride",
+	"approveSalePriceOverride",
+	"getReceiptsByReceiptId",
+	"createReturn",
+	"postReturnsByReturnIdApprove",
+	"postRefunds",
+	"postRefundsByRefundIdApprove",
+	"postReceiptsByReceiptIdReissue",
+	"postReceiptsByReceiptIdVoid",
+] as const;
+
+export const WS3_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(
+	(operation) =>
+		(WS3_OPERATION_IDS as readonly string[]).includes(operation.operationId)
+);

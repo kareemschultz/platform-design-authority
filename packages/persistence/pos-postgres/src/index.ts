@@ -7,7 +7,10 @@ import type {
 	PosRepository,
 	PriceOverrideRecord,
 	ReceiptRecord,
+	RefundRecord,
 	RegisterSessionRecord,
+	ReturnLineRecord,
+	ReturnRecord,
 	SaleLineRecord,
 	SaleRecord,
 } from "@meridian/domain-pos";
@@ -21,7 +24,10 @@ import {
 	posCommandReceipts,
 	posPriceOverrides,
 	posReceipts,
+	posRefunds,
 	posRegisterSessions,
+	posReturnLines,
+	posReturns,
 	posSaleLines,
 	posSales,
 } from "./schema";
@@ -133,6 +139,7 @@ function mapSaleLine(row: typeof posSaleLines.$inferSelect): SaleLineRecord {
 		discountMinor: row.discountMinor,
 		grossMinor: row.grossMinor,
 		id: row.id,
+		inventoryMovementId: row.inventoryMovementId,
 		lineTotalMinor: row.lineTotalMinor,
 		nonStatutory: row.nonStatutory as true,
 		priceOverrideId: row.priceOverrideId,
@@ -159,6 +166,7 @@ function saleLineValues(
 		discountMinor: line.discountMinor,
 		grossMinor: line.grossMinor,
 		id: line.id,
+		inventoryMovementId: line.inventoryMovementId,
 		lineTotalMinor: line.lineTotalMinor,
 		nonStatutory: line.nonStatutory,
 		priceOverrideId: line.priceOverrideId,
@@ -300,6 +308,141 @@ function saleReceiptValues(
 	};
 }
 
+// ---------------------------------------------------------------------------
+// WS3 PR3: Return, Refund mappers and value builders.
+// ---------------------------------------------------------------------------
+
+function mapReturnLine(
+	row: typeof posReturnLines.$inferSelect
+): ReturnLineRecord {
+	return {
+		discountMinor: row.discountMinor,
+		grossMinor: row.grossMinor,
+		id: row.id,
+		lineTotalMinor: row.lineTotalMinor,
+		nonStatutory: row.nonStatutory as true,
+		productId: row.productId,
+		productName: row.productName,
+		quantity: row.quantity,
+		saleLineId: row.saleLineId,
+		taxAmountMinor: row.taxAmountMinor,
+		taxableBaseMinor: row.taxableBaseMinor,
+		taxCategory: row.taxCategory as ReturnLineRecord["taxCategory"],
+		unit: row.unit,
+		unitPriceMinor: row.unitPriceMinor,
+		variantId: row.variantId,
+	};
+}
+
+function returnLineValues(
+	line: ReturnLineRecord,
+	tenantId: string,
+	returnId: string
+): typeof posReturnLines.$inferInsert {
+	return {
+		discountMinor: line.discountMinor,
+		grossMinor: line.grossMinor,
+		id: line.id,
+		lineTotalMinor: line.lineTotalMinor,
+		nonStatutory: line.nonStatutory,
+		productId: line.productId,
+		productName: line.productName,
+		quantity: line.quantity,
+		returnId,
+		saleLineId: line.saleLineId,
+		taxAmountMinor: line.taxAmountMinor,
+		taxableBaseMinor: line.taxableBaseMinor,
+		taxCategory: line.taxCategory,
+		tenantId,
+		unit: line.unit,
+		unitPriceMinor: line.unitPriceMinor,
+		variantId: line.variantId,
+	};
+}
+
+function mapReturnHeader(
+	row: typeof posReturns.$inferSelect,
+	lines: ReturnLineRecord[]
+): ReturnRecord {
+	return {
+		approvedAt: row.approvedAt,
+		approvedByActorUserId: row.approvedByActorUserId,
+		approvedByPartyId: row.approvedByPartyId,
+		createdAt: row.createdAt,
+		createdByActorUserId: row.createdByActorUserId,
+		createdByPartyId: row.createdByPartyId,
+		currency: row.currency,
+		exchangeSaleId: row.exchangeSaleId,
+		id: row.id,
+		lines,
+		mode: row.mode as ReturnRecord["mode"],
+		organizationId: row.organizationId,
+		reason: row.reason,
+		receiptId: row.receiptId,
+		registerId: row.registerId,
+		saleId: row.saleId,
+		state: row.state as ReturnRecord["state"],
+		tenantId: row.tenantId,
+		totalRefundableMinor: row.totalRefundableMinor,
+		updatedAt: row.updatedAt,
+		version: row.version,
+	};
+}
+
+function returnHeaderValues(
+	record: ReturnRecord
+): typeof posReturns.$inferInsert {
+	return {
+		approvedAt: record.approvedAt,
+		approvedByActorUserId: record.approvedByActorUserId,
+		approvedByPartyId: record.approvedByPartyId,
+		createdAt: record.createdAt,
+		createdByActorUserId: record.createdByActorUserId,
+		createdByPartyId: record.createdByPartyId,
+		currency: record.currency,
+		exchangeSaleId: record.exchangeSaleId,
+		id: record.id,
+		mode: record.mode,
+		organizationId: record.organizationId,
+		reason: record.reason,
+		receiptId: record.receiptId,
+		registerId: record.registerId,
+		saleId: record.saleId,
+		state: record.state,
+		tenantId: record.tenantId,
+		totalRefundableMinor: record.totalRefundableMinor,
+		updatedAt: record.updatedAt,
+		version: record.version,
+	};
+}
+
+function mapRefund(row: typeof posRefunds.$inferSelect): RefundRecord {
+	return {
+		amountMinor: row.amountMinor,
+		approvedAt: row.approvedAt,
+		approvedByActorUserId: row.approvedByActorUserId,
+		approvedByPartyId: row.approvedByPartyId,
+		cashMovementId: row.cashMovementId,
+		createdAt: row.createdAt,
+		currency: row.currency,
+		id: row.id,
+		organizationId: row.organizationId,
+		registerId: row.registerId,
+		requestedAt: row.requestedAt,
+		requestedByActorUserId: row.requestedByActorUserId,
+		requestedByPartyId: row.requestedByPartyId,
+		returnId: row.returnId,
+		state: row.state as RefundRecord["state"],
+		tenantId: row.tenantId,
+		updatedAt: row.updatedAt,
+		version: row.version,
+	};
+}
+
+function refundValues(record: RefundRecord): typeof posRefunds.$inferInsert {
+	return record;
+}
+
 export function createPosRepository(
 	connection: PosPostgresConnection
 ): PosRepository {
@@ -344,6 +487,23 @@ export function createPosRepository(
 					)
 				);
 		}
+	}
+
+	async function loadReturnLines(
+		tenantId: string,
+		returnId: string
+	): Promise<ReturnLineRecord[]> {
+		const rows = await database
+			.select()
+			.from(posReturnLines)
+			.where(
+				and(
+					eq(posReturnLines.tenantId, tenantId),
+					eq(posReturnLines.returnId, returnId)
+				)
+			)
+			.orderBy(posReturnLines.createdAt, posReturnLines.id);
+		return rows.map(mapReturnLine);
 	}
 
 	return {
@@ -398,6 +558,43 @@ export function createPosRepository(
 				throw new Error("POS receipt insert returned no row");
 			}
 			return mapSaleReceipt(row);
+		},
+		async createRefund(record) {
+			const rows = await database
+				.insert(posRefunds)
+				.values(refundValues(record))
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				throw new Error("POS refund insert returned no row");
+			}
+			return mapRefund(row);
+		},
+		async createReturn(record) {
+			const rows = await database
+				.insert(posReturns)
+				.values(returnHeaderValues(record))
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				throw new Error("POS return insert returned no row");
+			}
+			// A Return's lines are inserted ONCE at creation and never
+			// replaced (unlike `replaceSaleLines` — a Return, whether
+			// created `Pending` via `createReturn` or created already
+			// `Completed` via `voidReceipt`, never mutates its own lines
+			// after the fact; only header fields transition via
+			// `updateReturn`).
+			if (record.lines.length > 0) {
+				await database
+					.insert(posReturnLines)
+					.values(
+						record.lines.map((line) =>
+							returnLineValues(line, record.tenantId, record.id)
+						)
+					);
+			}
+			return mapReturnHeader(row, record.lines);
 		},
 		async createSale(record) {
 			const rows = await database
@@ -460,6 +657,29 @@ export function createPosRepository(
 				.where(and(eq(posReceipts.tenantId, tenantId), eq(posReceipts.id, id)))
 				.limit(1);
 			return rows[0] ? mapSaleReceipt(rows[0]) : null;
+		},
+		async getRefund(tenantId, id) {
+			const rows = await database
+				.select()
+				.from(posRefunds)
+				.where(and(eq(posRefunds.tenantId, tenantId), eq(posRefunds.id, id)))
+				.limit(1)
+				.for("update");
+			return rows[0] ? mapRefund(rows[0]) : null;
+		},
+		async getReturn(tenantId, id) {
+			const rows = await database
+				.select()
+				.from(posReturns)
+				.where(and(eq(posReturns.tenantId, tenantId), eq(posReturns.id, id)))
+				.limit(1)
+				.for("update");
+			const [row] = rows;
+			if (!row) {
+				return null;
+			}
+			const lines = await loadReturnLines(tenantId, id);
+			return mapReturnHeader(row, lines);
 		},
 		async getSale(tenantId, saleId) {
 			const rows = await database
@@ -549,6 +769,26 @@ export function createPosRepository(
 			}
 			return { inserted: false, record: existing };
 		},
+		async sumReturnedQuantity(tenantId, saleLineId) {
+			// Every `pos_return_line` row for a given `saleLineId` counts,
+			// regardless of its owning Return's state (`Pending` or
+			// `Completed` — the frozen control plan's over-return cap
+			// reserves against BOTH, see `PosRepository.sumReturnedQuantity`'s
+			// doc comment in `@meridian/domain-pos`). No `Rejected`/denied
+			// Return state exists to exclude.
+			const rows = await database
+				.select({
+					total: sql<string>`coalesce(sum(${posReturnLines.quantity}), 0)::text`,
+				})
+				.from(posReturnLines)
+				.where(
+					and(
+						eq(posReturnLines.tenantId, tenantId),
+						eq(posReturnLines.saleLineId, saleLineId)
+					)
+				);
+			return rows[0]?.total ?? "0";
+		},
 		async updatePriceOverride(record, expectedVersion) {
 			const rows = await database
 				.update(posPriceOverrides)
@@ -562,6 +802,38 @@ export function createPosRepository(
 				)
 				.returning();
 			return rows[0] ? mapPriceOverride(rows[0]) : "version_conflict";
+		},
+		async updateRefund(record, expectedVersion) {
+			const rows = await database
+				.update(posRefunds)
+				.set(refundValues(record))
+				.where(
+					and(
+						eq(posRefunds.tenantId, record.tenantId),
+						eq(posRefunds.id, record.id),
+						eq(posRefunds.version, expectedVersion)
+					)
+				)
+				.returning();
+			return rows[0] ? mapRefund(rows[0]) : "version_conflict";
+		},
+		async updateReturn(record, expectedVersion) {
+			const rows = await database
+				.update(posReturns)
+				.set(returnHeaderValues(record))
+				.where(
+					and(
+						eq(posReturns.tenantId, record.tenantId),
+						eq(posReturns.id, record.id),
+						eq(posReturns.version, expectedVersion)
+					)
+				)
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				return "version_conflict" as const;
+			}
+			return mapReturnHeader(row, record.lines);
 		},
 		async updateSale(record, expectedVersion) {
 			const rows = await database

@@ -1,0 +1,2 @@
+DROP INDEX "inventory_stock_movement_tenant_reversal_uidx";--> statement-breakpoint
+CREATE UNIQUE INDEX "inventory_stock_movement_tenant_reversal_uidx" ON "inventory_stock_movement" USING btree ("tenant_id","reversal_of_movement_id") WHERE "inventory_stock_movement"."reversal_of_movement_id" is not null and "inventory_stock_movement"."source_type" <> 'Sale';

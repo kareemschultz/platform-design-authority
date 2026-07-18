@@ -6,17 +6,21 @@ import {
 	posCommandReceipts,
 	posPriceOverrides,
 	posReceipts,
+	posRefunds,
 	posRegisterSessions,
+	posReturnLines,
+	posReturns,
 	posSaleLines,
 	posSales,
 } from "./schema";
 
 const pr1Tables = [posCashMovements, posCommandReceipts, posRegisterSessions];
 const pr2Tables = [posSales, posSaleLines, posPriceOverrides, posReceipts];
-const tables = [...pr1Tables, ...pr2Tables];
+const pr3Tables = [posReturns, posReturnLines, posRefunds];
+const tables = [...pr1Tables, ...pr2Tables, ...pr3Tables];
 
 describe("POS PostgreSQL ownership", () => {
-	test("declares exactly the seven registered POS-owned tables (PR1 register/cash + PR2 sale/receipt/price-override)", () => {
+	test("declares exactly the ten registered POS-owned tables (PR1 register/cash + PR2 sale/receipt/price-override + PR3 return/refund)", () => {
 		expect(
 			tables
 				.map(getTableName)
@@ -26,7 +30,10 @@ describe("POS PostgreSQL ownership", () => {
 			"pos_command_receipt",
 			"pos_price_override",
 			"pos_receipt",
+			"pos_refund",
 			"pos_register_session",
+			"pos_return",
+			"pos_return_line",
 			"pos_sale",
 			"pos_sale_line",
 		]);
@@ -82,6 +89,35 @@ describe("POS PostgreSQL ownership", () => {
 			const columns = getTableColumns(table);
 			expect(columns.tenantId).toBeDefined();
 			expect(columns.id).toBeDefined();
+		}
+	});
+
+	test("uses integer minor-unit money, version, and enumerated state types on the PR3 return/refund tables", () => {
+		const returnHeader = getTableColumns(posReturns);
+		const returnLine = getTableColumns(posReturnLines);
+		const refund = getTableColumns(posRefunds);
+		expect(returnHeader.totalRefundableMinor.getSQLType()).toBe("bigint");
+		expect(returnHeader.version.dataType).toBe("number");
+		expect(returnHeader.createdAt.dataType).toBe("date");
+		expect(returnLine.quantity.getSQLType()).toBe("numeric(38, 6)");
+		expect(returnLine.lineTotalMinor.getSQLType()).toBe("bigint");
+		expect(refund.amountMinor.getSQLType()).toBe("bigint");
+		expect(refund.version.dataType).toBe("number");
+	});
+
+	test("declares every PR3 table's primary key as (tenant_id, id)", () => {
+		for (const table of pr3Tables) {
+			const columns = getTableColumns(table);
+			expect(columns.tenantId).toBeDefined();
+			expect(columns.id).toBeDefined();
+		}
+	});
+
+	test("requires tenant scope on every PR3 return/refund table", () => {
+		for (const table of pr3Tables) {
+			const { tenantId } = getTableColumns(table);
+			expect(tenantId).toBeDefined();
+			expect(tenantId?.notNull).toBe(true);
 		}
 	});
 });

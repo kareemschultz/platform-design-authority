@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-035
 title: Shadcn Studio Evaluation
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-18
@@ -75,14 +75,14 @@ The complete family and variant names, plus the full per-family authenticated/Pr
 
 This delta is deliberately narrower than the 2026-07-13 exhaustive inventory. It records newly advertised candidates and the boundary between Studio's public website and its pinned MCP metadata interface. No source, installation payload, private URL, or premium asset was retrieved.
 
-Website evidence was verified in a rendered Chrome session with the browser's Playwright-backed DOM inspection and viewport screenshots, not inferred only from static page extraction or URL parameters. On the Radix-selected Autocomplete URL, the live DOM exposed the `Radix UI` component-library control and `/preview/components/radix/autocomplete?index=0` link while also rendering `Base UI Autocomplete Support`, `Radix UI Autocomplete Support`, and Base UI-specific implementation prose. Screenshots are ephemeral review evidence and are not committed because they reproduce third-party presentation content; the durable repository evidence is the bounded observation and source URL below.
+Website evidence was verified in rendered Chrome sessions with the browser's Playwright-backed DOM inspection and viewport screenshots, not inferred only from static page extraction or URL parameters. At the `?base=radix` Autocomplete URL, one live DOM read exposed a `Radix UI` component-library control, while an independent rendered recheck exposed `Base UI Component Library`; both retained the `/preview/components/radix/autocomplete?index=0` link and rendered `Base UI Autocomplete Support`, `Radix UI Autocomplete Support`, and Base UI-specific implementation prose. The control is therefore not a stable implementation signal. Screenshots are ephemeral review evidence and are not committed because they reproduce third-party presentation content; the durable repository evidence is the bounded observation and source URL below.
 
 | Evidence | Verified result | Interpretation |
 |---|---|---|
 | npm package metadata | `shadcn-studio-mcp` remains at 1.0.7; its last publish remains 2026-01-13 | Studio's server-side and website catalogs can change without a new MCP package release |
 | MCP block catalog | 61 block families remain listed; Onboarding Feed is present | The block catalog remains queryable but its summary count is not a complete product-catalog view |
 | Onboarding Feed family metadata | 5 variants returned; variant 02 declares `@stepperize/react` and variant 05 declares `motion` | Variant-level dependency and authority review is required before any prototype |
-| Public component catalog | The official page advertises 58 component families, 1,000+ variants, and a new Autocomplete family with 10 components; its documentation exposes Base UI and Radix UI modes, including a `?base=radix` view that labels the library Radix UI and links to `/preview/components/radix/autocomplete?index=0` | These are vendor catalog claims, not an acceptance or accessibility result. The Radix-selected page also contains generic Base UI-specific prose, so its page copy cannot establish the actual variant implementation or dependencies; the mode selector does not alter Meridian's governed primitive choice |
+| Public component catalog | The official page advertises 58 component families, 1,000+ variants, and a new Autocomplete family with 10 components. At `?base=radix`, rendered Chrome/Playwright checks retained `/preview/components/radix/autocomplete?index=0` but exposed conflicting `Radix UI` and `Base UI` component-library control labels across rechecks while keeping Base UI-specific prose | These are vendor catalog claims, not an acceptance or accessibility result. The conflicting hydrated control and copy cannot establish the actual variant implementation or dependencies; the URL parameter does not alter Meridian's governed primitive choice |
 | MCP component metadata | `autocomplete`, `auto-complete`, `autocomplete-component`, and `typeahead` returned `Component not found`; the known `combobox` family returned 14 variants | Autocomplete is not currently discoverable through the pinned MCP metadata API; absence is not proof that the Studio product lacks it |
 | Public templates | AIDesk, Sprintrix, Promptly, and Brandly are advertised on first-party template pages | Templates are not enumerated by the available Studio MCP metadata tools and remain outside the verified MCP inventory |
 | License page | Last-updated date remains 2026-01-13 | No new license grant was inferred from the catalog release |

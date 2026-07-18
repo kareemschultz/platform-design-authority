@@ -8,6 +8,14 @@ This repository defines the platform before implementation. It is the source of 
 
 Draft documents support research and technical prototypes. They do not become production authority merely because they exist.
 
+## Disclosure, licensing, and contributions
+
+This is a **publicly visible, source-visible controlled-prototype repository**, not an open-source release. No source-code or documentation license is granted. Public visibility does not authorize reuse, redistribution, package publication, commercial use of the internal Meridian codename, or external contributions.
+
+Knowingly disclosed classes are governed architecture and strategy, controlled-prototype source, Draft contracts and schemas, sanitized audit/readiness evidence, local-only development configuration, and contributor automation. Secrets, real environment files, customer or tenant data, private provider/legal/commercial material, raw security or incident evidence, production configuration, and protected premium source are prohibited. Raw external evidence belongs in an approved restricted system; only sanitized conclusions and opaque evidence references may appear here.
+
+External contributions are closed under [CONTRIBUTING.md](CONTRIBUTING.md). Do not report sensitive security matters publicly; follow [SECURITY.md](SECURITY.md). PDA-REV-019 records the dated path-level disclosure review. Final public-visibility, copyright ownership, source/documentation licensing, contributor terms, and third-party notice decisions remain open under FDR-002/FDR-005 and qualified legal review.
+
 ## Vision
 
 Build one unified platform that can run organizations across industries without forcing every customer to purchase, see, or use every capability.

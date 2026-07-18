@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-005
 title: Roadmap Section Index
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -29,14 +29,15 @@ last_reviewed: 2026-07-17
 
 ## Current Delivery Position
 
-Technical Prototypes 1–3 retain their fourth-audit controlled-prototype clearance: identity and tenant context, Catalog and Inventory ledger, and POS cash workflow. P-W2a issue [#90](https://github.com/kareemschultz/platform-design-authority/issues/90) records WS2 complete at controlled-prototype depth. P3/WS3 nevertheless remains blocked until customer discovery issue [#82](https://github.com/kareemschultz/platform-design-authority/issues/82) retains 8 structured interviews and 3 direct workflow observations across at least 3 businesses and repository disclosure review issue [#83](https://github.com/kareemschultz/platform-design-authority/issues/83) is complete.
+Technical Prototypes 1–3 retain their fourth-audit controlled-prototype clearance: identity and tenant context, Catalog and Inventory ledger, and POS cash workflow. P-W2a issue [#90](https://github.com/kareemschultz/platform-design-authority/issues/90) records WS2 complete at controlled-prototype depth. PDA-REV-019 records repository disclosure review issue [#83](https://github.com/kareemschultz/platform-design-authority/issues/83), subject to exact-head independent concurrence and merge. P3/WS3 nevertheless remains blocked until issue [#94](https://github.com/kareemschultz/platform-design-authority/issues/94) establishes restricted raw-evidence handling and customer discovery issue [#82](https://github.com/kareemschultz/platform-design-authority/issues/82) retains 8 structured interviews and 3 direct workflow observations across at least 3 businesses. Final FDR-005 visibility and licensing ratification remains separate and open.
 
 P4–P7 implementation receives no general clearance until the M3 standing-audit charter checkpoint records a disposition against completed P3 evidence; each prototype's stricter founder-decision, ADR, provider, security, and external-evidence gates still apply. The broader first slice proceeds only after named blockers, founder gates, provider and jurisdiction evidence, and prototype results are dispositioned. Workstream sequencing, package targets, and per-milestone gates are defined in `FIRST_SLICE_IMPLEMENTATION_PLAN.md`.
 
 ## Remaining Execution Evidence
 
 - Real customer interviews and workflow observations for WS3
-- Repository disclosure/redaction review
+- Restricted raw-evidence handling and a public-safe reference scheme
+- Final FDR-005 visibility/licensing ratification and its security/provenance follow-ups
 - Prototype results
 - Named design partners and pilot commitments
 - Estimates, staffing, and financing

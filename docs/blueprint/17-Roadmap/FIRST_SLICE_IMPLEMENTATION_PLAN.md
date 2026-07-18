@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.15.0
+version: 0.16.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -22,7 +22,7 @@ This plan maps the governed planning inputs into concrete engineering workstream
 
 Where this plan and those documents conflict, they win. All work scheduled here proceeds under the ratification-wave **prototype exception**: Draft/Proposed documents guide non-production prototypes that name the decisions they test (chiefly ADR-0020 runtime, ADR-0002/0003 boundaries, ADR-0013 stored-value ownership).
 
-**Founder decision record (2026-07-17):** issue #81, comment `5008157609`, ratifies FDR-004's bounded first-slice scope, approves WSX, gates WS3 on real customer evidence and repository disclosure review, and selects the M3 standing-audit charter checkpoint as the general P4–P7 entry clearance. Scope ratification does not promote this Draft plan, convert target depth into implementation evidence, validate the market hypothesis, or authorize pilot/production use. M0 passed under provisional adoption before this ratification; P-W2a issue #90 records that historical sequence and the superseding exact-`main` WS2 review.
+**Founder decision record (2026-07-17):** issue #81, comment `5008157609`, ratifies FDR-004's bounded first-slice scope, approves WSX, gates WS3 on real customer evidence and repository disclosure review, and selects the M3 standing-audit charter checkpoint as the general P4–P7 entry clearance. PDA-REV-019 now records the issue #83 disclosure/redaction review, subject to exact-head independent concurrence and merge; the remaining WS3 hard gates are issue #94's restricted raw-evidence handling and issue #82's retained real-world evidence. Scope ratification does not promote this Draft plan, convert target depth into implementation evidence, validate the market hypothesis, or authorize pilot/production use. M0 passed under provisional adoption before this ratification; P-W2a issue #90 records that historical sequence and the superseding exact-`main` WS2 review.
 
 ### 1.1 Implementation Posture: Backend Foundation First, Not Entire Backend First
 
@@ -79,7 +79,7 @@ Any package left outside a family carries a recorded exception **with expiry** i
 graph LR
   WS0[WS0 Scaffold alignment + contracts] --> WS1[WS1 Identity and tenancy P1]
   WS1 --> WS2[WS2 Catalog and inventory P2]
-  X3[WSX customer evidence + disclosure review] --> WS3
+  X3[WSX restricted evidence handling + customer evidence] --> WS3
   WS2 --> WS3[WS3 POS cash P3]
   WS3 --> M3[M3 charter checkpoint]
   M3 --> WS4[WS4 Stored value P4]
@@ -92,11 +92,11 @@ graph LR
 
 | Workstream | Blocked by | Parallel lane notes | External gates |
 |---|---|---|---|
-| WSX | — | External engagements run alongside technical work and do not consume one of the two technical-workstream slots | Per-row gates and issues #82–#88 below |
+| WSX | — | External engagements run alongside technical work and do not consume one of the two technical-workstream slots | Per-row gates and issues below |
 | WS0 | — | Single lane; everything depends on it | — |
 | WS1 (P1) | WS0 | — | — |
 | WS2 (P2) | WS1 | — | — |
-| WS3 (P3) | WS2 controlled-prototype closeout recorded | — | #82 retained real-world customer threshold; #83 disclosure review complete |
+| WS3 (P3) | WS2 controlled-prototype closeout recorded | — | #94 restricted raw-evidence handling; #82 retained real-world customer threshold; PDA-REV-019 records the #83 disclosure review subject to exact-head independent concurrence and merge |
 | WS4 (P4) | Recorded M3 charter checkpoint; WS3 | May run beside WS5 | FDR-003 before PR1 schema freeze |
 | WS5 (P5) | Recorded M3 charter checkpoint; WS3 | Preparatory client-sync design may run earlier; P5 implementation may not | Device-trust/key-management ADR and device/browser matrix before PR1 |
 | WS6 (P6) | Recorded M3 charter checkpoint | Provider-neutral preparatory analysis may run earlier; P6 implementation may not | Real-provider work gated on FDR-002/FDR-007 and WSX #84/#85 |
@@ -117,15 +117,18 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 | Gate and tracking issue | Accountable role | Start by | Finish by |
 |---|---|---|---|
 | Customer discovery [#82](https://github.com/kareemschultz/platform-design-authority/issues/82) | Founder | Immediately after the P-W1 decision-recording PR merges | Before WS3 entry: 8 structured interviews and 3 direct workflow observations across at least 3 businesses, retained as real-world evidence; no agent-generated, simulated, inferred, or waived substitute is acceptable |
-| Repository disclosure/redaction [#83](https://github.com/kareemschultz/platform-design-authority/issues/83) | Founder, with Platform Design Authority support | Immediately after the P-W1 decision-recording PR merges | Before WS3 entry and FDR-005 public-visibility ratification |
+| Repository disclosure/redaction [#83](https://github.com/kareemschultz/platform-design-authority/issues/83) | Founder, with Platform Design Authority support | Immediately after the P-W1 decision-recording PR merges | PDA-REV-019 records the review, subject to exact-head independent concurrence and merge; final FDR-005 visibility/licensing ratification remains separate and open |
 | Qualified Guyana counsel [#84](https://github.com/kareemschultz/platform-design-authority/issues/84) | Founder; qualified Guyana counsel supplies external evidence | Begin sourcing after the P-W1 decision-recording PR merges and before a real-provider commitment | Provider-contract implications before real-provider work; dated tax/VAT and Data Protection Act evidence before pilot |
 | Provider capability/certification [#85](https://github.com/kareemschultz/platform-design-authority/issues/85) | Founder; named provider representatives/certification contacts supply external evidence | After FDR-002/FDR-007 identify the legal entity and provider categories | Before real-provider sandbox work or any pilot claim for the selected rail |
 | Independent accessibility evaluation [#86](https://github.com/kareemschultz/platform-design-authority/issues/86) | Platform Design Authority; independent accessibility specialist supplies external evidence | Schedule by WS7 entry after the relevant surface/topology stabilizes | Before pilot entry, including independent retest |
 | Independent penetration test [#87](https://github.com/kareemschultz/platform-design-authority/issues/87) | Platform Design Authority; qualified independent tester supplies external evidence | Schedule by WS7 entry; execute after production-relevant RLS/topology evidence | Before pilot entry, including independent retest |
 | Commercial offer/cost worksheet [#88](https://github.com/kareemschultz/platform-design-authority/issues/88) | Founder | Once the production-topology decision provides a defensible cost basis | Before pilot recruitment or presentation of a commercial offer |
+| Private vulnerability intake and repository security scanning [#92](https://github.com/kareemschultz/platform-design-authority/issues/92) | Founder, with Platform Design Authority support | After PDA-REV-019 records the disclosure review | Before accepting external vulnerability reports or claiming repository scanning coverage |
+| Third-party notices, SBOM, and asset provenance [#93](https://github.com/kareemschultz/platform-design-authority/issues/93) | Platform Design Authority | After PDA-REV-019 records the disclosure review | Before any distribution or license posture that relies on a complete third-party provenance baseline |
+| Restricted evidence store and public-safe reference scheme [#94](https://github.com/kareemschultz/platform-design-authority/issues/94) | Founder, with Platform Design Authority support | After PDA-REV-019 records the disclosure review | Before retaining raw customer-discovery evidence and before WS3 entry |
 
-- **Exit:** every row cites retained real-world evidence in the readiness table and its tracking issue is dispositioned. Synthetic interviews, generated observations, automated-only conformance scans, simulator claims about real providers, placeholder professionals, or invented commercial figures do not count.
-- **Gates:** #82 and #83 are hard WS3 entry gates. The remaining rows bind their named real-provider or pilot milestones even if M7 technical work is complete.
+- **Exit:** every row cites retained evidence appropriate to its gate in the readiness table and its tracking issue is dispositioned. Synthetic interviews, generated observations, automated-only conformance scans, simulator claims about real providers, placeholder professionals, or invented commercial figures do not count as substitutes for evidence that must come from an independent or real-world source.
+- **Gates:** PDA-REV-019 records the #83 review subject to exact-head independent concurrence and merge. The remaining hard WS3 entry gates are #94 and #82. Final FDR-005 visibility/licensing ratification remains separate and open; the other rows bind their named security, provenance, real-provider, or pilot milestones even if M7 technical work is complete.
 
 ### WS0 — Scaffold Alignment and Contract Materialization — **complete (2026-07-13)**
 
@@ -177,13 +180,13 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 ### WS3 — POS Cash Workflow (P3)
 
 - **Why:** The cash sale is the beachhead's economic heartbeat and the platform's first legally meaningful artifact chain (receipt numbering, register custody, accountant handoff) — cash-first matches Guyana reality and defers all provider risk.
-- **Entry:** WS2 controlled-prototype closeout is recorded through P-W2a issue #90; customer discovery #82 records at least 8 structured interviews and 3 direct workflow observations across at least 3 businesses as retained real-world evidence; repository disclosure/redaction review #83 is complete. No agent-generated, simulated, inferred, or waived substitute satisfies the customer-evidence gate. FA4's P1–P3 controlled-prototype clearance remains the authority for P3.
+- **Entry:** WS2 controlled-prototype closeout is recorded through P-W2a issue #90; PDA-REV-019 records the repository disclosure/redaction review from issue #83 subject to exact-head independent concurrence and merge; issue #94 establishes restricted raw-evidence handling; and customer discovery #82 records at least 8 structured interviews and 3 direct workflow observations across at least 3 businesses as retained real-world evidence. No agent-generated, simulated, inferred, or waived substitute satisfies the customer-evidence gate. FA4's P1–P3 controlled-prototype clearance remains the authority for P3.
 - **Proves:** PDA-RDM-004 §Prototype 3.
 - **Packages:** NEW `domains/pos`; `engines/pricing`, `engines/tax` (prototype depth, values from `GUYANA_RETAIL_PROTOTYPE_TAX_PACK.md` — explicitly non-statutory).
 - **Contracts:** `/registers/*` (open/close/cash-movements/safe-drops), `/sales*`, `/receipts/*` (reissue/void), `/deposits*`, `/refunds*`, `/returns*`, `/exports/accountant-handoff` (+ `FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`, `schemas/finance/finance-handoff-v1.schema.json`); `commerce.*` sale/register/return events.
 - **Tests:** dominant dimensions `happy_path`, `validation_and_denial`, `recovery_replay_and_reconciliation`; budgets: median cash sale ≤30s (P90 ≤60s), platform processing 750ms p95 / 1.5s p99, add-scanned-item 100ms p95, POS route JS ≤350KB target; receipt numbering offline-safe (via `platform/numbering`).
 - **Exit:** scenarios 3, 4, 6, 9, 10 demonstrated end-to-end; DoD §6.
-- **Gates:** tax values remain prototype-only (production statutory behavior stays machine-deferred: `fiscalization.submissions`). Repository prose, synthetic interviews, or generated observations do not satisfy #82, and provisional public visibility does not satisfy #83.
+- **Gates:** tax values remain prototype-only (production statutory behavior stays machine-deferred: `fiscalization.submissions`). Repository prose, synthetic interviews, or generated observations do not satisfy #82; raw evidence may not be retained until #94 establishes restricted handling. PDA-REV-019 satisfies the disclosure-review record only after exact-head independent concurrence and merge; it does not ratify final FDR-005 visibility or licensing.
 
 ### WS4 — Stored Value (P4)
 
@@ -257,6 +260,6 @@ Scope changes route through PDA-RDM-003 §Change Control (doc + `registry/first-
 
 - **FDR-002 (platform legal entity)** — critical path for WS6 provider sandboxes and everything commercial; tracked in the Founder Decision Register.
 - **FDR-004** — ratified on 2026-07-17 for the bounded PDA-RDM-003 / `registry/first-slice.json` scope and deferrals. This closes the scope-selection authority gap but does not erase that M0 passed earlier under provisional adoption, promote Draft sources, establish customer evidence, or authorize pilot/production use.
-- **FDR-005 / repository disclosure** — public visibility remains provisional; issue #83 must complete before WS3, and prohibited content remains prohibited regardless of repository visibility.
+- **FDR-005 / repository disclosure** — PDA-REV-019 records issue #83's disclosure/redaction review subject to exact-head independent concurrence and merge. Final public visibility, licensing, and contribution policy remain open under FDR-005; #92 and #93 track security-intake/scanning and provenance follow-up, and prohibited content remains prohibited regardless of repository visibility.
 - **Drizzle production-scale revalidation** — the bounded WS2 controlled-prototype spike passed exact-decimal, row-lock concurrency, reversal, rebuild, atomic-outbox, and 250k Product query-shape checks. Production-scale ledger/query latency, upgrade behavior, and provider topology remain open; Kysely remains the recorded alternative if later evidence invalidates the selected adapter.
 - **Windows contributor environment** — Turbopack MAX_PATH and long-path issues are recorded in the docs troubleshooting page; CI (Linux) is authoritative.

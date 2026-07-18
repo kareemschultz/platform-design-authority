@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Founder
 last_reviewed: 2026-07-17
@@ -63,17 +63,19 @@ The production native storefront, customer recurring agreements, memberships, ad
 
 This ratification closes the founder scope decision identified by F-L-003. It does not promote the Draft manifest or implementation plan, authorize a pilot or production deployment, or remove their legal, provider, security, accessibility, operational, and evidence gates.
 
-**WS3 entry condition:** do not start WS3 until (1) the separate P-W2a WS2 closeout synchronization is merged, (2) the FDR-005 repository disclosure review is complete, and (3) the customer-evidence gate records at least 8 structured interviews and 3 workflow observations across at least 3 businesses, as directed in the same founder approval. The customer evidence must be retained real-world evidence; agents cannot generate, simulate, infer, or waive it.
+**WS3 entry condition:** P-W2a is merged and PDA-REV-019 records the FDR-005 repository disclosure review. WS3 still may not start until the customer-evidence gate records at least 8 structured interviews and 3 workflow observations across at least 3 businesses, as directed in the same founder approval. Issue #94 must establish restricted handling before raw customer evidence is retained. The customer evidence must be real-world evidence; agents cannot generate, simulate, infer, or waive it.
 
 ## FDR-005 — Repository Visibility and Documentation License
 
-**Status:** Open — provisional public visibility approved on 2026-07-17; final path classification and licensing remain undecided.
+**Status:** Open — provisional public visibility approved on 2026-07-17; the controlled-prototype path review is recorded by PDA-REV-019; final visibility, ownership, licensing, and contribution ratification remain undecided.
 
 **Decision owner:** Founder.
 
 **Decision evidence:** [Issue #81, owner approval comment 5008157609](https://github.com/kareemschultz/platform-design-authority/issues/81#issuecomment-5008157609).
 
 **Current operating decision:** the repository may remain public only as a provisional disclosure posture while the required review is completed. Public availability is not evidence that every path has been classified for disclosure, that the documentation or source has been licensed for reuse, that security-sensitive detail is suitable for publication, or that public contribution is accepted.
+
+**Recorded path review:** PDA-REV-019 classifies the evaluated controlled-prototype tree as public or sanitized public while defining Restricted and Prohibited classes that must remain outside public collaboration surfaces. It records no confirmed current or historical live secret/customer/private-provider/premium-source exposure, closes public external contribution intake, and adds mechanical high-signal disclosure checks. Issues #92–#94 retain private security intake/scanning, third-party notice/SBOM/asset provenance, and restricted external-evidence storage. Completion of the path review satisfies only the issue #83/WS3 disclosure-review trigger; it does not ratify a license, public contribution model, external distribution, pilot, or production posture.
 
 Until final ratification, every change must continue to exclude secrets, customer or partner identities, private premium-source code, license keys, private download URLs, production credentials, exploitable production security detail, and material that contractual, legal, privacy, security, or licensing review has not cleared. A public repository does not waive copyright, confidentiality, trademark, privacy, or third-party license obligations.
 

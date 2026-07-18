@@ -2,6 +2,10 @@ name: Architecture or governance change
 description: Propose a change to an authoritative decision, ADR, or governed specification.
 labels: ["contracts"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Public-safe content only. Do not include secrets, customer data, private provider/legal/commercial material, exploit instructions, incident evidence, private URLs, or unredacted logs. Follow `SECURITY.md` for the security-reporting boundary.
   - type: textarea
     id: authority
     attributes:

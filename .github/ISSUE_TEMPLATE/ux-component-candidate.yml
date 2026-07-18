@@ -2,6 +2,10 @@ name: UX / component candidate
 description: Propose a UI component, pattern, or external source candidate for evaluation.
 labels: ["ux"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Public-safe content only. Do not include premium credentials or source, private download URLs, customer data, private provider/legal/commercial material, or unredacted screenshots/logs. Follow `SECURITY.md` for the security-reporting boundary.
   - type: textarea
     id: user-task
     attributes:

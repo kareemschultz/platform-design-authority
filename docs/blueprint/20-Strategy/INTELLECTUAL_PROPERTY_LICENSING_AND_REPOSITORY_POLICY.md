@@ -1,7 +1,7 @@
 ---
 document_id: PDA-STR-029
 title: Intellectual Property Licensing and Repository Policy
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Founder
 last_reviewed: 2026-07-17
@@ -32,9 +32,11 @@ Contracts must identify the entity owning platform IP, employee and contractor a
 
 Public content may support trust, recruiting, ecosystem growth, and thought leadership. Private content protects security details, commercial strategy, customer information, unreleased capabilities, and operational procedures.
 
-FDR-005 records the current repository posture as **provisionally public**, not finally ratified. Issue [#83](https://github.com/kareemschultz/platform-design-authority/issues/83) must retain a path-level disclosure and redaction review before WS3 starts and before final public-visibility or documentation-license ratification.
+FDR-005 records the current repository posture as **provisionally public**, not finally ratified. PDA-REV-019 retains issue [#83](https://github.com/kareemschultz/platform-design-authority/issues/83)'s path-level disclosure and redaction review. That review clears only the controlled-prototype WS3 disclosure gate after independent concurrence and merge; final public visibility, source/documentation licensing, contributions, and external distribution remain open.
 
 The review may allow architecture principles, approved public contracts, sanitized examples, non-sensitive implementation source, and public evidence summaries. It must exclude secrets and credentials, customer or provider confidential data, private negotiations, exploit-ready production security detail, protected premium assets or redistribution rights, and personal data without an approved basis. Moving a repository or path does not waive those prohibitions.
+
+PDA-REV-019 is the current classification ledger. Raw customer/external evidence uses the restricted system selected by issue #94; private security intake and native scanning remain tracked by issue #92; dependency notices, SBOM, copied-source provenance, and asset rights remain tracked by issue #93. Public/source-visible material carries no reuse license meanwhile.
 
 ## Open Source
 
@@ -43,6 +45,8 @@ Dependencies and released components require license review, attribution, compat
 ## Contributions
 
 External contributions require contributor terms, code review, security review, tests, provenance, and documentation. Contribution does not automatically confer product direction or marketplace approval.
+
+External contributions are closed until FDR-005, FDR-002, contributor terms, licensing, provenance, private security intake, and repository controls are ratified. `CONTRIBUTING.md` states the current public boundary.
 
 ## Customer and Partner Content
 

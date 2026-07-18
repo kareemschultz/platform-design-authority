@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-004
 title: Technical Prototype Plan
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-17
@@ -25,7 +25,7 @@ P1–P3 retain the controlled-prototype clearance recorded by the fourth audit. 
 
 | Prototype | General clearance | Additional entry conditions |
 |---|---|---|
-| P3 | Existing FA4 P1–P3 clearance | WS2 closeout is recorded through P-W2a; customer discovery [#82](https://github.com/kareemschultz/platform-design-authority/issues/82) satisfies 8 structured interviews plus 3 direct workflow observations across at least 3 businesses with retained real-world evidence; repository disclosure review [#83](https://github.com/kareemschultz/platform-design-authority/issues/83) is complete. |
+| P3 | Existing FA4 P1–P3 clearance | WS2 controlled-prototype closeout is recorded through P-W2a issue [#90](https://github.com/kareemschultz/platform-design-authority/issues/90); customer discovery [#82](https://github.com/kareemschultz/platform-design-authority/issues/82) satisfies 8 structured interviews plus 3 direct workflow observations across at least 3 businesses with retained real-world evidence; repository disclosure review [#83](https://github.com/kareemschultz/platform-design-authority/issues/83) is complete. |
 | P4 | Recorded M3 charter checkpoint | P3 complete; FDR-003 dispositioned before the first schema freeze; ledger target remains a target until measured. |
 | P5 | Recorded M3 charter checkpoint | P3 complete; offline device-trust/key-management ADR and device/browser support matrix completed before the first signing-contract freeze. |
 | P6 | Recorded M3 charter checkpoint | Provider-neutral preparatory analysis may continue before M3, but P6 implementation entry waits for the checkpoint; real-provider work additionally requires FDR-002/FDR-007 and WSX issues [#84](https://github.com/kareemschultz/platform-design-authority/issues/84) and [#85](https://github.com/kareemschultz/platform-design-authority/issues/85). |
@@ -39,7 +39,7 @@ Prove Better Auth, sessions, 2FA or passkey seam, tenant selection, Party link, 
 
 Prove product search, stock ledger, balances, adjustments, counts, idempotency, tenant isolation, and event publication.
 
-**Current result:** a controlled-prototype closeout candidate is recorded in PDA-IMPL-007. PR1-PR6 are merged after exact-head independent concurrence; PR7 contains the registry-derived 14-capability/182-cell executable evidence matrix, live PostgreSQL and browser evidence, and explicit scale/accessibility/security deferrals. Prototype 2 is not closed by this draft statement: PR7 exact-head concurrence, merge, exact-`main` verification, and the separate whole-WS2 audit remain required. The result does not make this plan implementation-ready, authorize a pilot or production deployment, close RR-007/RR-009, or resolve founder/external gates.
+**Current result:** PDA-IMPL-007 records Prototype 2 complete at controlled-prototype depth with 14/14 WS2 capabilities and 182/182 WS2 required cells. PR #79 exact head `22a3a38369d458d065d5fb2bc2216d09aec410de` merged as `81e903b27bf41785106775afb33f9f88738e39b9` without the required pre-merge concurrence; PDA-REV-013 then independently reviewed that exact merged `main`, and the Founder accepted it as the superseding WS2 review in issue #81. P-W2a issue #90 synchronizes that honest sequence. This result does not make this Draft plan implementation-ready, authorize a pilot or production deployment, close RR-007/RR-009, or resolve customer, disclosure, founder, or other external gates.
 
 ## Prototype 3 — POS Cash Workflow
 

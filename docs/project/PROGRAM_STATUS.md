@@ -4,9 +4,9 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at `635fa3f1618d5c880585fdd3e86de7a16d0993ac`, which includes the RR-011 remediation and re-verification, WS1 closeout, project-tracking records, and WS2 PR1-PR6 (governance/contracts, Catalog core, Inventory ledger, durable event delivery, bounded imports/online numbering, and the Product/Inventory web experience), each independently audited across one or more remediation rounds before merge
+**Evidence cutoff:** `main` at `7de0688d11a80de950f0e0639ade84b23e790e59`, which includes WS2 PR7 merged as `81e903b27bf41785106775afb33f9f88738e39b9`, the independent exact-`main` whole-project audit PDA-REV-013, PR #80's audited remediation, and PR #89's founder-decision recording
 
-**Last updated:** 2026-07-16
+**Last updated:** 2026-07-17
 
 This dashboard is a non-authoritative program-control summary. It is subordinate to the authority order in `AGENTS.md`, and it cannot ratify a document, close a risk, or replace evidence in an ADR, approved specification, registry, review disposition, issue, or pull request.
 
@@ -15,9 +15,10 @@ This dashboard is a non-authoritative program-control summary. It is subordinate
 | Measure | Current result | Interpretation |
 |---|---:|---|
 | Blueprint baseline completeness | **100% for controlled-prototype implementation commencement** | The bounded documentation baseline needed to continue the named prototypes exists. FA4-032, ratification waves, and production gates remain open. |
-| First-slice implementation | **37.8% provisional weighted completion** | WS0 and WS1 are complete at controlled-prototype depth. WS2 has four of six weighted stages merged (75%); automated test/quality-budget evidence and independent closeout remain open on merged `main`. WS3–WS7 have not begun implementation. |
+| First-slice implementation | **42.0% provisional weighted completion** | WS0, WS1, and WS2 are complete at controlled-prototype depth. WS3 is blocked on retained customer evidence and the repository disclosure review; WS4–WS7 have not begun implementation. |
 | WS1 progress | **100% stage-weighted** | PR1–PR9 implement contracts, persistence, identity/tenancy/Party, authorization, entitlements, Audit/revocation, the real shell, and governed closeout evidence. This is not pilot or production readiness. |
-| Capability evidence coverage | **11/103 capabilities; 143/1,294 required cells** | The generated registry now computes evidence coverage. The 11 WS1 capabilities are evidenced at registered first-slice depth; remaining workstreams stay Planned. |
+| WS2 progress | **100% stage-weighted** | PR1–PR7 implement and evidence Catalog, Inventory, durable event delivery, bounded import/numbering, and the Product/Inventory experience at controlled-prototype depth. The historical PR #79 review-sequence deviation is retained below. |
+| Capability evidence coverage | **25/103 capabilities; 325/1,294 required cells** | The generated registry computes evidence coverage. All 11 WS1 and 14 WS2 capabilities are evidenced at their registered first-slice depth; this is not pilot or production evidence. |
 | Production readiness | **Not claimed** | Founder, legal, customer, provider, security, accessibility, operational, pilot, and other external gates remain authoritative. |
 
 ## Blueprint baseline
@@ -34,15 +35,15 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 |---|---:|---|---:|---:|---|
 | WS0 — Scaffold alignment and contracts | 8% | complete | 100% | 8.0% | PR #23, #31, #32; package families, foundation types, generated contracts, contract parity, and executable architecture gates are merged. |
 | WS1 — Identity, tenancy, Party, authorization | 17% | complete | 100% | 17.0% | PR #54 merged the PR1–PR9 controlled-prototype closeout; PDA-IMPL-005 and the generated matrix record evidence and residual gates. |
-| WS2 — Catalog and inventory ledger | 17% | in-progress | 75% | 12.8% | PR #63 (plan), #65 (PR1), #67 (PR2), #69 (PR3), #74 (PR4), #76 (PR5), and #78 (PR6 web experience) complete the plan, core, persistence/integration, and UI stages. Issue #73 owns the remaining 15% automated evidence/quality-budget stage and 10% independent closeout stage. |
-| WS3 — POS cash | 17% | planned | 0% | 0% | Blocked on WS2. |
-| WS4 — Stored value | 11% | planned | 0% | 0% | Blocked on WS3. |
-| WS5 — Offline sync | 12% | planned | 0% | 0% | Full workstream blocked on WS3; bounded client-engine research may begin after WS1 under the parallelism rule. |
-| WS6 — Provider adapter | 9% | planned | 0% | 0% | Engine work may follow WS1; provider sandbox and pilot path remain externally gated by founder/provider decisions. |
-| WS7 — Recovery and operations | 9% | planned | 0% | 0% | Starts after WS2 provides real ledgers/outbox; closes last. |
-| **Total** | **100%** |  |  | **37.8%** | Provisional weighted implementation completion at the merged-main cutoff: exact arithmetic is **37.75%**, rounded to one decimal by the reporting standard. WS2 reaches 100% / 17.0% contribution and the program reaches 42.0% only after PR7 merge plus the required final whole-workstream audit. |
+| WS2 — Catalog and inventory ledger | 17% | complete | 100% | 17.0% | PR #79 merged the PR1–PR7 closeout evidence as `81e903b`; PDA-REV-013 independently reproduced the exact merged `main`, and issue #81 accepted that audit as the superseding WS2 review while retaining the missed pre-merge concurrence as a governance deviation. |
+| WS3 — POS cash | 17% | blocked | 0% | 0% | Entry remains blocked until issue #82 records 8 interviews and 3 workflow observations across at least 3 businesses and issue #83 completes the repository disclosure/redaction review. |
+| WS4 — Stored value | 11% | planned | 0% | 0% | Requires WS3, the recorded M3 P4–P7 charter checkpoint, and FDR-003 before the first schema freeze. |
+| WS5 — Offline sync | 12% | planned | 0% | 0% | Requires WS3, the recorded M3 checkpoint, and the device-trust/key-management ADR; preparatory client-sync design may run earlier but does not advance progress. |
+| WS6 — Provider adapter | 9% | planned | 0% | 0% | Provider-neutral analysis may run before M3; implementation waits for the recorded M3 checkpoint, and real-provider work remains gated by FDR-002/FDR-007 and issues #84/#85. |
+| WS7 — Recovery and operations | 9% | planned | 0% | 0% | Requires the recorded M3 checkpoint and closes after WS4/WS5; production-readiness evidence must use the selected production-relevant topology. |
+| **Total** | **100%** |  |  | **42.0%** | Provisional weighted implementation completion at the merged-`main` cutoff: WS0 contributes 8.0%, WS1 contributes 17.0%, and WS2 contributes 17.0%. Prototype completion does not advance any production-readiness gate. |
 
-**PR7 branch candidate (not merged-main progress):** PDA-IMPL-007 and `evidence/first-slice/ws2-capability-evidence.json` generate 25/103 evidenced capabilities and 325/1,294 executable required cells, including all 14 WS2 capabilities / 182 WS2 cells. The headline remains 11/103 and 143/1,294 until exact-head concurrence and merge; the WS2 percentage remains 75% until the separate whole-workstream audit also concurs.
+**WS2 closeout provenance and deviation:** PR #79 final head `22a3a38369d458d065d5fb2bc2216d09aec410de` merged as `81e903b27bf41785106775afb33f9f88738e39b9` without the governed pre-merge independent exact-head concurrence. PDA-REV-013 subsequently reviewed and reproduced the exact merged `main` at `81e903b`; its concurrence confirmed the WS2 implementation evidence while recording the sequence defect as F-A-001. The Founder accepted PDA-REV-013 as the superseding WS2 review in issue #81, comment `5008157609`. This disposition closes the controlled-prototype reporting gate without rewriting history or claiming that PR #79 followed the required sequence.
 
 ## WS1 delivery detail
 
@@ -71,7 +72,7 @@ Completion is bounded by `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` and applie
 | PR4 durable event delivery, worker topology, and projections | complete | issue #70 / PR #74 merged at `7202fc8`; independently audited across two rounds; PDA-REV-009 records RR-006 closed at controlled-prototype depth |
 | PR5 bounded imports and online numbering foundation | complete | issue #71 (closed) / PR #76 merged at `f7d2a6b`; independently audited across two rounds (round 1 withheld concurrence on 4 P1 findings including numbering never reaching a production code path; round 2 recorded concurrence after all 4 were independently reproduced fixed, including a 10-way live concurrency test proving no duplicate effects under retry) |
 | PR6 Product and Inventory web experience | complete | issue #72 closed; PR #78 exact head `c69e5fb` concurred and merged as `635fa3f`; PDA-APP-025 |
-| PR7 verification and controlled-prototype closeout | closeout candidate | issue #73; PDA-IMPL-007 plus the machine-readable source generate 14 WS2 capabilities / 182 executable cells and retain reproduced database/browser evidence plus explicit production deferrals; exact-head concurrence, merge, exact-main checks, and final whole-WS2 audit remain open |
+| PR7 verification and controlled-prototype closeout | complete with recorded sequence deviation | issue #73 / PR #79 final head `22a3a383` merged as `81e903b`; PDA-IMPL-007 and the machine-readable source evidence 14 WS2 capabilities / 182 executable cells; PDA-REV-013 independently reproduced exact merged `main`; issue #81 accepted that audit as the superseding review and retained the missed pre-merge concurrence as F-A-001 |
 
 ## Current implementation assets
 
@@ -98,15 +99,17 @@ Implemented and merged:
 
 Not yet complete:
 
-- WS2 verification, exact-head/merge/exact-main closeout, and final whole-workstream audit (PR7, issue #73);
 - WS3–WS7 business-domain implementation;
+- WS3 customer-discovery evidence and the repository disclosure/redaction review;
 - production-grade RLS topology and evidence;
 - production OTP/provider path and other external readiness gates.
 
 ## Immediate priorities
 
-1. Complete issue #73 as one focused PR7: registry-derived evidence, exact-head independent concurrence, merge, exact-main verification, and the separate final whole-WS2 audit. Do not close issue #12 or start broad WS3 implementation before that audit disposition is recorded.
-2. Extend the machine-readable evidence-source pattern per workstream; the program dashboard itself remains non-authoritative prose until a governed program-status source is introduced.
+1. Complete issue #82 with retained real-world evidence from at least 8 structured retailer interviews and 3 direct workflow observations across at least 3 businesses. Generated, simulated, inferred, or waived evidence does not satisfy this gate.
+2. Complete the dated path-level repository disclosure and redaction review in issue #83. WS3 remains blocked until both issues #82 and #83 close with their required evidence.
+3. Continue the parallel external-evidence track in issues #84–#88 without representing open legal, provider, accessibility, security, or commercial work as readiness.
+4. Extend the machine-readable evidence-source pattern per workstream; this dashboard remains a non-authoritative summary until a governed program-status source can be derived deterministically.
 
 ## Production-readiness gates (measure 4)
 
@@ -114,17 +117,17 @@ Per `PROGRESS_MEASUREMENT_STANDARD.md` measure 4, all eleven gate families are e
 
 | Gate family | Status | Owner | Evidence pointer |
 |---|---|---|---|
-| Founder decisions | Open | Founder | `FOUNDER_DECISION_REGISTER.md` FDR-001–010 (all open; FDR-004 past its M0 checkpoint — fifth-audit F-L-003) |
-| Legal/tax validation (Guyana) | Not started | Founder + counsel | `GUYANA_REGULATORY_VERIFICATION-2026-07-11.md` (prototype pack only; TA-007) |
-| Customer evidence | Zero recorded | Founder | `MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md` evidence log (fifth-audit F-L-002) |
-| Provider certification | Not started | Founder + provider | SA-025/SA-026; blocked on FDR-002/FDR-007 |
-| Penetration testing | Not started | PDA + external firm | RR-009; after RR-007 RLS topology |
-| Privacy/retention validation | Design only | Privacy counsel | ADR-0014 + deletion journal designed; DPA commencement unverified; retention periods pending professional confirmation |
-| Accessibility audit | Internal evidence only | PDA + external reviewers | WS1/WS2 automated+manual evidence retained; independent assistive-technology review open (RR-009) |
+| Founder decisions | Partially recorded; material decisions open | Founder | FDR-004 is ratified; FDR-005 remains provisional/open; FDR-011 and FDR-001–003/FDR-006–010 retain their named triggers. Issue #88 owns the commercial offer/cost package. |
+| Legal/tax validation (Guyana) | Not started | Founder + qualified counsel | Issue #84; `GUYANA_REGULATORY_VERIFICATION-2026-07-11.md` is a prototype research pack only, not professional advice or validation. |
+| Customer evidence | Zero recorded; WS3 blocking | Founder | Issue #82 and `MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md`; required minimum is 8 interviews plus 3 observations across at least 3 businesses. |
+| Provider certification | Not started | Founder + named providers | Issue #85; SA-025/SA-026 and FDR-002/FDR-007 define the unresolved provider categories and prerequisites. Simulator behavior is not provider evidence. |
+| Penetration testing | Not started | PDA + qualified independent provider | Issue #87 and RR-009; execute only after production-relevant RLS and deployment topology exist, then retain sanitized report/retest pointers. |
+| Privacy/retention validation | Design only | Founder + qualified privacy counsel | Issue #84; ADR-0014 and the deletion journal are designed, while Data Protection Act commencement/obligations and retention periods remain professionally unverified. |
+| Accessibility audit | Internal prototype evidence only | PDA + independent accessibility specialist | Issue #86 and RR-009; WS1/WS2 automated/manual evidence does not replace assistive-technology evaluation or establish WCAG 2.2 AA conformance. |
 | Performance/capacity | Controlled-prototype samples only | PDA | Perf JSONs carry explicit limitation fields; no artifact for production topology |
 | Recovery exercises | No artifact yet | PDA/Ops | WS7 will execute the Draft runbooks (restore, deletion-journal replay) |
 | Operational readiness | Design only | Founder + PDA | 15-Operations runbooks Draft; support/staffing model undecided |
-| Pilot outcomes | Blocked | Founder | All above gates plus commercial offer (fifth-audit F-L-010) |
+| Pilot outcomes | Blocked | Founder | Issues #82–#88 plus the remaining RLS, recovery, operations, privacy, founder, and provider gates; no pilot has been authorized or executed. |
 
 ## Open risk summary
 
@@ -133,7 +136,8 @@ The Architecture Risk Register remains authoritative. The most important current
 - controlled-prototype database isolation versus future production RLS topology;
 - RR-006 is closed at controlled-prototype depth by PDA-REV-009 after PR #74 exact-head concurrence and merge; production event SLOs, capacity, multi-replica topology, retention, and restore exercises remain open under their named owners;
 - RR-007 remains open: application/repository constraints and two-tenant tests are not production PostgreSQL role/RLS topology evidence;
-- provider, legal, customer, founder, security, accessibility, operational, and pilot evidence still open;
+- F-A-001 is dispositioned through the Founder-approved superseding exact-`main` review, but the PR #79 pre-merge concurrence failure remains recorded as a governance deviation rather than rewritten history;
+- customer, repository-disclosure, provider, legal, founder, security, accessibility, commercial, operational, and pilot evidence remains open through issues #82–#88 and the Architecture Risk Register;
 - risk of generated contracts, implementation, Fumadocs, and this dashboard drifting apart.
 
 ## Machine-readable status (deferred)

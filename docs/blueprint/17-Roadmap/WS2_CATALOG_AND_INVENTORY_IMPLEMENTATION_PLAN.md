@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.9.0
+version: 1.0.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
 ---
 
@@ -12,11 +12,11 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
 
 ## 1. Purpose, Authority, and Lifecycle
 
-This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section "WS2 — Catalog and Inventory Ledger (P2)" into the implementation-control plan for Technical Prototype 2. It defines the exact capability depth, owners, package boundaries, contract corrections, pull-request sequence, evidence, and exit gates required before WS2 can close.
+This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section "WS2 — Catalog and Inventory Ledger (P2)" into the implementation-control plan and final controlled-prototype record for Technical Prototype 2. It defines the exact capability depth, owners, package boundaries, contract corrections, pull-request sequence, evidence, and exit gates used to close WS2 at that depth.
 
-This is a **Draft plan for a controlled prototype**. It may guide only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, close FDR-004, establish a contractual service level, or claim the first slice is complete. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and WS2 stops for disposition.
+This remains a **Draft plan for a controlled prototype**. It may guide and record only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, establish a contractual service level, or claim the first slice is complete. FDR-004 was separately ratified by the Founder in issue #81; that decision does not promote this Draft or remove any customer, legal, provider, security, accessibility, operational, or disclosure gate. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and work stops for disposition.
 
-Issue #62 owns the merged plan; issues #64, #66, #68, #70, #71, and #72 own merged PR1-PR6 execution evidence; issue #73 owns active PR7 verification and closeout. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on every merged implementation head through PR #78. PR7 still requires exact-head independent review before merge and a separate whole-WS2 audit after merge.
+Issue #62 owns the merged plan; issues #64, #66, #68, #70, #71, and #72 own merged PR1-PR6 execution evidence; issue #73 owns PR7 verification and closeout; and issue #12 is the parent WS2 implementation work item. Claude Code independently concurred on every implementation head through PR #78. PR #79 final head `22a3a38369d458d065d5fb2bc2216d09aec410de` then merged as `81e903b27bf41785106775afb33f9f88738e39b9` without recorded pre-merge concurrence. PDA-REV-013 independently audited that exact merged `main`, reproduced the WS2 evidence, and the Founder accepted it as the superseding WS2 review in issue #81, comment `5008157609`; PR #89 merged that decision record as `7de0688d11a80de950f0e0639ade84b23e790e59`. The missed pre-merge concurrence remains documented as F-A-001; the superseding review does not rewrite that history.
 
 ### 1.1 Implementation progress
 
@@ -28,7 +28,7 @@ Issue #62 owns the merged plan; issues #64, #66, #68, #70, #71, and #72 own merg
 | PR4 — durable delivery and projections | Merged as PR #74 after exact-head Claude Code concurrence | Merge commit `7202fc819b70982c013e1ca11a4fcc136e01e2de`; PDA-APP-023 plus final re-audit comment `4991097241` close RR-006 at controlled-prototype depth. RR-007 and production delivery gates remain open. |
 | PR5 — bounded imports and online Numbering | Merged as PR #76 after exact-head Claude Code concurrence | Merge commit `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`; retain bounded CSV, owner-command, atomic import-reference, strict online Numbering, tenant, recovery, and disclosed residual evidence in PDA-APP-024. |
 | PR6 — Product and Inventory web experience | Merged as PR #78 after exact-head Claude Code concurrence | Exact head `c69e5fb4415083affc40dc52f2d0ada78846252e`; merge `635fa3f1618d5c880585fdd3e86de7a16d0993ac`; retain PDA-APP-025's bounded UI, accessibility-target, browser, help, performance, and direct-denial evidence. |
-| PR7 — verification and controlled-prototype closeout | Closeout candidate on issue #73 | PDA-IMPL-007 and the generated matrix record 14 capabilities / 182 executable required cells plus live database/browser evidence and explicit production deferrals. Exact-head review, merge, exact-main checks, and final whole-WS2 audit remain mandatory. |
+| PR7 — verification and controlled-prototype closeout | Merged as PR #79; controlled-prototype closeout independently verified on exact merged `main` | Final PR head `22a3a38369d458d065d5fb2bc2216d09aec410de` merged as `81e903b27bf41785106775afb33f9f88738e39b9` without pre-merge concurrence. PDA-IMPL-007 and the generated matrix record 14/14 capabilities and 182/182 executable required cells; PDA-REV-013 reproduced the evidence on the exact merge, and issue #81 accepts that audit as the superseding review while retaining the F-A-001 deviation. |
 
 ### 1.2 Governing sources
 
@@ -48,7 +48,7 @@ Issue #62 owns the merged plan; issues #64, #66, #68, #70, #71, and #72 own merg
 | UX and accessibility | PDA-UX-010, PDA-UX-017, PDA-UX-020, PDA-UX-028 |
 | Evidence | PDA-TST-013, `registry/first-slice-tests.json`, PDA-RDM-006 |
 | Work coordination | PDA-ENGR-014 and the GitHub Project |
-| Founder scope authority | FDR-004; still open and only provisionally adopted |
+| Founder scope authority | FDR-004; ratified on 2026-07-17 through issue #81, without promoting this Draft or satisfying external gates |
 
 ## 2. Verified Starting State and Review Disposition
 
@@ -520,7 +520,7 @@ The selections close decision ambiguity only. They do not pre-close PR1's indepe
 
 The following are not WS2 exit blockers unless implementation falsely claims them: rich categories/brands/assortments/media/localization, supplier catalog and costs, pricing calculation, lots/serials/expiry/quarantine depth, replenishment, financial valuation, warehouse execution, production global search, external webhooks, full offline synchronization, production RLS, production scale/failover, and contractual/pilot evidence.
 
-### 16.3 WS2 closes only when
+### 16.3 WS2 exit conditions and final disposition
 
 - G1–G6 are closed without an expired or contradictory exception;
 - all 14 capabilities have committed evidence for every required dimension at registered depth;
@@ -539,14 +539,15 @@ The following are not WS2 exit blockers unless implementation falsely claims the
 - Bun and the approved Node fallback execute the declared critical contracts, domains, migrations, event delivery, and API paths;
 - registry evidence, technology lessons, risk dispositions, runbooks, documentation, migrations, contracts, and all repository gates are green on the reviewed head.
 
-WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype depth. It does not close RR-007, FDR-004, broader first-slice work, or pilot/production gates.
+WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype depth. It does not close RR-007, RR-009, broader first-slice work, external-evidence obligations, or pilot/production gates.
 
-PDA-IMPL-007 section 12 dispositions every item above as a PR7 candidate. The generated evidence gate must report exactly 14 WS2 capabilities and 182 executable required cells. Aggregate coverage must report 25 of 103 capabilities and 325 of 1,294 executable required cells. Those counts are branch evidence only until the reviewed head merges. Open scale, pilot, production, external-review, and assistive-technology targets remain explicit deferrals; they are not machine-evidence substitutes. No checklist row may substitute for exact-head independent concurrence or the separate post-merge whole-WS2 audit.
+PDA-IMPL-007 section 12 dispositions every item above as satisfied at controlled-prototype depth. The generated evidence gate reports exactly 14 of 14 WS2 capabilities and 182 of 182 executable required cells. Aggregate first-slice coverage reports 25 of 103 capabilities and 325 of 1,294 executable required cells. PDA-REV-013 independently reproduced that evidence on exact merged `main` `81e903b27bf41785106775afb33f9f88738e39b9`; the Founder accepted it as the superseding WS2 review after the missed PR #79 pre-merge concurrence. Open scale, RLS, provider, legal, customer, security, accessibility, pilot, production, external-review, and assistive-technology targets remain explicit gates or deferrals; they are not machine-evidence substitutes.
 
 ## 17. Review and Change Record
 
 | Reviewer | Perspective | Decision | Date | Notes |
 |---|---|---|---|---|
+| Claude Code / PDA-REV-013 | Fifth whole-project audit and superseding exact-`main` WS2 review | Concurred with WS2 implementation evidence; reported process deviation F-A-001 | 2026-07-17 | Audited exact merged `main` `81e903b27bf41785106775afb33f9f88738e39b9`, reproduced 14/14 WS2 capabilities and 182/182 required cells, and recorded that PR #79 had merged without pre-merge concurrence. The Founder accepted this audit as the superseding review in issue #81; no pre-merge concurrence is retroactively claimed. |
 | Codex | Author and cross-document reconciliation | Drafted for independent review | 2026-07-14 | Reconciled ADR-0027 ownership, current registry counts, missing lifecycle/dispatch/read contracts, RR-006, and the WS2/WS5 offline boundary. |
 | Claude Code | Independent architecture and registry consistency | Changes required on v0.1.0 | 2026-07-14 | Submitted one P1, one P2, and two P3 findings on worker/pool authority, Persistence owner registration, dispatch permission naming, and offline-budget meaning; all accepted and remediated in v0.1.1, with implementation closure still assigned to PR1/WS5. |
 | Claude Code | Independent plan concurrence | Concurred on PR #63 exact head | 2026-07-14 | Re-verified all four remediations in an isolated worktree, confirmed identifier non-collision and clean governance/CI, and declared G1 satisfied before PR1 began. |
@@ -561,6 +562,7 @@ PDA-IMPL-007 section 12 dispositions every item above as a PR7 candidate. The ge
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 1.0.0 | 2026-07-17 | Platform Design Authority | Recorded PR #79's actual final-head/merge sequence, PDA-REV-013's superseding exact-`main` review, and the Founder disposition in issue #81; finalized WS2 at 14/14 capabilities and 182/182 required cells at controlled-prototype depth while preserving F-A-001, RR-007/RR-009, external, pilot, and production gates. |
 | 0.9.0 | 2026-07-16 | Platform Design Authority | Linked PDA-IMPL-007 and the registry-derived 14-capability/182-cell PR7 closeout candidate, reconciled every section 16.3 condition, and retained exact-head concurrence, merge, exact-main verification, whole-WS2 audit, RR-007/RR-009, external, pilot, and production gates. |
 | 0.8.0 | 2026-07-16 | Platform Design Authority | Recorded PR6 withheld-concurrence remediation, exact-head concurrence and merge; activated PR7 issue #73; corrected the Constitution ID; and retained exact-head, exact-main, whole-WS2, RR-007, external, pilot, and production gates. |
 | 0.7.0 | 2026-07-16 | Platform Design Authority | Recorded PR5 exact-head concurrence and merge, activated PR6 issue #72, linked PDA-APP-025, and retained PR7 plus every WS2 exit and production gate. |

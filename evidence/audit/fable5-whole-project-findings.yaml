@@ -37,6 +37,7 @@ audit:
 
 findings:
   - id: F-A-001
+    status: "founder-decision-recorded (issue #81; PR #89 concurrence comment 5008646684 and merge 7de0688); P-W2a implemented-pending-independent-review (issue #90)"
     lens: A-governance
     severity: P1
     confidence: confirmed
@@ -56,6 +57,7 @@ findings:
     wave: W1
 
   - id: F-L-001
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); external-evidence track remains open in issues #82-#88"
     lens: L-roadmap
     severity: P1
     confidence: high
@@ -72,6 +74,7 @@ findings:
     wave: W1
 
   - id: F-L-002
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); WS3 customer-evidence gate remains open in issue #82"
     lens: L-roadmap
     severity: P1
     confidence: high
@@ -88,6 +91,7 @@ findings:
     wave: W1
 
   - id: F-A-002
+    status: "implemented-pending-independent-review (issue #90)"
     lens: A-governance
     severity: P2
     confidence: confirmed
@@ -104,7 +108,7 @@ findings:
     wave: W2
 
   - id: F-A-003
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: A-governance
     severity: P2
     confidence: confirmed
@@ -123,7 +127,7 @@ findings:
     wave: W2
 
   - id: F-B-001
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: B-architecture
     severity: P2
     confidence: high
@@ -140,7 +144,7 @@ findings:
     wave: W2
 
   - id: F-B-002
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136, second-review remediation); second-review correction below
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6); review corrections retained below"
     lens: B-architecture
     severity: P2
     confidence: high
@@ -162,7 +166,7 @@ findings:
     fourth_review_correction_4: "The independent review of exact head 4acb743 confirmed the namespace-laundering and require() bypasses fixed but found one narrow remaining form: a no-substitution template-literal (backtick) specifier in dynamic import() — await import(`@meridian/persistence-catalog-postgres`) — evaded the quote-only specifier matcher (reproduced, checker exit 0). Fixed by extending PERSISTENCE_SPECIFIER to accept no-substitution backtick literals, so both dynamic import() and require() reject them (shared matcher); PDA-ENGR-012 bumped to v1.7.1. Added a failing worker probe (__architecture_worker_backtick_dynamic_import_fixture.ts) and preserved the allowed static named-import probe; verified an interpolated backtick (`${...}`) is NOT matched and remains explicitly out of scope, and the full-tree checker still passes with no false positives. Residual known limit narrowed and restated: runtime string-INTERPOLATED (`${...}`) or CONCATENATED specifiers/identifiers remain outside static text matching; no-substitution string and backtick literals are now covered."
 
   - id: F-H-001
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: H-frontend
     severity: P2
     confidence: high
@@ -180,6 +184,7 @@ findings:
     fourth_review_correction: "Codex's PR #80 review at exact head a0bfe12 found the prior single Playwright test only injected a mocked 401 while the real Better Auth session stayed valid, so it exercised the client 401->reauth routing contract but not a genuine expiry (its name overclaimed). Fixed by renaming that test to the client-contract lens it actually is (with a comment on why a navigated full expiry cannot render QueryFailure — the Operations server-component layout redirects first) and adding a separate deterministic genuine-expiry lens that removes the session credential and asserts the layout redirect lands in Operations, not Administration."
 
   - id: F-L-003
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); historical M0 provisional-adoption deviation retained"
     lens: L-roadmap
     severity: P2
     confidence: high
@@ -196,6 +201,7 @@ findings:
     wave: W2
 
   - id: F-L-004
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); M3 and workstream-specific P4-P7 entry gates remain open"
     lens: L-roadmap
     severity: P2
     confidence: medium-high
@@ -212,7 +218,7 @@ findings:
     wave: W2
 
   - id: F-L-005
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: L-roadmap
     severity: P2
     confidence: high
@@ -229,6 +235,7 @@ findings:
     wave: W2
 
   - id: F-L-006
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); dated naming and availability checks remain open"
     lens: L-roadmap
     severity: P2
     confidence: high
@@ -245,6 +252,7 @@ findings:
     wave: W2
 
   - id: F-L-007
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); repository disclosure/redaction gate remains open in issue #83"
     lens: L-roadmap
     severity: P2
     confidence: medium
@@ -261,7 +269,7 @@ findings:
     wave: W2
 
   - id: F-B-003
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: B-architecture
     severity: P3
     confidence: confirmed
@@ -278,7 +286,7 @@ findings:
     wave: W2
 
   - id: F-B-004
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: B-architecture
     severity: P3
     confidence: high
@@ -295,7 +303,7 @@ findings:
     wave: W2
 
   - id: F-B-005
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: B-architecture
     severity: P3
     confidence: medium-high
@@ -312,7 +320,7 @@ findings:
     wave: W2
 
   - id: F-B-006
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: B-architecture
     severity: P3
     confidence: high
@@ -329,7 +337,7 @@ findings:
     wave: W3
 
   - id: F-H-002
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: H-frontend
     severity: P3
     confidence: high
@@ -346,7 +354,7 @@ findings:
     wave: W3
 
   - id: F-H-003
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: H-frontend
     severity: P3
     confidence: medium
@@ -363,7 +371,7 @@ findings:
     wave: W3
 
   - id: F-H-004
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: H-frontend
     severity: P3
     confidence: high
@@ -380,7 +388,7 @@ findings:
     wave: W3
 
   - id: F-H-005
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: H-frontend
     severity: P3
     confidence: medium
@@ -397,7 +405,7 @@ findings:
     wave: W3
 
   - id: F-H-006
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: H-frontend
     severity: P3
     confidence: medium
@@ -414,7 +422,7 @@ findings:
     wave: W3
 
   - id: F-H-007
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: H-frontend
     severity: P3
     confidence: high
@@ -431,7 +439,7 @@ findings:
     wave: W3
 
   - id: F-H-008
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: H-frontend
     severity: P3
     confidence: high
@@ -448,7 +456,7 @@ findings:
     wave: W3
 
   - id: F-L-008
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: L-roadmap
     severity: P3
     confidence: high
@@ -465,6 +473,7 @@ findings:
     wave: W3
 
   - id: F-L-009
+    status: "open (FDR-003 is required before WS4 PR1 schema freeze)"
     lens: L-roadmap
     severity: P3
     confidence: high
@@ -481,6 +490,7 @@ findings:
     wave: W4
 
   - id: F-L-010
+    status: "open (commercial offer and cost evidence is tracked in issue #88)"
     lens: L-roadmap
     severity: P3
     confidence: medium-high
@@ -497,7 +507,7 @@ findings:
     wave: W4
 
   - id: F-A-004
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
     lens: A-governance
     severity: P3
     confidence: medium
@@ -514,7 +524,7 @@ findings:
     wave: W3
 
   - id: F-I-001
-    status: implemented-pending-independent-review (commits 7d6b05b, 0841136); see FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md §Implementation status for the F-I-001 correction narrative (single source, this field only points to it)
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6); see FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md §Implementation status for the F-I-001 correction narrative (single source, this field only points to it)"
     lens: I-ci-tests
     severity: P3
     confidence: confirmed

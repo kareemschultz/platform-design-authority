@@ -336,7 +336,7 @@ describe("WS2 Event Backbone API contract", () => {
 const PR3_PERMISSION_NAMESPACE_PATTERN = /^commerce\.(receipt|refund|return)\./;
 
 describe("WS3 POS Cash Workflow API contract", () => {
-	test("is semantically aligned with every generated commerce.* operation implemented through PR3", () => {
+	test("is semantically aligned with every generated commerce.*/platform.export.* operation implemented through PR4", () => {
 		const actual = collectProcedures(ws3PosApiContract)
 			.map((procedure) => ({
 				...procedure["~orpc"].meta,
@@ -353,7 +353,7 @@ describe("WS3 POS Cash Workflow API contract", () => {
 		);
 
 		expect(actual).toEqual(expected);
-		expect(actual).toHaveLength(17);
+		expect(actual).toHaveLength(21);
 	});
 
 	test("every PR3 operation declares a commerce.return/refund/receipt permission, never a bare authenticated-session read", () => {
@@ -395,5 +395,36 @@ describe("WS3 POS Cash Workflow API contract", () => {
 		);
 		expect(paths.some((path) => path.includes("exchange"))).toBe(false);
 		expect(paths.some((path) => path.includes("gift"))).toBe(false);
+	});
+
+	test("every PR4 deposit/export operation declares its exact frozen permission, never a bare authenticated-session read", () => {
+		const expectedPermissions: Record<string, string> = {
+			createAccountantHandoffExport: "platform.export.create",
+			createDeposit: "commerce.deposit.create",
+			getExportsByExportId: "platform.export.read",
+			postDepositsByDepositIdConfirm: "commerce.deposit.confirm",
+		};
+		const pr4Operations = WS3_OPENAPI_OPERATION_METADATA.filter((operation) =>
+			Object.keys(expectedPermissions).includes(operation.operationId)
+		);
+		expect(pr4Operations).toHaveLength(4);
+		for (const operation of pr4Operations) {
+			expect("permission" in operation).toBe(true);
+			const expected: string | undefined =
+				expectedPermissions[operation.operationId];
+			expect(expected).toBeDefined();
+			expect((operation as { permission: string }).permission).toBe(
+				expected as string
+			);
+		}
+	});
+
+	test("realizes the deposit maker/checker pair as create/confirm (matching the registered permission pair exactly), self-approval separation an application-layer rule (frozen control plan §6.6)", () => {
+		const operationIds = WS3_OPENAPI_OPERATION_METADATA.map(
+			(operation) => operation.operationId
+		);
+		expect(operationIds).toContain("createDeposit");
+		expect(operationIds).toContain("postDepositsByDepositIdConfirm");
+		expect(operationIds).not.toContain("commerce.deposit.reject");
 	});
 });

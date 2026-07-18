@@ -255,6 +255,8 @@ export interface CashMovementNetTotals {
 export type PosCommandOperation =
 	| "commerce.cash-movement.create"
 	| "commerce.cash-variance.approve"
+	| "commerce.deposit.confirm"
+	| "commerce.deposit.create"
 	| "commerce.price-override.approve"
 	| "commerce.price-override.request"
 	| "commerce.receipt.reissue"
@@ -279,6 +281,79 @@ export interface PosCommandReceipt {
 	tenantId: string;
 }
 
+// ---------------------------------------------------------------------------
+// WS3 PR4: Accountant handoff export source data (frozen control plan
+// §8.1). This is a bounded, timezone-aware READ over POS's own owned data
+// — never a write path, never a maker/checker pair. `periodStartUtc`/
+// `periodEndUtc` are exact UTC instants (half-open: >= start, < end); the
+// caller (composition, via `AccountantHandoffRequest.timezone`) is
+// responsible for having derived them from the requested local calendar
+// boundary — POS performs plain instant-range comparisons against its own
+// `timestamptz` columns, which are timezone-agnostic by construction, so
+// no local-date truncation bug can be introduced on this side of the
+// boundary. Electronic-tender/stored-value tender totals are always zero
+// on this branch: `completeSale` accepts Cash tenders only
+// (`requireCashOnlyTenders`) — WS4/WS6 governed deferrals, not omissions.
+// ---------------------------------------------------------------------------
+
+export interface PosFinanceHandoffSaleFact {
+	completedAt: Date;
+	currency: string;
+	discountMinor: number;
+	grossMinor: number;
+	id: string;
+	taxMinor: number;
+	totalMinor: number;
+}
+
+export interface PosFinanceHandoffRefundFact {
+	amountMinor: number;
+	currency: string;
+	movementId: string;
+	postedAt: Date;
+	refundId: string;
+}
+
+export interface PosFinanceHandoffVarianceFact {
+	currency: string;
+	occurredAt: Date;
+	registerId: string;
+	sessionId: string;
+	varianceMinor: number;
+}
+
+export interface PosFinanceHandoffUnresolvedVarianceFact {
+	closeRequestedAt: Date;
+	registerId: string;
+	sessionId: string;
+}
+
+export interface PosFinanceHandoffDepositFact {
+	amountMinor: number;
+	currency: string;
+	depositId: string;
+	depositReference: string;
+	occurredAt: Date;
+}
+
+export interface PosFinanceHandoffSourceData {
+	closedVariances: PosFinanceHandoffVarianceFact[];
+	/** Net signed quantity movement (fixed-point, scale 1,000,000 — matching
+	 * `RETURN_QUANTITY_SCALE`) across completed Sale lines minus Return
+	 * lines in range: POS's own already-recorded quantities (the same ones
+	 * each line's `inventoryMovementId` posted to Inventory), not a second
+	 * query against Inventory's authoritative ledger (a domain may not
+	 * import another domain's tables — see the PR4 contract-coverage
+	 * enumeration's inventory-input disposition). */
+	netInventoryQuantityScaled: string;
+	preparedDeposits: PosFinanceHandoffDepositFact[];
+	reconciledDeposits: PosFinanceHandoffDepositFact[];
+	refunds: PosFinanceHandoffRefundFact[];
+	returnCount: number;
+	sales: PosFinanceHandoffSaleFact[];
+	unresolvedVariances: PosFinanceHandoffUnresolvedVarianceFact[];
+}
+
 export interface PosRepository {
 	acquireCommandLock: (
 		tenantId: string,
@@ -294,6 +369,26 @@ export interface PosRepository {
 	createCashMovement: (
 		record: CashMovementRecord
 	) => Promise<CashMovementRecord>;
+
+	// -- WS3 PR4: Deposit, Finance handoff -----------------------------------
+	createDeposit: (record: DepositRecord) => Promise<DepositRecord>;
+	/** Inserts the dedicated custody-transfer row — the ONLY effect
+	 * `deposit.confirm` posts (frozen control plan §6.6: "Posts the
+	 * safe-to-bank custody transfer atomically"). No row in this table may
+	 * ever exist for a `Prepared` deposit; the domain layer's
+	 * effect-free-preparation invariant depends on `createDeposit` never
+	 * calling this. */
+	createDepositCustodyTransfer: (record: {
+		amountMinor: number;
+		confirmedByActorUserId: string;
+		confirmedByPartyId: string;
+		currency: string;
+		depositId: string;
+		id: string;
+		organizationId: string;
+		postedAt: Date;
+		tenantId: string;
+	}) => Promise<void>;
 	createPriceOverride: (
 		record: PriceOverrideRecord
 	) => Promise<PriceOverrideRecord>;
@@ -308,6 +403,8 @@ export interface PosRepository {
 		operation: PosCommandOperation,
 		idempotencyKey: string
 	) => Promise<PosCommandReceipt | null>;
+	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
+	getDeposit: (tenantId: string, id: string) => Promise<DepositRecord | null>;
 	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
 	getOpenSession: (
 		tenantId: string,
@@ -328,6 +425,18 @@ export interface PosRepository {
 		tenantId: string,
 		sessionId: string
 	) => Promise<RegisterSessionRecord | null>;
+	/** Locks EVERY referenced session row (SELECT ... FOR UPDATE), always in
+	 * ascending `id` order regardless of the caller's array order, so two
+	 * concurrent deposit preparations naming overlapping-but-differently-
+	 * ordered session sets can never deadlock — the same discipline
+	 * `getSale` gives return.create's cumulative-quantity check, applied
+	 * here to serialize concurrent safe-custody reservation (round-3
+	 * P1-4). Returns fewer rows than requested if any id does not belong
+	 * to the tenant; callers MUST verify the count matches. */
+	lockSessionsForDeposit: (
+		tenantId: string,
+		sessionIds: string[]
+	) => Promise<RegisterSessionRecord[]>;
 	netCashMovements: (
 		tenantId: string,
 		sessionId: string
@@ -343,9 +452,35 @@ export interface PosRepository {
 	openRegister: (
 		record: RegisterSessionRecord
 	) => Promise<RegisterSessionRecord | "already_open">;
+	/**
+	 * Bounded, timezone-agnostic instant-range read over POS's own owned
+	 * data (WS3 PR4 §8.1) — never touches another domain's tables. Legal-
+	 * entity scoping is enforced at the composition/router boundary (POS
+	 * records carry no `legalEntityId` in first slice; a governed
+	 * simplification recorded in the PR4 contract-coverage enumeration),
+	 * not filtered here.
+	 */
+	queryFinanceHandoffSourceData: (input: {
+		organizationId: string;
+		periodEndUtc: Date;
+		periodStartUtc: Date;
+		tenantId: string;
+	}) => Promise<PosFinanceHandoffSourceData>;
 	recordCommandReceipt: (
 		receipt: PosCommandReceipt
 	) => Promise<{ inserted: boolean; record: PosCommandReceipt }>;
+	/** Sums the `amountMinor` of every distinct `Prepared`/`Reconciled`
+	 * Deposit that shares AT LEAST ONE session with the given set (a
+	 * conservative, session-set-level reservation — see the PR4
+	 * contract-coverage enumeration's documented custody-conservation
+	 * design note). Excludes `excludeDepositId` (the deposit being
+	 * re-validated on confirm, if any) so a deposit never double-reserves
+	 * against its own prior preparation. */
+	sumReservedDepositsForSessions: (
+		tenantId: string,
+		sessionIds: string[],
+		excludeDepositId?: string
+	) => Promise<number>;
 	/** Sums every prior return line's quantity against one Sale line, across
 	 * BOTH `Pending` and `Completed` Return rows (frozen control plan §6.3:
 	 * "cumulative-returned-quantity check performed at create time"; a
@@ -361,6 +496,16 @@ export interface PosRepository {
 		tenantId: string,
 		saleLineId: string
 	) => Promise<string>;
+	/** Sums `SafeDrop` cash-movement amounts across the given sessions —
+	 * the safe-custody pool a deposit's `sourceShiftIds` may draw against. */
+	sumSafeDropForSessions: (
+		tenantId: string,
+		sessionIds: string[]
+	) => Promise<number>;
+	updateDeposit: (
+		record: DepositRecord,
+		expectedVersion: number
+	) => Promise<DepositRecord | "version_conflict">;
 	updatePriceOverride: (
 		record: PriceOverrideRecord,
 		expectedVersion: number
@@ -732,6 +877,8 @@ export interface PosUnitOfWork {
 export interface PosIdFactory {
 	create: (
 		kind:
+			| "deposit"
+			| "deposit-custody-transfer"
 			| "event"
 			| "exchange"
 			| "movement"
@@ -1423,6 +1570,21 @@ export type ReturnMode = (typeof RETURN_MODES)[number];
 export const REFUND_STATES = ["Requested", "Posted"] as const;
 export type RefundState = (typeof REFUND_STATES)[number];
 
+/**
+ * Deposit lifecycle (WS3 PR4, frozen control plan §6.6): `deposit.create`
+ * is EFFECT-FREE preparation — it reserves `countedAmount` against the
+ * available safe custody carried by `sourceShiftIds` (register sessions
+ * whose `SafeDrop` cash movements fund the deposit), but posts no custody
+ * transfer. Only `deposit.confirm`, by an actor other than the preparer,
+ * posts the safe->bank custody transfer (a dedicated
+ * `pos_deposit_custody_transfer` row, never present before confirmation —
+ * see `PosRepository.createDepositCustodyTransfer`). A Deposit is a
+ * custody RECORD, not a payment rail: no provider interaction of any kind
+ * (WS6/facilitation-custody remain permanently out of scope).
+ */
+export const DEPOSIT_STATES = ["Prepared", "Reconciled"] as const;
+export type DepositState = (typeof DEPOSIT_STATES)[number];
+
 export interface ReturnLineRecord {
 	discountMinor: number;
 	grossMinor: number;
@@ -1491,6 +1653,50 @@ export interface RefundRecord {
 	state: RefundState;
 	tenantId: string;
 	updatedAt: Date;
+	version: number;
+}
+
+/**
+ * `DepositRecord` is the Deposit maker/checker aggregate (WS3 PR4, frozen
+ * control plan §6.6). `sourceShiftIds` names the register sessions whose
+ * `SafeDrop` cash movements fund this deposit's custody reservation —
+ * `deposit.create` never accepts a caller-supplied register or safe
+ * identifier beyond this list, structurally tying every deposit back to
+ * traceable register provenance. `depositReference` is a human-facing
+ * reference number allocated through `platform/numbering` (organization-
+ * scoped, distinct from the opaque `id`), separate per CLAUDE.md §7
+ * ("opaque internal identifiers separately from human references").
+ */
+export interface DepositRecord {
+	amountMinor: number;
+	confirmedAt: Date | null;
+	confirmedByActorUserId: string | null;
+	confirmedByPartyId: string | null;
+	createdAt: Date;
+	currency: string;
+	depositReference: string;
+	id: string;
+	organizationId: string;
+	preparedAt: Date;
+	preparedByActorUserId: string;
+	preparedByPartyId: string;
+	sourceShiftIds: string[];
+	state: DepositState;
+	tenantId: string;
+	updatedAt: Date;
+	version: number;
+}
+
+export interface DepositView {
+	amount: { amountMinor: number; currency: string };
+	confirmedAt: string | null;
+	confirmerPartyId: string | null;
+	depositReference: string;
+	id: string;
+	preparedAt: string;
+	preparerPartyId: string;
+	sourceShiftIds: string[];
+	state: DepositState;
 	version: number;
 }
 
@@ -1580,6 +1786,32 @@ export interface PosReturnUnitOfWork {
 	) => Promise<T>;
 }
 
+/**
+ * The Deposit human-reference allocation path (WS3 PR4). Scoped per
+ * ORGANIZATION (not per register, unlike `ReceiptNumberAllocatorPort`) —
+ * a deposit draws safe custody from a set of register sessions, not one
+ * register, so the reference sequence is organization-wide.
+ */
+export interface DepositReferenceAllocatorPort {
+	allocate: (input: {
+		actorUserId: string;
+		correlationId: string;
+		depositId: string;
+		idempotencyKey: string;
+		organizationId: string;
+		tenantId: string;
+	}) => Promise<{ value: string }>;
+}
+
+export interface PosDepositTransactionScope extends PosTransactionScope {
+	numbering: DepositReferenceAllocatorPort;
+}
+export interface PosDepositUnitOfWork {
+	execute: <T>(
+		operation: (scope: PosDepositTransactionScope) => Promise<T>
+	) => Promise<T>;
+}
+
 function returnView(record: ReturnRecord): ReturnView {
 	return {
 		approvedAt: record.approvedAt?.toISOString() ?? null,
@@ -1636,6 +1868,21 @@ function refundView(record: RefundRecord): RefundView {
 		registerId: record.registerId,
 		requestedAt: record.requestedAt.toISOString(),
 		returnId: record.returnId,
+		state: record.state,
+		version: record.version,
+	};
+}
+
+function depositView(record: DepositRecord): DepositView {
+	return {
+		amount: { amountMinor: record.amountMinor, currency: record.currency },
+		confirmedAt: record.confirmedAt?.toISOString() ?? null,
+		confirmerPartyId: record.confirmedByPartyId,
+		depositReference: record.depositReference,
+		id: record.id,
+		preparedAt: record.preparedAt.toISOString(),
+		preparerPartyId: record.preparedByPartyId,
+		sourceShiftIds: record.sourceShiftIds,
 		state: record.state,
 		version: record.version,
 	};
@@ -2226,6 +2473,11 @@ async function linkExchange(
 
 export interface PosServiceOptions {
 	clock: () => Date;
+	/** Used ONLY by `createDeposit`: the organization-scoped deposit-
+	 * reference-number allocation seam (WS3 PR4, mirrors `saleUnitOfWork`'s
+	 * "one shared unit of work" discipline). `confirmDeposit` never touches
+	 * Numbering — it uses the plain `unitOfWork` instead. */
+	depositUnitOfWork: PosDepositUnitOfWork;
 	ids: PosIdFactory;
 	parties: PosPartyPort;
 	pricing: PosPricingPort;
@@ -3115,6 +3367,124 @@ export function createPosService(options: PosServiceOptions) {
 			);
 		},
 
+		/**
+		 * `deposit.confirm` (frozen control plan §6.6): the ONLY method that
+		 * ever writes a `pos_deposit_custody_transfer` row — the posted
+		 * safe-to-bank custody transfer, atomic with `commerce.deposit.
+		 * reconciled.v1`. `getDeposit` locks the row (SELECT ... FOR UPDATE),
+		 * so concurrent double-confirm attempts serialize: the second
+		 * transaction observes `state: "Reconciled"` already and is rejected,
+		 * exactly one ever posts.
+		 */
+		async confirmDeposit(input: {
+			actorUserId: string;
+			correlationId: string;
+			depositId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			tenantId: string;
+		}): Promise<DepositView> {
+			const requestFingerprint = await fingerprint({
+				depositId: input.depositId,
+			});
+			return options.unitOfWork.execute(async ({ events, repository }) => {
+				const prior = await replay<DepositView>(repository, {
+					idempotencyKey: input.idempotencyKey,
+					operation: "commerce.deposit.confirm",
+					requestFingerprint,
+					tenantId: input.tenantId,
+				});
+				if (prior) {
+					return prior;
+				}
+				const current = await repository.getDeposit(
+					input.tenantId,
+					input.depositId
+				);
+				if (!current) {
+					throw new PosError("not_found", "Deposit was not found");
+				}
+				if (current.state !== "Prepared") {
+					throw new PosError(
+						"invalid_state",
+						"Only a Prepared deposit can be confirmed"
+					);
+				}
+				if (current.preparedByActorUserId === input.actorUserId) {
+					throw new PosError(
+						"approval_separation",
+						"The preparer cannot confirm their own deposit"
+					);
+				}
+				const now = options.clock();
+				const confirmerPartyId = await options.parties.requireActorPartyId({
+					authUserId: input.actorUserId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				});
+				await repository.createDepositCustodyTransfer({
+					amountMinor: current.amountMinor,
+					confirmedByActorUserId: input.actorUserId,
+					confirmedByPartyId: confirmerPartyId,
+					currency: current.currency,
+					depositId: current.id,
+					id: options.ids.create("deposit-custody-transfer"),
+					organizationId: input.organizationId,
+					postedAt: now,
+					tenantId: input.tenantId,
+				});
+				await events.append(
+					event({
+						actorUserId: input.actorUserId,
+						aggregateId: current.id,
+						capabilityId: "commerce.cash-management",
+						correlationId: input.correlationId,
+						data: {
+							amountMinor: current.amountMinor,
+							confirmerPartyId,
+							currency: current.currency,
+							depositId: current.id,
+							depositReference: current.depositReference,
+						},
+						eventId: options.ids.create("event"),
+						idempotencyKey: input.idempotencyKey,
+						name: "commerce.deposit.reconciled.v1",
+						now,
+						organizationId: input.organizationId,
+						schemaRef:
+							"schemas/events/commerce.deposit.reconciled.v1.schema.json",
+						tenantId: input.tenantId,
+					})
+				);
+				const updated: DepositRecord = {
+					...current,
+					confirmedAt: now,
+					confirmedByActorUserId: input.actorUserId,
+					confirmedByPartyId: confirmerPartyId,
+					state: "Reconciled",
+					updatedAt: now,
+					version: current.version + 1,
+				};
+				const saved = await repository.updateDeposit(updated, current.version);
+				if (saved === "version_conflict") {
+					throw new PosError("version_conflict", "Deposit version is stale");
+				}
+				const result = depositView(saved);
+				return recordResult(
+					repository,
+					{
+						idempotencyKey: input.idempotencyKey,
+						operation: "commerce.deposit.confirm",
+						requestFingerprint,
+						resourceId: saved.id,
+						tenantId: saved.tenantId,
+					},
+					result,
+					now
+				);
+			});
+		},
+
 		async createCashMovement(input: {
 			actorUserId: string;
 			amount: { amountMinor: number; currency: string };
@@ -3222,6 +3592,162 @@ export function createPosService(options: PosServiceOptions) {
 					now
 				);
 			});
+		},
+
+		// -- WS3 PR4: Deposit, Finance handoff -----------------------------------
+
+		/**
+		 * `deposit.create` (frozen control plan §6.6): EFFECT-FREE preparation.
+		 * Reserves `countedAmountMinor` against the available safe custody
+		 * carried by `sourceShiftIds` and posts NO custody transfer — no row
+		 * is ever written to `pos_deposit_custody_transfer` from this method.
+		 * The reservation itself is race-safe: `lockSessionsForDeposit` locks
+		 * every referenced session row (always sorted ascending, deadlock-free
+		 * under concurrent overlapping requests) BEFORE summing the safe-drop
+		 * pool and existing reservations, serializing concurrent preparations
+		 * against the same sessions exactly like `return.create`'s
+		 * `getSale`-then-`sumReturnedQuantity` pattern (round-3 P1-4).
+		 */
+		async createDeposit(input: {
+			actorUserId: string;
+			correlationId: string;
+			countedAmountMinor: number;
+			currency: string;
+			idempotencyKey: string;
+			organizationId: string;
+			sourceShiftIds: string[];
+			tenantId: string;
+		}): Promise<DepositView> {
+			requireCurrency(input.currency);
+			requirePositiveMinor(
+				input.countedAmountMinor,
+				"countedAmount.amountMinor"
+			);
+			if (input.sourceShiftIds.length === 0) {
+				throw new PosError(
+					"validation",
+					"A deposit requires at least one source shift"
+				);
+			}
+			const sortedShiftIds = [...new Set(input.sourceShiftIds)].sort();
+			const requestFingerprint = await fingerprint({
+				countedAmountMinor: input.countedAmountMinor,
+				currency: input.currency,
+				sourceShiftIds: sortedShiftIds,
+			});
+			return options.depositUnitOfWork.execute(
+				async ({ events, numbering, repository }) => {
+					const prior = await replay<DepositView>(repository, {
+						idempotencyKey: input.idempotencyKey,
+						operation: "commerce.deposit.create",
+						requestFingerprint,
+						tenantId: input.tenantId,
+					});
+					if (prior) {
+						return prior;
+					}
+					const sessions = await repository.lockSessionsForDeposit(
+						input.tenantId,
+						sortedShiftIds
+					);
+					if (sessions.length !== sortedShiftIds.length) {
+						throw new PosError(
+							"invalid_reference",
+							"One or more source shifts were not found"
+						);
+					}
+					for (const session of sessions) {
+						requireMatchingCurrency(input.currency, session.currency);
+					}
+					const safeDropTotalMinor = await repository.sumSafeDropForSessions(
+						input.tenantId,
+						sortedShiftIds
+					);
+					const reservedMinor = await repository.sumReservedDepositsForSessions(
+						input.tenantId,
+						sortedShiftIds
+					);
+					const availableMinor = safeDropTotalMinor - reservedMinor;
+					if (input.countedAmountMinor > availableMinor) {
+						throw new PosError(
+							"validation",
+							"Deposit exceeds available safe custody"
+						);
+					}
+					const now = options.clock();
+					const preparerPartyId = await options.parties.requireActorPartyId({
+						authUserId: input.actorUserId,
+						organizationId: input.organizationId,
+						tenantId: input.tenantId,
+					});
+					const id = options.ids.create("deposit");
+					const allocation = await numbering.allocate({
+						actorUserId: input.actorUserId,
+						correlationId: input.correlationId,
+						depositId: id,
+						idempotencyKey: input.idempotencyKey,
+						organizationId: input.organizationId,
+						tenantId: input.tenantId,
+					});
+					const record: DepositRecord = {
+						amountMinor: input.countedAmountMinor,
+						confirmedAt: null,
+						confirmedByActorUserId: null,
+						confirmedByPartyId: null,
+						createdAt: now,
+						currency: input.currency,
+						depositReference: allocation.value,
+						id,
+						organizationId: input.organizationId,
+						preparedAt: now,
+						preparedByActorUserId: input.actorUserId,
+						preparedByPartyId: preparerPartyId,
+						sourceShiftIds: sortedShiftIds,
+						state: "Prepared",
+						tenantId: input.tenantId,
+						updatedAt: now,
+						version: 1,
+					};
+					const saved = await repository.createDeposit(record);
+					await events.append(
+						event({
+							actorUserId: input.actorUserId,
+							aggregateId: saved.id,
+							capabilityId: "commerce.cash-management",
+							correlationId: input.correlationId,
+							data: {
+								amountMinor: saved.amountMinor,
+								currency: saved.currency,
+								depositId: saved.id,
+								depositReference: saved.depositReference,
+								preparerPartyId,
+								sourceShiftIds: saved.sourceShiftIds,
+							},
+							eventId: options.ids.create("event"),
+							idempotencyKey: input.idempotencyKey,
+							name: "commerce.deposit.prepared.v1",
+							now,
+							organizationId: input.organizationId,
+							schemaRef:
+								"schemas/events/commerce.deposit.prepared.v1.schema.json",
+							tenantId: input.tenantId,
+						})
+					);
+					const result = depositView(saved);
+					return recordResult(
+						repository,
+						{
+							idempotencyKey: input.idempotencyKey,
+							operation: "commerce.deposit.create",
+							requestFingerprint,
+							resourceId: saved.id,
+							tenantId: saved.tenantId,
+						},
+						result,
+						now
+					);
+				}
+			);
 		},
 
 		async createRefund(input: {
@@ -3782,6 +4308,25 @@ export function createPosService(options: PosServiceOptions) {
 			});
 		},
 
+		/**
+		 * Bounded read used ONLY by the accountant handoff export composition
+		 * (WS3 PR4 §8.1) — not a permissioned POS command in its own right;
+		 * the caller's `platform.export.create`/`.read` authorization already
+		 * gates access before this is ever invoked, mirroring how `products`
+		 * (in `apps/server/composition/pos.ts`) is an unauthenticated
+		 * cross-domain read protected by its OWN caller's permission check.
+		 */
+		queryFinanceHandoffSourceData(input: {
+			organizationId: string;
+			periodEndUtc: Date;
+			periodStartUtc: Date;
+			tenantId: string;
+		}): Promise<PosFinanceHandoffSourceData> {
+			return options.unitOfWork.execute(({ repository }) =>
+				repository.queryFinanceHandoffSourceData(input)
+			);
+		},
+
 		// -- WS3 PR3: Receipt reissue and gift receipt ---------------------------
 
 		/** Reprints an existing receipt as a new numbered `Reissue`-kind
@@ -4198,6 +4743,8 @@ export interface PosActiveContextPort {
 export type PosPermission =
 	| "commerce.cash-movement.create"
 	| "commerce.cash-variance.approve"
+	| "commerce.deposit.confirm"
+	| "commerce.deposit.create"
 	| "commerce.price-override.approve"
 	| "commerce.price-override.request"
 	| "commerce.receipt.read"
@@ -4437,6 +4984,33 @@ export function createPosApplication(options: {
 				tenders: input.tenders,
 			});
 		},
+
+		// -- WS3 PR4: Deposit -----------------------------------------------------
+
+		async confirmDeposit(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			depositId: string;
+			idempotencyKey: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.cash-management",
+				contextId: input.contextId,
+				permission: "commerce.deposit.confirm",
+				sessionId: input.sessionId,
+			});
+			return options.service.confirmDeposit({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				depositId: input.depositId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: context.organizationId,
+				tenantId: context.tenantId,
+			});
+		},
 		async createCashMovement(input: {
 			actorUserId: string;
 			amount: { amountMinor: number; currency: string };
@@ -4468,6 +5042,35 @@ export function createPosApplication(options: {
 				reasonCode: input.reasonCode,
 				referenceId: input.referenceId,
 				registerId: input.registerId,
+				tenantId: context.tenantId,
+			});
+		},
+
+		async createDeposit(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			countedAmountMinor: number;
+			currency: string;
+			idempotencyKey: string;
+			sessionId: string;
+			sourceShiftIds: string[];
+		}) {
+			const context = await authorize({
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.cash-management",
+				contextId: input.contextId,
+				permission: "commerce.deposit.create",
+				sessionId: input.sessionId,
+			});
+			return options.service.createDeposit({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				countedAmountMinor: input.countedAmountMinor,
+				currency: input.currency,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: context.organizationId,
+				sourceShiftIds: input.sourceShiftIds,
 				tenantId: context.tenantId,
 			});
 		},

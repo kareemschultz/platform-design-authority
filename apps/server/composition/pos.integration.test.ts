@@ -65,6 +65,14 @@ const ids: PosIdFactory = {
 function service(failEvents = false) {
 	return createPosService({
 		clock: () => new Date(),
+		depositUnitOfWork: {
+			execute: () =>
+				Promise.reject(
+					new Error(
+						"depositUnitOfWork is not exercised by this lane — see deposits.integration.test.ts for PR4's own lane"
+					)
+				),
+		},
 		ids,
 		parties: {
 			requireActorPartyId: ({ authUserId }) =>
@@ -157,6 +165,14 @@ function createTestSaleInventoryAdapter(
 function saleService(options: { failEventName?: string } = {}) {
 	return createPosService({
 		clock: () => new Date(),
+		depositUnitOfWork: {
+			execute: () =>
+				Promise.reject(
+					new Error(
+						"depositUnitOfWork is not exercised by this lane — see deposits.integration.test.ts for PR4's own lane"
+					)
+				),
+		},
 		ids,
 		parties: {
 			requireActorPartyId: ({ authUserId }) =>
@@ -282,7 +298,7 @@ const base = {
 };
 
 describe.serial("POS PostgreSQL controlled prototype", () => {
-	test("migrates idempotently and creates the ten registered POS-owned tables (PR1 register/cash + PR2 sale/receipt/price-override + PR3 return/refund)", async () => {
+	test("migrates idempotently and creates the thirteen registered POS-owned tables (PR1 register/cash + PR2 sale/receipt/price-override + PR3 return/refund + PR4 deposit)", async () => {
 		await migratePos(testPool);
 		const tables = await testPool.query<{ table_name: string }>(
 			"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name LIKE 'pos_%' ORDER BY table_name"
@@ -290,6 +306,9 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 		expect(tables.rows.map((row) => row.table_name)).toEqual([
 			"pos_cash_movement",
 			"pos_command_receipt",
+			"pos_deposit",
+			"pos_deposit_custody_transfer",
+			"pos_deposit_source_shift",
 			"pos_price_override",
 			"pos_receipt",
 			"pos_refund",

@@ -80,6 +80,63 @@ export function createReceiptNumberAllocator(client: PoolClient) {
 	};
 }
 
+/**
+ * WS3 PR4's deposit-reference allocation path (frozen control plan §6.6).
+ * Scoped per ORGANIZATION (not per register, unlike
+ * `createReceiptNumberAllocator`) — a deposit draws safe custody from a
+ * set of register sessions, not one register, so the reference sequence
+ * is organization-wide, mirroring `createImportReferenceAllocator`'s
+ * scoping exactly.
+ */
+export function createDepositReferenceAllocator(client: PoolClient) {
+	const service = createNumberingService({
+		clock: () => new Date(),
+		ids: {
+			create: (kind) => `numbering_${kind}_${randomUUID().replaceAll("-", "")}`,
+		},
+		unitOfWork: {
+			execute: (operation) =>
+				operation({
+					events: createPostgresOutbox(client),
+					repository: createNumberingRepository(client),
+				}),
+		},
+	});
+	return {
+		async allocate(input: {
+			actorUserId: string;
+			correlationId: string;
+			depositId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			tenantId: string;
+		}) {
+			const sequenceId = `sequence_deposit_${input.organizationId}`;
+			await service.ensureSystemSequence({
+				id: sequenceId,
+				organizationId: input.organizationId,
+				ownerNamespace: "commerce",
+				padding: 6,
+				prefix: "DEP-",
+				recordType: "Deposit",
+				sequenceKey: `commerce.deposit.${input.organizationId}`,
+				tenantId: input.tenantId,
+			});
+			const allocation = await service.allocate({
+				actorUserId: input.actorUserId,
+				businessRecordId: input.depositId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: input.organizationId,
+				sequenceId,
+				sourceCommandId: input.idempotencyKey,
+				tenantId: input.tenantId,
+			});
+			return { value: allocation.value };
+		},
+	};
+}
+
 export function createImportReferenceAllocator(client: PoolClient) {
 	const service = createNumberingService({
 		clock: () => new Date(),

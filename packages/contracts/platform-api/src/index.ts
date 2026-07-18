@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { OPENAPI_OPERATION_METADATA } from "./generated";
 import {
+	AccountantHandoffExportSchema,
+	AccountantHandoffRequestSchema,
 	ActiveContextRequestSchema,
 	ActiveContextSchema,
 	CashMovementSchema,
@@ -10,6 +12,7 @@ import {
 	CompleteSaleRequestSchema,
 	CreateCashMovementRequestSchema,
 	CreateCsvImportSchema,
+	CreateDepositSchema,
 	CreateEventReplayRequestSchema,
 	CreateInventoryAdjustmentSchema,
 	CreateOrganizationPartySchema,
@@ -25,6 +28,7 @@ import {
 	CreateStockTransferSchema,
 	CreateUserInvitationRequestSchema,
 	CurrentIdentitySchema,
+	DepositSchema,
 	EventReplayRequestSchema,
 	IdentifierSchema,
 	ImportCorrectionReportSchema,
@@ -1312,6 +1316,93 @@ export const voidReceiptContract = base
 	)
 	.output(ReturnSchema);
 
+// ---------------------------------------------------------------------------
+// WS3 PR4: Deposit (commerce.deposit.create/.confirm) and the accountant
+// handoff export (platform.export.create/.read).
+// ---------------------------------------------------------------------------
+
+export const createDepositContract = base
+	.route({
+		method: "POST",
+		path: "/v1/deposits",
+		successStatus: 201,
+	})
+	.meta({
+		operationId: "createDeposit",
+		permission: "commerce.deposit.create",
+		requestRef: "#/components/schemas/CreateDeposit",
+		responseRef: "#/components/schemas/Deposit",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateDepositSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(DepositSchema);
+
+export const confirmDepositContract = base
+	.route({
+		method: "POST",
+		path: "/v1/deposits/{depositId}/confirm",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postDepositsByDepositIdConfirm",
+		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/Deposit",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ depositId: IdentifierSchema }),
+		})
+	)
+	.output(DepositSchema);
+
+export const createAccountantHandoffExportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/exports/accountant-handoff",
+		successStatus: 202,
+	})
+	.meta({
+		operationId: "createAccountantHandoffExport",
+		permission: "platform.export.create",
+		requestRef: "#/components/schemas/AccountantHandoffRequest",
+		responseRef: "#/components/schemas/AccountantHandoffExport",
+		successStatus: 202,
+	})
+	.input(
+		z.object({
+			body: AccountantHandoffRequestSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(AccountantHandoffExportSchema);
+
+export const getExportContract = base
+	.route({
+		method: "GET",
+		path: "/v1/exports/{exportId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getExportsByExportId",
+		permission: "platform.export.read",
+		responseRef: "#/components/schemas/AccountantHandoffExport",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ exportId: IdentifierSchema }),
+		})
+	)
+	.output(AccountantHandoffExportSchema);
+
 export const createOpeningStockImportContract = base
 	.route({
 		method: "POST",
@@ -1775,6 +1866,10 @@ export const ws3PosApiContract = {
 	commerce: {
 		cashMovements: { create: createCashMovementContract },
 		cashVariances: { approve: approveCashVarianceContract },
+		deposits: {
+			confirm: confirmDepositContract,
+			create: createDepositContract,
+		},
 		priceOverrides: {
 			approve: approveSalePriceOverrideContract,
 			request: requestSalePriceOverrideContract,
@@ -1802,6 +1897,10 @@ export const ws3PosApiContract = {
 			create: createSaleContract,
 			hold: holdSaleContract,
 		},
+	},
+	exports: {
+		createAccountantHandoff: createAccountantHandoffExportContract,
+		get: getExportContract,
 	},
 };
 
@@ -1920,14 +2019,13 @@ export const WS3_PR1_OPENAPI_OPERATION_METADATA =
 		(WS3_PR1_OPERATION_IDS as readonly string[]).includes(operation.operationId)
 	);
 
-/** WS3 PR1-PR3 scope: every `commerce.*` operation implemented behind this
- * branch's router as of PR3 (registers/cash/sale/receipt/return/refund/
- * void/reissue). PR4's deposit/export operations are not yet implemented
- * and are intentionally excluded — matching `WS3_PR1_OPERATION_IDS`' own
- * "not yet implemented" discipline above. `ws3PosApiContract`'s procedure
- * tree is asserted against exactly this set (see `index.test.ts`), the
- * same parity discipline `PLATFORM_OPENAPI_OPERATION_METADATA` and
- * `WS2_OPENAPI_OPERATION_METADATA` already use. */
+/** WS3 PR1-PR4 scope: every `commerce.*`/`platform.export.*` operation
+ * implemented behind this branch's router as of PR4 (registers/cash/sale/
+ * receipt/return/refund/void/reissue/deposit/accountant-handoff export).
+ * `ws3PosApiContract`'s procedure tree is asserted against exactly this
+ * set (see `index.test.ts`), the same parity discipline
+ * `PLATFORM_OPENAPI_OPERATION_METADATA` and `WS2_OPENAPI_OPERATION_
+ * METADATA` already use. */
 export const WS3_OPERATION_IDS = [
 	...WS3_PR1_OPERATION_IDS,
 	"createSale",
@@ -1942,6 +2040,10 @@ export const WS3_OPERATION_IDS = [
 	"postRefundsByRefundIdApprove",
 	"postReceiptsByReceiptIdReissue",
 	"postReceiptsByReceiptIdVoid",
+	"createDeposit",
+	"postDepositsByDepositIdConfirm",
+	"createAccountantHandoffExport",
+	"getExportsByExportId",
 ] as const;
 
 export const WS3_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(

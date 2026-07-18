@@ -965,6 +965,65 @@ export const VoidReceiptRequestSchema = z
 	})
 	.strict();
 
+// ---------------------------------------------------------------------------
+// WS3 PR4: Deposit (commerce.deposit.create/.confirm, frozen control plan
+// §6.6) and the accountant-handoff export (platform.export.create/.read,
+// FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md/PDA-DOM-026).
+// ---------------------------------------------------------------------------
+
+export const CreateDepositSchema = z
+	.object({
+		countedAmount: MoneySchema,
+		currency: z.string().regex(/^[A-Z]{3}$/),
+		sourceShiftIds: z.array(IdentifierSchema).min(1),
+	})
+	.strict();
+
+export const DepositSchema = z.object({
+	amount: MoneySchema,
+	confirmedAt: InstantSchema.nullable(),
+	confirmerPartyId: NullableIdentifierSchema,
+	depositReference: z.string(),
+	id: IdentifierSchema,
+	preparedAt: InstantSchema,
+	preparerPartyId: IdentifierSchema,
+	sourceShiftIds: z.array(IdentifierSchema),
+	state: z.enum(["Prepared", "Reconciled"]),
+	version: z.number().int().min(1),
+});
+
+export const AccountantHandoffRequestSchema = z
+	.object({
+		currency: z.string().regex(/^[A-Z]{3}$/),
+		legalEntityId: IdentifierSchema,
+		periodEnd: InstantSchema,
+		periodStart: InstantSchema,
+		timezone: z.string().min(1).max(100),
+	})
+	.strict();
+
+export const AccountantHandoffExportSchema = z.object({
+	contentHash: z.string(),
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	generatedAt: InstantSchema,
+	id: IdentifierSchema,
+	idempotencyKey: z.string(),
+	kind: z.literal("AccountantHandoff"),
+	legalEntityId: IdentifierSchema,
+	organizationId: IdentifierSchema,
+	// The full accountant export package; `payload.postingBatch` validates
+	// against schemas/finance/finance-handoff-v1.schema.json — that JSON
+	// Schema file remains the single source of truth for its shape, not
+	// re-encoded a second time as zod here.
+	payload: z.record(z.string(), z.unknown()),
+	periodEnd: InstantSchema,
+	periodStart: InstantSchema,
+	ruleVersion: z.string(),
+	schemaVersion: z.string(),
+	tenantId: IdentifierSchema,
+	timezone: z.string(),
+});
+
 export const CsvImportManifestSchema = z.object({
 	decimalSeparator: z.enum([".", ","]),
 	defaultUnit: z.string().min(1).max(50).optional(),
@@ -1239,3 +1298,11 @@ export type CreateRefund = z.infer<typeof CreateRefundSchema>;
 export type Refund = z.infer<typeof RefundSchema>;
 export type ReissueReceiptRequest = z.infer<typeof ReissueReceiptRequestSchema>;
 export type VoidReceiptRequest = z.infer<typeof VoidReceiptRequestSchema>;
+export type CreateDeposit = z.infer<typeof CreateDepositSchema>;
+export type Deposit = z.infer<typeof DepositSchema>;
+export type AccountantHandoffRequest = z.infer<
+	typeof AccountantHandoffRequestSchema
+>;
+export type AccountantHandoffExport = z.infer<
+	typeof AccountantHandoffExportSchema
+>;

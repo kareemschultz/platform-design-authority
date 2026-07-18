@@ -29,6 +29,13 @@
       "when": 1784224575648,
       "tag": "0003_rare_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784390256987,
+      "tag": "0004_clumsy_doomsday",
+      "breakpoints": true
     }
   ]
 }

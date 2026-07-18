@@ -654,3 +654,157 @@ export const posRefunds = pgTable(
 		),
 	]
 );
+
+/**
+ * `pos_deposit` is the Deposit maker/checker aggregate (WS3 PR4, frozen
+ * control plan §6.6). `Prepared` is EFFECT-FREE: it reserves
+ * `amount_minor` against the available safe custody carried by its
+ * `pos_deposit_source_shift` rows but posts no custody transfer.
+ * `Reconciled` is set only by `confirmDeposit`, atomic with the ONE row it
+ * ever inserts into `pos_deposit_custody_transfer` — never at insert time
+ * here. `deposit_reference` is a human-facing reference number (`platform/
+ * numbering`, organization-scoped), separate from the opaque `id` per
+ * CLAUDE.md §7.
+ */
+export const posDeposits = pgTable(
+	"pos_deposit",
+	{
+		amountMinor: minorAmount("amount_minor").notNull(),
+		classification: classification(),
+		confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+		confirmedByActorUserId: text("confirmed_by_actor_user_id"),
+		confirmedByPartyId: text("confirmed_by_party_id"),
+		createdAt: createdAt(),
+		currency: text("currency").notNull(),
+		depositReference: text("deposit_reference").notNull(),
+		id: text("id").notNull(),
+		organizationId: text("organization_id").notNull(),
+		preparedAt: timestamp("prepared_at", { withTimezone: true }).notNull(),
+		preparedByActorUserId: text("prepared_by_actor_user_id").notNull(),
+		preparedByPartyId: text("prepared_by_party_id").notNull(),
+		state: text("state").default("Prepared").notNull(),
+		tenantId: text("tenant_id").notNull(),
+		updatedAt: updatedAt(),
+		version: integer("version").default(1).notNull(),
+	},
+	(table) => [
+		check("pos_deposit_currency_check", sql`${table.currency} ~ '^[A-Z]{3}$'`),
+		check("pos_deposit_amount_check", sql`${table.amountMinor} > 0`),
+		check(
+			"pos_deposit_state_check",
+			sql`${table.state} in ('Prepared', 'Reconciled')`
+		),
+		check(
+			"pos_deposit_reconciled_check",
+			sql`(${table.state} = 'Reconciled') = (${table.confirmedAt} is not null and ${table.confirmedByActorUserId} is not null and ${table.confirmedByPartyId} is not null)`
+		),
+		primaryKey({ columns: [table.tenantId, table.id], name: "pos_deposit_pk" }),
+		uniqueIndex("pos_deposit_tenant_reference_uidx").on(
+			table.tenantId,
+			table.depositReference
+		),
+		index("pos_deposit_tenant_state_idx").on(
+			table.tenantId,
+			table.organizationId,
+			table.state
+		),
+		index("pos_deposit_tenant_prepared_at_idx").on(
+			table.tenantId,
+			table.organizationId,
+			table.preparedAt
+		),
+		index("pos_deposit_tenant_confirmed_at_idx").on(
+			table.tenantId,
+			table.organizationId,
+			table.confirmedAt
+		),
+	]
+);
+
+/**
+ * `pos_deposit_source_shift` is a normalized child table (one row per
+ * register session a Deposit draws safe custody from), matching the
+ * `pos_return_line`/`pos_sale_line` normalized-child precedent rather than
+ * an embedded JSONB array — it exists specifically so the safe-custody
+ * reservation query (`sumSafeDropForSessions`/
+ * `sumReservedDepositsForSessions`) can join and lock efficiently instead
+ * of scanning a JSONB array per candidate deposit.
+ */
+export const posDepositSourceShifts = pgTable(
+	"pos_deposit_source_shift",
+	{
+		depositId: text("deposit_id").notNull(),
+		sessionId: text("session_id").notNull(),
+		tenantId: text("tenant_id").notNull(),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.tenantId, table.depositId, table.sessionId],
+			name: "pos_deposit_source_shift_pk",
+		}),
+		foreignKey({
+			columns: [table.tenantId, table.depositId],
+			foreignColumns: [posDeposits.tenantId, posDeposits.id],
+			name: "pos_deposit_source_shift_deposit_fk",
+		}),
+		foreignKey({
+			columns: [table.tenantId, table.sessionId],
+			foreignColumns: [posRegisterSessions.tenantId, posRegisterSessions.id],
+			name: "pos_deposit_source_shift_session_fk",
+		}),
+		// Authoritative lookup for "which Prepared/Reconciled deposits already
+		// reserve against session X" — the reservation query's join path.
+		index("pos_deposit_source_shift_tenant_session_idx").on(
+			table.tenantId,
+			table.sessionId
+		),
+	]
+);
+
+/**
+ * `pos_deposit_custody_transfer` holds the ONE row `deposit.confirm` ever
+ * inserts — the posted safe-to-bank custody transfer itself. No row here
+ * may exist for a `Prepared` deposit (frozen control plan §6.6,
+ * effect-free preparation); the unique index caps a Deposit at exactly
+ * one transfer ever, mirroring `pos_refund_tenant_return_uidx`'s "at most
+ * one Refund per Return" discipline.
+ */
+export const posDepositCustodyTransfers = pgTable(
+	"pos_deposit_custody_transfer",
+	{
+		amountMinor: minorAmount("amount_minor").notNull(),
+		classification: classification(),
+		confirmedByActorUserId: text("confirmed_by_actor_user_id").notNull(),
+		confirmedByPartyId: text("confirmed_by_party_id").notNull(),
+		createdAt: createdAt(),
+		currency: text("currency").notNull(),
+		depositId: text("deposit_id").notNull(),
+		id: text("id").notNull(),
+		organizationId: text("organization_id").notNull(),
+		postedAt: timestamp("posted_at", { withTimezone: true }).notNull(),
+		tenantId: text("tenant_id").notNull(),
+	},
+	(table) => [
+		check(
+			"pos_deposit_custody_transfer_currency_check",
+			sql`${table.currency} ~ '^[A-Z]{3}$'`
+		),
+		check(
+			"pos_deposit_custody_transfer_amount_check",
+			sql`${table.amountMinor} > 0`
+		),
+		primaryKey({
+			columns: [table.tenantId, table.id],
+			name: "pos_deposit_custody_transfer_pk",
+		}),
+		foreignKey({
+			columns: [table.tenantId, table.depositId],
+			foreignColumns: [posDeposits.tenantId, posDeposits.id],
+			name: "pos_deposit_custody_transfer_deposit_fk",
+		}),
+		uniqueIndex("pos_deposit_custody_transfer_tenant_deposit_uidx").on(
+			table.tenantId,
+			table.depositId
+		),
+	]
+);

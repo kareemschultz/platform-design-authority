@@ -4,9 +4,12 @@ import {
 	type CashMovementRecord,
 	createPosApplication,
 	createPosService,
+	DEPOSIT_STATES,
+	type DepositRecord,
 	type PendingPosEvent,
 	type PosCommandReceipt,
 	PosError,
+	type PosFinanceHandoffSourceData,
 	type PosIdFactory,
 	type PosPermission,
 	type PosPricingPort,
@@ -43,6 +46,7 @@ import {
 // `PosTaxPort` adapter's output.
 const TEST_MONEY_SCALE = 100n;
 const TEST_QUANTITY_SCALE = 1_000_000n;
+const DEPOSIT_REFERENCE_PATTERN = /^DEP-\d{6}$/;
 const TEST_CATEGORY_RATES: Record<string, string> = {
 	GY_EXEMPT: "0.00",
 	GY_OUT_OF_SCOPE: "0.00",
@@ -161,6 +165,12 @@ function createInMemoryRepository() {
 	const saleReceipts = new Map<string, ReceiptRecord>();
 	const returns = new Map<string, ReturnRecord>();
 	const refunds = new Map<string, RefundRecord>();
+	const deposits = new Map<string, DepositRecord>();
+	const depositCustodyTransfers: Array<{
+		amountMinor: number;
+		depositId: string;
+		id: string;
+	}> = [];
 
 	const repository: PosRepository = {
 		acquireCommandLock: () => Promise.resolve(),
@@ -176,6 +186,20 @@ function createInMemoryRepository() {
 		createCashMovement: (record) => {
 			movements.push(record);
 			return Promise.resolve(record);
+		},
+
+		// -- WS3 PR4: Deposit, Finance handoff -----------------------------------
+		createDeposit: (record) => {
+			deposits.set(record.id, record);
+			return Promise.resolve(record);
+		},
+		createDepositCustodyTransfer: (record) => {
+			depositCustodyTransfers.push({
+				amountMinor: record.amountMinor,
+				depositId: record.depositId,
+				id: record.id,
+			});
+			return Promise.resolve();
 		},
 		createPriceOverride: (record) => {
 			priceOverrides.set(record.id, record);
@@ -203,6 +227,12 @@ function createInMemoryRepository() {
 			Promise.resolve(
 				commandReceipts.get(`${tenantId}${operation}${idempotencyKey}`) ?? null
 			),
+		getDeposit: (tenantId, id) => {
+			const record = deposits.get(id);
+			return Promise.resolve(
+				record && record.tenantId === tenantId ? record : null
+			);
+		},
 		getOpenSession: (tenantId, registerId) =>
 			Promise.resolve(
 				[...sessions.values()].find(
@@ -248,6 +278,16 @@ function createInMemoryRepository() {
 				record && record.tenantId === tenantId ? record : null
 			);
 		},
+		lockSessionsForDeposit: (tenantId, sessionIds) =>
+			Promise.resolve(
+				[...sessionIds]
+					.sort()
+					.map((id) => sessions.get(id))
+					.filter(
+						(session): session is RegisterSessionRecord =>
+							session !== undefined && session.tenantId === tenantId
+					)
+			),
 		netCashMovements: (tenantId, sessionId) => {
 			const relevant = movements.filter(
 				(movement) =>
@@ -280,6 +320,111 @@ function createInMemoryRepository() {
 			sessions.set(record.id, record);
 			return Promise.resolve(record);
 		},
+		queryFinanceHandoffSourceData: (input) => {
+			const inRange = (value: Date | null) =>
+				value !== null &&
+				value >= input.periodStartUtc &&
+				value < input.periodEndUtc;
+			const scopedSales = [...sales.values()].filter(
+				(sale) =>
+					sale.tenantId === input.tenantId &&
+					sale.organizationId === input.organizationId &&
+					sale.state === "Completed" &&
+					inRange(sale.completedAt)
+			);
+			const scopedReturns = [...returns.values()].filter(
+				(candidate) =>
+					candidate.tenantId === input.tenantId &&
+					candidate.organizationId === input.organizationId &&
+					candidate.state === "Completed" &&
+					inRange(candidate.updatedAt)
+			);
+			const scopedRefundMovements = movements.filter(
+				(movement) =>
+					movement.tenantId === input.tenantId &&
+					movement.organizationId === input.organizationId &&
+					movement.reasonCode === "Refund" &&
+					inRange(movement.createdAt)
+			);
+			const closedVariances = [...sessions.values()].filter(
+				(session) =>
+					session.tenantId === input.tenantId &&
+					session.organizationId === input.organizationId &&
+					session.state === "Closed" &&
+					session.varianceMinor !== null &&
+					session.varianceMinor !== 0 &&
+					inRange(session.closedAt)
+			);
+			const unresolvedVariances = [...sessions.values()].filter(
+				(session) =>
+					session.tenantId === input.tenantId &&
+					session.organizationId === input.organizationId &&
+					session.state === "Closing" &&
+					inRange(session.closeRequestedAt)
+			);
+			const scopedDeposits = [...deposits.values()].filter(
+				(deposit) =>
+					deposit.tenantId === input.tenantId &&
+					deposit.organizationId === input.organizationId
+			);
+			const result: PosFinanceHandoffSourceData = {
+				closedVariances: closedVariances.map((session) => ({
+					currency: session.currency,
+					occurredAt: session.closedAt as Date,
+					registerId: session.registerId,
+					sessionId: session.id,
+					varianceMinor: session.varianceMinor as number,
+				})),
+				netInventoryQuantityScaled: "0",
+				preparedDeposits: scopedDeposits
+					.filter(
+						(deposit) =>
+							deposit.state === "Prepared" && inRange(deposit.preparedAt)
+					)
+					.map((deposit) => ({
+						amountMinor: deposit.amountMinor,
+						currency: deposit.currency,
+						depositId: deposit.id,
+						depositReference: deposit.depositReference,
+						occurredAt: deposit.preparedAt,
+					})),
+				reconciledDeposits: scopedDeposits
+					.filter(
+						(deposit) =>
+							deposit.state === "Reconciled" && inRange(deposit.confirmedAt)
+					)
+					.map((deposit) => ({
+						amountMinor: deposit.amountMinor,
+						currency: deposit.currency,
+						depositId: deposit.id,
+						depositReference: deposit.depositReference,
+						occurredAt: deposit.confirmedAt as Date,
+					})),
+				refunds: scopedRefundMovements.map((movement) => ({
+					amountMinor: movement.amountMinor,
+					currency: movement.currency,
+					movementId: movement.id,
+					postedAt: movement.createdAt,
+					refundId: movement.referenceId ?? movement.id,
+				})),
+				returnCount: scopedReturns.length,
+				sales: scopedSales.map((sale) => ({
+					completedAt: sale.completedAt as Date,
+					currency: sale.currency,
+					discountMinor: sale.discountMinor,
+					grossMinor: sale.grossMinor,
+					id: sale.id,
+					taxMinor: sale.taxMinor,
+					totalMinor: sale.totalMinor,
+				})),
+				unresolvedVariances: unresolvedVariances.map((session) => ({
+					closeRequestedAt: session.closeRequestedAt as Date,
+					registerId: session.registerId,
+					sessionId: session.id,
+				})),
+			};
+			return Promise.resolve(result);
+		},
 		recordCommandReceipt: (receipt) => {
 			const key = `${receipt.tenantId}${receipt.operation}${receipt.idempotencyKey}`;
 			const existing = commandReceipts.get(key);
@@ -289,6 +434,22 @@ function createInMemoryRepository() {
 			commandReceipts.set(key, receipt);
 			return Promise.resolve({ inserted: true, record: receipt });
 		},
+		sumReservedDepositsForSessions: (
+			tenantId,
+			sessionIds,
+			excludeDepositId
+		) => {
+			const relevant = [...deposits.values()].filter(
+				(deposit) =>
+					deposit.tenantId === tenantId &&
+					deposit.id !== excludeDepositId &&
+					(deposit.state === "Prepared" || deposit.state === "Reconciled") &&
+					deposit.sourceShiftIds.some((id) => sessionIds.includes(id))
+			);
+			return Promise.resolve(
+				relevant.reduce((sum, deposit) => sum + deposit.amountMinor, 0)
+			);
+		},
 		sumReturnedQuantity: (tenantId, saleLineId) => {
 			const total = [...returns.values()]
 				.filter((candidate) => candidate.tenantId === tenantId)
@@ -296,6 +457,25 @@ function createInMemoryRepository() {
 				.filter((line) => line.saleLineId === saleLineId)
 				.reduce((sum, line) => sum + Number(line.quantity), 0);
 			return Promise.resolve(total.toString());
+		},
+		sumSafeDropForSessions: (tenantId, sessionIds) => {
+			const relevant = movements.filter(
+				(movement) =>
+					movement.tenantId === tenantId &&
+					movement.reasonCode === "SafeDrop" &&
+					sessionIds.includes(movement.sessionId)
+			);
+			return Promise.resolve(
+				relevant.reduce((sum, movement) => sum + movement.amountMinor, 0)
+			);
+		},
+		updateDeposit: (record, expectedVersion) => {
+			const current = deposits.get(record.id);
+			if (!current || current.version !== expectedVersion) {
+				return Promise.resolve("version_conflict" as const);
+			}
+			deposits.set(record.id, record);
+			return Promise.resolve(record);
 		},
 		updatePriceOverride: (record, expectedVersion) => {
 			const current = priceOverrides.get(record.id);
@@ -340,6 +520,8 @@ function createInMemoryRepository() {
 	};
 
 	return {
+		depositCustodyTransfers,
+		deposits,
 		movements,
 		priceOverrides,
 		refunds,
@@ -353,6 +535,8 @@ function createInMemoryRepository() {
 
 function createHarness() {
 	const {
+		deposits,
+		depositCustodyTransfers,
 		movements,
 		priceOverrides,
 		refunds,
@@ -392,8 +576,23 @@ function createHarness() {
 		repository,
 	};
 	let receiptCounter = 0;
+	let depositReferenceCounter = 0;
 	const service = createPosService({
 		clock: () => new Date("2026-07-18T12:00:00.000Z"),
+		depositUnitOfWork: {
+			execute: (operation) =>
+				operation({
+					...scope,
+					numbering: {
+						allocate: () => {
+							depositReferenceCounter += 1;
+							return Promise.resolve({
+								value: `DEP-${depositReferenceCounter.toString().padStart(6, "0")}`,
+							});
+						},
+					},
+				}),
+		},
 		ids,
 		parties: {
 			requireActorPartyId: ({ authUserId }) =>
@@ -462,6 +661,8 @@ function createHarness() {
 		unitOfWork: { execute: (operation) => operation(scope) },
 	});
 	return {
+		depositCustodyTransfers,
+		deposits,
 		events,
 		ids,
 		movements,
@@ -2283,5 +2484,347 @@ describe("POS application: permission-before-dispatch and self-approval separati
 		});
 		expect(opened.state).toBe("Open");
 		expect(isDispatched()).toBe(true);
+	});
+});
+
+describe("POS domain: Deposit (prepare/confirm)", () => {
+	test("Prepared precedes Reconciled and preparation never starts confirmed", () => {
+		expect(DEPOSIT_STATES).toEqual(["Prepared", "Reconciled"]);
+		expect(DEPOSIT_STATES.indexOf("Prepared")).toBeLessThan(
+			DEPOSIT_STATES.indexOf("Reconciled")
+		);
+	});
+
+	async function openAndSafeDrop(
+		service: ReturnType<typeof createHarness>["service"],
+		input: {
+			amountMinor: number;
+			idempotencyPrefix: string;
+			registerId: string;
+		}
+	) {
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${input.idempotencyPrefix}-open`,
+			openingFloat: { amountMinor: 500_000, currency: "GYD" },
+			registerId: input.registerId,
+		});
+		const movement = await service.createCashMovement({
+			...base,
+			amount: { amountMinor: input.amountMinor, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: `${input.idempotencyPrefix}-safe-drop`,
+			reasonCode: "SafeDrop",
+			registerId: input.registerId,
+		});
+		return movement.sessionId;
+	}
+
+	test("prepares a deposit that reserves safe custody and posts NO custody transfer", async () => {
+		const { depositCustodyTransfers, events, service } = createHarness();
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 100_000,
+			idempotencyPrefix: "dep-happy",
+			registerId: "register_dep_happy",
+		});
+
+		const prepared = await service.createDeposit({
+			...base,
+			correlationId: base.correlationId,
+			countedAmountMinor: 100_000,
+			currency: "GYD",
+			idempotencyKey: "dep-happy-create",
+			sourceShiftIds: [sessionId],
+		});
+
+		expect(prepared.state).toBe("Prepared");
+		expect(prepared.amount).toEqual({ amountMinor: 100_000, currency: "GYD" });
+		expect(prepared.depositReference).toMatch(DEPOSIT_REFERENCE_PATTERN);
+		expect(prepared.confirmedAt).toBeNull();
+		expect(depositCustodyTransfers).toHaveLength(0);
+		const preparedEvents = events.filter(
+			(envelope) => envelope.name === "commerce.deposit.prepared.v1"
+		);
+		expect(preparedEvents).toHaveLength(1);
+		expect(preparedEvents[0]?.data).toMatchObject({
+			amountMinor: 100_000,
+			depositId: prepared.id,
+		});
+	});
+
+	test("rejects a deposit that exceeds available safe custody", async () => {
+		const { service } = createHarness();
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 50_000,
+			idempotencyPrefix: "dep-over",
+			registerId: "register_dep_over",
+		});
+
+		const attempt = service.createDeposit({
+			...base,
+			countedAmountMinor: 50_001,
+			currency: "GYD",
+			idempotencyKey: "dep-over-create",
+			sourceShiftIds: [sessionId],
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "validation" });
+	});
+
+	test("caps cumulative reservation across two deposits against the same safe-drop pool", async () => {
+		const { service } = createHarness();
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 100_000,
+			idempotencyPrefix: "dep-cumulative",
+			registerId: "register_dep_cumulative",
+		});
+
+		const first = await service.createDeposit({
+			...base,
+			countedAmountMinor: 60_000,
+			currency: "GYD",
+			idempotencyKey: "dep-cumulative-first",
+			sourceShiftIds: [sessionId],
+		});
+		expect(first.amount.amountMinor).toBe(60_000);
+
+		// 60,000 already reserved of 100,000 available -> only 40,000 remains.
+		const secondTooMuch = service.createDeposit({
+			...base,
+			countedAmountMinor: 40_001,
+			currency: "GYD",
+			idempotencyKey: "dep-cumulative-second-over",
+			sourceShiftIds: [sessionId],
+		});
+		await expect(secondTooMuch).rejects.toMatchObject({ code: "validation" });
+
+		const secondOk = await service.createDeposit({
+			...base,
+			countedAmountMinor: 40_000,
+			currency: "GYD",
+			idempotencyKey: "dep-cumulative-second-ok",
+			sourceShiftIds: [sessionId],
+		});
+		expect(secondOk.amount.amountMinor).toBe(40_000);
+	});
+
+	test("rejects preparing a deposit against an unknown source shift", async () => {
+		const { service } = createHarness();
+		const attempt = service.createDeposit({
+			...base,
+			countedAmountMinor: 1000,
+			currency: "GYD",
+			idempotencyKey: "dep-unknown-shift",
+			sourceShiftIds: ["session_does_not_exist"],
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_reference" });
+	});
+
+	test("confirms a deposit by a different actor, posting exactly one custody transfer atomic with commerce.deposit.reconciled.v1", async () => {
+		const { depositCustodyTransfers, events, service } = createHarness();
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 75_000,
+			idempotencyPrefix: "dep-confirm",
+			registerId: "register_dep_confirm",
+		});
+		const prepared = await service.createDeposit({
+			...base,
+			countedAmountMinor: 75_000,
+			currency: "GYD",
+			idempotencyKey: "dep-confirm-create",
+			sourceShiftIds: [sessionId],
+		});
+
+		const confirmed = await service.confirmDeposit({
+			actorUserId: "user_checker",
+			correlationId: base.correlationId,
+			depositId: prepared.id,
+			idempotencyKey: "dep-confirm-confirm",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+
+		expect(confirmed.state).toBe("Reconciled");
+		expect(confirmed.confirmedAt).not.toBeNull();
+		// The financial fact (amount/currency) fixed at preparation never
+		// changes across confirmation — a correction would require a NEW
+		// deposit record (reversal/compensation, CLAUDE.md §5), never an
+		// edit of this one.
+		expect(confirmed.amount).toEqual(prepared.amount);
+		expect(depositCustodyTransfers).toHaveLength(1);
+		expect(depositCustodyTransfers[0]).toMatchObject({
+			amountMinor: 75_000,
+			depositId: prepared.id,
+		});
+		const reconciledEvents = events.filter(
+			(envelope) => envelope.name === "commerce.deposit.reconciled.v1"
+		);
+		expect(reconciledEvents).toHaveLength(1);
+		expect(reconciledEvents[0]?.data).toMatchObject({
+			amountMinor: 75_000,
+			depositId: prepared.id,
+		});
+	});
+
+	test("denies self-confirmation by the preparer", async () => {
+		const { depositCustodyTransfers, service } = createHarness();
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 20_000,
+			idempotencyPrefix: "dep-self",
+			registerId: "register_dep_self",
+		});
+		const prepared = await service.createDeposit({
+			...base,
+			countedAmountMinor: 20_000,
+			currency: "GYD",
+			idempotencyKey: "dep-self-create",
+			sourceShiftIds: [sessionId],
+		});
+
+		const attempt = service.confirmDeposit({
+			actorUserId: base.actorUserId,
+			correlationId: base.correlationId,
+			depositId: prepared.id,
+			idempotencyKey: "dep-self-confirm",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		await expect(attempt).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+		expect(depositCustodyTransfers).toHaveLength(0);
+	});
+
+	test("rejects confirming an already-Reconciled deposit", async () => {
+		const { service } = createHarness();
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 15_000,
+			idempotencyPrefix: "dep-double",
+			registerId: "register_dep_double",
+		});
+		const prepared = await service.createDeposit({
+			...base,
+			countedAmountMinor: 15_000,
+			currency: "GYD",
+			idempotencyKey: "dep-double-create",
+			sourceShiftIds: [sessionId],
+		});
+		await service.confirmDeposit({
+			actorUserId: "user_checker",
+			correlationId: base.correlationId,
+			depositId: prepared.id,
+			idempotencyKey: "dep-double-confirm-1",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+
+		const secondConfirm = service.confirmDeposit({
+			actorUserId: "user_checker_2",
+			correlationId: base.correlationId,
+			depositId: prepared.id,
+			idempotencyKey: "dep-double-confirm-2",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		await expect(secondConfirm).rejects.toMatchObject({
+			code: "invalid_state",
+		});
+	});
+
+	test("idempotency-key replay returns the identical prepared and confirmed result", async () => {
+		const { service } = createHarness();
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 30_000,
+			idempotencyPrefix: "dep-replay",
+			registerId: "register_dep_replay",
+		});
+		const first = await service.createDeposit({
+			...base,
+			countedAmountMinor: 30_000,
+			currency: "GYD",
+			idempotencyKey: "dep-replay-create",
+			sourceShiftIds: [sessionId],
+		});
+		const replayed = await service.createDeposit({
+			...base,
+			countedAmountMinor: 30_000,
+			currency: "GYD",
+			idempotencyKey: "dep-replay-create",
+			sourceShiftIds: [sessionId],
+		});
+		expect(replayed).toEqual(first);
+
+		const confirmedFirst = await service.confirmDeposit({
+			actorUserId: "user_checker",
+			correlationId: base.correlationId,
+			depositId: first.id,
+			idempotencyKey: "dep-replay-confirm",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		const confirmedReplayed = await service.confirmDeposit({
+			actorUserId: "user_checker",
+			correlationId: base.correlationId,
+			depositId: first.id,
+			idempotencyKey: "dep-replay-confirm",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		expect(confirmedReplayed).toEqual(confirmedFirst);
+	});
+
+	test("application layer requires permission and denies self-confirmation before dispatch", async () => {
+		const { service } = createHarness();
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 10_000,
+			idempotencyPrefix: "dep-app",
+			registerId: "register_dep_app",
+		});
+		const permissionCalls: PosPermission[] = [];
+		const application = createPosApplication({
+			activeContexts: {
+				requireActiveContext: () =>
+					Promise.resolve({
+						organizationId: base.organizationId,
+						tenantId: base.tenantId,
+					}),
+			},
+			entitlements: { requireEntitlement: () => Promise.resolve() },
+			permissions: {
+				requirePermission: (permissionInput) => {
+					permissionCalls.push(permissionInput.permission);
+					return Promise.resolve();
+				},
+			},
+			service,
+		});
+
+		const prepared = await application.createDeposit({
+			actorUserId: base.actorUserId,
+			contextId: "context_a",
+			correlationId: base.correlationId,
+			countedAmountMinor: 10_000,
+			currency: "GYD",
+			idempotencyKey: "dep-app-create",
+			sessionId: "auth_session_a",
+			sourceShiftIds: [sessionId],
+		});
+		expect(permissionCalls).toEqual(["commerce.deposit.create"]);
+
+		const attempt = application.confirmDeposit({
+			actorUserId: base.actorUserId,
+			contextId: "context_a",
+			correlationId: base.correlationId,
+			depositId: prepared.id,
+			idempotencyKey: "dep-app-confirm-self",
+			sessionId: "auth_session_a",
+		});
+		await expect(attempt).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+		expect(permissionCalls).toEqual([
+			"commerce.deposit.create",
+			"commerce.deposit.confirm",
+		]);
 	});
 });

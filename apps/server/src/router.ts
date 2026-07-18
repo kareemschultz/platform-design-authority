@@ -16,7 +16,10 @@ import {
 	cancelProductImportContract,
 	closeRegisterContract,
 	completeSaleContract,
+	confirmDepositContract,
+	createAccountantHandoffExportContract,
 	createCashMovementContract,
+	createDepositContract,
 	createEventReplayContract,
 	createInventoryAdjustmentContract,
 	createOpeningStockImportContract,
@@ -35,6 +38,7 @@ import {
 	createUserInvitationContract,
 	dispatchStockTransferContract,
 	getCurrentIdentityContract,
+	getExportContract,
 	getInventoryAdjustmentContract,
 	getOpeningStockImportContract,
 	getOpeningStockImportCorrectionReportContract,
@@ -2003,6 +2007,121 @@ const voidReceipt = implement(voidReceiptContract)
 		}
 	});
 
+// ---------------------------------------------------------------------------
+// WS3 PR4: Deposit (commerce.deposit.create/.confirm) and the accountant
+// handoff export (platform.export.create/.read).
+// ---------------------------------------------------------------------------
+
+const createDeposit = implement(createDepositContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.deposit.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createDeposit({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				countedAmountMinor: input.body.countedAmount.amountMinor,
+				currency: input.body.currency,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				sourceShiftIds: input.body.sourceShiftIds,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const confirmDeposit = implement(confirmDepositContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.deposit.confirm",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.confirmDeposit({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				depositId: input.params.depositId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createAccountantHandoffExport = implement(
+	createAccountantHandoffExportContract
+)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.export.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createAccountantHandoffExport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				currency: input.body.currency,
+				idempotencyKey: input.headers["idempotency-key"],
+				legalEntityId: input.body.legalEntityId,
+				periodEnd: input.body.periodEnd,
+				periodStart: input.body.periodStart,
+				sessionId: session.session.id,
+				timezone: input.body.timezone,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getExport = implement(getExportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.export.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getAccountantHandoffExport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				exportId: input.params.exportId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const approveInventoryAdjustment = implement(approveInventoryAdjustmentContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -2482,6 +2601,10 @@ export const appRouter = {
 	commerce: {
 		cashMovements: { create: createCashMovement },
 		cashVariances: { approve: approveCashVariance },
+		deposits: {
+			confirm: confirmDeposit,
+			create: createDeposit,
+		},
 		priceOverrides: {
 			approve: approveSalePriceOverride,
 			request: requestSalePriceOverride,
@@ -2512,6 +2635,10 @@ export const appRouter = {
 	},
 	entitlements: { list: listEntitlements },
 	events: { createReplay: createEventReplay },
+	exports: {
+		createAccountantHandoff: createAccountantHandoffExport,
+		get: getExport,
+	},
 	healthCheck: publicProcedure.handler(() => "OK"),
 	identity: {
 		getCurrent: currentIdentity,

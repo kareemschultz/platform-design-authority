@@ -488,7 +488,10 @@ paths:
             schema: {$ref: '#/components/schemas/CreateDeposit'}
       responses:
         '201':
-          description: Deposit created
+          description: Deposit prepared (effect-free); reserves the counted amount against available safe custody, no custody transfer posted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Deposit'}
   /payment-intents:
     post:
       tags: [Payment]
@@ -606,7 +609,10 @@ paths:
             schema: {$ref: '#/components/schemas/AccountantHandoffRequest'}
       responses:
         '202':
-          description: Export job created
+          description: Export job created; deterministic and idempotent for the same bounded range and source data
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AccountantHandoffExport'}
   /webhook-subscriptions:
     post:
       tags: [Webhooks]
@@ -1615,7 +1621,10 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Deposit confirmed; posts the safe-to-bank custody transfer atomically, by an actor other than the preparer
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Deposit'}
   /cash-variances/{varianceId}/approve:
     post:
       tags: [Commerce]
@@ -1822,14 +1831,17 @@ paths:
           description: Contract response; the owning specification defines state and error semantics
   /exports/{exportId}:
     get:
-      tags: [Identity]
+      tags: [Exports]
       operationId: getExportsByExportId
       x-permission: platform.export.read
       parameters:
         - {name: exportId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Export job found
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AccountantHandoffExport'}
   /deposit-reconciliations:
     post:
       tags: [Exports]
@@ -3027,6 +3039,20 @@ components:
         currency: {type: string, pattern: '^[A-Z]{3}$'}
         sourceShiftIds: {type: array, minItems: 1, items: {$ref: '#/components/schemas/Identifier'}}
         countedAmount: {$ref: '#/components/schemas/Money'}
+    Deposit:
+      type: object
+      required: [id, depositReference, amount, sourceShiftIds, state, preparerPartyId, preparedAt, confirmerPartyId, confirmedAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        depositReference: {type: string, description: 'Human-facing reference number (platform/numbering, organization-scoped), separate from the opaque id.'}
+        amount: {$ref: '#/components/schemas/Money'}
+        sourceShiftIds: {type: array, items: {$ref: '#/components/schemas/Identifier'}}
+        state: {type: string, enum: [Prepared, Reconciled], description: 'Prepared is effect-free (reserves safe custody, posts no custody transfer); Reconciled posts the safe-to-bank custody transfer atomically (commerce.deposit.confirm, frozen control plan §6.6).'}
+        preparerPartyId: {$ref: '#/components/schemas/Identifier'}
+        preparedAt: {type: string, format: date-time}
+        confirmerPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        confirmedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
     CreatePaymentIntent:
       type: object
       required: [saleId, rail, amount]
@@ -3065,12 +3091,32 @@ components:
         locationId: {$ref: '#/components/schemas/Identifier'}
     AccountantHandoffRequest:
       type: object
-      required: [legalEntityId, periodStart, periodEnd, currency]
+      required: [legalEntityId, periodStart, periodEnd, currency, timezone]
       properties:
         legalEntityId: {$ref: '#/components/schemas/Identifier'}
+        periodStart: {type: string, format: date-time, description: 'Exact UTC instant lower bound (inclusive) of the export range. The caller derives this from the desired local calendar boundary using timezone; the server performs plain instant-range comparisons, never a local-date truncation.'}
+        periodEnd: {type: string, format: date-time, description: 'Exact UTC instant upper bound (exclusive) of the export range.'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        timezone: {type: string, description: 'IANA timezone the caller used to derive periodStart/periodEnd from local calendar dates (e.g. America/Guyana). Carried through to finance-handoff-v1''s period.timezone for legally relevant local-date interpretation (CLAUDE.md §7) — never used to re-derive the UTC bounds server-side.'}
+    AccountantHandoffExport:
+      type: object
+      required: [id, idempotencyKey, kind, tenantId, legalEntityId, organizationId, currency, timezone, ruleVersion, schemaVersion, contentHash, generatedAt, periodStart, periodEnd, payload]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        idempotencyKey: {type: string}
+        kind: {type: string, enum: [AccountantHandoff]}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        legalEntityId: {$ref: '#/components/schemas/Identifier'}
+        organizationId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        timezone: {type: string}
+        ruleVersion: {type: string}
+        schemaVersion: {type: string}
+        contentHash: {type: string, description: 'sha256 of the canonical (recursively key-sorted) JSON serialization of payload — deterministic and reproducible for identical inputs (frozen control plan Tests: "export determinism"), excludes generatedAt/id.'}
+        generatedAt: {type: string, format: date-time, description: 'Wall-clock generation time of THIS job record; excluded from contentHash so two independent generations over identical inputs still hash identically.'}
         periodStart: {type: string, format: date-time}
         periodEnd: {type: string, format: date-time}
-        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        payload: {type: object, description: 'The full accountant export package (PDA-DOM-026): payload.postingBatch validates against schemas/finance/finance-handoff-v1.schema.json exactly; sibling fields (manifest-adjacent summaries, reconciliation, exceptions) are documented in FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md''s "Accountant Export Package" section. Left as a free-form object here rather than fully inlining finance-handoff-v1''s schema a second time — the JSON Schema file remains the single source of truth for postingBatch''s shape.'}
     CreateWebhookSubscription:
       type: object
       required: [endpoint, eventNames]

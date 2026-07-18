@@ -1355,3 +1355,675 @@ export function createImportService(options: {
 		},
 	};
 }
+
+// ---------------------------------------------------------------------------
+// WS3 PR4: Accountant handoff export (frozen control plan §8.1,
+// `FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`/PDA-DOM-026). The export is a
+// SEAM to Finance, not a General Ledger (full GL explicitly deferred).
+//
+// Architecture note: `packages/platform/import-export` is family
+// `platform`; `registry/architecture-rules.json`'s
+// `family_grants_are_contract_only` forbids a direct `platform` ->
+// `domains` import edge (the same rule WS3 PR2 discovered blocking
+// `domains` -> `engines`, recorded in the WS3 control plan §10.4). This
+// file therefore declares `AccountantHandoffSourceData` as its OWN local
+// port — structurally identical to `@meridian/domain-pos`'s
+// `PosFinanceHandoffSourceData` but with zero import from that package —
+// mirroring the "domain defines its own local port; composition supplies
+// a conforming adapter" discipline `PosPricingPort`/`PosTaxPort` already
+// established. `apps/server/composition` (a registered composition root,
+// permitted to import both families) is the only place a real
+// `posService.queryFinanceHandoffSourceData(...)` result is passed to
+// `createExportService`'s `createAccountantHandoffExport` — the two
+// values are structurally, not nominally, compatible.
+// ---------------------------------------------------------------------------
+
+export const FINANCE_HANDOFF_SCHEMA_VERSION = "1.0.0";
+/** Versioned posting-rule identifier (finance-handoff contract "Posting
+ * rules are effective-dated and versioned. Changing a rule does not
+ * rewrite prior source transactions or previously accepted batches.").
+ * WS3 PR4 implements exactly one rule version; historical rule-version
+ * replay across multiple versions is a governed deferral (PR4
+ * contract-coverage enumeration) — there is only one version to replay. */
+export const ACCOUNTANT_HANDOFF_RULE_VERSION = "ws3-pr4-prototype-1";
+
+export interface AccountantHandoffSaleFact {
+	completedAt: Date;
+	currency: string;
+	discountMinor: number;
+	grossMinor: number;
+	id: string;
+	taxMinor: number;
+	totalMinor: number;
+}
+export interface AccountantHandoffRefundFact {
+	amountMinor: number;
+	currency: string;
+	movementId: string;
+	postedAt: Date;
+	refundId: string;
+}
+export interface AccountantHandoffVarianceFact {
+	currency: string;
+	occurredAt: Date;
+	registerId: string;
+	sessionId: string;
+	varianceMinor: number;
+}
+export interface AccountantHandoffUnresolvedVarianceFact {
+	closeRequestedAt: Date;
+	registerId: string;
+	sessionId: string;
+}
+export interface AccountantHandoffDepositFact {
+	amountMinor: number;
+	currency: string;
+	depositId: string;
+	depositReference: string;
+	occurredAt: Date;
+}
+export interface AccountantHandoffSourceData {
+	closedVariances: AccountantHandoffVarianceFact[];
+	netInventoryQuantityScaled: string;
+	preparedDeposits: AccountantHandoffDepositFact[];
+	reconciledDeposits: AccountantHandoffDepositFact[];
+	refunds: AccountantHandoffRefundFact[];
+	returnCount: number;
+	sales: AccountantHandoffSaleFact[];
+	unresolvedVariances: AccountantHandoffUnresolvedVarianceFact[];
+}
+
+export interface FinanceHandoffPostingLine {
+	accountRole: string;
+	amountMinor: number;
+	description?: string | null;
+	direction: "Credit" | "Debit";
+	lineId: string;
+	sourceId: string;
+	sourceType: string;
+}
+export interface FinanceHandoffException {
+	code: string;
+	message: string;
+	severity: "Blocking" | "Warning";
+	sourceIds?: string[];
+}
+export interface FinanceHandoffControlTotals {
+	cashMinor: number;
+	cashVarianceMinor: number;
+	depositMinor: number;
+	discountsMinor: number;
+	electronicTenderMinor: number;
+	feesMinor: number;
+	grossSalesMinor: number;
+	inventoryQuantityInMinorUnits: number;
+	inventoryValuationMinor: number;
+	netSalesMinor: number;
+	refundsMinor: number;
+	storedValueIssuedMinor: number;
+	storedValueRedeemedMinor: number;
+	taxMinor: number;
+}
+/** The object validated against `schemas/finance/finance-handoff-v1.
+ * schema.json` — the SCHEMA's own `additionalProperties: false` covers
+ * exactly the "Posting Batch" section of PDA-DOM-026, never the
+ * "Accountant Export Package" section's manifest/hashes/reconciliation
+ * siblings (see `AccountantHandoffPayload` below); this is confirmed, not
+ * a contradiction to report (PR4 contract-coverage enumeration). */
+export interface FinanceHandoffPostingBatch {
+	batchId: string;
+	controlTotals: FinanceHandoffControlTotals;
+	createdAt: string;
+	currency: string;
+	exceptions: FinanceHandoffException[];
+	legalEntityId: string;
+	lines: FinanceHandoffPostingLine[];
+	period: { end: string; start: string; timezone: string };
+	ruleVersion: string;
+	schemaVersion: "1.0.0";
+	sourceEventRange: { firstEventId: string | null; lastEventId: string | null };
+	tenantId: string;
+}
+/** The full "Accountant Export Package" (PDA-DOM-026): `postingBatch` is
+ * the ONLY member validated against finance-handoff-v1; every sibling is
+ * a package content the contract names but the schema deliberately does
+ * not cover. Every field here is a PURE function of (tenantId,
+ * legalEntityId, period, currency, ruleVersion, source data) — no
+ * wall-clock value anywhere in this object — so two independent
+ * generations over identical inputs produce byte-identical JSON (frozen
+ * control plan Tests: "export determinism"). Wall-clock generation time
+ * and the opaque export job id live ONLY in the surrounding
+ * `ExportJobRecord` envelope, outside this hashed/compared object. */
+export interface AccountantHandoffPayload {
+	cashAndDepositReconciliation: {
+		cashVarianceMinor: number;
+		depositMinor: number;
+		unresolvedVarianceSessionIds: string[];
+	};
+	humanReadableReviewSummary: string;
+	inventoryMovementAndValuationInput: {
+		quantityInMinorUnits: number;
+		valuationMinor: number;
+	};
+	postingBatch: FinanceHandoffPostingBatch;
+	sourceTransactionSummary: {
+		depositCount: number;
+		refundCount: number;
+		returnCount: number;
+		saleCount: number;
+	};
+	storedValueLiabilityMovement: {
+		issuedMinor: number;
+		redeemedMinor: number;
+	};
+	taxSummary: { taxMinor: number };
+	tenderAndSettlementReconciliation: {
+		cashMinor: number;
+		electronicTenderMinor: number;
+		feesMinor: number;
+	};
+}
+
+/** Deterministic, dependency-free JSON serialization (recursively sorted
+ * object keys) — guarantees the SAME logical payload always serializes to
+ * the SAME bytes regardless of property construction order, which is
+ * what makes `hashAccountantHandoffPayload`'s content hash reproducible. */
+export function canonicalJsonStringify(value: unknown): string {
+	return JSON.stringify(sortKeysDeep(value));
+}
+
+function sortKeysDeep(value: unknown): unknown {
+	if (Array.isArray(value)) {
+		return value.map(sortKeysDeep);
+	}
+	if (value !== null && typeof value === "object") {
+		const entries = Object.entries(value as Record<string, unknown>).sort(
+			([left], [right]) => left.localeCompare(right)
+		);
+		const sorted: Record<string, unknown> = {};
+		for (const [key, entryValue] of entries) {
+			sorted[key] = sortKeysDeep(entryValue);
+		}
+		return sorted;
+	}
+	return value;
+}
+
+function accountantHandoffBatchId(input: {
+	currency: string;
+	legalEntityId: string;
+	periodEndUtc: Date;
+	periodStartUtc: Date;
+	ruleVersion: string;
+	tenantId: string;
+}): string {
+	// Deterministic, NOT random — two calls with identical inputs must
+	// derive the identical batchId for the finance-handoff-v1-validated
+	// object to be byte-identical (frozen control plan "export generation
+	// is idempotent for the same range: same input -> same content hash").
+	const basis = [
+		input.tenantId,
+		input.legalEntityId,
+		input.periodStartUtc.toISOString(),
+		input.periodEndUtc.toISOString(),
+		input.currency,
+		input.ruleVersion,
+	].join("|");
+	const modulus = 2n ** 64n;
+	let hash = 0n;
+	for (const codeUnit of new TextEncoder().encode(basis)) {
+		hash = (hash * 31n + BigInt(codeUnit)) % modulus;
+	}
+	return `batch_${hash.toString(16).padStart(16, "0")}`;
+}
+
+function assertBalancedPostingLines(lines: FinanceHandoffPostingLine[]): void {
+	const net = lines.reduce(
+		(sum, line) =>
+			sum + (line.direction === "Debit" ? line.amountMinor : -line.amountMinor),
+		0
+	);
+	if (net !== 0) {
+		throw new Error(
+			`Accountant handoff posting lines are unbalanced by ${net} minor units — this indicates a defect in buildAccountantHandoffPayload, never a reachable input-dependent state`
+		);
+	}
+}
+
+/**
+ * Builds the deterministic accountant-handoff payload from bounded
+ * source data (WS3 PR4 §8.1). Every posting-rule family the contract
+ * names is realized or explicitly deferred with a recorded exception —
+ * see the PR4 contract-coverage enumeration (commit body) for the full
+ * per-requirement mapping. WS3's `completeSale` accepts Cash tenders
+ * ONLY (`requireCashOnlyTenders`), so `cashMinor` always equals total
+ * sale revenue and every sale posts as a "Cash sale" rule-family line
+ * pair/triple; Electronic-tender, Mixed-tender, and Stored-value rule
+ * families are WS4/WS6 governed deferrals, recorded as Warning
+ * exceptions, never silently omitted.
+ */
+export function buildAccountantHandoffPayload(input: {
+	currency: string;
+	legalEntityId: string;
+	periodEndUtc: Date;
+	periodStartUtc: Date;
+	source: AccountantHandoffSourceData;
+	tenantId: string;
+	timezone: string;
+}): AccountantHandoffPayload {
+	const ruleVersion = ACCOUNTANT_HANDOFF_RULE_VERSION;
+	const lines: FinanceHandoffPostingLine[] = [];
+
+	for (const sale of input.source.sales) {
+		lines.push({
+			accountRole: "CashOnHand",
+			amountMinor: sale.totalMinor,
+			direction: "Debit",
+			lineId: `${sale.id}:cash-debit`,
+			sourceId: sale.id,
+			sourceType: "Sale",
+		});
+		const revenueMinor = sale.grossMinor - sale.discountMinor;
+		if (revenueMinor > 0) {
+			lines.push({
+				accountRole: "SalesRevenue",
+				amountMinor: revenueMinor,
+				direction: "Credit",
+				lineId: `${sale.id}:revenue-credit`,
+				sourceId: sale.id,
+				sourceType: "Sale",
+			});
+		}
+		if (sale.taxMinor > 0) {
+			lines.push({
+				accountRole: "SalesTaxPayable",
+				amountMinor: sale.taxMinor,
+				direction: "Credit",
+				lineId: `${sale.id}:tax-credit`,
+				sourceId: sale.id,
+				sourceType: "Sale",
+			});
+		}
+	}
+
+	for (const refund of input.source.refunds) {
+		lines.push({
+			accountRole: "RefundsAndAllowances",
+			amountMinor: refund.amountMinor,
+			direction: "Debit",
+			lineId: `${refund.movementId}:refund-debit`,
+			sourceId: refund.refundId,
+			sourceType: "Refund",
+		});
+		lines.push({
+			accountRole: "CashOnHand",
+			amountMinor: refund.amountMinor,
+			direction: "Credit",
+			lineId: `${refund.movementId}:refund-cash-credit`,
+			sourceId: refund.refundId,
+			sourceType: "Refund",
+		});
+	}
+
+	for (const variance of input.source.closedVariances) {
+		const amountMinor = Math.abs(variance.varianceMinor);
+		if (variance.varianceMinor > 0) {
+			lines.push(
+				{
+					accountRole: "CashOnHand",
+					amountMinor,
+					direction: "Debit",
+					lineId: `${variance.sessionId}:variance-cash-debit`,
+					sourceId: variance.sessionId,
+					sourceType: "CashVariance",
+				},
+				{
+					accountRole: "CashVarianceGainOrLoss",
+					amountMinor,
+					direction: "Credit",
+					lineId: `${variance.sessionId}:variance-credit`,
+					sourceId: variance.sessionId,
+					sourceType: "CashVariance",
+				}
+			);
+		} else {
+			lines.push(
+				{
+					accountRole: "CashVarianceGainOrLoss",
+					amountMinor,
+					direction: "Debit",
+					lineId: `${variance.sessionId}:variance-debit`,
+					sourceId: variance.sessionId,
+					sourceType: "CashVariance",
+				},
+				{
+					accountRole: "CashOnHand",
+					amountMinor,
+					direction: "Credit",
+					lineId: `${variance.sessionId}:variance-cash-credit`,
+					sourceId: variance.sessionId,
+					sourceType: "CashVariance",
+				}
+			);
+		}
+	}
+
+	for (const deposit of input.source.reconciledDeposits) {
+		lines.push(
+			{
+				accountRole: "BankDepositsInTransit",
+				amountMinor: deposit.amountMinor,
+				direction: "Debit",
+				lineId: `${deposit.depositId}:deposit-debit`,
+				sourceId: deposit.depositId,
+				sourceType: "Deposit",
+			},
+			{
+				accountRole: "CashOnHand",
+				amountMinor: deposit.amountMinor,
+				direction: "Credit",
+				lineId: `${deposit.depositId}:deposit-cash-credit`,
+				sourceId: deposit.depositId,
+				sourceType: "Deposit",
+			}
+		);
+	}
+
+	lines.sort((left, right) => left.lineId.localeCompare(right.lineId));
+	assertBalancedPostingLines(lines);
+
+	const exceptions: FinanceHandoffException[] = [];
+	for (const unresolved of input.source.unresolvedVariances) {
+		exceptions.push({
+			code: "UNRESOLVED_CASH_VARIANCE",
+			message:
+				"Register session variance is pending commerce.cash-variance.approve within this period; excluded from cashVarianceMinor and posted only once resolved.",
+			severity: "Blocking",
+			sourceIds: [unresolved.sessionId],
+		});
+	}
+	for (const prepared of input.source.preparedDeposits) {
+		exceptions.push({
+			code: "DEPOSIT_IN_TRANSIT",
+			message:
+				"Deposit was prepared (commerce.deposit.create) but not yet confirmed (commerce.deposit.confirm) within this period; excluded from depositMinor until reconciled.",
+			severity: "Warning",
+			sourceIds: [prepared.depositId],
+		});
+	}
+	exceptions.push(
+		{
+			code: "WS4_STORED_VALUE_DEFERRED",
+			message:
+				"Stored-value issuance/redemption/breakage posting rules and the customer-account tender rule family are WS4 scope; not evidenced by this export (governed deferral, FIRST_SLICE_IMPLEMENTATION_PLAN.md §WS4).",
+			severity: "Warning",
+		},
+		{
+			code: "WS6_ELECTRONIC_TENDER_AND_FEES_DEFERRED",
+			message:
+				"Electronic-tender/mixed-tender sale posting rules and provider fee/settlement-difference reconciliation are WS6 (Provider Adapter) scope; WS3's completeSale accepts Cash tenders only (governed deferral, FIRST_SLICE_IMPLEMENTATION_PLAN.md §WS6).",
+			severity: "Warning",
+		},
+		{
+			code: "INVENTORY_VALUATION_NOT_TRACKED",
+			message:
+				"First slice does not track per-unit inventory cost; inventoryValuationMinor is always 0 (governed deferral — full valuation input requires Inventory/Finance costing work not in WS3 scope).",
+			severity: "Warning",
+		}
+	);
+	exceptions.sort((left, right) => {
+		const byCode = left.code.localeCompare(right.code);
+		if (byCode !== 0) {
+			return byCode;
+		}
+		return (left.sourceIds?.[0] ?? "").localeCompare(
+			right.sourceIds?.[0] ?? ""
+		);
+	});
+
+	const grossSalesMinor = input.source.sales.reduce(
+		(sum, sale) => sum + sale.grossMinor,
+		0
+	);
+	const discountsMinor = input.source.sales.reduce(
+		(sum, sale) => sum + sale.discountMinor,
+		0
+	);
+	const taxMinor = input.source.sales.reduce(
+		(sum, sale) => sum + sale.taxMinor,
+		0
+	);
+	const cashMinor = input.source.sales.reduce(
+		(sum, sale) => sum + sale.totalMinor,
+		0
+	);
+	const refundsMinor = input.source.refunds.reduce(
+		(sum, refund) => sum + refund.amountMinor,
+		0
+	);
+	const cashVarianceMinor = input.source.closedVariances.reduce(
+		(sum, variance) => sum + variance.varianceMinor,
+		0
+	);
+	const depositMinor = input.source.reconciledDeposits.reduce(
+		(sum, deposit) => sum + deposit.amountMinor,
+		0
+	);
+	const inventoryQuantityInMinorUnits = Number(
+		input.source.netInventoryQuantityScaled
+	);
+
+	const controlTotals: FinanceHandoffControlTotals = {
+		cashMinor,
+		cashVarianceMinor,
+		depositMinor,
+		discountsMinor,
+		electronicTenderMinor: 0,
+		feesMinor: 0,
+		grossSalesMinor,
+		inventoryQuantityInMinorUnits,
+		inventoryValuationMinor: 0,
+		netSalesMinor: grossSalesMinor - discountsMinor,
+		refundsMinor,
+		storedValueIssuedMinor: 0,
+		storedValueRedeemedMinor: 0,
+		taxMinor,
+	};
+
+	const postingBatch: FinanceHandoffPostingBatch = {
+		batchId: accountantHandoffBatchId({
+			currency: input.currency,
+			legalEntityId: input.legalEntityId,
+			periodEndUtc: input.periodEndUtc,
+			periodStartUtc: input.periodStartUtc,
+			ruleVersion,
+			tenantId: input.tenantId,
+		}),
+		controlTotals,
+		// Deterministic: echoes the period end boundary, never wall-clock
+		// generation time (see this file's header note and
+		// `AccountantHandoffPayload`'s doc comment) — required by
+		// finance-handoff-v1 but MUST be a pure function of the input for
+		// two independent generations to hash identically.
+		createdAt: input.periodEndUtc.toISOString(),
+		currency: input.currency,
+		exceptions,
+		legalEntityId: input.legalEntityId,
+		lines,
+		period: {
+			end: input.periodEndUtc.toISOString(),
+			start: input.periodStartUtc.toISOString(),
+			timezone: input.timezone,
+		},
+		ruleVersion,
+		schemaVersion: FINANCE_HANDOFF_SCHEMA_VERSION,
+		sourceEventRange: { firstEventId: null, lastEventId: null },
+		tenantId: input.tenantId,
+	};
+
+	return {
+		cashAndDepositReconciliation: {
+			cashVarianceMinor,
+			depositMinor,
+			unresolvedVarianceSessionIds: input.source.unresolvedVariances.map(
+				(candidate) => candidate.sessionId
+			),
+		},
+		humanReadableReviewSummary:
+			`Accountant handoff for tenant ${input.tenantId}, legal entity ${input.legalEntityId}, ` +
+			`period ${input.timezone} ${input.periodStartUtc.toISOString()} to ${input.periodEndUtc.toISOString()}, ` +
+			`currency ${input.currency}: gross sales ${grossSalesMinor}, discounts ${discountsMinor}, tax ${taxMinor}, ` +
+			`net sales ${controlTotals.netSalesMinor}, cash received ${cashMinor}, refunds ${refundsMinor}, ` +
+			`cash variance ${cashVarianceMinor}, deposits reconciled ${depositMinor}, ${exceptions.length} exception(s) recorded ` +
+			"(non-statutory prototype; not a production accounting or tax filing artifact).",
+		inventoryMovementAndValuationInput: {
+			quantityInMinorUnits: inventoryQuantityInMinorUnits,
+			valuationMinor: 0,
+		},
+		postingBatch,
+		sourceTransactionSummary: {
+			depositCount:
+				input.source.preparedDeposits.length +
+				input.source.reconciledDeposits.length,
+			refundCount: input.source.refunds.length,
+			returnCount: input.source.returnCount,
+			saleCount: input.source.sales.length,
+		},
+		storedValueLiabilityMovement: { issuedMinor: 0, redeemedMinor: 0 },
+		taxSummary: { taxMinor },
+		tenderAndSettlementReconciliation: {
+			cashMinor,
+			electronicTenderMinor: 0,
+			feesMinor: 0,
+		},
+	};
+}
+
+export interface ExportJobRecord {
+	contentHash: string;
+	createdByActorUserId: string;
+	currency: string;
+	generatedAt: Date;
+	id: string;
+	idempotencyKey: string;
+	kind: "AccountantHandoff";
+	legalEntityId: string;
+	organizationId: string;
+	payload: AccountantHandoffPayload;
+	periodEndUtc: Date;
+	periodStartUtc: Date;
+	ruleVersion: string;
+	schemaVersion: string;
+	tenantId: string;
+	timezone: string;
+}
+
+export interface ExportRepository {
+	/** Insert-or-replay on the (tenantId, idempotencyKey) unique index —
+	 * mirrors `pos_command_receipt`'s onConflictDoNothing()-then-reselect
+	 * pattern (`inserted: false` on a same-key replay). */
+	createExportJob: (
+		record: ExportJobRecord
+	) => Promise<{ inserted: boolean; record: ExportJobRecord }>;
+	getExportJob: (
+		tenantId: string,
+		id: string
+	) => Promise<ExportJobRecord | null>;
+}
+
+export interface ExportIdFactory {
+	create: (kind: "export") => string;
+}
+
+export class ExportError extends Error {
+	readonly code: "idempotency_conflict" | "not_found" | "validation";
+	constructor(code: ExportError["code"], message: string) {
+		super(message);
+		this.code = code;
+		this.name = "ExportError";
+	}
+}
+
+/**
+ * No registered event exists for `platform.export.*` (WS3 control plan
+ * §4: "The export artifact and its manifest/hash are the durable
+ * record") — `createAccountantHandoffExport` therefore appends none; the
+ * export job row itself, with its `contentHash`, is the durable evidence.
+ * No transaction/outbox seam is needed for that reason: a single
+ * idempotency-guarded insert suffices, unlike the maker/checker command
+ * surfaces elsewhere in WS3.
+ */
+export function createExportService(options: {
+	clock: () => Date;
+	hash: { sha256: (content: string) => Promise<string> };
+	ids: ExportIdFactory;
+	repository: ExportRepository;
+}) {
+	return {
+		async createAccountantHandoffExport(input: {
+			actorUserId: string;
+			currency: string;
+			idempotencyKey: string;
+			legalEntityId: string;
+			organizationId: string;
+			periodEndUtc: Date;
+			periodStartUtc: Date;
+			source: AccountantHandoffSourceData;
+			tenantId: string;
+			timezone: string;
+		}): Promise<ExportJobRecord> {
+			if (input.periodStartUtc.getTime() >= input.periodEndUtc.getTime()) {
+				throw new ExportError(
+					"validation",
+					"periodStart must be strictly before periodEnd"
+				);
+			}
+			const payload = buildAccountantHandoffPayload({
+				currency: input.currency,
+				legalEntityId: input.legalEntityId,
+				periodEndUtc: input.periodEndUtc,
+				periodStartUtc: input.periodStartUtc,
+				source: input.source,
+				tenantId: input.tenantId,
+				timezone: input.timezone,
+			});
+			const contentHash = await options.hash.sha256(
+				canonicalJsonStringify(payload)
+			);
+			const record: ExportJobRecord = {
+				contentHash,
+				createdByActorUserId: input.actorUserId,
+				currency: input.currency,
+				generatedAt: options.clock(),
+				id: options.ids.create("export"),
+				idempotencyKey: input.idempotencyKey,
+				kind: "AccountantHandoff",
+				legalEntityId: input.legalEntityId,
+				organizationId: input.organizationId,
+				payload,
+				periodEndUtc: input.periodEndUtc,
+				periodStartUtc: input.periodStartUtc,
+				ruleVersion: ACCOUNTANT_HANDOFF_RULE_VERSION,
+				schemaVersion: FINANCE_HANDOFF_SCHEMA_VERSION,
+				tenantId: input.tenantId,
+				timezone: input.timezone,
+			};
+			const claim = await options.repository.createExportJob(record);
+			return claim.record;
+		},
+
+		async getAccountantHandoffExport(input: {
+			exportId: string;
+			tenantId: string;
+		}): Promise<ExportJobRecord> {
+			const record = await options.repository.getExportJob(
+				input.tenantId,
+				input.exportId
+			);
+			if (!record) {
+				throw new ExportError("not_found", "Export was not found");
+			}
+			return record;
+		},
+	};
+}

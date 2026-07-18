@@ -141,6 +141,8 @@
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/pg": "catalog:",
+        "ajv": "8.20.0",
+        "ajv-formats": "3.0.1",
         "drizzle-orm": "catalog:",
         "tsdown": "^0.22.3",
         "tsx": "4.21.0",
@@ -295,8 +297,6 @@
       "dependencies": {
         "@meridian/contracts-events": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
-        "@meridian/engine-pricing": "workspace:*",
-        "@meridian/engine-tax": "workspace:*",
       },
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",

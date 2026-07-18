@@ -6,6 +6,7 @@ import { catalogTransportApplication } from "./catalog";
 import { createCurrentIdentityResolver } from "./current-identity";
 import { entitlementTransportApplication } from "./entitlements";
 import { eventReplayTransportApplication } from "./events";
+import { financeHandoffTransportApplication } from "./finance-handoff";
 import { identitySessionTransportApplication } from "./identity";
 import { importTransportApplication } from "./imports";
 import { inventoryTransportApplication } from "./inventory";
@@ -34,6 +35,7 @@ export const serverApplication = {
 	...catalogTransportApplication,
 	...entitlementTransportApplication,
 	...eventReplayTransportApplication,
+	...financeHandoffTransportApplication,
 	...identitySessionTransportApplication,
 	...importTransportApplication,
 	...inventoryTransportApplication,

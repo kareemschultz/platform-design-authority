@@ -149,6 +149,14 @@ function createTestReturnInventoryAdapter(
 function posService(options: { failEventName?: string } = {}) {
 	return createPosService({
 		clock: () => new Date(),
+		depositUnitOfWork: {
+			execute: () =>
+				Promise.reject(
+					new Error(
+						"depositUnitOfWork is not exercised by this lane — see deposits.integration.test.ts for PR4's own lane"
+					)
+				),
+		},
 		ids,
 		parties: {
 			requireActorPartyId: ({ authUserId }) =>
@@ -331,7 +339,7 @@ afterAll(async () => {
 describe.serial(
 	"WS3 PR3 return, refund, void, reissue, exchange PostgreSQL controlled prototype",
 	() => {
-		test("migrates idempotently and adds exactly the three PR3-owned tables to PR1/PR2's seven", async () => {
+		test("migrates idempotently: the single shared pos-postgres migration stream now carries all thirteen tables through PR4 (this file's own tests exercise only PR3 behavior)", async () => {
 			await migratePos(testPool);
 			const tables = await testPool.query<{ table_name: string }>(
 				"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name LIKE 'pos_%' ORDER BY table_name"
@@ -339,6 +347,9 @@ describe.serial(
 			expect(tables.rows.map((row) => row.table_name)).toEqual([
 				"pos_cash_movement",
 				"pos_command_receipt",
+				"pos_deposit",
+				"pos_deposit_custody_transfer",
+				"pos_deposit_source_shift",
 				"pos_price_override",
 				"pos_receipt",
 				"pos_refund",

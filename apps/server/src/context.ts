@@ -1,5 +1,6 @@
 import type { PermissionId } from "@meridian/contracts-permissions";
 import type {
+	AccountantHandoffExport,
 	ActiveContext,
 	ActiveContextRequest,
 	AuditRecord,
@@ -17,6 +18,7 @@ import type {
 	CreateStockTransfer,
 	CreateUserInvitationRequest,
 	CurrentIdentity,
+	Deposit,
 	Entitlement,
 	EventReplayRequest,
 	ImportCorrectionReport,
@@ -549,6 +551,16 @@ export interface PosApplication {
 			type: "Cash" | "PaymentIntent" | "StoredValue";
 		}>;
 	}) => Promise<Sale>;
+
+	// -- WS3 PR4: Deposit -----------------------------------------------------
+	confirmDeposit: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		depositId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<Deposit>;
 	createCashMovement: (input: {
 		actorUserId: string;
 		amount: Money;
@@ -562,6 +574,16 @@ export interface PosApplication {
 		registerId: string;
 		sessionId: string;
 	}) => Promise<CashMovement>;
+	createDeposit: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		countedAmountMinor: number;
+		currency: string;
+		idempotencyKey: string;
+		sessionId: string;
+		sourceShiftIds: string[];
+	}) => Promise<Deposit>;
 	createRefund: (input: {
 		actorUserId: string;
 		contextId: string;
@@ -670,6 +692,28 @@ export interface PosApplication {
 	}) => Promise<Return>;
 }
 
+/** WS3 PR4: accountant-handoff export (`platform.export.create`/`.read`). */
+export interface FinanceHandoffApplication {
+	createAccountantHandoffExport: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		currency: string;
+		idempotencyKey: string;
+		legalEntityId: string;
+		periodEnd: string;
+		periodStart: string;
+		sessionId: string;
+		timezone: string;
+	}) => Promise<AccountantHandoffExport>;
+	getAccountantHandoffExport: (input: {
+		actorUserId: string;
+		contextId: string;
+		exportId: string;
+		sessionId: string;
+	}) => Promise<AccountantHandoffExport>;
+}
+
 export interface ImportApplication {
 	acceptImport: (input: {
 		actorUserId: string;
@@ -759,6 +803,7 @@ export interface ServerApplication
 		CatalogApplication,
 		EntitlementsApplication,
 		EventReplayApplication,
+		FinanceHandoffApplication,
 		IdentitySessionsApplication,
 		ImportApplication,
 		InventoryApplication,

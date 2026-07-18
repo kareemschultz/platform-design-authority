@@ -18,7 +18,10 @@ import {
 	createReturnInventoryMovementAdapter,
 	createSaleInventoryMovementAdapter,
 } from "./inventory";
-import { createReceiptNumberAllocator } from "./numbering";
+import {
+	createDepositReferenceAllocator,
+	createReceiptNumberAllocator,
+} from "./numbering";
 import { partyIdentityLinkDirectory } from "./party";
 import { databasePool } from "./postgres";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
@@ -69,6 +72,20 @@ const returnUnitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({
 	repository: createPosRepository(client),
 }));
 
+/**
+ * WS3 PR4's shared unit of work for `deposit.create` ONLY (frozen control
+ * plan §6.6, mirrors `saleUnitOfWork`'s "one shared unit of work"
+ * discipline): one `createPostgresUnitOfWork`, one `PoolClient`, one
+ * transaction spanning the deposit-reservation commit and the
+ * organization-scoped deposit-reference allocation. `confirmDeposit` never
+ * touches Numbering — it uses the plain `unitOfWork` above.
+ */
+const depositUnitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({
+	events: createPostgresOutbox(client),
+	numbering: createDepositReferenceAllocator(client),
+	repository: createPosRepository(client),
+}));
+
 const parties = {
 	async requireActorPartyId(input: {
 		authUserId: string;
@@ -114,6 +131,7 @@ const products: PosCatalogPort = {
 
 export const posService = createPosService({
 	clock: () => new Date(),
+	depositUnitOfWork,
 	ids,
 	parties,
 	pricing: createPricingEngine(),
@@ -153,7 +171,9 @@ export const posTransportApplication = {
 	approveSalePriceOverride: posApplication.approvePriceOverride,
 	closeRegister: posApplication.closeRegister,
 	completeSale: posApplication.completeSale,
+	confirmDeposit: posApplication.confirmDeposit,
 	createCashMovement: posApplication.createCashMovement,
+	createDeposit: posApplication.createDeposit,
 	createRefund: posApplication.createRefund,
 	createReturn: posApplication.createReturn,
 	createSafeDrop: (

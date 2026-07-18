@@ -59,6 +59,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		path: "/v1/deposits",
 		permission: "commerce.deposit.create",
 		requestRef: "#/components/schemas/CreateDeposit",
+		responseRef: "#/components/schemas/Deposit",
 		successStatus: 201,
 	},
 	{
@@ -66,6 +67,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postDepositsByDepositIdConfirm",
 		path: "/v1/deposits/{depositId}/confirm",
 		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/Deposit",
 		successStatus: 200,
 	},
 	{
@@ -106,6 +108,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		path: "/v1/exports/accountant-handoff",
 		permission: "platform.export.create",
 		requestRef: "#/components/schemas/AccountantHandoffRequest",
+		responseRef: "#/components/schemas/AccountantHandoffExport",
 		successStatus: 202,
 	},
 	{
@@ -113,6 +116,7 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "getExportsByExportId",
 		path: "/v1/exports/{exportId}",
 		permission: "platform.export.read",
+		responseRef: "#/components/schemas/AccountantHandoffExport",
 		successStatus: 200,
 	},
 	{

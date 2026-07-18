@@ -3,7 +3,9 @@ import { fileURLToPath } from "node:url";
 import type {
 	CashMovementNetTotals,
 	CashMovementRecord,
+	DepositRecord,
 	PosCommandReceipt,
+	PosFinanceHandoffSourceData,
 	PosRepository,
 	PriceOverrideRecord,
 	ReceiptRecord,
@@ -14,7 +16,7 @@ import type {
 	SaleLineRecord,
 	SaleRecord,
 } from "@meridian/domain-pos";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lt, ne, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool, PoolClient } from "pg";
@@ -22,6 +24,9 @@ import type { Pool, PoolClient } from "pg";
 import {
 	posCashMovements,
 	posCommandReceipts,
+	posDepositCustodyTransfers,
+	posDepositSourceShifts,
+	posDeposits,
 	posPriceOverrides,
 	posReceipts,
 	posRefunds,
@@ -34,6 +39,24 @@ import {
 
 export type PosPostgresConnection = Pool | PoolClient;
 export const POS_MIGRATION_TABLE = "pos_migrations";
+
+/** Matches domain-pos's `RETURN_QUANTITY_SCALE` fixed-point convention
+ * (WS3 PR4 finance-handoff net-inventory-quantity control total). Postgres
+ * returns a `numeric(38,6)` SUM as decimal text; this converts it to the
+ * same signed fixed-point integer string scale the domain layer already
+ * uses, doing exact integer arithmetic — never binary floating point
+ * (CLAUDE.md §7). */
+const FINANCE_QUANTITY_SCALE = 1_000_000n;
+function decimalTextToScaledQuantity(value: string): bigint {
+	const trimmed = value.trim();
+	const negative = trimmed.startsWith("-");
+	const unsigned = negative ? trimmed.slice(1) : trimmed;
+	const [whole = "0", fraction = ""] = unsigned.split(".");
+	const fractionPadded = `${fraction}000000`.slice(0, 6);
+	const scaled =
+		BigInt(whole || "0") * FINANCE_QUANTITY_SCALE + BigInt(fractionPadded);
+	return negative ? -scaled : scaled;
+}
 
 function isUniqueViolation(error: unknown, indexName: string): boolean {
 	if (typeof error !== "object" || error === null) {
@@ -443,6 +466,56 @@ function refundValues(record: RefundRecord): typeof posRefunds.$inferInsert {
 	return record;
 }
 
+// ---------------------------------------------------------------------------
+// WS3 PR4: Deposit mappers and value builders.
+// ---------------------------------------------------------------------------
+
+function mapDeposit(
+	row: typeof posDeposits.$inferSelect,
+	sourceShiftIds: string[]
+): DepositRecord {
+	return {
+		amountMinor: row.amountMinor,
+		confirmedAt: row.confirmedAt,
+		confirmedByActorUserId: row.confirmedByActorUserId,
+		confirmedByPartyId: row.confirmedByPartyId,
+		createdAt: row.createdAt,
+		currency: row.currency,
+		depositReference: row.depositReference,
+		id: row.id,
+		organizationId: row.organizationId,
+		preparedAt: row.preparedAt,
+		preparedByActorUserId: row.preparedByActorUserId,
+		preparedByPartyId: row.preparedByPartyId,
+		sourceShiftIds,
+		state: row.state as DepositRecord["state"],
+		tenantId: row.tenantId,
+		updatedAt: row.updatedAt,
+		version: row.version,
+	};
+}
+
+function depositValues(record: DepositRecord): typeof posDeposits.$inferInsert {
+	return {
+		amountMinor: record.amountMinor,
+		confirmedAt: record.confirmedAt,
+		confirmedByActorUserId: record.confirmedByActorUserId,
+		confirmedByPartyId: record.confirmedByPartyId,
+		createdAt: record.createdAt,
+		currency: record.currency,
+		depositReference: record.depositReference,
+		id: record.id,
+		organizationId: record.organizationId,
+		preparedAt: record.preparedAt,
+		preparedByActorUserId: record.preparedByActorUserId,
+		preparedByPartyId: record.preparedByPartyId,
+		state: record.state,
+		tenantId: record.tenantId,
+		updatedAt: record.updatedAt,
+		version: record.version,
+	};
+}
+
 export function createPosRepository(
 	connection: PosPostgresConnection
 ): PosRepository {
@@ -506,6 +579,23 @@ export function createPosRepository(
 		return rows.map(mapReturnLine);
 	}
 
+	async function loadDepositSourceShiftIds(
+		tenantId: string,
+		depositId: string
+	): Promise<string[]> {
+		const rows = await database
+			.select({ sessionId: posDepositSourceShifts.sessionId })
+			.from(posDepositSourceShifts)
+			.where(
+				and(
+					eq(posDepositSourceShifts.tenantId, tenantId),
+					eq(posDepositSourceShifts.depositId, depositId)
+				)
+			)
+			.orderBy(posDepositSourceShifts.sessionId);
+		return rows.map((row) => row.sessionId);
+	}
+
 	return {
 		async acquireCommandLock(tenantId, operation, idempotencyKey) {
 			const lockIdentity = `${tenantId}${operation}${idempotencyKey}`;
@@ -536,6 +626,41 @@ export function createPosRepository(
 				throw new Error("POS cash movement insert returned no row");
 			}
 			return mapMovement(row);
+		},
+
+		// -- WS3 PR4: Deposit, Finance handoff -----------------------------------
+		async createDeposit(record) {
+			const rows = await database
+				.insert(posDeposits)
+				.values(depositValues(record))
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				throw new Error("POS deposit insert returned no row");
+			}
+			if (record.sourceShiftIds.length > 0) {
+				await database.insert(posDepositSourceShifts).values(
+					record.sourceShiftIds.map((sessionId) => ({
+						depositId: record.id,
+						sessionId,
+						tenantId: record.tenantId,
+					}))
+				);
+			}
+			return mapDeposit(row, record.sourceShiftIds);
+		},
+		async createDepositCustodyTransfer(record) {
+			await database.insert(posDepositCustodyTransfers).values({
+				amountMinor: record.amountMinor,
+				confirmedByActorUserId: record.confirmedByActorUserId,
+				confirmedByPartyId: record.confirmedByPartyId,
+				currency: record.currency,
+				depositId: record.depositId,
+				id: record.id,
+				organizationId: record.organizationId,
+				postedAt: record.postedAt,
+				tenantId: record.tenantId,
+			});
 		},
 		async createPriceOverride(record) {
 			const rows = await database
@@ -621,6 +746,20 @@ export function createPosRepository(
 				)
 				.limit(1);
 			return rows[0] ? mapReceipt(rows[0]) : null;
+		},
+		async getDeposit(tenantId, id) {
+			const rows = await database
+				.select()
+				.from(posDeposits)
+				.where(and(eq(posDeposits.tenantId, tenantId), eq(posDeposits.id, id)))
+				.limit(1)
+				.for("update");
+			const [row] = rows;
+			if (!row) {
+				return null;
+			}
+			const sourceShiftIds = await loadDepositSourceShiftIds(tenantId, id);
+			return mapDeposit(row, sourceShiftIds);
 		},
 		async getOpenSession(tenantId, registerId) {
 			const rows = await database
@@ -709,6 +848,23 @@ export function createPosRepository(
 				.for("update");
 			return rows[0] ? mapSession(rows[0]) : null;
 		},
+		async lockSessionsForDeposit(tenantId, sessionIds) {
+			if (sessionIds.length === 0) {
+				return [];
+			}
+			const rows = await database
+				.select()
+				.from(posRegisterSessions)
+				.where(
+					and(
+						eq(posRegisterSessions.tenantId, tenantId),
+						inArray(posRegisterSessions.id, sessionIds)
+					)
+				)
+				.orderBy(posRegisterSessions.id)
+				.for("update");
+			return rows.map(mapSession);
+		},
 		async netCashMovements(
 			tenantId,
 			sessionId
@@ -750,6 +906,208 @@ export function createPosRepository(
 				throw error;
 			}
 		},
+		async queryFinanceHandoffSourceData(input) {
+			const { organizationId, periodEndUtc, periodStartUtc, tenantId } = input;
+
+			const saleRows = await database
+				.select()
+				.from(posSales)
+				.where(
+					and(
+						eq(posSales.tenantId, tenantId),
+						eq(posSales.organizationId, organizationId),
+						eq(posSales.state, "Completed"),
+						gte(posSales.completedAt, periodStartUtc),
+						lt(posSales.completedAt, periodEndUtc)
+					)
+				)
+				.orderBy(posSales.id);
+
+			const refundRows = await database
+				.select()
+				.from(posCashMovements)
+				.where(
+					and(
+						eq(posCashMovements.tenantId, tenantId),
+						eq(posCashMovements.organizationId, organizationId),
+						eq(posCashMovements.reasonCode, "Refund"),
+						gte(posCashMovements.createdAt, periodStartUtc),
+						lt(posCashMovements.createdAt, periodEndUtc)
+					)
+				)
+				.orderBy(posCashMovements.id);
+
+			const closedVarianceRows = await database
+				.select()
+				.from(posRegisterSessions)
+				.where(
+					and(
+						eq(posRegisterSessions.tenantId, tenantId),
+						eq(posRegisterSessions.organizationId, organizationId),
+						eq(posRegisterSessions.state, "Closed"),
+						ne(posRegisterSessions.varianceMinor, 0),
+						gte(posRegisterSessions.closedAt, periodStartUtc),
+						lt(posRegisterSessions.closedAt, periodEndUtc)
+					)
+				)
+				.orderBy(posRegisterSessions.id);
+
+			const unresolvedVarianceRows = await database
+				.select()
+				.from(posRegisterSessions)
+				.where(
+					and(
+						eq(posRegisterSessions.tenantId, tenantId),
+						eq(posRegisterSessions.organizationId, organizationId),
+						eq(posRegisterSessions.state, "Closing"),
+						gte(posRegisterSessions.closeRequestedAt, periodStartUtc),
+						lt(posRegisterSessions.closeRequestedAt, periodEndUtc)
+					)
+				)
+				.orderBy(posRegisterSessions.id);
+
+			const preparedDepositRows = await database
+				.select()
+				.from(posDeposits)
+				.where(
+					and(
+						eq(posDeposits.tenantId, tenantId),
+						eq(posDeposits.organizationId, organizationId),
+						eq(posDeposits.state, "Prepared"),
+						gte(posDeposits.preparedAt, periodStartUtc),
+						lt(posDeposits.preparedAt, periodEndUtc)
+					)
+				)
+				.orderBy(posDeposits.id);
+
+			const reconciledDepositRows = await database
+				.select()
+				.from(posDeposits)
+				.where(
+					and(
+						eq(posDeposits.tenantId, tenantId),
+						eq(posDeposits.organizationId, organizationId),
+						eq(posDeposits.state, "Reconciled"),
+						gte(posDeposits.confirmedAt, periodStartUtc),
+						lt(posDeposits.confirmedAt, periodEndUtc)
+					)
+				)
+				.orderBy(posDeposits.id);
+
+			const returnCountRows = await database
+				.select({ count: sql<string>`count(*)::text` })
+				.from(posReturns)
+				.where(
+					and(
+						eq(posReturns.tenantId, tenantId),
+						eq(posReturns.organizationId, organizationId),
+						eq(posReturns.state, "Completed"),
+						gte(posReturns.approvedAt, periodStartUtc),
+						lt(posReturns.approvedAt, periodEndUtc)
+					)
+				);
+
+			const saleQuantityRows = await database
+				.select({
+					total: sql<string>`coalesce(sum(${posSaleLines.quantity}), 0)::text`,
+				})
+				.from(posSaleLines)
+				.innerJoin(
+					posSales,
+					and(
+						eq(posSaleLines.tenantId, posSales.tenantId),
+						eq(posSaleLines.saleId, posSales.id)
+					)
+				)
+				.where(
+					and(
+						eq(posSales.tenantId, tenantId),
+						eq(posSales.organizationId, organizationId),
+						eq(posSales.state, "Completed"),
+						gte(posSales.completedAt, periodStartUtc),
+						lt(posSales.completedAt, periodEndUtc)
+					)
+				);
+
+			const returnQuantityRows = await database
+				.select({
+					total: sql<string>`coalesce(sum(${posReturnLines.quantity}), 0)::text`,
+				})
+				.from(posReturnLines)
+				.innerJoin(
+					posReturns,
+					and(
+						eq(posReturnLines.tenantId, posReturns.tenantId),
+						eq(posReturnLines.returnId, posReturns.id)
+					)
+				)
+				.where(
+					and(
+						eq(posReturns.tenantId, tenantId),
+						eq(posReturns.organizationId, organizationId),
+						eq(posReturns.state, "Completed"),
+						gte(posReturns.approvedAt, periodStartUtc),
+						lt(posReturns.approvedAt, periodEndUtc)
+					)
+				);
+
+			const saleQuantityScaled = decimalTextToScaledQuantity(
+				saleQuantityRows[0]?.total ?? "0"
+			);
+			const returnQuantityScaled = decimalTextToScaledQuantity(
+				returnQuantityRows[0]?.total ?? "0"
+			);
+
+			const result: PosFinanceHandoffSourceData = {
+				closedVariances: closedVarianceRows.map((row) => ({
+					currency: row.currency,
+					occurredAt: row.closedAt as Date,
+					registerId: row.registerId,
+					sessionId: row.id,
+					varianceMinor: row.varianceMinor as number,
+				})),
+				netInventoryQuantityScaled: (
+					saleQuantityScaled - returnQuantityScaled
+				).toString(),
+				preparedDeposits: preparedDepositRows.map((row) => ({
+					amountMinor: row.amountMinor,
+					currency: row.currency,
+					depositId: row.id,
+					depositReference: row.depositReference,
+					occurredAt: row.preparedAt,
+				})),
+				reconciledDeposits: reconciledDepositRows.map((row) => ({
+					amountMinor: row.amountMinor,
+					currency: row.currency,
+					depositId: row.id,
+					depositReference: row.depositReference,
+					occurredAt: row.confirmedAt as Date,
+				})),
+				refunds: refundRows.map((row) => ({
+					amountMinor: row.amountMinor,
+					currency: row.currency,
+					movementId: row.id,
+					postedAt: row.createdAt,
+					refundId: row.referenceId ?? row.id,
+				})),
+				returnCount: Number(returnCountRows[0]?.count ?? "0"),
+				sales: saleRows.map((row) => ({
+					completedAt: row.completedAt as Date,
+					currency: row.currency,
+					discountMinor: row.discountMinor,
+					grossMinor: row.grossMinor,
+					id: row.id,
+					taxMinor: row.taxMinor,
+					totalMinor: row.totalMinor,
+				})),
+				unresolvedVariances: unresolvedVarianceRows.map((row) => ({
+					closeRequestedAt: row.closeRequestedAt as Date,
+					registerId: row.registerId,
+					sessionId: row.id,
+				})),
+			};
+			return result;
+		},
 		async recordCommandReceipt(receipt) {
 			const rows = await database
 				.insert(posCommandReceipts)
@@ -768,6 +1126,43 @@ export function createPosRepository(
 				throw new Error("POS command receipt conflict could not be loaded");
 			}
 			return { inserted: false, record: existing };
+		},
+		async sumReservedDepositsForSessions(
+			tenantId,
+			sessionIds,
+			excludeDepositId
+		) {
+			if (sessionIds.length === 0) {
+				return 0;
+			}
+			const shiftRows = await database
+				.selectDistinct({ depositId: posDepositSourceShifts.depositId })
+				.from(posDepositSourceShifts)
+				.where(
+					and(
+						eq(posDepositSourceShifts.tenantId, tenantId),
+						inArray(posDepositSourceShifts.sessionId, sessionIds)
+					)
+				);
+			const depositIds = shiftRows
+				.map((row) => row.depositId)
+				.filter((id) => id !== excludeDepositId);
+			if (depositIds.length === 0) {
+				return 0;
+			}
+			const rows = await database
+				.select({
+					total: sql<string>`coalesce(sum(${posDeposits.amountMinor}), 0)::text`,
+				})
+				.from(posDeposits)
+				.where(
+					and(
+						eq(posDeposits.tenantId, tenantId),
+						inArray(posDeposits.id, depositIds),
+						inArray(posDeposits.state, ["Prepared", "Reconciled"])
+					)
+				);
+			return Number(rows[0]?.total ?? "0");
 		},
 		async sumReturnedQuantity(tenantId, saleLineId) {
 			// Every `pos_return_line` row for a given `saleLineId` counts,
@@ -788,6 +1183,42 @@ export function createPosRepository(
 					)
 				);
 			return rows[0]?.total ?? "0";
+		},
+		async sumSafeDropForSessions(tenantId, sessionIds) {
+			if (sessionIds.length === 0) {
+				return 0;
+			}
+			const rows = await database
+				.select({
+					total: sql<string>`coalesce(sum(${posCashMovements.amountMinor}), 0)::text`,
+				})
+				.from(posCashMovements)
+				.where(
+					and(
+						eq(posCashMovements.tenantId, tenantId),
+						eq(posCashMovements.reasonCode, "SafeDrop"),
+						inArray(posCashMovements.sessionId, sessionIds)
+					)
+				);
+			return Number(rows[0]?.total ?? "0");
+		},
+		async updateDeposit(record, expectedVersion) {
+			const rows = await database
+				.update(posDeposits)
+				.set(depositValues(record))
+				.where(
+					and(
+						eq(posDeposits.tenantId, record.tenantId),
+						eq(posDeposits.id, record.id),
+						eq(posDeposits.version, expectedVersion)
+					)
+				)
+				.returning();
+			const [row] = rows;
+			if (!row) {
+				return "version_conflict" as const;
+			}
+			return mapDeposit(row, record.sourceShiftIds);
 		},
 		async updatePriceOverride(record, expectedVersion) {
 			const rows = await database

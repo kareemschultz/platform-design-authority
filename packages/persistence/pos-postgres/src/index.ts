@@ -134,6 +134,7 @@ function mapSaleLine(row: typeof posSaleLines.$inferSelect): SaleLineRecord {
 		grossMinor: row.grossMinor,
 		id: row.id,
 		lineTotalMinor: row.lineTotalMinor,
+		nonStatutory: row.nonStatutory as true,
 		priceOverrideId: row.priceOverrideId,
 		priceOverrideState:
 			row.priceOverrideState as SaleLineRecord["priceOverrideState"],
@@ -159,6 +160,7 @@ function saleLineValues(
 		grossMinor: line.grossMinor,
 		id: line.id,
 		lineTotalMinor: line.lineTotalMinor,
+		nonStatutory: line.nonStatutory,
 		priceOverrideId: line.priceOverrideId,
 		priceOverrideState: line.priceOverrideState,
 		productId: line.productId,

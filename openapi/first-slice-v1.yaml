@@ -2833,7 +2833,7 @@ components:
         referenceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
     SaleLine:
       type: object
-      required: [id, productId, productName, quantity, unit, unitPrice, gross, discount, taxableBase, taxCategory, tax, lineTotal, priceOverrideId, priceOverrideState]
+      required: [id, productId, productName, quantity, unit, unitPrice, gross, discount, taxableBase, taxCategory, tax, lineTotal, nonStatutory, priceOverrideId, priceOverrideState]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         productId: {$ref: '#/components/schemas/Identifier'}
@@ -2848,6 +2848,7 @@ components:
         taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
         tax: {$ref: '#/components/schemas/Money'}
         lineTotal: {$ref: '#/components/schemas/Money'}
+        nonStatutory: {type: boolean, enum: [true], description: 'Always true — this line was computed by the prototype, non-statutory Guyana tax pack (PDA-IND-090). Never verified for statutory filing or production use.'}
         priceOverrideId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         priceOverrideState: {oneOf: [{type: string, enum: [Pending, Approved]}, {type: 'null'}]}
     Sale:
@@ -2873,7 +2874,7 @@ components:
         version: {type: integer, minimum: 1}
     ReceiptLine:
       type: object
-      required: [productName, quantity, unit, unitPrice, discount, taxableBase, taxCategory, tax, lineTotal]
+      required: [productName, quantity, unit, unitPrice, discount, taxableBase, taxCategory, tax, lineTotal, nonStatutory]
       properties:
         productName: {type: string}
         quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
@@ -2884,6 +2885,7 @@ components:
         taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
         tax: {$ref: '#/components/schemas/Money'}
         lineTotal: {$ref: '#/components/schemas/Money'}
+        nonStatutory: {type: boolean, enum: [true], description: 'Always true — this line was computed by the prototype, non-statutory Guyana tax pack (PDA-IND-090). Never verified for statutory filing or production use.'}
     Receipt:
       type: object
       required: [id, receiptNumber, kind, registerId, currency, priceSuppressed, issuedAt, lines, tenders, total]

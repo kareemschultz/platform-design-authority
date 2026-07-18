@@ -822,11 +822,26 @@ describe.serial(
 				state: "Completed",
 			});
 
+			// PDA conformance remediation: the tax engine's `nonStatutory: true`
+			// marker (stage file, "every computed tax line carries a
+			// `prototype_non_statutory: true` style marker") must survive all
+			// the way to the persisted sale line, the API view, and the
+			// immutable receipt snapshot — never silently dropped at a
+			// domain-to-storage or domain-to-view boundary.
+			expect(completed.lines[0]?.nonStatutory).toBe(true);
+			const saleLineRows = await testPool.query<{ non_statutory: boolean }>(
+				"SELECT non_statutory FROM pos_sale_line WHERE tenant_id = $1 AND sale_id = $2",
+				[tenantId, created.id]
+			);
+			expect(saleLineRows.rows).toHaveLength(1);
+			expect(saleLineRows.rows[0]?.non_statutory).toBe(true);
+
 			const receiptRows = await testPool.query<{
+				lines: Array<{ nonStatutory?: boolean }>;
 				receipt_number: string;
 				total_minor: string;
 			}>(
-				"SELECT receipt_number, total_minor::text AS total_minor FROM pos_receipt WHERE tenant_id = $1 AND sale_id = $2",
+				"SELECT receipt_number, total_minor::text AS total_minor, lines FROM pos_receipt WHERE tenant_id = $1 AND sale_id = $2",
 				[tenantId, created.id]
 			);
 			expect(receiptRows.rows).toHaveLength(1);
@@ -836,6 +851,7 @@ describe.serial(
 			expect(receiptRows.rows[0]?.receipt_number).toBe(
 				`R-${registerId}-000001`
 			);
+			expect(receiptRows.rows[0]?.lines[0]?.nonStatutory).toBe(true);
 
 			const movementRows = await testPool.query<{
 				quantity: string;

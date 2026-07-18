@@ -370,6 +370,12 @@ export interface SaleLineRecord {
 	grossMinor: number;
 	id: string;
 	lineTotalMinor: number;
+	/** Propagated verbatim from `PosTaxPort.calculateLine`'s `TaxLineResult.
+	 * nonStatutory` (stage file: "every computed tax line carries a
+	 * `prototype_non_statutory: true` style marker per the PR0 contract").
+	 * Persisted so a downstream reader of the Sale line never has to trust
+	 * an out-of-band claim that the tax figures are prototype-only. */
+	nonStatutory: true;
 	priceOverrideId: string | null;
 	priceOverrideState: ApprovalState | null;
 	productId: string;
@@ -439,6 +445,10 @@ export interface PriceOverrideRecord {
 export interface ReceiptLineSnapshot {
 	discountMinor: number;
 	lineTotalMinor: number;
+	/** Same prototype-tax marker as `SaleLineRecord.nonStatutory`, snapshotted
+	 * onto the immutable receipt so a printed/returned receipt carries the
+	 * same disclosure the sale line did. */
+	nonStatutory: true;
 	productName: string;
 	quantity: string;
 	taxAmountMinor: number;
@@ -579,6 +589,7 @@ export interface SaleLineView {
 	gross: { amountMinor: number; currency: string };
 	id: string;
 	lineTotal: { amountMinor: number; currency: string };
+	nonStatutory: true;
 	priceOverrideId: string | null;
 	priceOverrideState: ApprovalState | null;
 	productId: string;
@@ -615,6 +626,7 @@ export interface SaleView {
 export interface ReceiptLineView {
 	discount: { amountMinor: number; currency: string };
 	lineTotal: { amountMinor: number; currency: string };
+	nonStatutory: true;
 	productName: string;
 	quantity: string;
 	tax: { amountMinor: number; currency: string };
@@ -842,6 +854,7 @@ function saleView(record: SaleRecord): SaleView {
 				amountMinor: line.lineTotalMinor,
 				currency: record.currency,
 			},
+			nonStatutory: line.nonStatutory,
 			priceOverrideId: line.priceOverrideId,
 			priceOverrideState: line.priceOverrideState,
 			productId: line.productId,
@@ -884,6 +897,7 @@ function receiptView(record: ReceiptRecord): ReceiptView {
 				amountMinor: line.lineTotalMinor,
 				currency: record.currency,
 			},
+			nonStatutory: line.nonStatutory,
 			productName: line.productName,
 			quantity: line.quantity,
 			tax: { amountMinor: line.taxAmountMinor, currency: record.currency },
@@ -1146,6 +1160,7 @@ async function priceSaleLine(
 		grossMinor: decimalToMoneyMinor(priced.grossAmount, "grossAmount"),
 		id: options.ids.create("sale-line"),
 		lineTotalMinor: taxableBaseMinor + taxAmountMinor,
+		nonStatutory: taxed.nonStatutory,
 		priceOverrideId: null,
 		priceOverrideState: null,
 		productId: lineInput.productId,
@@ -1191,6 +1206,7 @@ async function computeOverriddenLine(
 		discountMinor: decimalToMoneyMinor(priced.discountAmount, "discountAmount"),
 		grossMinor: decimalToMoneyMinor(priced.grossAmount, "grossAmount"),
 		lineTotalMinor: taxableBaseMinor + taxAmountMinor,
+		nonStatutory: taxed.nonStatutory,
 		priceOverrideState: "Approved",
 		taxAmountMinor,
 		taxableBaseMinor,
@@ -1742,6 +1758,7 @@ export function createPosService(options: PosServiceOptions) {
 						lines: sale.lines.map((line) => ({
 							discountMinor: line.discountMinor,
 							lineTotalMinor: line.lineTotalMinor,
+							nonStatutory: line.nonStatutory,
 							productName: line.productName,
 							quantity: line.quantity,
 							taxAmountMinor: line.taxAmountMinor,
@@ -1782,6 +1799,31 @@ export function createPosService(options: PosServiceOptions) {
 						throw new PosError("version_conflict", "Sale version is stale");
 					}
 
+					// CONFORMANCE DECISION (recorded here, not silently applied): the
+					// `nonStatutory` marker restored elsewhere in this branch
+					// (SaleLineRecord/ReceiptLineSnapshot/SaleLineView/ReceiptLineView)
+					// does NOT extend onto `commerce.sale.completed.v1`'s aggregate
+					// `taxMinor` below, or onto `commerce.receipt.issued.v1` (which
+					// carries no tax field at all — nothing to mark). Both event
+					// schemas were frozen in PR0 with `additionalProperties: false`;
+					// `commerce.sale.completed.v1` is a registered `v1` name (CLAUDE.md
+					// §6: `<namespace>.<entity>.<past-tense-fact>.v<major>`), so adding
+					// a new REQUIRED field would be a breaking change demanding a `v2`
+					// event this stage is not authorized to mint. The schema's existing
+					// OPTIONAL `taxSnapshotVersion` field is left `null` rather than
+					// repurposed to signal non-statutory provenance: its semantics were
+					// never defined by PR0 (no doc references it), and guessing a
+					// reading here risks colliding with whatever a later, real
+					// tax-snapshot-versioning feature needs it to mean. Every consumer
+					// of `taxMinor` from this event is, for the whole WS3 controlled-
+					// prototype branch, implicitly reading `engine.tax`'s
+					// `NON_STATUTORY_NOTICE` output (registered at `prototype` depth in
+					// `registry/first-slice.json`) — this is a branch-wide disposition,
+					// not a per-event fact this schema shape can carry without a
+					// version bump. Flagged for the orchestrator/founder decision on
+					// whether PR0's event contract should gain a `v2` or a defined
+					// `taxSnapshotVersion` convention; this PR2 remediation does not
+					// unilaterally amend a frozen event schema to force the point.
 					await events.append(
 						saleEvent({
 							actorUserId: input.actorUserId,

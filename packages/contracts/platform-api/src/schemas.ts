@@ -808,6 +808,7 @@ export const SaleLineSchema = z.object({
 	gross: MoneySchema,
 	id: IdentifierSchema,
 	lineTotal: MoneySchema,
+	nonStatutory: z.literal(true),
 	priceOverrideId: NullableIdentifierSchema,
 	priceOverrideState: z.enum(["Pending", "Approved"]).nullable(),
 	productId: IdentifierSchema,
@@ -844,6 +845,7 @@ export const SaleSchema = z.object({
 export const ReceiptLineSchema = z.object({
 	discount: MoneySchema,
 	lineTotal: MoneySchema,
+	nonStatutory: z.literal(true),
 	productName: z.string(),
 	quantity: PositiveDecimalQuantitySchema,
 	tax: MoneySchema,

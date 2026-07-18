@@ -284,6 +284,7 @@ export const posSaleLines = pgTable(
 		grossMinor: minorAmount("gross_minor").notNull(),
 		id: text("id").notNull(),
 		lineTotalMinor: minorAmount("line_total_minor").notNull(),
+		nonStatutory: boolean("non_statutory").default(true).notNull(),
 		priceOverrideId: text("price_override_id"),
 		priceOverrideState: text("price_override_state"),
 		productId: text("product_id").notNull(),
@@ -308,6 +309,15 @@ export const posSaleLines = pgTable(
 		check(
 			"pos_sale_line_price_override_state_check",
 			sql`${table.priceOverrideState} is null or ${table.priceOverrideState} in ('Pending', 'Approved')`
+		),
+		// `engine.tax` is registered at `prototype` depth only (stage packet,
+		// `NON_STATUTORY_NOTICE`): every tax line PR2's tax engine produces
+		// carries `nonStatutory: true` as a literal type, so the column can
+		// never legitimately hold `false` on this branch — the CHECK makes
+		// that invariant a database-level backstop, not just a TypeScript one.
+		check(
+			"pos_sale_line_non_statutory_check",
+			sql`${table.nonStatutory} = true`
 		),
 		primaryKey({
 			columns: [table.tenantId, table.id],

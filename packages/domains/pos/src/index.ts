@@ -2435,6 +2435,7 @@ export function createPosService(options: PosServiceOptions) {
 				const updatedSale: SaleRecord = {
 					...sale,
 					lines: updatedLines,
+					state: sale.state === "Held" ? "Open" : sale.state,
 					updatedAt: now,
 					version: sale.version + 1,
 				};

@@ -1275,6 +1275,13 @@ describe.serial(
 			// of which way the comparison lands on this local dev host.
 			expect(["PASS", "MISS"]).toContain(addScannedItem.disposition);
 			expect(["PASS", "MISS"]).toContain(saleProcessing.disposition);
-		});
+			// Explicit 60s test timeout (third test() argument): this test runs
+			// WARMUP_ITERATIONS + SAMPLE_ITERATIONS (55) create+complete round
+			// trips against live PostgreSQL (~110 sequential round trips), which
+			// can approach bun's default 5000ms per-test ceiling under load and
+			// fail spuriously. The override widens only the harness ceiling; it
+			// does not change the measured budgets, targets, or the >=50-sample
+			// requirement above.
+		}, 60_000);
 	}
 );

@@ -1261,6 +1261,51 @@ describe("POS domain: Sale, PriceOverride, Receipt", () => {
 		expect(completed.change).toEqual({ amountMinor: 0, currency: "GYD" });
 	});
 
+	test("requesting a price override on a Held sale implicitly resumes it to Open (frozen control plan §6.2) with totals unchanged", async () => {
+		const { service } = createHarness();
+		await openSaleRegister(service, "register_override_held");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "sale-override-held-1",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 100_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_override_held",
+		});
+		const lineId = sale.lines[0]?.id as string;
+
+		const held = await service.holdSale({
+			...base,
+			idempotencyKey: "sale-override-held-op",
+			saleId: sale.id,
+		});
+		expect(held.state).toBe("Held");
+
+		const requested = await service.requestPriceOverride({
+			...base,
+			idempotencyKey: "override-request-held-1",
+			lineId,
+			reason: "Manager-approved discount for damaged packaging",
+			requestedPrice: { amountMinor: 80_000, currency: "GYD" },
+			saleId: sale.id,
+		});
+		expect(requested.state).toBe("Open");
+		expect(requested.lines[0]?.priceOverrideState).toBe("Pending");
+		// Requesting an override only stamps markers; price and totals are
+		// unchanged until approval.
+		expect(requested.lines[0]?.unitPrice).toEqual({
+			amountMinor: 100_000,
+			currency: "GYD",
+		});
+		expect(requested.total).toEqual(held.total);
+	});
+
 	test("replays an idempotent sale.create and sale.complete without duplicating a receipt or stock movement", async () => {
 		const { service, saleReceipts, stockMovements } = createHarness();
 		await openSaleRegister(service, "register_sale_replay");

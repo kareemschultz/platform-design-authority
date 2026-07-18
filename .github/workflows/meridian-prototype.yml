@@ -16,6 +16,11 @@ on:
       - "bun.lock"
       - "docker-compose.yml"
       - "package.json"
+      - "LICENSE*"
+      - "LICENCE*"
+      - "COPYING*"
+      - "THIRD_PARTY_NOTICES.md"
+      - "third_party/**"
       - "tsconfig.json"
       - "turbo.json"
       - ".github/workflows/meridian-prototype.yml"
@@ -94,6 +99,11 @@ jobs:
         run: |
           bun run architecture:check
           python scripts/test_architecture_checker.py
+
+      - name: Third-party provenance baseline
+        run: |
+          bun run third-party:test
+          bun run third-party:check
 
       - name: Migration freshness
         run: |

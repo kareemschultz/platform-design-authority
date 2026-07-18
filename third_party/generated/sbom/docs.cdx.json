@@ -1,0 +1,508 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:npm/%40fumadocs/base-ui@16.11.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "3b7c442e59045c01046e47d1d44cc3d9722faf1c5ee6c2523690ab485dbebae2705fba8e6c372fb463ec0cd273c0eb329cea8960fb0ebeb1b590b90020b79ab3"
+        }
+      ],
+      "name": "@fumadocs/base-ui",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "fumadocs-ui"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"fumadocs-ui\",\"selector\":\"npm:@fumadocs/base-ui@16.11.3\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40fumadocs/base-ui@16.11.3",
+      "type": "library",
+      "version": "16.11.3"
+    },
+    {
+      "bom-ref": "pkg:npm/class-variance-authority@0.7.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "29afbd4ebbadbfb1bc33a593e927a2456cfbf762b9a84a881841b35ca84013ac4e58063aa4f1fc53ef48637a0232fea4a9398bb2fed787fdb0d918a091e3ccb2"
+        }
+      ],
+      "name": "class-variance-authority",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "class-variance-authority"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"class-variance-authority\",\"selector\":\"^0.7.1\"}]"
+        }
+      ],
+      "purl": "pkg:npm/class-variance-authority@0.7.1",
+      "type": "library",
+      "version": "0.7.1"
+    },
+    {
+      "bom-ref": "pkg:npm/cnfast@0.0.8",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "1235ca31f19f770b55e0070d490e80c10695ce90b507b2317a2c00dc59614d7cfe60594c2958b8735257f6d803d903a56a14178c1f0a517ac16981bedeff3bd5"
+        }
+      ],
+      "name": "cnfast",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "cnfast"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"cnfast\",\"selector\":\"^0.0.8\"}]"
+        }
+      ],
+      "purl": "pkg:npm/cnfast@0.0.8",
+      "type": "library",
+      "version": "0.0.8"
+    },
+    {
+      "bom-ref": "pkg:npm/flexsearch@0.8.212",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c12c89af51945a838e208491bbe5f621788e7157e0f6aa8147208f45474b308189a8fccca3e8cc465bc4f37b75e2fd63d1d44c11a05b111fda7508e9e83bb6a7"
+        }
+      ],
+      "name": "flexsearch",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "flexsearch"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"flexsearch\",\"selector\":\"^0.8.212\"}]"
+        }
+      ],
+      "purl": "pkg:npm/flexsearch@0.8.212",
+      "type": "library",
+      "version": "0.8.212"
+    },
+    {
+      "bom-ref": "pkg:npm/fumadocs-core@16.11.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "00784e618d9803df2f11b8332c1c6a67dcb27d6e9598e4c82232bcd37c42396526ab289553c38d72423a22e2042164f0caf938b3f3c00b8f69d352740a38a8fb"
+        }
+      ],
+      "name": "fumadocs-core",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "fumadocs-core"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"fumadocs-core\",\"selector\":\"16.11.3\"}]"
+        }
+      ],
+      "purl": "pkg:npm/fumadocs-core@16.11.3",
+      "type": "library",
+      "version": "16.11.3"
+    },
+    {
+      "bom-ref": "pkg:npm/fumadocs-mdx@15.1.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "da70eeb1295816e355732079d63818ded037af4d402d3c28511acc0cda1cedc6c9299dac69cfcf5be083aba4874c0ae48113261622984067eca49763813b4f4e"
+        }
+      ],
+      "name": "fumadocs-mdx",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "fumadocs-mdx"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"fumadocs-mdx\",\"selector\":\"15.1.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/fumadocs-mdx@15.1.0",
+      "type": "library",
+      "version": "15.1.0"
+    },
+    {
+      "bom-ref": "pkg:npm/hast-util-to-jsx-runtime@2.3.6",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "ce5eacf0bc0dca8d4ff6ec3e5c91af66d74517519d0243a0f2e8cec3ee0fc9befaf3be1f2e9b38b9e1d70e15d6764e981d0e8e814b629e5886ed1b18bc26db06"
+        }
+      ],
+      "name": "hast-util-to-jsx-runtime",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "hast-util-to-jsx-runtime"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"hast-util-to-jsx-runtime\",\"selector\":\"^2.3.6\"}]"
+        }
+      ],
+      "purl": "pkg:npm/hast-util-to-jsx-runtime@2.3.6",
+      "type": "library",
+      "version": "2.3.6"
+    },
+    {
+      "bom-ref": "pkg:npm/lucide-react@1.24.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "613ea6043f2518a920e27337f5e9e59bde3fb1f248896d182944fad1f072e182bcb5a8b7d72960d55846356c64a52287a3d51a81f9d9ab021f7f71d30d0c1778"
+        }
+      ],
+      "name": "lucide-react",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "lucide-react"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"lucide-react\",\"selector\":\"1.24.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/lucide-react@1.24.0",
+      "type": "library",
+      "version": "1.24.0"
+    },
+    {
+      "bom-ref": "pkg:npm/next@16.2.10",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "daca26e405576f7904e988e29dedff98d6c16b2605e7c7a0b8158855551daf5cbf2f8dbac72544818c60046fb5402df83f6c7913eb5c0eea7a5e4b8e017ddd08"
+        }
+      ],
+      "name": "next",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "next"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"next\",\"selector\":\"16.2.10\"}]"
+        }
+      ],
+      "purl": "pkg:npm/next@16.2.10",
+      "type": "library",
+      "version": "16.2.10"
+    },
+    {
+      "bom-ref": "pkg:npm/react-dom@19.2.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b74051557bdb884fe8db41dfc3aebdacb6cc0835ad6192ef9898a0cb67f4331b1717eef5a71851df13a4b299ac3bc877665373ca26c09ad09ade5e2560a93a81"
+        }
+      ],
+      "name": "react-dom",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-dom"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-dom\",\"selector\":\"^19.2.7\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-dom@19.2.7",
+      "type": "library",
+      "version": "19.2.7"
+    },
+    {
+      "bom-ref": "pkg:npm/react@19.2.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "1cd7bd5ac9536d79852bca3c726c2001e245481bedd5b3dd1c254ab5a695f96940377ea6a53e21711a706dfddf639e9aaf6a085f3b01a4e0222111c0758d0e95"
+        }
+      ],
+      "name": "react",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react\",\"selector\":\"^19.2.7\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react@19.2.7",
+      "type": "library",
+      "version": "19.2.7"
+    },
+    {
+      "bom-ref": "pkg:npm/remark-gfm@4.0.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "d6aba87d9d9143d11675e377e12efdf8a131575efae3ec02506a29e423cbd5619d0f4a1c3e9bbdd65ccf19bc163040a9129778da4246430cd17f2a2ff63e3236"
+        }
+      ],
+      "name": "remark-gfm",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "remark-gfm"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"remark-gfm\",\"selector\":\"^4.0.1\"}]"
+        }
+      ],
+      "purl": "pkg:npm/remark-gfm@4.0.1",
+      "type": "library",
+      "version": "4.0.1"
+    },
+    {
+      "bom-ref": "pkg:npm/remark-rehype@11.1.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "0e1ee5e7b89a9da128229cdba743c2f542807424959250fc139469c3b1137db4e5dc5a9c38e82ae6ad8b54386018291a06fee9db82578a43ddbe18661ef28cb3"
+        }
+      ],
+      "name": "remark-rehype",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "remark-rehype"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"remark-rehype\",\"selector\":\"^11.1.2\"}]"
+        }
+      ],
+      "purl": "pkg:npm/remark-rehype@11.1.2",
+      "type": "library",
+      "version": "11.1.2"
+    },
+    {
+      "bom-ref": "pkg:npm/remark@15.0.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "121b79c37d2bb825e0166c5551294d590f628a29aad3b51129e152de135cf1c516cb59655f828359fc840d947270c73ece7b0df54c79fed27f04576074ec00dc"
+        }
+      ],
+      "name": "remark",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "remark"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"remark\",\"selector\":\"^15.0.1\"}]"
+        }
+      ],
+      "purl": "pkg:npm/remark@15.0.1",
+      "type": "library",
+      "version": "15.0.1"
+    },
+    {
+      "bom-ref": "pkg:npm/unist-util-visit@5.1.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "9bebc87727823a976bfd07900aed84cf15ffa21812f0a6e73c38059e2e1d42c7d20ada73f14a83c98e468d1aeef0f0cab989fb16ad7d8f5090fa7252b0628ece"
+        }
+      ],
+      "name": "unist-util-visit",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "unist-util-visit"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"unist-util-visit\",\"selector\":\"^5.1.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/unist-util-visit@5.1.0",
+      "type": "library",
+      "version": "5.1.0"
+    },
+    {
+      "bom-ref": "pkg:npm/zod@4.4.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cad10d163209165d94c1882575eda37215b61f09b818914b0e249759d4eb25004837d15cca9ee7e0387124489634024c575fc1a967d6fe4920ef55037072724d"
+        }
+      ],
+      "name": "zod",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "zod"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"zod\",\"selector\":\"^4.4.3\"}]"
+        }
+      ],
+      "purl": "pkg:npm/zod@4.4.3",
+      "type": "library",
+      "version": "4.4.3"
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "incomplete",
+      "assemblies": [
+        "urn:pda:workspace:apps/docs"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:npm/%40fumadocs/base-ui@16.11.3",
+        "pkg:npm/class-variance-authority@0.7.1",
+        "pkg:npm/cnfast@0.0.8",
+        "pkg:npm/flexsearch@0.8.212",
+        "pkg:npm/fumadocs-core@16.11.3",
+        "pkg:npm/fumadocs-mdx@15.1.0",
+        "pkg:npm/hast-util-to-jsx-runtime@2.3.6",
+        "pkg:npm/lucide-react@1.24.0",
+        "pkg:npm/next@16.2.10",
+        "pkg:npm/react-dom@19.2.7",
+        "pkg:npm/react@19.2.7",
+        "pkg:npm/remark-gfm@4.0.1",
+        "pkg:npm/remark-rehype@11.1.2",
+        "pkg:npm/remark@15.0.1",
+        "pkg:npm/unist-util-visit@5.1.0",
+        "pkg:npm/zod@4.4.3"
+      ],
+      "ref": "urn:pda:workspace:apps/docs"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "urn:pda:workspace:apps/docs",
+      "name": "docs",
+      "properties": [
+        {
+          "name": "pda:distribution-authority",
+          "value": "none"
+        },
+        {
+          "name": "pda:inventory-scope",
+          "value": "direct-declared-runtime-dependencies"
+        },
+        {
+          "name": "pda:sbom-type",
+          "value": "declared-manifest"
+        },
+        {
+          "name": "pda:not-post-build-or-artifact-sbom",
+          "value": "true"
+        },
+        {
+          "name": "pda:license-conclusions",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:source-lockfile",
+          "value": "bun.lock"
+        },
+        {
+          "name": "pda:serial-number-policy",
+          "value": "omitted-for-byte-reproducible-source-baseline;artifact-boms-must-mint-rfc4122"
+        }
+      ],
+      "type": "application",
+      "version": "0.0.4"
+    }
+  },
+  "specVersion": "1.6",
+  "version": 1
+}

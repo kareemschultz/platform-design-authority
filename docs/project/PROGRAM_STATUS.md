@@ -108,7 +108,7 @@ Not yet complete:
 
 1. Complete issue #94 before retaining raw customer evidence: select an access-controlled evidence store and public-safe opaque reference scheme.
 2. Complete issue #82 with retained real-world evidence from at least 8 structured retailer interviews and 3 direct workflow observations across at least 3 businesses. Generated, simulated, inferred, or waived evidence does not satisfy this gate. PDA-REV-019 completes the separate repository disclosure review at controlled-prototype depth after independent concurrence and merge.
-3. Continue issues #92/#93 and the parallel external-evidence track in issues #84–#88 without representing open security, licensing, legal, provider, accessibility, or commercial work as readiness.
+3. Continue issue #93 and issue #96 (responder continuity, protected-main, and repository-workflow enforcement — the follow-up to PDA-REV-020's private vulnerability intake and native security-scanning baseline) alongside the parallel external-evidence track in issues #84–#88, without representing open security, licensing, legal, provider, accessibility, or commercial work as readiness.
 4. Extend the machine-readable evidence-source pattern per workstream; this dashboard remains a non-authoritative summary until a governed program-status source can be derived deterministically.
 
 ## Production-readiness gates (measure 4)

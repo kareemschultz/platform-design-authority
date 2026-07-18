@@ -213,6 +213,43 @@ class PublicDisclosureTest(unittest.TestCase):
         self.assertTrue(any("worktree file is missing" in error for error in errors))
         self.assertNotIn(secret, "\n".join(errors))
 
+    def test_allows_anonymous_git_ssh_transport_urls(self) -> None:
+        # `git@host` with no password is the standard anonymous git-over-ssh
+        # transport identity (GitHub/GitLab/Bitbucket/SourceHut all use it);
+        # it appears in the `repository` field of a large fraction of
+        # published npm packages and is not a credential leak.
+        cases = {
+            "npm-repo-field.txt": "git+ssh://git@github.com/facebook/react-native.git",
+            "bare-git-scheme.txt": "git://git@github.com/EventSource/eventsource.git",
+            "ssh-git-scheme.txt": "ssh+git://git@bitbucket.org/example/repo.git",
+        }
+        temporary, root = self.make_repository(cases)
+        self.addCleanup(temporary.cleanup)
+
+        self.assertEqual(validate_public_disclosure(root), [])
+
+    def test_rejects_git_transport_url_with_password(self) -> None:
+        credential_url = "git+ssh://git:" + "leaked-token@github.com/org/repo.git"
+        temporary, root = self.make_repository({"config.txt": credential_url})
+        self.addCleanup(temporary.cleanup)
+
+        errors = validate_public_disclosure(root)
+
+        self.assertTrue(any("credential-bearing-url" in error for error in errors))
+
+    def test_rejects_non_git_username_only_url(self) -> None:
+        # A bare username on a non-git-transport scheme is still flagged —
+        # the exemption is narrowly scoped to the `git` transport identity,
+        # not to username-only URLs in general (some services put the
+        # actual secret in the username position, e.g. HTTP Basic tokens).
+        credential_url = "https://sk-live-example-" + "token@api.example.com/v1"
+        temporary, root = self.make_repository({"config.txt": credential_url})
+        self.addCleanup(temporary.cleanup)
+
+        errors = validate_public_disclosure(root)
+
+        self.assertTrue(any("credential-bearing-url" in error for error in errors))
+
     def test_requires_root_security_and_contributing_files(self) -> None:
         temporary, root = self.make_repository(
             {"README.md": "# Example\n"}, include_required_files=False

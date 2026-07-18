@@ -2192,10 +2192,10 @@
       "document_id": "PDA-ENGR-013",
       "path": "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.23.0",
+      "version": "0.24.0",
       "status": "Draft",
       "owner": "Platform Engineering",
-      "last_reviewed": "2026-07-16",
+      "last_reviewed": "2026-07-18",
       "related_adrs": [
         "ADR-0004",
         "ADR-0005",
@@ -3658,6 +3658,17 @@
       "review_evidence": null
     },
     {
+      "document_id": "PDA-REV-020",
+      "path": "docs/reviews/REPOSITORY_SECURITY_SCANNING_AND_VULNERABILITY_INTAKE-2026-07-18.md",
+      "title": "Repository Security Scanning and Vulnerability Intake Baseline",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-18",
+      "related_adrs": [],
+      "review_evidence": null
+    },
+    {
       "document_id": "PDA-SEC-001",
       "path": "docs/blueprint/11-Security/README.md",
       "title": "Security Section Index",
@@ -3744,10 +3755,10 @@
       "document_id": "PDA-SEC-014",
       "path": "docs/blueprint/11-Security/SECURE_SOFTWARE_SUPPLY_CHAIN_AND_VULNERABILITY_MANAGEMENT.md",
       "title": "Secure Software Supply Chain and Vulnerability Management",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-18",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -4019,10 +4030,10 @@
       "document_id": "PDA-STR-029",
       "path": "docs/blueprint/20-Strategy/INTELLECTUAL_PROPERTY_LICENSING_AND_REPOSITORY_POLICY.md",
       "title": "Intellectual Property Licensing and Repository Policy",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "status": "Draft",
       "owner": "Founder",
-      "last_reviewed": "2026-07-17",
+      "last_reviewed": "2026-07-18",
       "related_adrs": [],
       "review_evidence": null
     },

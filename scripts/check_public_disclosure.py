@@ -166,12 +166,31 @@ def _is_allowed_local_url(candidate: str) -> bool:
     }
 
 
+_GIT_TRANSPORT_SCHEMES = {"ssh", "git", "git+ssh", "ssh+git"}
+
+
+def _is_git_transport_identity(parsed) -> bool:
+    """`git@host` with no password is the standard anonymous git-over-ssh
+    transport user recognized by GitHub/GitLab/Bitbucket/SourceHut — not a
+    credential. It appears in the `repository` field of a large fraction of
+    published npm packages (e.g. `git+ssh://git@github.com/org/repo.git`),
+    so an SBOM or lockfile inventory legitimately contains many of these.
+    """
+    return (
+        parsed.password is None
+        and parsed.username == "git"
+        and parsed.scheme.lower() in _GIT_TRANSPORT_SCHEMES
+    )
+
+
 def _has_embedded_credentials(candidate: str) -> bool:
     try:
         parsed = urlsplit(candidate.rstrip(".,);]}"))
     except ValueError:
         return False
-    if parsed.username is not None or parsed.password is not None:
+    if parsed.password is not None:
+        return True
+    if parsed.username is not None and not _is_git_transport_identity(parsed):
         return True
     query_pairs = parse_qsl(parsed.query, keep_blank_values=True)
     fragment_pairs = parse_qsl(parsed.fragment, keep_blank_values=True)

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-029
 title: Intellectual Property Licensing and Repository Policy
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 ---
 
 # Intellectual Property, Licensing, and Repository Policy
@@ -36,7 +36,11 @@ FDR-005 records the current repository posture as **provisionally public**, not 
 
 The review may allow architecture principles, approved public contracts, sanitized examples, non-sensitive implementation source, and public evidence summaries. It must exclude secrets and credentials, customer or provider confidential data, private negotiations, exploit-ready production security detail, protected premium assets or redistribution rights, and personal data without an approved basis. Moving a repository or path does not waive those prohibitions.
 
-PDA-REV-019 is the current classification ledger. Raw customer/external evidence uses the restricted system selected by issue #94; private security intake and native scanning remain tracked by issue #92; dependency notices, SBOM, copied-source provenance, and asset rights remain tracked by issue #93. Public/source-visible material carries no reuse license meanwhile.
+PDA-REV-019 is the current classification ledger. Raw customer/external evidence uses the restricted system selected by issue #94. PDA-REV-020 records private security intake and native scanning subject to exact-head review and merge; issue #96 retains responder continuity, protected-main, and repository-level workflow enforcement. Dependency notices, SBOM, copied-source provenance, and asset rights remain tracked by issue #93. Public/source-visible material carries no reuse license meanwhile.
+
+## Change Log
+
+- **0.4.0 (2026-07-18):** Linked PDA-REV-020's private vulnerability intake/native scanning baseline and retained issue #96's responder, protected-main, and workflow-enforcement decisions without changing the provisional public or unlicensed posture.
 
 ## Open Source
 

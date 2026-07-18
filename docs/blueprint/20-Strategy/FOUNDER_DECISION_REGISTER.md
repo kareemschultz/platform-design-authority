@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.6.0
+version: 0.7.1
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 ---
 
 # Founder Decision Register
@@ -63,7 +63,7 @@ The production native storefront, customer recurring agreements, memberships, ad
 
 This ratification closes the founder scope decision identified by F-L-003. It does not promote the Draft manifest or implementation plan, authorize a pilot or production deployment, or remove their legal, provider, security, accessibility, operational, and evidence gates.
 
-**WS3 entry condition:** P-W2a is merged and PDA-REV-019 records the FDR-005 repository disclosure review. WS3 still may not start until the customer-evidence gate records at least 8 structured interviews and 3 workflow observations across at least 3 businesses, as directed in the same founder approval. Issue #94 must establish restricted handling before raw customer evidence is retained. The customer evidence must be real-world evidence; agents cannot generate, simulate, infer, or waive it.
+**WS3 entry condition:** P-W2a is merged and PDA-REV-019 records the FDR-005 repository disclosure review. WS3 still may not start until the customer-evidence gate records at least 8 structured interviews and 3 workflow observations across at least 3 businesses, as directed in the same founder approval. Issue #94 must establish restricted handling before raw customer evidence is retained. The customer evidence must be real-world evidence; agents cannot generate, simulate, infer, or waive it. FDR-012 (2026-07-18) records a bounded controlled-prototype implementation exception on isolated branch `claude/ws3-integration` without changing these entry, retention, or merge conditions.
 
 ## FDR-005 — Repository Visibility and Documentation License
 
@@ -178,6 +178,24 @@ The dated baseline in `PRODUCT_NAMING_AND_PACKAGE_SCOPE_AVAILABILITY-2026-07-17.
 
 Until ratified, public packages must not be published under `@meridian/*`; a verified alternative scope may be selected without changing canonical identifiers or source-directory names.
 
+## FDR-012 — WS3 Controlled-Prototype Implementation Ahead of Evidence Gates
+
+**Status:** Decided (2026-07-18) — bounded controlled-prototype exception; the #94/#82 entry, retention, and merge gates are unchanged.
+
+**Decision owner:** Founder.
+
+**Decision evidence:** [Founder approval comment on PR #101](https://github.com/kareemschultz/platform-design-authority/pull/101#issuecomment-5010116100) (2026-07-18) together with the governed pull request recording this entry; the WS3 unblock plan on [issue #13](https://github.com/kareemschultz/platform-design-authority/issues/13) records the surrounding sequencing context.
+
+**Decision:** WS3 (POS cash workflow) implementation may proceed ahead of the issue #94 and issue #82 entry gates only as a controlled prototype on the isolated branch `claude/ws3-integration`, under all of the following recorded conditions:
+
+1. No WS3 change merges to `main`, and no consolidated WS3 pull request may merge, until issue #94 (restricted evidence store) and issue #82 (real customer evidence: 8 structured interviews and 3 direct workflow observations across at least 3 businesses) are closed with retained evidence. The evidence thresholds are unchanged and cannot be satisfied, simulated, inferred, or waived by agents.
+2. The full deterministic gate suite (types, tests, lint, documentation governance, registries, contracts, architecture, disclosure) is enforced at every stage boundary on the branch.
+3. The per-PR independent-review discipline is replaced, for this workstream only, by one consolidated independent review of the entire integration diff before any merge to `main`; findings from that review must be remediated before merge. This is a recorded deviation from the one-issue-one-PR-one-review practice, accepted for build velocity.
+4. WS3 completion, program-status percentages, and workstream state remain unchanged until the consolidated review concurs and the entry gates close; all run artifacts state `implemented-pending-gates-and-review`.
+5. If issue #82's customer evidence contradicts implemented WS3 scope, the evidence wins: the affected scope is reworked before merge, per PDA-STR-027's confirmed/contradicted synthesis.
+
+This decision does not promote any Draft document, does not record WS3 entry, and does not authorize pilot or production use.
+
 ## Governance
 
 A decision closes only when:
@@ -189,3 +207,8 @@ A decision closes only when:
 5. The decision is represented in implementation and customer claims.
 
 Architecture documents reference this register rather than inventing business facts.
+
+## Change Log
+
+- 2026-07-18 — v0.7.0 added FDR-012 (WS3 controlled-prototype implementation ahead of evidence gates, five recorded conditions) and cross-referenced it from FDR-004's WS3 entry condition.
+- 2026-07-18 — v0.7.1 cited the dedicated Founder approval comment on PR #101 as FDR-012's decision evidence and mirrored the FDR-012 review-process carve-out into CLAUDE.md/AGENTS.md §12 (Codex bot review P1/P2).

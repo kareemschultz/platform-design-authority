@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.16.1
+version: 0.17.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-18
@@ -180,7 +180,7 @@ Template per workstream: **Why · Entry · Proves · Packages · Contracts · Te
 ### WS3 — POS Cash Workflow (P3)
 
 - **Why:** The cash sale is the beachhead's economic heartbeat and the platform's first legally meaningful artifact chain (receipt numbering, register custody, accountant handoff) — cash-first matches Guyana reality and defers all provider risk.
-- **Entry:** WS2 controlled-prototype closeout is recorded through P-W2a issue #90; PDA-REV-019 records the repository disclosure/redaction review from issue #83 subject to exact-head independent concurrence and merge; issue #94 establishes restricted raw-evidence handling; and customer discovery #82 records at least 8 structured interviews and 3 direct workflow observations across at least 3 businesses as retained real-world evidence. No agent-generated, simulated, inferred, or waived substitute satisfies the customer-evidence gate. FA4's P1–P3 controlled-prototype clearance remains the authority for P3.
+- **Entry:** WS2 controlled-prototype closeout is recorded through P-W2a issue #90; PDA-REV-019 records the repository disclosure/redaction review from issue #83 subject to exact-head independent concurrence and merge; issue #94 establishes restricted raw-evidence handling; and customer discovery #82 records at least 8 structured interviews and 3 direct workflow observations across at least 3 businesses as retained real-world evidence. No agent-generated, simulated, inferred, or waived substitute satisfies the customer-evidence gate. FA4's P1–P3 controlled-prototype clearance remains the authority for P3. Under FDR-012 (2026-07-18), WS3 implementation may proceed ahead of the #94/#82 gates only as a controlled prototype on the isolated branch `claude/ws3-integration`; those gates continue to bind WS3 entry recording, any merge to `main`, and all progress claims.
 - **Proves:** PDA-RDM-004 §Prototype 3.
 - **Packages:** NEW `domains/pos`; `engines/pricing`, `engines/tax` (prototype depth, values from `GUYANA_RETAIL_PROTOTYPE_TAX_PACK.md` — explicitly non-statutory).
 - **Contracts:** `/registers/*` (open/close/cash-movements/safe-drops), `/sales*`, `/receipts/*` (reissue/void), `/deposits*`, `/refunds*`, `/returns*`, `/exports/accountant-handoff` (+ `FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md`, `schemas/finance/finance-handoff-v1.schema.json`); `commerce.*` sale/register/return events.
@@ -267,3 +267,4 @@ Scope changes route through PDA-RDM-003 §Change Control (doc + `registry/first-
 ## 11. Change Log
 
 - 2026-07-18 — v0.16.1 corrected current security-intake enforcement routing from closed issue #92 to retained follow-up issue #96; issue #93 continues to own provenance follow-up.
+- 2026-07-18 — v0.17.0 recorded FDR-012's bounded controlled-prototype exception: WS3 implementation may proceed on isolated branch `claude/ws3-integration` ahead of the #94/#82 gates, which continue to bind entry recording, merge to `main`, and progress claims.

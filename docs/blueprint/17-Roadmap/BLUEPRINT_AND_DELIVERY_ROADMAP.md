@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-001
 title: Blueprint and Delivery Roadmap
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 related_adrs: [ADR-0013, ADR-0014, ADR-0015]
 ---
 
@@ -64,7 +64,7 @@ Execution note (2026-07-17, fifth-audit F-L-008): this phase is executed as the 
 Founder controls recorded on 2026-07-17 apply to that execution sequence:
 
 - WSX is the approved parallel external-evidence track, with accountable roles and start-by/finish-by milestone gates in PDA-REV-015 and PDA-RDM-007.
-- PDA-REV-019 records the repository disclosure/redaction review from issue #83, subject to exact-head independent concurrence and merge. WS3 may not start until issue #94 establishes restricted raw-evidence handling and the issue #82 market-evidence record contains at least 8 structured interviews plus 3 direct workflow observations across at least 3 distinct businesses. These are hard gates; agent-generated, simulated, inferred, or waived evidence is not acceptable. Final FDR-005 visibility and licensing ratification remains separate and open.
+- PDA-REV-019 records the repository disclosure/redaction review from issue #83, subject to exact-head independent concurrence and merge. Under FDR-012, WS3 implementation may proceed only as a controlled prototype on the isolated branch `claude/ws3-integration`; WS3 entry recording, any merge to `main`, and progress claims remain blocked until issue #94 establishes restricted raw-evidence handling and the issue #82 market-evidence record contains at least 8 structured interviews plus 3 direct workflow observations across at least 3 distinct businesses. These are hard gates; agent-generated, simulated, inferred, or waived evidence is not acceptable. Final FDR-005 visibility and licensing ratification remains separate and open.
 - P1–P3 retain the FA4 controlled-prototype clearance. P4–P7 receive general entry clearance only at the M3 standing-charter checkpoint, after the checkpoint is recorded; every workstream-specific founder, ADR, provider, security, evidence, and sequencing gate remains binding.
 
 Build a non-production vertical slice that proves:
@@ -235,3 +235,7 @@ Each delivered workflow tracks:
 - AI acceptance and override rate where AI is present
 - Customer business outcome
 - Competitive benchmark position
+
+## Change Log
+
+- 2026-07-18 — v0.6.0 recorded FDR-012's bounded controlled-prototype exception for WS3 on isolated branch `claude/ws3-integration`; the #94/#82 entry, evidence, merge, and status gates are unchanged.

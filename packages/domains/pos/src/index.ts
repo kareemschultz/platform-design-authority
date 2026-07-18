@@ -1667,45 +1667,90 @@ function scaledToReturnQuantity(value: bigint): string {
 	return `${whole}${fraction ? `.${fraction}` : ""}`;
 }
 
-/** Prices one returned line proportionally to how much of the ORIGINAL
- * sale line's quantity it returns (round-half-up on integer minor units,
- * matching this file's other money arithmetic) — a return never re-runs
- * `engine.pricing`/`engine.tax`, it apportions the already-locked sale-line
- * amounts, so a return can never disagree with what the customer was
- * actually charged. */
+/** Rounds `originalAmountMinor * partScaled / wholeScaled` half-up on
+ * integer minor units (matching this file's other money arithmetic).
+ * Scaled-bigint building block for `proportionalMinor` — never called on
+ * its own with an independently-chosen `partScaled`, because rounding a
+ * fresh fraction on every call is exactly the defect `proportionalMinor`'s
+ * doc comment explains. */
+function roundedShareMinor(
+	originalAmountMinor: number,
+	partScaled: bigint,
+	wholeScaled: bigint
+): number {
+	if (wholeScaled === 0n) {
+		return 0;
+	}
+	const numerator = BigInt(originalAmountMinor) * partScaled;
+	return Number((numerator + wholeScaled / 2n) / wholeScaled);
+}
+
+/** Prices one returned line's INCREMENT of the ORIGINAL sale line's amount:
+ * the delta between the cumulative proportional share owed at
+ * `priorReturnedQuantity + returnedQuantity` and the share already
+ * attributed to `priorReturnedQuantity` — never an independently-rounded
+ * fraction of `returnedQuantity` alone. A return never re-runs
+ * `engine.pricing`/`engine.tax`, it apportions the already-locked
+ * sale-line amounts.
+ *
+ * This is deliberately NOT `roundedShareMinor(originalAmountMinor,
+ * returnedQuantity, originalQuantity)`: rounding each partial return's own
+ * slice independently lets round-half-up systematically overstate or
+ * understate the total across a SEQUENCE of separate partial returns on
+ * the same line (e.g. three independent 1-of-3 returns on a 100-minor-unit
+ * line round to 33 each, refunding 99 total — one minor unit permanently
+ * unaccounted for, even though a single return of all 3 units at once
+ * apportions to exactly 100). Pricing the cumulative running total instead
+ * and taking the delta against what prior returns on this line already
+ * consumed makes every sequence of partial returns telescope back to
+ * `roundedShareMinor(originalAmountMinor, totalReturnedQuantity,
+ * originalQuantity)` regardless of how it was split across calls — in
+ * particular, once a line's returns collectively reach its full original
+ * quantity, `partScaled === wholeScaled` and the sum of every partial
+ * return's amount equals `originalAmountMinor` exactly, no rounding
+ * remainder lost or invented. */
 function proportionalMinor(
 	originalAmountMinor: number,
+	priorReturnedQuantity: string,
 	returnedQuantity: string,
 	originalQuantity: string
 ): number {
-	const part = returnQuantityToScaled(returnedQuantity);
 	const whole = returnQuantityToScaled(originalQuantity);
-	if (whole === 0n) {
-		return 0;
-	}
-	const numerator = BigInt(originalAmountMinor) * part;
-	return Number((numerator + whole / 2n) / whole);
+	const priorScaled = returnQuantityToScaled(priorReturnedQuantity);
+	const cumulativeScaled =
+		priorScaled + returnQuantityToScaled(returnedQuantity);
+	const priorShare = roundedShareMinor(originalAmountMinor, priorScaled, whole);
+	const cumulativeShare = roundedShareMinor(
+		originalAmountMinor,
+		cumulativeScaled,
+		whole
+	);
+	return cumulativeShare - priorShare;
 }
 
 function priceReturnLine(
 	saleLine: SaleLineRecord,
+	priorReturnedQuantity: string,
 	returnedQuantity: string,
 	ids: PosIdFactory
 ): ReturnLineRecord {
 	return {
 		discountMinor: proportionalMinor(
 			saleLine.discountMinor,
+			priorReturnedQuantity,
 			returnedQuantity,
 			saleLine.quantity
 		),
 		grossMinor: proportionalMinor(
 			saleLine.grossMinor,
+			priorReturnedQuantity,
 			returnedQuantity,
 			saleLine.quantity
 		),
 		id: ids.create("return-line"),
 		lineTotalMinor: proportionalMinor(
 			saleLine.lineTotalMinor,
+			priorReturnedQuantity,
 			returnedQuantity,
 			saleLine.quantity
 		),
@@ -1716,11 +1761,13 @@ function priceReturnLine(
 		saleLineId: saleLine.id,
 		taxAmountMinor: proportionalMinor(
 			saleLine.taxAmountMinor,
+			priorReturnedQuantity,
 			returnedQuantity,
 			saleLine.quantity
 		),
 		taxableBaseMinor: proportionalMinor(
 			saleLine.taxableBaseMinor,
+			priorReturnedQuantity,
 			returnedQuantity,
 			saleLine.quantity
 		),
@@ -1792,7 +1839,9 @@ async function buildReturnLines(
 				`Return quantity for product ${saleLine.productId} exceeds what remains unreturned on the original sale line`
 			);
 		}
-		lines.push(priceReturnLine(saleLine, requested.quantity, ids));
+		lines.push(
+			priceReturnLine(saleLine, priorReturned, requested.quantity, ids)
+		);
 	}
 	if (lines.length === 0) {
 		throw new PosError("validation", "A return requires at least one line");

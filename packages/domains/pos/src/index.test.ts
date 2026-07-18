@@ -1639,6 +1639,53 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 		await expect(thirdReturn).rejects.toMatchObject({ code: "validation" });
 	});
 
+	test("conserves money across a SEQUENCE of independently-priced partial returns whose per-unit share does not divide evenly (compensation math)", async () => {
+		const harness = createHarness();
+		const { service } = harness;
+		// unitPriceMinor 102 ("1.02") x quantity 3 -> grossMinor 306,
+		// taxAmountMinor round-half-up(306 * 0.14) = 43, lineTotalMinor 349 —
+		// deliberately NOT a multiple of 3, so apportioning 1-of-3 three
+		// times independently (the pre-fix `proportionalMinor`) would round
+		// 349/3 -> 116 on every call and refund only 348 total, one minor
+		// unit short of what the customer actually paid. The fixed
+		// cumulative-delta apportionment must still sum to exactly 349.
+		const { completed, lineId, saleId } = await completedSale(
+			harness,
+			"register_partial_return_rounding",
+			{ quantity: "3", unitPriceMinor: 102 }
+		);
+		const originalLineTotalMinor = completed.lines[0]?.lineTotal.amountMinor;
+		if (originalLineTotalMinor === undefined) {
+			throw new Error("Completed sale is missing its first line");
+		}
+		expect(originalLineTotalMinor).toBe(349);
+
+		let refundedMinor = 0;
+		for (const [index, idempotencyKey] of [
+			"rounding-return-1",
+			"rounding-return-2",
+			"rounding-return-3",
+		].entries()) {
+			// biome-ignore lint/performance/noAwaitInLoops: each return must observe the prior one's cumulative-quantity effect before the next is priced.
+			const created = await service.createReturn({
+				...base,
+				idempotencyKey,
+				lines: [{ quantity: "1", saleLineId: lineId }],
+				reason: `Sequential partial return ${index + 1} of 3`,
+				saleId,
+			});
+			const approved = await service.approveReturn({
+				...base,
+				actorUserId: "user_checker",
+				idempotencyKey: `${idempotencyKey}-approve`,
+				returnId: created.id,
+			});
+			refundedMinor += approved.totalRefundable.amountMinor;
+		}
+
+		expect(refundedMinor).toBe(originalLineTotalMinor);
+	});
+
 	test("rejects a return referencing a sale that has not yet completed", async () => {
 		const harness = createHarness();
 		const { service } = harness;

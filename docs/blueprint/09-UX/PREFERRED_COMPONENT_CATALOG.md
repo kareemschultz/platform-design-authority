@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.7.0
+version: 0.7.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-18
@@ -360,7 +360,7 @@ Preferred Candidate authorizes a bounded normalization prototype only.
 
 | Candidate | Research value | Boundary before promotion |
 |---|---|---|
-| Studio Autocomplete 10 | Visual comparison for product, Party, location, and global-search inputs | The pinned MCP cannot currently resolve the family. Although Studio exposes Base UI and Radix UI views, rendered rechecks at `?base=radix` produced conflicting component-library labels while retaining the Radix preview link and Base UI-specific prose, so only item-level source and dependency evidence may establish the primitive family. New owned work remains Base UI-backed under ADR-0022; Radix is comparison/fallback evidence and primitive families must not be mixed inside one component. Keep official/owned Command and Combobox as the baseline; require a supported-client item review plus async cancellation, tenant/permission filtering, large-data, offline/degraded, keyboard, focus, and screen-reader evidence. |
+| Studio Autocomplete 10 | Visual comparison for product, Party, location, and global-search inputs | The pinned MCP cannot currently resolve the family. Studio exposes an explicit Base UI/Radix UI component-library selector; rendered evidence must record the active selector, page URL, and preview link together instead of treating different selector states as contradictory implementation evidence. Only item-level source and dependency evidence may establish the primitive family. New owned work remains Base UI-backed under ADR-0022; Radix is comparison/fallback evidence and primitive families must not be mixed inside one component. Keep official/owned Command and Combobox as the baseline; require a supported-client item review plus async cancellation, tenant/permission filtering, large-data, offline/degraded, keyboard, focus, and screen-reader evidence. |
 | Studio Onboarding Feed 02, 03, and 04 | Multi-step setup, progress/dialog, and readiness-history composition ideas | Review `@stepperize/react` before dependency adoption; completion and chronology remain application/audit authority, not local component state. Dialog actions require explicit consequence, cancellation, and recovery. |
 | AIDesk template | Inbox, support, contact, and knowledge-surface composition reference | No whole-template acquisition and no reuse of its authentication, ticket, contact, AI-agent, or role semantics. |
 | Sprintrix template | Saved views, filters, board, roadmap, and activity composition reference | No whole-template acquisition and no reuse of project-domain, team, security, billing, integration, or authorization behavior. |

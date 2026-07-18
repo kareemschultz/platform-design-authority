@@ -1,0 +1,508 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:npm/%40orpc/client@1.14.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "ff296833debfe99dea9661205b8fd53185278715db0abea520988a4879acbe180a730ad43ce3c9acbde9d19a48b73e52295b504b05c8853e4a713ff7bdafc07b"
+        }
+      ],
+      "name": "@orpc/client",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@orpc/client"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@orpc/client\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40orpc/client@1.14.7",
+      "type": "library",
+      "version": "1.14.7"
+    },
+    {
+      "bom-ref": "pkg:npm/%40orpc/server@1.14.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "6cddfcaf05442cfc7f0041e73882a5273d15a363a7bb31a908c74cb6ca6a2a88a9a2c9290788eac7608c15908cce3e1ec38de6fac5125266d0674d354387e04c"
+        }
+      ],
+      "name": "@orpc/server",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@orpc/server"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@orpc/server\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40orpc/server@1.14.7",
+      "type": "library",
+      "version": "1.14.7"
+    },
+    {
+      "bom-ref": "pkg:npm/%40orpc/tanstack-query@1.14.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "70d39d1f0c60ebe087384f50a95b5a5843cc3102ef633b35f71648b395faf5482611e856cbfcebb6612b6f10ddcddedada94c27195c370557b92497fd7691ed1"
+        }
+      ],
+      "name": "@orpc/tanstack-query",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@orpc/tanstack-query"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@orpc/tanstack-query\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40orpc/tanstack-query@1.14.7",
+      "type": "library",
+      "version": "1.14.7"
+    },
+    {
+      "bom-ref": "pkg:npm/%40swc/helpers@0.5.23",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e654ac30e4d751178f8250dfbee01052a9067a4f47836924b0e61acb69b4f9747ef9bd8d5982ffe2c5b2baf54122cf282a725ac64762f7085a2ffb2a375dda7f"
+        }
+      ],
+      "name": "@swc/helpers",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@swc/helpers"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@swc/helpers\",\"selector\":\"^0.5.23\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40swc/helpers@0.5.23",
+      "type": "library",
+      "version": "0.5.23"
+    },
+    {
+      "bom-ref": "pkg:npm/%40tanstack/react-form@1.33.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "9c47dac8ebbedbbab9719e44d06e5d9a775da8b70b8dd1426ad6cbfcb0acfe22c3e3af5ad68d7260996bf1121257719f9eab01a66d217fef24338a248797cf0b"
+        }
+      ],
+      "name": "@tanstack/react-form",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@tanstack/react-form"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@tanstack/react-form\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40tanstack/react-form@1.33.2",
+      "type": "library",
+      "version": "1.33.2"
+    },
+    {
+      "bom-ref": "pkg:npm/%40tanstack/react-query@5.101.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b1e0e4afa9331b35f5a2469a4ed64fb6003af3c0833e55d4cf50bac52834112aa7d3856e73cb65ad89acd6cddd7bece706a84f5711517e901f51ffba5ef7cf5a"
+        }
+      ],
+      "name": "@tanstack/react-query",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@tanstack/react-query"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@tanstack/react-query\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40tanstack/react-query@5.101.2",
+      "type": "library",
+      "version": "5.101.2"
+    },
+    {
+      "bom-ref": "pkg:npm/babel-plugin-react-compiler@1.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "2319bcb457e828a20f61d0822984ecaaff85778209d0342a3321229a8fa9c5438c511f5c54f9704eb16df40beefb771be99a77980ce5fadd4cac6d9fc712acc7"
+        }
+      ],
+      "name": "babel-plugin-react-compiler",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "babel-plugin-react-compiler"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"babel-plugin-react-compiler\",\"selector\":\"^1.0.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/babel-plugin-react-compiler@1.0.0",
+      "type": "library",
+      "version": "1.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/better-auth@1.6.23",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e2f39a45df5488a18a9bd47e7a3d238d4d5eb3732224888d73d42add50a762a399e3f9dbe76ef642a4f1598a03c72517979c7a036c76c1ee4a64a40ef6d79341"
+        }
+      ],
+      "name": "better-auth",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "better-auth"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"better-auth\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/better-auth@1.6.23",
+      "type": "library",
+      "version": "1.6.23"
+    },
+    {
+      "bom-ref": "pkg:npm/dotenv@17.4.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "9c8e14dd3a2db4a01c003f4b2ee77809bedbd90ced40c5047c76ef8531f4f5ba974f19d289ef169e33c02d5fd6302ac967a515fea1c9e8bd373aa3b72dc75867"
+        }
+      ],
+      "name": "dotenv",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "dotenv"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"dotenv\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/dotenv@17.4.2",
+      "type": "library",
+      "version": "17.4.2"
+    },
+    {
+      "bom-ref": "pkg:npm/lucide-react@1.24.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "613ea6043f2518a920e27337f5e9e59bde3fb1f248896d182944fad1f072e182bcb5a8b7d72960d55846356c64a52287a3d51a81f9d9ab021f7f71d30d0c1778"
+        }
+      ],
+      "name": "lucide-react",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "lucide-react"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"lucide-react\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/lucide-react@1.24.0",
+      "type": "library",
+      "version": "1.24.0"
+    },
+    {
+      "bom-ref": "pkg:npm/next-themes@0.4.6",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "a59be00f92f4204bd7e7ff465b21cc7f79bc04a895430b023077e8168b17b5704c9da4b4667209f524f86f836a2d5283126f10071a0d34635a06fd89345e9734"
+        }
+      ],
+      "name": "next-themes",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "next-themes"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"next-themes\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/next-themes@0.4.6",
+      "type": "library",
+      "version": "0.4.6"
+    },
+    {
+      "bom-ref": "pkg:npm/next@16.2.10",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "daca26e405576f7904e988e29dedff98d6c16b2605e7c7a0b8158855551daf5cbf2f8dbac72544818c60046fb5402df83f6c7913eb5c0eea7a5e4b8e017ddd08"
+        }
+      ],
+      "name": "next",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "next"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"next\",\"selector\":\"^16.2.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/next@16.2.10",
+      "type": "library",
+      "version": "16.2.10"
+    },
+    {
+      "bom-ref": "pkg:npm/react-dom@19.2.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b74051557bdb884fe8db41dfc3aebdacb6cc0835ad6192ef9898a0cb67f4331b1717eef5a71851df13a4b299ac3bc877665373ca26c09ad09ade5e2560a93a81"
+        }
+      ],
+      "name": "react-dom",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-dom"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-dom\",\"selector\":\"^19.2.7\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-dom@19.2.7",
+      "type": "library",
+      "version": "19.2.7"
+    },
+    {
+      "bom-ref": "pkg:npm/react@19.2.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "1cd7bd5ac9536d79852bca3c726c2001e245481bedd5b3dd1c254ab5a695f96940377ea6a53e21711a706dfddf639e9aaf6a085f3b01a4e0222111c0758d0e95"
+        }
+      ],
+      "name": "react",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react\",\"selector\":\"^19.2.7\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react@19.2.7",
+      "type": "library",
+      "version": "19.2.7"
+    },
+    {
+      "bom-ref": "pkg:npm/sonner@2.0.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "5ba64de29e7c93c683280e173dcc768692105c14408328965646214fb0af2ba0f7880bbbc63bd5ca1407836fe268a259d57549e2bed7bb018bf961842b7ee2f7"
+        }
+      ],
+      "name": "sonner",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "sonner"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"sonner\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/sonner@2.0.7",
+      "type": "library",
+      "version": "2.0.7"
+    },
+    {
+      "bom-ref": "pkg:npm/zod@4.4.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cad10d163209165d94c1882575eda37215b61f09b818914b0e249759d4eb25004837d15cca9ee7e0387124489634024c575fc1a967d6fe4920ef55037072724d"
+        }
+      ],
+      "name": "zod",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "zod"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"zod\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/zod@4.4.3",
+      "type": "library",
+      "version": "4.4.3"
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "incomplete",
+      "assemblies": [
+        "urn:pda:workspace:apps/web"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:npm/%40orpc/client@1.14.7",
+        "pkg:npm/%40orpc/server@1.14.7",
+        "pkg:npm/%40orpc/tanstack-query@1.14.7",
+        "pkg:npm/%40swc/helpers@0.5.23",
+        "pkg:npm/%40tanstack/react-form@1.33.2",
+        "pkg:npm/%40tanstack/react-query@5.101.2",
+        "pkg:npm/babel-plugin-react-compiler@1.0.0",
+        "pkg:npm/better-auth@1.6.23",
+        "pkg:npm/dotenv@17.4.2",
+        "pkg:npm/lucide-react@1.24.0",
+        "pkg:npm/next-themes@0.4.6",
+        "pkg:npm/next@16.2.10",
+        "pkg:npm/react-dom@19.2.7",
+        "pkg:npm/react@19.2.7",
+        "pkg:npm/sonner@2.0.7",
+        "pkg:npm/zod@4.4.3"
+      ],
+      "ref": "urn:pda:workspace:apps/web"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "urn:pda:workspace:apps/web",
+      "name": "web",
+      "properties": [
+        {
+          "name": "pda:distribution-authority",
+          "value": "none"
+        },
+        {
+          "name": "pda:inventory-scope",
+          "value": "direct-declared-runtime-dependencies"
+        },
+        {
+          "name": "pda:sbom-type",
+          "value": "declared-manifest"
+        },
+        {
+          "name": "pda:not-post-build-or-artifact-sbom",
+          "value": "true"
+        },
+        {
+          "name": "pda:license-conclusions",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:source-lockfile",
+          "value": "bun.lock"
+        },
+        {
+          "name": "pda:serial-number-policy",
+          "value": "omitted-for-byte-reproducible-source-baseline;artifact-boms-must-mint-rfc4122"
+        }
+      ],
+      "type": "application",
+      "version": "0.1.0"
+    }
+  },
+  "specVersion": "1.6",
+  "version": 1
+}

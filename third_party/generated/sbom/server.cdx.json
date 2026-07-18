@@ -1,0 +1,312 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:npm/%40hono/node-server@2.0.8",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "1ae096ccbc70836d7c7f2d4968772e945b1d72e635da1c62b7cdd5f9a960a334cf9f084d8cbad12ff02583d3988cb64ba14675af0fd2e0275332c9e448a0a614"
+        }
+      ],
+      "name": "@hono/node-server",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@hono/node-server"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@hono/node-server\",\"selector\":\"2.0.8\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40hono/node-server@2.0.8",
+      "type": "library",
+      "version": "2.0.8"
+    },
+    {
+      "bom-ref": "pkg:npm/%40orpc/openapi@1.14.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7a54f1abeb56a90bd4694de7b0641c96c279aa4c5425ede5671290c82aa6aedeebde81b734c6b45bc79f5b35d5af127accc21abf5979953287694fd022fe8d3b"
+        }
+      ],
+      "name": "@orpc/openapi",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@orpc/openapi"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@orpc/openapi\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40orpc/openapi@1.14.7",
+      "type": "library",
+      "version": "1.14.7"
+    },
+    {
+      "bom-ref": "pkg:npm/%40orpc/server@1.14.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "6cddfcaf05442cfc7f0041e73882a5273d15a363a7bb31a908c74cb6ca6a2a88a9a2c9290788eac7608c15908cce3e1ec38de6fac5125266d0674d354387e04c"
+        }
+      ],
+      "name": "@orpc/server",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@orpc/server"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@orpc/server\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40orpc/server@1.14.7",
+      "type": "library",
+      "version": "1.14.7"
+    },
+    {
+      "bom-ref": "pkg:npm/%40orpc/zod@1.14.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b782421c5ef442b57d6a960ab89138754974030a077237a73db48f7cfee3efabb9d2a0e579a9f71395c6424c534b814759bc253956396e1490cca71e80dfcc06"
+        }
+      ],
+      "name": "@orpc/zod",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@orpc/zod"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@orpc/zod\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40orpc/zod@1.14.7",
+      "type": "library",
+      "version": "1.14.7"
+    },
+    {
+      "bom-ref": "pkg:npm/better-auth@1.6.23",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e2f39a45df5488a18a9bd47e7a3d238d4d5eb3732224888d73d42add50a762a399e3f9dbe76ef642a4f1598a03c72517979c7a036c76c1ee4a64a40ef6d79341"
+        }
+      ],
+      "name": "better-auth",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "better-auth"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"better-auth\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/better-auth@1.6.23",
+      "type": "library",
+      "version": "1.6.23"
+    },
+    {
+      "bom-ref": "pkg:npm/dotenv@17.4.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "9c8e14dd3a2db4a01c003f4b2ee77809bedbd90ced40c5047c76ef8531f4f5ba974f19d289ef169e33c02d5fd6302ac967a515fea1c9e8bd373aa3b72dc75867"
+        }
+      ],
+      "name": "dotenv",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "dotenv"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"dotenv\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/dotenv@17.4.2",
+      "type": "library",
+      "version": "17.4.2"
+    },
+    {
+      "bom-ref": "pkg:npm/hono@4.12.29",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "d613624636b062b2eaff89b70d04233c6160d156649384634090df7ff7b1708e839bd0622fbe6ac46addeff73a60ec4f76ae80b1c3f72e25e143a7ca142d566b"
+        }
+      ],
+      "name": "hono",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "hono"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"hono\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/hono@4.12.29",
+      "type": "library",
+      "version": "4.12.29"
+    },
+    {
+      "bom-ref": "pkg:npm/pg@8.22.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "f308a1d6f54804cc6850cda8078b2826c0fdb439c3a4bbf8397049f8427316cbf2703fa57f222b782da0187abbf1ff236cb2edf9bbe53d315d1597c990ebb300"
+        }
+      ],
+      "name": "pg",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "pg"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"pg\",\"selector\":\"8.22.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/pg@8.22.0",
+      "type": "library",
+      "version": "8.22.0"
+    },
+    {
+      "bom-ref": "pkg:npm/zod@4.4.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cad10d163209165d94c1882575eda37215b61f09b818914b0e249759d4eb25004837d15cca9ee7e0387124489634024c575fc1a967d6fe4920ef55037072724d"
+        }
+      ],
+      "name": "zod",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "zod"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"zod\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/zod@4.4.3",
+      "type": "library",
+      "version": "4.4.3"
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "incomplete",
+      "assemblies": [
+        "urn:pda:workspace:apps/server"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:npm/%40hono/node-server@2.0.8",
+        "pkg:npm/%40orpc/openapi@1.14.7",
+        "pkg:npm/%40orpc/server@1.14.7",
+        "pkg:npm/%40orpc/zod@1.14.7",
+        "pkg:npm/better-auth@1.6.23",
+        "pkg:npm/dotenv@17.4.2",
+        "pkg:npm/hono@4.12.29",
+        "pkg:npm/pg@8.22.0",
+        "pkg:npm/zod@4.4.3"
+      ],
+      "ref": "urn:pda:workspace:apps/server"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "urn:pda:workspace:apps/server",
+      "name": "server",
+      "properties": [
+        {
+          "name": "pda:distribution-authority",
+          "value": "none"
+        },
+        {
+          "name": "pda:inventory-scope",
+          "value": "direct-declared-runtime-dependencies"
+        },
+        {
+          "name": "pda:sbom-type",
+          "value": "declared-manifest"
+        },
+        {
+          "name": "pda:not-post-build-or-artifact-sbom",
+          "value": "true"
+        },
+        {
+          "name": "pda:license-conclusions",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:source-lockfile",
+          "value": "bun.lock"
+        },
+        {
+          "name": "pda:serial-number-policy",
+          "value": "omitted-for-byte-reproducible-source-baseline;artifact-boms-must-mint-rfc4122"
+        }
+      ],
+      "type": "application",
+      "version": "0.0.0-prototype"
+    }
+  },
+  "specVersion": "1.6",
+  "version": 1
+}

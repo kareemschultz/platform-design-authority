@@ -59,6 +59,8 @@ openapi/                Draft API contracts
 schemas/                Draft JSON Schemas for events, AI, offline, providers, exports
 registry/               Machine-readable governance and delivery artifacts
 scripts/                Deterministic validation and registry generation
+third_party/            Controlled-prototype provenance source and generated inventories/SBOMs
+THIRD_PARTY_NOTICES.md  Generated third-party notice baseline; no distribution authority
 docs/reviews/                Independent audits, registrations, and dispositions
 docs/templates/              Standard authoring templates
 .agents/skills/          Agent Skills-compatible project workflows
@@ -97,6 +99,7 @@ package.json             Bun/Turborepo workspace root
 - `docs/blueprint/18-Decisions/ADR-0024-POSTGRESQL-18-MINIMAL-EXTENSION-POLICY.md`
 - `docs/blueprint/18-Decisions/ADR-0025-NORMALIZE-MONOREPO-AND-DOCUMENTATION-LAYOUT.md`
 - `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- `third_party/README.md`
 - `docs/blueprint/19-Appendices/DOCUMENTATION_COMPLETENESS_MATRIX-2026-07-11.md`
 - `docs/reviews/FABLE5_THIRD_AUDIT_V1.md`
 - `docs/reviews/FABLE5_THIRD_AUDIT_DISPOSITION_V1.md`
@@ -116,6 +119,7 @@ bun run --filter docs dev       # Fumadocs portal on port 4000
 bun run build                   # build all workspaces
 bun run check-types             # typecheck all workspaces
 bun run check                   # ultracite/Biome lint and format check
+bun run third-party:check       # verify declared SBOM, notice, and provenance freshness
 bun run fix                     # apply safe lint/format fixes
 bun run test                    # run workspace tests
 bun run db:start                # start the disposable PostgreSQL container

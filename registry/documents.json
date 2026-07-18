@@ -2192,7 +2192,7 @@
       "document_id": "PDA-ENGR-013",
       "path": "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.24.0",
+      "version": "0.25.0",
       "status": "Draft",
       "owner": "Platform Engineering",
       "last_reviewed": "2026-07-18",
@@ -3403,10 +3403,10 @@
       "document_id": "PDA-RDM-007",
       "path": "docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md",
       "title": "Meridian First-Slice Implementation Plan",
-      "version": "0.16.0",
+      "version": "0.16.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-17",
+      "last_reviewed": "2026-07-18",
       "related_adrs": [
         "ADR-0002",
         "ADR-0003",
@@ -3799,10 +3799,10 @@
       "document_id": "PDA-STR-001",
       "path": "docs/blueprint/20-Strategy/README.md",
       "title": "Strategy Section Index",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-17",
+      "last_reviewed": "2026-07-18",
       "related_adrs": [],
       "review_evidence": null
     },
@@ -4041,11 +4041,13 @@
       "document_id": "PDA-STR-031",
       "path": "docs/blueprint/20-Strategy/THIRD_PARTY_NOTICES_SBOM_AND_ASSET_PROVENANCE.md",
       "title": "Third-Party Notices, SBOM, and Asset Provenance Baseline",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-18",
-      "related_adrs": [],
+      "related_adrs": [
+        "ADR-0026"
+      ],
       "review_evidence": null
     },
     {

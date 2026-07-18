@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0.0",
+  "status": "controlled-prototype-baseline",
+  "distribution_authority": "none",
+  "default_license_conclusion": "NOASSERTION",
+  "coverage_scopes": [
+    "packages/ui-web/core/src/components/*.tsx",
+    "apps/native/assets/images/*",
+    "apps/web/public/favicon/*",
+    "apps/web/src/app/favicon.ico"
+  ],
+  "records": [
+    {
+      "id": "source.better-t-stack.ui.3.36.3",
+      "kind": "copied-source",
+      "source_name": "Better-T-Stack",
+      "source_version": "3.36.3 / commit e1bf536f3ba1804a944735efab3941a21f6ba815",
+      "source_url": "https://github.com/AmanVarshney01/create-better-t-stack/tree/e1bf536f3ba1804a944735efab3941a21f6ba815",
+      "declared_upstream_license": "MIT",
+      "upstream_license_url": "https://github.com/AmanVarshney01/create-better-t-stack/blob/e1bf536f3ba1804a944735efab3941a21f6ba815/LICENSE",
+      "license_conclusion": "NOASSERTION",
+      "notice_status": "included-in-generated-baseline",
+      "permitted_use_evidence": {
+        "status": "public-upstream-license-observed-not-legally-reviewed",
+        "references": ["docs/implementation/SCAFFOLD_README.md"]
+      },
+      "distribution_status": "legal-review-required",
+      "modifications": "Scaffold-generated components were normalized into repository-maintained TypeScript source paths and subsequently modified for the governed UI system.",
+      "files": [
+        "packages/ui-web/core/src/components/button.tsx",
+        "packages/ui-web/core/src/components/card.tsx",
+        "packages/ui-web/core/src/components/checkbox.tsx",
+        "packages/ui-web/core/src/components/dropdown-menu.tsx",
+        "packages/ui-web/core/src/components/input.tsx",
+        "packages/ui-web/core/src/components/label.tsx",
+        "packages/ui-web/core/src/components/skeleton.tsx",
+        "packages/ui-web/core/src/components/sonner.tsx"
+      ]
+    },
+    {
+      "id": "source.shadcn.ui.4.13.0",
+      "kind": "copied-source",
+      "source_name": "shadcn/ui CLI",
+      "source_version": "4.13.0 / commit d0fae528221011f75a8c64a917073904c2847493",
+      "source_url": "https://github.com/shadcn-ui/ui/tree/d0fae528221011f75a8c64a917073904c2847493",
+      "declared_upstream_license": "MIT",
+      "upstream_license_url": "https://github.com/shadcn-ui/ui/blob/d0fae528221011f75a8c64a917073904c2847493/LICENSE.md",
+      "license_conclusion": "NOASSERTION",
+      "notice_status": "included-in-generated-baseline",
+      "permitted_use_evidence": {
+        "status": "public-upstream-license-observed-not-legally-reviewed",
+        "references": [
+          "docs/blueprint/09-UX/WS1_THIN_APPLICATION_SHELL_IMPLEMENTATION_EVIDENCE.md",
+          "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md"
+        ]
+      },
+      "distribution_status": "legal-review-required",
+      "modifications": "CLI-generated components were copied into repository-maintained source paths and normalized for Base UI and the governed design system.",
+      "files": [
+        "packages/ui-web/core/src/components/alert.tsx",
+        "packages/ui-web/core/src/components/badge.tsx",
+        "packages/ui-web/core/src/components/dialog.tsx",
+        "packages/ui-web/core/src/components/separator.tsx",
+        "packages/ui-web/core/src/components/sheet.tsx",
+        "packages/ui-web/core/src/components/table.tsx"
+      ]
+    },
+    {
+      "id": "asset.expo-template.prototype-icons",
+      "kind": "scaffold-asset",
+      "source_name": "Expo template through Better-T-Stack",
+      "source_version": "Better-T-Stack 3.36.3 / Expo SDK 57 scaffold",
+      "source_url": "https://github.com/expo/expo",
+      "declared_upstream_license": "NOASSERTION",
+      "upstream_license_url": null,
+      "license_conclusion": "NOASSERTION",
+      "notice_status": "included-in-generated-baseline",
+      "permitted_use_evidence": {
+        "status": "not-established-for-exact-assets",
+        "references": ["docs/implementation/SCAFFOLD_README.md"]
+      },
+      "distribution_status": "replace-before-distribution",
+      "modifications": "Retained only for local controlled-prototype operation; exact asset rights and trademark disposition have not been established.",
+      "files": [
+        "apps/native/assets/images/android-icon-background.png",
+        "apps/native/assets/images/android-icon-foreground.png",
+        "apps/native/assets/images/android-icon-monochrome.png",
+        "apps/native/assets/images/favicon.png",
+        "apps/native/assets/images/icon.png",
+        "apps/native/assets/images/splash-icon.png"
+      ]
+    },
+    {
+      "id": "asset.better-t-stack.prototype-favicons",
+      "kind": "scaffold-asset",
+      "source_name": "Better-T-Stack PWA scaffold",
+      "source_version": "3.36.3 / exact asset provenance unresolved",
+      "source_url": "https://github.com/AmanVarshney01/create-better-t-stack/tree/e1bf536f3ba1804a944735efab3941a21f6ba815",
+      "declared_upstream_license": "NOASSERTION",
+      "upstream_license_url": null,
+      "license_conclusion": "NOASSERTION",
+      "notice_status": "included-in-generated-baseline",
+      "permitted_use_evidence": {
+        "status": "not-established-for-exact-assets",
+        "references": ["docs/implementation/SCAFFOLD_README.md"]
+      },
+      "distribution_status": "replace-before-distribution",
+      "modifications": "Retained because no explicit reference is not sufficient proof of non-use by browser metadata conventions; replace with owned assets before distribution.",
+      "files": [
+        "apps/web/public/favicon/apple-touch-icon.png",
+        "apps/web/public/favicon/favicon-96x96.png",
+        "apps/web/public/favicon/favicon.svg",
+        "apps/web/public/favicon/web-app-manifest-192x192.png",
+        "apps/web/public/favicon/web-app-manifest-512x512.png",
+        "apps/web/src/app/favicon.ico"
+      ]
+    }
+  ],
+  "license_observation_scope": "Dated installed-package-manifest observations from the Windows controlled-prototype install. They identify review cases but are not a complete cross-platform license inventory or legal conclusion.",
+  "license_review_required_identities": [
+    {"package":"@biomejs/biome","version":"2.5.2"},
+    {"package":"@biomejs/biome","version":"2.5.3"},
+    {"package":"@biomejs/cli-win32-x64","version":"2.5.2"},
+    {"package":"@biomejs/cli-win32-x64","version":"2.5.3"},
+    {"package":"@expo-google-fonts/material-symbols","version":"0.4.38"},
+    {"package":"@img/sharp-win32-x64","version":"0.34.5"},
+    {"package":"fb-dotslash","version":"0.5.8"},
+    {"package":"node-forge","version":"1.4.0"},
+    {"package":"type-fest","version":"0.21.3"},
+    {"package":"type-fest","version":"0.7.1"},
+    {"package":"type-fest","version":"5.8.0"},
+    {"package":"@yuku-codegen/binding-win32-x64","version":"0.6.1"},
+    {"package":"@yuku-parser/binding-win32-x64","version":"0.6.1"},
+    {"package":"spawndamnit","version":"3.0.1"},
+    {"package":"big-integer","version":"1.6.52"},
+    {"package":"stream-buffers","version":"2.2.0"},
+    {"package":"@axe-core/playwright","version":"4.12.1"},
+    {"package":"axe-core","version":"4.12.1"},
+    {"package":"lightningcss","version":"1.32.0"},
+    {"package":"lightningcss-win32-x64-msvc","version":"1.32.0"},
+    {"package":"caniuse-lite","version":"1.0.30001805"}
+  ],
+  "license_review_observation_count": 21,
+  "license_review_observations": [
+    {"package":"@biomejs/biome","version":"2.5.2","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
+    {"package":"@biomejs/biome","version":"2.5.3","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
+    {"package":"@biomejs/cli-win32-x64","version":"2.5.2","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Windows optional package; select and record the applicable branch."},
+    {"package":"@biomejs/cli-win32-x64","version":"2.5.3","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Windows optional package; select and record the applicable branch."},
+    {"package":"@expo-google-fonts/material-symbols","version":"0.4.38","observed_expression":"MIT AND Apache-2.0","expression_kind":"and-conjunctive","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"AND is cumulative; both obligations require disposition."},
+    {"package":"@img/sharp-win32-x64","version":"0.34.5","observed_expression":"Apache-2.0 AND LGPL-3.0-or-later","expression_kind":"and-conjunctive","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Windows optional binary; artifact reachability and cumulative obligations require review."},
+    {"package":"fb-dotslash","version":"0.5.8","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
+    {"package":"node-forge","version":"1.4.0","observed_expression":"BSD-3-Clause OR GPL-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
+    {"package":"type-fest","version":"0.21.3","observed_expression":"MIT OR CC0-1.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
+    {"package":"type-fest","version":"0.7.1","observed_expression":"MIT OR CC0-1.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
+    {"package":"type-fest","version":"5.8.0","observed_expression":"MIT OR CC0-1.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
+    {"package":"@yuku-codegen/binding-win32-x64","version":"0.6.1","observed_expression":null,"expression_kind":"metadata-missing","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Published package manifest omitted a license field; do not inherit a parent license without evidence."},
+    {"package":"@yuku-parser/binding-win32-x64","version":"0.6.1","observed_expression":null,"expression_kind":"metadata-missing","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Published package manifest omitted a license field; do not inherit a parent license without evidence."},
+    {"package":"spawndamnit","version":"3.0.1","observed_expression":"SEE LICENSE IN LICENSE","expression_kind":"license-file-pointer","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Preserve and review the bundled license text; the pointer is not an SPDX conclusion."},
+    {"package":"big-integer","version":"1.6.52","observed_expression":"Unlicense","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Qualified acceptance is required before distribution."},
+    {"package":"stream-buffers","version":"2.2.0","observed_expression":"Unlicense","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Qualified acceptance is required before distribution."},
+    {"package":"@axe-core/playwright","version":"4.12.1","observed_expression":"MPL-2.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Artifact reachability, modifications, and notice/source obligations require review."},
+    {"package":"axe-core","version":"4.12.1","observed_expression":"MPL-2.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Artifact reachability, modifications, and notice/source obligations require review."},
+    {"package":"lightningcss","version":"1.32.0","observed_expression":"MPL-2.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Artifact reachability, modifications, and notice/source obligations require review."},
+    {"package":"lightningcss-win32-x64-msvc","version":"1.32.0","observed_expression":"MPL-2.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Windows optional binary; artifact reachability and obligations require review."},
+    {"package":"caniuse-lite","version":"1.0.30001805","observed_expression":"CC-BY-4.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Attribution applies if the dataset is present in a distributed artifact."}
+  ],
+  "build_time_references": [
+    {
+      "id": "font.next.google.geist-inter",
+      "kind": "build-time-font-reference",
+      "source_name": "Geist, Geist Mono, and Inter through next/font/google",
+      "source_url": "https://github.com/vercel/next.js",
+      "declared_upstream_license": "OFL-1.1",
+      "upstream_license_url": "https://github.com/vercel/geist-font/blob/main/OFL.txt",
+      "license_conclusion": "NOASSERTION",
+      "permitted_use_evidence": {"status":"public-upstream-license-observed-not-artifact-reviewed","references":["apps/web/src/app/layout.tsx"]},
+      "distribution_status": "artifact-review-required",
+      "reference_paths": ["apps/web/src/app/layout.tsx"],
+      "limitation": "Font files are fetched and embedded during build and are not represented by the JavaScript lock inventory. Built output requires separate inspection."
+    }
+  ]
+}

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-007
 title: Meridian First-Slice Implementation Plan
-version: 0.16.0
+version: 0.16.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 related_adrs: [ADR-0002, ADR-0003, ADR-0013, ADR-0020, ADR-0025, ADR-0027]
 ---
 
@@ -260,6 +260,10 @@ Scope changes route through PDA-RDM-003 §Change Control (doc + `registry/first-
 
 - **FDR-002 (platform legal entity)** — critical path for WS6 provider sandboxes and everything commercial; tracked in the Founder Decision Register.
 - **FDR-004** — ratified on 2026-07-17 for the bounded PDA-RDM-003 / `registry/first-slice.json` scope and deferrals. This closes the scope-selection authority gap but does not erase that M0 passed earlier under provisional adoption, promote Draft sources, establish customer evidence, or authorize pilot/production use.
-- **FDR-005 / repository disclosure** — PDA-REV-019 records issue #83's disclosure/redaction review subject to exact-head independent concurrence and merge. Final public visibility, licensing, and contribution policy remain open under FDR-005; #92 and #93 track security-intake/scanning and provenance follow-up, and prohibited content remains prohibited regardless of repository visibility.
+- **FDR-005 / repository disclosure** — PDA-REV-019 records issue #83's disclosure/redaction review subject to exact-head independent concurrence and merge. Final public visibility, licensing, and contribution policy remain open under FDR-005; #96 and #93 track retained security-intake enforcement and provenance follow-up, and prohibited content remains prohibited regardless of repository visibility.
 - **Drizzle production-scale revalidation** — the bounded WS2 controlled-prototype spike passed exact-decimal, row-lock concurrency, reversal, rebuild, atomic-outbox, and 250k Product query-shape checks. Production-scale ledger/query latency, upgrade behavior, and provider topology remain open; Kysely remains the recorded alternative if later evidence invalidates the selected adapter.
 - **Windows contributor environment** — Turbopack MAX_PATH and long-path issues are recorded in the docs troubleshooting page; CI (Linux) is authoritative.
+
+## 11. Change Log
+
+- 2026-07-18 — v0.16.1 corrected current security-intake enforcement routing from closed issue #92 to retained follow-up issue #96; issue #93 continues to own provenance follow-up.

@@ -1,0 +1,88 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:npm/pg@8.22.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "f308a1d6f54804cc6850cda8078b2826c0fdb439c3a4bbf8397049f8427316cbf2703fa57f222b782da0187abbf1ff236cb2edf9bbe53d315d1597c990ebb300"
+        }
+      ],
+      "name": "pg",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "pg"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"pg\",\"selector\":\"8.22.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/pg@8.22.0",
+      "type": "library",
+      "version": "8.22.0"
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "incomplete",
+      "assemblies": [
+        "urn:pda:workspace:apps/worker"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:npm/pg@8.22.0"
+      ],
+      "ref": "urn:pda:workspace:apps/worker"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "urn:pda:workspace:apps/worker",
+      "name": "worker",
+      "properties": [
+        {
+          "name": "pda:distribution-authority",
+          "value": "none"
+        },
+        {
+          "name": "pda:inventory-scope",
+          "value": "direct-declared-runtime-dependencies"
+        },
+        {
+          "name": "pda:sbom-type",
+          "value": "declared-manifest"
+        },
+        {
+          "name": "pda:not-post-build-or-artifact-sbom",
+          "value": "true"
+        },
+        {
+          "name": "pda:license-conclusions",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:source-lockfile",
+          "value": "bun.lock"
+        },
+        {
+          "name": "pda:serial-number-policy",
+          "value": "omitted-for-byte-reproducible-source-baseline;artifact-boms-must-mint-rfc4122"
+        }
+      ],
+      "type": "application",
+      "version": "0.0.0-prototype"
+    }
+  },
+  "specVersion": "1.6",
+  "version": 1
+}

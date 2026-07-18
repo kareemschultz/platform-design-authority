@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-001
 title: Strategy Section Index
-version: 0.7.0
+version: 0.7.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-18
 ---
 
 # Strategy
@@ -54,7 +54,7 @@ Commercial specifications are authoritative over handbook summaries for editions
 - Platform Experience Index baseline studies
 - Business DNA prototype results
 - Legal entity, tax, banking, privacy, payment, and regulatory advice
-- Final repository visibility, licensing, contribution, security-scanning, and third-party-provenance decisions retained under FDR-005; PDA-REV-019 records the issue #83 disclosure/redaction review, while issues #92 and #93 track the remaining operational work
+- Final repository visibility, licensing, contribution, security-scanning, and third-party-provenance decisions retained under FDR-005; PDA-REV-019 records the issue #83 disclosure/redaction review, while issues #96 and #93 track the remaining operational work
 - Long-term financial and financing model
 - Product-name and public package-scope availability evidence before FDR-011 can close
 
@@ -74,4 +74,5 @@ Strategy guides prioritization but does not bypass architecture, security, evide
 
 ## Change log
 
+- 2026-07-18 — v0.7.1 corrected current security-control routing from closed issue #92 to retained follow-up issue #96; issue #93 continues to own third-party provenance follow-up.
 - 2026-07-17 — v0.7.0 recorded PDA-REV-019 as the issue #83 disclosure/redaction review subject to exact-head independent concurrence and merge; separated the remaining FDR-005 visibility, licensing, contribution, scanning, and provenance work; and named issues #94 and #82 as the remaining WS3-entry gates.

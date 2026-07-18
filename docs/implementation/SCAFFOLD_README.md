@@ -4,6 +4,8 @@ The executable scaffold now occupies the repository root under ADR-0025. It is c
 
 This is not production approval for the runtime, scaffold, UI system, database image, auth configuration, documentation portal, or native auth exchange.
 
+Third-party copied-source, retained-asset, and declared-dependency evidence is maintained in [`../../third_party/README.md`](../../third_party/README.md), with generated notices in [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md). Those records are not post-build artifact SBOMs or distribution approval.
+
 ## Provenance
 
 - Initial generated SHA: `75e793fdcb2c79066bcb2bfc744971d608e56a00`
@@ -34,6 +36,7 @@ Known limitations:
 - Node fallback uses the separate `server` package `start:node` entry backed by the Hono Node adapter.
 - Accessibility, white-label, tenant-isolation, PostgreSQL restore, and production runtime evidence are not claimed.
 - PWA support is continuity only and does not replace governed offline sync.
+- Retained scaffold icons and favicons are controlled-prototype placeholders classified `replace-before-distribution`; four unreferenced React/Expo demo-logo files were removed by PDA-STR-031.
 
 ## Features
 
@@ -165,6 +168,9 @@ packages/
 - `bun run db:migrate`: Run every owner stream serially through the composition root
 - `bun run db:test`: Prove clean/upgrade/repeat/failure recovery and state-plus-outbox atomicity against a disposable host-reachable database
 - `bun run check`: Run the pinned Ultracite formatting and linting authority
+- `bun run third-party:generate`: Regenerate declared SBOM, lock inventory, path/hash inventory, and notices
+- `bun run third-party:test`: Run deterministic provenance checker tests
+- `bun run third-party:check`: Fail if third-party outputs or governed path coverage are stale
 - `cd apps/web && bun run generate-pwa-assets`: Generate PWA assets
 - `bun run docker:build`: Build the Docker Compose images
 - `bun run docker:up`: Build and start the Docker Compose stack

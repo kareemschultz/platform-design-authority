@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ENGR-013
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.23.0
+version: 0.24.0
 status: Draft
 owner: Platform Engineering
-last_reviewed: 2026-07-16
-verified_as_of: 2026-07-16
+last_reviewed: 2026-07-18
+verified_as_of: 2026-07-18
 related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0018, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024, ADR-0025, ADR-0027]
 ---
 
@@ -64,6 +64,7 @@ These stable releases were observed from official sources on 2026-07-12 and rech
 | Astro Starlight | 0.41.3 | Static docs fallback | Introduces Astro | Static build, integration and authoring comparison | Fumadocs/Nextra | If independent static portal required |
 | Docusaurus | 3.10.2 | Multi-version docs fallback | Version copies and second framework increase maintenance | Multi-supported-release need and build budget | Fumadocs current docs + migrations | When multiple release lines coexist |
 | Changesets CLI | 2.31.0 exact controlled-prototype lock | Selected implementation release metadata | Private workspace packages are versioned for change accounting without package tags; Changesets does not replace governed docs, issues, PR evidence, or curated release notes | Changeset status, package dependency, generated version/changelog dry run before release automation, rollback review | Manual reviewed release process | Every release workflow or Changesets upgrade |
+| GitHub Actions core actions | `actions/checkout` v4 at `34e114876b0b11c390a56381ad16ebd13914f8d5`; `actions/setup-python` v5 at `a26af69be951a213d495a4c3e4e4022e16d87065`; `actions/upload-artifact` v4 at `ea165f8d65b6e75b540449e92b4886f43607fa02` | Selected immutable CI pins | Major-version tags are mutable; workflows use the official tag's verified commit observed on 2026-07-18 and retain the human-readable major in a comment | Documentation, status, prototype, and artifact-upload workflows pass from the pinned commits; re-resolve official refs before any change | Prior independently reviewed full SHA after advisory review | Every upstream major/tag movement, security advisory, or workflow-permission change |
 | OpenTofu | 1.12.3 | Selected infrastructure-as-code engine | CLI, providers, modules, state backends, and Terraform-compatibility claims require independent pinning and review | Plan/apply/destroy, drift, state recovery, provider upgrade, policy and self-hosted installation tests | Reviewed Terraform-compatible workflow or provider-native templates after ADR amendment | Every CLI/provider/module lock |
 | pg_durable | 0.2.3 | Platform Labs only | Pre-1.0, evaluation images, preload/extension, AMD64, database failure-domain coupling | Isolation, HA/PITR, load, upgrade, security, compensation/versioning comparison | Application worker, pg_cron, Temporal | Each release and prototype |
 
@@ -90,6 +91,7 @@ These stable releases were observed from official sources on 2026-07-12 and rech
 | TanStack Start | `https://tanstack.com/start/latest/docs/framework/react/overview`; `https://tanstack.com/start/latest/docs/framework/react/guide/server-components` | 2026-07-12 |
 | Documentation alternatives | `https://nextra.site/docs`; `https://docusaurus.io/docs/versioning`; `https://astro.build/themes/details/starlight/` | 2026-07-12 |
 | Changesets | `https://github.com/changesets/changesets`; `https://github.com/changesets/action` | 2026-07-12 |
+| GitHub Actions core actions | Official Git ref and verified-commit APIs for `actions/checkout` tag `v4`, `actions/setup-python` tag `v5`, and `actions/upload-artifact` tag `v4`; pinned workflow execution in this repository | 2026-07-18 |
 | OpenTofu | `https://opentofu.org/docs/`; `https://github.com/opentofu/opentofu/releases/tag/v1.12.3`; `https://registry.opentofu.org/` | 2026-07-12 |
 | pg_durable | `https://microsoft.github.io/pg_durable/`; `https://github.com/microsoft/pg_durable/releases/tag/v0.2.3`; `https://github.com/microsoft/pg_durable/blob/main/USER_GUIDE.md` | 2026-07-12 |
 | PostgreSQL 18 | `https://www.postgresql.org/docs/18/`; `https://www.postgresql.org/docs/18/release-18-4.html`; `https://www.postgresql.org/docs/18/functions-uuid.html` | 2026-07-12 |

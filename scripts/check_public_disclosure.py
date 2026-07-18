@@ -109,6 +109,15 @@ CREDENTIAL_QUERY_KEYS = {
     "x-goog-signature",
 }
 LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost"}
+LOCAL_DATABASE_FIXTURE_CREDENTIALS = {
+    ("postgres", "${POSTGRES_PASSWORD}"),
+    ("postgres", "ci-only-postgres-password"),
+    ("postgres", "dev"),
+    ("postgres", "replace-host-database-password"),
+    ("postgres", "replace-with-local-password"),
+    ("postgres", "test"),
+    ("postgres", "unit-test"),
+}
 GENERIC_SECRET_ASSIGNMENT = re.compile(
     r"(?i)\b(?:api[_-]?key|access[_-]?token|auth[_-]?token|client[_-]?secret|"
     r"license[_-]?key|pass(?:word|wd)|private[_-]?key|secret)\b\s*[:=]\s*"
@@ -125,13 +134,14 @@ NON_SECRET_VALUE_MARKERS = {
     "unit-test",
     "verification",
 }
+REGULAR_FILE_GIT_MODES = {"100644", "100755"}
 
 
-def _tracked_files(root: Path) -> tuple[list[str], list[str]]:
-    """Return current-tree paths known to Git and any enumeration error."""
+def _tracked_files(root: Path) -> tuple[list[tuple[str, str, str, str]], list[str]]:
+    """Return current-index (path, mode, object id, stage) entries."""
     try:
         result = subprocess.run(
-            ["git", "-C", str(root), "ls-files", "-z", "--cached"],
+            ["git", "-C", str(root), "ls-files", "-z", "--cached", "--stage"],
             check=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
@@ -140,8 +150,59 @@ def _tracked_files(root: Path) -> tuple[list[str], list[str]]:
         return [], ["public-disclosure: unable to execute git ls-files"]
     if result.returncode != 0:
         return [], ["public-disclosure: unable to enumerate git-tracked files"]
-    paths = [os.fsdecode(item) for item in result.stdout.split(b"\0") if item]
-    return sorted(paths), []
+    entries: list[tuple[str, str, str, str]] = []
+    for item in result.stdout.split(b"\0"):
+        if not item:
+            continue
+        try:
+            metadata, raw_path = item.split(b"\t", 1)
+            raw_mode, raw_object_id, raw_stage = metadata.split(b" ")
+            mode = raw_mode.decode("ascii")
+            object_id = raw_object_id.decode("ascii")
+            stage = raw_stage.decode("ascii")
+        except (UnicodeDecodeError, ValueError):
+            return [], ["public-disclosure: unable to parse git index entries"]
+        entries.append((os.fsdecode(raw_path), mode, object_id, stage))
+    return sorted(entries), []
+
+
+def _read_index_blobs(root: Path, object_ids: set[str]) -> dict[str, bytes]:
+    ordered_ids = sorted(object_ids)
+    if not ordered_ids:
+        return {}
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "--batch"],
+            check=False,
+            input=("\n".join(ordered_ids) + "\n").encode("ascii"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError:
+        return {}
+    if result.returncode != 0:
+        return {}
+
+    blobs: dict[str, bytes] = {}
+    cursor = 0
+    for requested_id in ordered_ids:
+        header_end = result.stdout.find(b"\n", cursor)
+        if header_end < 0:
+            return {}
+        header = result.stdout[cursor:header_end].split()
+        cursor = header_end + 1
+        if len(header) != 3 or header[1] != b"blob":
+            return {}
+        try:
+            size = int(header[2])
+        except ValueError:
+            return {}
+        content_end = cursor + size
+        if content_end >= len(result.stdout) or result.stdout[content_end] != 10:
+            return {}
+        blobs[requested_id] = result.stdout[cursor:content_end]
+        cursor = content_end + 1
+    return blobs
 
 
 def _filename_class(relative: str) -> str | None:
@@ -160,10 +221,11 @@ def _is_allowed_local_url(candidate: str) -> bool:
         hostname = (parsed.hostname or "").lower()
     except ValueError:
         return False
-    return parsed.scheme.lower() in {"postgres", "postgresql"} and hostname in {
-        *LOCAL_HOSTS,
-        "postgres",
-    }
+    return (
+        parsed.scheme.lower() in {"postgres", "postgresql"}
+        and hostname in {*LOCAL_HOSTS, "postgres"}
+        and (parsed.username, parsed.password) in LOCAL_DATABASE_FIXTURE_CREDENTIALS
+    )
 
 
 _GIT_TRANSPORT_SCHEMES = {"ssh", "git", "git+ssh", "ssh+git"}
@@ -236,25 +298,94 @@ def _decode_text(content: bytes) -> str | None:
     return None
 
 
+def _scan_content(relative: str, content: bytes) -> list[str]:
+    text = _decode_text(content)
+    if text is None:
+        return []
+    errors: list[str] = []
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        for rule_name, pattern in CONTENT_RULES:
+            if pattern.search(line):
+                errors.append(
+                    f"{relative}:{line_number}: public-disclosure detected "
+                    f"{rule_name} (matched value redacted)"
+                )
+        if _is_high_signal_generic_secret(line):
+            errors.append(
+                f"{relative}:{line_number}: public-disclosure detected "
+                "generic-secret-assignment (matched value redacted)"
+            )
+        if any(
+            _has_embedded_credentials(candidate)
+            and not _is_allowed_local_url(candidate)
+            for candidate in URL.findall(line)
+        ):
+            errors.append(
+                f"{relative}:{line_number}: public-disclosure detected "
+                "credential-bearing-url (matched value redacted)"
+            )
+    return errors
+
+
 def validate_public_disclosure(root: Path = ROOT) -> list[str]:
     """Return stable, redacted diagnostics for public-disclosure violations."""
     root = root.resolve()
     tracked, errors = _tracked_files(root)
+    index_blobs = _read_index_blobs(
+        root,
+        {
+            object_id
+            for _relative, mode, object_id, stage in tracked
+            if stage == "0" and mode in REGULAR_FILE_GIT_MODES
+        },
+    )
 
-    tracked_set = set(tracked)
+    tracked_set = {
+        relative
+        for relative, mode, _object_id, stage in tracked
+        if stage == "0" and mode in REGULAR_FILE_GIT_MODES
+    }
     for required in REQUIRED_ROOT_FILES:
         if required not in tracked_set or not (root / required).is_file():
             errors.append(
                 f"public-disclosure: missing tracked root file: {required}"
             )
 
-    for relative in tracked:
+    for relative, git_mode, object_id, stage in tracked:
         path = root / Path(relative)
-        if not path.is_file():
+        if stage != "0":
+            errors.append(
+                f"{relative}: public-disclosure unresolved git index stage {stage}"
+            )
             continue
+        if git_mode == "120000":
+            errors.append(
+                f"{relative}: public-disclosure tracked symbolic link is prohibited"
+            )
+            continue
+        if git_mode not in REGULAR_FILE_GIT_MODES:
+            errors.append(
+                f"{relative}: public-disclosure unsupported git index mode "
+                f"{git_mode}"
+            )
+            continue
+
+        index_content = index_blobs.get(object_id)
+        if index_content is None:
+            errors.append(
+                f"{relative}: public-disclosure index blob could not be read"
+            )
+        else:
+            errors.extend(_scan_content(relative, index_content))
+
         if path.is_symlink():
             errors.append(
                 f"{relative}: public-disclosure tracked symbolic link is prohibited"
+            )
+            continue
+        if not path.is_file():
+            errors.append(
+                f"{relative}: public-disclosure tracked worktree file is missing"
             )
             continue
 
@@ -270,30 +401,7 @@ def validate_public_disclosure(root: Path = ROOT) -> list[str]:
         except OSError:
             errors.append(f"{relative}: public-disclosure file could not be read")
             continue
-        text = _decode_text(content)
-        if text is None:
-            continue
-        for line_number, line in enumerate(text.splitlines(), start=1):
-            for rule_name, pattern in CONTENT_RULES:
-                if pattern.search(line):
-                    errors.append(
-                        f"{relative}:{line_number}: public-disclosure detected "
-                        f"{rule_name} (matched value redacted)"
-                    )
-            if _is_high_signal_generic_secret(line):
-                errors.append(
-                    f"{relative}:{line_number}: public-disclosure detected "
-                    "generic-secret-assignment (matched value redacted)"
-                )
-            if any(
-                _has_embedded_credentials(candidate)
-                and not _is_allowed_local_url(candidate)
-                for candidate in URL.findall(line)
-            ):
-                errors.append(
-                    f"{relative}:{line_number}: public-disclosure detected "
-                    "credential-bearing-url (matched value redacted)"
-                )
+        errors.extend(_scan_content(relative, content))
 
     return sorted(set(errors))
 

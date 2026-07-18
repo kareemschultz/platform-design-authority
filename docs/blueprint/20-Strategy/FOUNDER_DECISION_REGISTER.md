@@ -207,3 +207,7 @@ A decision closes only when:
 5. The decision is represented in implementation and customer claims.
 
 Architecture documents reference this register rather than inventing business facts.
+
+## Change Log
+
+- 2026-07-18 — v0.7.0 added FDR-012 (WS3 controlled-prototype implementation ahead of evidence gates, five recorded conditions) and cross-referenced it from FDR-004's WS3 entry condition.

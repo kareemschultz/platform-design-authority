@@ -85,6 +85,10 @@ Each prototype records source commit, exact dependency and container versions, o
 - Payment facilitation
 - Every business domain
 
+## Change Log
+
+- 2026-07-18 — v0.7.0 amended the P3 entry-clearance row with FDR-012's bounded controlled-prototype exception (isolated branch `claude/ws3-integration`); P3 entry recording and merge remain bound by the row's #94/#82 clearances.
+
 ## Exit Criteria
 
 Proceed to implementation-ready specifications only when the core boundaries are proven, critical findings are dispositioned, all applicable founder and external gates are resolved, and the prototype results do not invalidate the selected architecture. FDR-004 scope ratification satisfies only the scope-selection gate.

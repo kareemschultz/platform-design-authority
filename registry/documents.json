@@ -3333,10 +3333,10 @@
       "document_id": "PDA-RDM-001",
       "path": "docs/blueprint/17-Roadmap/BLUEPRINT_AND_DELIVERY_ROADMAP.md",
       "title": "Blueprint and Delivery Roadmap",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-17",
+      "last_reviewed": "2026-07-18",
       "related_adrs": [
         "ADR-0013",
         "ADR-0014",

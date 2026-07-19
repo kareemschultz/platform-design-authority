@@ -3,7 +3,6 @@
 import type { Deposit } from "@meridian/contracts-platform-api";
 import { Button } from "@meridian/ui-web/components/button";
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -28,6 +27,7 @@ import {
 	PosSectionCard,
 	PosTextField,
 } from "./pos-shared";
+import { useOnlineGatedMutation } from "./use-online-gated-mutation";
 import { useWorkspace } from "./workspace-context";
 
 const DepositValuesSchema = z.object({
@@ -41,7 +41,10 @@ const DepositValuesSchema = z.object({
 export function DepositNewPage() {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
-	const create = useMutation(orpc.commerce.deposits.create.mutationOptions());
+	const create = useOnlineGatedMutation(
+		orpc.commerce.deposits.create.mutationOptions(),
+		workspace.isOnline
+	);
 	const [created, setCreated] = useState<Deposit | null>(null);
 
 	const form = useForm({
@@ -154,7 +157,10 @@ export function DepositNewPage() {
 export function DepositConfirmPage() {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
-	const confirm = useMutation(orpc.commerce.deposits.confirm.mutationOptions());
+	const confirm = useOnlineGatedMutation(
+		orpc.commerce.deposits.confirm.mutationOptions(),
+		workspace.isOnline
+	);
 	const [depositId, setDepositId] = useState("");
 	const [confirmed, setConfirmed] = useState<Deposit | null>(null);
 	const [selfApproval, setSelfApproval] = useState(false);
@@ -222,7 +228,7 @@ export function DepositConfirmPage() {
 						/>
 						<Button
 							className="w-fit"
-							disabled={confirm.isPending}
+							disabled={confirm.isPending || !workspace.isOnline}
 							onClick={confirmDeposit}
 							type="button"
 						>

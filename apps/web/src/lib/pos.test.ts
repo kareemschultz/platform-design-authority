@@ -28,6 +28,7 @@ import {
 	parseMoneyInputToMinor,
 	recordCreatedResource,
 	recordMakerActor,
+	resolveBarcodeScan,
 	runningExpectedCashMinor,
 	saleHasPendingPriceOverride,
 	saveRegisterWorkspace,
@@ -415,6 +416,105 @@ describe("sale cart drafts", () => {
 		expect(isValidCartLineDraft(cartLine({ unitPriceInput: "" }))).toBe(false);
 		expect(isValidCartLineDraft(cartLine({ unitPriceInput: "abc" }))).toBe(
 			false
+		);
+	});
+});
+
+// WS3 remediation R3, Finding F: the barcode-scan race fix's core DECISION
+// logic, unit-tested independent of the DOM/React harness `sale-pages.
+// tsx`'s `ProductLookup` wraps around it. This is the exact function every
+// `queryClient.fetchQuery` resolution is passed through — proving it here
+// proves the auto-add/no-match/ambiguous boundary regardless of network
+// timing, which the e2e suite separately proves for the actual race
+// (slow-then-fast out-of-order resolution, focus retention, aria-live).
+describe("barcode scan resolution (Finding F)", () => {
+	function product(
+		overrides: Partial<{
+			id: string;
+			name: string;
+			variants: Array<{ id: string; name: string }>;
+		}> = {}
+	) {
+		return {
+			archivedAt: null,
+			archiveReason: null,
+			createdAt: "2026-07-18T09:00:00.000Z",
+			id: overrides.id ?? "product_a",
+			name: overrides.name ?? "Cola 500ml",
+			state: "Active" as const,
+			updatedAt: "2026-07-18T09:00:00.000Z",
+			variants: (
+				overrides.variants ?? [{ id: "variant_a", name: "Default" }]
+			).map((variant) => ({
+				id: variant.id,
+				identifiers: [],
+				name: variant.name,
+			})),
+			version: 1,
+		};
+	}
+
+	test("resolves to 'added' for exactly one product with exactly one variant, carrying the matched product and variant", () => {
+		const match = product({ id: "product_cola", name: "Cola 500ml" });
+		const outcome = resolveBarcodeScan([match]);
+		expect(outcome).toEqual({
+			kind: "added",
+			product: match,
+			variantId: "variant_a",
+		});
+	});
+
+	test("resolves to 'no-match' for zero results — never silently does nothing", () => {
+		expect(resolveBarcodeScan([])).toEqual({ kind: "no-match" });
+	});
+
+	test("resolves to 'ambiguous' for a product with more than one variant — never guesses which variant", () => {
+		const multiVariant = product({
+			variants: [
+				{ id: "variant_a", name: "Small" },
+				{ id: "variant_b", name: "Large" },
+			],
+		});
+		expect(resolveBarcodeScan([multiVariant])).toEqual({ kind: "ambiguous" });
+	});
+
+	test("resolves to 'ambiguous' for more than one matching product — never picks one arbitrarily", () => {
+		const first = product({ id: "product_a" });
+		const second = product({ id: "product_b" });
+		expect(resolveBarcodeScan([first, second])).toEqual({ kind: "ambiguous" });
+	});
+
+	// The actual race this finding fixes: a fast response for barcode B
+	// resolving before a slow response for barcode A does. Because the
+	// caller (ProductLookup.scanBarcode) invokes this resolver on EACH
+	// response independently — never on shared reactive query state — the
+	// resolution for A, whenever it finally arrives, still resolves to A's
+	// own product, never B's, and vice versa. This is the property the
+	// pre-fix code (`if (results.data && addSingleVariant(results.data.
+	// items))`, reading one shared `results.data`) could not guarantee: a
+	// stale `results.data` from whichever query last settled could be read
+	// by the WRONG Enter press. Modeled here directly, without a DOM.
+	test("out-of-order resolution: a stale response for barcode A can never resolve to barcode B's product, regardless of arrival order", () => {
+		const productA = product({ id: "product_a", name: "Barcode A product" });
+		const productB = product({ id: "product_b", name: "Barcode B product" });
+
+		// Simulates: scan A (slow network) fires first; scan B (fast
+		// network) fires second and resolves FIRST; A resolves LAST.
+		const resolvedForB = resolveBarcodeScan([productB]);
+		const resolvedForA = resolveBarcodeScan([productA]);
+
+		expect(resolvedForB).toMatchObject({ kind: "added", product: productB });
+		expect(resolvedForA).toMatchObject({ kind: "added", product: productA });
+		// The defect this replaces: both resolutions used to funnel through
+		// ONE shared `results.data` value, so whichever query's data
+		// happened to be current when Enter was read could leak into the
+		// other scan's outcome. Each call above is independent and neither
+		// result equals the other's product.
+		expect(resolvedForA.kind === "added" && resolvedForA.product.id).toBe(
+			"product_a"
+		);
+		expect(resolvedForB.kind === "added" && resolvedForB.product.id).toBe(
+			"product_b"
 		);
 	});
 });

@@ -6,9 +6,9 @@ import { Input } from "@meridian/ui-web/components/input";
 import { Label } from "@meridian/ui-web/components/label";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -25,6 +25,7 @@ import {
 	loadSaleWorkspace,
 	parseMoneyInputToMinor,
 	recordMakerActor,
+	resolveBarcodeScan,
 	SALE_TAX_CATEGORIES,
 	SALE_TAX_CATEGORY_LABELS,
 	saleHasPendingPriceOverride,
@@ -45,6 +46,7 @@ import {
 	PosTextField,
 } from "./pos-shared";
 import { EmptyState } from "./query-state";
+import { useOnlineGatedMutation } from "./use-online-gated-mutation";
 import { useWorkspace, useWorkspaceWorkGuard } from "./workspace-context";
 
 /** Debounces a value used to drive the sale screen's product-search query.
@@ -114,12 +116,66 @@ function ProductLookup({
 		staleTime: 5000,
 	});
 
-	function addSingleVariant(products: Product[]): boolean {
-		if (products.length !== 1 || products[0].variants.length !== 1) {
-			return false;
+	const queryClient = useQueryClient();
+	const barcodeInputRef = useRef<HTMLInputElement | null>(null);
+	// WS3 remediation R3, Finding F (barcode race) + second independent
+	// review's supplemental requirement (accessible scan announcements).
+	// aria-live, not visual-only: a screen-reader user gets the same
+	// added/no-match/error outcome a sighted cashier sees via the toast.
+	const [scanAnnouncement, setScanAnnouncement] = useState("");
+
+	async function scanBarcode(scannedValue: string) {
+		if (!contextId) {
+			return;
 		}
-		onAdd(draftFromProduct(products[0], products[0].variants[0].id));
-		return true;
+		try {
+			// Awaits the lookup for THIS EXACT scanned value directly, via
+			// an imperative fetchQuery — never reads the reactive `results`
+			// query's `data`, which reflects whatever barcode is CURRENTLY
+			// in the input, not necessarily the one this Enter press
+			// scanned. Two scans fired in quick succession (a slow lookup
+			// for barcode A immediately followed by a fast one for barcode
+			// B) therefore always resolve independently: each `scanBarcode`
+			// call acts only on its own awaited response, so a late-
+			// arriving response for A can never be mistaken for B's result
+			// (or vice versa) regardless of network resolution order.
+			const data = await queryClient.fetchQuery({
+				...orpc.catalog.products.list.queryOptions({
+					input: {
+						headers: { "x-active-context-id": contextId },
+						query: { barcode: scannedValue, limit: 10, state: "Active" },
+					},
+				}),
+			});
+			const outcome = resolveBarcodeScan(data.items);
+			if (outcome.kind === "added") {
+				onAdd(draftFromProduct(outcome.product, outcome.variantId));
+				const label = outcome.product.name;
+				toast.success(`${label} added`);
+				setScanAnnouncement(`${label} added to the cart.`);
+			} else if (outcome.kind === "no-match") {
+				toast.error(`No matching product for barcode ${scannedValue}`);
+				setScanAnnouncement(`No matching product for barcode ${scannedValue}.`);
+			} else {
+				toast.error(`Barcode ${scannedValue} matched more than one product`);
+				setScanAnnouncement(
+					`Barcode ${scannedValue} matched more than one product. Use "Search by name or SKU" to find and add it.`
+				);
+			}
+		} catch {
+			toast.error("Product lookup failed. Scan again.");
+			setScanAnnouncement(
+				`Looking up barcode ${scannedValue} failed. Scan again.`
+			);
+		} finally {
+			// Second independent review's supplemental requirement: the
+			// scanner-focused input must keep focus after every outcome so
+			// the next physical scan can fire immediately, with no manual
+			// re-click. `barcode` state was already cleared synchronously
+			// when Enter was pressed (below), so this never fights
+			// whatever the cashier has typed since.
+			barcodeInputRef.current?.focus();
+		}
 	}
 
 	return (
@@ -140,12 +196,28 @@ function ProductLookup({
 								return;
 							}
 							event.preventDefault();
-							if (results.data && addSingleVariant(results.data.items)) {
-								setBarcode("");
-								toast.success("Product added");
+							const scannedValue = barcode.trim();
+							if (!scannedValue) {
+								return;
 							}
+							// Clears synchronously, BEFORE the async lookup even
+							// starts — the field is immediately ready for the
+							// next physical scan (a real scanner does not wait
+							// for a network round-trip), and a slow-resolving
+							// earlier scan's `finally` cleanup can never wipe
+							// out text the cashier has typed in the meantime,
+							// because it no longer touches `barcode` state at
+							// all (see `scanBarcode`).
+							setBarcode("");
+							// `scanBarcode` already handles its own success/no-match/
+							// error outcomes internally (toast + aria-live); this
+							// `.catch` only guards against an unexpected throw
+							// outside that handling ever surfacing as an unhandled
+							// promise rejection.
+							scanBarcode(scannedValue).catch(() => undefined);
 						}}
 						placeholder="e.g. 7501234567890"
+						ref={barcodeInputRef}
 						value={barcode}
 					/>
 				</div>
@@ -159,6 +231,9 @@ function ProductLookup({
 					/>
 				</div>
 			</div>
+			<p aria-live="polite" className="sr-only" role="status">
+				{scanAnnouncement}
+			</p>
 			{!isOnline && (
 				<p className="text-muted-foreground text-sm">
 					You are offline. Product lookup is unavailable until you reconnect.
@@ -195,7 +270,9 @@ function ProductLookup({
 								<Button
 									onClick={() => {
 										onAdd(draftFromProduct(product, variant.id));
-										toast.success("Product added");
+										toast.success(`${product.name} added`);
+										setScanAnnouncement(`${product.name} added to the cart.`);
+										barcodeInputRef.current?.focus();
 									}}
 									size="sm"
 									type="button"
@@ -294,7 +371,10 @@ function SaleCartBuilder({
 	const router = useRouter();
 	const [lines, setLines] = useState<CartLineDraft[]>([]);
 	const [isDirty, setIsDirty] = useState(false);
-	const create = useMutation(orpc.commerce.sales.create.mutationOptions());
+	const create = useOnlineGatedMutation(
+		orpc.commerce.sales.create.mutationOptions(),
+		workspace.isOnline
+	);
 	useWorkspaceWorkGuard(
 		workspaceWorkState(create.isPending, isDirty || lines.length > 0)
 	);
@@ -444,8 +524,9 @@ function PriceOverrideRequestForm({
 }) {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
-	const request = useMutation(
-		orpc.commerce.priceOverrides.request.mutationOptions()
+	const request = useOnlineGatedMutation(
+		orpc.commerce.priceOverrides.request.mutationOptions(),
+		workspace.isOnline
 	);
 	const form = useForm({
 		defaultValues: { reason: "", requestedPrice: "0.00" },
@@ -494,15 +575,25 @@ function PriceOverrideRequestForm({
 		>
 			<form.Field name="requestedPrice">
 				{(field) => (
-					<PosMoneyField field={field} label="Requested price (GYD)" />
+					<PosMoneyField
+						field={field}
+						id={`price-override-${lineId}-requestedPrice`}
+						label="Requested price (GYD)"
+					/>
 				)}
 			</form.Field>
 			<form.Field name="reason">
-				{(field) => <PosTextField field={field} label="Reason" />}
+				{(field) => (
+					<PosTextField
+						field={field}
+						id={`price-override-${lineId}-reason`}
+						label="Reason"
+					/>
+				)}
 			</form.Field>
 			<MutationError error={request.error} isOnline={workspace.isOnline} />
 			<Button
-				disabled={request.isPending}
+				disabled={request.isPending || !workspace.isOnline}
 				size="sm"
 				type="submit"
 				variant="outline"
@@ -548,8 +639,9 @@ export function PriceOverrideApprovePage() {
 function PriceOverrideApproveSection({ saleId }: { saleId: string }) {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
-	const approve = useMutation(
-		orpc.commerce.priceOverrides.approve.mutationOptions()
+	const approve = useOnlineGatedMutation(
+		orpc.commerce.priceOverrides.approve.mutationOptions(),
+		workspace.isOnline
 	);
 	const [overrideId, setOverrideId] = useState("");
 	const [approved, setApproved] = useState<Sale | null>(null);
@@ -609,7 +701,7 @@ function PriceOverrideApproveSection({ saleId }: { saleId: string }) {
 						label="Price override ID"
 					/>
 					<Button
-						disabled={approve.isPending}
+						disabled={approve.isPending || !workspace.isOnline}
 						onClick={approveOverride}
 						type="button"
 					>
@@ -639,8 +731,14 @@ function SaleWorkspaceView({
 }) {
 	const workspace = useWorkspace();
 	const router = useRouter();
-	const hold = useMutation(orpc.commerce.sales.hold.mutationOptions());
-	const complete = useMutation(orpc.commerce.sales.complete.mutationOptions());
+	const hold = useOnlineGatedMutation(
+		orpc.commerce.sales.hold.mutationOptions(),
+		workspace.isOnline
+	);
+	const complete = useOnlineGatedMutation(
+		orpc.commerce.sales.complete.mutationOptions(),
+		workspace.isOnline
+	);
 
 	const form = useForm({
 		defaultValues: { tendered: "0.00" },
@@ -770,7 +868,7 @@ function SaleWorkspaceView({
 				>
 					<MutationError error={hold.error} isOnline={workspace.isOnline} />
 					<Button
-						disabled={hold.isPending}
+						disabled={hold.isPending || !workspace.isOnline}
 						onClick={holdSale}
 						type="button"
 						variant="outline"

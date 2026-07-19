@@ -2,7 +2,6 @@
 
 import type { Refund } from "@meridian/contracts-platform-api";
 import { Button } from "@meridian/ui-web/components/button";
-import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -20,12 +19,16 @@ import {
 	StateBadge,
 } from "./operations-shared";
 import { CopyableId, PosSectionCard, PosTextField } from "./pos-shared";
+import { useOnlineGatedMutation } from "./use-online-gated-mutation";
 import { useWorkspace } from "./workspace-context";
 
 export function RefundNewPage() {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
-	const create = useMutation(orpc.commerce.refunds.create.mutationOptions());
+	const create = useOnlineGatedMutation(
+		orpc.commerce.refunds.create.mutationOptions(),
+		workspace.isOnline
+	);
 	const [returnId, setReturnId] = useState("");
 	const [created, setCreated] = useState<Refund | null>(null);
 
@@ -109,7 +112,10 @@ export function RefundNewPage() {
 export function RefundApprovePage() {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
-	const approve = useMutation(orpc.commerce.refunds.approve.mutationOptions());
+	const approve = useOnlineGatedMutation(
+		orpc.commerce.refunds.approve.mutationOptions(),
+		workspace.isOnline
+	);
 	const [refundId, setRefundId] = useState("");
 	const [approved, setApproved] = useState<Refund | null>(null);
 	const [selfApproval, setSelfApproval] = useState(false);
@@ -177,7 +183,7 @@ export function RefundApprovePage() {
 						/>
 						<Button
 							className="w-fit"
-							disabled={approve.isPending}
+							disabled={approve.isPending || !workspace.isOnline}
 							onClick={approveRefund}
 							type="button"
 						>

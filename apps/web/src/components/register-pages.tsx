@@ -41,6 +41,7 @@ import {
 	PosTextField,
 	posHref,
 } from "./pos-shared";
+import { useOnlineGatedMutation } from "./use-online-gated-mutation";
 import { useWorkspace, useWorkspaceWorkGuard } from "./workspace-context";
 
 const RegisterOpenValuesSchema = z.object({
@@ -221,8 +222,9 @@ function CashMovementForm({
 	registerSessionId: string;
 }) {
 	const workspace = useWorkspace();
-	const create = useMutation(
-		orpc.commerce.cashMovements.create.mutationOptions()
+	const create = useOnlineGatedMutation(
+		orpc.commerce.cashMovements.create.mutationOptions(),
+		workspace.isOnline
 	);
 	const intentRef = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	const form = useForm({
@@ -326,7 +328,7 @@ function CashMovementForm({
 				)}
 			</form.Field>
 			<MutationError error={create.error} isOnline={workspace.isOnline} />
-			<Button disabled={create.isPending} type="submit">
+			<Button disabled={create.isPending || !workspace.isOnline} type="submit">
 				{create.isPending ? "Recording…" : "Record movement"}
 			</Button>
 		</form>
@@ -341,7 +343,10 @@ function SafeDropForm({
 	registerId: string;
 }) {
 	const workspace = useWorkspace();
-	const create = useMutation(orpc.commerce.safeDrops.create.mutationOptions());
+	const create = useOnlineGatedMutation(
+		orpc.commerce.safeDrops.create.mutationOptions(),
+		workspace.isOnline
+	);
 	const intentRef = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	const form = useForm({
 		defaultValues: { amount: "0.00", note: "" },
@@ -416,7 +421,11 @@ function SafeDropForm({
 				)}
 			</form.Field>
 			<MutationError error={create.error} isOnline={workspace.isOnline} />
-			<Button disabled={create.isPending} type="submit" variant="outline">
+			<Button
+				disabled={create.isPending || !workspace.isOnline}
+				type="submit"
+				variant="outline"
+			>
 				{create.isPending ? "Recording…" : "Record safe drop"}
 			</Button>
 		</form>
@@ -605,7 +614,10 @@ export function RegisterClosePage({
 }) {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
-	const close = useMutation(orpc.commerce.registers.close.mutationOptions());
+	const close = useOnlineGatedMutation(
+		orpc.commerce.registers.close.mutationOptions(),
+		workspace.isOnline
+	);
 	const [isDirty, setIsDirty] = useState(false);
 	const intentRef = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	const [result, setResult] = useState<RegisterSession | null>(null);
@@ -826,8 +838,9 @@ function VarianceApprovalSection({
 }) {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
-	const approve = useMutation(
-		orpc.commerce.cashVariances.approve.mutationOptions()
+	const approve = useOnlineGatedMutation(
+		orpc.commerce.cashVariances.approve.mutationOptions(),
+		workspace.isOnline
 	);
 	const [varianceId, setVarianceId] = useState(registerSessionId);
 	const [approved, setApproved] = useState<RegisterSession | null>(null);
@@ -893,6 +906,7 @@ function VarianceApprovalSection({
 				<VarianceApproveForm
 					initialVarianceId={varianceId}
 					initialVersion=""
+					isOnline={workspace.isOnline}
 					onApprove={approveVariance}
 					onVarianceIdChange={setVarianceId}
 					pending={approve.isPending}
@@ -906,12 +920,14 @@ function VarianceApprovalSection({
 function VarianceApproveForm({
 	initialVarianceId,
 	initialVersion,
+	isOnline = true,
 	onApprove,
 	onVarianceIdChange,
 	pending,
 }: {
 	initialVarianceId: string;
 	initialVersion: string;
+	isOnline?: boolean;
 	onApprove: (varianceId: string, version: string) => Promise<void>;
 	onVarianceIdChange?: (value: string) => void;
 	pending: boolean;
@@ -952,7 +968,7 @@ function VarianceApproveForm({
 					<PosTextField field={field} inputMode="numeric" label="Version" />
 				)}
 			</form.Field>
-			<Button className="w-fit" disabled={pending} type="submit">
+			<Button className="w-fit" disabled={pending || !isOnline} type="submit">
 				{pending ? "Approving…" : "Approve variance"}
 			</Button>
 		</form>

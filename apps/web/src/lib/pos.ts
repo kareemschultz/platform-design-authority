@@ -1,5 +1,6 @@
 import type {
 	AccountantHandoffExport,
+	Product,
 	SaleLineInput,
 	SaleTaxCategory,
 } from "@meridian/contracts-platform-api";
@@ -442,6 +443,40 @@ export function toSaleLineInput(line: CartLineDraft): SaleLineInput {
 		unitPrice: { amountMinor: unitPriceMinor, currency: POS_CURRENCY },
 		variantId: line.variantId ?? undefined,
 	};
+}
+
+// ---------------------------------------------------------------------------
+// WS3 remediation R3, Finding F: the barcode-scan Enter-to-add DECISION,
+// extracted as a pure function so the race fix's correctness (which
+// product a given lookup response resolves to) is unit-testable without a
+// DOM/React harness — `sale-pages.tsx`'s `ProductLookup` awaits an
+// imperative `queryClient.fetchQuery` keyed to the EXACT scanned value and
+// calls this resolver on ITS OWN response only, never on shared reactive
+// `useQuery` state, which is what let a slow earlier response's stale data
+// add the wrong product for a faster later scan before this fix.
+// ---------------------------------------------------------------------------
+
+export type BarcodeScanOutcome =
+	| { kind: "added"; product: Product; variantId: string }
+	| { kind: "ambiguous" }
+	| { kind: "no-match" };
+
+/** A barcode lookup auto-adds only when it resolves to exactly one Product
+ * with exactly one Variant — anything else (no match, or a genuinely
+ * ambiguous multi-product/multi-variant result) must never silently pick
+ * one; the caller shows visible+accessible feedback for both cases. */
+export function resolveBarcodeScan(products: Product[]): BarcodeScanOutcome {
+	if (products.length === 0) {
+		return { kind: "no-match" };
+	}
+	const [only] = products;
+	if (products.length === 1 && only && only.variants.length === 1) {
+		const [variant] = only.variants;
+		if (variant) {
+			return { kind: "added", product: only, variantId: variant.id };
+		}
+	}
+	return { kind: "ambiguous" };
 }
 
 export function isValidCartLineDraft(line: CartLineDraft): boolean {

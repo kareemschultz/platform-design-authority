@@ -3,7 +3,7 @@
 import type { Receipt } from "@meridian/contracts-platform-api";
 import { Button } from "@meridian/ui-web/components/button";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { orpc } from "@/utils/orpc";
 import { MutationError, OperationsPageFrame } from "./operations-shared";
 import { PosSectionCard, PosTextField } from "./pos-shared";
 import { QueryFailure } from "./query-state";
+import { useOnlineGatedMutation } from "./use-online-gated-mutation";
 import { useWorkspace } from "./workspace-context";
 
 function ReceiptLayout({ receipt }: { receipt: Receipt }) {
@@ -92,8 +93,9 @@ const VoidValuesSchema = z.object({
 
 function VoidReceiptSection({ receiptId }: { receiptId: string }) {
 	const workspace = useWorkspace();
-	const voidMutation = useMutation(
-		orpc.commerce.receipts.void.mutationOptions()
+	const voidMutation = useOnlineGatedMutation(
+		orpc.commerce.receipts.void.mutationOptions(),
+		workspace.isOnline
 	);
 	const [voided, setVoided] = useState(false);
 	const form = useForm({
@@ -143,7 +145,7 @@ function VoidReceiptSection({ receiptId }: { receiptId: string }) {
 				/>
 				<Button
 					className="w-fit"
-					disabled={voidMutation.isPending}
+					disabled={voidMutation.isPending || !workspace.isOnline}
 					type="submit"
 					variant="destructive"
 				>
@@ -157,7 +159,10 @@ function VoidReceiptSection({ receiptId }: { receiptId: string }) {
 function ReissueReceiptSection({ receiptId }: { receiptId: string }) {
 	const workspace = useWorkspace();
 	const router = useRouter();
-	const reissue = useMutation(orpc.commerce.receipts.reissue.mutationOptions());
+	const reissue = useOnlineGatedMutation(
+		orpc.commerce.receipts.reissue.mutationOptions(),
+		workspace.isOnline
+	);
 
 	async function reissueReceipt(priceSuppressed: boolean) {
 		const reissued = await reissue.mutateAsync({
@@ -180,7 +185,7 @@ function ReissueReceiptSection({ receiptId }: { receiptId: string }) {
 			<MutationError error={reissue.error} isOnline={workspace.isOnline} />
 			<div className="flex flex-wrap gap-2">
 				<Button
-					disabled={reissue.isPending}
+					disabled={reissue.isPending || !workspace.isOnline}
 					onClick={() => reissueReceipt(false)}
 					type="button"
 					variant="outline"
@@ -188,7 +193,7 @@ function ReissueReceiptSection({ receiptId }: { receiptId: string }) {
 					{reissue.isPending ? "Reissuing…" : "Reissue"}
 				</Button>
 				<Button
-					disabled={reissue.isPending}
+					disabled={reissue.isPending || !workspace.isOnline}
 					onClick={() => reissueReceipt(true)}
 					type="button"
 					variant="outline"

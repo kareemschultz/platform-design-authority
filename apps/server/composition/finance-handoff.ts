@@ -103,8 +103,16 @@ async function requireExportContext(input: {
 	// one bound to their active context — AND, fixing the Finding K gap,
 	// a request that declares a `legalEntityId` at all now FAILS CLOSED if
 	// the active context carries none, instead of silently proceeding with
-	// the caller-supplied value unverified.
-	if (input.legalEntityId) {
+	// the caller-supplied value unverified. Checked by PRESENCE
+	// (`!== undefined`), not truthiness: `getAccountantHandoffExport` (a
+	// read) never passes this field at all (parameter omitted, genuinely
+	// `undefined`) and stays exempt, exactly as before; `createAccountant
+	// HandoffExport`'s `legalEntityId` is a required `string` on its own
+	// input type, so this branch always runs for creates, and
+	// `requireLegalEntityScope` itself now rejects an empty-string
+	// `requestLegalEntityId` as a defense-in-depth backstop to the
+	// transport-level `IdentifierSchema` regex that already blocks one.
+	if (input.legalEntityId !== undefined) {
 		requireLegalEntityScope({
 			contextLegalEntityId: context.legalEntityId,
 			requestLegalEntityId: input.legalEntityId,

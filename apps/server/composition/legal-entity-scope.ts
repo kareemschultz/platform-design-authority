@@ -30,11 +30,29 @@ import { ExportError } from "@meridian/platform-import-export";
  * and the caller-supplied `requestLegalEntityId` flowed straight into the
  * export record UNVERIFIED — the real gap this closes. When BOTH are
  * present and equal, the export proceeds exactly as before.
+ *
+ * Defense in depth (raised on advisor review of this stage): the ONLY
+ * real caller today, `createAccountantHandoffExportContract`'s oRPC
+ * contract, already rejects an empty-string `legalEntityId` before this
+ * function is ever reached (`AccountantHandoffRequestSchema.legalEntityId`
+ * is `IdentifierSchema`, a `^[A-Za-z0-9_-]{12,64}$` regex — an empty
+ * string cannot pass it). This function does not rely on that upstream
+ * guard staying in place: `requestLegalEntityId` is validated for falsy
+ * values (empty string included) exactly like `contextLegalEntityId`, so
+ * "legalEntityId unset on either side is now REJECTED" (the directive's
+ * own wording) holds even if a future caller reaches this function through
+ * a path that skips the transport-level schema.
  */
 export function requireLegalEntityScope(input: {
 	contextLegalEntityId?: string | null;
 	requestLegalEntityId: string;
 }): void {
+	if (!input.requestLegalEntityId) {
+		throw new ExportError(
+			"validation",
+			"legalEntityId is required for this export"
+		);
+	}
 	if (!input.contextLegalEntityId) {
 		throw new ExportError(
 			"validation",

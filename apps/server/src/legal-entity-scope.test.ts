@@ -88,4 +88,21 @@ describe("legal-entity-scope: WS3 remediation R2, Finding K", () => {
 		}
 		expect(caught).toMatchObject({ code: "validation", name: "ExportError" });
 	});
+
+	test("DEFENSE IN DEPTH (advisor-raised): rejects when the REQUEST-side legalEntityId is the empty string, even with a well-formed active context — the directive's 'unset on either side' wording, not just the context side", () => {
+		let caught: unknown;
+		try {
+			requireLegalEntityScope({
+				contextLegalEntityId: "legal_entity_0001",
+				requestLegalEntityId: "",
+			});
+		} catch (error) {
+			caught = error;
+		}
+		expect(caught).toMatchObject({
+			code: "validation",
+			message: expect.stringContaining("legalEntityId is required"),
+			name: "ExportError",
+		});
+	});
 });

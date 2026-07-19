@@ -280,7 +280,7 @@
         "keeps returns strictly tenant-scoped: tenant B cannot reference tenant A's sale, and cannot see or approve tenant A's return",
         "denies return approval before application dispatch when permission is not granted, and dispatches once granted",
         "realizes an exchange atomically: the replacement sale completes, the Return is marked consumed, and commerce.exchange.completed.v1 commits together with the sale (raw SQL)",
-        "voids a completed sale on an open session atomically, and rejects the void once the register session has closed",
+        "voids a completed sale on an open session atomically — including its own compensating cash-ledger entry (WS3 remediation R1 cycle 2, closing the gap adversarial re-review found in the original Finding A fix) — and rejects the void once the register session has closed",
         "reissues a receipt with no monetary effect, and priceSuppressed realizes a gift receipt"
       ],
       "command": "bun test apps/server/composition/returns.integration.test.ts --timeout 30000",

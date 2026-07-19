@@ -1034,7 +1034,7 @@ describe.serial(
 			expect(secondAttempt).toMatchObject({ code: "invalid_state" });
 		});
 
-		test("voids a completed sale on an open session atomically, and rejects the void once the register session has closed", async () => {
+		test("voids a completed sale on an open session atomically — including its own compensating cash-ledger entry (WS3 remediation R1 cycle 2, closing the gap adversarial re-review found in the original Finding A fix) — and rejects the void once the register session has closed", async () => {
 			const tenantId = "tenant_returns_void";
 			const registerId = "register_returns_void";
 			const pos = posService();
@@ -1064,23 +1064,55 @@ describe.serial(
 			);
 			expect(movementRows.rows[0]?.count).toBe("1");
 
-			// WS3 remediation R1, Finding A: `expectedCashMinor` now includes
-			// the fixture sale's own cash-in (`completedFixtureSale` tenders
-			// exactly 456,000 in Cash, no change), so a zero-variance close
-			// requires counting the opening float (100,000) PLUS that sale
-			// proceeds — 556,000, not just the float. `voidReceipt` posts no
-			// cash-ledger entry of its own (a documented, separately-tracked
-			// gap outside this stage's scope), so the void above does not
-			// change this figure.
-			await pos.closeRegister({
+			// WS3 remediation R1 cycle 2: `voidReceipt` now posts its own
+			// compensating `PaidOut`/`Refund` cash-ledger entry, atomically in
+			// the SAME transaction as the Inventory reversal and Return/
+			// receipt above — mirroring `approveRefund`'s posting, since
+			// every voidable sale is by construction a completed Cash sale
+			// (`requireCashOnlyTenders`). PROVEN failing pre-fix: before this
+			// cycle, no row existed here at all (`rows[0]` was `undefined`,
+			// this assertion would have thrown a matcher error against
+			// `undefined`), and `closeRegister` below at `countedCash:
+			// 100_000` would have landed on `state: "Closing"` with
+			// `variance: -456_000` instead of `"Closed"`/`variance: 0`,
+			// because the voided sale's Finding A `PaidIn` proceeds were
+			// never reversed.
+			const cashMovementRows = await testPool.query<{
+				amount_minor: string;
+				direction: string;
+				reason_code: string;
+				reference_id: string | null;
+			}>(
+				"SELECT direction, reason_code, amount_minor::text AS amount_minor, reference_id FROM pos_cash_movement WHERE tenant_id = $1 AND reference_id = $2",
+				[tenantId, voided.id]
+			);
+			expect(cashMovementRows.rows[0]).toEqual({
+				amount_minor: "456000",
+				direction: "PaidOut",
+				reason_code: "Refund",
+				reference_id: voided.id,
+			});
+
+			// The actual boundary this cycle closes: closing at exactly the
+			// ORIGINAL opening float (100,000) — not float-plus-unreversed-
+			// sale-proceeds (556,000) — now lands at zero variance, because
+			// the sale's proceeds and the void's reversal net to zero on the
+			// authoritative ledger `closeRegister` reads.
+			const closed = await pos.closeRegister({
 				actorUserId: returnsBase.actorUserId,
 				correlationId: returnsBase.correlationId,
-				countedCash: { amountMinor: 556_000, currency: "GYD" },
+				countedCash: { amountMinor: 100_000, currency: "GYD" },
 				idempotencyKey: "void-close-register",
 				organizationId: returnsBase.organizationId,
 				registerId,
 				tenantId,
 			});
+			expect(closed.expectedCash).toEqual({
+				amountMinor: 100_000,
+				currency: "GYD",
+			});
+			expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+			expect(closed.state).toBe("Closed");
 
 			const sale2 = await (async () => {
 				await pos.openRegister({

@@ -2818,14 +2818,17 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 		await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
 	});
 
-	test("voids a completed sale on an open session as a full compensation with its own permission, not a maker/checker pair", async () => {
+	test("voids a completed sale on an open session as a full compensation with its own permission, not a maker/checker pair — WS3 remediation R1 cycle 2: also reverses the voided sale's own cash-ledger proceeds, PROVEN failing pre-fix (git stash-reverting only the voidReceipt cash-posting block: `movements` contained no PaidOut/Refund row for the void at all, and closing at countedCash 0 landed on state 'Closing' with variance -342000, not 'Closed' at variance 0)", async () => {
 		const harness = createHarness();
-		const { service, events, returnMovements } = harness;
+		const { service, events, movements, returnMovements } = harness;
 		const { completed, registerId, saleId } = await completedSale(
 			harness,
 			"register_void_happy",
 			{ quantity: "3" }
 		);
+		// completedSale posts its own Finding A PaidIn proceeds for the full
+		// sale total (3 units @ 114_000/unit incl. 14% VAT = 342_000).
+		expect(completed.total).toEqual({ amountMinor: 342_000, currency: "GYD" });
 
 		const voided = await service.voidReceipt({
 			...base,
@@ -2847,6 +2850,167 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 			(envelope) => envelope.name === "commerce.return.completed.v1"
 		);
 		expect(voidEvent?.data).toMatchObject({ mode: "Void", registerId, saleId });
+
+		// The compensating cash-ledger entry: a PaidOut, reasonCode Refund,
+		// referencing the void's own Return id, for the FULL voided amount.
+		const voidCashMovement = movements.find(
+			(movement) => movement.referenceId === voided.id
+		);
+		expect(voidCashMovement).toMatchObject({
+			amountMinor: 342_000,
+			direction: "PaidOut",
+			reasonCode: "Refund",
+		});
+		const voidCashEvent = events.find(
+			(envelope) =>
+				envelope.name === "commerce.cash-movement.posted.v1" &&
+				(envelope.data as { referenceId?: string }).referenceId === voided.id
+		);
+		expect(voidCashEvent?.data).toMatchObject({
+			amountMinor: 342_000,
+			direction: "PaidOut",
+			reasonCode: "Refund",
+		});
+
+		// The actual boundary this remediation closes: closing the register
+		// at exactly its opening float (0) now lands at zero variance —
+		// the sale's proceeds and the void's reversal net to zero on the
+		// SAME authoritative ledger `closeRegister` reads, not a partial
+		// reconstruction that still carries the voided sale's proceeds.
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 0, currency: "GYD" },
+			idempotencyKey: "void-1-close",
+			registerId,
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.state).toBe("Closed");
+	});
+
+	test("Finding A cycle 2: voiding only the REMAINING unreturned quantity reverses exactly that remainder's cash, never double-compensating the portion already returned and refunded", async () => {
+		const harness = createHarness();
+		const { movements, service } = harness;
+		const { completed, saleId } = await completedSale(
+			harness,
+			"register_void_partial",
+			{ quantity: "4" }
+		);
+		// 4 units @ 114_000/unit = 456_000 total, all Cash (Finding A PaidIn).
+		expect(completed.total).toEqual({ amountMinor: 456_000, currency: "GYD" });
+		const lineId = completed.lines[0]?.id as string;
+
+		// Return + refund 1 of 4 units first (114_000), same session.
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "void-partial-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Wrong size",
+			saleId,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "void-partial-return-approve",
+			returnId: created.id,
+		});
+		const refund = await service.createRefund({
+			...base,
+			idempotencyKey: "void-partial-refund-create",
+			returnId: approvedReturn.id,
+		});
+		await service.approveRefund({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "void-partial-refund-approve",
+			refundId: refund.id,
+		});
+
+		// Void the sale: only 3 of the original 4 units remain unreturned,
+		// so the void's cash reversal must be 3/4 of the total (342_000),
+		// NOT the full 456_000 (which would double-compensate the unit
+		// already returned and refunded above).
+		const voided = await service.voidReceipt({
+			...base,
+			idempotencyKey: "void-partial-void-1",
+			reason: "Remaining units defective",
+			receiptId: completed.receiptId as string,
+		});
+		const voidCashMovement = movements.find(
+			(movement) => movement.referenceId === voided.id
+		);
+		expect(voidCashMovement).toMatchObject({
+			amountMinor: 342_000,
+			direction: "PaidOut",
+			reasonCode: "Refund",
+		});
+
+		// Ledger nets to exactly zero: 456_000 sale in, 114_000 refund out,
+		// 342_000 void out.
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 0, currency: "GYD" },
+			idempotencyKey: "void-partial-close",
+			registerId: "register_void_partial",
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.state).toBe("Closed");
+	});
+
+	test("Finding E applies to void's cash-out too: a void that would drive expected cash negative is REJECTED with no cash-ledger entry, no cash event, no Return/receipt, and no Inventory reversal", async () => {
+		const harness = createHarness();
+		const { events, movements, returns, returnMovements, service } = harness;
+		const registerId = "register_void_insufficient_cash";
+		const { completed } = await completedSale(harness, registerId, {
+			quantity: "3",
+		});
+		expect(completed.total).toEqual({ amountMinor: 342_000, currency: "GYD" });
+
+		// Drain the drawer below the sale's own proceeds via a safe-drop —
+		// expected cash is now 342_000 - 340_000 = 2_000, less than the
+		// 342_000 a void of this sale would need to pay back out.
+		await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 340_000, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: `${registerId}-safe-drop`,
+			reasonCode: "SafeDrop",
+			registerId,
+		});
+
+		const preAttemptMovementCount = movements.length;
+		const preAttemptEventCount = events.length;
+		const preAttemptReturnCount = returns.size;
+
+		const attempt = service.voidReceipt({
+			...base,
+			idempotencyKey: "void-insufficient-cash-1",
+			reason: "Should be rejected",
+			receiptId: completed.receiptId as string,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "insufficient_cash" });
+
+		// No partial effects survived: no new cash movement, no new event,
+		// no Return row created, no Inventory reversal posted — the
+		// transaction rolled back in full, not just the cash step.
+		expect(movements).toHaveLength(preAttemptMovementCount);
+		expect(events).toHaveLength(preAttemptEventCount);
+		expect(returns.size).toBe(preAttemptReturnCount);
+		expect(returnMovements).toHaveLength(0);
+
+		// The sale itself is still Completed and its proceeds are still on
+		// the ledger untouched — the guard denies, it does not silently
+		// half-apply.
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 2000, currency: "GYD" },
+			idempotencyKey: "void-insufficient-cash-close",
+			registerId,
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 2000, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.state).toBe("Closed");
 	});
 
 	test("rejects a void once the sale's register session has closed (void-after-close rejection)", async () => {

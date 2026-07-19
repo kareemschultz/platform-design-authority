@@ -2191,7 +2191,11 @@ async function requireVoidableSale(
 	repository: PosRepository,
 	tenantId: string,
 	receiptId: string
-): Promise<{ receipt: ReceiptRecord; sale: SaleRecord }> {
+): Promise<{
+	receipt: ReceiptRecord;
+	sale: SaleRecord;
+	session: RegisterSessionRecord;
+}> {
 	const receipt = await repository.getReceipt(tenantId, receiptId);
 	if (!receipt) {
 		throw new PosError("not_found", "Receipt was not found");
@@ -2213,7 +2217,7 @@ async function requireVoidableSale(
 			"A sale can only be voided while its register session is still open"
 		);
 	}
-	return { receipt, sale };
+	return { receipt, sale, session };
 }
 
 /** Every sale line's REMAINING (unreturned) quantity, priced through
@@ -4765,7 +4769,14 @@ export function createPosService(options: PosServiceOptions) {
 		 * correctly across timezones). Voids whatever quantity REMAINS
 		 * unreturned per line (so a sale partially returned earlier in the
 		 * same session voids only its remainder, never double-compensating
-		 * the portion already returned). */
+		 * the portion already returned). WS3 remediation R1 cycle 2: since
+		 * every voidable sale is, by construction, a completed CASH sale
+		 * (Finding A posted its `PaidIn` proceeds), this also posts the
+		 * mirror `PaidOut` cash-ledger entry for the voided remainder,
+		 * guarded by Finding E's fail-closed
+		 * `requireCashOutWithinExpectedCash` check, atomically in the SAME
+		 * transaction — see the inline comment at the posting site and
+		 * `remediation-dispositions.md` "## A". */
 		async voidReceipt(input: {
 			actorUserId: string;
 			correlationId: string;
@@ -4790,7 +4801,7 @@ export function createPosService(options: PosServiceOptions) {
 					if (prior) {
 						return prior;
 					}
-					const { receipt, sale } = await requireVoidableSale(
+					const { receipt, sale, session } = await requireVoidableSale(
 						repository,
 						input.tenantId,
 						input.receiptId
@@ -4803,6 +4814,98 @@ export function createPosService(options: PosServiceOptions) {
 						tenantId: input.tenantId,
 					});
 					const returnId = options.ids.create("return");
+					const totalRefundableMinor = lines.reduce(
+						(sum, line) => sum + line.lineTotalMinor,
+						0
+					);
+
+					// WS3 remediation R1 cycle 2 (closes the gap the adversarial
+					// re-review found in Finding A's original fix): every sale
+					// `voidReceipt` can reach is `state === "Completed"`, and
+					// `completeSale` accepts ONLY `Cash` tenders at this
+					// prototype depth (`requireCashOnlyTenders`) — so every
+					// voidable sale already has a `PaidIn` cash-ledger entry
+					// (Finding A) sitting in `netCashMovements` for its full
+					// proceeds. `pr3-returns.md` describes void as "a full
+					// compensation," explicitly distinct from receipt reissue,
+					// which the same spec marks "no monetary effect" — so void
+					// must reverse that same cash-in on the SAME authoritative
+					// ledger `closeRegister`/`currentExpectedCashMinor` reads,
+					// exactly as `approveRefund` reverses a sale's proceeds via
+					// its own `Refund`/`PaidOut` posting. Without this, the
+					// voided sale's `PaidIn` entry stays in the ledger forever
+					// and `closeRegister` overstates expected cash by exactly
+					// the voided sale's proceeds for the rest of the session —
+					// a direct violation of Finding A's own closing criterion.
+					// Reuses Finding E's fail-closed guard
+					// (`requireCashOutWithinExpectedCash`), checked and posted
+					// BEFORE the Inventory reversal, numbering allocation, or
+					// any receipt/Return write below — not merely before the
+					// cash-ledger row itself — so a rejected void leaves
+					// GENUINELY zero side effects rather than relying solely
+					// on the surrounding DB transaction's rollback to erase
+					// work already dispatched to other ports. Posts under
+					// `reasonCode: "Refund"` (the schema's existing reason for
+					// a cash-out compensating a prior sale — `approveRefund`
+					// uses the same code for the same reason) with
+					// `referenceId: returnId` naming this void's own Return
+					// record, and mirrors `completeSale`'s own zero-amount
+					// guard: a void with nothing left to refund (a
+					// fully-discounted remainder) posts no ledger row.
+					if (totalRefundableMinor > 0) {
+						const expectedCashBeforeVoid = await currentExpectedCashMinor(
+							repository,
+							input.tenantId,
+							session
+						);
+						requireCashOutWithinExpectedCash(
+							expectedCashBeforeVoid,
+							totalRefundableMinor
+						);
+						const voidCashMovementId = options.ids.create("movement");
+						const voidCashMovement = await repository.createCashMovement({
+							actorPartyId,
+							actorUserId: input.actorUserId,
+							amountMinor: totalRefundableMinor,
+							createdAt: now,
+							currency: sale.currency,
+							direction: "PaidOut",
+							id: voidCashMovementId,
+							note: "Void of completed sale",
+							organizationId: input.organizationId,
+							reasonCode: "Refund",
+							referenceId: returnId,
+							registerId: sale.registerId,
+							sessionId: session.id,
+							tenantId: input.tenantId,
+						});
+						await events.append(
+							event({
+								actorUserId: input.actorUserId,
+								aggregateId: voidCashMovement.id,
+								capabilityId: "commerce.cash-management",
+								correlationId: input.correlationId,
+								data: {
+									actorPartyId,
+									amountMinor: voidCashMovement.amountMinor,
+									currency: voidCashMovement.currency,
+									direction: voidCashMovement.direction,
+									movementId: voidCashMovement.id,
+									reasonCode: voidCashMovement.reasonCode,
+									referenceId: voidCashMovement.referenceId,
+									registerId: voidCashMovement.registerId,
+								},
+								eventId: options.ids.create("event"),
+								idempotencyKey: `${input.idempotencyKey}:cash-movement`,
+								name: "commerce.cash-movement.posted.v1",
+								now,
+								organizationId: input.organizationId,
+								schemaRef:
+									"schemas/events/commerce.cash-movement.posted.v1.schema.json",
+								tenantId: input.tenantId,
+							})
+						);
+					}
 
 					await postReturnCompensatingMovements(inventory, sale, lines, {
 						actorUserId: input.actorUserId,
@@ -4820,10 +4923,7 @@ export function createPosService(options: PosServiceOptions) {
 						saleId: returnId,
 						tenantId: input.tenantId,
 					});
-					const totalRefundableMinor = lines.reduce(
-						(sum, line) => sum + line.lineTotalMinor,
-						0
-					);
+
 					const receiptId = options.ids.create("receipt");
 					const voidReceiptRecord = buildReturnReceiptRecord({
 						cashierPartyId: actorPartyId,

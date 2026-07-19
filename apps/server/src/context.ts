@@ -688,6 +688,15 @@ export interface PosApplication {
 		returnId: string;
 		sessionId: string;
 	}) => Promise<Return>;
+	/** WS3 remediation R3, Finding J (part 2): completes the
+	 * receipt-to-return path `getReceiptByNumber` starts. */
+	getSaleForReturn: (input: {
+		actorUserId: string;
+		contextId: string;
+		receiptNumber: string;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
 	holdSale: (input: {
 		actorUserId: string;
 		contextId: string;

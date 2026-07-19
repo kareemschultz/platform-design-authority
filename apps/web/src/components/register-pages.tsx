@@ -820,7 +820,6 @@ export function RegisterClosePage({
 								<PosTextField field={field} label="Reason (optional)" />
 							)}
 						</form.Field>
-						<MutationError error={close.error} isOnline={workspace.isOnline} />
 						<form.Subscribe
 							selector={(state) => ({
 								canSubmit: state.canSubmit,
@@ -858,6 +857,7 @@ export function RegisterClosePage({
 						)}
 					</form>
 					<ConsequencePreviewDialog
+						commitError={close.error}
 						confirming={close.isPending}
 						confirmLabel="Close register"
 						data={preview.data}
@@ -865,6 +865,7 @@ export function RegisterClosePage({
 						error={preview.error}
 						isError={preview.isError}
 						isLoading={preview.isLoading}
+						isOnline={workspace.isOnline}
 						onConfirm={() => {
 							commitClose().catch(() => undefined);
 						}}
@@ -1033,8 +1034,8 @@ function VarianceApprovalSection({
 					pending={approve.isPending}
 				/>
 			)}
-			<MutationError error={approve.error} isOnline={workspace.isOnline} />
 			<ConsequencePreviewDialog
+				commitError={approve.error}
 				confirming={approve.isPending}
 				confirmLabel="Approve variance"
 				data={preview.data}
@@ -1042,6 +1043,7 @@ function VarianceApprovalSection({
 				error={preview.error}
 				isError={preview.isError}
 				isLoading={preview.isLoading}
+				isOnline={workspace.isOnline}
 				onConfirm={() => {
 					commitApproveVariance().catch(() => undefined);
 				}}

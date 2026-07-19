@@ -6,7 +6,7 @@ import { Input } from "@meridian/ui-web/components/input";
 import { Label } from "@meridian/ui-web/components/label";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import { useForm } from "@tanstack/react-form";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ import {
 	toSaleLineInput,
 } from "@/lib/pos";
 import { workspaceWorkState } from "@/lib/workspace-change";
-import { orpc } from "@/utils/orpc";
+import { client, orpc } from "@/utils/orpc";
 import {
 	MutationError,
 	OperationsPageFrame,
@@ -116,7 +116,6 @@ function ProductLookup({
 		staleTime: 5000,
 	});
 
-	const queryClient = useQueryClient();
 	const barcodeInputRef = useRef<HTMLInputElement | null>(null);
 	// WS3 remediation R3, Finding F (barcode race) + second independent
 	// review's supplemental requirement (accessible scan announcements).
@@ -130,22 +129,29 @@ function ProductLookup({
 		}
 		try {
 			// Awaits the lookup for THIS EXACT scanned value directly, via
-			// an imperative fetchQuery — never reads the reactive `results`
-			// query's `data`, which reflects whatever barcode is CURRENTLY
-			// in the input, not necessarily the one this Enter press
-			// scanned. Two scans fired in quick succession (a slow lookup
-			// for barcode A immediately followed by a fast one for barcode
-			// B) therefore always resolve independently: each `scanBarcode`
-			// call acts only on its own awaited response, so a late-
-			// arriving response for A can never be mistaken for B's result
-			// (or vice versa) regardless of network resolution order.
-			const data = await queryClient.fetchQuery({
-				...orpc.catalog.products.list.queryOptions({
-					input: {
-						headers: { "x-active-context-id": contextId },
-						query: { barcode: scannedValue, limit: 10, state: "Active" },
-					},
-				}),
+			// the RAW oRPC client (`client`, not `queryClient.fetchQuery`) —
+			// a genuinely standalone request outside TanStack Query's cache/
+			// observer system, never reads the reactive `results` query's
+			// `data`. This matters for two independent reasons: (1) `data`
+			// reflects whatever barcode is CURRENTLY in the input, not
+			// necessarily the one this Enter press scanned — two scans
+			// fired in quick succession (a slow lookup for barcode A
+			// immediately followed by a fast one for barcode B) must
+			// resolve independently, so a late-arriving response for A can
+			// never be mistaken for B's result regardless of network
+			// resolution order; and (2) `queryClient.fetchQuery` for the
+			// SAME queryKey the reactive `results` query is ALSO using
+			// (typed-then-scanned) would share that query's in-flight
+			// retryer — when Enter synchronously clears `barcode` state and
+			// disables the reactive observer, TanStack Query can ABORT that
+			// shared fetch with no other observer left to keep it alive,
+			// even though this scan's own await is still on it (caught
+			// directly: a real, request-timing-dependent regression, not
+			// hypothetical). A raw, uncached client call has no observer to
+			// lose and nothing for a sibling query's lifecycle to cancel.
+			const data = await client.catalog.products.list({
+				headers: { "x-active-context-id": contextId },
+				query: { barcode: scannedValue, limit: 10, state: "Active" },
 			});
 			const outcome = resolveBarcodeScan(data.items);
 			if (outcome.kind === "added") {

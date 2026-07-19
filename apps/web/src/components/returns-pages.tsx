@@ -13,7 +13,6 @@ import { z } from "zod";
 import {
 	formatMoneyMinor,
 	isKnownSelfApproval,
-	loadSaleWorkspace,
 	outstandingReturnableQuantity,
 	recordCreatedResource,
 	recordMakerActor,
@@ -71,16 +70,25 @@ function SaleLineReturnRow({
 	);
 }
 
-/** Validates only the return form's own field. Sale ID is looked up via
- * separate page-level state (`useState`, not a `form.Field`) — the form
- * itself is gated on `sale && sale.state === "Completed"` already being
- * true before it renders, so a Sale ID requirement in this schema would
- * validate a key the form's value object never contains and block every
- * submission unconditionally. */
+/** Validates only the return form's own field. The sale to return against is
+ * looked up via separate page-level state (`useState`, not a `form.Field`)
+ * — the form itself is gated on `sale && sale.state === "Completed"`
+ * already being true before it renders, so a lookup-key requirement in this
+ * schema would validate a key the form's value object never contains and
+ * block every submission unconditionally. */
 const ReturnFormSchema = z.object({
 	reason: z.string().min(1, "A reason is required").max(500),
 });
 
+/** WS3 remediation R3, Finding J: `receiptNumber` + `registerId` — the SAME
+ * two values `ReceiptLayout` prints on every receipt (the title and the
+ * "Register:" line) — resolved through `commerce.sales.getForReturn`
+ * (gated on `commerce.return.create`, the permission this whole page
+ * requires) rather than an opaque Sale ID a cashier can only have if it
+ * happens to still be cached in THEIR OWN browser's sessionStorage. This
+ * closes the receipt-to-return dead end: a fresh browser with no prior
+ * session for this sale can still start a return, using only what a real
+ * printed receipt shows. */
 export function ReturnNewPage() {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
@@ -88,18 +96,24 @@ export function ReturnNewPage() {
 		orpc.commerce.returns.create.mutationOptions(),
 		workspace.isOnline
 	);
-	const [saleId, setSaleId] = useState("");
-	const [sale, setSale] = useState<Sale | null | undefined>(undefined);
+	const [registerId, setRegisterId] = useState("");
+	const [receiptNumber, setReceiptNumber] = useState("");
 	const [selections, setSelections] = useState<Record<string, string>>({});
 	const [created, setCreated] = useState<Return | null>(null);
 
-	useEffect(() => {
-		if (!saleId) {
-			setSale(undefined);
-			return;
-		}
-		setSale(loadSaleWorkspace(saleId));
-	}, [saleId]);
+	const saleLookup = useQuery({
+		...orpc.commerce.sales.getForReturn.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				params: { receiptNumber, registerId },
+			},
+		}),
+		enabled: Boolean(
+			workspace.contextId && registerId.trim() && receiptNumber.trim()
+		),
+		retry: false,
+	});
+	const sale: Sale | undefined = saleLookup.data;
 
 	const form = useForm({
 		defaultValues: { reason: "" },
@@ -156,24 +170,42 @@ export function ReturnNewPage() {
 
 	return (
 		<OperationsPageFrame
-			description="Realizes commerce.return.create. Enter the Sale ID from the original receipt — this browser can only look up a sale it completed or previously cached locally (no commerce.sale.* read endpoint is registered in this contract surface)."
+			description="Realizes commerce.return.create. Enter the register and receipt number printed on the customer's receipt — both are shown on every receipt (the title and the &quot;Register:&quot; line) — to look up the original sale. Works from a fresh browser with no prior local cache of this sale."
 			title="Create a return"
 		>
 			<div className="grid gap-6">
 				<PosSectionCard title="Original sale lookup">
-					<div className="grid max-w-md gap-1">
-						<Label htmlFor="return-sale-id">Sale ID</Label>
-						<Input
-							autoFocus
-							id="return-sale-id"
-							onChange={(event) => setSaleId(event.target.value.trim())}
-							value={saleId}
-						/>
+					<div className="grid max-w-md gap-4 sm:grid-cols-2">
+						<div className="grid gap-1">
+							<Label htmlFor="return-register-id">Register</Label>
+							<Input
+								autoFocus
+								id="return-register-id"
+								onChange={(event) => setRegisterId(event.target.value.trim())}
+								value={registerId}
+							/>
+						</div>
+						<div className="grid gap-1">
+							<Label htmlFor="return-receipt-number">Receipt number</Label>
+							<Input
+								id="return-receipt-number"
+								onChange={(event) =>
+									setReceiptNumber(event.target.value.trim())
+								}
+								value={receiptNumber}
+							/>
+						</div>
 					</div>
-					{saleId && sale === null ? (
-						<p className="mt-3 text-muted-foreground text-sm">
-							This sale is not available in this browser. Ask the cashier who
-							completed it to process the return from that browser.
+					{saleLookup.isFetching ? (
+						<p className="mt-3 text-muted-foreground text-sm" role="status">
+							Looking up the sale for this receipt…
+						</p>
+					) : null}
+					{saleLookup.isError ? (
+						<p className="mt-3 text-destructive text-sm" role="alert">
+							No sale was found for register {registerId}, receipt{" "}
+							{receiptNumber}. Check both values against the printed receipt and
+							try again.
 						</p>
 					) : null}
 				</PosSectionCard>
@@ -340,8 +372,8 @@ export function ReturnApprovePage() {
 						</Button>
 					</div>
 				)}
-				<MutationError error={approve.error} isOnline={workspace.isOnline} />
 				<ConsequencePreviewDialog
+					commitError={approve.error}
 					confirming={approve.isPending}
 					confirmLabel="Approve return"
 					data={preview.data}
@@ -349,6 +381,7 @@ export function ReturnApprovePage() {
 					error={preview.error}
 					isError={preview.isError}
 					isLoading={preview.isLoading}
+					isOnline={workspace.isOnline}
 					onConfirm={() => {
 						commitApproveReturn().catch(() => undefined);
 					}}

@@ -354,12 +354,13 @@ describe("WS3 POS Cash Workflow API contract", () => {
 		);
 
 		expect(actual).toEqual(expected);
-		// WS3 remediation R3, Findings I and J: +6 pre-commit consequence-
+		// WS3 remediation R3, Findings I and J: +7 pre-commit consequence-
 		// preview / receipt-to-return-lookup reads (getReturnsByReturnId,
 		// getRefundsByRefundId, getDepositsByDepositId,
 		// getRegisterSessionsBySessionId, getCashVariancesByVarianceId,
-		// getRegistersByRegisterIdReceiptsByReceiptNumber), 21 -> 27.
-		expect(actual).toHaveLength(27);
+		// getRegistersByRegisterIdReceiptsByReceiptNumber,
+		// getRegistersByRegisterIdReceiptsByReceiptNumberSale), 21 -> 28.
+		expect(actual).toHaveLength(28);
 	});
 
 	test("every PR3 operation declares a commerce.return/refund/receipt permission, never a bare authenticated-session read", () => {

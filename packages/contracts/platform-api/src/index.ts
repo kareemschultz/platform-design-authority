@@ -1219,6 +1219,44 @@ export const getReceiptByNumberContract = base
 	)
 	.output(ReceiptSchema);
 
+/** WS3 remediation R3, Finding J (part 2): completes the receipt-to-return
+ * path `getReceiptByNumberContract` starts. `CreateReturnSchema` requires a
+ * real `saleLineId` per line (matched server-side against the Sale's own
+ * line records — `buildReturnLines` in `packages/domains/pos/src/index.ts`),
+ * and `ReceiptLineSnapshot` carries no line id (an immutable point-in-time
+ * receipt snapshot, not a live Sale projection) — so a receiptNumber ->
+ * Receipt resolution alone can never populate a return form. Gated on
+ * `commerce.return.create`, the permission the return this preview leads to
+ * actually requires (mirroring Finding I's "the consuming mutation's own
+ * permission also authorizes the preview read" pattern), not
+ * `commerce.receipt.read` — one permission covers the whole
+ * receipt-to-return path, avoiding a second permission seam a
+ * return-creating role might not separately hold. No new permission
+ * invented; reuses the existing `commerce.return.create` from
+ * `registry/permissions.json`. */
+export const getSaleForReturnContract = base
+	.route({
+		method: "GET",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}/sale",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumberSale",
+		permission: "commerce.return.create",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({
+				receiptNumber: z.string().min(1).max(200),
+				registerId: IdentifierSchema,
+			}),
+		})
+	)
+	.output(SaleSchema);
+
 // ---------------------------------------------------------------------------
 // WS3 PR3: Return, Refund, Void, Reissue. Exchange has no dedicated
 // contract — it rides `completeSaleContract`'s `exchangeOfReturnId` (§6.5).
@@ -2054,6 +2092,7 @@ export const ws3PosApiContract = {
 		sales: {
 			complete: completeSaleContract,
 			create: createSaleContract,
+			getForReturn: getSaleForReturnContract,
 			hold: holdSaleContract,
 		},
 	},
@@ -2212,6 +2251,7 @@ export const WS3_OPERATION_IDS = [
 	"getRegisterSessionsBySessionId",
 	"getCashVariancesByVarianceId",
 	"getRegistersByRegisterIdReceiptsByReceiptNumber",
+	"getRegistersByRegisterIdReceiptsByReceiptNumberSale",
 ] as const;
 
 export const WS3_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(

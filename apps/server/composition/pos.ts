@@ -204,6 +204,7 @@ export const posTransportApplication = {
 	getRefund: posApplication.getRefund,
 	getRegisterSession: posApplication.getRegisterSession,
 	getReturn: posApplication.getReturn,
+	getSaleForReturn: posApplication.getSaleForReturn,
 	holdSale: posApplication.holdSale,
 	openRegister: posApplication.openRegister,
 	reissueReceipt: posApplication.reissueReceipt,

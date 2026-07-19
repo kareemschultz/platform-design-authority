@@ -108,6 +108,7 @@ function context(input?: {
 			getRefund: () => Promise.reject(new Error("not used")),
 			getRegisterSession: () => Promise.reject(new Error("not used")),
 			getReturn: () => Promise.reject(new Error("not used")),
+			getSaleForReturn: () => Promise.reject(new Error("not used")),
 			getStockCount: () => Promise.reject(new Error("not used")),
 			getStockTransfer: () => Promise.reject(new Error("not used")),
 			holdSale: () => Promise.reject(new Error("not used")),
@@ -258,6 +259,7 @@ describe("appRouter contract surface", () => {
 		expect(Object.keys(appRouter.commerce.sales).sort()).toEqual([
 			"complete",
 			"create",
+			"getForReturn",
 			"hold",
 		]);
 		expect(Object.keys(appRouter.commerce.priceOverrides).sort()).toEqual([

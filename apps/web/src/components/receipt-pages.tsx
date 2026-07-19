@@ -155,10 +155,6 @@ function VoidReceiptSection({ receipt }: { receipt: Receipt }) {
 				<form.Field name="reason">
 					{(field) => <PosTextField field={field} label="Reason (optional)" />}
 				</form.Field>
-				<MutationError
-					error={voidMutation.error}
-					isOnline={workspace.isOnline}
-				/>
 				<Button
 					className="w-fit"
 					disabled={voidMutation.isPending || !workspace.isOnline}
@@ -169,13 +165,15 @@ function VoidReceiptSection({ receipt }: { receipt: Receipt }) {
 				</Button>
 			</form>
 			<ConsequencePreviewDialog
+				commitError={voidMutation.error}
 				confirming={voidMutation.isPending}
 				confirmLabel="Void receipt"
 				data={receipt}
 				description="This reverses the original sale and cannot be undone from this screen."
-				error={voidMutation.error}
+				error={undefined}
 				isError={false}
 				isLoading={false}
+				isOnline={workspace.isOnline}
 				onConfirm={() => {
 					commitVoid().catch(() => undefined);
 				}}

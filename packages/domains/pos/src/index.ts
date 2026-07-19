@@ -4547,6 +4547,51 @@ export function createPosService(options: PosServiceOptions) {
 			return returnView(record);
 		},
 
+		/** WS3 remediation R3, Finding J (part 2): resolves a receiptNumber +
+		 * registerId (both printed on `ReceiptLayout`) all the way to the
+		 * originating Sale — `getReceiptByNumber` above stops at the Receipt,
+		 * which is not enough to build a return (see the contract's doc
+		 * comment). Mirrors `requireVoidableSale`'s exact
+		 * "receipt.kind !== 'Sale' || !receipt.saleId" validity check, and
+		 * `createReturn`'s own `repository.getSale(..., locationId)` call —
+		 * a location-scoped actor previewing a sale here sees exactly the
+		 * scope they could actually return against. */
+		getSaleForReturn(
+			tenantId: string,
+			organizationId: string,
+			locationId: string | undefined,
+			registerId: string,
+			receiptNumber: string
+		): Promise<SaleView> {
+			return options.unitOfWork.execute(async ({ repository }) => {
+				const receipt = await repository.getReceiptByNumber(
+					tenantId,
+					organizationId,
+					registerId,
+					receiptNumber
+				);
+				if (!receipt) {
+					throw new PosError("not_found", "Receipt was not found");
+				}
+				if (receipt.kind !== "Sale" || !receipt.saleId) {
+					throw new PosError(
+						"invalid_state",
+						"Only a Sale receipt has a returnable sale"
+					);
+				}
+				const sale = await repository.getSale(
+					tenantId,
+					organizationId,
+					receipt.saleId,
+					locationId
+				);
+				if (!sale) {
+					throw new PosError("not_found", "Sale was not found");
+				}
+				return saleView(sale);
+			});
+		},
+
 		async holdSale(input: {
 			actorUserId: string;
 			correlationId: string;
@@ -5897,6 +5942,36 @@ export function createPosApplication(options: {
 				context.tenantId,
 				context.organizationId,
 				input.returnId
+			);
+		},
+		/** WS3 remediation R3, Finding J (part 2): completes the
+		 * receipt-to-return path — gated on `commerce.return.create` (the
+		 * permission the return this preview leads to actually requires),
+		 * matching Finding I's "the consuming mutation's own permission also
+		 * authorizes the preview read" pattern, not `commerce.receipt.read`.
+		 * See the contract's doc comment for why a second Receipt-only
+		 * lookup cannot substitute for this. */
+		async getSaleForReturn(input: {
+			actorUserId: string;
+			contextId: string;
+			receiptNumber: string;
+			registerId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.returns",
+				contextId: input.contextId,
+				permission: "commerce.return.create",
+				sessionId: input.sessionId,
+			});
+			return options.service.getSaleForReturn(
+				context.tenantId,
+				context.organizationId,
+				context.locationId,
+				input.registerId,
+				input.receiptNumber
 			);
 		},
 		async holdSale(input: {

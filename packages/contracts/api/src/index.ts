@@ -624,6 +624,12 @@ export const ENDPOINTS = [
 		permission: "commerce.receipt.read",
 	},
 	{
+		method: "GET",
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumberSale",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}/sale",
+		permission: "commerce.return.create",
+	},
+	{
 		method: "POST",
 		operationId: "postRegistersByRegisterIdSafeDrops",
 		path: "/v1/registers/{registerId}/safe-drops",

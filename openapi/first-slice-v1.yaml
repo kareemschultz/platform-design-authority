@@ -1732,6 +1732,20 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Receipt'}
+  /registers/{registerId}/receipts/{receiptNumber}/sale:
+    get:
+      tags: [Commerce]
+      operationId: getRegistersByRegisterIdReceiptsByReceiptNumberSale
+      x-permission: commerce.return.create
+      parameters:
+        - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: receiptNumber, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding J - completes the receipt-to-return path the sibling receiptNumber lookup starts. `CreateReturnSchema` requires per-line `saleLineId`, which `ReceiptLineSnapshot` never carries (an immutable receipt snapshot, not a live sale projection) - so resolving only as far as the Receipt's `saleId` is not enough to build a return. Gated on `commerce.return.create` (the permission the return this preview leads to actually requires), not `commerce.receipt.read`, so a single permission check covers the whole receipt-to-return path with no second permission seam. Returns the full Sale (with real `lines[].id`) a returnable Sale-kind receipt resolves to.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
   /receipts/{receiptId}/reissue:
     post:
       tags: [Commerce]

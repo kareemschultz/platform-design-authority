@@ -650,6 +650,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		successStatus: 200,
 	},
 	{
+		method: "GET",
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumberSale",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}/sale",
+		permission: "commerce.return.create",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	},
+	{
 		method: "POST",
 		operationId: "postRegistersByRegisterIdSafeDrops",
 		path: "/v1/registers/{registerId}/safe-drops",

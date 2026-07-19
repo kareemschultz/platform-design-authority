@@ -27,6 +27,31 @@ const CASHIER_EMAIL = "ws3-cashier@example.test";
 const CASHIER_PASSWORD = "WS3-browser-cashier-verification-password-0001";
 const RECEIPT_URL_PATTERN = /\/operations\/pos\/receipts\//;
 const EXPORT_DOWNLOAD_FILENAME_PATTERN = /^accountant-handoff-.*\.json$/;
+const RECEIPT_NUMBER_DISCLOSURE_PATTERN =
+	/receipt number printed on the customer's receipt/;
+const SALE_ID_TEXT_PATTERN = /Sale ID/;
+const RECEIPT_HEADING_NAME_PATTERN = /^Receipt\s+\S+/;
+const RECEIPT_HEADING_PREFIX_PATTERN = /^Receipt\s+/;
+const REGISTER_LINE_PREFIX_PATTERN = /^Register:\s*/;
+const CONNECTION_REQUIRED_PATTERN = /connection/i;
+
+/** Computes a valid GTIN-13 check digit for a 12-digit base, replicating
+ * `packages/domains/catalog/src/index.ts`'s `gtinCheckDigitIsValid` exactly
+ * (weight 3 on the digit immediately left of the check digit, alternating
+ * with weight 1, summed right-to-left over the 12 base digits) — the
+ * product-create form's default "GTIN scheme" is GTIN-13, which requires
+ * BOTH exact 13-digit length AND a checksum-valid value; an arbitrary
+ * digit string (e.g. a raw timestamp) fails validation with "Identifier
+ * does not satisfy its declared GTIN scheme". */
+function gtin13(base12: string): string {
+	const digits = [...base12].map(Number).reverse();
+	const sum = digits.reduce(
+		(total, digit, index) => total + digit * (index % 2 === 0 ? 3 : 1),
+		0
+	);
+	const checkDigit = (10 - (sum % 10)) % 10;
+	return `${base12}${checkDigit}`;
+}
 
 async function signIn(
 	page: Page,
@@ -143,12 +168,26 @@ test("register close with a matching count closes immediately at zero variance",
 		page.getByRole("heading", { name: "Close register" })
 	).toBeVisible();
 	await page.getByLabel("Counted cash (GYD)").fill("80.00");
+	// WS3 remediation R3, Finding I: close-register is now a two-step
+	// review/confirm flow — "Review & close register" opens the
+	// consequence-preview dialog (server-derived expected cash), and the
+	// actual commerce.register.close mutation fires only from the dialog's
+	// own "Close register" confirm control.
+	await page.getByRole("button", { name: "Review & close register" }).click();
+	await expect(
+		page.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
+	const closeCommitButton = page.getByRole("button", {
+		exact: true,
+		name: "Close register",
+	});
+	await expect(closeCommitButton).toBeEnabled();
 	const closeResponsePromise = page.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/registers/close")
 	);
-	await page.getByRole("button", { name: "Close register" }).click();
+	await closeCommitButton.click();
 	const closeResponse = await closeResponsePromise;
 	expect(closeResponse.ok()).toBe(true);
 	await expect(
@@ -165,12 +204,23 @@ test("register close with a mismatched count requires a second identity's cash-v
 	const sessionId = await openRegister(makerPage, registerId, "80.00");
 	await makerPage.goto(`/operations/pos/registers/${sessionId}/close`);
 	await makerPage.getByLabel("Counted cash (GYD)").fill("70.00");
+	await makerPage
+		.getByRole("button", { name: "Review & close register" })
+		.click();
+	await expect(
+		makerPage.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
+	const makerCloseCommitButton = makerPage.getByRole("button", {
+		exact: true,
+		name: "Close register",
+	});
+	await expect(makerCloseCommitButton).toBeEnabled();
 	const closeResponsePromise = makerPage.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/registers/close")
 	);
-	await makerPage.getByRole("button", { name: "Close register" }).click();
+	await makerCloseCommitButton.click();
 	const closeResponse = await closeResponsePromise;
 	expect(closeResponse.ok()).toBe(true);
 	await expect(
@@ -184,7 +234,7 @@ test("register close with a mismatched count requires a second identity's cash-v
 		)
 	).toBeVisible();
 	await expect(
-		makerPage.getByRole("button", { name: "Approve variance" })
+		makerPage.getByRole("button", { name: "Review & approve variance" })
 	).toHaveCount(0);
 	const body = (await closeResponse.json()) as {
 		json: { id: string; version: number };
@@ -209,12 +259,23 @@ test("register close with a mismatched count requires a second identity's cash-v
 		.getByLabel("Variance / register session ID")
 		.fill(body.json.id);
 	await checkerPage.getByLabel("Version").fill(String(body.json.version));
+	await checkerPage
+		.getByRole("button", { name: "Review & approve variance" })
+		.click();
+	await expect(
+		checkerPage.getByRole("heading", { name: "Approve this cash variance?" })
+	).toBeVisible();
+	const varianceCommitButton = checkerPage.getByRole("button", {
+		exact: true,
+		name: "Approve variance",
+	});
+	await expect(varianceCommitButton).toBeEnabled();
 	const approveResponsePromise = checkerPage.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/cashVariances/approve")
 	);
-	await checkerPage.getByRole("button", { name: "Approve variance" }).click();
+	await varianceCommitButton.click();
 	const approveResponse = await approveResponsePromise;
 	expect(approveResponse.ok()).toBe(true);
 	await expect(
@@ -244,20 +305,34 @@ test("a cashier without commerce.register.close is denied closing their own regi
 	const body = (await openResponse.json()) as { json: { id: string } };
 	await page.goto(`/operations/pos/registers/${body.json.id}/close`);
 	await page.getByLabel("Counted cash (GYD)").fill("50.00");
-	const closeResponsePromise = page.waitForResponse(
+	// WS3 remediation R3, Finding I: the pre-commit consequence-preview read
+	// (`getRegisterSession`) is gated on the SAME `commerce.register.close`
+	// permission the commit itself requires — a cashier without it is
+	// denied at the PREVIEW step, before `commerce.register.close` (the
+	// actual commit) is ever attempted. The dialog surfaces the SAME
+	// non-disclosing "Permission denied" copy the rest of the app uses
+	// (Finding G's dialog-error fix), and the commit control stays
+	// disabled throughout — it can never be clicked to fire the mutation.
+	const previewResponsePromise = page.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
-			response.url().endsWith("/rpc/commerce/registers/close")
+			response.url().endsWith("/rpc/commerce/registerSessions/get")
 	);
-	await page.getByRole("button", { name: "Close register" }).click();
-	const closeResponse = await closeResponsePromise;
-	expect(closeResponse.status()).toBe(403);
+	await page.getByRole("button", { name: "Review & close register" }).click();
+	const previewResponse = await previewResponsePromise;
+	expect(previewResponse.status()).toBe(403);
+	await expect(
+		page.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
 	await expect(page.getByText("Permission denied")).toBeVisible();
 	await expect(
 		page.getByText(
 			"Your current role or scope does not permit this change. No change was applied."
 		)
 	).toBeVisible();
+	await expect(
+		page.getByRole("button", { exact: true, name: "Close register" })
+	).toBeDisabled();
 });
 
 test("register session view records a paid-out movement and decreases the running expected-cash tally", async ({
@@ -401,7 +476,8 @@ async function seedProductStock(
  * `seedProductStock`). */
 async function createActiveProduct(
 	page: Page,
-	label: string
+	label: string,
+	barcode?: string
 ): Promise<{ id: string; name: string }> {
 	const productName = `WS3 POS ${label} ${Date.now()}`;
 	await page.goto("/operations/products/new");
@@ -410,6 +486,9 @@ async function createActiveProduct(
 	).toBeVisible();
 	await page.getByLabel("Product name").fill(productName);
 	await page.getByLabel("Variant name").fill("Default");
+	if (barcode) {
+		await page.getByLabel("Barcode (optional)").fill(barcode);
+	}
 	const createResponsePromise = page.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
@@ -480,6 +559,40 @@ async function createSaleWithOneLine(
 	return body.json;
 }
 
+/** WS3 remediation R3, Finding J: reads ONLY what `ReceiptLayout` actually
+ * prints — the `receiptNumber` (the section heading, e.g. "Receipt
+ * RCPT-000123") and `registerId` (the "Register: …" line) — never the
+ * `receiptId` in the URL or the Sale ID a real paper/PDF receipt never
+ * shows. Simulates a cashier reading their own printed receipt to start a
+ * return, not a browser with the sale's opaque IDs still in memory. */
+async function readPrintedReceiptReference(
+	page: Page,
+	receiptId: string
+): Promise<{ receiptNumber: string; registerId: string }> {
+	await page.goto(`/operations/pos/receipts/${encodeURIComponent(receiptId)}`);
+	const receiptHeading = await page
+		.getByRole("heading", { name: RECEIPT_HEADING_NAME_PATTERN })
+		.first()
+		.textContent();
+	const receiptNumber = (receiptHeading ?? "")
+		.replace(RECEIPT_HEADING_PREFIX_PATTERN, "")
+		.trim();
+	if (!receiptNumber) {
+		throw new Error("Could not read a receiptNumber off the receipt view");
+	}
+	const registerLine = await page
+		.locator("p", { hasText: "Register:" })
+		.first()
+		.textContent();
+	const registerId = (registerLine ?? "")
+		.replace(REGISTER_LINE_PREFIX_PATTERN, "")
+		.trim();
+	if (!registerId) {
+		throw new Error("Could not read a registerId off the receipt view");
+	}
+	return { receiptNumber, registerId };
+}
+
 test("full cash sale: open register, complete a sale, view the receipt, close the register at zero variance", async ({
 	page,
 }) => {
@@ -536,17 +649,133 @@ test("full cash sale: open register, complete a sale, view the receipt, close th
 		page.getByRole("heading", { name: "Close register" })
 	).toBeVisible();
 	await page.getByLabel("Counted cash (GYD)").fill(expectedCashMajor);
+	await page.getByRole("button", { name: "Review & close register" }).click();
+	await expect(
+		page.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
+	const fullSaleCloseCommitButton = page.getByRole("button", {
+		exact: true,
+		name: "Close register",
+	});
+	await expect(fullSaleCloseCommitButton).toBeEnabled();
 	const closeResponsePromise = page.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/registers/close")
 	);
-	await page.getByRole("button", { name: "Close register" }).click();
+	await fullSaleCloseCommitButton.click();
 	const closeResponse = await closeResponsePromise;
 	expect(closeResponse.ok()).toBe(true);
 	await expect(
 		page.getByRole("heading", { name: "Register closed" })
 	).toBeVisible();
+});
+
+/**
+ * WS3 remediation R3, Finding F: the barcode-scan race. PRE-FIX,
+ * `ProductLookup`'s Enter handler read `results.data` — a single shared
+ * `useQuery` keyed off whatever barcode was CURRENTLY in the input at the
+ * instant of the read, not the barcode that was scanned. Firing a slow
+ * lookup for barcode A immediately followed by a fast lookup for barcode B
+ * would, pre-fix, resolve however the last-settled response happened to
+ * shape `results.data` at read time — concretely, if A's slower response
+ * arrived after B's synchronous `results.data` read already fired for B
+ * (or vice versa depending on exact timing), a scan could add the WRONG
+ * product or silently add nothing, because the code had no way to bind a
+ * specific response back to the specific scan that triggered it. This test
+ * proves the POST-fix behavior instead: intercepting the real network
+ * layer and deliberately delaying barcode A's response LONGER than barcode
+ * B's, firing A then B in quick succession, and asserting the cart ends up
+ * with exactly one line for A's product and exactly one line for B's
+ * product — never swapped, never merged, never dropped — because each scan
+ * now awaits its OWN `queryClient.fetchQuery` keyed to its OWN scanned
+ * value (`apps/web/src/components/sale-pages.tsx` `scanBarcode`).
+ */
+test("barcode scan race: a slow response for an earlier scan can never be mistaken for a later scan's product", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const base12 = String(Date.now()).slice(0, 12);
+	const barcodeA = gtin13(base12);
+	const barcodeB = gtin13(
+		`${base12.slice(0, 11)}${(Number(base12.slice(11)) + 1) % 10}`
+	);
+	const registerId = `register_barcode_race_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+	const { name: productAName } = await createActiveProduct(
+		page,
+		"barcode-race-a",
+		barcodeA
+	);
+	const { name: productBName } = await createActiveProduct(
+		page,
+		"barcode-race-b",
+		barcodeB
+	);
+
+	await page.route("**/rpc/catalog/products/list", async (route) => {
+		const postData = route.request().postDataJSON() as {
+			json?: { query?: { barcode?: string } };
+		};
+		const scannedBarcode = postData.json?.query?.barcode;
+		if (scannedBarcode === barcodeA) {
+			// The earlier scan resolves LAST — the exact ordering that broke
+			// the pre-fix shared-query-state read.
+			await new Promise((resolve) => setTimeout(resolve, 700));
+		}
+		await route.continue();
+	});
+
+	await page.goto(
+		`/operations/pos/sales/new?registerId=${encodeURIComponent(registerId)}&registerSessionId=${encodeURIComponent(registerSessionId)}`
+	);
+	await expect(page.getByRole("heading", { name: "New sale" })).toBeVisible();
+
+	const barcodeInput = page.getByLabel("Scan or enter barcode");
+	// Fires the SLOW scan for A first, then — without waiting for it to
+	// settle — the FAST scan for B, reproducing the exact out-of-order
+	// resolution the pre-fix code could not handle.
+	await barcodeInput.fill(barcodeA);
+	await barcodeInput.press("Enter");
+	await barcodeInput.fill(barcodeB);
+	await barcodeInput.press("Enter");
+
+	// The scan-outcome aria-live region — a single element whose text
+	// changes with each outcome. `[aria-live="polite"]` alone also matches
+	// Sonner's toast-notification landmark region, so this is additionally
+	// scoped to the `<p>` tag ProductLookup actually renders.
+	const scanAnnouncement = page.locator('p[aria-live="polite"]');
+
+	// B resolves first (no artificial delay); its outcome must already be
+	// visible while A is still in flight.
+	await expect(scanAnnouncement).toContainText(`${productBName} added`);
+	await expect(
+		page.getByRole("list", { name: "Cart lines" }).getByRole("listitem")
+	).toHaveCount(1);
+
+	// A resolves after its artificial delay; the cart must then show BOTH
+	// products, each exactly once, neither swapped for the other.
+	await expect(scanAnnouncement).toContainText(`${productAName} added`, {
+		timeout: 5000,
+	});
+	const cartList = page.getByRole("list", { name: "Cart lines" });
+	await expect(cartList.getByRole("listitem")).toHaveCount(2);
+	await expect(cartList.getByText(productAName)).toHaveCount(1);
+	await expect(cartList.getByText(productBName)).toHaveCount(1);
+
+	// Scanner input focus is preserved after each outcome (second
+	// independent review's supplemental requirement) — the next physical
+	// scan can fire without a manual re-click.
+	await expect(barcodeInput).toBeFocused();
+
+	// An unknown barcode produces visible, accessible feedback — never
+	// silent nothing.
+	await barcodeInput.fill("0000000000000");
+	await barcodeInput.press("Enter");
+	await expect(scanAnnouncement).toContainText(
+		"No matching product for barcode 0000000000000"
+	);
+	await expect(cartList.getByRole("listitem")).toHaveCount(2);
 });
 
 test("sale hold and resume: a Held sale can be completed after navigating away and back", async ({
@@ -663,6 +892,141 @@ test("price-override request on a sale line, approved by a second identity, unbl
 	).toBeVisible();
 });
 
+/**
+ * WS3 remediation R3, Finding H: `PriceOverrideRequestForm` renders once
+ * PER SALE LINE inside `sale.lines.map(...)` (`sale-pages.tsx`). PRE-FIX,
+ * its fields used bare names ("requestedPrice"/"reason") with no per-line
+ * `id` — a second line's form would produce a SECOND `id="requestedPrice"`
+ * element, an HTML duplicate-id violation that corrupts `<label for>`
+ * association: the browser resolves every `<label for="requestedPrice">`
+ * to the FIRST matching input regardless of which `<li>` it is visually
+ * inside, so `getByLabel("Requested price (GYD)")` (and a screen reader's
+ * own label lookup) would always target line 1's input even when the user
+ * intends to edit line 2's. This test proves the POST-fix behavior: two
+ * sale lines, each with its own open price-override form, have fully
+ * independent, uniquely-identified fields — id, help/error association,
+ * and value state never cross-contaminate between lines.
+ */
+test("duplicate DOM ids: two sale lines each with an open price-override form have independent, uniquely-identified fields", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const registerId = `register_dup_id_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+	const { name: productAName } = await createActiveProduct(page, "dup-id-a");
+	const { name: productBName } = await createActiveProduct(page, "dup-id-b");
+
+	await page.goto(
+		`/operations/pos/sales/new?registerId=${encodeURIComponent(registerId)}&registerSessionId=${encodeURIComponent(registerSessionId)}`
+	);
+	await expect(page.getByRole("heading", { name: "New sale" })).toBeVisible();
+
+	const searchInput = page.getByLabel("Search by name or SKU");
+	const addButton = page.getByRole("button", { name: "Add" }).first();
+
+	const firstSearchResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/catalog/products/list")
+	);
+	await searchInput.fill(productAName);
+	await firstSearchResponsePromise;
+	await addButton.click();
+
+	const secondSearchResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/catalog/products/list")
+	);
+	await searchInput.fill(productBName);
+	await secondSearchResponsePromise;
+	await addButton.click();
+
+	const unitPriceInputs = page.getByLabel("Unit price (GYD)");
+	await expect(unitPriceInputs).toHaveCount(2);
+	await unitPriceInputs.nth(0).fill("10.00");
+	await unitPriceInputs.nth(1).fill("15.00");
+
+	const createResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/sales/create")
+	);
+	await page.getByRole("button", { name: "Create sale" }).click();
+	const createResponse = await createResponsePromise;
+	const createdSale = (await createResponse.json()) as {
+		json: { id: string; lines: Array<{ id: string; productName: string }> };
+	};
+	await expect(
+		page.getByRole("heading", { name: `Sale ${createdSale.json.id}` })
+	).toBeVisible();
+
+	const [line1, line2] = createdSale.json.lines;
+
+	// Unique DOM ids per line, derived from the line's own stable id.
+	const priceField1 = page.locator(
+		`#price-override-${line1.id}-requestedPrice`
+	);
+	const priceField2 = page.locator(
+		`#price-override-${line2.id}-requestedPrice`
+	);
+	const reasonField1 = page.locator(`#price-override-${line1.id}-reason`);
+	const reasonField2 = page.locator(`#price-override-${line2.id}-reason`);
+	await expect(priceField1).toHaveCount(1);
+	await expect(priceField2).toHaveCount(1);
+	await expect(reasonField1).toHaveCount(1);
+	await expect(reasonField2).toHaveCount(1);
+
+	// Correct accessible name / label association per line — a real
+	// screen-reader-equivalent lookup (`getByLabel`), not just a raw `id`
+	// check: each `<label for>` must resolve to ITS OWN line's input.
+	await expect(page.getByLabel("Requested price (GYD)").nth(0)).toHaveAttribute(
+		"id",
+		`price-override-${line1.id}-requestedPrice`
+	);
+	await expect(page.getByLabel("Requested price (GYD)").nth(1)).toHaveAttribute(
+		"id",
+		`price-override-${line2.id}-requestedPrice`
+	);
+
+	// Trigger validation errors independently on each line (empty
+	// requested-price + empty reason both fail their own schema) and
+	// assert the error-message elements are ALSO uniquely identified and
+	// correctly associated via aria-describedby — the supplemental
+	// requirement the label-only fix alone would not cover.
+	await priceField1.fill("-5.00");
+	const requestButtons = page.getByRole("button", { name: "Request override" });
+	await requestButtons.nth(0).click();
+	await expect(priceField1).toHaveAttribute("aria-invalid", "true");
+	const errorId1 = await priceField1.getAttribute("aria-describedby");
+	expect(errorId1).toBe(`price-override-${line1.id}-requestedPrice-error`);
+	await expect(page.locator(`#${errorId1}`)).toBeVisible();
+	// Line 2's field is untouched by line 1's invalid submission — no
+	// shared/duplicate error id, no cross-line validation bleed.
+	await expect(priceField2).not.toHaveAttribute("aria-invalid", "true");
+	await expect(
+		page.locator(`#price-override-${line2.id}-requestedPrice-error`)
+	).toHaveCount(0);
+
+	// Editing line 1's override value does not affect line 2's own value —
+	// fully independent state, not a shared/duplicate-id-corrupted field.
+	await priceField2.fill("99.00");
+	await expect(priceField1).toHaveValue("-5.00");
+	await expect(priceField2).toHaveValue("99.00");
+
+	// Keyboard tab order reaches both lines' price fields independently
+	// (each is a real, individually-focusable, uniquely-identified
+	// control — no duplicate id for the browser to collapse focus onto).
+	await priceField1.focus();
+	await expect(priceField1).toBeFocused();
+	await page.keyboard.press("Tab");
+	await expect(reasonField1).toBeFocused();
+	await priceField2.focus();
+	await expect(priceField2).toBeFocused();
+	await page.keyboard.press("Tab");
+	await expect(reasonField2).toBeFocused();
+});
+
 test("return flow: creating a return against a completed sale leaves it Pending with no inventory effect yet", async ({
 	page,
 }) => {
@@ -670,7 +1034,7 @@ test("return flow: creating a return against a completed sale leaves it Pending 
 	const registerId = `register_return_${Date.now()}`;
 	const registerSessionId = await openRegister(page, registerId, "100.00");
 	const { name: productName } = await createActiveProduct(page, "return");
-	const sale = await createSaleWithOneLine(
+	await createSaleWithOneLine(
 		page,
 		registerId,
 		registerSessionId,
@@ -684,13 +1048,21 @@ test("return flow: creating a return against a completed sale leaves it Pending 
 			response.url().includes("/rpc/commerce/sales/complete")
 	);
 	await page.getByRole("button", { name: "Complete sale" }).click();
-	await completeResponsePromise;
+	const completeResponse = await completeResponsePromise;
+	const completed = (await completeResponse.json()) as {
+		json: { receiptId: string };
+	};
+	const receiptReference = await readPrintedReceiptReference(
+		page,
+		completed.json.receiptId
+	);
 
 	await page.goto("/operations/pos/returns/new");
 	await expect(
 		page.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await page.getByLabel("Sale ID").fill(sale.id);
+	await page.getByLabel("Register").fill(receiptReference.registerId);
+	await page.getByLabel("Receipt number").fill(receiptReference.receiptNumber);
 	await expect(
 		page.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();
@@ -710,6 +1082,143 @@ test("return flow: creating a return against a completed sale leaves it Pending 
 	await expect(page.getByText("Pending", { exact: true })).toBeVisible();
 });
 
+/**
+ * WS3 remediation R3, Finding J: the receipt-to-return dead end. PRE-FIX,
+ * `ReturnNewPage` required a bare "Sale ID" text field with the disclosure
+ * "Enter the Sale ID from the original receipt" — but `ReceiptLayout` never
+ * prints a Sale ID (only `receiptNumber` and `registerId`), and the field
+ * resolved through `loadSaleWorkspace`, a THIS-BROWSER-ONLY
+ * `sessionStorage` read (`apps/web/src/lib/pos.ts`) with no server lookup
+ * behind it at all. A genuinely fresh browser context — a different device,
+ * or the same device after clearing storage, the way a real cashier
+ * starting a return days later would be — has no `sessionStorage` entry for
+ * a sale ANOTHER session created, so pre-fix code could not have completed
+ * this scenario at all: there was no field to even type a register/receipt
+ * number into, and even a correct Sale ID typed by hand would resolve to
+ * `null` (`loadSaleWorkspace` returns `null` for an unknown key), rendering
+ * "This sale is not available in this browser" and permanently dead-ending
+ * the flow. This test proves the POST-fix behavior instead: a brand new
+ * `browser.newContext()` (no cookies, no storage, nothing carried over from
+ * the browser that completed the sale) can still start and submit a return,
+ * using only `receiptNumber` + `registerId` — the two values a real printed
+ * receipt actually shows — resolved through the new
+ * `commerce.sales.getForReturn` server read.
+ */
+test("receipt-to-return: a fresh browser with no prior session for the sale can start a return using only what the printed receipt shows", async ({
+	browser,
+}) => {
+	test.setTimeout(60_000);
+
+	// Browser A: completes the sale and reads ONLY what a real receipt
+	// would print — never the receiptId in the URL, never the Sale ID.
+	const cashierContext = await browser.newContext();
+	const cashierPage = await cashierContext.newPage();
+	const registerId = `register_fresh_return_${Date.now()}`;
+	const registerSessionId = await openRegister(
+		cashierPage,
+		registerId,
+		"100.00"
+	);
+	const { name: productName } = await createActiveProduct(
+		cashierPage,
+		"fresh-return"
+	);
+	await createSaleWithOneLine(
+		cashierPage,
+		registerId,
+		registerSessionId,
+		productName,
+		"15.00"
+	);
+	await cashierPage.getByLabel("Cash tendered (GYD)").fill("20.00");
+	const completeResponsePromise = cashierPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().includes("/rpc/commerce/sales/complete")
+	);
+	await cashierPage.getByRole("button", { name: "Complete sale" }).click();
+	const completeResponse = await completeResponsePromise;
+	const completed = (await completeResponse.json()) as {
+		json: { receiptId: string };
+	};
+	const printedReference = await readPrintedReceiptReference(
+		cashierPage,
+		completed.json.receiptId
+	);
+	await cashierContext.close();
+
+	// Browser B: a genuinely separate context — no cookies, no
+	// sessionStorage, no IndexedDB carried over from browser A. Signs in
+	// fresh and starts a return using ONLY `printedReference`.
+	const freshContext = await browser.newContext();
+	const freshPage = await freshContext.newPage();
+	await signIn(freshPage, "/operations/pos/returns/new");
+	await selectLocation(freshPage, "Georgetown Browser Store");
+	await expect(
+		freshPage.getByRole("heading", { name: "Create a return" })
+	).toBeVisible();
+
+	// The disclosure copy names the printed values, never an opaque Sale
+	// ID — the smaller bug the same finding calls out.
+	await expect(
+		freshPage.getByText(RECEIPT_NUMBER_DISCLOSURE_PATTERN)
+	).toBeVisible();
+	await expect(freshPage.getByText(SALE_ID_TEXT_PATTERN)).toHaveCount(0);
+
+	const saleLookupResponsePromise = freshPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/sales/getForReturn")
+	);
+	await freshPage.getByLabel("Register").fill(printedReference.registerId);
+	await freshPage
+		.getByLabel("Receipt number")
+		.fill(printedReference.receiptNumber);
+	const saleLookupResponse = await saleLookupResponsePromise;
+	expect(saleLookupResponse.ok()).toBe(true);
+	await expect(
+		freshPage.getByRole("heading", { name: "Lines to return" })
+	).toBeVisible();
+	await expect(freshPage.getByText(productName)).toBeVisible();
+
+	await freshPage.getByLabel("Return quantity (0 = skip)").fill("1");
+	await freshPage
+		.getByLabel("Reason")
+		.fill("Fresh-browser receipt-to-return verification");
+	const returnResponsePromise = freshPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/create")
+	);
+	await freshPage.getByRole("button", { name: "Create return" }).click();
+	const returnResponse = await returnResponsePromise;
+	expect(returnResponse.ok()).toBe(true);
+	await expect(
+		freshPage.getByRole("heading", { name: "Return created" })
+	).toBeVisible();
+});
+
+test("receipt-to-return: an unknown register/receipt pair produces visible feedback, not a silent dead end", async ({
+	page,
+}) => {
+	await signIn(page, "/operations/pos/returns/new");
+	await selectLocation(page, "Georgetown Browser Store");
+	await expect(
+		page.getByRole("heading", { name: "Create a return" })
+	).toBeVisible();
+	await page.getByLabel("Register").fill("register_does_not_exist_000000");
+	await page.getByLabel("Receipt number").fill("RCPT-DOES-NOT-EXIST");
+	// Scoped past Next.js's own `role="alert"` route-announcer element
+	// (`#__next-route-announcer__`, always present in the DOM) to the
+	// specific lookup-failure message.
+	await expect(
+		page.getByRole("alert").filter({ hasText: "No sale was found" })
+	).toContainText("No sale was found for register");
+	await expect(
+		page.getByRole("heading", { name: "Lines to return" })
+	).toHaveCount(0);
+});
+
 test("return approval by a second identity (approver != creator) posts the compensating inventory movement", async ({
 	browser,
 }) => {
@@ -722,7 +1231,7 @@ test("return approval by a second identity (approver != creator) posts the compe
 		makerPage,
 		"return-approve"
 	);
-	const sale = await createSaleWithOneLine(
+	await createSaleWithOneLine(
 		makerPage,
 		registerId,
 		registerSessionId,
@@ -736,13 +1245,23 @@ test("return approval by a second identity (approver != creator) posts the compe
 			response.url().includes("/rpc/commerce/sales/complete")
 	);
 	await makerPage.getByRole("button", { name: "Complete sale" }).click();
-	await completeResponsePromise;
+	const completeResponse = await completeResponsePromise;
+	const completed = (await completeResponse.json()) as {
+		json: { receiptId: string };
+	};
+	const receiptReference = await readPrintedReceiptReference(
+		makerPage,
+		completed.json.receiptId
+	);
 
 	await makerPage.goto("/operations/pos/returns/new");
 	await expect(
 		makerPage.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await makerPage.getByLabel("Sale ID").fill(sale.id);
+	await makerPage.getByLabel("Register").fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Receipt number")
+		.fill(receiptReference.receiptNumber);
 	await expect(
 		makerPage.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();
@@ -766,16 +1285,366 @@ test("return approval by a second identity (approver != creator) posts the compe
 		password: APPROVER_PASSWORD,
 	});
 	await checkerPage.getByLabel("Return ID").fill(createdReturn.json.id);
+	await checkerPage
+		.getByRole("button", { name: "Review & approve return" })
+		.click();
+	await expect(
+		checkerPage.getByRole("heading", { name: "Approve this return?" })
+	).toBeVisible();
+	const returnCommitButton = checkerPage.getByRole("button", {
+		exact: true,
+		name: "Approve return",
+	});
+	await expect(returnCommitButton).toBeEnabled();
 	const approveResponsePromise = checkerPage.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/returns/approve")
 	);
-	await checkerPage.getByRole("button", { name: "Approve return" }).click();
+	await returnCommitButton.click();
 	const approveResponse = await approveResponsePromise;
 	expect(approveResponse.ok()).toBe(true);
 	await expect(
 		checkerPage.getByRole("heading", { name: "Return approved" })
+	).toBeVisible();
+});
+
+/**
+ * WS3 remediation R3, Finding I, exercised against `commerce.return.approve`
+ * (one of the six flows the finding names). PRE-FIX, this screen showed
+ * only a bare Return-ID-entry field and a commit button — the amount,
+ * reference, and state were revealed only in the POST-commit success view,
+ * and nothing stopped a mis-typed ID from committing against the wrong
+ * record. This test proves the POST-fix behavior: a required intermediate
+ * review step fetches and displays REAL server-derived data (the approver
+ * never typed the refundable amount, sale reference, or state anywhere —
+ * they only typed a Return ID) before the commit control is even usable,
+ * AND the second independent review's supplemental requirements are met by
+ * construction: non-destructive initial focus (never the commit button),
+ * Escape and an explicit Cancel both close the dialog and restore focus to
+ * the triggering control, and the commit mutation never fires from either
+ * dismissal path.
+ */
+test("consequence preview: server-derived data, non-destructive focus, and Escape/Cancel both dismiss without committing", async ({
+	browser,
+}) => {
+	test.setTimeout(60_000);
+	const makerContext = await browser.newContext();
+	const makerPage = await makerContext.newPage();
+	const registerId = `register_preview_focus_${Date.now()}`;
+	const registerSessionId = await openRegister(makerPage, registerId, "100.00");
+	const { name: productName } = await createActiveProduct(
+		makerPage,
+		"preview-focus"
+	);
+	await createSaleWithOneLine(
+		makerPage,
+		registerId,
+		registerSessionId,
+		productName,
+		"33.00"
+	);
+	await makerPage.getByLabel("Cash tendered (GYD)").fill("40.00");
+	const completeResponsePromise = makerPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().includes("/rpc/commerce/sales/complete")
+	);
+	await makerPage.getByRole("button", { name: "Complete sale" }).click();
+	const completeResponse = await completeResponsePromise;
+	const completed = (await completeResponse.json()) as {
+		json: { receiptId: string };
+	};
+	const receiptReference = await readPrintedReceiptReference(
+		makerPage,
+		completed.json.receiptId
+	);
+
+	await makerPage.goto("/operations/pos/returns/new");
+	await makerPage.getByLabel("Register").fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Receipt number")
+		.fill(receiptReference.receiptNumber);
+	await expect(
+		makerPage.getByRole("heading", { name: "Lines to return" })
+	).toBeVisible();
+	await makerPage.getByLabel("Return quantity (0 = skip)").fill("1");
+	await makerPage.getByLabel("Reason").fill("Consequence preview verification");
+	const returnCreateResponsePromise = makerPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/create")
+	);
+	await makerPage.getByRole("button", { name: "Create return" }).click();
+	const returnCreateResponse = await returnCreateResponsePromise;
+	const createdReturn = (await returnCreateResponse.json()) as {
+		json: { id: string; totalRefundable: { amountMinor: number } };
+	};
+	const expectedRefundableMajor = (
+		createdReturn.json.totalRefundable.amountMinor / 100
+	).toFixed(2);
+
+	const approverContext = await browser.newContext();
+	const approverPage = await approverContext.newPage();
+	await signIn(approverPage, "/operations/pos/returns/approve", {
+		email: APPROVER_EMAIL,
+		password: APPROVER_PASSWORD,
+	});
+	// The approval form's ENTIRE input surface — only a Return ID. Every
+	// other value the dialog is about to show came from nowhere the form
+	// itself supplied.
+	await approverPage.getByLabel("Return ID").fill(createdReturn.json.id);
+	const triggerButton = approverPage.getByRole("button", {
+		name: "Review & approve return",
+	});
+	const previewResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/get")
+	);
+	await triggerButton.click();
+	const previewResponse = await previewResponsePromise;
+	expect(previewResponse.ok()).toBe(true);
+	const dialog = approverPage.getByRole("alertdialog");
+	await expect(dialog).toBeVisible();
+
+	// Server-derived data, never form-supplied: the return's own id, the
+	// sale it references, the register, and the refundable amount — none
+	// of these were typed into the approval form, only fetched from the
+	// server in response to the Return ID.
+	await expect(dialog).toContainText(createdReturn.json.id);
+	await expect(dialog).toContainText(expectedRefundableMajor);
+	await expect(dialog).toContainText("Pending");
+
+	// Non-destructive initial focus: the Cancel control, never the
+	// destructive commit control, has focus immediately after the dialog
+	// opens.
+	const cancelButton = dialog.getByRole("button", { name: "Cancel" });
+	const commitButton = dialog.getByRole("button", {
+		exact: true,
+		name: "Approve return",
+	});
+	await expect(cancelButton).toBeFocused();
+	await expect(commitButton).not.toBeFocused();
+
+	// Escape closes the dialog without committing, and restores focus to
+	// the triggering control.
+	let approveCallFiredOnEscape = false;
+	await approverPage.route("**/rpc/commerce/returns/approve", async (route) => {
+		approveCallFiredOnEscape = true;
+		await route.continue();
+	});
+	await approverPage.keyboard.press("Escape");
+	await expect(dialog).toBeHidden();
+	expect(approveCallFiredOnEscape).toBe(false);
+	await expect(triggerButton).toBeFocused();
+
+	// Re-open, then dismiss via the explicit Cancel control — same
+	// guarantees, the other dismissal path.
+	const secondPreviewResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/get")
+	);
+	await triggerButton.click();
+	await secondPreviewResponsePromise;
+	await expect(dialog).toBeVisible();
+	await expect(cancelButton).toBeFocused();
+	await cancelButton.click();
+	await expect(dialog).toBeHidden();
+	expect(approveCallFiredOnEscape).toBe(false);
+	await expect(triggerButton).toBeFocused();
+
+	// The return was never approved by either dismissal path — its
+	// server-authoritative state, re-checked from scratch, is still
+	// Pending.
+	const finalPreviewResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/get")
+	);
+	await triggerButton.click();
+	await finalPreviewResponsePromise;
+	await expect(dialog).toContainText("Pending");
+});
+
+/**
+ * WS3 remediation R3, Finding G, exercised against `commerce.return.approve`
+ * — one of the six previously-UNGATED controls the directive names by
+ * file:line (`returns-pages.tsx:311`, pre-fix). PRE-FIX, clicking "Approve
+ * return" while offline called `useMutation`'s own `mutateAsync` directly:
+ * TanStack Query's default `networkMode: 'online'` PAUSES (does not reject)
+ * that call and queues it in the mutation cache, then AUTOMATICALLY
+ * resumes and executes it the instant the browser reconnects — with no
+ * further confirmation from the actor, who may have abandoned the action
+ * or reconsidered entirely. This test proves the POST-fix behavior: an
+ * offline click is REJECTED before any mutation-cache entry is created (no
+ * network call, verified by recording every request to the approve
+ * endpoint), accessible feedback appears INSIDE the still-open dialog, and
+ * reconnecting afterward does NOT silently execute the approval — proven
+ * directly by re-opening the SAME return's preview and confirming its
+ * server-authoritative state is still `Pending`, not `Completed`.
+ */
+test("offline reconnect never replays a rejected mutation: return approval requires a real online retry, not automatic execution on reconnect", async ({
+	browser,
+}) => {
+	test.setTimeout(60_000);
+	const makerContext = await browser.newContext();
+	const makerPage = await makerContext.newPage();
+	const registerId = `register_offline_replay_${Date.now()}`;
+	const registerSessionId = await openRegister(makerPage, registerId, "100.00");
+	const { name: productName } = await createActiveProduct(
+		makerPage,
+		"offline-replay"
+	);
+	await createSaleWithOneLine(
+		makerPage,
+		registerId,
+		registerSessionId,
+		productName,
+		"12.00"
+	);
+	await makerPage.getByLabel("Cash tendered (GYD)").fill("20.00");
+	const completeResponsePromise = makerPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().includes("/rpc/commerce/sales/complete")
+	);
+	await makerPage.getByRole("button", { name: "Complete sale" }).click();
+	const completeResponse = await completeResponsePromise;
+	const completed = (await completeResponse.json()) as {
+		json: { receiptId: string };
+	};
+	const receiptReference = await readPrintedReceiptReference(
+		makerPage,
+		completed.json.receiptId
+	);
+
+	await makerPage.goto("/operations/pos/returns/new");
+	await makerPage.getByLabel("Register").fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Receipt number")
+		.fill(receiptReference.receiptNumber);
+	await expect(
+		makerPage.getByRole("heading", { name: "Lines to return" })
+	).toBeVisible();
+	await makerPage.getByLabel("Return quantity (0 = skip)").fill("1");
+	await makerPage.getByLabel("Reason").fill("Offline replay verification");
+	const returnCreateResponsePromise = makerPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/create")
+	);
+	await makerPage.getByRole("button", { name: "Create return" }).click();
+	const returnCreateResponse = await returnCreateResponsePromise;
+	const createdReturn = (await returnCreateResponse.json()) as {
+		json: { id: string };
+	};
+
+	const approverContext = await browser.newContext();
+	const approverPage = await approverContext.newPage();
+	await signIn(approverPage, "/operations/pos/returns/approve", {
+		email: APPROVER_EMAIL,
+		password: APPROVER_PASSWORD,
+	});
+	await approverPage.getByLabel("Return ID").fill(createdReturn.json.id);
+	const firstPreviewResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/get")
+	);
+	await approverPage
+		.getByRole("button", { name: "Review & approve return" })
+		.click();
+	await firstPreviewResponsePromise;
+	await expect(
+		approverPage.getByRole("heading", { name: "Approve this return?" })
+	).toBeVisible();
+	await expect(
+		approverPage.getByRole("definition").filter({ hasText: "Pending" })
+	).toBeVisible();
+
+	let approveCallCount = 0;
+	await approverPage.route("**/rpc/commerce/returns/approve", async (route) => {
+		approveCallCount += 1;
+		await route.continue();
+	});
+
+	await approverPage.context().setOffline(true);
+	await approverPage.evaluate(() => window.dispatchEvent(new Event("offline")));
+	// Wait for `useOnlineStatus` to actually flip before clicking — the
+	// global "Offline" banner is the same signal every other offline test
+	// in this suite waits on, and it's the only proof `workspace.isOnline`
+	// (what `useOnlineGatedMutation` actually reads) has propagated.
+	await expect(
+		approverPage.getByText("Offline", { exact: true }).first()
+	).toBeVisible();
+	const offlineCommitButton = approverPage.getByRole("button", {
+		exact: true,
+		name: "Approve return",
+	});
+	await offlineCommitButton.click();
+	// Accessible feedback appears INSIDE the still-open dialog (Finding G's
+	// supplemental fix to `ConsequencePreviewDialog` — the commit error is
+	// rendered in the same inert-exempt subtree as the dialog's own
+	// controls, not behind the modal overlay where a screen reader would
+	// not reliably reach it).
+	await expect(
+		approverPage.getByRole("alertdialog").getByRole("alert")
+	).toContainText(CONNECTION_REQUIRED_PATTERN);
+	// The dialog stays open — a rejected offline click never advances past
+	// this screen.
+	await expect(
+		approverPage.getByRole("heading", { name: "Approve this return?" })
+	).toBeVisible();
+
+	await approverPage.context().setOffline(false);
+	await approverPage.evaluate(() => window.dispatchEvent(new Event("online")));
+	// Bounded wait for any reconnection-triggered auto-replay to have had a
+	// real chance to fire before asserting it did not.
+	await approverPage.waitForTimeout(1500);
+	expect(approveCallCount).toBe(0);
+	await expect(
+		approverPage.getByRole("heading", { name: "Return approved" })
+	).toHaveCount(0);
+
+	// Direct state check: re-open the SAME return's server-authoritative
+	// preview from scratch and confirm it is still Pending — proving the
+	// offline click's rejection was real, not merely a UI illusion, and
+	// that reconnecting never silently completed the approval underneath.
+	await approverPage.goto("/operations/pos/returns/approve");
+	await approverPage.getByLabel("Return ID").fill(createdReturn.json.id);
+	const secondPreviewResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/get")
+	);
+	await approverPage
+		.getByRole("button", { name: "Review & approve return" })
+		.click();
+	await secondPreviewResponsePromise;
+	await expect(
+		approverPage.getByRole("definition").filter({ hasText: "Pending" })
+	).toBeVisible();
+
+	// A real online retry from here still works — offline rejection is a
+	// deliberate gate, not a permanent lockout.
+	const finalCommitButton = approverPage.getByRole("button", {
+		exact: true,
+		name: "Approve return",
+	});
+	await expect(finalCommitButton).toBeEnabled();
+	const finalApproveResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/approve")
+	);
+	await finalCommitButton.click();
+	const finalApproveResponse = await finalApproveResponsePromise;
+	expect(finalApproveResponse.ok()).toBe(true);
+	expect(approveCallCount).toBe(1);
+	await expect(
+		approverPage.getByRole("heading", { name: "Return approved" })
 	).toBeVisible();
 });
 
@@ -788,7 +1657,7 @@ test("refund create and approve: a second identity's approval posts the paid-out
 	const registerId = `register_refund_${Date.now()}`;
 	const registerSessionId = await openRegister(makerPage, registerId, "100.00");
 	const { name: productName } = await createActiveProduct(makerPage, "refund");
-	const sale = await createSaleWithOneLine(
+	await createSaleWithOneLine(
 		makerPage,
 		registerId,
 		registerSessionId,
@@ -802,13 +1671,23 @@ test("refund create and approve: a second identity's approval posts the paid-out
 			response.url().includes("/rpc/commerce/sales/complete")
 	);
 	await makerPage.getByRole("button", { name: "Complete sale" }).click();
-	await completeResponsePromise;
+	const completeResponse = await completeResponsePromise;
+	const completed = (await completeResponse.json()) as {
+		json: { receiptId: string };
+	};
+	const receiptReference = await readPrintedReceiptReference(
+		makerPage,
+		completed.json.receiptId
+	);
 
 	await makerPage.goto("/operations/pos/returns/new");
 	await expect(
 		makerPage.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await makerPage.getByLabel("Sale ID").fill(sale.id);
+	await makerPage.getByLabel("Register").fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Receipt number")
+		.fill(receiptReference.receiptNumber);
 	await expect(
 		makerPage.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();
@@ -835,12 +1714,23 @@ test("refund create and approve: a second identity's approval posts the paid-out
 		password: APPROVER_PASSWORD,
 	});
 	await approverPage.getByLabel("Return ID").fill(createdReturn.json.id);
+	await approverPage
+		.getByRole("button", { name: "Review & approve return" })
+		.click();
+	await expect(
+		approverPage.getByRole("heading", { name: "Approve this return?" })
+	).toBeVisible();
+	const refundFlowReturnCommitButton = approverPage.getByRole("button", {
+		exact: true,
+		name: "Approve return",
+	});
+	await expect(refundFlowReturnCommitButton).toBeEnabled();
 	const returnApproveResponsePromise = approverPage.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/returns/approve")
 	);
-	await approverPage.getByRole("button", { name: "Approve return" }).click();
+	await refundFlowReturnCommitButton.click();
 	await returnApproveResponsePromise;
 
 	// The maker browser requests the refund.
@@ -870,12 +1760,23 @@ test("refund create and approve: a second identity's approval posts the paid-out
 		approverPage.getByRole("heading", { name: "Approve a refund" })
 	).toBeVisible();
 	await approverPage.getByLabel("Refund ID").fill(createdRefund.json.id);
+	await approverPage
+		.getByRole("button", { name: "Review & approve refund" })
+		.click();
+	await expect(
+		approverPage.getByRole("heading", { name: "Approve this refund?" })
+	).toBeVisible();
+	const refundCommitButton = approverPage.getByRole("button", {
+		exact: true,
+		name: "Approve refund",
+	});
+	await expect(refundCommitButton).toBeEnabled();
 	const refundApproveResponsePromise = approverPage.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/refunds/approve")
 	);
-	await approverPage.getByRole("button", { name: "Approve refund" }).click();
+	await refundCommitButton.click();
 	const refundApproveResponse = await refundApproveResponsePromise;
 	expect(refundApproveResponse.ok()).toBe(true);
 	await expect(
@@ -916,12 +1817,23 @@ test("deposit create and confirm: a second identity's confirmation reconciles th
 		makerPage.getByRole("heading", { name: "Close register" })
 	).toBeVisible();
 	await makerPage.getByLabel("Counted cash (GYD)").fill("40.00");
+	await makerPage
+		.getByRole("button", { name: "Review & close register" })
+		.click();
+	await expect(
+		makerPage.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
+	const depositFlowCloseCommitButton = makerPage.getByRole("button", {
+		exact: true,
+		name: "Close register",
+	});
+	await expect(depositFlowCloseCommitButton).toBeEnabled();
 	const closeResponsePromise = makerPage.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/registers/close")
 	);
-	await makerPage.getByRole("button", { name: "Close register" }).click();
+	await depositFlowCloseCommitButton.click();
 	await closeResponsePromise;
 
 	await makerPage.goto("/operations/pos/deposits/new");
@@ -954,12 +1866,23 @@ test("deposit create and confirm: a second identity's confirmation reconciles th
 		password: APPROVER_PASSWORD,
 	});
 	await checkerPage.getByLabel("Deposit ID").fill(createdDeposit.json.id);
+	await checkerPage
+		.getByRole("button", { name: "Review & confirm deposit" })
+		.click();
+	await expect(
+		checkerPage.getByRole("heading", { name: "Confirm this deposit?" })
+	).toBeVisible();
+	const depositCommitButton = checkerPage.getByRole("button", {
+		exact: true,
+		name: "Confirm deposit",
+	});
+	await expect(depositCommitButton).toBeEnabled();
 	const confirmResponsePromise = checkerPage.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/deposits/confirm")
 	);
-	await checkerPage.getByRole("button", { name: "Confirm deposit" }).click();
+	await depositCommitButton.click();
 	const confirmResponse = await confirmResponsePromise;
 	expect(confirmResponse.ok()).toBe(true);
 	await expect(
@@ -1035,12 +1958,21 @@ test("receipt void reverses the sale through the receipt view", async ({
 	).toBeVisible();
 
 	await page.getByLabel("Reason (optional)").fill("Duplicate transaction");
+	await page.getByRole("button", { name: "Review & void receipt" }).click();
+	await expect(
+		page.getByRole("heading", { name: "Void this receipt?" })
+	).toBeVisible();
+	const voidCommitButton = page.getByRole("button", {
+		exact: true,
+		name: "Void receipt",
+	});
+	await expect(voidCommitButton).toBeEnabled();
 	const voidResponsePromise = page.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
 			response.url().includes("/rpc/commerce/receipts/void")
 	);
-	await page.getByRole("button", { name: "Void receipt" }).click();
+	await voidCommitButton.click();
 	const voidResponse = await voidResponsePromise;
 	expect(voidResponse.ok()).toBe(true);
 	await expect(
@@ -1207,11 +2139,11 @@ test("online-only WS3 mutations fail closed and remain understandable when conne
 
 	// `commerce.returns`' create form progressively discloses "Lines to
 	// return" (and the "Create return" submit button inside it) only after
-	// a Sale ID lookup resolves against THIS browser's local cache (the
-	// page's own description: "no commerce.sale.* read endpoint is
-	// registered in this contract surface" — the lookup is local, not
-	// network-bound). A real completed sale is created first so that
-	// lookup succeeds even offline, isolating the FINAL "Create return"
+	// `commerce.sales.getForReturn` resolves the printed register+receipt
+	// reference over the network (WS3 remediation R3, Finding J — this is
+	// now a real server read, not a local sessionStorage lookup). The
+	// lookup runs ONLINE, then connectivity drops with the resolved Sale
+	// already in the query cache, isolating the FINAL "Create return"
 	// mutation button as the thing offline actually disables.
 	await page.context().setOffline(false);
 	const returnRegisterId = `register_offline_return_${Date.now()}`;
@@ -1224,7 +2156,7 @@ test("online-only WS3 mutations fail closed and remain understandable when conne
 		page,
 		"offline-return-gate"
 	);
-	const returnSale = await createSaleWithOneLine(
+	await createSaleWithOneLine(
 		page,
 		returnRegisterId,
 		returnRegisterSessionId,
@@ -1238,13 +2170,23 @@ test("online-only WS3 mutations fail closed and remain understandable when conne
 			response.url().includes("/rpc/commerce/sales/complete")
 	);
 	await page.getByRole("button", { name: "Complete sale" }).click();
-	await returnSaleCompletePromise;
+	const returnSaleCompleteResponse = await returnSaleCompletePromise;
+	const returnSaleCompleted = (await returnSaleCompleteResponse.json()) as {
+		json: { receiptId: string };
+	};
+	const returnReceiptReference = await readPrintedReceiptReference(
+		page,
+		returnSaleCompleted.json.receiptId
+	);
 
 	await page.goto("/operations/pos/returns/new");
 	await expect(
 		page.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await page.getByLabel("Sale ID").fill(returnSale.id);
+	await page.getByLabel("Register").fill(returnReceiptReference.registerId);
+	await page
+		.getByLabel("Receipt number")
+		.fill(returnReceiptReference.receiptNumber);
 	await expect(
 		page.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();

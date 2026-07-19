@@ -207,8 +207,8 @@ export function RefundApprovePage() {
 						</Button>
 					</div>
 				)}
-				<MutationError error={approve.error} isOnline={workspace.isOnline} />
 				<ConsequencePreviewDialog
+					commitError={approve.error}
 					confirming={approve.isPending}
 					confirmLabel="Approve refund"
 					data={preview.data}
@@ -216,6 +216,7 @@ export function RefundApprovePage() {
 					error={preview.error}
 					isError={preview.isError}
 					isLoading={preview.isLoading}
+					isOnline={workspace.isOnline}
 					onConfirm={() => {
 						commitApproveRefund().catch(() => undefined);
 					}}

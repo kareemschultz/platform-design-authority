@@ -12,6 +12,8 @@ import {
 import { Button } from "@meridian/ui-web/components/button";
 import { useRef } from "react";
 
+import { MutationError } from "./operations-shared";
+
 /**
  * WS3 remediation R3, Finding I: the ONE consequence-preview dialog every
  * close-register / refund-approve / deposit-confirm / return-approve /
@@ -31,6 +33,7 @@ import { useRef } from "react";
  *   button/native element, no custom key handling needed.
  */
 export function ConsequencePreviewDialog<TData>({
+	commitError,
 	confirmDisabled,
 	confirmLabel,
 	confirming,
@@ -40,12 +43,25 @@ export function ConsequencePreviewDialog<TData>({
 	error,
 	isError,
 	isLoading,
+	isOnline = true,
 	onConfirm,
 	onOpenChange,
 	open,
 	renderPreview,
 	title,
 }: {
+	/** WS3 remediation R3, Finding G's accessible-feedback requirement
+	 * applied to a rejected/failed COMMIT (as distinct from `error`, the
+	 * PREVIEW read's own error): the caller's own mutation `error` (e.g. an
+	 * `OfflineRejectionError` from `useOnlineGatedMutation`). This dialog
+	 * stays open on a failed commit (no call site closes it except on
+	 * success), and Base UI's `AlertDialog` makes background content inert
+	 * while open — a `MutationError` rendered only OUTSIDE this dialog
+	 * would be visually present but not reliably reachable by assistive
+	 * technology while the modal remains focus-trapped. Rendering it INSIDE
+	 * the dialog keeps the feedback in the same inert-exempt subtree the
+	 * Cancel/commit controls already are. */
+	commitError?: unknown;
 	/** Disables the confirm control for a reason OTHER than
 	 * loading/error/confirming (e.g. a required reason field is still
 	 * empty) — merged with the built-in loading/error/confirming gates. */
@@ -61,6 +77,16 @@ export function ConsequencePreviewDialog<TData>({
 	error: unknown;
 	isError: boolean;
 	isLoading: boolean;
+	/** Classifies BOTH the preview read's `error` and `commitError` through
+	 * the SAME `mutationFailurePresentation` `MutationError` already uses
+	 * elsewhere — a permission-denied or offline-rejected read/commit would
+	 * otherwise only ever render this dialog's generic "Could not load
+	 * current details" copy, losing the specific, actionable disclosure
+	 * (e.g. "Permission denied…") the rest of the app gives for the exact
+	 * same failure classes. Defaults to `true` (most callers are
+	 * mid-online-only-flow already; offline-specific copy only differs when
+	 * `false` is passed explicitly). */
+	isOnline?: boolean;
 	onConfirm: () => void;
 	onOpenChange: (open: boolean) => void;
 	open: boolean;
@@ -81,14 +107,17 @@ export function ConsequencePreviewDialog<TData>({
 						<p role="status">Loading current details from the server…</p>
 					) : null}
 					{isError ? (
-						<p role="alert">
-							Could not load current details
-							{error instanceof Error ? `: ${error.message}` : "."} Close this
-							dialog and try again.
-						</p>
+						<>
+							<MutationError error={error} isOnline={isOnline} />
+							<p className="text-muted-foreground text-sm">
+								Close this dialog and try again once the underlying issue is
+								resolved.
+							</p>
+						</>
 					) : null}
 					{!(isLoading || isError) && data ? renderPreview(data) : null}
 				</div>
+				<MutationError error={commitError} isOnline={isOnline} />
 				<AlertDialogFooter>
 					<AlertDialogCancel ref={cancelRef}>Cancel</AlertDialogCancel>
 					<Button

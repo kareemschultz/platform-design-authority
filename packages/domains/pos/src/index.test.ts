@@ -3584,6 +3584,117 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 		// the persisted refund always equals the Return's own total.
 		expect(refund.amount).toEqual(approvedReturn.totalRefundable);
 	});
+
+	// WS3 remediation R3, Finding J (part 2): `getSaleForReturn` completes
+	// the receipt-to-return path `getReceiptByNumber` (Finding J part 1)
+	// starts. PRE-FIX, no server operation existed at all that resolved a
+	// printed receiptNumber+registerId to a Sale's real line ids — the ONLY
+	// path was an opaque Sale ID cached in the browser that completed the
+	// sale. These tests could not have "passed against pre-fix code" in the
+	// sense of an existing function behaving wrongly; the function did not
+	// exist. What they instead prove is the actual boundary this new
+	// function enforces: it resolves ONLY a genuine Sale-kind receipt to
+	// its exact originating Sale (never a Return/Reissue receipt, never an
+	// unrelated Sale, never a different tenant/organization's Sale), with
+	// real `lines[].id` values `commerce.return.create`'s own
+	// `saleLineId` matching depends on.
+	describe("getSaleForReturn (WS3 remediation R3, Finding J part 2)", () => {
+		test("resolves a Sale-kind receipt's receiptNumber+registerId to the exact originating Sale, with real line ids matching the completed Sale's own lines", async () => {
+			const harness = createHarness();
+			const { service } = harness;
+			const { completed, registerId, saleId } = await completedSale(
+				harness,
+				"register_get_sale_for_return_happy"
+			);
+			const receipt = await service.getReceipt(
+				base.tenantId,
+				base.organizationId,
+				completed.receiptId as string
+			);
+			expect(receipt.kind).toBe("Sale");
+
+			const resolved = await service.getSaleForReturn(
+				base.tenantId,
+				base.organizationId,
+				base.locationId,
+				registerId,
+				receipt.receiptNumber
+			);
+			expect(resolved.id).toBe(saleId);
+			expect(resolved.state).toBe("Completed");
+			expect(resolved.lines).toEqual(completed.lines);
+		});
+
+		test("rejects (invalid_state) resolving a Reissue-kind receipt — only a Sale-kind receipt has a returnable sale", async () => {
+			const harness = createHarness();
+			const { service } = harness;
+			const { completed, registerId } = await completedSale(
+				harness,
+				"register_get_sale_for_return_reissue"
+			);
+			const reissued = await service.reissueReceipt({
+				...base,
+				idempotencyKey: "get-sale-for-return-reissue",
+				priceSuppressed: false,
+				receiptId: completed.receiptId as string,
+			});
+			expect(reissued.kind).toBe("Reissue");
+
+			const attempt = service.getSaleForReturn(
+				base.tenantId,
+				base.organizationId,
+				base.locationId,
+				registerId,
+				reissued.receiptNumber
+			);
+			await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+		});
+
+		test("rejects (invalid_state) resolving a Return-kind (void) receipt the same way", async () => {
+			const harness = createHarness();
+			const { service } = harness;
+			const { completed, registerId } = await completedSale(
+				harness,
+				"register_get_sale_for_return_void"
+			);
+			const voided = await service.voidReceipt({
+				...base,
+				idempotencyKey: "get-sale-for-return-void",
+				reason: "Finding J invalid_state coverage",
+				receiptId: completed.receiptId as string,
+			});
+			const voidReceipt = await service.getReceipt(
+				base.tenantId,
+				base.organizationId,
+				voided.receiptId as string
+			);
+			expect(voidReceipt.kind).toBe("Return");
+
+			const attempt = service.getSaleForReturn(
+				base.tenantId,
+				base.organizationId,
+				base.locationId,
+				registerId,
+				voidReceipt.receiptNumber
+			);
+			await expect(attempt).rejects.toMatchObject({ code: "invalid_state" });
+		});
+
+		test("rejects (not_found) an unknown receiptNumber/registerId pair — never falls back to a different register's receipt sharing the same number", async () => {
+			const harness = createHarness();
+			const { service } = harness;
+			await completedSale(harness, "register_get_sale_for_return_unknown");
+
+			const attempt = service.getSaleForReturn(
+				base.tenantId,
+				base.organizationId,
+				base.locationId,
+				"register_get_sale_for_return_unknown",
+				"RCPT-DOES-NOT-EXIST"
+			);
+			await expect(attempt).rejects.toMatchObject({ code: "not_found" });
+		});
+	});
 });
 
 describe("POS application: permission-before-dispatch and self-approval separation", () => {

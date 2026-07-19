@@ -252,8 +252,8 @@ export function DepositConfirmPage() {
 						</Button>
 					</div>
 				)}
-				<MutationError error={confirm.error} isOnline={workspace.isOnline} />
 				<ConsequencePreviewDialog
+					commitError={confirm.error}
 					confirming={confirm.isPending}
 					confirmLabel="Confirm deposit"
 					data={preview.data}
@@ -261,6 +261,7 @@ export function DepositConfirmPage() {
 					error={preview.error}
 					isError={preview.isError}
 					isLoading={preview.isLoading}
+					isOnline={workspace.isOnline}
 					onConfirm={() => {
 						commitConfirmDeposit().catch(() => undefined);
 					}}

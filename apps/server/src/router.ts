@@ -54,6 +54,7 @@ import {
 	getRefundContract,
 	getRegisterSessionContract,
 	getReturnContract,
+	getSaleForReturnContract,
 	getStockCountContract,
 	getStockTransferContract,
 	holdSaleContract,
@@ -1929,6 +1930,33 @@ const getReceiptByNumber = implement(getReceiptByNumberContract)
 		}
 	});
 
+/** WS3 remediation R3, Finding J (part 2): completes the receipt-to-return
+ * path — gated on `commerce.return.create`, not `commerce.receipt.read`. */
+const getSaleForReturn = implement(getSaleForReturnContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getSaleForReturn({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				receiptNumber: input.params.receiptNumber,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 // ---------------------------------------------------------------------------
 // WS3 PR3: Return, Refund, Void, Reissue. Exchange has no dedicated
 // procedure — it rides `completeSale`'s `exchangeOfReturnId` above.
@@ -2784,6 +2812,7 @@ export const commerceRouter = {
 	sales: {
 		complete: completeSale,
 		create: createSale,
+		getForReturn: getSaleForReturn,
 		hold: holdSale,
 	},
 };

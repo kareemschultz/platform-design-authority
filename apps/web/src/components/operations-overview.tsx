@@ -1,7 +1,13 @@
 "use client";
 
 import { buttonVariants } from "@meridian/ui-web/components/button";
-import { ArrowRight, Boxes, ClipboardCheck, PackageSearch } from "lucide-react";
+import {
+	ArrowRight,
+	Boxes,
+	ClipboardCheck,
+	PackageSearch,
+	ShoppingCart,
+} from "lucide-react";
 import Link from "next/link";
 
 import { OperationsPageFrame } from "./operations-shared";
@@ -28,6 +34,13 @@ const workspaces = [
 		href: "/operations/imports",
 		icon: ClipboardCheck,
 		label: "Imports",
+	},
+	{
+		description:
+			"Registers, sales, receipts, returns, refunds, deposits, and the accountant handoff export.",
+		href: "/operations/pos",
+		icon: ShoppingCart,
+		label: "Point of Sale",
 	},
 ] as const;
 

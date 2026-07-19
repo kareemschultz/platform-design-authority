@@ -114,7 +114,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 	const queryClient = useQueryClient();
 	const isOnline = useOnlineStatus();
 	const [storedContextId, setStoredContextId] = useState<string | null>(null);
-	const storageLoaded = useRef(false);
+	const [hasReadStorage, setHasReadStorage] = useState(false);
 	const initialContextAttempted = useRef(false);
 	const contextRequestSequence = useRef(0);
 	const workStates = useRef(new Map<string, WorkspaceWorkState>());
@@ -126,7 +126,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		setStoredContextId(sessionStorage.getItem(ACTIVE_CONTEXT_STORAGE_KEY));
-		storageLoaded.current = true;
+		setHasReadStorage(true);
 	}, []);
 
 	const identityQuery = useQuery({
@@ -235,7 +235,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		if (
-			!storageLoaded.current ||
+			!hasReadStorage ||
 			initialContextAttempted.current ||
 			identityQuery.isLoading
 		) {
@@ -261,6 +261,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [
 		activate,
+		hasReadStorage,
 		identityQuery.data,
 		identityQuery.isError,
 		identityQuery.isLoading,
@@ -427,7 +428,23 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 					<AlertDescription>{contextChangeMessage}</AlertDescription>
 				</Alert>
 			) : null}
-			<div key={contextId ?? "no-active-context"}>{children}</div>
+			{value.isLoading ? (
+				// `key={contextId}` below intentionally remounts `children` on a
+				// genuine context change, discarding any workspace-scoped form
+				// state (the switch-confirmation dialog above says as much). But
+				// `contextId` starts `null` on every hard navigation until
+				// `identityQuery` resolves with the persisted context header —
+				// mounting `children` against that transient `null` key first,
+				// then swapping to the real key moments later, remounts a page
+				// the user may already be mid-interaction with. Holding off
+				// until the identity query has actually settled means `children`
+				// only ever mounts once, against the already-resolved contextId.
+				<div className="mx-auto max-w-screen-2xl px-4 py-10">
+					<Skeleton className="h-24 w-full" />
+				</div>
+			) : (
+				<div key={contextId ?? "no-active-context"}>{children}</div>
+			)}
 			<Dialog
 				onOpenChange={(open) => {
 					if (!open) {

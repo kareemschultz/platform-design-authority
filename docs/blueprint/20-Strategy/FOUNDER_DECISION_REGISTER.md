@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.7.1
+version: 0.8.1
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-18
+last_reviewed: 2026-07-19
 ---
 
 # Founder Decision Register
@@ -196,6 +196,33 @@ Until ratified, public packages must not be published under `@meridian/*`; a ver
 
 This decision does not promote any Draft document, does not record WS3 entry, and does not authorize pilot or production use.
 
+## FDR-013 — Shadcn Studio Component Sourcing Operating Checklist
+
+**Status:** Decided (2026-07-19) — operationalizes FDR-009's general premium-asset direction into an item-level checklist for Shadcn Studio specifically; supersedes no gate, does not change `SHADCN_STUDIO_EVALUATION.md`'s "no item is Prototype Approved or Platform Approved by evaluation alone" baseline — it defines the exact conditions under which a specific item MAY be promoted.
+
+**Decision owner:** Founder.
+
+**Decision evidence:** Founder authorization given directly in a Claude Code session on `claude/ws3-integration`, 2026-07-19, in response to the independent (Codex) UI/accessibility review's Studio-boundary framing recorded in the external WS3 remediation planning packet (outside this repository, not a governed document); durable record posted to [issue #13, comment 5015116379](https://github.com/kareemschultz/platform-design-authority/issues/13#issuecomment-5015116379) (2026-07-19).
+
+**Decision:** Claude (or any implementer) may retrieve, copy, adapt, and install appropriately licensed Shadcn Studio Base UI component or block source when it materially improves the implementation, for both the active WS3 remediation (where a component directly closes a correctness or usability defect) and the later platform-wide work in issue #110. This does not authorize wholesale template installation. Avoid broad visual refactoring inside the WS3 correctness pass specifically — bounded, defect-driven use only there.
+
+Before committing any such item:
+
+1. Confirm the exact item is the Base UI variant, not Radix (Studio serves both per its `?base=base`/`?base=radix` toggle — select Base UI).
+2. Confirm the Studio entitlement/license actually held permits the intended use.
+3. Record item-level provenance: item name, URL/registry identifier, retrieval date, license/entitlement owner, original dependencies, files copied, modifications made, and redistribution status.
+4. Normalize into platform-owned source, semantic tokens, the Rhea configuration, Lucide icons, Tailwind conventions, and existing Next.js architecture (ADR-0005) — never a silent framework switch.
+5. Keep TanStack Query, TanStack Form, and Zod 4 unless a separate approved decision explicitly changes them.
+6. Remove or replace incompatible dependencies the source item may carry: React Hook Form, Zod 3, Zustand, `react-use`, unnecessary motion libraries, alternate export libraries, and Radix primitives.
+7. Preserve domain authority, permissions, tenant/location scope, offline rules, accessibility, responsive behavior, RTL, white-label safety, and reduced-motion behavior.
+8. Add component, interaction, accessibility, responsive, and regression tests before promotion (satisfies, does not replace, `COMPONENT_ACCEPTANCE_CHECKLIST.md`'s existing promotion gates).
+
+Visual composition (shell hierarchy, toolbars, tables, empty states, forms, onboarding, responsive layouts) may be extracted and adapted from Studio templates even when the full template is not used. Do not import an entire template's routing, authentication, authorization, fake database, business model, or state architecture (AdminCN, AIDesk, Sprintrix, Promptly, and similar full templates named in `SHADCN_STUDIO_EVALUATION.md` remain Restricted as whole templates under this decision).
+
+If an exact Studio asset cannot satisfy licensing, provenance, Base UI, accessibility, or architecture requirements, recreate the useful pattern in platform-owned code instead of forcing the asset in.
+
+**Ratification triggers:** durable GitHub record posted (see Decision evidence above) — this trigger is satisfied. Revisit if the actual Studio license/entitlement terms verified under condition 2 turn out narrower than assumed, or if `SHADCN_STUDIO_EVALUATION.md`/`COMPONENT_SOURCE_MATRIX.md` are next revised and should cross-reference this FDR directly.
+
 ## Governance
 
 A decision closes only when:
@@ -212,3 +239,5 @@ Architecture documents reference this register rather than inventing business fa
 
 - 2026-07-18 — v0.7.0 added FDR-012 (WS3 controlled-prototype implementation ahead of evidence gates, five recorded conditions) and cross-referenced it from FDR-004's WS3 entry condition.
 - 2026-07-18 — v0.7.1 cited the dedicated Founder approval comment on PR #101 as FDR-012's decision evidence and mirrored the FDR-012 review-process carve-out into CLAUDE.md/AGENTS.md §12 (Codex bot review P1/P2).
+- 2026-07-19 — v0.8.0 added FDR-013 (Shadcn Studio component-sourcing operating checklist), operationalizing FDR-009 for item-level Studio acquisition during the WS3 remediation and issue #110.
+- 2026-07-19 — v0.8.1 cited FDR-013's durable GitHub evidence (issue #13 comment 5015116379); ratification trigger satisfied.

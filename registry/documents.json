@@ -3870,10 +3870,10 @@
       "document_id": "PDA-STR-002",
       "path": "docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md",
       "title": "Founder Decision Register",
-      "version": "0.7.1",
+      "version": "0.8.1",
       "status": "Draft",
       "owner": "Founder",
-      "last_reviewed": "2026-07-18",
+      "last_reviewed": "2026-07-19",
       "related_adrs": [],
       "review_evidence": null
     },

@@ -275,6 +275,21 @@ function createInMemoryRepository() {
 					: null
 			);
 		},
+		getReceiptByNumber: (
+			tenantId,
+			organizationId,
+			registerId,
+			receiptNumber
+		) => {
+			const record = [...saleReceipts.values()].find(
+				(candidate) =>
+					candidate.tenantId === tenantId &&
+					candidate.organizationId === organizationId &&
+					candidate.registerId === registerId &&
+					candidate.receiptNumber === receiptNumber
+			);
+			return Promise.resolve(record ?? null);
+		},
 		getRefund: (tenantId, organizationId, id) => {
 			const record = refunds.get(id);
 			return Promise.resolve(

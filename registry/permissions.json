@@ -144,7 +144,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 120,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.deposit.confirm",
@@ -156,7 +156,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 122,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.deposit.create",
@@ -204,7 +204,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 123,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.receipt.reissue",
@@ -240,7 +240,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 116,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.refund.create",
@@ -264,7 +264,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 118,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.register.open",
@@ -288,7 +288,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 114,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.return.create",

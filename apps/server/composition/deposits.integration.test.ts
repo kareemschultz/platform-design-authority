@@ -534,5 +534,63 @@ describe.serial(
 			);
 			expect(error).toMatchObject({ code: "approval_separation" });
 		});
+
+		// WS3 remediation R3, Finding I: pre-commit consequence preview for
+		// commerce.deposit.confirm. Before this stage `getDeposit` did not
+		// exist as a callable operation (a compile error, not a 404); the
+		// adversarial proof is the org-isolation boundary and the real
+		// server-derived amount/preparer data, below.
+		test("getDeposit carries real server-derived data (amount, preparer, state) and stays non-disclosing across organizations", async () => {
+			const tenantId = "tenant_deposits_preview_isolation";
+			const orgA = "organization_deposits_preview_a";
+			const orgB = "organization_deposits_preview_b";
+			const registerId = "register_deposits_preview_isolation";
+			const pos = posService();
+			await pos.openRegister({
+				actorUserId: depositsBase.actorUserId,
+				correlationId: depositsBase.correlationId,
+				currency: "GYD",
+				idempotencyKey: `open_${registerId}`,
+				locationId: `location_${registerId}`,
+				openingFloat: { amountMinor: 500_000, currency: "GYD" },
+				organizationId: orgA,
+				registerId,
+				tenantId,
+			});
+			const movement = await pos.createCashMovement({
+				actorUserId: depositsBase.actorUserId,
+				amount: { amountMinor: 40_000, currency: "GYD" },
+				correlationId: depositsBase.correlationId,
+				direction: "PaidOut",
+				idempotencyKey: `safedrop_${registerId}`,
+				organizationId: orgA,
+				reasonCode: "SafeDrop",
+				registerId,
+				tenantId,
+			});
+			const prepared = await pos.createDeposit({
+				actorUserId: depositsBase.actorUserId,
+				correlationId: depositsBase.correlationId,
+				countedAmountMinor: 40_000,
+				currency: "GYD",
+				idempotencyKey: "preview-isolation-create",
+				organizationId: orgA,
+				sourceShiftIds: [movement.sessionId],
+				tenantId,
+			});
+
+			const crossOrg = await captureError(
+				pos.getDeposit(tenantId, orgB, prepared.id)
+			);
+			expect(crossOrg).toMatchObject({ code: "not_found" });
+
+			const own = await pos.getDeposit(tenantId, orgA, prepared.id);
+			expect(own).toMatchObject({
+				amount: { amountMinor: 40_000, currency: "GYD" },
+				id: prepared.id,
+				preparerPartyId: `party_${depositsBase.actorUserId}`,
+				state: "Prepared",
+			});
+		});
 	}
 );

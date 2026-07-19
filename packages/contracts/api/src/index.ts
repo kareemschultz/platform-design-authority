@@ -150,6 +150,12 @@ export const ENDPOINTS = [
 		permission: "platform.audit.read",
 	},
 	{
+		method: "GET",
+		operationId: "getCashVariancesByVarianceId",
+		path: "/v1/cash-variances/{varianceId}",
+		permission: "commerce.cash-variance.approve",
+	},
+	{
 		method: "POST",
 		operationId: "postCashVariancesByVarianceIdApprove",
 		path: "/v1/cash-variances/{varianceId}/approve",
@@ -190,6 +196,12 @@ export const ENDPOINTS = [
 		operationId: "createDeposit",
 		path: "/v1/deposits",
 		permission: "commerce.deposit.create",
+	},
+	{
+		method: "GET",
+		operationId: "getDepositsByDepositId",
+		path: "/v1/deposits/{depositId}",
+		permission: "commerce.deposit.confirm",
 	},
 	{
 		method: "POST",
@@ -570,10 +582,22 @@ export const ENDPOINTS = [
 		permission: "commerce.refund.create",
 	},
 	{
+		method: "GET",
+		operationId: "getRefundsByRefundId",
+		path: "/v1/refunds/{refundId}",
+		permission: "commerce.refund.approve",
+	},
+	{
 		method: "POST",
 		operationId: "postRefundsByRefundIdApprove",
 		path: "/v1/refunds/{refundId}/approve",
 		permission: "commerce.refund.approve",
+	},
+	{
+		method: "GET",
+		operationId: "getRegisterSessionsBySessionId",
+		path: "/v1/register-sessions/{sessionId}",
+		permission: "commerce.register.close",
 	},
 	{
 		method: "POST",
@@ -594,6 +618,12 @@ export const ENDPOINTS = [
 		permission: "commerce.register.open",
 	},
 	{
+		method: "GET",
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumber",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}",
+		permission: "commerce.receipt.read",
+	},
+	{
 		method: "POST",
 		operationId: "postRegistersByRegisterIdSafeDrops",
 		path: "/v1/registers/{registerId}/safe-drops",
@@ -604,6 +634,12 @@ export const ENDPOINTS = [
 		operationId: "createReturn",
 		path: "/v1/returns",
 		permission: "commerce.return.create",
+	},
+	{
+		method: "GET",
+		operationId: "getReturnsByReturnId",
+		path: "/v1/returns/{returnId}",
+		permission: "commerce.return.approve",
 	},
 	{
 		method: "POST",

@@ -1185,6 +1185,40 @@ export const getReceiptContract = base
 	)
 	.output(ReceiptSchema);
 
+/** WS3 remediation R3, Finding J: resolves a human-legible reference
+ * actually printed on the receipt — `receiptNumber` and `registerId`, both
+ * shown by `ReceiptLayout` (apps/web) — to the Receipt (and, via its
+ * nullable `saleId`, the return path), instead of requiring the opaque Sale
+ * ID a cashier can only have if it happens to still be cached in THEIR OWN
+ * browser's sessionStorage. Reuses `commerce.receipt.read`, the same
+ * permission `getReceiptContract` already requires — no new identifier
+ * invented. `receiptNumber` is unique only per (tenantId, registerId) —
+ * `pos_receipt_tenant_register_number_uidx` — so `registerId` is a required
+ * path segment, not an optional disambiguator; both values are printed
+ * together on every receipt. */
+export const getReceiptByNumberContract = base
+	.route({
+		method: "GET",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumber",
+		permission: "commerce.receipt.read",
+		responseRef: "#/components/schemas/Receipt",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({
+				receiptNumber: z.string().min(1).max(200),
+				registerId: IdentifierSchema,
+			}),
+		})
+	)
+	.output(ReceiptSchema);
+
 // ---------------------------------------------------------------------------
 // WS3 PR3: Return, Refund, Void, Reissue. Exchange has no dedicated
 // contract — it rides `completeSaleContract`'s `exchangeOfReturnId` (§6.5).
@@ -1207,6 +1241,30 @@ export const createReturnContract = base
 		z.object({
 			body: CreateReturnSchema,
 			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(ReturnSchema);
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.return.approve`. Reuses that exact permission — no new
+ * identifier invented; an approver may, by definition, preview what they
+ * can approve. */
+export const getReturnContract = base
+	.route({
+		method: "GET",
+		path: "/v1/returns/{returnId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getReturnsByReturnId",
+		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ returnId: IdentifierSchema }),
 		})
 	)
 	.output(ReturnSchema);
@@ -1248,6 +1306,27 @@ export const createRefundContract = base
 		z.object({
 			body: CreateRefundSchema,
 			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(RefundSchema);
+
+/** WS3 remediation R3, Finding I. */
+export const getRefundContract = base
+	.route({
+		method: "GET",
+		path: "/v1/refunds/{refundId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getRefundsByRefundId",
+		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/Refund",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ refundId: IdentifierSchema }),
 		})
 	)
 	.output(RefundSchema);
@@ -1342,6 +1421,27 @@ export const createDepositContract = base
 	)
 	.output(DepositSchema);
 
+/** WS3 remediation R3, Finding I. */
+export const getDepositContract = base
+	.route({
+		method: "GET",
+		path: "/v1/deposits/{depositId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getDepositsByDepositId",
+		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/Deposit",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ depositId: IdentifierSchema }),
+		})
+	)
+	.output(DepositSchema);
+
 export const confirmDepositContract = base
 	.route({
 		method: "POST",
@@ -1361,6 +1461,57 @@ export const confirmDepositContract = base
 		})
 	)
 	.output(DepositSchema);
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.register.close` (the closer's own upcoming action). */
+export const getRegisterSessionContract = base
+	.route({
+		method: "GET",
+		path: "/v1/register-sessions/{sessionId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getRegisterSessionsBySessionId",
+		permission: "commerce.register.close",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ sessionId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
+/** WS3 remediation R3, Finding I: the SAME register-session read as
+ * `getRegisterSessionContract` above, gated on `commerce.cash-variance.
+ * approve` instead — the closer and the variance approver are different
+ * Parties by Finding C's separation-of-duties rule and are not guaranteed
+ * to hold each other's permission, so this is a second thin operation over
+ * the identical underlying resource rather than one operation gated on
+ * either permission (this contract surface authorizes one permission per
+ * operation throughout). `varianceId` IS the register session id, matching
+ * `approveCashVarianceContract`'s existing `{varianceId}` param exactly. */
+export const getCashVarianceContract = base
+	.route({
+		method: "GET",
+		path: "/v1/cash-variances/{varianceId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getCashVariancesByVarianceId",
+		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ varianceId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
 
 export const createAccountantHandoffExportContract = base
 	.route({
@@ -1865,10 +2016,14 @@ export const ws2CatalogInventoryApiContract = {
 export const ws3PosApiContract = {
 	commerce: {
 		cashMovements: { create: createCashMovementContract },
-		cashVariances: { approve: approveCashVarianceContract },
+		cashVariances: {
+			approve: approveCashVarianceContract,
+			get: getCashVarianceContract,
+		},
 		deposits: {
 			confirm: confirmDepositContract,
 			create: createDepositContract,
+			get: getDepositContract,
 		},
 		priceOverrides: {
 			approve: approveSalePriceOverrideContract,
@@ -1876,13 +2031,16 @@ export const ws3PosApiContract = {
 		},
 		receipts: {
 			get: getReceiptContract,
+			getByNumber: getReceiptByNumberContract,
 			reissue: reissueReceiptContract,
 			void: voidReceiptContract,
 		},
 		refunds: {
 			approve: approveRefundContract,
 			create: createRefundContract,
+			get: getRefundContract,
 		},
+		registerSessions: { get: getRegisterSessionContract },
 		registers: {
 			close: closeRegisterContract,
 			open: openRegisterContract,
@@ -1890,6 +2048,7 @@ export const ws3PosApiContract = {
 		returns: {
 			approve: approveReturnContract,
 			create: createReturnContract,
+			get: getReturnContract,
 		},
 		safeDrops: { create: createSafeDropContract },
 		sales: {
@@ -2044,6 +2203,15 @@ export const WS3_OPERATION_IDS = [
 	"postDepositsByDepositIdConfirm",
 	"createAccountantHandoffExport",
 	"getExportsByExportId",
+	// WS3 remediation R3: Findings I and J's pre-commit consequence-preview
+	// and receipt-to-return server-lookup reads, all reusing an already-
+	// registered commerce.* permission (no new identifier invented).
+	"getReturnsByReturnId",
+	"getRefundsByRefundId",
+	"getDepositsByDepositId",
+	"getRegisterSessionsBySessionId",
+	"getCashVariancesByVarianceId",
+	"getRegistersByRegisterIdReceiptsByReceiptNumber",
 ] as const;
 
 export const WS3_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(

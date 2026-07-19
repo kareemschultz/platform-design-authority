@@ -11,6 +11,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		successStatus: 200,
 	},
 	{
+		method: "GET",
+		operationId: "getCashVariancesByVarianceId",
+		path: "/v1/cash-variances/{varianceId}",
+		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	},
+	{
 		method: "POST",
 		operationId: "postCashVariancesByVarianceIdApprove",
 		path: "/v1/cash-variances/{varianceId}/approve",
@@ -61,6 +69,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		requestRef: "#/components/schemas/CreateDeposit",
 		responseRef: "#/components/schemas/Deposit",
 		successStatus: 201,
+	},
+	{
+		method: "GET",
+		operationId: "getDepositsByDepositId",
+		path: "/v1/deposits/{depositId}",
+		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/Deposit",
+		successStatus: 200,
 	},
 	{
 		method: "POST",
@@ -575,11 +591,27 @@ export const OPENAPI_OPERATION_METADATA = [
 		successStatus: 200,
 	},
 	{
+		method: "GET",
+		operationId: "getRefundsByRefundId",
+		path: "/v1/refunds/{refundId}",
+		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/Refund",
+		successStatus: 200,
+	},
+	{
 		method: "POST",
 		operationId: "postRefundsByRefundIdApprove",
 		path: "/v1/refunds/{refundId}/approve",
 		permission: "commerce.refund.approve",
 		responseRef: "#/components/schemas/Refund",
+		successStatus: 200,
+	},
+	{
+		method: "GET",
+		operationId: "getRegisterSessionsBySessionId",
+		path: "/v1/register-sessions/{sessionId}",
+		permission: "commerce.register.close",
+		responseRef: "#/components/schemas/RegisterSession",
 		successStatus: 200,
 	},
 	{
@@ -610,6 +642,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		successStatus: 200,
 	},
 	{
+		method: "GET",
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumber",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}",
+		permission: "commerce.receipt.read",
+		responseRef: "#/components/schemas/Receipt",
+		successStatus: 200,
+	},
+	{
 		method: "POST",
 		operationId: "postRegistersByRegisterIdSafeDrops",
 		path: "/v1/registers/{registerId}/safe-drops",
@@ -626,6 +666,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		requestRef: "#/components/schemas/CreateReturn",
 		responseRef: "#/components/schemas/Return",
 		successStatus: 201,
+	},
+	{
+		method: "GET",
+		operationId: "getReturnsByReturnId",
+		path: "/v1/returns/{returnId}",
+		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 200,
 	},
 	{
 		method: "POST",

@@ -635,12 +635,59 @@ export interface PosApplication {
 		registerId: string;
 		sessionId: string;
 	}) => Promise<Sale>;
+	/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+	 * `commerce.cash-variance.approve` — same underlying register session
+	 * `getRegisterSession` below reads, gated on the variance-approver's own
+	 * permission instead of the closer's. */
+	getCashVariance: (input: {
+		actorUserId: string;
+		contextId: string;
+		sessionId: string;
+		varianceId: string;
+	}) => Promise<RegisterSession>;
+	/** WS3 remediation R3, Finding I. */
+	getDeposit: (input: {
+		actorUserId: string;
+		contextId: string;
+		depositId: string;
+		sessionId: string;
+	}) => Promise<Deposit>;
 	getReceipt: (input: {
 		actorUserId: string;
 		contextId: string;
 		receiptId: string;
 		sessionId: string;
 	}) => Promise<Receipt>;
+	/** WS3 remediation R3, Finding J. */
+	getReceiptByNumber: (input: {
+		actorUserId: string;
+		contextId: string;
+		receiptNumber: string;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<Receipt>;
+	/** WS3 remediation R3, Finding I. */
+	getRefund: (input: {
+		actorUserId: string;
+		contextId: string;
+		refundId: string;
+		sessionId: string;
+	}) => Promise<Refund>;
+	/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+	 * `commerce.register.close` (the closer's own upcoming action). */
+	getRegisterSession: (input: {
+		actorUserId: string;
+		contextId: string;
+		registerSessionId: string;
+		sessionId: string;
+	}) => Promise<RegisterSession>;
+	/** WS3 remediation R3, Finding I. */
+	getReturn: (input: {
+		actorUserId: string;
+		contextId: string;
+		returnId: string;
+		sessionId: string;
+	}) => Promise<Return>;
 	holdSale: (input: {
 		actorUserId: string;
 		contextId: string;

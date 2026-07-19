@@ -1242,5 +1242,232 @@ describe.serial(
 			);
 			expect(saleRow.rows[0]?.state).toBe("Completed");
 		});
+
+		// -------------------------------------------------------------------
+		// WS3 remediation R3, Findings I and J: pre-commit consequence-preview
+		// reads for return/refund approval, and the receipt-number lookup
+		// that fixes the receipt-to-return dead end. Before this stage none
+		// of `getReturn`/`getRefund`/`getReceiptByNumber` existed as callable
+		// operations (calling them was a compile error), so "proven to fail
+		// pre-fix" is the capability's prior nonexistence; the adversarial
+		// proof below is the actual boundary each read now enforces.
+		// -------------------------------------------------------------------
+
+		test("getReturn and getRefund carry real server-derived data (amount, register, state) and stay non-disclosing across organizations", async () => {
+			const tenantId = "tenant_returns_preview_isolation";
+			const orgA = "organization_returns_preview_a";
+			const orgB = "organization_returns_preview_b";
+			const registerId = "register_returns_preview_isolation";
+			const pos = posService();
+			await pos.openRegister({
+				actorUserId: returnsBase.actorUserId,
+				correlationId: returnsBase.correlationId,
+				currency: "GYD",
+				idempotencyKey: "preview-isolation-open",
+				locationId: locationFor(registerId),
+				openingFloat: { amountMinor: 100_000, currency: "GYD" },
+				organizationId: orgA,
+				registerId,
+				tenantId,
+			});
+			const inventory = createInventoryService({
+				clock: () => new Date(),
+				ids: inventoryIds,
+				references: {
+					requireLocation: () => Promise.resolve(),
+					requireProduct: () => Promise.resolve(),
+				},
+				unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+					events: createPostgresOutbox(client),
+					repository: createInventoryRepository(client),
+				})),
+			});
+			const seedKey = crypto.randomUUID().replaceAll("-", "");
+			const seedAdjustment = await inventory.createAdjustment({
+				actorUserId: "returns_preview_seeder",
+				body: {
+					locationId: locationFor(registerId),
+					productId: RETURN_PRODUCT_ID,
+					quantity: "1000",
+					reason: "Finding I/J preview-isolation stock seed",
+					unit: "each",
+				},
+				correlationId: `seed_${seedKey}`,
+				idempotencyKey: `seed_create_${seedKey}`,
+				organizationId: orgA,
+				tenantId,
+			});
+			await inventory.approveAdjustment({
+				actorUserId: "returns_preview_seeder_approver",
+				adjustmentId: seedAdjustment.id,
+				correlationId: `seed_${seedKey}`,
+				idempotencyKey: `seed_approve_${seedKey}`,
+				organizationId: orgA,
+				tenantId,
+				version: seedAdjustment.version,
+			});
+			const sale = await pos.createSale({
+				actorUserId: returnsBase.actorUserId,
+				correlationId: returnsBase.correlationId,
+				currency: "GYD",
+				idempotencyKey: "preview-isolation-sale-create",
+				lines: [
+					{
+						productId: RETURN_PRODUCT_ID,
+						quantity: "1",
+						unit: "each",
+						unitPrice: { amountMinor: 200_000, currency: "GYD" },
+					},
+				],
+				organizationId: orgA,
+				registerId,
+				tenantId,
+			});
+			const completed = await pos.completeSale({
+				actorUserId: returnsBase.actorUserId,
+				correlationId: returnsBase.correlationId,
+				idempotencyKey: "preview-isolation-sale-complete",
+				organizationId: orgA,
+				saleId: sale.id,
+				tenantId,
+				tenders: [
+					{
+						amountMinor: sale.total.amountMinor,
+						currency: "GYD",
+						type: "Cash",
+					},
+				],
+			});
+			const saleLineId = completed.lines[0]?.id as string;
+			const createdReturn = await pos.createReturn({
+				actorUserId: returnsBase.actorUserId,
+				correlationId: returnsBase.correlationId,
+				idempotencyKey: "preview-isolation-return-create",
+				lines: [{ quantity: "1", saleLineId }],
+				organizationId: orgA,
+				reason: "Finding I preview isolation",
+				saleId: completed.id,
+				tenantId,
+			});
+
+			// Org B (same tenant) may not preview org A's pending return —
+			// the SAME non-disclosing not_found Finding B's other reads use.
+			const crossOrgReturn = await captureError(
+				pos.getReturn(tenantId, orgB, createdReturn.id)
+			);
+			expect(crossOrgReturn).toMatchObject({ code: "not_found" });
+
+			const ownReturn = await pos.getReturn(tenantId, orgA, createdReturn.id);
+			// totalRefundable is tax-inclusive (200_000 gross + 14% GY_STANDARD_14
+			// tax = 228_000) — the server-authoritative figure Finding I's
+			// preview must show, not the line's bare unit price.
+			expect(ownReturn).toMatchObject({
+				id: createdReturn.id,
+				registerId,
+				saleId: completed.id,
+				state: "Pending",
+				totalRefundable: { amountMinor: 228_000, currency: "GYD" },
+			});
+
+			const approvedReturn = await pos.approveReturn({
+				actorUserId: "returns_preview_checker",
+				correlationId: returnsBase.correlationId,
+				idempotencyKey: "preview-isolation-return-approve",
+				organizationId: orgA,
+				returnId: createdReturn.id,
+				tenantId,
+			});
+			const refund = await pos.createRefund({
+				actorUserId: returnsBase.actorUserId,
+				correlationId: returnsBase.correlationId,
+				idempotencyKey: "preview-isolation-refund-create",
+				organizationId: orgA,
+				returnId: approvedReturn.id,
+				tenantId,
+			});
+
+			const crossOrgRefund = await captureError(
+				pos.getRefund(tenantId, orgB, refund.id)
+			);
+			expect(crossOrgRefund).toMatchObject({ code: "not_found" });
+
+			const ownRefund = await pos.getRefund(tenantId, orgA, refund.id);
+			expect(ownRefund).toMatchObject({
+				amount: { amountMinor: 228_000, currency: "GYD" },
+				id: refund.id,
+				registerId,
+				returnId: approvedReturn.id,
+				state: "Requested",
+			});
+		});
+
+		test("getReceiptByNumber (Finding J) resolves the printed receiptNumber+registerId to the Receipt's saleId, and is scoped to the register the number was issued on, not just the organization", async () => {
+			const tenantId = "tenant_returns_receipt_lookup";
+			const registerId = "register_returns_receipt_lookup";
+			const otherRegisterId = "register_returns_receipt_lookup_other";
+			const pos = posService();
+			await openRegisterAndSeedStock(pos, registerId, tenantId);
+			await openRegisterAndSeedStock(pos, otherRegisterId, tenantId);
+			const sale = await completedFixtureSale(
+				pos,
+				registerId,
+				tenantId,
+				"receipt-lookup"
+			);
+			const receiptId = sale.receiptId as string;
+			const receipt = await pos.getReceipt(
+				tenantId,
+				returnsBase.organizationId,
+				receiptId
+			);
+
+			// The happy path: exactly what a fresh browser can read off a
+			// printed receipt (receiptNumber + registerId, both shown by
+			// ReceiptLayout) resolves to the same Receipt, including its
+			// saleId — the field the receipt itself never prints.
+			const looked = await pos.getReceiptByNumber(
+				tenantId,
+				returnsBase.organizationId,
+				registerId,
+				receipt.receiptNumber
+			);
+			expect(looked).toMatchObject({
+				id: receiptId,
+				receiptNumber: receipt.receiptNumber,
+				saleId: sale.id,
+			});
+
+			// The SAME receiptNumber string queried against a DIFFERENT
+			// register (`pos_receipt_tenant_register_number_uidx`'s actual
+			// uniqueness scope is per-register, not per-organization) must
+			// not resolve — proves this can never cross-resolve to the wrong
+			// register's receipt even if two registers' numbering happened
+			// to collide, rather than relying on the numbering allocator's
+			// registerId-prefixed format alone.
+			const wrongRegister = await captureError(
+				pos.getReceiptByNumber(
+					tenantId,
+					returnsBase.organizationId,
+					otherRegisterId,
+					receipt.receiptNumber
+				)
+			);
+			expect(wrongRegister).toMatchObject({ code: "not_found" });
+
+			// Cross-organization (same tenant, same register id would not
+			// exist under org B anyway, but the org filter is asserted
+			// directly since B's non-disclosing contract requires it on
+			// every by-ID/by-reference read, not only genuinely-missing
+			// registers).
+			const crossOrg = await captureError(
+				pos.getReceiptByNumber(
+					tenantId,
+					"organization_returns_receipt_lookup_other",
+					registerId,
+					receipt.receiptNumber
+				)
+			);
+			expect(crossOrg).toMatchObject({ code: "not_found" });
+		});
 	}
 );

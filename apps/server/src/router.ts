@@ -37,7 +37,9 @@ import {
 	createStockTransferContract,
 	createUserInvitationContract,
 	dispatchStockTransferContract,
+	getCashVarianceContract,
 	getCurrentIdentityContract,
+	getDepositContract,
 	getExportContract,
 	getInventoryAdjustmentContract,
 	getOpeningStockImportContract,
@@ -47,7 +49,11 @@ import {
 	getProductContract,
 	getProductImportContract,
 	getProductImportCorrectionReportContract,
+	getReceiptByNumberContract,
 	getReceiptContract,
+	getRefundContract,
+	getRegisterSessionContract,
+	getReturnContract,
 	getStockCountContract,
 	getStockTransferContract,
 	holdSaleContract,
@@ -1668,6 +1674,60 @@ const approveCashVariance = implement(approveCashVarianceContract)
 		}
 	});
 
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.cash-variance.approve` — same underlying register session
+ * `getRegisterSession` below reads, gated on the variance-approver's own
+ * permission instead of the closer's. */
+const getCashVariance = implement(getCashVarianceContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-variance.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getCashVariance({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				sessionId: session.session.id,
+				varianceId: input.params.varianceId,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.register.close` (the closer's own upcoming action). */
+const getRegisterSession = implement(getRegisterSessionContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.register.close",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getRegisterSession({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				registerSessionId: input.params.sessionId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 // ---------------------------------------------------------------------------
 // WS3 PR2: sales, receipts, price overrides. Every procedure revalidates
 // active context and enforces its declared permission BEFORE application
@@ -1843,6 +1903,32 @@ const getReceipt = implement(getReceiptContract)
 		}
 	});
 
+/** WS3 remediation R3, Finding J. */
+const getReceiptByNumber = implement(getReceiptByNumberContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.receipt.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getReceiptByNumber({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				receiptNumber: input.params.receiptNumber,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 // ---------------------------------------------------------------------------
 // WS3 PR3: Return, Refund, Void, Reissue. Exchange has no dedicated
 // procedure — it rides `completeSale`'s `exchangeOfReturnId` above.
@@ -1869,6 +1955,32 @@ const createReturn = implement(createReturnContract)
 				lines: input.body.lines,
 				reason: input.body.reason,
 				saleId: input.body.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.return.approve`, gated on that exact permission. */
+const getReturn = implement(getReturnContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getReturn({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				returnId: input.params.returnId,
 				sessionId: session.session.id,
 			});
 		} catch (error) {
@@ -1921,6 +2033,32 @@ const createRefund = implement(createRefundContract)
 				correlationId: context.correlationId,
 				idempotencyKey: input.headers["idempotency-key"],
 				returnId: input.body.returnId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.refund.approve`, gated on that exact permission. */
+const getRefund = implement(getRefundContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.refund.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getRefund({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				refundId: input.params.refundId,
 				sessionId: session.session.id,
 			});
 		} catch (error) {
@@ -2035,6 +2173,32 @@ const createDeposit = implement(createDepositContract)
 				idempotencyKey: input.headers["idempotency-key"],
 				sessionId: session.session.id,
 				sourceShiftIds: input.body.sourceShiftIds,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.deposit.confirm`, gated on that exact permission. */
+const getDeposit = implement(getDepositContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.deposit.confirm",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getDeposit({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				depositId: input.params.depositId,
+				sessionId: session.session.id,
 			});
 		} catch (error) {
 			return mapApplicationError(context, error);
@@ -2576,142 +2740,183 @@ const listAuditRecords = implement(listAuditRecordsContract)
 		}
 	});
 
+/** Extracted from `appRouter` below (rather than inlined) so its type is
+ * resolved and named once — adding Finding I/J's 6 new procedures pushed
+ * the single giant `appRouter` object literal over TS's type-serialization
+ * limit (TS7056, "type too complex to serialize"); splitting the largest
+ * sub-tree into its own named const keeps the top-level `typeof appRouter`
+ * cheap to re-derive. Purely a compiler-ergonomics split — the router
+ * shape (and `AppRouterClient`) is unchanged. */
+export const commerceRouter = {
+	cashMovements: { create: createCashMovement },
+	cashVariances: { approve: approveCashVariance, get: getCashVariance },
+	deposits: {
+		confirm: confirmDeposit,
+		create: createDeposit,
+		get: getDeposit,
+	},
+	priceOverrides: {
+		approve: approveSalePriceOverride,
+		request: requestSalePriceOverride,
+	},
+	receipts: {
+		get: getReceipt,
+		getByNumber: getReceiptByNumber,
+		reissue: reissueReceipt,
+		void: voidReceipt,
+	},
+	refunds: {
+		approve: approveRefund,
+		create: createRefund,
+		get: getRefund,
+	},
+	registerSessions: { get: getRegisterSession },
+	registers: {
+		close: closeRegister,
+		open: openRegister,
+	},
+	returns: {
+		approve: approveReturn,
+		create: createReturn,
+		get: getReturn,
+	},
+	safeDrops: { create: createSafeDrop },
+	sales: {
+		complete: completeSale,
+		create: createSale,
+		hold: holdSale,
+	},
+};
+
+export const catalogRouter = {
+	imports: {
+		accept: acceptProductImport,
+		approve: approveProductImport,
+		cancel: cancelProductImport,
+		correctionReport: getProductImportCorrectionReport,
+		create: createProductImport,
+		findings: listProductImportFindings,
+		get: getProductImport,
+		list: listProductImports,
+		purgeStaging: purgeProductImportStaging,
+	},
+	products: {
+		activate: activateProduct,
+		archive: archiveProduct,
+		create: createProduct,
+		get: getProduct,
+		list: listProducts,
+		update: updateProduct,
+	},
+};
+
+export const inventoryRouter = {
+	adjustments: {
+		approve: approveInventoryAdjustment,
+		create: createInventoryAdjustment,
+		get: getInventoryAdjustment,
+		list: listInventoryAdjustments,
+		reverse: reverseInventoryAdjustment,
+	},
+	balances: { list: listStockBalances },
+	counts: {
+		approve: approveStockCount,
+		create: createStockCount,
+		get: getStockCount,
+		list: listStockCounts,
+		saveDraft: saveStockCountDraft,
+		submit: submitStockCount,
+	},
+	imports: {
+		acceptOpeningStock: acceptOpeningStockImport,
+		approveOpeningStock: approveOpeningStockImport,
+		cancelOpeningStock: cancelOpeningStockImport,
+		createOpeningStock: createOpeningStockImport,
+		getOpeningStock: getOpeningStockImport,
+		listOpeningStock: listOpeningStockImports,
+		openingStockCorrectionReport: getOpeningStockImportCorrectionReport,
+		openingStockFindings: listOpeningStockImportFindings,
+		purgeOpeningStockStaging: purgeOpeningStockImportStaging,
+	},
+	transfers: {
+		create: createStockTransfer,
+		dispatch: dispatchStockTransfer,
+		get: getStockTransfer,
+		list: listStockTransfers,
+		receive: receiveStockTransfer,
+	},
+};
+
+const auditRouter = { list: listAuditRecords };
+const entitlementsRouter = { list: listEntitlements };
+const eventsRouter = { createReplay: createEventReplay };
+const exportsRouter = {
+	createAccountantHandoff: createAccountantHandoffExport,
+	get: getExport,
+};
+const healthCheckProcedure = publicProcedure.handler(() => "OK");
+const identityRouter = {
+	getCurrent: currentIdentity,
+	setActiveContext,
+};
+const organizationsRouter = {
+	get: getOrganization,
+	list: listOrganizations,
+	listLocations,
+	update: updateOrganization,
+};
+const partiesRouter = {
+	createIdentityLink: createPartyIdentityLink,
+	createOrganization: createOrganizationParty,
+	createPerson: createPersonParty,
+	get: getParty,
+	list: listParties,
+	update: updateParty,
+};
+const privateDataProcedure = protectedProcedure.handler(({ context }) => ({
+	message: "This is private",
+	user: context.session.user,
+}));
+const rolesRouter = {
+	assign: createRoleAssignment,
+	list: listRoles,
+};
+const sessionsRouter = {
+	list: listCurrentUserSessions,
+	revoke: revokeCurrentUserSession,
+};
+const usersRouter = {
+	invite: inviteUser,
+	list: listUsers,
+	suspendMembership,
+};
+
+/** WS3 remediation R3: adding Findings I/J's 6 new procedures pushed the
+ * top-level router object past TS7056's "type too complex to serialize"
+ * limit under `apps/server`'s `composite: true` (declaration-emission)
+ * tsconfig. Every branch above is now a separately named const (instead of
+ * one giant inline nested literal) SPECIFICALLY so `typeof appRouter`
+ * below only has to reference each already-resolved named type instead of
+ * re-inferring and re-printing the whole tree as one anonymous structural
+ * type in one pass — this alone (no explicit annotation, no `Router<...>`
+ * cast) is what keeps the checker under the limit. `AppRouterClient` (the
+ * typed API client apps/web consumes) is unchanged in shape. */
 export const appRouter = {
-	audit: { list: listAuditRecords },
-	catalog: {
-		imports: {
-			accept: acceptProductImport,
-			approve: approveProductImport,
-			cancel: cancelProductImport,
-			correctionReport: getProductImportCorrectionReport,
-			create: createProductImport,
-			findings: listProductImportFindings,
-			get: getProductImport,
-			list: listProductImports,
-			purgeStaging: purgeProductImportStaging,
-		},
-		products: {
-			activate: activateProduct,
-			archive: archiveProduct,
-			create: createProduct,
-			get: getProduct,
-			list: listProducts,
-			update: updateProduct,
-		},
-	},
-	commerce: {
-		cashMovements: { create: createCashMovement },
-		cashVariances: { approve: approveCashVariance },
-		deposits: {
-			confirm: confirmDeposit,
-			create: createDeposit,
-		},
-		priceOverrides: {
-			approve: approveSalePriceOverride,
-			request: requestSalePriceOverride,
-		},
-		receipts: {
-			get: getReceipt,
-			reissue: reissueReceipt,
-			void: voidReceipt,
-		},
-		refunds: {
-			approve: approveRefund,
-			create: createRefund,
-		},
-		registers: {
-			close: closeRegister,
-			open: openRegister,
-		},
-		returns: {
-			approve: approveReturn,
-			create: createReturn,
-		},
-		safeDrops: { create: createSafeDrop },
-		sales: {
-			complete: completeSale,
-			create: createSale,
-			hold: holdSale,
-		},
-	},
-	entitlements: { list: listEntitlements },
-	events: { createReplay: createEventReplay },
-	exports: {
-		createAccountantHandoff: createAccountantHandoffExport,
-		get: getExport,
-	},
-	healthCheck: publicProcedure.handler(() => "OK"),
-	identity: {
-		getCurrent: currentIdentity,
-		setActiveContext,
-	},
-	inventory: {
-		adjustments: {
-			approve: approveInventoryAdjustment,
-			create: createInventoryAdjustment,
-			get: getInventoryAdjustment,
-			list: listInventoryAdjustments,
-			reverse: reverseInventoryAdjustment,
-		},
-		balances: { list: listStockBalances },
-		counts: {
-			approve: approveStockCount,
-			create: createStockCount,
-			get: getStockCount,
-			list: listStockCounts,
-			saveDraft: saveStockCountDraft,
-			submit: submitStockCount,
-		},
-		imports: {
-			acceptOpeningStock: acceptOpeningStockImport,
-			approveOpeningStock: approveOpeningStockImport,
-			cancelOpeningStock: cancelOpeningStockImport,
-			createOpeningStock: createOpeningStockImport,
-			getOpeningStock: getOpeningStockImport,
-			listOpeningStock: listOpeningStockImports,
-			openingStockCorrectionReport: getOpeningStockImportCorrectionReport,
-			openingStockFindings: listOpeningStockImportFindings,
-			purgeOpeningStockStaging: purgeOpeningStockImportStaging,
-		},
-		transfers: {
-			create: createStockTransfer,
-			dispatch: dispatchStockTransfer,
-			get: getStockTransfer,
-			list: listStockTransfers,
-			receive: receiveStockTransfer,
-		},
-	},
-	organizations: {
-		get: getOrganization,
-		list: listOrganizations,
-		listLocations,
-		update: updateOrganization,
-	},
-	parties: {
-		createIdentityLink: createPartyIdentityLink,
-		createOrganization: createOrganizationParty,
-		createPerson: createPersonParty,
-		get: getParty,
-		list: listParties,
-		update: updateParty,
-	},
-	privateData: protectedProcedure.handler(({ context }) => ({
-		message: "This is private",
-		user: context.session.user,
-	})),
-	roles: {
-		assign: createRoleAssignment,
-		list: listRoles,
-	},
-	sessions: {
-		list: listCurrentUserSessions,
-		revoke: revokeCurrentUserSession,
-	},
-	users: {
-		invite: inviteUser,
-		list: listUsers,
-		suspendMembership,
-	},
+	audit: auditRouter,
+	catalog: catalogRouter,
+	commerce: commerceRouter,
+	entitlements: entitlementsRouter,
+	events: eventsRouter,
+	exports: exportsRouter,
+	healthCheck: healthCheckProcedure,
+	identity: identityRouter,
+	inventory: inventoryRouter,
+	organizations: organizationsRouter,
+	parties: partiesRouter,
+	privateData: privateDataProcedure,
+	roles: rolesRouter,
+	sessions: sessionsRouter,
+	users: usersRouter,
 };
 
 export type AppRouter = typeof appRouter;

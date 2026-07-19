@@ -74,6 +74,7 @@ function context(input?: {
 			createStockTransfer: () => Promise.reject(new Error("not used")),
 			dispatchStockTransfer: () => Promise.reject(new Error("not used")),
 			getAccountantHandoffExport: () => Promise.reject(new Error("not used")),
+			getCashVariance: () => Promise.reject(new Error("not used")),
 			getCurrentIdentity: async ({
 				activeContextId,
 				authUserId,
@@ -95,6 +96,7 @@ function context(input?: {
 				partyId: null,
 				sessionId,
 			}),
+			getDeposit: () => Promise.reject(new Error("not used")),
 			getImport: () => Promise.reject(new Error("not used")),
 			getImportCorrectionReport: () => Promise.reject(new Error("not used")),
 			getInventoryAdjustment: () => Promise.reject(new Error("not used")),
@@ -102,6 +104,10 @@ function context(input?: {
 			getParty: () => Promise.reject(new Error("not used")),
 			getProduct: () => Promise.reject(new Error("not used")),
 			getReceipt: () => Promise.reject(new Error("not used")),
+			getReceiptByNumber: () => Promise.reject(new Error("not used")),
+			getRefund: () => Promise.reject(new Error("not used")),
+			getRegisterSession: () => Promise.reject(new Error("not used")),
+			getReturn: () => Promise.reject(new Error("not used")),
 			getStockCount: () => Promise.reject(new Error("not used")),
 			getStockTransfer: () => Promise.reject(new Error("not used")),
 			holdSale: () => Promise.reject(new Error("not used")),
@@ -212,6 +218,7 @@ describe("appRouter contract surface", () => {
 			"priceOverrides",
 			"receipts",
 			"refunds",
+			"registerSessions",
 			"registers",
 			"returns",
 			"safeDrops",
@@ -220,6 +227,7 @@ describe("appRouter contract surface", () => {
 		expect(Object.keys(appRouter.commerce.deposits).sort()).toEqual([
 			"confirm",
 			"create",
+			"get",
 		]);
 		expect(Object.keys(appRouter.exports).sort()).toEqual([
 			"createAccountantHandoff",
@@ -229,6 +237,14 @@ describe("appRouter contract surface", () => {
 			"close",
 			"open",
 		]);
+		// WS3 remediation R3, Finding I: `commerce.register.close`'s and
+		// `commerce.cash-variance.approve`'s pre-commit consequence-preview
+		// reads live under a dedicated `registerSessions`/`cashVariances`
+		// namespace rather than `registers` — the resource being read is the
+		// RegisterSession, not the register-open/close command surface.
+		expect(Object.keys(appRouter.commerce.registerSessions).sort()).toEqual([
+			"get",
+		]);
 		expect(Object.keys(appRouter.commerce.cashMovements).sort()).toEqual([
 			"create",
 		]);
@@ -237,6 +253,7 @@ describe("appRouter contract surface", () => {
 		]);
 		expect(Object.keys(appRouter.commerce.cashVariances).sort()).toEqual([
 			"approve",
+			"get",
 		]);
 		expect(Object.keys(appRouter.commerce.sales).sort()).toEqual([
 			"complete",
@@ -249,16 +266,19 @@ describe("appRouter contract surface", () => {
 		]);
 		expect(Object.keys(appRouter.commerce.receipts).sort()).toEqual([
 			"get",
+			"getByNumber",
 			"reissue",
 			"void",
 		]);
 		expect(Object.keys(appRouter.commerce.refunds).sort()).toEqual([
 			"approve",
 			"create",
+			"get",
 		]);
 		expect(Object.keys(appRouter.commerce.returns).sort()).toEqual([
 			"approve",
 			"create",
+			"get",
 		]);
 		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
 			"activate",

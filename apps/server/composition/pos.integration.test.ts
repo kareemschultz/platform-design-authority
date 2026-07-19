@@ -816,6 +816,164 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 		);
 		expect(closedEventRows.rows[0]?.count).toBe("1");
 	});
+
+	// -------------------------------------------------------------------
+	// WS3 remediation R3, Finding I: pre-commit consequence-preview reads.
+	// Before this stage `getRegisterSession`/`getCashVariance` did not
+	// exist on the application at all — calling them was a TypeScript
+	// compile error, not merely a runtime 404 — so there is no meaningful
+	// "run this exact test against the pre-fix build" step; the adversarial
+	// proof is the behavioral boundary itself: cross-org denial and
+	// permission-reuse correctness, below.
+	// -------------------------------------------------------------------
+
+	test("getRegisterSession and getCashVariance read the same session but stay strictly organization-scoped (Finding B's non-disclosing not_found, applied to the new reads)", async () => {
+		const pos = service();
+		const tenantId = "tenant_pos_preview_isolation";
+		const orgA = "organization_pos_preview_a";
+		const orgB = "organization_pos_preview_b";
+		const registerId = "register_pos_preview_isolation";
+		await pos.openRegister({
+			actorUserId: base.actorUserId,
+			correlationId: base.correlationId,
+			currency: "GYD",
+			idempotencyKey: "preview-isolation-open",
+			locationId: `${base.locationId}_a`,
+			openingFloat: { amountMinor: 20_000, currency: "GYD" },
+			organizationId: orgA,
+			registerId,
+			tenantId,
+		});
+		const closing = await pos.closeRegister({
+			actorUserId: base.actorUserId,
+			correlationId: base.correlationId,
+			countedCash: { amountMinor: 15_000, currency: "GYD" },
+			idempotencyKey: "preview-isolation-close",
+			organizationId: orgA,
+			registerId,
+			tenantId,
+		});
+		expect(closing.state).toBe("Closing");
+
+		// Org B (same tenant) reading org A's session by ID: the SAME
+		// governed not_found denial B's other by-ID reads use — never a
+		// distinguishable "forbidden" that would disclose the row exists.
+		const crossOrgSession = await captureError(
+			pos.getRegisterSession(tenantId, orgB, closing.id)
+		);
+		expect(crossOrgSession).toMatchObject({ code: "not_found" });
+
+		// Org A reading its own session succeeds and carries the real
+		// server-derived expected-cash/variance data (Finding I's actual
+		// requirement — not just that a call succeeds).
+		const ownSession = await pos.getRegisterSession(tenantId, orgA, closing.id);
+		expect(ownSession).toMatchObject({
+			expectedCash: { amountMinor: 20_000, currency: "GYD" },
+			id: closing.id,
+			locationId: `${base.locationId}_a`,
+			registerId,
+			state: "Closing",
+		});
+	});
+
+	test("getRegisterSession (close preview) and getCashVariance (variance-approve preview) are gated by DIFFERENT permissions even though they read the identical resource", async () => {
+		const pos = service();
+		const registerId = "register_pos_preview_permission";
+		await pos.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "preview-permission-open",
+			openingFloat: { amountMinor: 5000, currency: "GYD" },
+			registerId,
+		});
+		const closing = await pos.closeRegister({
+			...base,
+			countedCash: { amountMinor: 4000, currency: "GYD" },
+			idempotencyKey: "preview-permission-close",
+			registerId,
+		});
+		expect(closing.state).toBe("Closing");
+
+		function applicationGrantingOnly(grantedPermission: string) {
+			const permissionCalls: string[] = [];
+			return {
+				application: createPosApplication({
+					activeContexts: {
+						requireActiveContext: () =>
+							Promise.resolve({
+								organizationId: base.organizationId,
+								tenantId: base.tenantId,
+							}),
+					},
+					entitlements: { requireEntitlement: () => Promise.resolve() },
+					permissions: {
+						requirePermission: (input) => {
+							permissionCalls.push(input.permission);
+							return input.permission === grantedPermission
+								? Promise.resolve()
+								: Promise.reject(
+										Object.assign(new Error("permission denied"), {
+											code: "authorization_denied",
+										})
+									);
+						},
+					},
+					service: pos,
+				}),
+				permissionCalls,
+			};
+		}
+
+		// A caller holding ONLY commerce.register.close (the closer's own
+		// permission) can preview the register session but is denied the
+		// cash-variance preview of the SAME resource.
+		const closerOnly = applicationGrantingOnly("commerce.register.close");
+		const closerPreview = await closerOnly.application.getRegisterSession({
+			actorUserId: base.actorUserId,
+			contextId: "context_pos_preview_closer",
+			registerSessionId: closing.id,
+			sessionId: "session_pos_preview_closer",
+		});
+		expect(closerPreview.id).toBe(closing.id);
+		expect(closerOnly.permissionCalls).toEqual(["commerce.register.close"]);
+		const closerDeniedVariance = await captureError(
+			closerOnly.application.getCashVariance({
+				actorUserId: base.actorUserId,
+				contextId: "context_pos_preview_closer",
+				sessionId: "session_pos_preview_closer",
+				varianceId: closing.id,
+			})
+		);
+		expect(closerDeniedVariance).toMatchObject({
+			code: "authorization_denied",
+		});
+
+		// A caller holding ONLY commerce.cash-variance.approve (the
+		// approver's own permission) gets the reverse: variance preview
+		// allowed, register-close preview denied.
+		const approverOnly = applicationGrantingOnly(
+			"commerce.cash-variance.approve"
+		);
+		const approverPreview = await approverOnly.application.getCashVariance({
+			actorUserId: "pos_checker",
+			contextId: "context_pos_preview_approver",
+			sessionId: "session_pos_preview_approver",
+			varianceId: closing.id,
+		});
+		expect(approverPreview.id).toBe(closing.id);
+		expect(approverOnly.permissionCalls).toEqual([
+			"commerce.cash-variance.approve",
+		]);
+		const approverDeniedClose = await captureError(
+			approverOnly.application.getRegisterSession({
+				actorUserId: "pos_checker",
+				contextId: "context_pos_preview_approver",
+				registerSessionId: closing.id,
+				sessionId: "session_pos_preview_approver",
+			})
+		);
+		expect(approverDeniedClose).toMatchObject({ code: "authorization_denied" });
+	});
 });
 
 // -----------------------------------------------------------------------

@@ -450,6 +450,17 @@ export interface PosRepository {
 		organizationId: string,
 		id: string
 	) => Promise<ReceiptRecord | null>;
+	/** WS3 remediation R3, Finding J: keyed on the SAME (tenantId,
+	 * registerId, receiptNumber) tuple `pos_receipt_tenant_register_number_
+	 * uidx` guarantees uniqueness over — `registerId` is required, not an
+	 * optional filter, so this can never return an arbitrary pick among
+	 * several receipts sharing a number across different registers. */
+	getReceiptByNumber: (
+		tenantId: string,
+		organizationId: string,
+		registerId: string,
+		receiptNumber: string
+	) => Promise<ReceiptRecord | null>;
 	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
 	getRefund: (
 		tenantId: string,
@@ -4439,6 +4450,21 @@ export function createPosService(options: PosServiceOptions) {
 			});
 		},
 
+		/** WS3 remediation R3, Finding I. */
+		async getDeposit(
+			tenantId: string,
+			organizationId: string,
+			depositId: string
+		): Promise<DepositView> {
+			const record = await options.unitOfWork.execute(({ repository }) =>
+				repository.getDeposit(tenantId, organizationId, depositId)
+			);
+			if (!record) {
+				throw new PosError("not_found", "Deposit was not found");
+			}
+			return depositView(record);
+		},
+
 		async getReceipt(
 			tenantId: string,
 			organizationId: string,
@@ -4453,6 +4479,42 @@ export function createPosService(options: PosServiceOptions) {
 			return receiptView(record);
 		},
 
+		/** WS3 remediation R3, Finding J. */
+		async getReceiptByNumber(
+			tenantId: string,
+			organizationId: string,
+			registerId: string,
+			receiptNumber: string
+		): Promise<ReceiptView> {
+			const record = await options.unitOfWork.execute(({ repository }) =>
+				repository.getReceiptByNumber(
+					tenantId,
+					organizationId,
+					registerId,
+					receiptNumber
+				)
+			);
+			if (!record) {
+				throw new PosError("not_found", "Receipt was not found");
+			}
+			return receiptView(record);
+		},
+
+		/** WS3 remediation R3, Finding I. */
+		async getRefund(
+			tenantId: string,
+			organizationId: string,
+			refundId: string
+		): Promise<RefundView> {
+			const record = await options.unitOfWork.execute(({ repository }) =>
+				repository.getRefund(tenantId, organizationId, refundId)
+			);
+			if (!record) {
+				throw new PosError("not_found", "Refund was not found");
+			}
+			return refundView(record);
+		},
+
 		async getRegisterSession(
 			tenantId: string,
 			organizationId: string,
@@ -4465,6 +4527,24 @@ export function createPosService(options: PosServiceOptions) {
 				throw new PosError("not_found", "Register session was not found");
 			}
 			return registerSessionView(record);
+		},
+
+		/** WS3 remediation R3, Finding I. Same pre-commit consequence-preview
+		 * read `getReceipt` already realizes for void/reissue, applied to
+		 * Return so `commerce.return.approve`'s approver sees server-derived
+		 * context before committing rather than only the ID they typed. */
+		async getReturn(
+			tenantId: string,
+			organizationId: string,
+			returnId: string
+		): Promise<ReturnView> {
+			const record = await options.unitOfWork.execute(({ repository }) =>
+				repository.getReturn(tenantId, organizationId, returnId)
+			);
+			if (!record) {
+				throw new PosError("not_found", "Return was not found");
+			}
+			return returnView(record);
 		},
 
 		async holdSale(input: {
@@ -5652,6 +5732,59 @@ export function createPosApplication(options: {
 				tenantId: context.tenantId,
 			});
 		},
+		/** WS3 remediation R3, Finding I: the SAME register-session read as
+		 * `getRegisterSession` above, but gated on `commerce.cash-variance.
+		 * approve` instead — the variance approver and the closer are
+		 * different Parties by Finding C's separation-of-duties rule and are
+		 * not guaranteed to hold each other's permission, so this is a
+		 * second thin operation over the identical underlying read rather
+		 * than one operation gated on either permission (this codebase's
+		 * permission check is single-permission-per-procedure throughout;
+		 * see `PosPermissionPort`/`requirePermission`). `varianceId` IS the
+		 * register session id, matching `approveCashVariance`'s existing
+		 * `{varianceId}` route param and `VarianceApproveForm`'s "Variance /
+		 * register session ID" field exactly. */
+		async getCashVariance(input: {
+			actorUserId: string;
+			contextId: string;
+			sessionId: string;
+			varianceId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.register-management",
+				contextId: input.contextId,
+				permission: "commerce.cash-variance.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.getRegisterSession(
+				context.tenantId,
+				context.organizationId,
+				input.varianceId
+			);
+		},
+		/** WS3 remediation R3, Finding I. */
+		async getDeposit(input: {
+			actorUserId: string;
+			contextId: string;
+			depositId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.cash-management",
+				contextId: input.contextId,
+				permission: "commerce.deposit.confirm",
+				sessionId: input.sessionId,
+			});
+			return options.service.getDeposit(
+				context.tenantId,
+				context.organizationId,
+				input.depositId
+			);
+		},
 		async getReceipt(input: {
 			actorUserId: string;
 			contextId: string;
@@ -5670,6 +5803,100 @@ export function createPosApplication(options: {
 				context.tenantId,
 				context.organizationId,
 				input.receiptId
+			);
+		},
+		/** WS3 remediation R3, Finding J: resolves a human-legible printed
+		 * reference (receiptNumber + registerId, both on `ReceiptLayout`) to
+		 * the receipt (and, via its `saleId`, the return path) — the SAME
+		 * `commerce.receipt.read` permission `getReceipt` already requires,
+		 * no new permission invented. */
+		async getReceiptByNumber(input: {
+			actorUserId: string;
+			contextId: string;
+			receiptNumber: string;
+			registerId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.receipts",
+				contextId: input.contextId,
+				permission: "commerce.receipt.read",
+				sessionId: input.sessionId,
+			});
+			return options.service.getReceiptByNumber(
+				context.tenantId,
+				context.organizationId,
+				input.registerId,
+				input.receiptNumber
+			);
+		},
+		/** WS3 remediation R3, Finding I. */
+		async getRefund(input: {
+			actorUserId: string;
+			contextId: string;
+			refundId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.refunds",
+				contextId: input.contextId,
+				permission: "commerce.refund.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.getRefund(
+				context.tenantId,
+				context.organizationId,
+				input.refundId
+			);
+		},
+		/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+		 * `commerce.register.close` (the closer's own upcoming action). */
+		async getRegisterSession(input: {
+			actorUserId: string;
+			contextId: string;
+			registerSessionId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.register-management",
+				contextId: input.contextId,
+				permission: "commerce.register.close",
+				sessionId: input.sessionId,
+			});
+			return options.service.getRegisterSession(
+				context.tenantId,
+				context.organizationId,
+				input.registerSessionId
+			);
+		},
+		/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+		 * `commerce.return.approve` — reuses that exact permission (an
+		 * approver may, by definition, also preview) rather than inventing a
+		 * dedicated read permission. */
+		async getReturn(input: {
+			actorUserId: string;
+			contextId: string;
+			returnId: string;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.returns",
+				contextId: input.contextId,
+				permission: "commerce.return.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.getReturn(
+				context.tenantId,
+				context.organizationId,
+				input.returnId
 			);
 		},
 		async holdSale(input: {

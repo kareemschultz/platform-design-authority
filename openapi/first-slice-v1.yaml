@@ -1527,6 +1527,19 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Sale'}
+  /returns/{returnId}:
+    get:
+      tags: [Commerce]
+      operationId: getReturnsByReturnId
+      x-permission: commerce.return.approve
+      parameters:
+        - {name: returnId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.return.approve, gated on that exact permission (an approver may preview what they can approve)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Return'}
   /returns/{returnId}/approve:
     post:
       tags: [Commerce]
@@ -1556,6 +1569,19 @@ paths:
       responses:
         '200':
           description: Refund Requested against an approved Return; amount derived from the Return, no register cash effect yet
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Refund'}
+  /refunds/{refundId}:
+    get:
+      tags: [Commerce]
+      operationId: getRefundsByRefundId
+      x-permission: commerce.refund.approve
+      parameters:
+        - {name: refundId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.refund.approve
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Refund'}
@@ -1611,6 +1637,19 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/CashMovement'}
+  /deposits/{depositId}:
+    get:
+      tags: [Commerce]
+      operationId: getDepositsByDepositId
+      x-permission: commerce.deposit.confirm
+      parameters:
+        - {name: depositId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.deposit.confirm
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Deposit'}
   /deposits/{depositId}/confirm:
     post:
       tags: [Commerce]
@@ -1625,6 +1664,32 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Deposit'}
+  /register-sessions/{sessionId}:
+    get:
+      tags: [Commerce]
+      operationId: getRegisterSessionsBySessionId
+      x-permission: commerce.register.close
+      parameters:
+        - {name: sessionId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.register.close (the closer's own upcoming action)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
+  /cash-variances/{varianceId}:
+    get:
+      tags: [Commerce]
+      operationId: getCashVariancesByVarianceId
+      x-permission: commerce.cash-variance.approve
+      parameters:
+        - {name: varianceId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.cash-variance.approve; varianceId is the register session id, matching the approve operation and VarianceApproveForm exactly
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
   /cash-variances/{varianceId}/approve:
     post:
       tags: [Commerce]
@@ -1650,6 +1715,20 @@ paths:
       responses:
         '200':
           description: Receipt found
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Receipt'}
+  /registers/{registerId}/receipts/{receiptNumber}:
+    get:
+      tags: [Commerce]
+      operationId: getRegistersByRegisterIdReceiptsByReceiptNumber
+      x-permission: commerce.receipt.read
+      parameters:
+        - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: receiptNumber, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding J - resolves the human-legible receiptNumber+registerId printed on ReceiptLayout to the Receipt (and its saleId), so a cashier in a fresh browser can start a return without an opaque cached Sale ID
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Receipt'}

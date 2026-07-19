@@ -814,6 +814,38 @@ export function createPosRepository(
 				.limit(1);
 			return rows[0] ? mapSaleReceipt(rows[0]) : null;
 		},
+		/** WS3 remediation R3, Finding J: `pos_receipt_tenant_register_number_
+		 * uidx` is the actual authoritative uniqueness scope for `receiptNumber`
+		 * — (tenantId, registerId, receiptNumber), NOT (tenantId,
+		 * organizationId, receiptNumber). `registerId` is REQUIRED here (not
+		 * an optional disambiguator) so this can never silently pick an
+		 * arbitrary one of several same-numbered receipts across different
+		 * registers in the same organization. Both `receiptNumber` and
+		 * `registerId` are printed on `ReceiptLayout` (apps/web), so a cashier
+		 * reading a physical/on-screen receipt in a genuinely fresh browser
+		 * always has both values. `organizationId` is filtered too, matching
+		 * every other by-ID lookup's non-disclosing cross-org denial (Finding
+		 * B) even though `registerId` alone already implies one organization. */
+		async getReceiptByNumber(
+			tenantId,
+			organizationId,
+			registerId,
+			receiptNumber
+		) {
+			const rows = await database
+				.select()
+				.from(posReceipts)
+				.where(
+					and(
+						eq(posReceipts.tenantId, tenantId),
+						eq(posReceipts.organizationId, organizationId),
+						eq(posReceipts.registerId, registerId),
+						eq(posReceipts.receiptNumber, receiptNumber)
+					)
+				)
+				.limit(1);
+			return rows[0] ? mapSaleReceipt(rows[0]) : null;
+		},
 		async getRefund(tenantId, organizationId, id) {
 			const rows = await database
 				.select()

@@ -4,6 +4,7 @@ import {
 	ActiveContextRequestSchema,
 	appApiContract,
 	CatalogSkuLookupSchema,
+	CreateCashMovementRequestSchema,
 	CreateProductSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
@@ -375,6 +376,39 @@ describe("WS3 POS Cash Workflow API contract", () => {
 				PR3_PERMISSION_NAMESPACE_PATTERN
 			);
 		}
+	});
+
+	test("WS3 remediation R1 cycle 2 (advisor-flagged load-bearing invariant): the manual cash-movement command's reasonCode CANNOT be 'Refund' or 'SafeDrop' — closes the load-bearing assumption behind queryFinanceHandoffSourceData's Refund-vs-Void classification (packages/persistence/pos-postgres/src/index.ts), which relies on 'approveRefund' and 'voidReceipt' being the ONLY two domain-internal producers of a reasonCode:'Refund' cash movement. If a caller could submit reasonCode:'Refund' through this manual endpoint with an arbitrary referenceId, that movement would be misclassified sourceKind:'Void' by the LEFT JOIN's not-a-real-refund fallback.", () => {
+		const rejectedRefund = CreateCashMovementRequestSchema.safeParse({
+			amount: { amountMinor: 1000, currency: "GYD" },
+			direction: "PaidOut",
+			reasonCode: "Refund",
+			referenceId: "arbitrary_not_a_real_refund_id",
+		});
+		expect(rejectedRefund.success).toBe(false);
+
+		const rejectedSafeDrop = CreateCashMovementRequestSchema.safeParse({
+			amount: { amountMinor: 1000, currency: "GYD" },
+			direction: "PaidOut",
+			reasonCode: "SafeDrop",
+		});
+		expect(rejectedSafeDrop.success).toBe(false);
+
+		// The only three reasonCode values the manual command accepts —
+		// SafeDrop is fixed server-side by the dedicated safe-drops
+		// endpoint (apps/server/composition/pos.ts), never caller-chosen.
+		const acceptedPaidIn = CreateCashMovementRequestSchema.safeParse({
+			amount: { amountMinor: 1000, currency: "GYD" },
+			direction: "PaidIn",
+			reasonCode: "PaidIn",
+		});
+		expect(acceptedPaidIn.success).toBe(true);
+		const acceptedOther = CreateCashMovementRequestSchema.safeParse({
+			amount: { amountMinor: 1000, currency: "GYD" },
+			direction: "PaidOut",
+			reasonCode: "Other",
+		});
+		expect(acceptedOther.success).toBe(true);
 	});
 
 	test("realizes maker/checker self-approval separation as an application-layer rule, not a distinct deny permission (frozen control plan §6)", () => {

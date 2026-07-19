@@ -3,6 +3,7 @@
 import type { Deposit } from "@meridian/contracts-platform-api";
 import { Button } from "@meridian/ui-web/components/button";
 import { useForm } from "@tanstack/react-form";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -16,6 +17,7 @@ import {
 } from "@/lib/pos";
 import { orpc } from "@/utils/orpc";
 
+import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
 import {
 	MutationError,
 	OperationsPageFrame,
@@ -170,7 +172,20 @@ export function DepositConfirmPage() {
 		);
 	}, [depositId, identity?.authUserId]);
 
-	async function confirmDeposit() {
+	// WS3 remediation R3, Finding I: pre-commit consequence preview.
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const preview = useQuery({
+		...orpc.commerce.deposits.get.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				params: { depositId },
+			},
+		}),
+		enabled: confirmOpen && Boolean(workspace.contextId && depositId),
+		retry: false,
+	});
+
+	async function commitConfirmDeposit() {
 		if (!depositId) {
 			return;
 		}
@@ -181,6 +196,7 @@ export function DepositConfirmPage() {
 			},
 			params: { depositId },
 		});
+		setConfirmOpen(false);
 		setConfirmed(deposit);
 		toast.success("Deposit reconciled");
 	}
@@ -228,15 +244,55 @@ export function DepositConfirmPage() {
 						/>
 						<Button
 							className="w-fit"
-							disabled={confirm.isPending || !workspace.isOnline}
-							onClick={confirmDeposit}
+							disabled={!(depositId && workspace.isOnline)}
+							onClick={() => setConfirmOpen(true)}
 							type="button"
 						>
-							{confirm.isPending ? "Confirming…" : "Confirm deposit"}
+							Review &amp; confirm deposit
 						</Button>
 					</div>
 				)}
 				<MutationError error={confirm.error} isOnline={workspace.isOnline} />
+				<ConsequencePreviewDialog
+					confirming={confirm.isPending}
+					confirmLabel="Confirm deposit"
+					data={preview.data}
+					description="Confirming posts the safe-to-bank custody transfer atomically and cannot be undone from this screen."
+					error={preview.error}
+					isError={preview.isError}
+					isLoading={preview.isLoading}
+					onConfirm={() => {
+						commitConfirmDeposit().catch(() => undefined);
+					}}
+					onOpenChange={setConfirmOpen}
+					open={confirmOpen}
+					renderPreview={(deposit) => (
+						<dl className="grid gap-1">
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Deposit</dt>
+								<dd className="font-mono">{deposit.id}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Preparer (Party)</dt>
+								<dd className="font-mono">{deposit.preparerPartyId}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Amount</dt>
+								<dd>
+									{formatMoneyMinor(
+										deposit.amount.amountMinor,
+										deposit.amount.currency
+									)}
+								</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">State</dt>
+								<dd>{deposit.state}</dd>
+							</div>
+						</dl>
+					)}
+					title="Confirm this deposit?"
+				/>
 			</PosSectionCard>
 		</OperationsPageFrame>
 	);

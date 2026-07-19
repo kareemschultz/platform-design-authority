@@ -5,7 +5,7 @@ import { Button } from "@meridian/ui-web/components/button";
 import { Label } from "@meridian/ui-web/components/label";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -29,6 +29,7 @@ import {
 import { workspaceWorkState } from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
 
+import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
 import {
 	MutationError,
 	OperationsPageFrame,
@@ -623,6 +624,25 @@ export function RegisterClosePage({
 	const [result, setResult] = useState<RegisterSession | null>(null);
 	useWorkspaceWorkGuard(workspaceWorkState(close.isPending, isDirty));
 
+	// WS3 remediation R3, Finding I: pre-commit consequence preview. Fetched
+	// only once the dialog is actually open (not eagerly on page load) so
+	// the shown data is as fresh as possible at the moment of review.
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [pendingClose, setPendingClose] = useState<{
+		countedCashMinor: number;
+		reason?: string;
+	} | null>(null);
+	const preview = useQuery({
+		...orpc.commerce.registerSessions.get.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				params: { sessionId: registerSessionId },
+			},
+		}),
+		enabled: confirmOpen && Boolean(workspace.contextId),
+		retry: false,
+	});
+
 	// See RegisterSessionPage: sessionStorage is read post-mount only, to
 	// avoid a server/client hydration mismatch.
 	const [registerId, setRegisterId] = useState("");
@@ -649,47 +669,63 @@ export function RegisterClosePage({
 
 	const form = useForm({
 		defaultValues: { countedCash: "0.00", reason: "" },
-		onSubmit: async ({ value }) => {
+		// WS3 remediation R3, Finding I: submitting no longer commits
+		// directly — it opens the consequence-preview dialog. The actual
+		// close.mutateAsync call moves to `commitClose`, fired only from
+		// the dialog's explicit Confirm control.
+		onSubmit: ({ value }) => {
 			const countedCashMinor = parseMoneyInputToMinor(value.countedCash);
 			if (countedCashMinor === null) {
 				return;
 			}
-			const body = {
-				countedCash: {
-					amountMinor: countedCashMinor,
-					currency: "GYD" as const,
-				},
+			setPendingClose({
+				countedCashMinor,
 				reason: value.reason.trim() || undefined,
-			};
-			const intent = stableIntentKey(
-				intentRef.current,
-				JSON.stringify({ body, registerSessionId }),
-				() => crypto.randomUUID()
-			);
-			intentRef.current = intent;
-			const session = await close.mutateAsync({
-				body,
-				headers: {
-					"idempotency-key": intent.key,
-					"x-active-context-id": workspace.contextId ?? "",
-				},
-				params: { registerId },
 			});
-			intentRef.current = null;
-			setResult(session);
-			const currentAuthUserId = identityRef.current?.authUserId;
-			if (session.state === "Closing" && currentAuthUserId) {
-				// This browser performed the close (the maker for the pending
-				// variance approval): record it so THIS browser hides its own
-				// approve control (session-local best-effort — see pos.ts).
-				recordMakerActor("cash-variance", session.id, currentAuthUserId);
-			} else if (session.state === "Closed") {
-				clearRegisterWorkspace(session.id);
-				toast.success("Register closed");
-			}
+			setConfirmOpen(true);
 		},
 		validators: { onSubmit: CloseValuesSchema },
 	});
+
+	async function commitClose() {
+		if (!pendingClose) {
+			return;
+		}
+		const body = {
+			countedCash: {
+				amountMinor: pendingClose.countedCashMinor,
+				currency: "GYD" as const,
+			},
+			reason: pendingClose.reason,
+		};
+		const intent = stableIntentKey(
+			intentRef.current,
+			JSON.stringify({ body, registerSessionId }),
+			() => crypto.randomUUID()
+		);
+		intentRef.current = intent;
+		const session = await close.mutateAsync({
+			body,
+			headers: {
+				"idempotency-key": intent.key,
+				"x-active-context-id": workspace.contextId ?? "",
+			},
+			params: { registerId },
+		});
+		intentRef.current = null;
+		setConfirmOpen(false);
+		setResult(session);
+		const currentAuthUserId = identityRef.current?.authUserId;
+		if (session.state === "Closing" && currentAuthUserId) {
+			// This browser performed the close (the maker for the pending
+			// variance approval): record it so THIS browser hides its own
+			// approve control (session-local best-effort — see pos.ts).
+			recordMakerActor("cash-variance", session.id, currentAuthUserId);
+		} else if (session.state === "Closed") {
+			clearRegisterWorkspace(session.id);
+			toast.success("Register closed");
+		}
+	}
 
 	if (result?.state === "Closing") {
 		const { variance } = result;
@@ -809,7 +845,7 @@ export function RegisterClosePage({
 									}
 									type="submit"
 								>
-									{isSubmitting ? "Closing…" : "Close register"}
+									Review &amp; close register
 								</Button>
 							)}
 						</form.Subscribe>
@@ -821,6 +857,61 @@ export function RegisterClosePage({
 							</p>
 						)}
 					</form>
+					<ConsequencePreviewDialog
+						confirming={close.isPending}
+						confirmLabel="Close register"
+						data={preview.data}
+						description="Counted cash is compared against the register's authoritative expected cash. A match closes the register immediately; a difference routes to a second approver before it closes."
+						error={preview.error}
+						isError={preview.isError}
+						isLoading={preview.isLoading}
+						onConfirm={() => {
+							commitClose().catch(() => undefined);
+						}}
+						onOpenChange={setConfirmOpen}
+						open={confirmOpen}
+						renderPreview={(session) => (
+							<dl className="grid gap-1">
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Register</dt>
+									<dd className="font-mono">{session.registerId}</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Location</dt>
+									<dd className="font-mono">{session.locationId}</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">
+										Server expected cash
+									</dt>
+									<dd>
+										{session.expectedCash
+											? formatMoneyMinor(
+													session.expectedCash.amountMinor,
+													session.currency
+												)
+											: "—"}
+									</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Your counted cash</dt>
+									<dd>
+										{pendingClose
+											? formatMoneyMinor(
+													pendingClose.countedCashMinor,
+													session.currency
+												)
+											: "—"}
+									</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">State</dt>
+									<dd>{session.state}</dd>
+								</div>
+							</dl>
+						)}
+						title="Close this register?"
+					/>
 				</PosSectionCard>
 				<VarianceApprovalSection
 					key={`standalone-${registerSessionId}`}
@@ -861,16 +952,46 @@ function VarianceApprovalSection({
 		);
 	}, [varianceId, identity?.authUserId]);
 
-	async function approveVariance(id: string, version: string) {
+	// WS3 remediation R3, Finding I: pre-commit consequence preview,
+	// gated on commerce.cash-variance.approve (the SAME permission the
+	// commit itself requires) via getCashVariance — a separate operation
+	// from close-register's getRegisterSession even though both read the
+	// identical RegisterSession row (see the domain-layer doc comment).
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [pendingApproval, setPendingApproval] = useState<{
+		varianceId: string;
+		version: string;
+	} | null>(null);
+	const preview = useQuery({
+		...orpc.commerce.cashVariances.get.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				params: { varianceId: pendingApproval?.varianceId ?? "" },
+			},
+		}),
+		enabled: confirmOpen && Boolean(workspace.contextId && pendingApproval),
+		retry: false,
+	});
+
+	function reviewVariance(id: string, version: string) {
+		setPendingApproval({ varianceId: id, version });
+		setConfirmOpen(true);
+	}
+
+	async function commitApproveVariance() {
+		if (!pendingApproval) {
+			return;
+		}
 		const session = await approve.mutateAsync({
 			headers: {
 				"idempotency-key": crypto.randomUUID(),
-				"if-match": version,
+				"if-match": pendingApproval.version,
 				"x-active-context-id": workspace.contextId ?? "",
 			},
-			params: { varianceId: id },
+			params: { varianceId: pendingApproval.varianceId },
 		});
 		clearRegisterWorkspace(session.id);
+		setConfirmOpen(false);
 		setApproved(session);
 		toast.success("Variance approved; register closed");
 	}
@@ -907,12 +1028,65 @@ function VarianceApprovalSection({
 					initialVarianceId={varianceId}
 					initialVersion=""
 					isOnline={workspace.isOnline}
-					onApprove={approveVariance}
+					onApprove={reviewVariance}
 					onVarianceIdChange={setVarianceId}
 					pending={approve.isPending}
 				/>
 			)}
 			<MutationError error={approve.error} isOnline={workspace.isOnline} />
+			<ConsequencePreviewDialog
+				confirming={approve.isPending}
+				confirmLabel="Approve variance"
+				data={preview.data}
+				description="Approving posts the register as Closed and emits commerce.register.closed.v1. This cannot be undone from this screen."
+				error={preview.error}
+				isError={preview.isError}
+				isLoading={preview.isLoading}
+				onConfirm={() => {
+					commitApproveVariance().catch(() => undefined);
+				}}
+				onOpenChange={setConfirmOpen}
+				open={confirmOpen}
+				renderPreview={(session) => (
+					<dl className="grid gap-1">
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">Register</dt>
+							<dd className="font-mono">{session.registerId}</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">Location</dt>
+							<dd className="font-mono">{session.locationId}</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">Counted cash</dt>
+							<dd>
+								{session.countedCash
+									? formatMoneyMinor(
+											session.countedCash.amountMinor,
+											session.currency
+										)
+									: "—"}
+							</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">Variance</dt>
+							<dd>
+								{session.variance
+									? formatMoneyMinor(
+											session.variance.amountMinor,
+											session.currency
+										)
+									: "—"}
+							</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">State</dt>
+							<dd>{session.state}</dd>
+						</div>
+					</dl>
+				)}
+				title="Approve this cash variance?"
+			/>
 		</PosSectionCard>
 	);
 }
@@ -928,14 +1102,14 @@ function VarianceApproveForm({
 	initialVarianceId: string;
 	initialVersion: string;
 	isOnline?: boolean;
-	onApprove: (varianceId: string, version: string) => Promise<void>;
+	onApprove: (varianceId: string, version: string) => void;
 	onVarianceIdChange?: (value: string) => void;
 	pending: boolean;
 }) {
 	const form = useForm({
 		defaultValues: { varianceId: initialVarianceId, version: initialVersion },
-		onSubmit: async ({ value }) => {
-			await onApprove(value.varianceId, value.version);
+		onSubmit: ({ value }) => {
+			onApprove(value.varianceId, value.version);
 		},
 	});
 	return (
@@ -969,7 +1143,7 @@ function VarianceApproveForm({
 				)}
 			</form.Field>
 			<Button className="w-fit" disabled={pending || !isOnline} type="submit">
-				{pending ? "Approving…" : "Approve variance"}
+				Review &amp; approve variance
 			</Button>
 		</form>
 	);

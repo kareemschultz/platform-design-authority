@@ -2,6 +2,7 @@
 
 import type { Refund } from "@meridian/contracts-platform-api";
 import { Button } from "@meridian/ui-web/components/button";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -13,6 +14,7 @@ import {
 } from "@/lib/pos";
 import { orpc } from "@/utils/orpc";
 
+import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
 import {
 	MutationError,
 	OperationsPageFrame,
@@ -125,7 +127,20 @@ export function RefundApprovePage() {
 		);
 	}, [refundId, identity?.authUserId]);
 
-	async function approveRefund() {
+	// WS3 remediation R3, Finding I: pre-commit consequence preview.
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const preview = useQuery({
+		...orpc.commerce.refunds.get.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				params: { refundId },
+			},
+		}),
+		enabled: confirmOpen && Boolean(workspace.contextId && refundId),
+		retry: false,
+	});
+
+	async function commitApproveRefund() {
 		if (!refundId) {
 			return;
 		}
@@ -136,6 +151,7 @@ export function RefundApprovePage() {
 			},
 			params: { refundId },
 		});
+		setConfirmOpen(false);
 		setApproved(refund);
 		toast.success("Refund approved; cash posted");
 	}
@@ -183,15 +199,54 @@ export function RefundApprovePage() {
 						/>
 						<Button
 							className="w-fit"
-							disabled={approve.isPending || !workspace.isOnline}
-							onClick={approveRefund}
+							disabled={!(refundId && workspace.isOnline)}
+							onClick={() => setConfirmOpen(true)}
 							type="button"
 						>
-							{approve.isPending ? "Approving…" : "Approve refund"}
+							Review &amp; approve refund
 						</Button>
 					</div>
 				)}
 				<MutationError error={approve.error} isOnline={workspace.isOnline} />
+				<ConsequencePreviewDialog
+					confirming={approve.isPending}
+					confirmLabel="Approve refund"
+					data={preview.data}
+					description="Approving posts a paid-out cash movement (reason Refund) on the referenced open register and cannot be undone from this screen."
+					error={preview.error}
+					isError={preview.isError}
+					isLoading={preview.isLoading}
+					onConfirm={() => {
+						commitApproveRefund().catch(() => undefined);
+					}}
+					onOpenChange={setConfirmOpen}
+					open={confirmOpen}
+					renderPreview={(refund) => (
+						<dl className="grid gap-1">
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Refund</dt>
+								<dd className="font-mono">{refund.id}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Return</dt>
+								<dd className="font-mono">{refund.returnId}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Register</dt>
+								<dd className="font-mono">{refund.registerId}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Amount</dt>
+								<dd>{formatMoneyMinor(refund.amount.amountMinor, "GYD")}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">State</dt>
+								<dd>{refund.state}</dd>
+							</div>
+						</dl>
+					)}
+					title="Approve this refund?"
+				/>
 			</PosSectionCard>
 		</OperationsPageFrame>
 	);

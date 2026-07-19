@@ -12,6 +12,7 @@ import { z } from "zod";
 import { formatMoneyMinor, SALE_TAX_CATEGORY_LABELS } from "@/lib/pos";
 import { orpc } from "@/utils/orpc";
 
+import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
 import { MutationError, OperationsPageFrame } from "./operations-shared";
 import { PosSectionCard, PosTextField } from "./pos-shared";
 import { QueryFailure } from "./query-state";
@@ -91,29 +92,44 @@ const VoidValuesSchema = z.object({
 	reason: z.string().max(500),
 });
 
-function VoidReceiptSection({ receiptId }: { receiptId: string }) {
+function VoidReceiptSection({ receipt }: { receipt: Receipt }) {
 	const workspace = useWorkspace();
 	const voidMutation = useOnlineGatedMutation(
 		orpc.commerce.receipts.void.mutationOptions(),
 		workspace.isOnline
 	);
 	const [voided, setVoided] = useState(false);
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [confirmReason, setConfirmReason] = useState<string | undefined>();
 	const form = useForm({
 		defaultValues: { reason: "" },
-		onSubmit: async ({ value }) => {
-			await voidMutation.mutateAsync({
-				body: { reason: value.reason.trim() || undefined },
-				headers: {
-					"idempotency-key": crypto.randomUUID(),
-					"x-active-context-id": workspace.contextId ?? "",
-				},
-				params: { receiptId },
-			});
-			setVoided(true);
-			toast.success("Receipt voided");
+		// WS3 remediation R3, Finding I: submitting the form no longer
+		// commits directly — it opens the consequence-preview dialog. Void
+		// already shows the full receipt above this control (partial
+		// credit per the finding text); this dialog adds the explicit
+		// restatement AT THE POINT OF COMMIT the other five flows get, for
+		// consistency, plus the required non-destructive-focus/Escape/
+		// Cancel/keyboard behavior none of the six previously had.
+		onSubmit: ({ value }) => {
+			setConfirmReason(value.reason.trim() || undefined);
+			setConfirmOpen(true);
 		},
 		validators: { onSubmit: VoidValuesSchema },
 	});
+
+	async function commitVoid() {
+		await voidMutation.mutateAsync({
+			body: { reason: confirmReason },
+			headers: {
+				"idempotency-key": crypto.randomUUID(),
+				"x-active-context-id": workspace.contextId ?? "",
+			},
+			params: { receiptId: receipt.id },
+		});
+		setConfirmOpen(false);
+		setVoided(true);
+		toast.success("Receipt voided");
+	}
 
 	if (voided) {
 		return (
@@ -149,9 +165,55 @@ function VoidReceiptSection({ receiptId }: { receiptId: string }) {
 					type="submit"
 					variant="destructive"
 				>
-					{voidMutation.isPending ? "Voiding…" : "Void receipt"}
+					Review &amp; void receipt
 				</Button>
 			</form>
+			<ConsequencePreviewDialog
+				confirming={voidMutation.isPending}
+				confirmLabel="Void receipt"
+				data={receipt}
+				description="This reverses the original sale and cannot be undone from this screen."
+				error={voidMutation.error}
+				isError={false}
+				isLoading={false}
+				onConfirm={() => {
+					commitVoid().catch(() => undefined);
+				}}
+				onOpenChange={setConfirmOpen}
+				open={confirmOpen}
+				renderPreview={(current) => (
+					<dl className="grid gap-1">
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">Receipt</dt>
+							<dd className="font-mono">{current.receiptNumber}</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">Amount</dt>
+							<dd>
+								{current.total
+									? formatMoneyMinor(
+											current.total.amountMinor,
+											current.currency
+										)
+									: "—"}
+							</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">Register</dt>
+							<dd className="font-mono">{current.registerId}</dd>
+						</div>
+						<div className="flex justify-between gap-4">
+							<dt className="text-muted-foreground">Reason</dt>
+							<dd>{confirmReason ?? "(none given)"}</dd>
+						</div>
+						<p className="mt-2 text-destructive text-xs">
+							Irreversible from this screen: voiding posts a full compensating
+							reversal of the original sale.
+						</p>
+					</dl>
+				)}
+				title="Void this receipt?"
+			/>
 		</PosSectionCard>
 	);
 }
@@ -289,7 +351,7 @@ export function ReceiptViewPage({ receiptId }: { receiptId: string }) {
 					<ReissueReceiptSection receiptId={receiptId} />
 				</div>
 				<div className="print:hidden">
-					<VoidReceiptSection receiptId={receiptId} />
+					<VoidReceiptSection receipt={receipt.data} />
 				</div>
 			</div>
 		</OperationsPageFrame>

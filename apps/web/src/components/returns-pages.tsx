@@ -5,6 +5,7 @@ import { Button } from "@meridian/ui-web/components/button";
 import { Input } from "@meridian/ui-web/components/input";
 import { Label } from "@meridian/ui-web/components/label";
 import { useForm } from "@tanstack/react-form";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,6 +20,7 @@ import {
 } from "@/lib/pos";
 import { orpc } from "@/utils/orpc";
 
+import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
 import {
 	MutationError,
 	OperationsPageFrame,
@@ -249,7 +251,22 @@ export function ReturnApprovePage() {
 		);
 	}, [returnId, identity?.authUserId]);
 
-	async function approveReturn() {
+	// WS3 remediation R3, Finding I: pre-commit consequence preview.
+	// commerce.return.approve's own permission gates getReturn too — an
+	// approver may preview what they can approve.
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const preview = useQuery({
+		...orpc.commerce.returns.get.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				params: { returnId },
+			},
+		}),
+		enabled: confirmOpen && Boolean(workspace.contextId && returnId),
+		retry: false,
+	});
+
+	async function commitApproveReturn() {
 		if (!returnId) {
 			return;
 		}
@@ -260,6 +277,7 @@ export function ReturnApprovePage() {
 			},
 			params: { returnId },
 		});
+		setConfirmOpen(false);
 		setApproved(returnRecord);
 		toast.success("Return approved; inventory posted");
 	}
@@ -314,15 +332,63 @@ export function ReturnApprovePage() {
 						/>
 						<Button
 							className="w-fit"
-							disabled={approve.isPending || !workspace.isOnline}
-							onClick={approveReturn}
+							disabled={!(returnId && workspace.isOnline)}
+							onClick={() => setConfirmOpen(true)}
 							type="button"
 						>
-							{approve.isPending ? "Approving…" : "Approve return"}
+							Review &amp; approve return
 						</Button>
 					</div>
 				)}
 				<MutationError error={approve.error} isOnline={workspace.isOnline} />
+				<ConsequencePreviewDialog
+					confirming={approve.isPending}
+					confirmLabel="Approve return"
+					data={preview.data}
+					description="Approving posts the compensating Inventory movement and cannot be undone from this screen."
+					error={preview.error}
+					isError={preview.isError}
+					isLoading={preview.isLoading}
+					onConfirm={() => {
+						commitApproveReturn().catch(() => undefined);
+					}}
+					onOpenChange={setConfirmOpen}
+					open={confirmOpen}
+					renderPreview={(returnRecord) => (
+						<dl className="grid gap-1">
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Return</dt>
+								<dd className="font-mono">{returnRecord.id}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Sale</dt>
+								<dd className="font-mono">{returnRecord.saleId}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Register</dt>
+								<dd className="font-mono">{returnRecord.registerId}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Refundable amount</dt>
+								<dd>
+									{formatMoneyMinor(
+										returnRecord.totalRefundable.amountMinor,
+										returnRecord.currency
+									)}
+								</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">State</dt>
+								<dd>{returnRecord.state}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Reason</dt>
+								<dd>{returnRecord.reason}</dd>
+							</div>
+						</dl>
+					)}
+					title="Approve this return?"
+				/>
 			</PosSectionCard>
 		</OperationsPageFrame>
 	);

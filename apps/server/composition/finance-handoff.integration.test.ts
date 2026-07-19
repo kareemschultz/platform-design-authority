@@ -312,6 +312,15 @@ describe.serial(
 		test("generates an export whose postingBatch validates against the real finance-handoff-v1 JSON schema", async () => {
 			const tenantId = "tenant_finance_handoff_schema";
 			const pos = posService();
+			// WS3 PR6 fix: the sale below completes at the REAL wall-clock "now"
+			// (no `completedAtOverride`), so the query period must be anchored
+			// to `Date.now()` rather than a hardcoded calendar date — a fixed
+			// "2026-07-17..2026-07-19" window is a time bomb that silently
+			// empties `source.sales` (and therefore `postingBatch.lines`) the
+			// moment a real run crosses the hardcoded end date, exactly as
+			// happened here once wall-clock time passed 2026-07-19T00:00Z.
+			const periodStartUtc = new Date(Date.now() - 24 * 60 * 60 * 1000);
+			const periodEndUtc = new Date(Date.now() + 24 * 60 * 60 * 1000);
 			await openRegisterAndCompleteSale(pos, {
 				grossMinorPerUnit: 100_000,
 				idempotencyPrefix: "schema",
@@ -322,8 +331,8 @@ describe.serial(
 
 			const source = await pos.queryFinanceHandoffSourceData({
 				organizationId: financeHandoffBase.organizationId,
-				periodEndUtc: new Date("2026-07-19T00:00:00.000Z"),
-				periodStartUtc: new Date("2026-07-17T00:00:00.000Z"),
+				periodEndUtc,
+				periodStartUtc,
 				tenantId,
 			});
 			const record = await exportService().createAccountantHandoffExport({
@@ -332,8 +341,8 @@ describe.serial(
 				idempotencyKey: "schema-export",
 				legalEntityId: "legal_entity_finance_handoff_schema",
 				organizationId: financeHandoffBase.organizationId,
-				periodEndUtc: new Date("2026-07-19T00:00:00.000Z"),
-				periodStartUtc: new Date("2026-07-17T00:00:00.000Z"),
+				periodEndUtc,
+				periodStartUtc,
 				source,
 				tenantId,
 				timezone: "America/Guyana",
@@ -360,14 +369,19 @@ describe.serial(
 				tenantId,
 			});
 
-			const periodStartUtc = new Date("2026-07-17T00:00:00.000Z");
-			const periodEndUtc = new Date("2026-07-19T00:00:00.000Z");
+			// WS3 PR6 fix: same wall-clock time-bomb as the schema-validation
+			// test above — anchor to `Date.now()`, not a hardcoded calendar
+			// date, so this determinism proof runs over REAL non-empty source
+			// data instead of silently passing over an empty `source.sales`.
+			const periodStartUtc = new Date(Date.now() - 24 * 60 * 60 * 1000);
+			const periodEndUtc = new Date(Date.now() + 24 * 60 * 60 * 1000);
 			const source = await pos.queryFinanceHandoffSourceData({
 				organizationId: financeHandoffBase.organizationId,
 				periodEndUtc,
 				periodStartUtc,
 				tenantId,
 			});
+			expect(source.sales.length).toBeGreaterThan(0);
 			const requestBase = {
 				actorUserId: financeHandoffBase.actorUserId,
 				currency: "GYD",

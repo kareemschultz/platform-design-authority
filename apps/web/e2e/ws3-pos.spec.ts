@@ -1109,3 +1109,180 @@ test("accessibility: register open, the sale cart builder, and the receipt view 
 		.analyze();
 	expect(receiptResults.violations).toEqual([]);
 });
+
+// WS3 PR6 closeout: the accessibility test above scans only register-open,
+// the sale cart builder, and the receipt view (PR5's own scope). PR6's
+// evidence obligation needs `accessibility_and_responsive` coverage for
+// `commerce.returns`/`commerce.refunds`/`commerce.cash-management`
+// (deposits) too — those forms render without any completed workflow
+// prerequisite, so this scans just the landing forms rather than
+// re-running each full maker/checker flow.
+test("accessibility: the return-creation, refund-request, and deposit-preparation landing forms have no automated WCAG A/AA violations", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	await signIn(page, "/operations/pos/returns/new");
+	await expect(
+		page.getByRole("heading", { name: "Create a return" })
+	).toBeVisible();
+	const returnResults = await new AxeBuilder({ page })
+		.withTags(WCAG_TAGS)
+		.analyze();
+	expect(returnResults.violations).toEqual([]);
+
+	await page.goto("/operations/pos/refunds/new");
+	await expect(
+		page.getByRole("heading", { name: "Request a refund" })
+	).toBeVisible();
+	const refundResults = await new AxeBuilder({ page })
+		.withTags(WCAG_TAGS)
+		.analyze();
+	expect(refundResults.violations).toEqual([]);
+
+	await page.goto("/operations/pos/deposits/new");
+	await expect(
+		page.getByRole("heading", { name: "Prepare a deposit" })
+	).toBeVisible();
+	const depositResults = await new AxeBuilder({ page })
+		.withTags(WCAG_TAGS)
+		.analyze();
+	expect(depositResults.violations).toEqual([]);
+});
+
+// WS3 PR6 closeout: mirrors WS2's own "online-only mutations fail closed"
+// browser proof (`ws2-closeout.spec.ts`) for the WS3 forms sharing the same
+// `WorkspaceProvider`/`workspace.isOnline` gating and global "Offline"
+// alert. `commerce.offline-sales` proves ONLY this fail-closed boundary —
+// offline-safe command capture, leases, and general sync reconciliation
+// remain PENDING WS5 per the frozen control plan §5.
+test("online-only WS3 mutations fail closed and remain understandable when connectivity drops", async ({
+	page,
+}) => {
+	test.slow();
+	await signIn(page, "/operations/pos/registers/new");
+	await selectLocation(page, "Georgetown Browser Store");
+	const cases = [
+		{
+			button: "Open register",
+			heading: "Open register",
+			route: "/operations/pos/registers/new",
+		},
+		{
+			button: "Request refund",
+			heading: "Request a refund",
+			route: "/operations/pos/refunds/new",
+		},
+		{
+			button: "Prepare deposit",
+			heading: "Prepare a deposit",
+			route: "/operations/pos/deposits/new",
+		},
+	] as const;
+
+	async function expectOnlineOnlyCase(item: (typeof cases)[number]) {
+		await page.context().setOffline(false);
+		await page.goto(item.route);
+		await expect(
+			page.getByRole("heading", { name: item.heading })
+		).toBeVisible();
+		await page.context().setOffline(true);
+		await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+		await expect(
+			page.getByText("Offline", { exact: true }).first()
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: item.button })
+		).toBeDisabled();
+	}
+	await expectOnlineOnlyCase(cases[0]);
+	await expectOnlineOnlyCase(cases[1]);
+	await expectOnlineOnlyCase(cases[2]);
+
+	// `commerce.returns`' create form progressively discloses "Lines to
+	// return" (and the "Create return" submit button inside it) only after
+	// a Sale ID lookup resolves against THIS browser's local cache (the
+	// page's own description: "no commerce.sale.* read endpoint is
+	// registered in this contract surface" — the lookup is local, not
+	// network-bound). A real completed sale is created first so that
+	// lookup succeeds even offline, isolating the FINAL "Create return"
+	// mutation button as the thing offline actually disables.
+	await page.context().setOffline(false);
+	const returnRegisterId = `register_offline_return_${Date.now()}`;
+	const returnRegisterSessionId = await openRegister(
+		page,
+		returnRegisterId,
+		"100.00"
+	);
+	const { name: returnProductName } = await createActiveProduct(
+		page,
+		"offline-return-gate"
+	);
+	const returnSale = await createSaleWithOneLine(
+		page,
+		returnRegisterId,
+		returnRegisterSessionId,
+		returnProductName,
+		"9.00"
+	);
+	await page.getByLabel("Cash tendered (GYD)").fill("20.00");
+	const returnSaleCompletePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().includes("/rpc/commerce/sales/complete")
+	);
+	await page.getByRole("button", { name: "Complete sale" }).click();
+	await returnSaleCompletePromise;
+
+	await page.goto("/operations/pos/returns/new");
+	await expect(
+		page.getByRole("heading", { name: "Create a return" })
+	).toBeVisible();
+	await page.getByLabel("Sale ID").fill(returnSale.id);
+	await expect(
+		page.getByRole("heading", { name: "Lines to return" })
+	).toBeVisible();
+
+	await page.context().setOffline(true);
+	await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+	await expect(
+		page.getByText("Offline", { exact: true }).first()
+	).toBeVisible();
+	await expect(
+		page.getByRole("button", { name: "Create return" })
+	).toBeDisabled();
+
+	// A fifth case for `commerce.order-management`'s own sale-create route:
+	// unlike the four cases above, "Create sale" is ALSO disabled by
+	// `!allValid` with an empty cart, so a valid line is added ONLINE first
+	// — the assertion below then isolates offline as the sole remaining
+	// disqualifying condition.
+	await page.context().setOffline(false);
+	const registerId = `register_offline_sale_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+	const { name: productName } = await createActiveProduct(page, "offline-gate");
+	await page.goto(
+		`/operations/pos/sales/new?registerId=${encodeURIComponent(registerId)}&registerSessionId=${encodeURIComponent(registerSessionId)}`
+	);
+	await expect(page.getByRole("heading", { name: "New sale" })).toBeVisible();
+	const searchResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/catalog/products/list")
+	);
+	await page.getByLabel("Search by name or SKU").fill(productName);
+	await searchResponsePromise;
+	await page.getByRole("button", { name: "Add" }).first().click();
+	await page.getByLabel("Unit price (GYD)").fill("9.00");
+
+	await page.context().setOffline(true);
+	await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+	await expect(
+		page.getByText("Offline", { exact: true }).first()
+	).toBeVisible();
+	await expect(
+		page.getByRole("button", { name: "Create sale" })
+	).toBeDisabled();
+
+	await page.context().setOffline(false);
+	await page.evaluate(() => window.dispatchEvent(new Event("online")));
+});

@@ -1322,6 +1322,24 @@
       "review_evidence": []
     },
     {
+      "document_id": "PDA-DAT-020",
+      "path": "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+      "title": "WS3 POS Cash Schema Classification",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-18",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0017",
+        "ADR-0027"
+      ],
+      "review_evidence": []
+    },
+    {
       "document_id": "PDA-DEC-001",
       "path": "docs/blueprint/18-Decisions/README.md",
       "title": "Architecture Decision Record Index",
@@ -2192,10 +2210,10 @@
       "document_id": "PDA-ENGR-013",
       "path": "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.25.0",
+      "version": "0.26.0",
       "status": "Draft",
       "owner": "Platform Engineering",
-      "last_reviewed": "2026-07-18",
+      "last_reviewed": "2026-07-19",
       "related_adrs": [
         "ADR-0004",
         "ADR-0005",
@@ -2549,6 +2567,27 @@
         "ADR-0014",
         "ADR-0016",
         "ADR-0020",
+        "ADR-0027"
+      ],
+      "review_evidence": null
+    },
+    {
+      "document_id": "PDA-IMPL-008",
+      "path": "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+      "title": "WS3 POS Cash Implementation Evidence",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-19",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0017",
+        "ADR-0020",
+        "ADR-0026",
         "ADR-0027"
       ],
       "review_evidence": null

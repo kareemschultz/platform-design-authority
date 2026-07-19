@@ -62,6 +62,7 @@
     "architecture:check": "python scripts/check_architecture.py",
     "ws1:evidence:check": "python scripts/check_ws1_evidence.py",
     "ws2:evidence:check": "python -m unittest scripts/test_check_ws2_evidence.py && python scripts/check_ws2_evidence.py",
+    "ws3:evidence:check": "python -m unittest scripts/test_check_ws3_evidence.py && python scripts/check_ws3_evidence.py",
     "changeset": "changeset",
     "changeset:status": "changeset status"
   },

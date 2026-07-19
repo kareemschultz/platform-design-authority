@@ -63,7 +63,15 @@ test("scanned-item lookup (catalog.product.read via the sale screen) meets the 1
 	// `POS_NAVIGATION`/`ProductLookup`'s Enter-to-add binds to (frozen
 	// control plan §8, sale-pages.tsx).
 	const productName = `WS3 POS perf ${Date.now()}`;
-	const barcode = `${Date.now()}`.padStart(13, "0").slice(-13);
+	// A DISTINCT 13-digit code per iteration (base + zero-padded iteration
+	// suffix), not one fixed code reused across all 55 iterations: the sale
+	// screen's product-lookup query has a 5s `staleTime` (sale-pages.tsx), so
+	// reusing an identical barcode/query-key across iterations inside that
+	// window served the SECOND iteration onward from cache with no new
+	// `/rpc/catalog/products/list` request — `page.waitForResponse` then hung
+	// until the 30s test timeout. A fresh query key each iteration restores
+	// the test's own stated intent: measuring a REAL round-trip every time.
+	const barcodeBase = `${Date.now()}`.padStart(11, "0").slice(-11);
 	await page.goto("/operations/products/new");
 	await page.getByLabel("Product name").fill(productName);
 	await page.getByLabel("Variant name").fill("Default");
@@ -99,6 +107,7 @@ test("scanned-item lookup (catalog.product.read via the sale screen) meets the 1
 	// throughput under concurrency, matching what "add-scanned-item lookup"
 	// means in the stage spec.
 	for (let iteration = 0; iteration < totalIterations; iteration += 1) {
+		const barcode = `${barcodeBase}${String(iteration).padStart(2, "0")}`;
 		// biome-ignore lint/performance/noAwaitInLoops: sequential warm-iteration latency benchmark, not a throughput path.
 		await barcodeField.fill("");
 		const responsePromise = page.waitForResponse(

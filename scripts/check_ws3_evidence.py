@@ -1,0 +1,401 @@
+#!/usr/bin/env python3
+"""Validate WS3's registry-derived closeout matrix and AI-independent paths.
+
+Mirrors `check_ws2_evidence.py` exactly (frozen control plan/PR6 stage
+spec: "CI wiring ... exactly parallel to the ws1/ws2 entries"). The WS3
+capability set is a literal, explicitly enumerated set rather than a
+namespace-derived one (unlike WS2's `catalog`/`inventory` namespace
+filter) because the `commerce.*` namespace also carries four WS4-owned
+capabilities (`commerce.gift-cards`, `commerce.store-credit`,
+`commerce.stored-value`, `commerce.stored-value-ledger`) that are
+registered `first_slice: true` but are explicitly out of WS3 scope per
+the frozen control plan §5's "Deferred with existing authority" note.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+CAPABILITY_REGISTRY = ROOT / "registry" / "capabilities.json"
+TEST_REGISTRY = ROOT / "registry" / "first-slice-tests.json"
+EVIDENCE_SOURCE = ROOT / "evidence" / "first-slice" / "ws3-capability-evidence.json"
+EXPECTED_CAPABILITIES = {
+    "commerce.cash-management",
+    "commerce.exchanges",
+    "commerce.gift-receipts",
+    "commerce.mobile-pos",
+    "commerce.offline-sales",
+    "commerce.order-management",
+    "commerce.pos",
+    "commerce.receipts",
+    "commerce.refunds",
+    "commerce.register-management",
+    "commerce.returns",
+    "commerce.shift-management",
+}
+EXPECTED_CAPABILITY_COUNT = 12
+EXPECTED_DIMENSION_COUNT = 13
+AI_RUNTIME_MARKERS = ("@ai-sdk", "openai", "anthropic", "openrouter")
+SOURCE_SUFFIXES = {".cjs", ".js", ".json", ".mjs", ".ts", ".tsx"}
+IGNORED_PARTS = {".next", ".turbo", "dist", "node_modules", "playwright-report", "test-results"}
+ESSENTIAL_APPLICATION_PACKAGES = frozenset({"server", "web", "worker"})
+RUNTIME_DEPENDENCY_SECTIONS = (
+    "dependencies",
+    "optionalDependencies",
+    "peerDependencies",
+)
+
+
+@dataclass(frozen=True)
+class WorkspacePackage:
+    name: str
+    root: Path
+    runtime_dependencies: frozenset[str]
+    workspace_runtime_dependencies: frozenset[str]
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        raise AssertionError(f"required evidence input is missing: {path.relative_to(ROOT)}")
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise AssertionError(f"expected a JSON object: {path.relative_to(ROOT)}")
+    return value
+
+
+def derive_ws3_capabilities(capability_registry: dict[str, Any]) -> set[str]:
+    registered_first_slice = {
+        str(item["id"])
+        for item in capability_registry.get("capabilities", [])
+        if item.get("first_slice") is True
+    }
+    missing = EXPECTED_CAPABILITIES - registered_first_slice
+    if missing:
+        raise AssertionError(
+            f"WS3 capability set names IDs not registered first-slice: {sorted(missing)}"
+        )
+    if len(EXPECTED_CAPABILITIES) != EXPECTED_CAPABILITY_COUNT:
+        raise AssertionError(
+            "WS3 registry-derived capability count drift: "
+            f"expected {EXPECTED_CAPABILITY_COUNT}, found {len(EXPECTED_CAPABILITIES)} "
+            f"({sorted(EXPECTED_CAPABILITIES)})"
+        )
+    return set(EXPECTED_CAPABILITIES)
+
+
+def resolve_evidence_path(path_value: str, evidence_id: str) -> Path:
+    candidate = (ROOT / path_value).resolve()
+    try:
+        candidate.relative_to(ROOT.resolve())
+    except ValueError as exc:
+        raise AssertionError(
+            f"{evidence_id} references a path outside the repository: {path_value!r}"
+        ) from exc
+    if not path_value or not candidate.is_file():
+        raise AssertionError(f"{evidence_id} references missing source {path_value!r}")
+    return candidate
+
+
+def validate_source_claims(
+    registry: dict[str, Any], expected_capabilities: set[str]
+) -> tuple[int, set[str]]:
+    source = load_json(EVIDENCE_SOURCE)
+    if source.get("schema_version") != "1.0.0" or source.get("workstream_id") != "WS3":
+        raise AssertionError("WS3 evidence source has an unsupported identity or schema")
+    if source.get("status") != "controlled-prototype-evidence":
+        raise AssertionError("WS3 evidence source has an unsupported lifecycle status")
+    if not str(source.get("verified_on", "")).strip():
+        raise AssertionError("WS3 evidence source requires a verification date")
+    declared_capabilities = {str(value) for value in source.get("capabilities", [])}
+    if declared_capabilities != expected_capabilities:
+        raise AssertionError(
+            "WS3 source capability drift: "
+            f"{sorted(declared_capabilities ^ expected_capabilities)}"
+        )
+
+    known_dimensions = {str(value) for value in registry.get("dimensions", [])}
+    if len(known_dimensions) != EXPECTED_DIMENSION_COUNT:
+        raise AssertionError(
+            "WS3 test-dimension count drift: "
+            f"expected {EXPECTED_DIMENSION_COUNT}, found {len(known_dimensions)}"
+        )
+
+    evidence_ids: set[str] = set()
+    marker_count = 0
+    evidence_entries = source.get("evidence", [])
+    if not isinstance(evidence_entries, list) or not evidence_entries:
+        raise AssertionError("WS3 evidence source has no evidence entries")
+    for evidence in evidence_entries:
+        if not isinstance(evidence, dict):
+            raise AssertionError("WS3 evidence entries must be objects")
+        evidence_id = str(evidence.get("id", "")).strip()
+        if not evidence_id or evidence_id in evidence_ids:
+            raise AssertionError(f"duplicate or empty WS3 evidence id: {evidence_id!r}")
+        evidence_ids.add(evidence_id)
+
+        path_value = str(evidence.get("path", "")).strip()
+        evidence_path = resolve_evidence_path(path_value, evidence_id)
+        markers = evidence.get("contains", [])
+        if not isinstance(markers, list) or not markers:
+            raise AssertionError(f"{evidence_id} has no source markers")
+        content = evidence_path.read_text(encoding="utf-8")
+        for marker in markers:
+            marker_value = str(marker)
+            if not marker_value or marker_value not in content:
+                raise AssertionError(
+                    f"{evidence_id} marker {marker_value!r} is absent from {path_value}"
+                )
+            marker_count += 1
+
+        capabilities = {str(value) for value in evidence.get("capabilities", [])}
+        dimensions = {str(value) for value in evidence.get("dimensions", [])}
+        if not capabilities or not dimensions:
+            raise AssertionError(f"{evidence_id} requires capabilities and dimensions")
+        if not capabilities <= declared_capabilities:
+            raise AssertionError(
+                f"{evidence_id} uses undeclared capabilities: "
+                f"{sorted(capabilities - declared_capabilities)}"
+            )
+        if not dimensions <= known_dimensions:
+            raise AssertionError(
+                f"{evidence_id} uses unknown dimensions: {sorted(dimensions - known_dimensions)}"
+            )
+        if not str(evidence.get("command", "")).strip():
+            raise AssertionError(f"{evidence_id} requires a reproduction command")
+        runtimes = evidence.get("runtimes", [])
+        if not isinstance(runtimes, list) or not any(
+            str(value).strip() for value in runtimes
+        ):
+            raise AssertionError(f"{evidence_id} requires at least one runtime")
+
+    catalog_ids = {str(item.get("id")) for item in registry.get("evidence_catalog", [])}
+    if not evidence_ids <= catalog_ids:
+        raise AssertionError(
+            f"generated registry omits WS3 evidence: {sorted(evidence_ids - catalog_ids)}"
+        )
+    return marker_count, evidence_ids
+
+
+def validate_workstream_rows(
+    registry: dict[str, Any],
+    expected_capabilities: set[str],
+    workstream_evidence_ids: set[str],
+) -> int:
+    all_rows = {
+        str(row.get("capability_id")): row for row in registry.get("tests", [])
+    }
+    missing_rows = expected_capabilities - set(all_rows)
+    if missing_rows:
+        raise AssertionError(f"WS3 capabilities absent from test registry: {sorted(missing_rows)}")
+
+    required_cells = 0
+    for capability_id in sorted(expected_capabilities):
+        row = all_rows[capability_id]
+        if row.get("evidence_status") != "Evidenced":
+            raise AssertionError(f"{capability_id} is not Evidenced")
+        blocking = row.get("blocking_defects", [])
+        if blocking:
+            raise AssertionError(f"{capability_id} has blocking defects: {blocking}")
+        dimension_evidence = row.get("dimension_evidence", {})
+        for dimension, status in row.get("dimensions", {}).items():
+            if status != "required":
+                raise AssertionError(
+                    f"WS3 {capability_id}.{dimension} is {status!r}; all 13 cells are required"
+                )
+            required_cells += 1
+            cell_evidence = {str(value) for value in dimension_evidence.get(dimension, [])}
+            if not cell_evidence & workstream_evidence_ids:
+                raise AssertionError(
+                    f"{capability_id}.{dimension} lacks WS3-owned evidence"
+                )
+        for path_value in row.get("evidence_paths", []):
+            resolve_evidence_path(str(path_value), capability_id)
+
+    expected_cells = EXPECTED_CAPABILITY_COUNT * EXPECTED_DIMENSION_COUNT
+    if required_cells != expected_cells:
+        raise AssertionError(
+            f"WS3 required-cell drift: expected {expected_cells}, found {required_cells}"
+        )
+
+    generated_evidenced_cells = sum(
+        sum(1 for status in row.get("dimensions", {}).values() if status == "required")
+        for row in registry.get("tests", [])
+        if row.get("evidence_status") == "Evidenced"
+    )
+    coverage = registry.get("coverage", {})
+    if coverage.get("required_cells_evidenced") != generated_evidenced_cells:
+        raise AssertionError("generated aggregate evidence-cell total is inconsistent")
+    if int(coverage.get("capabilities_evidenced", -1)) < EXPECTED_CAPABILITY_COUNT:
+        raise AssertionError("generated aggregate capability coverage omits WS3")
+    return required_cells
+
+
+def discover_workspace_packages(
+    repository_root: Path = ROOT,
+) -> dict[str, WorkspacePackage]:
+    root_manifest_path = repository_root / "package.json"
+    root_manifest = json.loads(root_manifest_path.read_text(encoding="utf-8"))
+    workspace_config = root_manifest.get("workspaces", {})
+    workspace_patterns = (
+        workspace_config
+        if isinstance(workspace_config, list)
+        else workspace_config.get("packages", [])
+        if isinstance(workspace_config, dict)
+        else []
+    )
+    if not isinstance(workspace_patterns, list) or not workspace_patterns:
+        raise AssertionError("root package.json requires workspace package patterns")
+
+    packages: dict[str, WorkspacePackage] = {}
+    for pattern_value in workspace_patterns:
+        pattern = str(pattern_value).strip().replace("\\", "/")
+        if not pattern or pattern.startswith("/") or ".." in Path(pattern).parts:
+            raise AssertionError(f"unsafe workspace package pattern: {pattern!r}")
+        manifest_pattern = f"{pattern.rstrip('/')}/package.json"
+        for manifest_path in sorted(repository_root.glob(manifest_pattern)):
+            try:
+                manifest_path.resolve().relative_to(repository_root.resolve())
+            except ValueError as exc:
+                raise AssertionError(
+                    f"workspace manifest is outside the repository: {manifest_path}"
+                ) from exc
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if not isinstance(manifest, dict):
+                raise AssertionError(
+                    f"workspace manifest must be an object: "
+                    f"{manifest_path.relative_to(repository_root)}"
+                )
+            name = str(manifest.get("name", "")).strip()
+            if not name:
+                raise AssertionError(
+                    f"workspace manifest requires a name: "
+                    f"{manifest_path.relative_to(repository_root)}"
+                )
+            if name in packages:
+                raise AssertionError(f"duplicate workspace package name: {name}")
+
+            runtime_dependencies: set[str] = set()
+            workspace_runtime_dependencies: set[str] = set()
+            for section_name in RUNTIME_DEPENDENCY_SECTIONS:
+                section = manifest.get(section_name, {})
+                if not isinstance(section, dict):
+                    raise AssertionError(
+                        f"{manifest_path.relative_to(repository_root)} "
+                        f"has a non-object {section_name} section"
+                    )
+                runtime_dependencies.update(str(value) for value in section)
+                workspace_runtime_dependencies.update(
+                    str(name)
+                    for name, version in section.items()
+                    if str(version).startswith("workspace:")
+                )
+
+            packages[name] = WorkspacePackage(
+                name=name,
+                root=manifest_path.parent,
+                runtime_dependencies=frozenset(runtime_dependencies),
+                workspace_runtime_dependencies=frozenset(
+                    workspace_runtime_dependencies
+                ),
+            )
+    return packages
+
+
+def derive_runtime_dependency_closure(
+    packages: dict[str, WorkspacePackage],
+    entry_package_names: frozenset[str] = ESSENTIAL_APPLICATION_PACKAGES,
+) -> tuple[WorkspacePackage, ...]:
+    missing_entries = entry_package_names - packages.keys()
+    if missing_entries:
+        raise AssertionError(
+            f"WS3 essential application packages are missing: {sorted(missing_entries)}"
+        )
+
+    pending = list(sorted(entry_package_names))
+    closure: dict[str, WorkspacePackage] = {}
+    while pending:
+        name = pending.pop()
+        if name in closure:
+            continue
+        package = packages[name]
+        missing_workspace_dependencies = (
+            package.workspace_runtime_dependencies - packages.keys()
+        )
+        if missing_workspace_dependencies:
+            raise AssertionError(
+                f"{package.name} has undiscovered workspace runtime dependencies: "
+                f"{sorted(missing_workspace_dependencies)}"
+            )
+        closure[name] = package
+        pending.extend(
+            dependency
+            for dependency in package.runtime_dependencies
+            if dependency in packages and dependency not in closure
+        )
+    return tuple(closure[name] for name in sorted(closure))
+
+
+def find_ai_runtime_violations(
+    packages: tuple[WorkspacePackage, ...], repository_root: Path = ROOT
+) -> list[str]:
+    violations: list[str] = []
+    for package in packages:
+        if not package.root.is_dir():
+            raise AssertionError(
+                f"WS3 runtime package root is missing: "
+                f"{package.root.relative_to(repository_root)}"
+            )
+        for directory, child_directories, filenames in os.walk(package.root):
+            child_directories[:] = [
+                name for name in child_directories if name not in IGNORED_PARTS
+            ]
+            directory_path = Path(directory)
+            for filename in filenames:
+                path = directory_path / filename
+                if path.suffix not in SOURCE_SUFFIXES:
+                    continue
+                content = path.read_text(encoding="utf-8").lower()
+                for marker in AI_RUNTIME_MARKERS:
+                    if marker in content:
+                        violations.append(
+                            f"{path.relative_to(repository_root).as_posix()}: {marker}"
+                        )
+    return sorted(violations)
+
+
+def validate_ai_independence() -> int:
+    packages = discover_workspace_packages()
+    runtime_closure = derive_runtime_dependency_closure(packages)
+    violations = find_ai_runtime_violations(runtime_closure)
+    if violations:
+        raise AssertionError(
+            "WS3 essential paths depend on an AI runtime:\n" + "\n".join(violations)
+        )
+    return len(runtime_closure)
+
+
+def main() -> int:
+    capability_registry = load_json(CAPABILITY_REGISTRY)
+    registry = load_json(TEST_REGISTRY)
+    expected_capabilities = derive_ws3_capabilities(capability_registry)
+    marker_count, evidence_ids = validate_source_claims(registry, expected_capabilities)
+    required_cells = validate_workstream_rows(
+        registry, expected_capabilities, evidence_ids
+    )
+    runtime_package_count = validate_ai_independence()
+    print(
+        "WS3 evidence verified: "
+        f"{len(expected_capabilities)} capabilities, {required_cells} required cells, "
+        f"{marker_count} source markers, no AI runtime dependency across "
+        f"{runtime_package_count} workspace packages"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

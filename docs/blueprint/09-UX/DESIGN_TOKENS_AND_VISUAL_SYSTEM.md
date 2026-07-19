@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-015
 title: Design Tokens and Visual System
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-19
 ---
 
 # Design Tokens and Visual System
@@ -106,6 +106,23 @@ Color has semantic roles, not arbitrary ownership by components.
 - Modals, popovers, menus, and drawers use consistent elevation and overlay behavior.
 - Cards are used only when grouping needs a visible boundary; do not wrap every section in a card.
 
+### Operational surface treatment
+
+Information-dense product surfaces use a border-led hierarchy:
+
+- `surface.canvas` carries the page background.
+- `surface.default` carries the primary working plane.
+- `surface.subtle` distinguishes low-priority regions, table headers, and
+  grouped metadata without creating a competing card wall.
+- `surface.raised` and elevation are reserved for actual layering such as
+  sticky toolbars, popovers, drawers, and dialogs.
+- `border.subtle` or `border.default` provides most section and row separation;
+  shadows do not become the default boundary treatment.
+
+Components in one workspace use a consistent radius/elevation family. A
+premium block or visual reference does not authorize a parallel collection of
+raw radii, shadows, neutral colors, or status treatments.
+
 ## Motion
 
 Motion explains change, hierarchy, or continuity.
@@ -157,7 +174,23 @@ Brand configuration may not:
 
 ## Density Modes
 
-Support comfortable and compact density where the component and device allow it. Density changes spacing and control size within accessible minimums; it does not remove labels, evidence, or states.
+Support comfortable, compact, and touch/POS density where the component and
+device allow it. Density changes spacing and control size within accessible
+minimums; it does not remove labels, evidence, consequence previews, or
+states.
+
+- **Comfortable** is the default for forms, record workspaces, onboarding, and
+  mixed-skill administration.
+- **Compact** is appropriate for expert comparison, ledgers, queues, tables,
+  and KPI strips where scanning more records materially improves the task.
+- **Touch/POS** is required for frequent pointer, scanner, register, counting,
+  and mobile operational work and preserves at least the governed 48 px target.
+
+A surface selects one primary density profile and may use a documented
+exception for a bounded child such as a compact evidence table. Do not mix
+compact controls, oversized cards, and touch actions arbitrarily within one
+workflow. User-selectable density preferences remain constrained by component
+minimums and cannot reduce accessibility or hide required context.
 
 POS and touch workflows may use larger targets while accounting and inventory tables use compact density.
 
@@ -187,3 +220,10 @@ No product feature should add a raw brand color or spacing value directly to app
 - Web and native parity review
 - Print and generated-document review where relevant
 - Performance and font-loading checks
+
+## Change Log
+
+- 2026-07-19 — v0.3.0 defined the operational surface treatment and explicit
+  comfortable, compact, and touch/POS composition profiles following review of
+  an external dashboard visual reference. The governed token system and
+  Base UI/shadcn source model remain unchanged.

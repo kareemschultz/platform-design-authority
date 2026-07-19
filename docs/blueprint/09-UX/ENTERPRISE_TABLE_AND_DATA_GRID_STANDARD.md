@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-019
 title: Enterprise Table and Data Grid Standard
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-19
 ---
 
 # Enterprise Table and Data Grid Standard
@@ -34,6 +34,36 @@ A grid is not justified merely because a table library supports it.
 - Accessible keyboard and focus model
 - Loading, empty, partial, stale, offline, error, conflict, and permission states
 - Export using the same tenant, field, and permission policy
+
+## Table Surface and Toolbar Grammar
+
+Tables use a quiet, border-led working surface rather than a decorative card
+wall. The toolbar exposes the current result and the most common refinement
+path in a predictable order:
+
+1. Result title and count, including whether the count is exact, partial, or
+   unavailable.
+2. Promoted high-frequency filters such as status, product, location, period,
+   or owner.
+3. Search or exact lookup with a persistent visible label or accessible name.
+4. Saved view, column, density, and export controls.
+5. Contextual create or primary task action when the table is the task entry
+   point.
+
+Active filters appear as a readable summary or removable tokens below or
+within the toolbar. Advanced filters use a bounded panel or drawer. A bulk
+action bar appears only after selection and replaces or clearly separates
+ordinary row actions while stating the exact selected scope.
+
+Status cells use compact semantic labels with a non-color cue. Numeric and
+money columns use tabular numerals and appropriate alignment. Row borders,
+header surface contrast, and spacing express structure; per-row shadows and
+nested cards are prohibited.
+
+Compact density may reduce visible spacing but not names, focus indicators,
+row-specific selection labels, action hit areas, or critical currency, scope,
+freshness, and reconciliation context. Mobile transformation keeps the same
+filter and selection semantics even when rows become focused cards or lists.
 
 ## Keyboard Model
 
@@ -237,3 +267,9 @@ The platform owns the resulting interaction contract, accessibility, persistence
 - Export permission and classification tests
 - Tenant and field security
 - Offline and stale-data behavior
+
+## Change Log
+
+- 2026-07-19 — v0.5.0 added the governed table-surface and toolbar grammar,
+  translating useful external dashboard-reference patterns into the existing
+  TanStack/shadcn, accessibility, responsive, and white-label boundaries.

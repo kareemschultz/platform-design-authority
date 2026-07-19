@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-035
 title: Shadcn Studio Evaluation
-version: 0.3.0
+version: 0.7.2
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-18
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -56,7 +56,7 @@ Required fallback:
 
 **Compatibility finding (historical, 2026-07-13): Codex's configured credential did not authenticate at all.** The `shadcn-studio-mcp@1.0.7` package (confirmed by reading its `build/utils/config.js` source) only recognizes the environment variables `API_KEY` and `EMAIL`; `isPro()` requires both to resolve to non-empty values. The `.codex/config.toml` MCP entry for this server set `EMAIL` correctly but named the license variable `LICENSE_KEY`, which the package does not read — so `apiKey` never got set and Studio calls made from that Codex configuration ran in freemium mode regardless of the license actually held. A successful call only proves the server started, not that it authenticated (freemium calls also succeed).
 
-**Status update:** the founder has since reported correcting the local Codex configuration's variable name from `LICENSE_KEY` to `API_KEY`. This document does not independently verify that correction — Codex has not been restarted and no controlled with/without-credential comparison has been run against it (the technique used above to prove Claude's own access is genuinely authenticated, not merely configured). Until both of those happen, treat Codex-side Studio calls as unauthenticated; do not claim Codex-side Pro access from this correction alone.
+**Status update (2026-07-18):** after Codex was restarted, a metadata-only call for the known Application Shell family returned 18 variants, including 3 tagged `isPro: true`. That matches the authenticated control recorded on 2026-07-13; the historical unauthenticated control returned 1 variant. This independently verifies that the corrected Codex environment-variable name is effective in this session without exposing a credential. It proves bounded authenticated metadata interoperability only, not vendor support for Codex or reliability for large licensed payloads.
 
 ## Inventory profile
 
@@ -70,6 +70,39 @@ Required fallback:
 | Total | 61 | 146 catalog-level inspiration variants; 735 actual variant records observed via authenticated per-family metadata (74 explicitly `isPro: true`) | No automatic approval |
 
 The complete family and variant names, plus the full per-family authenticated/Pro-tagged breakdown, are in COMPONENT_SOURCE_MATRIX.md.
+
+## 2026-07-18 catalog delta review
+
+This delta is deliberately narrower than the 2026-07-13 exhaustive inventory. It records newly advertised candidates and the boundary between Studio's public website and its pinned MCP metadata interface. No source, installation payload, private URL, or premium asset was retrieved.
+
+Website evidence was verified from rendered Chrome captures and page text, not inferred only from static search extraction. Studio intentionally serves both implementations through an explicit Base UI/Radix UI component-library selector. The Base UI state is `?base=base`, displays `Base UI Component Library`, and links to `/preview/components/base/autocomplete?index=0`; the Radix state is `?base=radix`, displays `Radix UI Component Library`, and links to `/preview/components/radix/autocomplete?index=0`. The first-party page copy explicitly says that Autocomplete supports both Base UI and Radix UI. For Meridian candidate evaluation, select Base UI and capture the selected control, page URL, and preview link together. Those presentation signals still do not establish the copied item's source dependency graph. Screenshots are ephemeral review evidence and are not committed because they reproduce third-party presentation content; the durable repository evidence is the bounded observation and source URL below.
+
+| Evidence | Verified result | Interpretation |
+|---|---|---|
+| npm package metadata | `shadcn-studio-mcp` remains at 1.0.7; its last publish remains 2026-01-13 | Studio's server-side and website catalogs can change without a new MCP package release |
+| MCP block catalog | 61 block families remain listed; Onboarding Feed is present | The block catalog remains queryable but its summary count is not a complete product-catalog view |
+| Onboarding Feed family metadata | 5 variants returned; variant 02 declares `@stepperize/react` and variant 05 declares `motion` | Variant-level dependency and authority review is required before any prototype |
+| Public component catalog | The official page advertises 58 component families, 1,000+ variants, and a new Autocomplete family with 10 components. It explicitly supports both implementations: Base UI combines `Base UI Component Library`, `?base=base`, and `/preview/components/base/autocomplete?index=0`; Radix UI combines `Radix UI Component Library`, `?base=radix`, and `/preview/components/radix/autocomplete?index=0` | These are vendor catalog and presentation claims, not an acceptance, accessibility, source, or dependency result. Use the Base UI state for new Meridian candidate evaluation under ADR-0022 and capture the selector, URL, and preview together. The mode still does not prove the acquired item's dependency graph |
+| MCP component metadata | `autocomplete`, `auto-complete`, `autocomplete-component`, and `typeahead` returned `Component not found`; the known `combobox` family returned 14 variants | Autocomplete is not currently discoverable through the pinned MCP metadata API; absence is not proof that the Studio product lacks it |
+| Public templates | AIDesk, Sprintrix, Promptly, and Brandly are advertised on first-party template pages | Templates are not enumerated by the available Studio MCP metadata tools and remain outside the verified MCP inventory |
+| License page | Last-updated date remains 2026-01-13 | No new license grant was inferred from the catalog release |
+
+Candidate dispositions from this delta:
+
+| Candidate | Disposition | Meridian boundary |
+|---|---|---|
+| Autocomplete 10 | Researching | Compare visual and interaction ideas in Studio's Base UI mode (`?base=base`) against the official shadcn Command/Combobox and the platform-owned searchable-select direction. New owned work remains Base UI-backed under ADR-0022; Studio's Radix mode is comparison/fallback evidence only and does not authorize mixing primitive families. Capture `Base UI Component Library`, the Base UI URL, and the matching `/preview/components/base/...` link together, then require item-level source and dependency evidence before assigning a primitive family. Any prototype must preserve tenant and permission filtering, cancellable/debounced remote search, no-results, stale, degraded, offline, large-data, keyboard, focus, announcement, and custom-option semantics. |
+| Onboarding Feed 01 | Preferred Candidate | Bounded composition inspiration for an optional first-run or operational-readiness checklist. Completion state must come from governed application contracts; support skip, resume, recovery, and non-coercive disclosure. |
+| Onboarding Feed 02 | Researching | Multi-step setup reference only. `@stepperize/react` is a new dependency requiring separate review; external step state must not become business authority. |
+| Onboarding Feed 03 | Researching | Progress-and-dialog composition reference only. Dialog actions must expose consequence, cancellation, validation, and authoritative completion rather than treating presentation state as success. |
+| Onboarding Feed 04 | Researching | Timeline/readiness-history inspiration only; it cannot replace the immutable audit or canonical activity evidence. |
+| Onboarding Feed 05 | Restricted | Its `motion` dependency and privacy/billing demonstration content add cost and misleading authority risk without a current operational need. |
+| AIDesk | Researching | Visual composition reference for future support, inbox, and knowledge surfaces only. Do not reuse its authentication, ticket, AI-agent, contact, or role semantics. |
+| Sprintrix | Researching | Visual reference for saved views, filters, boards, and activity composition only. Do not import its project, issue, team, security, billing, or authorization model. |
+| Promptly | Restricted | AI interaction visual research only. It cannot define model authority, autonomy, data handling, pricing, or the deterministic non-AI path. |
+| Brandly | Restricted | Public-marketing inspiration only; it has no role in the authenticated operational application. |
+
+Studio descriptions such as "production-ready," "accessible," and "fully responsive" remain vendor claims until Meridian reproduces the relevant evidence against a named, licensed item.
 
 ## Strengths
 
@@ -151,11 +184,22 @@ This evaluation's 2026-07-13 authenticated pass used a Shadcn Studio Pro credent
 
 ## Recommendation
 
-Retain Studio MCP 1.0.7 as a pinned, optional discovery tool. Keep official shadcn/ui as canonical registry interface. Revisit Studio only for a named candidate and user task, through a supported-client fallback, after credential rotation and license review. If Studio cannot provide bounded, auditable source and dependency evidence, use official primitives and build the Meridian composite directly.
+Retain Studio MCP 1.0.7 as a pinned, optional discovery tool. Keep official shadcn/ui as canonical registry interface. Use the public catalog only to identify a named candidate; verify that candidate through bounded metadata and a supported-client fallback before any licensed source acquisition. Do not interpret a website/MCP mismatch as approval, rejection, or product absence. If Studio cannot provide bounded, auditable source and dependency evidence, use official primitives and build the Meridian composite directly.
 
 ## Sources and recheck
 
 - Studio MCP documentation: https://shadcnstudio.com/docs/getting-started/shadcn-studio-mcp-server
+- Studio component catalog: https://shadcnstudio.com/components
+- Studio Autocomplete documentation: https://shadcnstudio.com/docs/components/autocomplete
+- Studio Autocomplete Base UI view: https://shadcnstudio.com/docs/components/autocomplete?base=base
+- Studio Autocomplete Radix view: https://shadcnstudio.com/docs/components/autocomplete?base=radix
+- Studio Onboarding Feed: https://shadcnstudio.com/blocks/dashboard-and-application/onboarding-feed
+- Studio admin-dashboard templates: https://shadcnstudio.com/templates/admin-dashboard
+- Studio AIDesk template: https://shadcnstudio.com/templates/admin-dashboard/aidesk
+- Studio Sprintrix template: https://shadcnstudio.com/templates/admin-dashboard/sprintrix
+- Studio Promptly template: https://shadcnstudio.com/templates/admin-dashboard/promptly
+- Studio Brandly template: https://shadcnstudio.com/templates/brandly-agency-template
+- Studio license: https://shadcnstudio.com/license
 - Official shadcn MCP documentation: https://ui.shadcn.com/docs/mcp
 - MCP package registry metadata for the exact configured packages
 

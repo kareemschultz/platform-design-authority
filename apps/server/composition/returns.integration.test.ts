@@ -1064,10 +1064,18 @@ describe.serial(
 			);
 			expect(movementRows.rows[0]?.count).toBe("1");
 
+			// WS3 remediation R1, Finding A: `expectedCashMinor` now includes
+			// the fixture sale's own cash-in (`completedFixtureSale` tenders
+			// exactly 456,000 in Cash, no change), so a zero-variance close
+			// requires counting the opening float (100,000) PLUS that sale
+			// proceeds — 556,000, not just the float. `voidReceipt` posts no
+			// cash-ledger entry of its own (a documented, separately-tracked
+			// gap outside this stage's scope), so the void above does not
+			// change this figure.
 			await pos.closeRegister({
 				actorUserId: returnsBase.actorUserId,
 				correlationId: returnsBase.correlationId,
-				countedCash: { amountMinor: 100_000, currency: "GYD" },
+				countedCash: { amountMinor: 556_000, currency: "GYD" },
 				idempotencyKey: "void-close-register",
 				organizationId: returnsBase.organizationId,
 				registerId,
@@ -1089,10 +1097,12 @@ describe.serial(
 				return completedFixtureSale(pos, registerId, tenantId, "void-2");
 			})();
 
+			// This second session opened at float 0, so expected cash is
+			// exactly sale2's own 456,000 proceeds (Finding A).
 			await pos.closeRegister({
 				actorUserId: returnsBase.actorUserId,
 				correlationId: returnsBase.correlationId,
-				countedCash: { amountMinor: 100_000, currency: "GYD" },
+				countedCash: { amountMinor: 456_000, currency: "GYD" },
 				idempotencyKey: "void-close-register-2",
 				organizationId: returnsBase.organizationId,
 				registerId,

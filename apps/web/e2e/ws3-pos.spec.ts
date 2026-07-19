@@ -518,17 +518,24 @@ test("full cash sale: open register, complete a sale, view the receipt, close th
 		page.getByRole("heading", { exact: true, name: "Receipt" })
 	).toBeVisible();
 
-	// A cash sale posts no commerce.cash-movement — the register's
-	// server-computed expectedCash is opening float plus net PaidIn/PaidOut/
-	// SafeDrop/Refund movements only (packages/domains/pos/src/index.ts
-	// register.close), never completed cash-sale proceeds (a disclosed
-	// PR1-4 scoping boundary this stage's UI reflects, not resolves). Zero
-	// variance therefore requires the UNCHANGED opening float here.
+	// WS3 remediation R1, Finding A: a completed cash sale now posts its own
+	// PaidIn cash-ledger entry atomically with `sale.complete`
+	// (`packages/domains/pos/src/index.ts`'s `completeSale`), so the
+	// register's server-computed expectedCash is opening float PLUS that
+	// sale's net cash-in — SUPERSEDES this test's prior comment, which
+	// documented the pre-fix gap ("a cash sale posts no
+	// commerce.cash-movement ... never completed cash-sale proceeds") as an
+	// accepted scoping boundary. Zero variance now requires counting the
+	// opening float (100.00) plus the sale's own total, not the unchanged
+	// float.
+	const expectedCashMajor = ((10_000 + sale.total.amountMinor) / 100).toFixed(
+		2
+	);
 	await page.goto(`/operations/pos/registers/${registerSessionId}/close`);
 	await expect(
 		page.getByRole("heading", { name: "Close register" })
 	).toBeVisible();
-	await page.getByLabel("Counted cash (GYD)").fill("100.00");
+	await page.getByLabel("Counted cash (GYD)").fill(expectedCashMajor);
 	const closeResponsePromise = page.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&

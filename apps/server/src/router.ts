@@ -281,7 +281,8 @@ function mapApplicationError(context: Context, error: unknown): never {
 		code === "approval_separation" ||
 		code === "segregation_of_duties" ||
 		code === "invalid_state" ||
-		code === "negative_stock"
+		code === "negative_stock" ||
+		code === "insufficient_cash"
 	) {
 		throw new ORPCError("CONFLICT", {
 			data: problem(context, {

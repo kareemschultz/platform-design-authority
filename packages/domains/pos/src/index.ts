@@ -70,6 +70,7 @@ export class PosError extends Error {
 	readonly code:
 		| "approval_separation"
 		| "idempotency_conflict"
+		| "insufficient_cash"
 		| "invalid_reference"
 		| "invalid_state"
 		| "negative_stock"
@@ -526,6 +527,56 @@ export interface PosRepository {
 		record: RegisterSessionRecord,
 		expectedVersion: number
 	) => Promise<RegisterSessionRecord | "version_conflict">;
+}
+
+/**
+ * WS3 remediation R1, Finding A: the register's authoritative expected-cash
+ * figure — `openingFloatMinor` plus the SIGNED net of every `CashMovement`
+ * row posted for this session (`PaidIn` minus `PaidOut`, across every
+ * `reasonCode`: paid-in, paid-out, safe-drop, refund, and the cash-sale
+ * `"Other"` entries `completeSale` now posts — see its own remediation
+ * comment). `closeRegister` and the Finding E fail-closed guard below both
+ * read through this one function so they can never diverge on what
+ * "expected cash" means.
+ */
+async function currentExpectedCashMinor(
+	repository: PosRepository,
+	tenantId: string,
+	session: { id: string; openingFloatMinor: number }
+): Promise<number> {
+	const totals = await repository.netCashMovements(tenantId, session.id);
+	return session.openingFloatMinor + totals.paidInMinor - totals.paidOutMinor;
+}
+
+/**
+ * WS3 remediation R1, Finding E: `schemas/events/commerce.register.closed.v1
+ * .schema.json`'s `data.expectedCashMinor` is `{"type": "integer",
+ * "minimum": 0}` — a runtime path that could ever compute a negative
+ * expected cash would violate that already-frozen schema. Rather than
+ * weaken the schema (not authorized) or silently invent a business policy
+ * that expected cash may legitimately go negative (also not authorized),
+ * this applies the SAME governing pattern
+ * `docs/blueprint/17-Roadmap/WS3_POS_CASH_IMPLEMENTATION_PLAN.md` §10.3
+ * already established for a structurally identical prototype-depth gap (no
+ * `commerce.cash-variance.reject` deny path): "accepted prototype-depth
+ * limit, disclosed not silent," realized here as a fail-closed guard. Every
+ * cash-OUT posting (`approveRefund`'s `Refund` movement, and the
+ * `commerce.cash-movement.create` command's `PaidOut`-direction movements —
+ * `PaidOut`, `SafeDrop`, or `Other` with a `PaidOut` direction) calls this
+ * BEFORE writing any ledger row, event, or state change, so the schema's
+ * `minimum: 0` is satisfied by construction and stays untouched. See
+ * `remediation-dispositions.md` "## E — Negative expected-cash guard".
+ */
+function requireCashOutWithinExpectedCash(
+	expectedCashMinor: number,
+	amountOutMinor: number
+): void {
+	if (expectedCashMinor - amountOutMinor < 0) {
+		throw new PosError(
+			"insufficient_cash",
+			"This cash-out would drive the register's expected cash below zero"
+		);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -2770,15 +2821,30 @@ export function createPosService(options: PosServiceOptions) {
 				});
 
 				// Refund-exceeds-register-cash (frozen control plan Tests:
-				// "record variance vs reject — whichever PR0 declared"). PR1's
-				// `createCashMovement` never checks cash sufficiency for any
-				// PaidOut reason code (paid-out, safe-drop); a shortfall only
-				// ever surfaces as a counted-vs-expected variance at
-				// `register.close` (`cash-variance.approve`). This refund
-				// posting follows that SAME established semantics rather than
-				// inventing a reject path PR1 never had: it always posts, and
-				// any resulting shortfall is recorded — never rejected —
-				// through the ordinary close/variance flow.
+				// "record variance vs reject — whichever PR0 declared"). SUPERSEDED
+				// by WS3 remediation R1, Finding E: this refund posting no longer
+				// "always posts" regardless of drawer cash. `requireCashOutWithinExpectedCash`
+				// rejects BEFORE any ledger row, event, or state change if this
+				// refund would drive the register's authoritative expected cash
+				// (Finding A's ledger, computed by `currentExpectedCashMinor`)
+				// below zero — the fail-closed guard `schemas/events/commerce.
+				// register.closed.v1.schema.json`'s `expectedCashMinor minimum: 0`
+				// requires, applying the SAME disclosed-prototype-limit pattern
+				// `WS3_POS_CASH_IMPLEMENTATION_PLAN.md` §10.3 already established
+				// (see `remediation-dispositions.md` "## E"). A refund that keeps
+				// expected cash at or above zero still always posts; only a
+				// refund that would breach zero is denied — no variance is ever
+				// silently accepted at close time for that shortfall, because it
+				// is never posted in the first place.
+				const expectedCashBeforeRefund = await currentExpectedCashMinor(
+					repository,
+					input.tenantId,
+					session
+				);
+				requireCashOutWithinExpectedCash(
+					expectedCashBeforeRefund,
+					current.amountMinor
+				);
 				const movementId = options.ids.create("movement");
 				const movement: CashMovementRecord = {
 					actorPartyId: approverPartyId,
@@ -3016,12 +3082,27 @@ export function createPosService(options: PosServiceOptions) {
 					);
 				}
 				requireMatchingCurrency(current.currency, input.countedCash.currency);
-				const totals = await repository.netCashMovements(
+				// WS3 remediation R1, Finding A: `expectedCashMinor` is derived
+				// from the authoritative cash ledger — `openingFloatMinor` plus
+				// every signed `CashMovement` row this session has accumulated.
+				// Before this remediation, `completeSale` and `approveRefund`
+				// were the only two writers of Sale/Refund business effects and
+				// only `approveRefund` ever posted to this ledger, so this
+				// formula silently excluded every cash sale's proceeds and
+				// change. `completeSale` now posts its own `PaidIn` entry
+				// atomically with sale completion (see that method's own
+				// remediation comment), so this SAME formula — unchanged here —
+				// is now genuinely authoritative rather than a partial
+				// reconstruction. Finding E's fail-closed guard on every cash-OUT
+				// posting (`requireCashOutWithinExpectedCash`) is what keeps this
+				// value non-negative, satisfying `schemas/events/commerce.
+				// register.closed.v1.schema.json`'s `expectedCashMinor minimum:
+				// 0` — never by weakening the schema.
+				const expectedCashMinor = await currentExpectedCashMinor(
+					repository,
 					input.tenantId,
-					current.id
+					current
 				);
-				const expectedCashMinor =
-					current.openingFloatMinor + totals.paidInMinor - totals.paidOutMinor;
 				const varianceMinor = input.countedCash.amountMinor - expectedCashMinor;
 				const now = options.clock();
 				const closerPartyId = await options.parties.requireActorPartyId({
@@ -3243,6 +3324,78 @@ export function createPosService(options: PosServiceOptions) {
 					);
 					if (savedSale === "version_conflict") {
 						throw new PosError("version_conflict", "Sale version is stale");
+					}
+
+					// WS3 remediation R1, Finding A: a completed cash sale's net
+					// cash-in must post to the SAME authoritative cash ledger
+					// `approveRefund` already posts a `PaidOut` entry to —
+					// atomically inside THIS transaction (`saleUnitOfWork`, no
+					// separate follow-up write; CLAUDE.md §5's "explicit
+					// application contracts" discipline) — so `closeRegister`'s
+					// `netCashMovements`-derived `expectedCashMinor` stops
+					// excluding sale proceeds. `requireCashOnlyTenders` has
+					// already rejected every tender that is not `Cash`, so the
+					// drawer's net cash effect (every cash tender received minus
+					// change handed back) is algebraically always exactly
+					// `savedSale.totalMinor`: `tenderedMinor - changeMinor
+					// == tenderedMinor - (tenderedMinor - totalMinor) ==
+					// totalMinor`. `commerce.cash-movement.posted.v1` is a frozen
+					// PR0 `v1` event (`additionalProperties: false`, `reasonCode`
+					// enum fixed to `["PaidIn","PaidOut","SafeDrop","Refund",
+					// "Other"]`) — it has no `"Sale"` reason code to mint without
+					// an unauthorized `v2`, so this files under the schema's
+					// existing `"Other"` catch-all with `referenceId` naming this
+					// Sale, exactly the un-enumerated-cash-cause escape hatch PR0
+					// left available. A zero-total sale (e.g. every line fully
+					// discounted) has no cash effect and posts nothing —
+					// `requirePositiveMinor`-equivalent zero-amount ledger rows
+					// are never valid.
+					if (savedSale.totalMinor > 0) {
+						const saleCashMovementId = options.ids.create("movement");
+						const saleCashMovement: CashMovementRecord = {
+							actorPartyId: cashierPartyId,
+							actorUserId: input.actorUserId,
+							amountMinor: savedSale.totalMinor,
+							createdAt: now,
+							currency: savedSale.currency,
+							direction: "PaidIn",
+							id: saleCashMovementId,
+							note: "Cash sale proceeds",
+							organizationId: savedSale.organizationId,
+							reasonCode: "Other",
+							referenceId: savedSale.id,
+							registerId: savedSale.registerId,
+							sessionId: savedSale.sessionId,
+							tenantId: savedSale.tenantId,
+						};
+						const savedSaleCashMovement =
+							await repository.createCashMovement(saleCashMovement);
+						await events.append(
+							event({
+								actorUserId: input.actorUserId,
+								aggregateId: savedSaleCashMovement.id,
+								capabilityId: "commerce.cash-management",
+								correlationId: input.correlationId,
+								data: {
+									actorPartyId: cashierPartyId,
+									amountMinor: savedSaleCashMovement.amountMinor,
+									currency: savedSaleCashMovement.currency,
+									direction: savedSaleCashMovement.direction,
+									movementId: savedSaleCashMovement.id,
+									reasonCode: savedSaleCashMovement.reasonCode,
+									referenceId: savedSaleCashMovement.referenceId,
+									registerId: savedSaleCashMovement.registerId,
+								},
+								eventId: options.ids.create("event"),
+								idempotencyKey: `${input.idempotencyKey}:cash-movement`,
+								name: "commerce.cash-movement.posted.v1",
+								now,
+								organizationId: savedSale.organizationId,
+								schemaRef:
+									"schemas/events/commerce.cash-movement.posted.v1.schema.json",
+								tenantId: savedSale.tenantId,
+							})
+						);
 					}
 
 					// CONFORMANCE DECISION (recorded here, not silently applied): the
@@ -3529,6 +3682,25 @@ export function createPosService(options: PosServiceOptions) {
 					);
 				}
 				requireMatchingCurrency(session.currency, input.amount.currency);
+				// WS3 remediation R1, Finding E: `PaidOut` is the only direction
+				// that can drive the register's authoritative expected cash
+				// (Finding A's ledger) negative — `PaidIn` never can. This covers
+				// EVERY reason code this command accepts with `PaidOut` (`PaidOut`
+				// itself, `SafeDrop`, and an `Other` posted with a `PaidOut`
+				// direction), not just one named reason code. See
+				// `requireCashOutWithinExpectedCash`'s doc comment and
+				// `remediation-dispositions.md` "## E".
+				if (input.direction === "PaidOut") {
+					const expectedCashBeforeMovement = await currentExpectedCashMinor(
+						repository,
+						input.tenantId,
+						session
+					);
+					requireCashOutWithinExpectedCash(
+						expectedCashBeforeMovement,
+						input.amount.amountMinor
+					);
+				}
 				const now = options.clock();
 				const actorPartyId = await options.parties.requireActorPartyId({
 					authUserId: input.actorUserId,

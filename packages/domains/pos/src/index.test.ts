@@ -881,11 +881,18 @@ describe("POS domain: RegisterSession lifecycle", () => {
 
 	test("keeps posted cash movements append-only: a correction is a new opposite movement, never an edit", async () => {
 		const { movements, service } = createHarness();
+		// Opening float 1000 (WS3 remediation R1, Finding E: the original
+		// version of this test opened at float 0 and posted a 500 PaidOut
+		// first — that is now correctly REJECTED by
+		// `requireCashOutWithinExpectedCash` as a cash-out that would drive
+		// expected cash negative, so the fixture now opens with cash on
+		// hand sufficient for the erroneous paid-out, keeping this test's
+		// actual subject — append-only correction, never an edit — intact).
 		await service.openRegister({
 			...base,
 			currency: "GYD",
 			idempotencyKey: "reversal-open",
-			openingFloat: { amountMinor: 0, currency: "GYD" },
+			openingFloat: { amountMinor: 1000, currency: "GYD" },
 			registerId: "register_reversal",
 		});
 		const posted = await service.createCashMovement({
@@ -912,7 +919,7 @@ describe("POS domain: RegisterSession lifecycle", () => {
 		).toBe(true);
 		const closed = await service.closeRegister({
 			...base,
-			countedCash: { amountMinor: 0, currency: "GYD" },
+			countedCash: { amountMinor: 1000, currency: "GYD" },
 			idempotencyKey: "reversal-close",
 			registerId: "register_reversal",
 		});
@@ -1101,6 +1108,569 @@ describe("POS domain: RegisterSession lifecycle", () => {
 				registerId: "register_validation",
 			})
 		).rejects.toMatchObject({ code: "validation" });
+	});
+});
+
+describe("POS domain: Register cash-ledger integrity (WS3 remediation R1, Finding A + Finding E)", () => {
+	/** Opens `registerId` with `openingFloatMinor`, completes ONE cash sale
+	 * of a single `unitPriceMinor` line at the untaxed `GY_EXEMPT` category
+	 * (so `sale.total === unitPriceMinor` exactly, keeping the ledger
+	 * arithmetic in every test below trivially checkable), tendered with
+	 * `tenderedMinor` in cash. Returns the sale so callers can compute the
+	 * expected change/net-cash-in themselves. */
+	async function openAndCompleteExemptSale(
+		service: ReturnType<typeof createHarness>["service"],
+		input: {
+			openingFloatMinor: number;
+			registerId: string;
+			tenderedMinor: number;
+			unitPriceMinor: number;
+		}
+	) {
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${input.registerId}-open`,
+			openingFloat: { amountMinor: input.openingFloatMinor, currency: "GYD" },
+			registerId: input.registerId,
+		});
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${input.registerId}-sale-create`,
+			lines: [
+				{
+					productId: "prod_ledger",
+					quantity: "1",
+					taxCategory: "GY_EXEMPT",
+					unit: "each",
+					unitPrice: { amountMinor: input.unitPriceMinor, currency: "GYD" },
+				},
+			],
+			registerId: input.registerId,
+		});
+		expect(sale.total).toEqual({
+			amountMinor: input.unitPriceMinor,
+			currency: "GYD",
+		});
+		const completed = await service.completeSale({
+			...base,
+			idempotencyKey: `${input.registerId}-sale-complete`,
+			saleId: sale.id,
+			tenders: [
+				{ amountMinor: input.tenderedMinor, currency: "GYD", type: "Cash" },
+			],
+		});
+		return { completed, sale };
+	}
+
+	test("Finding A: opening float 100 + a cash sale tendered 20 against a total of 9 (change 11) => expected cash 109, posted atomically with sale completion", async () => {
+		const { movements, service } = createHarness();
+		const { completed } = await openAndCompleteExemptSale(service, {
+			openingFloatMinor: 100,
+			registerId: "register_ledger_expected_109",
+			tenderedMinor: 20,
+			unitPriceMinor: 9,
+		});
+		expect(completed.change).toEqual({ amountMinor: 11, currency: "GYD" });
+
+		// Atomic with `sale.complete` itself (Finding A: "no separate
+		// follow-up write") — the movement already exists by the time
+		// `completeSale` has returned, referencing the sale.
+		const saleMovement = movements.find(
+			(movement) => movement.referenceId === completed.id
+		);
+		expect(saleMovement).toMatchObject({
+			amountMinor: 9,
+			direction: "PaidIn",
+			reasonCode: "Other",
+		});
+
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 109, currency: "GYD" },
+			idempotencyKey: "register_ledger_expected_109-close",
+			registerId: "register_ledger_expected_109",
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 109, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.state).toBe("Closed");
+	});
+
+	test("Finding A: counting only the original float (100) in the same 20-tender/9-total/11-change scenario surfaces a -9 variance — PROVEN failing pre-fix: before Finding A the sale's cash-in was excluded from expectedCashMinor, so this would have read variance 0 (100 counted - 100 expected), not -9", async () => {
+		const { service } = createHarness();
+		await openAndCompleteExemptSale(service, {
+			openingFloatMinor: 100,
+			registerId: "register_ledger_variance_neg9",
+			tenderedMinor: 20,
+			unitPriceMinor: 9,
+		});
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 100, currency: "GYD" },
+			idempotencyKey: "register_ledger_variance_neg9-close",
+			registerId: "register_ledger_variance_neg9",
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 109, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: -9, currency: "GYD" });
+		expect(closed.varianceApprovalRequired).toBe(true);
+		expect(closed.state).toBe("Closing");
+	});
+
+	test("Finding A: a posted cash refund reduces expected cash by exactly the refunded amount (partial return, non-boundary)", async () => {
+		const harness = createHarness();
+		const { movements, service } = harness;
+		const registerId = "register_ledger_refund_reduces";
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-open`,
+			openingFloat: { amountMinor: 0, currency: "GYD" },
+			registerId,
+		});
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-sale-create`,
+			lines: [
+				{
+					productId: "prod_ledger_refund",
+					quantity: "2",
+					taxCategory: "GY_EXEMPT",
+					unit: "each",
+					unitPrice: { amountMinor: 9, currency: "GYD" },
+				},
+			],
+			registerId,
+		});
+		expect(sale.total).toEqual({ amountMinor: 18, currency: "GYD" });
+		const completed = await service.completeSale({
+			...base,
+			idempotencyKey: `${registerId}-sale-complete`,
+			saleId: sale.id,
+			tenders: [{ amountMinor: 18, currency: "GYD", type: "Cash" }],
+		});
+		const lineId = completed.lines[0]?.id as string;
+
+		// Half of the 2-unit line: refund = 9, half of the 18 total.
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "ledger-refund-reduces-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Partial return, Finding A ledger check",
+			saleId: sale.id,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "ledger-refund-reduces-return-approve",
+			returnId: created.id,
+		});
+		const refund = await service.createRefund({
+			...base,
+			idempotencyKey: "ledger-refund-reduces-refund-create",
+			returnId: approvedReturn.id,
+		});
+		expect(refund.amount).toEqual({ amountMinor: 9, currency: "GYD" });
+		const posted = await service.approveRefund({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "ledger-refund-reduces-refund-approve",
+			refundId: refund.id,
+		});
+		expect(posted.state).toBe("Posted");
+		expect(
+			movements.filter((movement) => movement.referenceId === refund.id)
+		).toHaveLength(1);
+
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 9, currency: "GYD" },
+			idempotencyKey: "ledger-refund-reduces-close",
+			registerId,
+		});
+		// 18 (sale) - 9 (refund) = 9: expected cash dropped by exactly the
+		// refund amount, not merely "some" reduction.
+		expect(closed.expectedCash).toEqual({ amountMinor: 9, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+	});
+
+	test("Finding A: paid-in, paid-out, safe-drop, deposit, sale, refund, and a reversal-correction all compose into one correct final expected cash in a single register session", async () => {
+		const harness = createHarness();
+		const { depositCustodyTransfers, movements, service } = harness;
+		const registerId = "register_ledger_signs_compose";
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-open`,
+			openingFloat: { amountMinor: 1000, currency: "GYD" },
+			registerId,
+		});
+		// running expected cash starts at 1000.
+		await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 200, currency: "GYD" },
+			direction: "PaidIn",
+			idempotencyKey: `${registerId}-paid-in`,
+			reasonCode: "PaidIn",
+			registerId,
+		});
+		// running: 1200.
+		const sale1 = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-sale1-create`,
+			lines: [
+				{
+					productId: "prod_signs_1",
+					quantity: "1",
+					taxCategory: "GY_EXEMPT",
+					unit: "each",
+					unitPrice: { amountMinor: 500, currency: "GYD" },
+				},
+			],
+			registerId,
+		});
+		await service.completeSale({
+			...base,
+			idempotencyKey: `${registerId}-sale1-complete`,
+			saleId: sale1.id,
+			tenders: [{ amountMinor: 500, currency: "GYD", type: "Cash" }],
+		});
+		// running: 1700.
+		const sale2 = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-sale2-create`,
+			lines: [
+				{
+					productId: "prod_signs_2",
+					quantity: "1",
+					taxCategory: "GY_EXEMPT",
+					unit: "each",
+					unitPrice: { amountMinor: 100, currency: "GYD" },
+				},
+			],
+			registerId,
+		});
+		const completedSale2 = await service.completeSale({
+			...base,
+			idempotencyKey: `${registerId}-sale2-complete`,
+			saleId: sale2.id,
+			tenders: [{ amountMinor: 100, currency: "GYD", type: "Cash" }],
+		});
+		// running: 1800.
+		await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 150, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: `${registerId}-paid-out`,
+			reasonCode: "PaidOut",
+			registerId,
+		});
+		// running: 1650.
+		await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 300, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: `${registerId}-safe-drop`,
+			reasonCode: "SafeDrop",
+			registerId,
+		});
+		// running: 1350.
+
+		// Refund (full return of sale2, 100): running 1350 -> 1250.
+		const sale2LineId = completedSale2.lines[0]?.id as string;
+		const return2 = await service.createReturn({
+			...base,
+			idempotencyKey: `${registerId}-return2-create`,
+			lines: [{ quantity: "1", saleLineId: sale2LineId }],
+			reason: "Full return of sale2",
+			saleId: sale2.id,
+		});
+		const approvedReturn2 = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: `${registerId}-return2-approve`,
+			returnId: return2.id,
+		});
+		const refund2 = await service.createRefund({
+			...base,
+			idempotencyKey: `${registerId}-refund2-create`,
+			returnId: approvedReturn2.id,
+		});
+		expect(refund2.amount).toEqual({ amountMinor: 100, currency: "GYD" });
+		await service.approveRefund({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: `${registerId}-refund2-approve`,
+			refundId: refund2.id,
+		});
+		// running: 1250.
+
+		// Reversal/correction pair (CLAUDE.md §5: corrections are a NEW
+		// opposite entry, never an edit): an erroneous paid-out immediately
+		// corrected by an opposite paid-in nets to zero without disturbing
+		// the running total.
+		await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 50, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: `${registerId}-erroneous-paid-out`,
+			reasonCode: "Other",
+			registerId,
+		});
+		// running: 1200.
+		await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 50, currency: "GYD" },
+			direction: "PaidIn",
+			idempotencyKey: `${registerId}-reversal-correction`,
+			note: "correction of erroneous paid-out",
+			reasonCode: "Other",
+			registerId,
+		});
+		// running: 1250.
+
+		// Deposit: reserves against the 300 safe-drop and confirms a
+		// custody transfer OUT of the safe (never the drawer) — this must
+		// NOT further move the register's own expected cash; the safe-drop
+		// already accounted for it.
+		const sessionId = movements.find(
+			(movement) => movement.reasonCode === "SafeDrop"
+		)?.sessionId as string;
+		const deposit = await service.createDeposit({
+			...base,
+			countedAmountMinor: 300,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-deposit-create`,
+			sourceShiftIds: [sessionId],
+		});
+		await service.confirmDeposit({
+			actorUserId: "user_checker",
+			correlationId: base.correlationId,
+			depositId: deposit.id,
+			idempotencyKey: `${registerId}-deposit-confirm`,
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		expect(depositCustodyTransfers).toHaveLength(1);
+
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 1250, currency: "GYD" },
+			idempotencyKey: `${registerId}-close`,
+			registerId,
+		});
+		// 1000 (float) + 200 (paid-in) + 500 (sale1) + 100 (sale2) - 150
+		// (paid-out) - 300 (safe-drop) - 100 (refund) - 50 (erroneous
+		// paid-out) + 50 (correction) = 1250. Deposit confirmation
+		// contributes nothing further.
+		expect(closed.expectedCash).toEqual({
+			amountMinor: 1250,
+			currency: "GYD",
+		});
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.state).toBe("Closed");
+	});
+
+	test("Finding A: a sale rejected for negative stock (rolled back) posts NO cash-ledger entry and does not change drawer cash", async () => {
+		const harness = createHarness();
+		const { movements, negativeStockProductIds, service } = harness;
+		const registerId = "register_ledger_sale_rollback";
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-open`,
+			openingFloat: { amountMinor: 500, currency: "GYD" },
+			registerId,
+		});
+		negativeStockProductIds.add("prod_oversold");
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-sale-create`,
+			lines: [
+				{
+					productId: "prod_oversold",
+					quantity: "1",
+					taxCategory: "GY_EXEMPT",
+					unit: "each",
+					unitPrice: { amountMinor: 50, currency: "GYD" },
+				},
+			],
+			registerId,
+		});
+		const attempt = service.completeSale({
+			...base,
+			idempotencyKey: `${registerId}-sale-complete`,
+			saleId: sale.id,
+			tenders: [{ amountMinor: 50, currency: "GYD", type: "Cash" }],
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "negative_stock" });
+
+		// The failed sale's inventory check runs BEFORE any cash-ledger
+		// write (Finding A posts only after `updateSale` succeeds), so
+		// nothing was ever appended for it.
+		expect(
+			movements.find((movement) => movement.referenceId === sale.id)
+		).toBeUndefined();
+		expect(movements).toHaveLength(0);
+
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 500, currency: "GYD" },
+			idempotencyKey: `${registerId}-close`,
+			registerId,
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 500, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+	});
+
+	test("Finding A: a repeated/idempotent close command does not double-post or re-derive expected cash", async () => {
+		const harness = createHarness();
+		const { movements, service, sessions } = harness;
+		const registerId = "register_ledger_idempotent_close";
+		await openAndCompleteExemptSale(service, {
+			openingFloatMinor: 100,
+			registerId,
+			tenderedMinor: 20,
+			unitPriceMinor: 9,
+		});
+		const movementCountAfterSale = movements.length;
+
+		const first = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 109, currency: "GYD" },
+			idempotencyKey: `${registerId}-close-repeat`,
+			registerId,
+		});
+		expect(first.state).toBe("Closed");
+		expect(first.version).toBe(2);
+		const versionAfterFirstClose = sessions.get(first.id)?.version;
+
+		// Same idempotency key AND the same request fingerprint (identical
+		// countedCash/reason/registerId): must short-circuit to the exact
+		// prior result via `replay`, never re-run the close logic.
+		const second = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 109, currency: "GYD" },
+			idempotencyKey: `${registerId}-close-repeat`,
+			registerId,
+		});
+		expect(second).toEqual(first);
+		expect(sessions.get(first.id)?.version).toBe(versionAfterFirstClose);
+		// The sale's own cash-ledger entry is untouched — closing never
+		// posts to the ledger itself, and replay never re-executes the
+		// handler that would have looked up the sale ledger again.
+		expect(movements).toHaveLength(movementCountAfterSale);
+	});
+
+	test("Finding E: a manual cash-out that would drive expected cash negative is rejected with no ledger entry, no event, and no state change", async () => {
+		const harness = createHarness();
+		const { events, movements, service, sessions } = harness;
+		const registerId = "register_ledger_e_reject";
+		const opened = await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-open`,
+			openingFloat: { amountMinor: 100, currency: "GYD" },
+			registerId,
+		});
+		const versionBefore = opened.version;
+		const movementsBefore = movements.length;
+		const eventsBefore = events.length;
+
+		const attempt = service.createCashMovement({
+			...base,
+			amount: { amountMinor: 150, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: `${registerId}-over-drawn`,
+			reasonCode: "PaidOut",
+			registerId,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "insufficient_cash" });
+		await expect(attempt).rejects.toBeInstanceOf(PosError);
+
+		expect(movements).toHaveLength(movementsBefore);
+		expect(events).toHaveLength(eventsBefore);
+		expect(sessions.get(opened.id)?.version).toBe(versionBefore);
+
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 100, currency: "GYD" },
+			idempotencyKey: `${registerId}-close`,
+			registerId,
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 100, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+	});
+
+	test("Finding E: a manual cash-out that keeps expected cash at or above zero still succeeds normally", async () => {
+		const { events, movements, service } = createHarness();
+		const registerId = "register_ledger_e_allow";
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-open`,
+			openingFloat: { amountMinor: 100, currency: "GYD" },
+			registerId,
+		});
+		const movement = await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 60, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: `${registerId}-within-bounds`,
+			reasonCode: "PaidOut",
+			registerId,
+		});
+		expect(movement.amount).toEqual({ amountMinor: 60, currency: "GYD" });
+		expect(movements).toHaveLength(1);
+		expect(
+			events.some(
+				(envelope) => envelope.name === "commerce.cash-movement.posted.v1"
+			)
+		).toBe(true);
+
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 40, currency: "GYD" },
+			idempotencyKey: `${registerId}-close`,
+			registerId,
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 40, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+	});
+
+	test("Finding E: a manual cash-out landing EXACTLY at the zero boundary succeeds (schema minimum:0 satisfied, not weakened)", async () => {
+		const { service } = createHarness();
+		const registerId = "register_ledger_e_boundary";
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: `${registerId}-open`,
+			openingFloat: { amountMinor: 100, currency: "GYD" },
+			registerId,
+		});
+		const movement = await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 100, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: `${registerId}-exact-drain`,
+			reasonCode: "PaidOut",
+			registerId,
+		});
+		expect(movement.amount).toEqual({ amountMinor: 100, currency: "GYD" });
+
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 0, currency: "GYD" },
+			idempotencyKey: `${registerId}-close`,
+			registerId,
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.state).toBe("Closed");
 	});
 });
 
@@ -1993,13 +2563,26 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 		expect(cashEvent?.data).toMatchObject({ referenceId: refund.id });
 	});
 
-	test("posts a refund even when it would exceed the register's counted cash — records the shortfall as an ordinary close variance rather than rejecting (frozen control plan Tests: record variance vs reject)", async () => {
+	test("SUPERSEDED by WS3 remediation R1 (Finding A + E): a full refund of a cash sale's own proceeds lands exactly at the zero boundary and succeeds (record variance vs reject — now reject-before-negative, boundary-inclusive)", async () => {
+		// Pre-remediation this test was named "posts a refund even when it
+		// would exceed the register's counted cash — records the shortfall
+		// as an ordinary close variance rather than rejecting" and asserted
+		// `closed.state === "Closing"` / `varianceApprovalRequired === true`
+		// on the theory that "this register's session never received any
+		// cash beyond the sale tender itself (which is not a paid-in
+		// movement)". Finding A makes that theory false: `completeSale` now
+		// posts the sale's own net cash-in atomically, so a refund that
+		// fully reverses that SAME sale, in the SAME still-open session,
+		// lands EXACTLY at the Finding E boundary (expected cash net to
+		// zero) rather than going negative — see the new
+		// "REJECTS a refund that would drive expected cash negative" test
+		// below for the genuinely-exceeds-cash case (Finding E).
 		const harness = createHarness();
-		const { service } = harness;
+		const { movements, service } = harness;
 		const registerId = "register_refund_exceeds_cash";
 		const { lineId, saleId } = await completedSale(harness, registerId, {
 			quantity: "1",
-			unitPriceMinor: 1_000_000, // 10,000.00 GYD — a refund larger than any float this session ever held in cash.
+			unitPriceMinor: 1_000_000, // 10,000.00 GYD sale, tendered exactly (no change).
 		});
 		const created = await service.createReturn({
 			...base,
@@ -2020,10 +2603,6 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 			returnId: approvedReturn.id,
 		});
 
-		// This register's session never received any cash beyond the sale
-		// tender itself (which is not a paid-in movement); the refund still
-		// posts — no "insufficient register cash" rejection code exists on
-		// this branch's PosError union.
 		const posted = await service.approveRefund({
 			...base,
 			actorUserId: "user_checker",
@@ -2031,6 +2610,16 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 			refundId: refund.id,
 		});
 		expect(posted.state).toBe("Posted");
+		// The sale's PaidIn entry (Finding A) and the refund's PaidOut entry
+		// exactly cancel: this is the Finding E boundary case (result of
+		// exactly 0), which succeeds rather than being rejected.
+		const saleMovement = movements.find(
+			(movement) => movement.referenceId === saleId
+		);
+		expect(saleMovement).toMatchObject({
+			amountMinor: refund.amount.amountMinor,
+			direction: "PaidIn",
+		});
 
 		const closed = await service.closeRegister({
 			...base,
@@ -2038,11 +2627,80 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 			idempotencyKey: "exceeds-cash-close",
 			registerId,
 		});
-		// expected = opening float (0) + paidIn (0) - paidOut (refund amount);
-		// a negative expected cash surfaces as a non-zero variance requiring
-		// commerce.cash-variance.approve, never a refund-time rejection.
-		expect(closed.state).toBe("Closing");
-		expect(closed.varianceApprovalRequired).toBe(true);
+		expect(closed.expectedCash).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
+		expect(closed.state).toBe("Closed");
+		expect(closed.varianceApprovalRequired).toBe(false);
+	});
+
+	test("REJECTS a refund that would drive expected cash negative, with no ledger entry, no event, and no state change (WS3 remediation R1, Finding E)", async () => {
+		const harness = createHarness();
+		const { events, movements, refunds, service } = harness;
+		const registerId = "register_refund_insufficient_cash";
+		const { lineId, saleId } = await completedSale(harness, registerId, {
+			quantity: "1",
+			unitPriceMinor: 1_000_000, // sale posts a 1,140,000 (with 14% tax) PaidIn entry.
+		});
+		// Drain almost all of the sale's own cash-in via a safe-drop BEFORE
+		// the refund is attempted, leaving only 100 minor units of expected
+		// cash — far short of the refund this full return will demand.
+		await service.createCashMovement({
+			...base,
+			amount: { amountMinor: 1_139_900, currency: "GYD" },
+			direction: "PaidOut",
+			idempotencyKey: "insufficient-cash-safe-drop",
+			reasonCode: "SafeDrop",
+			registerId,
+		});
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "insufficient-cash-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Large refund exceeding remaining drawer cash",
+			saleId,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "insufficient-cash-return-approve",
+			returnId: created.id,
+		});
+		const refund = await service.createRefund({
+			...base,
+			idempotencyKey: "insufficient-cash-refund-create",
+			returnId: approvedReturn.id,
+		});
+		expect(refund.amount.amountMinor).toBe(1_140_000);
+
+		const movementsBeforeAttempt = movements.length;
+		const eventsBeforeAttempt = events.length;
+		const attempt = service.approveRefund({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "insufficient-cash-refund-approve",
+			refundId: refund.id,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "insufficient_cash" });
+		await expect(attempt).rejects.toBeInstanceOf(PosError);
+
+		// No ledger entry, no event, and no business-state change: the
+		// refund stays exactly `Requested`, never transitions to `Posted`.
+		expect(movements).toHaveLength(movementsBeforeAttempt);
+		expect(events).toHaveLength(eventsBeforeAttempt);
+		const refundRecord = refunds.get(refund.id);
+		expect(refundRecord?.state).toBe("Requested");
+		expect(refundRecord?.cashMovementId).toBeNull();
+
+		// The register's expected cash is exactly what the safe-drop left
+		// behind (100) — completely unaffected by the rejected refund.
+		const closed = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 100, currency: "GYD" },
+			idempotencyKey: "insufficient-cash-close",
+			registerId,
+		});
+		expect(closed.expectedCash).toEqual({ amountMinor: 100, currency: "GYD" });
+		expect(closed.variance).toEqual({ amountMinor: 0, currency: "GYD" });
 	});
 
 	test("rejects a refund approval once the referenced register's session is no longer open", async () => {

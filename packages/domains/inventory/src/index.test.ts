@@ -156,13 +156,15 @@ class MemoryInventoryRepository implements InventoryRepository {
 	}
 	async listAdjustments(
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
-		filters?: Parameters<InventoryRepository["listAdjustments"]>[2]
+		filters?: Parameters<InventoryRepository["listAdjustments"]>[3]
 	) {
 		return this.page(
 			[...this.adjustments.values()].filter(
 				(record) =>
 					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
 					(!filters?.locationId || record.locationId === filters.locationId) &&
 					(!filters?.state || record.state === filters.state)
 			),
@@ -172,6 +174,7 @@ class MemoryInventoryRepository implements InventoryRepository {
 	}
 	async listBalances(
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: { locationId?: string; productId?: string }
 	) {
@@ -179,6 +182,7 @@ class MemoryInventoryRepository implements InventoryRepository {
 			[...this.balances.values()].filter(
 				(record) =>
 					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
 					(!filters?.locationId || record.locationId === filters.locationId) &&
 					(!filters?.productId || record.productId === filters.productId)
 			),
@@ -188,13 +192,15 @@ class MemoryInventoryRepository implements InventoryRepository {
 	}
 	async listCounts(
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
-		filters?: Parameters<InventoryRepository["listCounts"]>[2]
+		filters?: Parameters<InventoryRepository["listCounts"]>[3]
 	) {
 		return this.page(
 			[...this.counts.values()].filter(
 				(record) =>
 					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
 					(!filters?.locationId || record.locationId === filters.locationId) &&
 					(!filters?.state || record.state === filters.state)
 			),
@@ -204,13 +210,15 @@ class MemoryInventoryRepository implements InventoryRepository {
 	}
 	async listTransfers(
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
-		filters?: Parameters<InventoryRepository["listTransfers"]>[2]
+		filters?: Parameters<InventoryRepository["listTransfers"]>[3]
 	) {
 		return this.page(
 			[...this.transfers.values()].filter(
 				(record) =>
 					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
 					(!filters?.locationId ||
 						record.sourceLocationId === filters.locationId ||
 						record.destinationLocationId === filters.locationId) &&
@@ -982,6 +990,127 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 		);
 		expect(transferAfter?.state).toBe("Draft");
 		expect(transferAfter?.version).toBe(createdTransfer.version);
+	});
+
+	test("WS3 remediation R2 cycle 2, Finding B (list surface): listAdjustments, listCounts, listTransfers, and listBalances do not leak another organization's rows in the same tenant when the caller omits any locationId filter", async () => {
+		const { service } = harness();
+		let activeOrganizationId = "org_a";
+		const application = createInventoryApplication({
+			activeContexts: {
+				// Mirrors the real composition layer: `organizationId` comes
+				// ONLY from the caller's own active tenancy context, never
+				// from anything the request body supplies.
+				async requireActiveContext() {
+					return { organizationId: activeOrganizationId, tenantId: "tenant_a" };
+				},
+			},
+			// Both ports are no-ops here: this test proves data-layer
+			// (SQL/repository) organization scoping, not permission or
+			// entitlement evaluation, which are covered elsewhere.
+			entitlements: {
+				async requireEntitlement() {
+					// Always authorized; not under test here.
+				},
+			},
+			permissions: {
+				async requirePermission() {
+					// Always authorized; not under test here.
+				},
+			},
+			service,
+		});
+		const seed = async (organizationId: "org_a" | "org_b") => {
+			activeOrganizationId = organizationId;
+			const locationId = organizationId === "org_a" ? "loc_a" : "loc_b";
+			const createdAdjustment = await application.createAdjustment({
+				actorUserId: `${organizationId}_creator`,
+				body: {
+					locationId,
+					productId: "prod_shared",
+					quantity: "5",
+					reason: `${organizationId} list-leak seed`,
+					unit: "each",
+				},
+				contextId: "context",
+				correlationId: `list-leak-${organizationId}`,
+				idempotencyKey: `list-leak-adjustment-${organizationId}`,
+				sessionId: "session",
+			});
+			await application.approveAdjustment({
+				actorUserId: `${organizationId}_approver`,
+				adjustmentId: createdAdjustment.id,
+				contextId: "context",
+				correlationId: `list-leak-${organizationId}`,
+				idempotencyKey: `list-leak-adjustment-${organizationId}-approve`,
+				sessionId: "session",
+				version: createdAdjustment.version,
+			});
+			const count = await application.createCount({
+				actorUserId: `${organizationId}_counter`,
+				body: { blind: true, locationId },
+				contextId: "context",
+				idempotencyKey: `list-leak-count-${organizationId}`,
+				sessionId: "session",
+			});
+			const transfer = await application.createTransfer({
+				actorUserId: `${organizationId}_transfer_maker`,
+				body: {
+					destinationLocationId: `${locationId}_dest`,
+					lines: [{ productId: "prod_shared", quantity: "1", unit: "each" }],
+					sourceLocationId: locationId,
+				},
+				contextId: "context",
+				correlationId: `list-leak-transfer-${organizationId}`,
+				idempotencyKey: `list-leak-transfer-${organizationId}`,
+				sessionId: "session",
+			});
+			return { adjustment: createdAdjustment, count, transfer };
+		};
+		const seededA = await seed("org_a");
+		const seededB = await seed("org_b");
+
+		// The exploit shape the finding describes: the caller supplies NO
+		// locationId filter at all (a normal, unprivileged request) while
+		// authenticated into org_b's own active context.
+		activeOrganizationId = "org_b";
+		const listInput = {
+			authUserId: "org_b_reader",
+			contextId: "context",
+			page: { limit: 50 },
+			sessionId: "session",
+		};
+		const adjustments = await application.listAdjustments(listInput);
+		expect(adjustments.items.map((item) => item.id)).toContain(
+			seededB.adjustment.id
+		);
+		expect(adjustments.items.map((item) => item.id)).not.toContain(
+			seededA.adjustment.id
+		);
+
+		const counts = await application.listCounts(listInput);
+		expect(counts.items.map((item) => item.id)).toContain(seededB.count.id);
+		expect(counts.items.map((item) => item.id)).not.toContain(seededA.count.id);
+
+		const transfers = await application.listTransfers(listInput);
+		expect(transfers.items.map((item) => item.id)).toContain(
+			seededB.transfer.id
+		);
+		expect(transfers.items.map((item) => item.id)).not.toContain(
+			seededA.transfer.id
+		);
+
+		const balances = await application.listBalances({
+			authUserId: "org_b_reader",
+			contextId: "context",
+			page: { limit: 50 },
+			sessionId: "session",
+		});
+		expect(balances.items.some((item) => item.locationId === "loc_b")).toBe(
+			true
+		);
+		expect(balances.items.some((item) => item.locationId === "loc_a")).toBe(
+			false
+		);
 	});
 
 	test("evaluates active context, permission, and entitlement separately", async () => {

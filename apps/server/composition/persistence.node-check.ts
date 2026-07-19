@@ -328,6 +328,7 @@ try {
 	assert.equal(
 		(
 			await inventory.listBalances({
+				organizationId: "organization_catalog_node",
 				page: { limit: 50 },
 				tenantId: "tenant_catalog_node",
 			})

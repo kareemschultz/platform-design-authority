@@ -270,6 +270,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			}),
 		]);
 		let balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 100 },
 			tenantId: base.tenantId,
 		});
@@ -283,6 +284,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		);
 		expect(await inventory.rebuildBalances(base.tenantId)).toBeGreaterThan(0);
 		balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 100 },
 			tenantId: base.tenantId,
 		});
@@ -325,6 +327,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		}
 
 		const firstPage = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId,
 		});
@@ -332,6 +335,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstPage.items[0]?.unit).toBe(delimiterUnit);
 		expect(firstPage.nextCursor).toContain('"version":1');
 		const secondPage = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { cursor: firstPage.nextCursor ?? undefined, limit: 1 },
 			tenantId,
 		});
@@ -398,6 +402,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		}
 		const firstAdjustments = await inventory.listAdjustments({
 			filters: { locationId: "target_location", state: "PendingApproval" },
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId,
 		});
@@ -406,6 +411,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstAdjustments.nextCursor).not.toBeNull();
 		const secondAdjustments = await inventory.listAdjustments({
 			filters: { locationId: "target_location", state: "PendingApproval" },
+			organizationId: base.organizationId,
 			page: { cursor: firstAdjustments.nextCursor ?? undefined, limit: 1 },
 			tenantId,
 		});
@@ -431,6 +437,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		}
 		const firstCounts = await inventory.listCounts({
 			filters: { locationId: "target_location", state: "Draft" },
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId,
 		});
@@ -439,6 +446,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstCounts.nextCursor).not.toBeNull();
 		const secondCounts = await inventory.listCounts({
 			filters: { locationId: "target_location", state: "Draft" },
+			organizationId: base.organizationId,
 			page: { cursor: firstCounts.nextCursor ?? undefined, limit: 1 },
 			tenantId,
 		});
@@ -472,6 +480,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		}
 		const firstTransfers = await inventory.listTransfers({
 			filters: { locationId: "target_location", state: "Draft" },
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId,
 		});
@@ -479,6 +488,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstTransfers.nextCursor).not.toBeNull();
 		const secondTransfers = await inventory.listTransfers({
 			filters: { locationId: "target_location", state: "Draft" },
+			organizationId: base.organizationId,
 			page: { cursor: firstTransfers.nextCursor ?? undefined, limit: 1 },
 			tenantId,
 		});
@@ -778,6 +788,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			remainingQuantity: "0",
 		});
 		const balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 50 },
 			tenantId: base.tenantId,
 		});
@@ -792,6 +803,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		).toBe("5.000000");
 		const firstPage = await inventory.listBalances({
 			filters: { productId: "transfer_product" },
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId: base.tenantId,
 		});
@@ -799,6 +811,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstPage.nextCursor).not.toBeNull();
 		const secondPage = await inventory.listBalances({
 			filters: { productId: "transfer_product" },
+			organizationId: base.organizationId,
 			page: { cursor: firstPage.nextCursor ?? undefined, limit: 1 },
 			tenantId: base.tenantId,
 		});
@@ -831,6 +844,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			unit: "each",
 		});
 		let balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 50 },
 			tenantId: base.tenantId,
 		});
@@ -865,6 +879,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			reservation,
 		});
 		balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 50 },
 			tenantId: base.tenantId,
 		});
@@ -891,6 +906,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(
 			(
 				await inventory.listBalances({
+					organizationId: base.organizationId,
 					page: { limit: 50 },
 					tenantId: base.tenantId,
 				})
@@ -954,6 +970,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(
 			(
 				await inventory.listBalances({
+					organizationId: base.organizationId,
 					page: { limit: 50 },
 					tenantId: base.tenantId,
 				})
@@ -1043,6 +1060,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		const inventory = service();
 		const [own] = (
 			await inventory.listAdjustments({
+				organizationId: base.organizationId,
 				page: { limit: 50 },
 				tenantId: base.tenantId,
 			})

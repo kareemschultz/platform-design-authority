@@ -651,6 +651,7 @@ export function createInventoryRepository(
 
 		async listAdjustments(
 			tenantId: string,
+			organizationId: string,
 			page: InventoryPageRequest,
 			filters?: InventoryAdjustmentFilters
 		): Promise<InventoryPage<InventoryAdjustmentRecord>> {
@@ -660,6 +661,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryAdjustments.tenantId, tenantId),
+						eq(inventoryAdjustments.organizationId, organizationId),
 						filters?.locationId
 							? eq(inventoryAdjustments.locationId, filters.locationId)
 							: undefined,
@@ -679,6 +681,7 @@ export function createInventoryRepository(
 		},
 		async listBalances(
 			tenantId: string,
+			organizationId: string,
 			page: InventoryPageRequest,
 			filters?: InventoryBalanceFilters
 		): Promise<InventoryPage<InventoryBalanceRecord>> {
@@ -708,6 +711,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryStockBalances.tenantId, tenantId),
+						eq(inventoryStockBalances.organizationId, organizationId),
 						filters?.locationId
 							? eq(inventoryStockBalances.locationId, filters.locationId)
 							: undefined,
@@ -739,6 +743,7 @@ export function createInventoryRepository(
 		},
 		async listCounts(
 			tenantId: string,
+			organizationId: string,
 			page: InventoryPageRequest,
 			filters?: InventoryCountFilters
 		): Promise<InventoryPage<InventoryCountRecord>> {
@@ -748,6 +753,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryCounts.tenantId, tenantId),
+						eq(inventoryCounts.organizationId, organizationId),
 						filters?.locationId
 							? eq(inventoryCounts.locationId, filters.locationId)
 							: undefined,
@@ -768,6 +774,7 @@ export function createInventoryRepository(
 		},
 		async listTransfers(
 			tenantId: string,
+			organizationId: string,
 			page: InventoryPageRequest,
 			filters?: InventoryTransferFilters
 		): Promise<InventoryPage<InventoryTransferRecord>> {
@@ -777,6 +784,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryTransfers.tenantId, tenantId),
+						eq(inventoryTransfers.organizationId, organizationId),
 						filters?.locationId
 							? or(
 									eq(inventoryTransfers.sourceLocationId, filters.locationId),

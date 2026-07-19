@@ -361,23 +361,33 @@ export interface InventoryRepository {
 		organizationId: string,
 		id: string
 	) => Promise<InventoryTransferRecord | null>;
+	/** WS3 remediation R2 cycle 2, Finding B (list surface): `organizationId`
+	 * is REQUIRED (not optional) and filtered in the SQL `WHERE` clause
+	 * itself, mirroring the `get*` fix immediately above. Without it, any
+	 * actor holding the read permission in their OWN organization could omit
+	 * `filters.locationId` (or supply another organization's `locationId`)
+	 * and receive every organization's rows in the same tenant. */
 	listAdjustments: (
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: InventoryAdjustmentFilters
 	) => Promise<InventoryPage<InventoryAdjustmentRecord>>;
 	listBalances: (
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: InventoryBalanceFilters
 	) => Promise<InventoryPage<InventoryBalanceRecord>>;
 	listCounts: (
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: InventoryCountFilters
 	) => Promise<InventoryPage<InventoryCountRecord>>;
 	listTransfers: (
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: InventoryTransferFilters
 	) => Promise<InventoryPage<InventoryTransferRecord>>;
@@ -1650,11 +1660,17 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		},
 		async listAdjustments(input: {
 			filters?: InventoryAdjustmentFilters;
+			organizationId: string;
 			page: InventoryPageRequest;
 			tenantId: string;
 		}): Promise<InventoryPage<InventoryAdjustment>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listAdjustments(input.tenantId, input.page, input.filters)
+				repository.listAdjustments(
+					input.tenantId,
+					input.organizationId,
+					input.page,
+					input.filters
+				)
 			);
 			return {
 				items: result.items.map(adjustmentView),
@@ -1663,12 +1679,14 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		},
 		listBalances(input: {
 			filters?: InventoryBalanceFilters;
+			organizationId: string;
 			tenantId: string;
 			page: InventoryPageRequest;
 		}): Promise<InventoryPage<StockBalance>> {
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const page = await repository.listBalances(
 					input.tenantId,
+					input.organizationId,
 					input.page,
 					input.filters
 				);
@@ -1705,11 +1723,17 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		},
 		async listCounts(input: {
 			filters?: InventoryCountFilters;
+			organizationId: string;
 			page: InventoryPageRequest;
 			tenantId: string;
 		}): Promise<InventoryPage<StockCount>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listCounts(input.tenantId, input.page, input.filters)
+				repository.listCounts(
+					input.tenantId,
+					input.organizationId,
+					input.page,
+					input.filters
+				)
 			);
 			return {
 				items: result.items.map(countView),
@@ -1718,11 +1742,17 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		},
 		async listTransfers(input: {
 			filters?: InventoryTransferFilters;
+			organizationId: string;
 			page: InventoryPageRequest;
 			tenantId: string;
 		}): Promise<InventoryPage<StockTransfer>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listTransfers(input.tenantId, input.page, input.filters)
+				repository.listTransfers(
+					input.tenantId,
+					input.organizationId,
+					input.page,
+					input.filters
+				)
 			);
 			return {
 				items: result.items.map(transferView),
@@ -2843,6 +2873,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.listAdjustments({
 				filters: input.filters,
+				organizationId: context.organizationId,
 				page: input.page,
 				tenantId: context.tenantId,
 			});
@@ -2864,6 +2895,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.listBalances({
 				filters: input.filters,
+				organizationId: context.organizationId,
 				page: input.page,
 				tenantId: context.tenantId,
 			});
@@ -2885,6 +2917,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.listCounts({
 				filters: input.filters,
+				organizationId: context.organizationId,
 				page: input.page,
 				tenantId: context.tenantId,
 			});
@@ -2906,6 +2939,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.listTransfers({
 				filters: input.filters,
+				organizationId: context.organizationId,
 				page: input.page,
 				tenantId: context.tenantId,
 			});

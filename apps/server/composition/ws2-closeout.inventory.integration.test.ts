@@ -244,10 +244,18 @@ describe.serial("WS2 Inventory closeout evidence", () => {
 		).toMatchObject({ outcome: "duplicate" });
 
 		const [balanceA] = (
-			await inventory.listBalances({ page: { limit: 10 }, tenantId: tenantA })
+			await inventory.listBalances({
+				organizationId: shared.organizationId,
+				page: { limit: 10 },
+				tenantId: tenantA,
+			})
 		).items;
 		const [balanceB] = (
-			await inventory.listBalances({ page: { limit: 10 }, tenantId: tenantB })
+			await inventory.listBalances({
+				organizationId: shared.organizationId,
+				page: { limit: 10 },
+				tenantId: tenantB,
+			})
 		).items;
 		expect(balanceA).toMatchObject({
 			available: "9",
@@ -260,12 +268,18 @@ describe.serial("WS2 Inventory closeout evidence", () => {
 			reserved: "0",
 		});
 		expect(
-			(await inventory.listCounts({ page: { limit: 10 }, tenantId: tenantB }))
-				.items
+			(
+				await inventory.listCounts({
+					organizationId: shared.organizationId,
+					page: { limit: 10 },
+					tenantId: tenantB,
+				})
+			).items
 		).toHaveLength(0);
 		expect(
 			(
 				await inventory.listTransfers({
+					organizationId: shared.organizationId,
 					page: { limit: 10 },
 					tenantId: tenantB,
 				})
@@ -352,6 +366,7 @@ describe.serial("WS2 Inventory closeout evidence", () => {
 			const committedAt = performance.now();
 			const page = await inventory.listBalances({
 				filters: { locationId: `metrics_location_${index}` },
+				organizationId: "organization_ws2_metrics",
 				page: { limit: 1 },
 				tenantId,
 			});

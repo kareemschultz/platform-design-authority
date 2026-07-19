@@ -313,6 +313,15 @@ export interface PosFinanceHandoffRefundFact {
 	movementId: string;
 	postedAt: Date;
 	refundId: string;
+	/** WS3 remediation R1 cycle 2: distinguishes a real `approveRefund`
+	 * posting (`refundId` names an actual `pos_refund` row) from a
+	 * `voidReceipt` cash reversal (`refundId` names the void's `pos_return`
+	 * row instead — no `pos_refund` row exists for a Void). Both post the
+	 * same economic cash effect and belong in this Finance-handoff
+	 * category, but a consumer building posting-line provenance
+	 * (`sourceType`/`sourceId`) must not label a Void as a Refund reference
+	 * that does not exist. */
+	sourceKind: "Refund" | "Void";
 }
 
 export interface PosFinanceHandoffVarianceFact {

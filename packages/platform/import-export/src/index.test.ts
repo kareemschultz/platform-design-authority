@@ -944,6 +944,7 @@ describe("WS3 PR4: accountant handoff posting-batch construction", () => {
 					movementId: "movement_1",
 					postedAt: new Date("2026-07-17T13:00:00.000Z"),
 					refundId: "refund_1",
+					sourceKind: "Refund",
 				},
 			],
 		};
@@ -955,11 +956,15 @@ describe("WS3 PR4: accountant handoff posting-batch construction", () => {
 			accountRole: "RefundsAndAllowances",
 			amountMinor: 2000,
 			direction: "Debit",
+			sourceId: "refund_1",
+			sourceType: "Refund",
 		});
 		expect(byLineId.get("movement_1:refund-cash-credit")).toMatchObject({
 			accountRole: "CashOnHand",
 			amountMinor: 2000,
 			direction: "Credit",
+			sourceId: "refund_1",
+			sourceType: "Refund",
 		});
 		expect(byLineId.get("session_over:variance-cash-debit")).toMatchObject({
 			amountMinor: 500,
@@ -994,6 +999,44 @@ describe("WS3 PR4: accountant handoff posting-batch construction", () => {
 			depositMinor: 20_000,
 			refundsMinor: 2000,
 		});
+	});
+
+	test("WS3 remediation R1 cycle 2: a voidReceipt cash reversal (sourceKind Void) posts the same balanced line pair as a real refund, but labeled sourceType Void, not Refund, and sourceId is NOT presented as a refund reference — PROVEN failing pre-fix: before this cycle, AccountantHandoffRefundFact had no sourceKind field at all and buildAccountantHandoffPayload hardcoded sourceType: 'Refund' unconditionally, so a void's cash reversal (once Finding A cycle 2 started posting it under reasonCode 'Refund') would have been mislabeled as pointing to a pos_refund row that never exists for a Void", () => {
+		const source: AccountantHandoffSourceData = {
+			...EMPTY_SOURCE,
+			refunds: [
+				{
+					amountMinor: 4560,
+					currency: "GYD",
+					movementId: "movement_void_1",
+					postedAt: new Date("2026-07-17T14:00:00.000Z"),
+					refundId: "return_void_1",
+					sourceKind: "Void",
+				},
+			],
+		};
+		const payload = buildAccountantHandoffPayload(buildInput(source));
+		const byLineId = new Map(
+			payload.postingBatch.lines.map((line) => [line.lineId, line])
+		);
+		expect(byLineId.get("movement_void_1:refund-debit")).toMatchObject({
+			accountRole: "RefundsAndAllowances",
+			amountMinor: 4560,
+			direction: "Debit",
+			sourceId: "return_void_1",
+			sourceType: "Void",
+		});
+		expect(byLineId.get("movement_void_1:refund-cash-credit")).toMatchObject({
+			accountRole: "CashOnHand",
+			amountMinor: 4560,
+			direction: "Credit",
+			sourceId: "return_void_1",
+			sourceType: "Void",
+		});
+		// The cash effect still lands in the same control-total bucket as an
+		// ordinary refund (economically identical: cash out, contra-revenue
+		// up) — only the provenance label differs, never the accounting.
+		expect(payload.postingBatch.controlTotals.refundsMinor).toBe(4560);
 	});
 
 	test("records a Blocking exception for an unresolved cash variance and a Warning for an in-transit deposit", () => {
@@ -1110,6 +1153,7 @@ describe("WS3 PR4: accountant handoff export determinism and idempotency", () =>
 					movementId: "movement_x",
 					postedAt: new Date("2026-07-17T18:00:00.000Z"),
 					refundId: "refund_x",
+					sourceKind: "Refund",
 				},
 			],
 			sales: [

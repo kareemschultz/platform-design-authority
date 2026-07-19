@@ -504,6 +504,26 @@ describe.serial(
 				reason_code: "Refund",
 				reference_id: refundCreated.id,
 			});
+
+			// WS3 remediation R1 cycle 2 counter-case: a REAL refund (a genuine
+			// `pos_refund` row exists) must classify `sourceKind: "Refund"`
+			// against the same live LEFT JOIN the void counter-case above
+			// proves classifies `"Void"` — the join distinguishes both
+			// directions correctly, not just defaulting everything one way.
+			const financeSourceForRefund = await pos.queryFinanceHandoffSourceData({
+				organizationId: returnsBase.organizationId,
+				periodEndUtc: new Date(Date.now() + 24 * 60 * 60 * 1000),
+				periodStartUtc: new Date(Date.now() - 24 * 60 * 60 * 1000),
+				tenantId,
+			});
+			const refundFact = financeSourceForRefund.refunds.find(
+				(refund) => refund.refundId === refundCreated.id
+			);
+			expect(refundFact).toMatchObject({
+				refundId: refundCreated.id,
+				sourceKind: "Refund",
+			});
+
 			const refundOutboxRows = await testPool.query<{ name: string }>(
 				"SELECT name FROM platform_event_outbox WHERE tenant_id = $1 AND aggregate_id IN ($2, $3) ORDER BY name",
 				[tenantId, refundCreated.id, refundApproved.cashMovementId]
@@ -1091,6 +1111,33 @@ describe.serial(
 				direction: "PaidOut",
 				reason_code: "Refund",
 				reference_id: voided.id,
+			});
+
+			// WS3 remediation R1 cycle 2 (advisor-flagged follow-up): the void's
+			// reasonCode-"Refund" cash movement must NOT be misreported to
+			// Finance as pointing to a real `pos_refund` row — none exists for
+			// a Void. `queryFinanceHandoffSourceData`'s LEFT JOIN against
+			// `pos_refund` (packages/persistence/pos-postgres/src/index.ts)
+			// must classify it `sourceKind: "Void"` with `refundId` naming the
+			// Return, against the REAL Postgres join (not just the in-memory
+			// unit-test mock or the pure payload-builder unit test). PROVEN
+			// failing pre-fix: before this cycle, `queryFinanceHandoffSourceData`
+			// selected `posCashMovements.*` directly with no join at all and no
+			// `sourceKind` field existed on the returned fact — this exact
+			// assertion could not even compile against the prior type.
+			const financeSource = await pos.queryFinanceHandoffSourceData({
+				organizationId: returnsBase.organizationId,
+				periodEndUtc: new Date(Date.now() + 24 * 60 * 60 * 1000),
+				periodStartUtc: new Date(Date.now() - 24 * 60 * 60 * 1000),
+				tenantId,
+			});
+			const voidRefundFact = financeSource.refunds.find(
+				(refund) => refund.refundId === voided.id
+			);
+			expect(voidRefundFact).toMatchObject({
+				amountMinor: 456_000,
+				refundId: voided.id,
+				sourceKind: "Void",
 			});
 
 			// The actual boundary this cycle closes: closing at exactly the

@@ -406,6 +406,17 @@ function createInMemoryRepository() {
 					movementId: movement.id,
 					postedAt: movement.createdAt,
 					refundId: movement.referenceId ?? movement.id,
+					// WS3 remediation R1 cycle 2: mirrors the live-Postgres
+					// repository's LEFT JOIN — a reasonCode-"Refund" movement
+					// whose referenceId does NOT resolve to an actual
+					// RefundRecord was posted by voidReceipt (referenceId names
+					// the void's Return instead).
+					sourceKind:
+						movement.referenceId !== null &&
+						movement.referenceId !== undefined &&
+						refunds.has(movement.referenceId)
+							? "Refund"
+							: "Void",
 				})),
 				returnCount: scopedReturns.length,
 				sales: scopedSales.map((sale) => ({

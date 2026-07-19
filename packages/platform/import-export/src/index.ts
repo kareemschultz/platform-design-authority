@@ -1402,6 +1402,13 @@ export interface AccountantHandoffRefundFact {
 	movementId: string;
 	postedAt: Date;
 	refundId: string;
+	/** WS3 remediation R1 cycle 2: `"Void"` when this cash-out was posted by
+	 * `voidReceipt` (`refundId` is actually the void's Return id — no
+	 * `pos_refund` row exists for a Void) rather than a real
+	 * `approveRefund` posting. Drives the posting line's `sourceType` below
+	 * so the export never labels a Void as a Refund reference that does
+	 * not exist. */
+	sourceKind: "Refund" | "Void";
 }
 export interface AccountantHandoffVarianceFact {
 	currency: string;
@@ -1647,13 +1654,22 @@ export function buildAccountantHandoffPayload(input: {
 	}
 
 	for (const refund of input.source.refunds) {
+		// WS3 remediation R1 cycle 2: `refund.refundId` names a real
+		// `pos_refund` row only when `sourceKind === "Refund"`; for a
+		// `voidReceipt` cash reversal (`sourceKind === "Void"`) it names the
+		// void's `pos_return` row instead — labeling that posting line
+		// `sourceType: "Refund"` would point an auditor/reconciler at an
+		// entity that does not exist. The accounting treatment (contra-
+		// revenue debit / cash credit) is identical either way — only the
+		// provenance label differs.
+		const sourceType = refund.sourceKind;
 		lines.push({
 			accountRole: "RefundsAndAllowances",
 			amountMinor: refund.amountMinor,
 			direction: "Debit",
 			lineId: `${refund.movementId}:refund-debit`,
 			sourceId: refund.refundId,
-			sourceType: "Refund",
+			sourceType,
 		});
 		lines.push({
 			accountRole: "CashOnHand",
@@ -1661,7 +1677,7 @@ export function buildAccountantHandoffPayload(input: {
 			direction: "Credit",
 			lineId: `${refund.movementId}:refund-cash-credit`,
 			sourceId: refund.refundId,
-			sourceType: "Refund",
+			sourceType,
 		});
 	}
 

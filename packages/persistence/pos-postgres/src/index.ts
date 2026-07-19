@@ -923,9 +923,38 @@ export function createPosRepository(
 				)
 				.orderBy(posSales.id);
 
+			// WS3 remediation R1 cycle 2: `reasonCode: "Refund"` now has TWO
+			// distinct producers — `approveRefund` (referenceId names a real
+			// `pos_refund` row) and `voidReceipt`'s cash reversal (referenceId
+			// names the void's `pos_return` row instead; no `pos_refund` row
+			// exists for a Void, by design — see `remediation-dispositions.md`
+			// "## A" cycle-2 correction). Both belong in this Finance-handoff
+			// category (the cash effect is economically identical: cash out,
+			// contra-revenue up), but `buildAccountantHandoffPayload`
+			// (`@meridian/platform-import-export`) must not mislabel a Void's
+			// posting-line `sourceType`/`sourceId` as a `pos_refund` reference
+			// that does not exist. The LEFT JOIN distinguishes the two: a
+			// matched `posRefunds` row means a real Refund; no match means
+			// this reasonCode-"Refund" movement was posted by `voidReceipt`
+			// (the only other producer, by construction — no third writer of
+			// this reasonCode exists in `packages/domains/pos`).
 			const refundRows = await database
-				.select()
+				.select({
+					amountMinor: posCashMovements.amountMinor,
+					createdAt: posCashMovements.createdAt,
+					currency: posCashMovements.currency,
+					id: posCashMovements.id,
+					isVoidReversal: sql<boolean>`${posRefunds.id} is null`,
+					referenceId: posCashMovements.referenceId,
+				})
 				.from(posCashMovements)
+				.leftJoin(
+					posRefunds,
+					and(
+						eq(posRefunds.tenantId, posCashMovements.tenantId),
+						eq(posRefunds.id, posCashMovements.referenceId)
+					)
+				)
 				.where(
 					and(
 						eq(posCashMovements.tenantId, tenantId),
@@ -1089,6 +1118,7 @@ export function createPosRepository(
 					movementId: row.id,
 					postedAt: row.createdAt,
 					refundId: row.referenceId ?? row.id,
+					sourceKind: row.isVoidReversal ? "Void" : "Refund",
 				})),
 				returnCount: Number(returnCountRows[0]?.count ?? "0"),
 				sales: saleRows.map((row) => ({

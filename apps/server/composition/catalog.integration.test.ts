@@ -49,9 +49,9 @@ const ids: CatalogIdFactory = {
 	},
 };
 
-function service(failEvents = false) {
+function service(failEvents = false, clock: () => Date = () => new Date()) {
 	return createCatalogService({
-		clock: () => new Date(),
+		clock,
 		ids,
 		unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
 			events: failEvents
@@ -465,6 +465,90 @@ describe.serial("Catalog PostgreSQL controlled prototype", () => {
 		expect(draftResults.items.every((item) => item.state === "Draft")).toBe(
 			true
 		);
+	});
+
+	test("walks newest-first cursor pages with no duplicate or skipped Products, exercises the same-instant id tiebreak, and rejects a malformed cursor", async () => {
+		// A deterministic, strictly increasing clock (rather than the shared
+		// `service()` helper's wall clock) proves two things a wall-clock test
+		// cannot: (1) newest-first order is driven by `createdAt`, not creation
+		// sequence coincidentally matching `id` order — the regression this
+		// guards is apps/web/e2e/authenticated-operations.spec.ts's "create a
+		// Product, return to the list, find it" scenario silently regressing to
+		// the old id-only sort; (2) the id tiebreak fires and is deterministic
+		// for two Products created in the exact same instant (the last two
+		// created below share one timestamp), which a wall clock would only
+		// exercise by chance.
+		let tick = 0;
+		const clock = () => {
+			const at = new Date(2025, 0, 1, 0, 0, 0, tick);
+			tick += 1;
+			return at;
+		};
+		const catalog = service(false, clock);
+		const tenantId = "tenant_catalog_cursor_walk";
+		const createdIds: string[] = [];
+		for (let index = 0; index < 5; index += 1) {
+			const sameInstantAsPrevious = index === 4;
+			if (sameInstantAsPrevious) {
+				tick -= 1;
+			}
+			// biome-ignore lint/performance/noAwaitInLoops: each create must land before the next so the injected clock produces a deterministic, strictly ordered (bar the final intentional tie) createdAt sequence.
+			const created = await catalog.createProduct({
+				...productInput,
+				body: {
+					name: `Cursor Walk Product ${index}`,
+					variants: [
+						{
+							identifiers: [
+								{
+									scheme: "Tenant",
+									type: "SKU",
+									value: `CURSOR-WALK-${index}`,
+								},
+							],
+							name: "Default",
+						},
+					],
+				},
+				idempotencyKey: `idempotency_catalog_cursor_walk_${index}`,
+				tenantId,
+			});
+			createdIds.push(created.id);
+		}
+		// The last two Products share a createdAt instant; the id tiebreak
+		// (descending) resolves their relative order deterministically.
+		const [tiedFirst, tiedSecond] = [...createdIds.slice(3)].sort().reverse();
+		if (!(tiedFirst && tiedSecond)) {
+			throw new Error("expected two tied Products");
+		}
+
+		const pages: string[][] = [];
+		let cursor: string | undefined;
+		do {
+			// biome-ignore lint/performance/noAwaitInLoops: each page's cursor comes from the previous page's response.
+			const page = await catalog.listProducts(tenantId, { cursor, limit: 2 });
+			pages.push(page.items.map((item) => item.id));
+			cursor = page.nextCursor ?? undefined;
+		} while (cursor);
+
+		const walked = pages.flat();
+		expect(pages.map((page) => page.length)).toEqual([2, 2, 1]);
+		expect(walked).toHaveLength(createdIds.length);
+		expect(new Set(walked).size).toBe(createdIds.length);
+		expect(walked).toEqual([
+			tiedFirst,
+			tiedSecond,
+			...[...createdIds.slice(0, 3)].reverse(),
+		]);
+
+		expect(
+			await captureError(
+				catalog.listProducts(tenantId, {
+					cursor: "not-a-real-cursor",
+					limit: 2,
+				})
+			)
+		).toMatchObject({ message: "Catalog product cursor is invalid" });
 	});
 
 	test("stores and finds numeric tenant SKUs without removing separators", async () => {

@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
@@ -11,7 +12,7 @@ import type {
 	CatalogRepository,
 	CatalogVariantRecord,
 } from "@meridian/domain-catalog";
-import { and, asc, eq, gt, ilike, inArray, or } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, lt, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool, PoolClient } from "pg";
@@ -137,6 +138,84 @@ function productBase(
 		updatedAt: row.updatedAt,
 		version: row.version,
 	};
+}
+
+interface CatalogProductCursor {
+	createdAt: string;
+	id: string;
+	version: 1;
+}
+
+// Products list newest-first. `id` is a random UUID
+// (apps/server/composition/catalog.ts), so an id-only sort/keyset gives no
+// recency guarantee once a tenant holds more rows than one page — a
+// just-created row can land on any page with roughly uniform probability
+// (observed: apps/web/e2e/authenticated-operations.spec.ts's create-then-
+// return-to-list scenario, reproducible once a tenant crosses `limit`
+// products). The (createdAt, id) composite keyset below orders by creation
+// time with `id` only as a tiebreak for rows created in the same instant,
+// mirroring the established stock-balance composite-keyset pattern
+// (packages/persistence/inventory-postgres/src/index.ts `listBalances`).
+function serializeCatalogProductCursor(
+	cursor: Omit<CatalogProductCursor, "version">
+): string {
+	return Buffer.from(
+		JSON.stringify({ version: 1, ...cursor } satisfies CatalogProductCursor),
+		"utf8"
+	).toString("base64url");
+}
+
+function parseCatalogProductCursor(
+	cursor: string
+): CatalogProductCursor | null {
+	try {
+		const value: unknown = JSON.parse(
+			Buffer.from(cursor, "base64url").toString("utf8")
+		);
+		if (
+			typeof value !== "object" ||
+			value === null ||
+			Object.keys(value).length !== 3 ||
+			!("version" in value) ||
+			value.version !== 1 ||
+			!("createdAt" in value) ||
+			typeof value.createdAt !== "string" ||
+			Number.isNaN(Date.parse(value.createdAt)) ||
+			!("id" in value) ||
+			typeof value.id !== "string" ||
+			value.id.length === 0
+		) {
+			return null;
+		}
+		return { createdAt: value.createdAt, id: value.id, version: 1 };
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Decodes `page.cursor` and returns the keyset predicate for rows strictly
+ * after it in the `(createdAt desc, id desc)` walk, or `undefined` for the
+ * first page. Throws for a present-but-unparseable cursor rather than
+ * silently substituting page one, matching the stock-balance cursor
+ * precedent (apps/server/composition/inventory.ts).
+ */
+function resolveProductCursorFilter(page: CatalogPageRequest) {
+	if (!page.cursor) {
+		return;
+	}
+	const cursor = parseCatalogProductCursor(page.cursor);
+	if (!cursor) {
+		throw new Error("Catalog product cursor is invalid");
+	}
+	const cursorCreatedAt = new Date(cursor.createdAt);
+	return or(
+		lt(catalogProducts.createdAt, cursorCreatedAt),
+		and(
+			eq(catalogProducts.createdAt, cursorCreatedAt),
+			lt(catalogProducts.id, cursor.id)
+		)
+	);
 }
 
 export function createCatalogRepository(
@@ -327,6 +406,8 @@ export function createCatalogRepository(
 				return exact;
 			}
 
+			const afterCursor = resolveProductCursorFilter(page);
+
 			const search = page.query?.trim();
 			let identifierProductIds: string[] = [];
 			if (search) {
@@ -349,7 +430,7 @@ export function createCatalogRepository(
 					and(
 						eq(catalogProducts.tenantId, tenantId),
 						page.state ? eq(catalogProducts.state, page.state) : undefined,
-						page.cursor ? gt(catalogProducts.id, page.cursor) : undefined,
+						afterCursor,
 						search
 							? or(
 									ilike(catalogProducts.name, `%${search}%`),
@@ -360,17 +441,23 @@ export function createCatalogRepository(
 							: undefined
 					)
 				)
-				.orderBy(asc(catalogProducts.id))
+				.orderBy(desc(catalogProducts.createdAt), desc(catalogProducts.id))
 				.limit(page.limit + 1);
 			const items: CatalogProductRecord[] = [];
 			for (const row of rows.slice(0, page.limit)) {
 				// biome-ignore lint/performance/noAwaitInLoops: the repository may be bound to one transaction client, which cannot safely execute concurrent queries.
 				items.push(await loadProduct(row));
 			}
+			const boundary = rows.at(page.limit - 1);
 			return {
 				items,
 				nextCursor:
-					rows.length > page.limit ? (rows[page.limit - 1]?.id ?? null) : null,
+					rows.length > page.limit && boundary
+						? serializeCatalogProductCursor({
+								createdAt: boundary.createdAt.toISOString(),
+								id: boundary.id,
+							})
+						: null,
 			};
 		},
 

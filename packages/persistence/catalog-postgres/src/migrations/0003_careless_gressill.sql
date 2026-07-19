@@ -1,0 +1,1 @@
+CREATE INDEX "catalog_product_tenant_created_id_idx" ON "catalog_product" USING btree ("tenant_id","created_at","id");

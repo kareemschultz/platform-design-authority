@@ -747,11 +747,17 @@ export function createPosRepository(
 				.limit(1);
 			return rows[0] ? mapReceipt(rows[0]) : null;
 		},
-		async getDeposit(tenantId, id) {
+		async getDeposit(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(posDeposits)
-				.where(and(eq(posDeposits.tenantId, tenantId), eq(posDeposits.id, id)))
+				.where(
+					and(
+						eq(posDeposits.tenantId, tenantId),
+						eq(posDeposits.organizationId, organizationId),
+						eq(posDeposits.id, id)
+					)
+				)
 				.limit(1)
 				.for("update");
 			const [row] = rows;
@@ -761,56 +767,79 @@ export function createPosRepository(
 			const sourceShiftIds = await loadDepositSourceShiftIds(tenantId, id);
 			return mapDeposit(row, sourceShiftIds);
 		},
-		async getOpenSession(tenantId, registerId) {
+		async getOpenSession(tenantId, organizationId, registerId, locationId) {
 			const rows = await database
 				.select()
 				.from(posRegisterSessions)
 				.where(
 					and(
 						eq(posRegisterSessions.tenantId, tenantId),
+						eq(posRegisterSessions.organizationId, organizationId),
 						eq(posRegisterSessions.registerId, registerId),
-						eq(posRegisterSessions.state, "Open")
+						eq(posRegisterSessions.state, "Open"),
+						locationId
+							? eq(posRegisterSessions.locationId, locationId)
+							: undefined
 					)
 				)
 				.limit(1)
 				.for("update");
 			return rows[0] ? mapSession(rows[0]) : null;
 		},
-		async getPriceOverride(tenantId, id) {
+		async getPriceOverride(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(posPriceOverrides)
 				.where(
 					and(
 						eq(posPriceOverrides.tenantId, tenantId),
+						eq(posPriceOverrides.organizationId, organizationId),
 						eq(posPriceOverrides.id, id)
 					)
 				)
 				.limit(1);
 			return rows[0] ? mapPriceOverride(rows[0]) : null;
 		},
-		async getReceipt(tenantId, id) {
+		async getReceipt(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(posReceipts)
-				.where(and(eq(posReceipts.tenantId, tenantId), eq(posReceipts.id, id)))
+				.where(
+					and(
+						eq(posReceipts.tenantId, tenantId),
+						eq(posReceipts.organizationId, organizationId),
+						eq(posReceipts.id, id)
+					)
+				)
 				.limit(1);
 			return rows[0] ? mapSaleReceipt(rows[0]) : null;
 		},
-		async getRefund(tenantId, id) {
+		async getRefund(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(posRefunds)
-				.where(and(eq(posRefunds.tenantId, tenantId), eq(posRefunds.id, id)))
+				.where(
+					and(
+						eq(posRefunds.tenantId, tenantId),
+						eq(posRefunds.organizationId, organizationId),
+						eq(posRefunds.id, id)
+					)
+				)
 				.limit(1)
 				.for("update");
 			return rows[0] ? mapRefund(rows[0]) : null;
 		},
-		async getReturn(tenantId, id) {
+		async getReturn(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(posReturns)
-				.where(and(eq(posReturns.tenantId, tenantId), eq(posReturns.id, id)))
+				.where(
+					and(
+						eq(posReturns.tenantId, tenantId),
+						eq(posReturns.organizationId, organizationId),
+						eq(posReturns.id, id)
+					)
+				)
 				.limit(1)
 				.for("update");
 			const [row] = rows;
@@ -820,11 +849,18 @@ export function createPosRepository(
 			const lines = await loadReturnLines(tenantId, id);
 			return mapReturnHeader(row, lines);
 		},
-		async getSale(tenantId, saleId) {
+		async getSale(tenantId, organizationId, saleId, locationId) {
 			const rows = await database
 				.select()
 				.from(posSales)
-				.where(and(eq(posSales.tenantId, tenantId), eq(posSales.id, saleId)))
+				.where(
+					and(
+						eq(posSales.tenantId, tenantId),
+						eq(posSales.organizationId, organizationId),
+						eq(posSales.id, saleId),
+						locationId ? eq(posSales.locationId, locationId) : undefined
+					)
+				)
 				.limit(1)
 				.for("update");
 			const [row] = rows;
@@ -834,21 +870,30 @@ export function createPosRepository(
 			const lines = await loadSaleLines(tenantId, saleId);
 			return mapSaleHeader(row, lines);
 		},
-		async getSession(tenantId, sessionId) {
+		async getSession(tenantId, organizationId, sessionId, locationId) {
 			const rows = await database
 				.select()
 				.from(posRegisterSessions)
 				.where(
 					and(
 						eq(posRegisterSessions.tenantId, tenantId),
-						eq(posRegisterSessions.id, sessionId)
+						eq(posRegisterSessions.organizationId, organizationId),
+						eq(posRegisterSessions.id, sessionId),
+						locationId
+							? eq(posRegisterSessions.locationId, locationId)
+							: undefined
 					)
 				)
 				.limit(1)
 				.for("update");
 			return rows[0] ? mapSession(rows[0]) : null;
 		},
-		async lockSessionsForDeposit(tenantId, sessionIds) {
+		async lockSessionsForDeposit(
+			tenantId,
+			organizationId,
+			sessionIds,
+			locationId
+		) {
 			if (sessionIds.length === 0) {
 				return [];
 			}
@@ -858,7 +903,11 @@ export function createPosRepository(
 				.where(
 					and(
 						eq(posRegisterSessions.tenantId, tenantId),
-						inArray(posRegisterSessions.id, sessionIds)
+						eq(posRegisterSessions.organizationId, organizationId),
+						inArray(posRegisterSessions.id, sessionIds),
+						locationId
+							? eq(posRegisterSessions.locationId, locationId)
+							: undefined
 					)
 				)
 				.orderBy(posRegisterSessions.id)

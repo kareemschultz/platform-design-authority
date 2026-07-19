@@ -153,6 +153,7 @@ describe.serial("WS2 Inventory closeout evidence", () => {
 				adjustmentId: adjustment.id,
 				correlationId: `correlation_${tenantId}`,
 				idempotencyKey: `seed_approve_${tenantId}`,
+				organizationId: shared.organizationId,
 				tenantId,
 				version: 1,
 			});
@@ -272,18 +273,30 @@ describe.serial("WS2 Inventory closeout evidence", () => {
 		).toHaveLength(0);
 
 		const foreignCountError = normalizedError(
-			await captureError(inventory.getCount(tenantB, countA.id))
+			await captureError(
+				inventory.getCount(tenantB, shared.organizationId, countA.id)
+			)
 		);
 		const missingCountError = normalizedError(
-			await captureError(inventory.getCount(tenantB, "count_missing"))
+			await captureError(
+				inventory.getCount(tenantB, shared.organizationId, "count_missing")
+			)
 		);
 		expect(foreignCountError).toEqual(missingCountError);
 		expect(foreignCountError).toMatchObject({ code: "not_found" });
 		const foreignTransferError = normalizedError(
-			await captureError(inventory.getTransfer(tenantB, transferA.id))
+			await captureError(
+				inventory.getTransfer(tenantB, shared.organizationId, transferA.id)
+			)
 		);
 		const missingTransferError = normalizedError(
-			await captureError(inventory.getTransfer(tenantB, "transfer_missing"))
+			await captureError(
+				inventory.getTransfer(
+					tenantB,
+					shared.organizationId,
+					"transfer_missing"
+				)
+			)
 		);
 		expect(foreignTransferError).toEqual(missingTransferError);
 		expect(foreignTransferError).toMatchObject({ code: "not_found" });
@@ -331,6 +344,7 @@ describe.serial("WS2 Inventory closeout evidence", () => {
 				adjustmentId: adjustment.id,
 				correlationId: `metrics_correlation_${index}`,
 				idempotencyKey: `metrics_approve_${index}`,
+				organizationId: "organization_ws2_metrics",
 				tenantId,
 				version: 1,
 			});
@@ -389,10 +403,15 @@ describe.serial("WS2 Inventory closeout evidence", () => {
 				},
 				countId: count.id,
 				idempotencyKey: `count_save_${index}`,
+				organizationId: "organization_ws2_count_metrics",
 				tenantId,
 				version: 1,
 			});
-			const loaded = await inventory.getCount(tenantId, count.id);
+			const loaded = await inventory.getCount(
+				tenantId,
+				"organization_ws2_count_metrics",
+				count.id
+			);
 			durations.push(performance.now() - startedAt);
 			expect(loaded.lines).toHaveLength(1);
 		}

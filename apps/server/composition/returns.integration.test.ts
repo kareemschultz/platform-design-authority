@@ -248,6 +248,7 @@ async function seedStock(input: {
 		adjustmentId: adjustment.id,
 		correlationId: `seed_correlation_${key}`,
 		idempotencyKey: `seed_approve_${key}`,
+		organizationId: input.organizationId,
 		tenantId: input.tenantId,
 		version: adjustment.version,
 	});

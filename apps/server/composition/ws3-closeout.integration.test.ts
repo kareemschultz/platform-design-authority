@@ -245,6 +245,7 @@ async function seedStock(input: {
 		adjustmentId: adjustment.id,
 		correlationId: `seed_correlation_${key}`,
 		idempotencyKey: `seed_approve_${key}`,
+		organizationId: base.organizationId,
 		tenantId: input.tenantId,
 		version: adjustment.version,
 	});
@@ -429,6 +430,7 @@ describe.serial(
 				expect(completed.receiptId).not.toBeNull();
 				const receipt = await pos.getReceipt(
 					tenantId,
+					base.organizationId,
 					completed.receiptId as string
 				);
 				receiptNumbers.push(receipt.receiptNumber);

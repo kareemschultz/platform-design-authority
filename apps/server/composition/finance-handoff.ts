@@ -10,6 +10,7 @@ import {
 import { auditApplication } from "./audit";
 import { permissionAuthorizer } from "./authorization";
 import { entitlementEvaluator } from "./entitlements";
+import { requireLegalEntityScope } from "./legal-entity-scope";
 import { posService } from "./pos";
 import { databasePool } from "./postgres";
 import { tenancyService } from "./tenancy";
@@ -93,22 +94,21 @@ async function requireExportContext(input: {
 		organizationId: context.organizationId,
 		tenantId: context.tenantId,
 	});
-	// Legal-entity isolation (PR4 contract-coverage enumeration): POS
-	// records carry no `legalEntityId` in first slice (a governed
+	// Legal-entity isolation (PR4 contract-coverage enumeration; WS3
+	// remediation R2, Finding K — see `remediation-dispositions.md` "## K").
+	// POS records carry no `legalEntityId` in first slice (a governed
 	// simplification — single legal entity per organization is the
 	// deployed reality this branch proves). What IS enforced: a caller
-	// may not request an export under a `legalEntityId` different from
-	// the one bound to their active context, when the context carries
-	// one at all.
-	if (
-		input.legalEntityId &&
-		context.legalEntityId &&
-		context.legalEntityId !== input.legalEntityId
-	) {
-		throw new ExportError(
-			"validation",
-			"legalEntityId does not match the active context"
-		);
+	// may not request an export under a `legalEntityId` different from the
+	// one bound to their active context — AND, fixing the Finding K gap,
+	// a request that declares a `legalEntityId` at all now FAILS CLOSED if
+	// the active context carries none, instead of silently proceeding with
+	// the caller-supplied value unverified.
+	if (input.legalEntityId) {
+		requireLegalEntityScope({
+			contextLegalEntityId: context.legalEntityId,
+			requestLegalEntityId: input.legalEntityId,
+		});
 	}
 	return context;
 }

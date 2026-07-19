@@ -577,13 +577,14 @@ export function createInventoryRepository(
 			return loadTransfer(row);
 		},
 
-		async getAdjustment(tenantId, id) {
+		async getAdjustment(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(inventoryAdjustments)
 				.where(
 					and(
 						eq(inventoryAdjustments.tenantId, tenantId),
+						eq(inventoryAdjustments.organizationId, organizationId),
 						eq(inventoryAdjustments.id, id)
 					)
 				)
@@ -619,26 +620,28 @@ export function createInventoryRepository(
 				.limit(1);
 			return rows[0] ? mapReceipt(rows[0]) : null;
 		},
-		async getCount(tenantId, id) {
+		async getCount(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(inventoryCounts)
 				.where(
 					and(
 						eq(inventoryCounts.tenantId, tenantId),
+						eq(inventoryCounts.organizationId, organizationId),
 						eq(inventoryCounts.id, id)
 					)
 				)
 				.limit(1);
 			return rows[0] ? loadCount(rows[0]) : null;
 		},
-		async getTransfer(tenantId, id) {
+		async getTransfer(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(inventoryTransfers)
 				.where(
 					and(
 						eq(inventoryTransfers.tenantId, tenantId),
+						eq(inventoryTransfers.organizationId, organizationId),
 						eq(inventoryTransfers.id, id)
 					)
 				)

@@ -1928,6 +1928,10 @@ export interface ExportJobRecord {
 	payload: AccountantHandoffPayload;
 	periodEndUtc: Date;
 	periodStartUtc: Date;
+	/** WS3 remediation R2, Finding D: the canonical normalized-request
+	 * fingerprint (`createExportFingerprint`) this idempotency key is bound
+	 * to. Mirrors `ImportJobRecord.requestFingerprint`'s discipline. */
+	requestFingerprint: string;
 	ruleVersion: string;
 	schemaVersion: string;
 	tenantId: string;
@@ -1937,10 +1941,25 @@ export interface ExportJobRecord {
 export interface ExportRepository {
 	/** Insert-or-replay on the (tenantId, idempotencyKey) unique index —
 	 * mirrors `pos_command_receipt`'s onConflictDoNothing()-then-reselect
-	 * pattern (`inserted: false` on a same-key replay). */
+	 * pattern (`inserted: false` on a same-key replay). The caller MUST
+	 * still compare `requestFingerprint` on the returned record when
+	 * `inserted` is `false` (WS3 remediation R2, Finding D): this method
+	 * alone only resolves the (tenantId, idempotencyKey) race, it does not
+	 * know whether the racing request was the SAME logical export or a
+	 * genuine idempotency-key collision across different requests. */
 	createExportJob: (
 		record: ExportJobRecord
 	) => Promise<{ inserted: boolean; record: ExportJobRecord }>;
+	/** Mirrors `ImportRepository.findByCreateKey`'s pattern: looks up a
+	 * prior export by its idempotency key alone (WS3 remediation R2,
+	 * Finding D), before any payload/hash is computed, so a replay with a
+	 * matching fingerprint can short-circuit without recomputation and a
+	 * replay with a mismatched fingerprint can be rejected as a typed
+	 * conflict instead of silently returning the wrong export. */
+	findByIdempotencyKey: (
+		tenantId: string,
+		idempotencyKey: string
+	) => Promise<ExportJobRecord | null>;
 	getExportJob: (
 		tenantId: string,
 		id: string
@@ -1958,6 +1977,39 @@ export class ExportError extends Error {
 		this.code = code;
 		this.name = "ExportError";
 	}
+}
+
+/** WS3 remediation R2, Finding D: the canonical normalized-request
+ * fingerprint an `createAccountantHandoffExport` idempotency key is bound
+ * to — mirrors `createImportFingerprint`'s discipline in this same package
+ * and `packages/domains/pos/src/index.ts`'s `replay()`/`fingerprint()`
+ * helper for POS commands. Covers every outcome-affecting field: tenant/
+ * organization/legal-entity scope, the period (the export's "source
+ * range"), currency, and timezone (which shifts the UTC period boundary a
+ * given local-date request resolves to). `kind` is included even though
+ * this export surface currently has exactly one value, so the fingerprint
+ * does not silently stop covering format/classification if a second kind
+ * is ever registered. */
+function createExportFingerprint(input: {
+	currency: string;
+	kind: "AccountantHandoff";
+	legalEntityId: string;
+	organizationId: string;
+	periodEndUtc: Date;
+	periodStartUtc: Date;
+	tenantId: string;
+	timezone: string;
+}) {
+	return JSON.stringify({
+		currency: input.currency,
+		kind: input.kind,
+		legalEntityId: input.legalEntityId,
+		organizationId: input.organizationId,
+		periodEndUtc: input.periodEndUtc.toISOString(),
+		periodStartUtc: input.periodStartUtc.toISOString(),
+		tenantId: input.tenantId,
+		timezone: input.timezone,
+	});
 }
 
 /**
@@ -1994,6 +2046,35 @@ export function createExportService(options: {
 					"periodStart must be strictly before periodEnd"
 				);
 			}
+			const requestFingerprint = createExportFingerprint({
+				currency: input.currency,
+				kind: "AccountantHandoff",
+				legalEntityId: input.legalEntityId,
+				organizationId: input.organizationId,
+				periodEndUtc: input.periodEndUtc,
+				periodStartUtc: input.periodStartUtc,
+				tenantId: input.tenantId,
+				timezone: input.timezone,
+			});
+			// WS3 remediation R2, Finding D: check for a prior export under
+			// this SAME idempotency key BEFORE computing the payload/hash —
+			// mirrors `createImportService`'s `accept()` "Read first"
+			// discipline. Same key + same fingerprint replays the prior
+			// result without recomputation; same key + a DIFFERENT
+			// fingerprint is a typed conflict, never a silent wrong export.
+			const prior = await options.repository.findByIdempotencyKey(
+				input.tenantId,
+				input.idempotencyKey
+			);
+			if (prior) {
+				if (prior.requestFingerprint !== requestFingerprint) {
+					throw new ExportError(
+						"idempotency_conflict",
+						"The idempotency key is already bound to another export request"
+					);
+				}
+				return prior;
+			}
 			const payload = buildAccountantHandoffPayload({
 				currency: input.currency,
 				legalEntityId: input.legalEntityId,
@@ -2019,12 +2100,36 @@ export function createExportService(options: {
 				payload,
 				periodEndUtc: input.periodEndUtc,
 				periodStartUtc: input.periodStartUtc,
+				requestFingerprint,
 				ruleVersion: ACCOUNTANT_HANDOFF_RULE_VERSION,
 				schemaVersion: FINANCE_HANDOFF_SCHEMA_VERSION,
 				tenantId: input.tenantId,
 				timezone: input.timezone,
 			};
+			// The (tenantId, idempotencyKey) unique index is the authoritative
+			// concurrency guard for two truly simultaneous requests that both
+			// passed the `prior` check above as `null` (WS3 remediation R2,
+			// Finding D's concurrent-request requirement) — `createExportJob`
+			// resolves the race via onConflictDoNothing()-then-reselect
+			// (`inserted: false` returns the WINNING row, never this call's
+			// own `record`). The fingerprint comparison below still applies to
+			// that winning row: two concurrent callers with the SAME
+			// fingerprint get the identical winning result (no error, exactly
+			// one row ever created); two concurrent callers with DIFFERENT
+			// fingerprints under the same key still resolve to exactly one
+			// winner, and the LOSING caller gets a typed conflict instead of
+			// silently being handed a result for a different request than the
+			// one it made.
 			const claim = await options.repository.createExportJob(record);
+			if (
+				!claim.inserted &&
+				claim.record.requestFingerprint !== requestFingerprint
+			) {
+				throw new ExportError(
+					"idempotency_conflict",
+					"The idempotency key is already bound to another export request"
+				);
+			}
 			return claim.record;
 		},
 

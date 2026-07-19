@@ -413,27 +413,67 @@ export interface PosRepository {
 		operation: PosCommandOperation,
 		idempotencyKey: string
 	) => Promise<PosCommandReceipt | null>;
-	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
-	getDeposit: (tenantId: string, id: string) => Promise<DepositRecord | null>;
+	/** WS3 remediation R2, Finding B: `organizationId` is REQUIRED (not
+	 * optional) on every by-ID lookup below that can be reached from a
+	 * caller-supplied identifier — it is filtered in the SQL `WHERE`
+	 * clause itself (never a post-fetch check), so a row that exists but
+	 * belongs to a DIFFERENT organization in the SAME tenant is
+	 * indistinguishable at the SQL level from a row that does not exist at
+	 * all: both return `null`, and callers reject with the SAME governed
+	 * `PosError("not_found", ...)` denial used for a genuinely unknown id
+	 * (non-disclosing — a cross-org caller can never learn the resource
+	 * exists elsewhere). `locationId`, where supplied, is an ADDITIONAL SQL
+	 * filter on the tables that actually persist a location dimension
+	 * (`pos_register_session`, `pos_sale`) — omitted (`undefined`) it is a
+	 * no-op, matching an organization-scoped (not location-scoped) active
+	 * context. Locks the row (SELECT ... FOR UPDATE) inside the enclosing
+	 * transaction where noted below, unchanged from before this finding. */
+	getDeposit: (
+		tenantId: string,
+		organizationId: string,
+		id: string
+	) => Promise<DepositRecord | null>;
 	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
 	getOpenSession: (
 		tenantId: string,
-		registerId: string
+		organizationId: string,
+		registerId: string,
+		locationId?: string
 	) => Promise<RegisterSessionRecord | null>;
 	getPriceOverride: (
 		tenantId: string,
+		organizationId: string,
 		id: string
 	) => Promise<PriceOverrideRecord | null>;
-	getReceipt: (tenantId: string, id: string) => Promise<ReceiptRecord | null>;
+	getReceipt: (
+		tenantId: string,
+		organizationId: string,
+		id: string
+	) => Promise<ReceiptRecord | null>;
 	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
-	getRefund: (tenantId: string, id: string) => Promise<RefundRecord | null>;
+	getRefund: (
+		tenantId: string,
+		organizationId: string,
+		id: string
+	) => Promise<RefundRecord | null>;
 	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
-	getReturn: (tenantId: string, id: string) => Promise<ReturnRecord | null>;
+	getReturn: (
+		tenantId: string,
+		organizationId: string,
+		id: string
+	) => Promise<ReturnRecord | null>;
 	/** Locks the row (SELECT ... FOR UPDATE) inside the enclosing transaction. */
-	getSale: (tenantId: string, saleId: string) => Promise<SaleRecord | null>;
+	getSale: (
+		tenantId: string,
+		organizationId: string,
+		saleId: string,
+		locationId?: string
+	) => Promise<SaleRecord | null>;
 	getSession: (
 		tenantId: string,
-		sessionId: string
+		organizationId: string,
+		sessionId: string,
+		locationId?: string
 	) => Promise<RegisterSessionRecord | null>;
 	/** Locks EVERY referenced session row (SELECT ... FOR UPDATE), always in
 	 * ascending `id` order regardless of the caller's array order, so two
@@ -442,10 +482,13 @@ export interface PosRepository {
 	 * `getSale` gives return.create's cumulative-quantity check, applied
 	 * here to serialize concurrent safe-custody reservation (round-3
 	 * P1-4). Returns fewer rows than requested if any id does not belong
-	 * to the tenant; callers MUST verify the count matches. */
+	 * to the tenant, organization, AND (when supplied) location (WS3
+	 * remediation R2, Finding B); callers MUST verify the count matches. */
 	lockSessionsForDeposit: (
 		tenantId: string,
-		sessionIds: string[]
+		organizationId: string,
+		sessionIds: string[],
+		locationId?: string
 	) => Promise<RegisterSessionRecord[]>;
 	netCashMovements: (
 		tenantId: string,
@@ -1343,16 +1386,28 @@ function requireMatchingTenderCurrencies(
 async function requireCompletableSale(
 	repository: PosRepository,
 	tenantId: string,
-	saleId: string
+	organizationId: string,
+	saleId: string,
+	locationId?: string
 ): Promise<SaleRecord> {
-	const sale = await repository.getSale(tenantId, saleId);
+	const sale = await repository.getSale(
+		tenantId,
+		organizationId,
+		saleId,
+		locationId
+	);
 	if (!sale) {
 		throw new PosError("not_found", "Sale was not found");
 	}
 	if (sale.state === "Completed") {
 		throw new PosError("invalid_state", "Sale is already completed");
 	}
-	const session = await repository.getOpenSession(tenantId, sale.registerId);
+	const session = await repository.getOpenSession(
+		tenantId,
+		organizationId,
+		sale.registerId,
+		locationId
+	);
 	if (!session || session.id !== sale.sessionId) {
 		throw new PosError(
 			"invalid_state",
@@ -1516,19 +1571,36 @@ function applySaleLineUpdate(
 /** Loads and validates a Pending price override before it may be approved:
  * exists and belongs to the named sale, is still Pending, the approver
  * differs from the requester (self-approval denial, frozen control plan
- * §6), the sale is not yet Completed, and its target line still exists. */
+ * §6), the sale is not yet Completed, and its target line still exists.
+ *
+ * WS3 remediation R2, Finding C: the separation check resolves BOTH sides
+ * through canonical Party identity, never the Better Auth `actorUserId` —
+ * the maker's Party is already persisted (`requestedByPartyId`), and the
+ * approver's Party is resolved here (or safely denied via
+ * `PosError("invalid_reference", ...)` on a missing/ambiguous mapping)
+ * BEFORE the comparison runs, so two different auth accounts linked to the
+ * SAME Party are still denied self-approval. Returns the resolved
+ * `approverPartyId` so the caller does not re-resolve it. */
 async function requireApprovableOverride(
 	repository: PosRepository,
+	parties: PosPartyPort,
 	tenantId: string,
+	organizationId: string,
 	saleId: string,
 	overrideId: string,
-	actorUserId: string
+	actorUserId: string,
+	locationId?: string
 ): Promise<{
+	approverPartyId: string;
 	line: SaleLineRecord;
 	override: PriceOverrideRecord;
 	sale: SaleRecord;
 }> {
-	const override = await repository.getPriceOverride(tenantId, overrideId);
+	const override = await repository.getPriceOverride(
+		tenantId,
+		organizationId,
+		overrideId
+	);
 	if (!override || override.saleId !== saleId) {
 		throw new PosError("not_found", "Price override was not found");
 	}
@@ -1538,13 +1610,23 @@ async function requireApprovableOverride(
 			"Only a Pending price override can be approved"
 		);
 	}
-	if (override.requestedByActorUserId === actorUserId) {
+	const approverPartyId = await parties.requireActorPartyId({
+		authUserId: actorUserId,
+		organizationId,
+		tenantId,
+	});
+	if (override.requestedByPartyId === approverPartyId) {
 		throw new PosError(
 			"approval_separation",
 			"The requester cannot approve their own price override"
 		);
 	}
-	const sale = await repository.getSale(tenantId, saleId);
+	const sale = await repository.getSale(
+		tenantId,
+		organizationId,
+		saleId,
+		locationId
+	);
 	if (!sale) {
 		throw new PosError("not_found", "Sale was not found");
 	}
@@ -1558,7 +1640,7 @@ async function requireApprovableOverride(
 	if (!line) {
 		throw new PosError("invalid_reference", "Sale line was not found");
 	}
-	return { line, override, sale };
+	return { approverPartyId, line, override, sale };
 }
 
 /** Posts one synchronous Inventory `Sale` movement per line, inside the
@@ -2160,14 +2242,30 @@ async function buildReturnLines(
  * still Pending, the approver differs from the creator (self-approval
  * denial, frozen control plan §6), and its original Sale still exists.
  * Mirrors `requireApprovableOverride`'s discipline for the price-override
- * pair. */
+ * pair.
+ *
+ * WS3 remediation R2, Finding C: the separation check resolves BOTH sides
+ * through canonical Party identity (see `requireApprovableOverride`'s doc
+ * comment for the full rationale). Returns the resolved `approverPartyId`
+ * so the caller does not re-resolve it. */
 async function requireApprovableReturn(
 	repository: PosRepository,
+	parties: PosPartyPort,
 	tenantId: string,
+	organizationId: string,
 	returnId: string,
-	actorUserId: string
-): Promise<{ current: ReturnRecord; sale: SaleRecord }> {
-	const current = await repository.getReturn(tenantId, returnId);
+	actorUserId: string,
+	locationId?: string
+): Promise<{
+	approverPartyId: string;
+	current: ReturnRecord;
+	sale: SaleRecord;
+}> {
+	const current = await repository.getReturn(
+		tenantId,
+		organizationId,
+		returnId
+	);
 	if (!current) {
 		throw new PosError("not_found", "Return was not found");
 	}
@@ -2177,17 +2275,27 @@ async function requireApprovableReturn(
 			"Only a Pending return can be approved"
 		);
 	}
-	if (current.createdByActorUserId === actorUserId) {
+	const approverPartyId = await parties.requireActorPartyId({
+		authUserId: actorUserId,
+		organizationId,
+		tenantId,
+	});
+	if (current.createdByPartyId === approverPartyId) {
 		throw new PosError(
 			"approval_separation",
 			"The creator cannot approve their own return"
 		);
 	}
-	const sale = await repository.getSale(tenantId, current.saleId);
+	const sale = await repository.getSale(
+		tenantId,
+		organizationId,
+		current.saleId,
+		locationId
+	);
 	if (!sale) {
 		throw new PosError("not_found", "Original sale was not found");
 	}
-	return { current, sale };
+	return { approverPartyId, current, sale };
 }
 
 /** Loads and validates the original Sale a `receipt.void` targets: the
@@ -2199,27 +2307,43 @@ async function requireApprovableReturn(
 async function requireVoidableSale(
 	repository: PosRepository,
 	tenantId: string,
-	receiptId: string
+	organizationId: string,
+	receiptId: string,
+	locationId?: string
 ): Promise<{
 	receipt: ReceiptRecord;
 	sale: SaleRecord;
 	session: RegisterSessionRecord;
 }> {
-	const receipt = await repository.getReceipt(tenantId, receiptId);
+	const receipt = await repository.getReceipt(
+		tenantId,
+		organizationId,
+		receiptId
+	);
 	if (!receipt) {
 		throw new PosError("not_found", "Receipt was not found");
 	}
 	if (receipt.kind !== "Sale" || !receipt.saleId) {
 		throw new PosError("invalid_state", "Only a Sale receipt can be voided");
 	}
-	const sale = await repository.getSale(tenantId, receipt.saleId);
+	const sale = await repository.getSale(
+		tenantId,
+		organizationId,
+		receipt.saleId,
+		locationId
+	);
 	if (!sale) {
 		throw new PosError("not_found", "Sale was not found");
 	}
 	if (sale.state !== "Completed") {
 		throw new PosError("invalid_state", "Only a completed sale can be voided");
 	}
-	const session = await repository.getOpenSession(tenantId, sale.registerId);
+	const session = await repository.getOpenSession(
+		tenantId,
+		organizationId,
+		sale.registerId,
+		locationId
+	);
 	if (!session || session.id !== sale.sessionId) {
 		throw new PosError(
 			"invalid_state",
@@ -2442,6 +2566,7 @@ async function requireExchangeReturn(
 ): Promise<ReturnRecord> {
 	const exchangeReturn = await repository.getReturn(
 		tenantId,
+		sale.organizationId,
 		exchangeOfReturnId
 	);
 	if (
@@ -2573,6 +2698,7 @@ export function createPosService(options: PosServiceOptions) {
 			actorUserId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			sessionId: string;
 			tenantId: string;
@@ -2594,7 +2720,9 @@ export function createPosService(options: PosServiceOptions) {
 				}
 				const current = await repository.getSession(
 					input.tenantId,
-					input.sessionId
+					input.organizationId,
+					input.sessionId,
+					input.locationId
 				);
 				if (!current) {
 					throw new PosError("not_found", "Register session was not found");
@@ -2606,18 +2734,25 @@ export function createPosService(options: PosServiceOptions) {
 						"Only a session pending variance approval can be approved"
 					);
 				}
-				if (current.closedByActorUserId === input.actorUserId) {
+				// WS3 remediation R2, Finding C: compares canonical Party
+				// identity, not the Better Auth `actorUserId` — two different
+				// auth accounts linked to the SAME Party must still be denied
+				// self-approval. `requireActorPartyId` resolves (or safely
+				// denies, via `PosError("invalid_reference", ...)`) the
+				// approver's Party BEFORE the separation check runs, so the
+				// comparison below is always Party-to-Party.
+				const approverPartyId = await options.parties.requireActorPartyId({
+					authUserId: input.actorUserId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				});
+				if (current.closedByPartyId === approverPartyId) {
 					throw new PosError(
 						"approval_separation",
 						"The closer cannot approve their own cash variance"
 					);
 				}
 				const now = options.clock();
-				const approverPartyId = await options.parties.requireActorPartyId({
-					authUserId: input.actorUserId,
-					organizationId: input.organizationId,
-					tenantId: input.tenantId,
-				});
 				const updated: RegisterSessionRecord = {
 					...current,
 					closedAt: now,
@@ -2682,6 +2817,7 @@ export function createPosService(options: PosServiceOptions) {
 			actorUserId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			overrideId: string;
 			saleId: string;
@@ -2701,19 +2837,18 @@ export function createPosService(options: PosServiceOptions) {
 				if (prior) {
 					return prior;
 				}
-				const { line, override, sale } = await requireApprovableOverride(
-					repository,
-					input.tenantId,
-					input.saleId,
-					input.overrideId,
-					input.actorUserId
-				);
+				const { approverPartyId, line, override, sale } =
+					await requireApprovableOverride(
+						repository,
+						options.parties,
+						input.tenantId,
+						input.organizationId,
+						input.saleId,
+						input.overrideId,
+						input.actorUserId,
+						input.locationId
+					);
 				const now = options.clock();
-				const approverPartyId = await options.parties.requireActorPartyId({
-					authUserId: input.actorUserId,
-					organizationId: input.organizationId,
-					tenantId: input.tenantId,
-				});
 
 				const updatedLine = await computeOverriddenLine(
 					options,
@@ -2772,6 +2907,7 @@ export function createPosService(options: PosServiceOptions) {
 			actorUserId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			refundId: string;
 			tenantId: string;
@@ -2791,6 +2927,7 @@ export function createPosService(options: PosServiceOptions) {
 				}
 				const current = await repository.getRefund(
 					input.tenantId,
+					input.organizationId,
 					input.refundId
 				);
 				if (!current) {
@@ -2802,7 +2939,17 @@ export function createPosService(options: PosServiceOptions) {
 						"Only a Requested refund can be approved"
 					);
 				}
-				if (current.requestedByActorUserId === input.actorUserId) {
+				// WS3 remediation R2, Finding C: compares canonical Party
+				// identity, not the Better Auth `actorUserId` — resolve (or
+				// safely deny) the approver's Party BEFORE the separation
+				// check, then compare Party-to-Party against the maker's
+				// already-persisted `requestedByPartyId`.
+				const approverPartyId = await options.parties.requireActorPartyId({
+					authUserId: input.actorUserId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				});
+				if (current.requestedByPartyId === approverPartyId) {
 					throw new PosError(
 						"approval_separation",
 						"The requester cannot approve their own refund"
@@ -2818,7 +2965,9 @@ export function createPosService(options: PosServiceOptions) {
 				// register").
 				const session = await repository.getOpenSession(
 					input.tenantId,
-					current.registerId
+					input.organizationId,
+					current.registerId,
+					input.locationId
 				);
 				if (!session) {
 					throw new PosError(
@@ -2827,11 +2976,6 @@ export function createPosService(options: PosServiceOptions) {
 					);
 				}
 				const now = options.clock();
-				const approverPartyId = await options.parties.requireActorPartyId({
-					authUserId: input.actorUserId,
-					organizationId: input.organizationId,
-					tenantId: input.tenantId,
-				});
 
 				// Refund-exceeds-register-cash (frozen control plan Tests:
 				// "record variance vs reject — whichever PR0 declared"). SUPERSEDED
@@ -2937,6 +3081,7 @@ export function createPosService(options: PosServiceOptions) {
 			actorUserId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			returnId: string;
 			tenantId: string;
@@ -2955,18 +3100,17 @@ export function createPosService(options: PosServiceOptions) {
 					if (prior) {
 						return prior;
 					}
-					const { current, sale } = await requireApprovableReturn(
-						repository,
-						input.tenantId,
-						input.returnId,
-						input.actorUserId
-					);
+					const { approverPartyId, current, sale } =
+						await requireApprovableReturn(
+							repository,
+							options.parties,
+							input.tenantId,
+							input.organizationId,
+							input.returnId,
+							input.actorUserId,
+							input.locationId
+						);
 					const now = options.clock();
-					const approverPartyId = await options.parties.requireActorPartyId({
-						authUserId: input.actorUserId,
-						organizationId: input.organizationId,
-						tenantId: input.tenantId,
-					});
 
 					await postReturnCompensatingMovements(
 						inventory,
@@ -3060,6 +3204,7 @@ export function createPosService(options: PosServiceOptions) {
 			correlationId: string;
 			countedCash: { amountMinor: number; currency: string };
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			reason?: string | null;
 			registerId: string;
@@ -3086,7 +3231,9 @@ export function createPosService(options: PosServiceOptions) {
 				}
 				const current = await repository.getOpenSession(
 					input.tenantId,
-					input.registerId
+					input.organizationId,
+					input.registerId,
+					input.locationId
 				);
 				if (!current) {
 					throw new PosError(
@@ -3203,6 +3350,7 @@ export function createPosService(options: PosServiceOptions) {
 			 * §6.5 specifies). */
 			exchangeOfReturnId?: string | null;
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			saleId: string;
 			tenders: Array<{
@@ -3233,7 +3381,9 @@ export function createPosService(options: PosServiceOptions) {
 					const sale = await requireCompletableSale(
 						repository,
 						input.tenantId,
-						input.saleId
+						input.organizationId,
+						input.saleId,
+						input.locationId
 					);
 					requireMatchingTenderCurrencies(sale.currency, input.tenders);
 
@@ -3565,6 +3715,7 @@ export function createPosService(options: PosServiceOptions) {
 				}
 				const current = await repository.getDeposit(
 					input.tenantId,
+					input.organizationId,
 					input.depositId
 				);
 				if (!current) {
@@ -3576,18 +3727,20 @@ export function createPosService(options: PosServiceOptions) {
 						"Only a Prepared deposit can be confirmed"
 					);
 				}
-				if (current.preparedByActorUserId === input.actorUserId) {
+				// WS3 remediation R2, Finding C: compares canonical Party
+				// identity, not the Better Auth `actorUserId`.
+				const confirmerPartyId = await options.parties.requireActorPartyId({
+					authUserId: input.actorUserId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				});
+				if (current.preparedByPartyId === confirmerPartyId) {
 					throw new PosError(
 						"approval_separation",
 						"The preparer cannot confirm their own deposit"
 					);
 				}
 				const now = options.clock();
-				const confirmerPartyId = await options.parties.requireActorPartyId({
-					authUserId: input.actorUserId,
-					organizationId: input.organizationId,
-					tenantId: input.tenantId,
-				});
 				await repository.createDepositCustodyTransfer({
 					amountMinor: current.amountMinor,
 					confirmedByActorUserId: input.actorUserId,
@@ -3657,6 +3810,7 @@ export function createPosService(options: PosServiceOptions) {
 			correlationId: string;
 			direction: CashMovementDirection;
 			idempotencyKey: string;
+			locationId?: string;
 			note?: string | null;
 			organizationId: string;
 			reasonCode: CashMovementReasonCode;
@@ -3686,7 +3840,9 @@ export function createPosService(options: PosServiceOptions) {
 				}
 				const session = await repository.getOpenSession(
 					input.tenantId,
-					input.registerId
+					input.organizationId,
+					input.registerId,
+					input.locationId
 				);
 				if (!session) {
 					throw new PosError(
@@ -3799,6 +3955,7 @@ export function createPosService(options: PosServiceOptions) {
 			countedAmountMinor: number;
 			currency: string;
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			sourceShiftIds: string[];
 			tenantId: string;
@@ -3833,7 +3990,9 @@ export function createPosService(options: PosServiceOptions) {
 					}
 					const sessions = await repository.lockSessionsForDeposit(
 						input.tenantId,
-						sortedShiftIds
+						input.organizationId,
+						sortedShiftIds,
+						input.locationId
 					);
 					if (sessions.length !== sortedShiftIds.length) {
 						throw new PosError(
@@ -3958,6 +4117,7 @@ export function createPosService(options: PosServiceOptions) {
 				}
 				const returnRecord = await repository.getReturn(
 					input.tenantId,
+					input.organizationId,
 					input.returnId
 				);
 				if (!returnRecord) {
@@ -4061,6 +4221,7 @@ export function createPosService(options: PosServiceOptions) {
 			correlationId: string;
 			idempotencyKey: string;
 			lines: Array<{ quantity: string; saleLineId: string }>;
+			locationId?: string;
 			organizationId: string;
 			reason: string;
 			saleId: string;
@@ -4088,7 +4249,12 @@ export function createPosService(options: PosServiceOptions) {
 				// of this transaction — the concurrency guard `buildReturnLines`'
 				// cumulative-quantity check depends on (see its doc comment and
 				// `PosRepository.sumReturnedQuantity`'s).
-				const sale = await repository.getSale(input.tenantId, input.saleId);
+				const sale = await repository.getSale(
+					input.tenantId,
+					input.organizationId,
+					input.saleId,
+					input.locationId
+				);
 				if (!sale) {
 					throw new PosError("not_found", "Sale was not found");
 				}
@@ -4169,6 +4335,7 @@ export function createPosService(options: PosServiceOptions) {
 				unitPrice: { amountMinor: number; currency: string };
 				variantId?: string | null;
 			}>;
+			locationId?: string;
 			organizationId: string;
 			registerId: string;
 			tenantId: string;
@@ -4202,7 +4369,9 @@ export function createPosService(options: PosServiceOptions) {
 				}
 				const session = await repository.getOpenSession(
 					input.tenantId,
-					input.registerId
+					input.organizationId,
+					input.registerId,
+					input.locationId
 				);
 				if (!session) {
 					throw new PosError(
@@ -4272,10 +4441,11 @@ export function createPosService(options: PosServiceOptions) {
 
 		async getReceipt(
 			tenantId: string,
+			organizationId: string,
 			receiptId: string
 		): Promise<ReceiptView> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getReceipt(tenantId, receiptId)
+				repository.getReceipt(tenantId, organizationId, receiptId)
 			);
 			if (!record) {
 				throw new PosError("not_found", "Receipt was not found");
@@ -4285,10 +4455,11 @@ export function createPosService(options: PosServiceOptions) {
 
 		async getRegisterSession(
 			tenantId: string,
+			organizationId: string,
 			sessionId: string
 		): Promise<RegisterSessionView> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getSession(tenantId, sessionId)
+				repository.getSession(tenantId, organizationId, sessionId)
 			);
 			if (!record) {
 				throw new PosError("not_found", "Register session was not found");
@@ -4300,6 +4471,7 @@ export function createPosService(options: PosServiceOptions) {
 			actorUserId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			reason?: string | null;
 			saleId: string;
@@ -4319,7 +4491,12 @@ export function createPosService(options: PosServiceOptions) {
 				if (prior) {
 					return prior;
 				}
-				const current = await repository.getSale(input.tenantId, input.saleId);
+				const current = await repository.getSale(
+					input.tenantId,
+					input.organizationId,
+					input.saleId,
+					input.locationId
+				);
 				if (!current) {
 					throw new PosError("not_found", "Sale was not found");
 				}
@@ -4550,6 +4727,7 @@ export function createPosService(options: PosServiceOptions) {
 					}
 					const original = await repository.getReceipt(
 						input.tenantId,
+						input.organizationId,
 						input.receiptId
 					);
 					if (!original) {
@@ -4658,6 +4836,7 @@ export function createPosService(options: PosServiceOptions) {
 			correlationId: string;
 			idempotencyKey: string;
 			lineId: string;
+			locationId?: string;
 			organizationId: string;
 			reason: string;
 			requestedPrice: { amountMinor: number; currency: string };
@@ -4680,7 +4859,12 @@ export function createPosService(options: PosServiceOptions) {
 				if (prior) {
 					return prior;
 				}
-				const sale = await repository.getSale(input.tenantId, input.saleId);
+				const sale = await repository.getSale(
+					input.tenantId,
+					input.organizationId,
+					input.saleId,
+					input.locationId
+				);
 				if (!sale) {
 					throw new PosError("not_found", "Sale was not found");
 				}
@@ -4790,6 +4974,7 @@ export function createPosService(options: PosServiceOptions) {
 			actorUserId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			locationId?: string;
 			organizationId: string;
 			reason?: string | null;
 			receiptId: string;
@@ -4813,7 +4998,9 @@ export function createPosService(options: PosServiceOptions) {
 					const { receipt, sale, session } = await requireVoidableSale(
 						repository,
 						input.tenantId,
-						input.receiptId
+						input.organizationId,
+						input.receiptId,
+						input.locationId
 					);
 					const lines = await buildVoidLines(repository, options.ids, sale);
 					const now = options.clock();
@@ -5014,11 +5201,21 @@ export function createPosService(options: PosServiceOptions) {
 // ---------------------------------------------------------------------------
 
 export interface PosActiveContextPort {
+	/** `locationId` (WS3 remediation R2, Finding B) is present only when the
+	 * caller's active tenancy context is scoped to a specific location
+	 * (`@meridian/platform-tenancy`'s `ActiveContextRecord.locationId`,
+	 * already optional there) — an organization-scoped-only actor has none,
+	 * and every location filter downstream treats `undefined` as a no-op,
+	 * never as "deny everything" or "allow everything." */
 	requireActiveContext: (input: {
 		authUserId: string;
 		contextId: string;
 		sessionId: string;
-	}) => Promise<{ organizationId: string; tenantId: string }>;
+	}) => Promise<{
+		locationId?: string;
+		organizationId: string;
+		tenantId: string;
+	}>;
 }
 
 export type PosPermission =
@@ -5121,6 +5318,7 @@ export function createPosApplication(options: {
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				sessionId: input.registerSessionId,
 				tenantId: context.tenantId,
@@ -5150,6 +5348,7 @@ export function createPosApplication(options: {
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				overrideId: input.overrideId,
 				saleId: input.saleId,
@@ -5175,6 +5374,7 @@ export function createPosApplication(options: {
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				refundId: input.refundId,
 				tenantId: context.tenantId,
@@ -5199,6 +5399,7 @@ export function createPosApplication(options: {
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				returnId: input.returnId,
 				tenantId: context.tenantId,
@@ -5226,6 +5427,7 @@ export function createPosApplication(options: {
 				correlationId: input.correlationId,
 				countedCash: input.countedCash,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				reason: input.reason,
 				registerId: input.registerId,
@@ -5259,6 +5461,7 @@ export function createPosApplication(options: {
 				correlationId: input.correlationId,
 				exchangeOfReturnId: input.exchangeOfReturnId,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				saleId: input.saleId,
 				tenantId: context.tenantId,
@@ -5318,6 +5521,7 @@ export function createPosApplication(options: {
 				correlationId: input.correlationId,
 				direction: input.direction,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				note: input.note,
 				organizationId: context.organizationId,
 				reasonCode: input.reasonCode,
@@ -5350,6 +5554,7 @@ export function createPosApplication(options: {
 				countedAmountMinor: input.countedAmountMinor,
 				currency: input.currency,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				sourceShiftIds: input.sourceShiftIds,
 				tenantId: context.tenantId,
@@ -5401,6 +5606,7 @@ export function createPosApplication(options: {
 				correlationId: input.correlationId,
 				idempotencyKey: input.idempotencyKey,
 				lines: input.lines,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				reason: input.reason,
 				saleId: input.saleId,
@@ -5440,6 +5646,7 @@ export function createPosApplication(options: {
 				customerPartyId: input.customerPartyId,
 				idempotencyKey: input.idempotencyKey,
 				lines: input.lines,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				registerId: input.registerId,
 				tenantId: context.tenantId,
@@ -5459,7 +5666,11 @@ export function createPosApplication(options: {
 				permission: "commerce.receipt.read",
 				sessionId: input.sessionId,
 			});
-			return options.service.getReceipt(context.tenantId, input.receiptId);
+			return options.service.getReceipt(
+				context.tenantId,
+				context.organizationId,
+				input.receiptId
+			);
 		},
 		async holdSale(input: {
 			actorUserId: string;
@@ -5481,6 +5692,7 @@ export function createPosApplication(options: {
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				reason: input.reason,
 				saleId: input.saleId,
@@ -5566,6 +5778,7 @@ export function createPosApplication(options: {
 				correlationId: input.correlationId,
 				idempotencyKey: input.idempotencyKey,
 				lineId: input.lineId,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				reason: input.reason,
 				requestedPrice: input.requestedPrice,
@@ -5593,6 +5806,7 @@ export function createPosApplication(options: {
 				actorUserId: input.actorUserId,
 				correlationId: input.correlationId,
 				idempotencyKey: input.idempotencyKey,
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				reason: input.reason,
 				receiptId: input.receiptId,

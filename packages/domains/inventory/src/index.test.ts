@@ -115,9 +115,10 @@ class MemoryInventoryRepository implements InventoryRepository {
 		);
 		return record;
 	}
-	async getAdjustment(tenantId: string, id: string) {
+	async getAdjustment(tenantId: string, organizationId: string, id: string) {
+		const record = this.adjustments.get(this.key(tenantId, id));
 		return structuredClone(
-			this.adjustments.get(this.key(tenantId, id)) ?? null
+			record && record.organizationId === organizationId ? record : null
 		);
 	}
 	async getBalance(
@@ -141,11 +142,17 @@ class MemoryInventoryRepository implements InventoryRepository {
 				null
 		);
 	}
-	async getCount(tenantId: string, id: string) {
-		return structuredClone(this.counts.get(this.key(tenantId, id)) ?? null);
+	async getCount(tenantId: string, organizationId: string, id: string) {
+		const record = this.counts.get(this.key(tenantId, id));
+		return structuredClone(
+			record && record.organizationId === organizationId ? record : null
+		);
 	}
-	async getTransfer(tenantId: string, id: string) {
-		return structuredClone(this.transfers.get(this.key(tenantId, id)) ?? null);
+	async getTransfer(tenantId: string, organizationId: string, id: string) {
+		const record = this.transfers.get(this.key(tenantId, id));
+		return structuredClone(
+			record && record.organizationId === organizationId ? record : null
+		);
 	}
 	async listAdjustments(
 		tenantId: string,
@@ -440,6 +447,7 @@ describe("Inventory adjustment ledger", () => {
 				adjustmentId: created.id,
 				correlationId: command.correlationId,
 				idempotencyKey: "approve-self",
+				organizationId: command.organizationId,
 				tenantId: command.tenantId,
 				version: 1,
 			})
@@ -449,6 +457,7 @@ describe("Inventory adjustment ledger", () => {
 			adjustmentId: created.id,
 			correlationId: command.correlationId,
 			idempotencyKey: "approve",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 1,
 		});
@@ -459,6 +468,7 @@ describe("Inventory adjustment ledger", () => {
 			adjustmentId: created.id,
 			correlationId: command.correlationId,
 			idempotencyKey: "approve",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 1,
 		});
@@ -470,6 +480,7 @@ describe("Inventory adjustment ledger", () => {
 			body: { reason: "approved in error" },
 			correlationId: command.correlationId,
 			idempotencyKey: "reverse",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 2,
 		});
@@ -497,6 +508,7 @@ describe("Inventory adjustment ledger", () => {
 				adjustmentId: created.id,
 				correlationId: command.correlationId,
 				idempotencyKey: "negative",
+				organizationId: command.organizationId,
 				tenantId: command.tenantId,
 				version: 1,
 			})
@@ -530,6 +542,7 @@ describe("Inventory Return compensating movement (WS3 PR3)", () => {
 			adjustmentId: openingAdjustment.id,
 			correlationId: command.correlationId,
 			idempotencyKey: "approve-opening",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 1,
 		});
@@ -615,6 +628,7 @@ describe("Inventory blind counts", () => {
 			},
 			countId: count.id,
 			idempotencyKey: "count-draft-save",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 1,
 		};
@@ -625,7 +639,9 @@ describe("Inventory blind counts", () => {
 			observedQuantity: "7.500001",
 			varianceQuantity: null,
 		});
-		expect(await service.getCount("tenant_a", count.id)).toEqual(saved);
+		expect(await service.getCount("tenant_a", "org_a", count.id)).toEqual(
+			saved
+		);
 		expect(await service.saveCountDraft(input)).toEqual(saved);
 		expect(repository.counts.size).toBe(1);
 		await expect(
@@ -642,7 +658,9 @@ describe("Inventory blind counts", () => {
 				idempotencyKey: "count-draft-stale",
 			})
 		).rejects.toMatchObject({ code: "version_conflict" });
-		await expect(service.getCount("tenant_b", count.id)).rejects.toMatchObject({
+		await expect(
+			service.getCount("tenant_b", "org_a", count.id)
+		).rejects.toMatchObject({
 			code: "not_found",
 		});
 		const submitted = await service.submitCount({
@@ -650,6 +668,7 @@ describe("Inventory blind counts", () => {
 			body: input.body,
 			countId: count.id,
 			idempotencyKey: "count-submit-after-draft",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 2,
 		});
@@ -673,6 +692,7 @@ describe("Inventory blind counts", () => {
 			adjustmentId: seed.id,
 			correlationId: command.correlationId,
 			idempotencyKey: "seed",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 1,
 		});
@@ -692,6 +712,7 @@ describe("Inventory blind counts", () => {
 			},
 			countId: count.id,
 			idempotencyKey: "count-submit",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 1,
 		});
@@ -705,6 +726,7 @@ describe("Inventory blind counts", () => {
 				correlationId: "corr_count",
 				countId: count.id,
 				idempotencyKey: "count-self",
+				organizationId: "org_a",
 				tenantId: "tenant_a",
 				version: 2,
 			})
@@ -714,6 +736,7 @@ describe("Inventory blind counts", () => {
 			correlationId: "corr_count",
 			countId: count.id,
 			idempotencyKey: "count-post",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 2,
 		});
@@ -738,6 +761,7 @@ describe("Inventory transfer conservation", () => {
 			adjustmentId: seed.id,
 			correlationId: "seed",
 			idempotencyKey: "seed",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 1,
 		});
@@ -763,6 +787,7 @@ describe("Inventory transfer conservation", () => {
 			actorUserId: "dispatcher",
 			correlationId: "transfer",
 			idempotencyKey: "dispatch",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 1,
@@ -777,6 +802,7 @@ describe("Inventory transfer conservation", () => {
 			body: { lines: [{ lineId, receivedQuantity: "2" }], outcome: "Accepted" },
 			correlationId: "receive",
 			idempotencyKey: "receive-1",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 2,
@@ -788,6 +814,7 @@ describe("Inventory transfer conservation", () => {
 			body: { lines: [{ lineId, receivedQuantity: "4" }], outcome: "Accepted" },
 			correlationId: "receive",
 			idempotencyKey: "receive-2",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 3,
@@ -809,6 +836,7 @@ describe("Inventory transfer conservation", () => {
 			actorUserId: "dispatcher",
 			correlationId: "transfer",
 			idempotencyKey: "dispatch",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 1,
@@ -822,6 +850,7 @@ describe("Inventory transfer conservation", () => {
 			},
 			correlationId: "receive",
 			idempotencyKey: "exception",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 2,
@@ -851,8 +880,108 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 			body: adjustment,
 		});
 		await expect(
-			service.getAdjustment("tenant_b", created.id)
+			service.getAdjustment("tenant_b", "org_a", created.id)
 		).rejects.toMatchObject({ code: "not_found" });
+	});
+
+	test("WS3 remediation R2, Finding B: two organizations in the SAME tenant — org_b cannot read or approve org_a's adjustment, cannot read org_a's count, and cannot read or dispatch org_a's transfer, using their real known ids; every org_a record is left completely unchanged", async () => {
+		const { repository, service } = harness();
+
+		// -- Adjustment: create under org_a, attempt cross-org read + approve
+		// (mutation) from org_b in the SAME tenant, using the real known id.
+		const createdAdjustment = await service.createAdjustment({
+			...command,
+			body: adjustment,
+		});
+		await expect(
+			service.getAdjustment("tenant_a", "org_b", createdAdjustment.id)
+		).rejects.toMatchObject({ code: "not_found" });
+		await expect(
+			service.approveAdjustment({
+				actorUserId: "org_b_approver",
+				adjustmentId: createdAdjustment.id,
+				correlationId: "cross-org-correlation",
+				idempotencyKey: "cross-org-approve-adjustment",
+				organizationId: "org_b",
+				tenantId: "tenant_a",
+				version: createdAdjustment.version,
+			})
+		).rejects.toMatchObject({ code: "not_found" });
+		// org_a's adjustment is completely unchanged: still PendingApproval,
+		// same version, never posted to the balance ledger.
+		const adjustmentAfter = await repository.getAdjustment(
+			"tenant_a",
+			"org_a",
+			createdAdjustment.id
+		);
+		expect(adjustmentAfter?.state).toBe("PendingApproval");
+		expect(adjustmentAfter?.version).toBe(createdAdjustment.version);
+		expect(repository.balances.size).toBe(0);
+
+		// -- Count: create under org_a, attempt cross-org read from org_b.
+		const createdCount = await service.createCount({
+			actorUserId: command.actorUserId,
+			body: { blind: true, locationId: "loc_a" },
+			idempotencyKey: "cross-org-count-create",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		await expect(
+			service.getCount("tenant_a", "org_b", createdCount.id)
+		).rejects.toMatchObject({ code: "not_found" });
+
+		// -- Transfer: create (dispatch) under org_a, attempt cross-org read +
+		// dispatch (mutation) from org_b using the real known id.
+		const openingForTransfer = await service.createAdjustment({
+			actorUserId: command.actorUserId,
+			body: { ...adjustment, quantity: "10" },
+			correlationId: "cross-org-transfer-seed",
+			idempotencyKey: "cross-org-transfer-seed",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		await service.approveAdjustment({
+			actorUserId: "org_a_approver",
+			adjustmentId: openingForTransfer.id,
+			correlationId: "cross-org-transfer-seed",
+			idempotencyKey: "cross-org-transfer-seed-approve",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+			version: openingForTransfer.version,
+		});
+		const createdTransfer = await service.createTransfer({
+			actorUserId: command.actorUserId,
+			body: {
+				destinationLocationId: "loc_b",
+				lines: [{ productId: "prod_a", quantity: "3", unit: "each" }],
+				sourceLocationId: "loc_a",
+			},
+			correlationId: "cross-org-transfer",
+			idempotencyKey: "cross-org-transfer-create",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		await expect(
+			service.getTransfer("tenant_a", "org_b", createdTransfer.id)
+		).rejects.toMatchObject({ code: "not_found" });
+		await expect(
+			service.dispatchTransfer({
+				actorUserId: "org_b_dispatcher",
+				correlationId: "cross-org-transfer-dispatch",
+				idempotencyKey: "cross-org-transfer-cross-dispatch",
+				organizationId: "org_b",
+				tenantId: "tenant_a",
+				transferId: createdTransfer.id,
+				version: createdTransfer.version,
+			})
+		).rejects.toMatchObject({ code: "not_found" });
+		const transferAfter = await repository.getTransfer(
+			"tenant_a",
+			"org_a",
+			createdTransfer.id
+		);
+		expect(transferAfter?.state).toBe("Draft");
+		expect(transferAfter?.version).toBe(createdTransfer.version);
 	});
 
 	test("evaluates active context, permission, and entitlement separately", async () => {

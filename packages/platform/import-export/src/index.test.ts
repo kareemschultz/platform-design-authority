@@ -1214,6 +1214,14 @@ describe("WS3 PR4: accountant handoff export determinism and idempotency", () =>
 					byIdempotency.set(key, record.id);
 					return Promise.resolve({ inserted: true, record });
 				},
+				findByIdempotencyKey: (tenantId, idempotencyKey) => {
+					const key = `${tenantId}:${idempotencyKey}`;
+					const existingId = byIdempotency.get(key);
+					const record = existingId ? jobs.get(existingId) : undefined;
+					return Promise.resolve(
+						record && record.tenantId === tenantId ? record : null
+					);
+				},
 				getExportJob: (tenantId, id) => {
 					const record = jobs.get(id);
 					return Promise.resolve(
@@ -1222,7 +1230,7 @@ describe("WS3 PR4: accountant handoff export determinism and idempotency", () =>
 				},
 			},
 		});
-		return { service };
+		return { jobs, service };
 	}
 
 	test("createAccountantHandoffExport is idempotent under a replayed idempotency key (same export id, same hash)", async () => {
@@ -1314,5 +1322,79 @@ describe("WS3 PR4: accountant handoff export determinism and idempotency", () =>
 			tenantId: "tenant_2",
 		});
 		await expect(crossTenant).rejects.toMatchObject({ code: "not_found" });
+	});
+
+	test("WS3 remediation R2, Finding D: same idempotency key + a DIFFERENT request (different period) is a typed idempotency_conflict, NOT a silent wrong export", async () => {
+		const { jobs, service } = createExportHarness();
+		const base = {
+			actorUserId: "user_1",
+			currency: "GYD",
+			idempotencyKey: "export-key-conflict",
+			legalEntityId: "legal-entity-1",
+			organizationId: "org_1",
+			periodEndUtc: new Date("2026-07-18T04:00:00.000Z"),
+			periodStartUtc: new Date("2026-07-17T04:00:00.000Z"),
+			source: EMPTY_SOURCE,
+			tenantId: "tenant_1",
+			timezone: "America/Guyana",
+		};
+		const first = await service.createAccountantHandoffExport(base);
+		expect(jobs.size).toBe(1);
+
+		// SAME idempotency key, but a genuinely different request: a whole
+		// different reporting period. Pre-fix, this silently returned the
+		// FIRST export's result — a wrong-period export handed back as if it
+		// were the requested one.
+		const conflictingPeriod = service.createAccountantHandoffExport({
+			...base,
+			periodEndUtc: new Date("2026-07-25T04:00:00.000Z"),
+			periodStartUtc: new Date("2026-07-18T04:00:00.000Z"),
+		});
+		await expect(conflictingPeriod).rejects.toMatchObject({
+			code: "idempotency_conflict",
+		});
+		await expect(conflictingPeriod).rejects.toBeInstanceOf(ExportError);
+		// No second job was ever created for the conflicting request.
+		expect(jobs.size).toBe(1);
+		expect(jobs.get(first.id)?.periodStartUtc).toEqual(base.periodStartUtc);
+
+		// SAME idempotency key, different organizationId — also a conflict.
+		const conflictingOrg = service.createAccountantHandoffExport({
+			...base,
+			organizationId: "org_2_different",
+		});
+		await expect(conflictingOrg).rejects.toMatchObject({
+			code: "idempotency_conflict",
+		});
+		expect(jobs.size).toBe(1);
+
+		// SAME idempotency key, SAME request in every outcome-affecting
+		// field: still replays cleanly (non-regression — the conflict guard
+		// above must not have become over-eager).
+		const replayed = await service.createAccountantHandoffExport(base);
+		expect(replayed).toEqual(first);
+		expect(jobs.size).toBe(1);
+	});
+
+	test("WS3 remediation R2, Finding D: concurrent same-key/same-fingerprint requests produce exactly ONE export and both callers get the identical result", async () => {
+		const { jobs, service } = createExportHarness();
+		const request = {
+			actorUserId: "user_1",
+			currency: "GYD",
+			idempotencyKey: "export-key-concurrent",
+			legalEntityId: "legal-entity-1",
+			organizationId: "org_1",
+			periodEndUtc: new Date("2026-07-18T04:00:00.000Z"),
+			periodStartUtc: new Date("2026-07-17T04:00:00.000Z"),
+			source: EMPTY_SOURCE,
+			tenantId: "tenant_1",
+			timezone: "America/Guyana",
+		};
+		const [first, second] = await Promise.all([
+			service.createAccountantHandoffExport(request),
+			service.createAccountantHandoffExport(request),
+		]);
+		expect(second).toEqual(first);
+		expect(jobs.size).toBe(1);
 	});
 });

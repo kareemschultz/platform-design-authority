@@ -668,6 +668,7 @@ function mapExportJob(row: typeof exportJobs.$inferSelect): ExportJobRecord {
 		payload: row.payload as AccountantHandoffPayload,
 		periodEndUtc: row.periodEndUtc,
 		periodStartUtc: row.periodStartUtc,
+		requestFingerprint: row.requestFingerprint,
 		ruleVersion: row.ruleVersion,
 		schemaVersion: row.schemaVersion,
 		tenantId: row.tenantId,
@@ -715,6 +716,7 @@ export function createExportRepository(
 					payload: record.payload,
 					periodEndUtc: record.periodEndUtc,
 					periodStartUtc: record.periodStartUtc,
+					requestFingerprint: record.requestFingerprint,
 					ruleVersion: record.ruleVersion,
 					schemaVersion: record.schemaVersion,
 					tenantId: record.tenantId,
@@ -741,6 +743,7 @@ export function createExportRepository(
 			}
 			return { inserted: false, record: existing };
 		},
+		findByIdempotencyKey,
 		async getExportJob(tenantId, id) {
 			const rows = await database
 				.select()

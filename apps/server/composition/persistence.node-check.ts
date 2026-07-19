@@ -317,6 +317,7 @@ try {
 		adjustmentId: adjustment.id,
 		correlationId: "correlation_inventory_node",
 		idempotencyKey: "idempotency_inventory_node_approve",
+		organizationId: "organization_catalog_node",
 		tenantId: "tenant_catalog_node",
 		version: 1,
 	});
@@ -334,7 +335,11 @@ try {
 		"3.000001"
 	);
 	await assert.rejects(
-		inventory.getAdjustment("tenant_catalog_node_other", adjustment.id),
+		inventory.getAdjustment(
+			"tenant_catalog_node_other",
+			"organization_catalog_node",
+			adjustment.id
+		),
 		(error) =>
 			typeof error === "object" &&
 			error !== null &&
@@ -361,13 +366,20 @@ try {
 		},
 		countId: count.id,
 		idempotencyKey: "idempotency_inventory_node_count_draft",
+		organizationId: "organization_catalog_node",
 		tenantId: "tenant_catalog_node",
 		version: 1,
 	});
 	assert.equal(savedDraft.state, "InProgress");
 	assert.equal(savedDraft.version, 2);
 	assert.deepEqual(
-		(await inventory.getCount("tenant_catalog_node", count.id)).lines,
+		(
+			await inventory.getCount(
+				"tenant_catalog_node",
+				"organization_catalog_node",
+				count.id
+			)
+		).lines,
 		savedDraft.lines
 	);
 } finally {

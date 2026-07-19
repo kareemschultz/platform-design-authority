@@ -610,5 +610,112 @@ describe.serial(
 			});
 			expect(foundOwnTenant.id).toBe(recordA.id);
 		});
+
+		test("WS3 remediation R2, Finding D: same idempotency key + a genuinely different request (different period) is denied as a real live-PG idempotency_conflict, not a silent wrong export", async () => {
+			const tenantId = "tenant_finance_handoff_finding_d_conflict";
+			const pos = posService();
+			await openRegisterAndCompleteSale(pos, {
+				grossMinorPerUnit: 10_000,
+				idempotencyPrefix: "finding-d-conflict",
+				quantity: "1",
+				registerId: "register_finance_handoff_finding_d_conflict",
+				tenantId,
+			});
+			const periodStartUtc = new Date("2026-07-01T00:00:00.000Z");
+			const periodEndUtc = new Date("2026-08-01T00:00:00.000Z");
+			const source = await pos.queryFinanceHandoffSourceData({
+				organizationId: financeHandoffBase.organizationId,
+				periodEndUtc,
+				periodStartUtc,
+				tenantId,
+			});
+			const svc = exportService();
+			const requestBase = {
+				actorUserId: financeHandoffBase.actorUserId,
+				currency: "GYD",
+				idempotencyKey: "finding-d-conflict-key",
+				legalEntityId: "legal_entity_finding_d_conflict",
+				organizationId: financeHandoffBase.organizationId,
+				periodEndUtc,
+				periodStartUtc,
+				source,
+				tenantId,
+				timezone: "America/Guyana",
+			};
+			const first = await svc.createAccountantHandoffExport(requestBase);
+
+			// Same key, a DIFFERENT period end -- a genuinely different
+			// request. Pre-fix, `createExportJob`'s onConflictDoNothing simply
+			// returned the FIRST export's row (the January-scoped export)
+			// silently, as if it satisfied this differently-scoped request.
+			const conflictingError = await captureError(
+				svc.createAccountantHandoffExport({
+					...requestBase,
+					periodEndUtc: new Date("2026-09-01T00:00:00.000Z"),
+				})
+			);
+			expect(conflictingError).toMatchObject({ code: "idempotency_conflict" });
+
+			// Exactly one row exists for this idempotency key -- the
+			// conflicting request never got written, silently or otherwise.
+			const rows = await testPool.query<{ period_end_utc: Date }>(
+				"SELECT period_end_utc FROM platform_export_job WHERE tenant_id = $1 AND idempotency_key = $2",
+				[tenantId, requestBase.idempotencyKey]
+			);
+			expect(rows.rows).toHaveLength(1);
+			expect(rows.rows[0]?.period_end_utc.toISOString()).toBe(
+				periodEndUtc.toISOString()
+			);
+
+			// The SAME exact request still replays cleanly (non-regression).
+			const replayed = await svc.createAccountantHandoffExport(requestBase);
+			expect(replayed).toEqual(first);
+		});
+
+		test("WS3 remediation R2, Finding D: two truly concurrent live-PG requests with the same key and same fingerprint create exactly ONE export row and both callers receive the identical result", async () => {
+			const tenantId = "tenant_finance_handoff_finding_d_concurrent";
+			const pos = posService();
+			await openRegisterAndCompleteSale(pos, {
+				grossMinorPerUnit: 15_000,
+				idempotencyPrefix: "finding-d-concurrent",
+				quantity: "1",
+				registerId: "register_finance_handoff_finding_d_concurrent",
+				tenantId,
+			});
+			const periodStartUtc = new Date("2026-07-01T00:00:00.000Z");
+			const periodEndUtc = new Date("2026-08-01T00:00:00.000Z");
+			const source = await pos.queryFinanceHandoffSourceData({
+				organizationId: financeHandoffBase.organizationId,
+				periodEndUtc,
+				periodStartUtc,
+				tenantId,
+			});
+			const request = {
+				actorUserId: financeHandoffBase.actorUserId,
+				currency: "GYD",
+				idempotencyKey: "finding-d-concurrent-key",
+				legalEntityId: "legal_entity_finding_d_concurrent",
+				organizationId: financeHandoffBase.organizationId,
+				periodEndUtc,
+				periodStartUtc,
+				source,
+				tenantId,
+				timezone: "America/Guyana",
+			};
+			// Two genuinely separate `exportService()` instances (separate
+			// closures, same live pool) issuing the same request at the same
+			// time -- the real unique-index race, not a mock's single-threaded
+			// interleaving.
+			const [first, second] = await Promise.all([
+				exportService().createAccountantHandoffExport(request),
+				exportService().createAccountantHandoffExport(request),
+			]);
+			expect(second).toEqual(first);
+			const rows = await testPool.query(
+				"SELECT id FROM platform_export_job WHERE tenant_id = $1 AND idempotency_key = $2",
+				[tenantId, request.idempotencyKey]
+			);
+			expect(rows.rows).toHaveLength(1);
+		});
 	}
 );

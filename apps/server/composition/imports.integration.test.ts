@@ -136,6 +136,7 @@ function createServices(
 					adjustmentId: adjustment.id,
 					correlationId: input.correlationId,
 					idempotencyKey: `${input.idempotencyKey}:approve`,
+					organizationId: input.organizationId,
 					tenantId: input.tenantId,
 					version: adjustment.version,
 				});

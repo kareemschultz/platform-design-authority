@@ -328,8 +328,16 @@ export interface InventoryRepository {
 	createTransfer: (
 		record: InventoryTransferRecord
 	) => Promise<InventoryTransferRecord>;
+	/** WS3 remediation R2, Finding B: `organizationId` is REQUIRED (not
+	 * optional) — filtered in the SQL `WHERE` clause itself, mirroring
+	 * `@meridian/domain-pos`'s `PosRepository` fix for the same class of
+	 * defect. A row that exists but belongs to a different organization in
+	 * the same tenant is indistinguishable from a nonexistent one: both
+	 * return `null`, and callers reject with the SAME governed
+	 * `InventoryError("not_found", ...)` denial (non-disclosing). */
 	getAdjustment: (
 		tenantId: string,
+		organizationId: string,
 		id: string
 	) => Promise<InventoryAdjustmentRecord | null>;
 	getBalance: (
@@ -345,10 +353,12 @@ export interface InventoryRepository {
 	) => Promise<InventoryCommandReceipt | null>;
 	getCount: (
 		tenantId: string,
+		organizationId: string,
 		id: string
 	) => Promise<InventoryCountRecord | null>;
 	getTransfer: (
 		tenantId: string,
+		organizationId: string,
 		id: string
 	) => Promise<InventoryTransferRecord | null>;
 	listAdjustments: (
@@ -839,6 +849,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			adjustmentId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<InventoryAdjustment> {
@@ -858,6 +869,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getAdjustment(
 					input.tenantId,
+					input.organizationId,
 					input.adjustmentId
 				);
 				if (!current) {
@@ -966,6 +978,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			correlationId: string;
 			countId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<StockCount> {
@@ -986,6 +999,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getCount(
 					input.tenantId,
+					input.organizationId,
 					input.countId
 				);
 				if (!current) {
@@ -1474,6 +1488,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			actorUserId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			transferId: string;
 			version: number;
@@ -1494,6 +1509,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getTransfer(
 					input.tenantId,
+					input.organizationId,
 					input.transferId
 				);
 				if (!current) {
@@ -1595,28 +1611,37 @@ export function createInventoryService(options: InventoryServiceOptions) {
 
 		async getAdjustment(
 			tenantId: string,
+			organizationId: string,
 			id: string
 		): Promise<InventoryAdjustment> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getAdjustment(tenantId, id)
+				repository.getAdjustment(tenantId, organizationId, id)
 			);
 			if (!record) {
 				throw new InventoryError("not_found", "Adjustment was not found");
 			}
 			return adjustmentView(record);
 		},
-		async getCount(tenantId: string, id: string): Promise<StockCount> {
+		async getCount(
+			tenantId: string,
+			organizationId: string,
+			id: string
+		): Promise<StockCount> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getCount(tenantId, id)
+				repository.getCount(tenantId, organizationId, id)
 			);
 			if (!record) {
 				throw new InventoryError("not_found", "Stock Count was not found");
 			}
 			return countView(record);
 		},
-		async getTransfer(tenantId: string, id: string): Promise<StockTransfer> {
+		async getTransfer(
+			tenantId: string,
+			organizationId: string,
+			id: string
+		): Promise<StockTransfer> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getTransfer(tenantId, id)
+				repository.getTransfer(tenantId, organizationId, id)
 			);
 			if (!record) {
 				throw new InventoryError("not_found", "Transfer was not found");
@@ -1715,6 +1740,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			body: ReceiveStockTransfer;
 			correlationId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			transferId: string;
 			version: number;
@@ -1737,6 +1763,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getTransfer(
 					input.tenantId,
+					input.organizationId,
 					input.transferId
 				);
 				if (!current) {
@@ -2137,6 +2164,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			body: TransitionReason;
 			correlationId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<InventoryAdjustment> {
@@ -2157,6 +2185,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getAdjustment(
 					input.tenantId,
+					input.organizationId,
 					input.adjustmentId
 				);
 				if (!current) {
@@ -2254,6 +2283,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			body: SaveStockCountDraftLines;
 			countId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<StockCount> {
@@ -2283,6 +2313,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getCount(
 					input.tenantId,
+					input.organizationId,
 					input.countId
 				);
 				if (!current) {
@@ -2359,6 +2390,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			body: SubmitStockCount;
 			countId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<StockCount> {
@@ -2388,6 +2420,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getCount(
 					input.tenantId,
+					input.organizationId,
 					input.countId
 				);
 				if (!current) {
@@ -2590,6 +2623,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.approveAdjustment({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2612,6 +2646,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.approveCount({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2727,6 +2762,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.dispatchTransfer({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2746,6 +2782,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.getAdjustment(
 				context.tenantId,
+				context.organizationId,
 				input.adjustmentId
 			);
 		},
@@ -2763,7 +2800,11 @@ export function createInventoryApplication(options: {
 				permission: "inventory.count.read",
 				sessionId: input.sessionId,
 			});
-			return options.service.getCount(context.tenantId, input.countId);
+			return options.service.getCount(
+				context.tenantId,
+				context.organizationId,
+				input.countId
+			);
 		},
 		async getTransfer(input: {
 			authUserId: string;
@@ -2779,7 +2820,11 @@ export function createInventoryApplication(options: {
 				permission: "inventory.transfer.read",
 				sessionId: input.sessionId,
 			});
-			return options.service.getTransfer(context.tenantId, input.transferId);
+			return options.service.getTransfer(
+				context.tenantId,
+				context.organizationId,
+				input.transferId
+			);
 		},
 		async listAdjustments(input: {
 			authUserId: string;
@@ -2885,6 +2930,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.receiveTransfer({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2933,6 +2979,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.reverseAdjustment({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2955,6 +3002,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.saveCountDraft({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2977,6 +3025,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.submitCount({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},

@@ -147,6 +147,15 @@ export const posApplication = createPosApplication({
 		async requireActiveContext(input) {
 			const context = await tenancyService.requireContext(input);
 			return {
+				// WS3 remediation R2, Finding B: previously dropped here even
+				// though `tenancyService.requireContext` already resolves it
+				// (`ActiveContextRecord.locationId`, set by `switchContext`) —
+				// the domain layer's by-ID lookups now use this to additionally
+				// scope session/sale reads and mutations to the caller's active
+				// location, on top of organization scope, for a location-scoped
+				// actor. `undefined` for an organization-scoped-only actor is a
+				// no-op filter, never a deny-everything or allow-everything.
+				locationId: context.locationId,
 				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			};

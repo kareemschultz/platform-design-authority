@@ -227,65 +227,112 @@ function createInMemoryRepository() {
 			Promise.resolve(
 				commandReceipts.get(`${tenantId}${operation}${idempotencyKey}`) ?? null
 			),
-		getDeposit: (tenantId, id) => {
+		// WS3 remediation R2, Finding B: every by-ID lookup below filters by
+		// BOTH `tenantId` AND `organizationId` (and, where the record type
+		// carries a `locationId`, that too when the caller supplies one) —
+		// mirroring the real Postgres repository's SQL `WHERE` clause so this
+		// mock cannot silently diverge from the production isolation
+		// boundary. A record belonging to a different organization is
+		// indistinguishable from a nonexistent one (`null`), never disclosed.
+		getDeposit: (tenantId, organizationId, id) => {
 			const record = deposits.get(id);
 			return Promise.resolve(
-				record && record.tenantId === tenantId ? record : null
+				record &&
+					record.tenantId === tenantId &&
+					record.organizationId === organizationId
+					? record
+					: null
 			);
 		},
-		getOpenSession: (tenantId, registerId) =>
+		getOpenSession: (tenantId, organizationId, registerId, locationId) =>
 			Promise.resolve(
 				[...sessions.values()].find(
 					(session) =>
 						session.tenantId === tenantId &&
+						session.organizationId === organizationId &&
 						session.registerId === registerId &&
-						session.state === "Open"
+						session.state === "Open" &&
+						(locationId === undefined || session.locationId === locationId)
 				) ?? null
 			),
-		getPriceOverride: (tenantId, id) => {
+		getPriceOverride: (tenantId, organizationId, id) => {
 			const record = priceOverrides.get(id);
 			return Promise.resolve(
-				record && record.tenantId === tenantId ? record : null
+				record &&
+					record.tenantId === tenantId &&
+					record.organizationId === organizationId
+					? record
+					: null
 			);
 		},
-		getReceipt: (tenantId, id) => {
+		getReceipt: (tenantId, organizationId, id) => {
 			const record = saleReceipts.get(id);
 			return Promise.resolve(
-				record && record.tenantId === tenantId ? record : null
+				record &&
+					record.tenantId === tenantId &&
+					record.organizationId === organizationId
+					? record
+					: null
 			);
 		},
-		getRefund: (tenantId, id) => {
+		getRefund: (tenantId, organizationId, id) => {
 			const record = refunds.get(id);
 			return Promise.resolve(
-				record && record.tenantId === tenantId ? record : null
+				record &&
+					record.tenantId === tenantId &&
+					record.organizationId === organizationId
+					? record
+					: null
 			);
 		},
-		getReturn: (tenantId, id) => {
+		getReturn: (tenantId, organizationId, id) => {
 			const record = returns.get(id);
 			return Promise.resolve(
-				record && record.tenantId === tenantId ? record : null
+				record &&
+					record.tenantId === tenantId &&
+					record.organizationId === organizationId
+					? record
+					: null
 			);
 		},
-		getSale: (tenantId, saleId) => {
+		getSale: (tenantId, organizationId, saleId, locationId) => {
 			const record = sales.get(saleId);
 			return Promise.resolve(
-				record && record.tenantId === tenantId ? record : null
+				record &&
+					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
+					(locationId === undefined || record.locationId === locationId)
+					? record
+					: null
 			);
 		},
-		getSession: (tenantId, sessionId) => {
+		getSession: (tenantId, organizationId, sessionId, locationId) => {
 			const record = sessions.get(sessionId);
 			return Promise.resolve(
-				record && record.tenantId === tenantId ? record : null
+				record &&
+					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
+					(locationId === undefined || record.locationId === locationId)
+					? record
+					: null
 			);
 		},
-		lockSessionsForDeposit: (tenantId, sessionIds) =>
+		lockSessionsForDeposit: (
+			tenantId,
+			organizationId,
+			sessionIds,
+			locationId
+		) =>
 			Promise.resolve(
 				[...sessionIds]
 					.sort()
 					.map((id) => sessions.get(id))
 					.filter(
 						(session): session is RegisterSessionRecord =>
-							session !== undefined && session.tenantId === tenantId
+							session !== undefined &&
+							session.tenantId === tenantId &&
+							session.organizationId === organizationId &&
+							(locationId === undefined || session.locationId === locationId)
 					)
 			),
 		netCashMovements: (tenantId, sessionId) => {
@@ -544,7 +591,19 @@ function createInMemoryRepository() {
 	};
 }
 
-function createHarness() {
+/** WS3 remediation R2, Finding C: `createHarness`'s default `parties` mock
+ * is a pure bijection (`authUserId -> "party_" + authUserId"`), which can
+ * never express "two different auth accounts resolve to the same Party" —
+ * the exact scenario the maker/checker self-approval guards must reject.
+ * `partyResolution`, when supplied, overrides that default per-`authUserId`
+ * so a test can map two distinct `actorUserId`s onto one Party id, or
+ * return `null` to simulate a missing/ambiguous Party link (mirrors
+ * `apps/server/composition/pos.ts`'s real `requireActorPartyId`, which
+ * throws `PosError("invalid_reference", ...)` in that case). Every existing
+ * call site omits this option and keeps the original bijective behavior. */
+function createHarness(options?: {
+	partyResolution?: (authUserId: string) => string | null;
+}) {
 	const {
 		deposits,
 		depositCustodyTransfers,
@@ -606,8 +665,21 @@ function createHarness() {
 		},
 		ids,
 		parties: {
-			requireActorPartyId: ({ authUserId }) =>
-				Promise.resolve(`party_${authUserId}`),
+			requireActorPartyId: ({ authUserId }) => {
+				if (!options?.partyResolution) {
+					return Promise.resolve(`party_${authUserId}`);
+				}
+				const resolved = options.partyResolution(authUserId);
+				if (resolved === null) {
+					return Promise.reject(
+						new PosError(
+							"invalid_reference",
+							"Actor has no active Party identity link for the active organization"
+						)
+					);
+				}
+				return Promise.resolve(resolved);
+			},
 		},
 		pricing: createTestPricingEngine(),
 		products: {
@@ -990,6 +1062,102 @@ describe("POS domain: RegisterSession lifecycle", () => {
 			varianceApproverPartyId: "party_user_checker",
 			varianceMinor: -100,
 		});
+	});
+
+	test("WS3 remediation R2, Finding C: denies cash-variance self-approval across TWO DIFFERENT auth accounts that resolve to the SAME Party, with no state change", async () => {
+		// Non-bijective harness: "user_closer" and "user_alt_login" are two
+		// different Better Auth accounts, both linked to "party_shared" — the
+		// scenario a raw `actorUserId` comparison structurally cannot catch.
+		const { events, service, sessions } = createHarness({
+			partyResolution: (authUserId) =>
+				authUserId === "user_closer" || authUserId === "user_alt_login"
+					? "party_shared"
+					: `party_${authUserId}`,
+		});
+		await service.openRegister({
+			...base,
+			actorUserId: "user_closer",
+			currency: "GYD",
+			idempotencyKey: "finding-c-variance-open",
+			openingFloat: { amountMinor: 1000, currency: "GYD" },
+			registerId: "register_finding_c_variance",
+		});
+		const closing = await service.closeRegister({
+			...base,
+			actorUserId: "user_closer",
+			countedCash: { amountMinor: 900, currency: "GYD" },
+			idempotencyKey: "finding-c-variance-close",
+			registerId: "register_finding_c_variance",
+		});
+		expect(closing.state).toBe("Closing");
+		const sessionBefore = sessions.get(closing.id);
+		const eventCountBefore = events.length;
+
+		const crossAccountSelfApproval = service.approveCashVariance({
+			actorUserId: "user_alt_login",
+			correlationId: base.correlationId,
+			idempotencyKey: "finding-c-variance-approve",
+			organizationId: base.organizationId,
+			sessionId: closing.id,
+			tenantId: base.tenantId,
+			version: closing.version,
+		});
+		await expect(crossAccountSelfApproval).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+		// No business effect: the session row is byte-for-byte unchanged and
+		// no `commerce.register.closed.v1` event was appended.
+		expect(sessions.get(closing.id)).toEqual(sessionBefore);
+		expect(events).toHaveLength(eventCountBefore);
+
+		// A genuinely different Party can still approve it.
+		const approved = await service.approveCashVariance({
+			actorUserId: "user_real_checker",
+			correlationId: base.correlationId,
+			idempotencyKey: "finding-c-variance-approve-real",
+			organizationId: base.organizationId,
+			sessionId: closing.id,
+			tenantId: base.tenantId,
+			version: closing.version,
+		});
+		expect(approved.state).toBe("Closed");
+	});
+
+	test("WS3 remediation R2, Finding C: a missing/ambiguous Party mapping is a safe denial for cash-variance approval, with no state change", async () => {
+		const { events, service, sessions } = createHarness({
+			partyResolution: (authUserId) =>
+				authUserId === "user_no_party" ? null : `party_${authUserId}`,
+		});
+		await service.openRegister({
+			...base,
+			actorUserId: "user_closer_np",
+			currency: "GYD",
+			idempotencyKey: "finding-c-variance-np-open",
+			openingFloat: { amountMinor: 1000, currency: "GYD" },
+			registerId: "register_finding_c_variance_np",
+		});
+		const closing = await service.closeRegister({
+			...base,
+			actorUserId: "user_closer_np",
+			countedCash: { amountMinor: 900, currency: "GYD" },
+			idempotencyKey: "finding-c-variance-np-close",
+			registerId: "register_finding_c_variance_np",
+		});
+		const sessionBefore = sessions.get(closing.id);
+		const eventCountBefore = events.length;
+
+		const attempt = service.approveCashVariance({
+			actorUserId: "user_no_party",
+			correlationId: base.correlationId,
+			idempotencyKey: "finding-c-variance-np-approve",
+			organizationId: base.organizationId,
+			sessionId: closing.id,
+			tenantId: base.tenantId,
+			version: closing.version,
+		});
+		await expect(attempt).rejects.toMatchObject({ code: "invalid_reference" });
+		expect(sessions.get(closing.id)).toEqual(sessionBefore);
+		expect(events).toHaveLength(eventCountBefore);
 	});
 
 	test("replays an idempotent open and cash-movement command without duplicating effects", async () => {
@@ -2134,6 +2302,71 @@ describe("POS domain: Sale, PriceOverride, Receipt", () => {
 		expect(completed.change).toEqual({ amountMinor: 0, currency: "GYD" });
 	});
 
+	test("WS3 remediation R2, Finding C: denies price-override self-approval across TWO DIFFERENT auth accounts that resolve to the SAME Party, with no state change", async () => {
+		const { events, priceOverrides, service } = createHarness({
+			partyResolution: (authUserId) =>
+				authUserId === "user_requester" || authUserId === "user_alt_login"
+					? "party_shared"
+					: `party_${authUserId}`,
+		});
+		await openSaleRegister(service, "register_override_finding_c");
+		const sale = await service.createSale({
+			...base,
+			actorUserId: "user_requester",
+			currency: "GYD",
+			idempotencyKey: "sale-override-finding-c",
+			lines: [
+				{
+					productId: "prod_1",
+					quantity: "1",
+					unit: "each",
+					unitPrice: { amountMinor: 100_000, currency: "GYD" },
+				},
+			],
+			registerId: "register_override_finding_c",
+		});
+		const lineId = sale.lines[0]?.id as string;
+		const requested = await service.requestPriceOverride({
+			...base,
+			actorUserId: "user_requester",
+			idempotencyKey: "override-request-finding-c",
+			lineId,
+			reason: "Manager-approved discount for damaged packaging",
+			requestedPrice: { amountMinor: 80_000, currency: "GYD" },
+			saleId: sale.id,
+		});
+		const overrideId = requested.lines[0]?.priceOverrideId as string;
+		const overrideBefore = priceOverrides.get(overrideId);
+		const eventCountBefore = events.length;
+
+		const crossAccountSelfApproval = service.approvePriceOverride({
+			actorUserId: "user_alt_login",
+			correlationId: base.correlationId,
+			idempotencyKey: "override-approve-finding-c",
+			organizationId: base.organizationId,
+			overrideId,
+			saleId: sale.id,
+			tenantId: base.tenantId,
+		});
+		await expect(crossAccountSelfApproval).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+		expect(priceOverrides.get(overrideId)).toEqual(overrideBefore);
+		expect(priceOverrides.get(overrideId)?.state).toBe("Pending");
+		expect(events).toHaveLength(eventCountBefore);
+
+		const approved = await service.approvePriceOverride({
+			actorUserId: "user_real_checker",
+			correlationId: base.correlationId,
+			idempotencyKey: "override-approve-finding-c-real",
+			organizationId: base.organizationId,
+			overrideId,
+			saleId: sale.id,
+			tenantId: base.tenantId,
+		});
+		expect(approved.lines[0]?.priceOverrideState).toBe("Approved");
+	});
+
 	test("requesting a price override on a Held sale implicitly resumes it to Open (frozen control plan §6.2) with totals unchanged", async () => {
 		const { service } = createHarness();
 		await openSaleRegister(service, "register_override_held");
@@ -2248,6 +2481,7 @@ describe("POS domain: Sale, PriceOverride, Receipt", () => {
 		});
 		const receipt = await service.getReceipt(
 			base.tenantId,
+			base.organizationId,
 			completed.receiptId as string
 		);
 		expect(receipt.receiptNumber).toMatch(RECEIPT_NUMBER_PATTERN_RECEIPT_READ);
@@ -2378,6 +2612,51 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 			returnId: created.id,
 			saleId,
 		});
+	});
+
+	test("WS3 remediation R2, Finding C: denies return self-approval across TWO DIFFERENT auth accounts that resolve to the SAME Party, with no state change", async () => {
+		const harness = createHarness({
+			partyResolution: (authUserId) =>
+				authUserId === "user_creator" || authUserId === "user_alt_login"
+					? "party_shared"
+					: `party_${authUserId}`,
+		});
+		const { events, returns, service } = harness;
+		const { lineId, saleId } = await completedSale(
+			harness,
+			"register_return_finding_c"
+		);
+		const created = await service.createReturn({
+			...base,
+			actorUserId: "user_creator",
+			idempotencyKey: "return-create-finding-c",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Customer changed mind",
+			saleId,
+		});
+		const returnBefore = returns.get(created.id);
+		const eventCountBefore = events.length;
+
+		const crossAccountSelfApproval = service.approveReturn({
+			...base,
+			actorUserId: "user_alt_login",
+			idempotencyKey: "return-approve-finding-c",
+			returnId: created.id,
+		});
+		await expect(crossAccountSelfApproval).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+		expect(returns.get(created.id)).toEqual(returnBefore);
+		expect(returns.get(created.id)?.state).toBe("Pending");
+		expect(events).toHaveLength(eventCountBefore);
+
+		const approved = await service.approveReturn({
+			...base,
+			actorUserId: "user_real_checker",
+			idempotencyKey: "return-approve-finding-c-real",
+			returnId: created.id,
+		});
+		expect(approved.state).toBe("Completed");
 	});
 
 	test("prevents an over-return, cumulative across two partial returns", async () => {
@@ -2572,6 +2851,64 @@ describe("POS domain: Return, Refund, Void, Reissue, Exchange", () => {
 				(envelope.data as { reasonCode?: string }).reasonCode === "Refund"
 		);
 		expect(cashEvent?.data).toMatchObject({ referenceId: refund.id });
+	});
+
+	test("WS3 remediation R2, Finding C: denies refund self-approval across TWO DIFFERENT auth accounts that resolve to the SAME Party, with no state change, no cash movement, and no event", async () => {
+		const harness = createHarness({
+			partyResolution: (authUserId) =>
+				authUserId === "user_requester" || authUserId === "user_alt_login"
+					? "party_shared"
+					: `party_${authUserId}`,
+		});
+		const { events, movements, refunds, service } = harness;
+		const { lineId, saleId } = await completedSale(
+			harness,
+			"register_refund_finding_c"
+		);
+		const created = await service.createReturn({
+			...base,
+			idempotencyKey: "refund-finding-c-return-create",
+			lines: [{ quantity: "1", saleLineId: lineId }],
+			reason: "Refund path",
+			saleId,
+		});
+		const approvedReturn = await service.approveReturn({
+			...base,
+			actorUserId: "user_checker",
+			idempotencyKey: "refund-finding-c-return-approve",
+			returnId: created.id,
+		});
+		const refund = await service.createRefund({
+			...base,
+			actorUserId: "user_requester",
+			idempotencyKey: "refund-finding-c-create",
+			returnId: approvedReturn.id,
+		});
+		const refundBefore = refunds.get(refund.id);
+		const eventCountBefore = events.length;
+		const movementCountBefore = movements.length;
+
+		const crossAccountSelfApproval = service.approveRefund({
+			...base,
+			actorUserId: "user_alt_login",
+			idempotencyKey: "refund-finding-c-approve",
+			refundId: refund.id,
+		});
+		await expect(crossAccountSelfApproval).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+		expect(refunds.get(refund.id)).toEqual(refundBefore);
+		expect(refunds.get(refund.id)?.state).toBe("Requested");
+		expect(events).toHaveLength(eventCountBefore);
+		expect(movements).toHaveLength(movementCountBefore);
+
+		const posted = await service.approveRefund({
+			...base,
+			actorUserId: "user_real_checker",
+			idempotencyKey: "refund-finding-c-approve-real",
+			refundId: refund.id,
+		});
+		expect(posted.state).toBe("Posted");
 	});
 
 	test("SUPERSEDED by WS3 remediation R1 (Finding A + E): a full refund of a cash sale's own proceeds lands exactly at the zero boundary and succeeds (record variance vs reject — now reject-before-negative, boundary-inclusive)", async () => {
@@ -3526,6 +3863,57 @@ describe("POS domain: Deposit (prepare/confirm)", () => {
 			code: "approval_separation",
 		});
 		expect(depositCustodyTransfers).toHaveLength(0);
+	});
+
+	test("WS3 remediation R2, Finding C: denies deposit self-confirmation across TWO DIFFERENT auth accounts that resolve to the SAME Party, with no state change and no custody transfer", async () => {
+		const { deposits, depositCustodyTransfers, events, service } =
+			createHarness({
+				partyResolution: (authUserId) =>
+					authUserId === "user_preparer" || authUserId === "user_alt_login"
+						? "party_shared"
+						: `party_${authUserId}`,
+			});
+		const sessionId = await openAndSafeDrop(service, {
+			amountMinor: 20_000,
+			idempotencyPrefix: "dep-finding-c",
+			registerId: "register_dep_finding_c",
+		});
+		const prepared = await service.createDeposit({
+			...base,
+			actorUserId: "user_preparer",
+			countedAmountMinor: 20_000,
+			currency: "GYD",
+			idempotencyKey: "dep-finding-c-create",
+			sourceShiftIds: [sessionId],
+		});
+		const depositBefore = deposits.get(prepared.id);
+		const eventCountBefore = events.length;
+
+		const crossAccountSelfConfirm = service.confirmDeposit({
+			actorUserId: "user_alt_login",
+			correlationId: base.correlationId,
+			depositId: prepared.id,
+			idempotencyKey: "dep-finding-c-confirm",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		await expect(crossAccountSelfConfirm).rejects.toMatchObject({
+			code: "approval_separation",
+		});
+		expect(deposits.get(prepared.id)).toEqual(depositBefore);
+		expect(deposits.get(prepared.id)?.state).toBe("Prepared");
+		expect(depositCustodyTransfers).toHaveLength(0);
+		expect(events).toHaveLength(eventCountBefore);
+
+		const confirmed = await service.confirmDeposit({
+			actorUserId: "user_real_checker",
+			correlationId: base.correlationId,
+			depositId: prepared.id,
+			idempotencyKey: "dep-finding-c-confirm-real",
+			organizationId: base.organizationId,
+			tenantId: base.tenantId,
+		});
+		expect(confirmed.state).toBe("Reconciled");
 	});
 
 	test("rejects confirming an already-Reconciled deposit", async () => {

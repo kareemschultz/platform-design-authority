@@ -310,6 +310,19 @@ export const exportJobs = pgTable(
 		periodStartUtc: timestamp("period_start_utc", {
 			withTimezone: true,
 		}).notNull(),
+		/** WS3 remediation R2, Finding D: the canonical normalized-request
+		 * fingerprint an idempotency-key reuse is bound to (mirrors
+		 * `platform_import_job.request_fingerprint` in this same package and
+		 * `pos_command_receipt`'s `request_fingerprint` in
+		 * `@meridian/persistence-pos-postgres`). Existing pre-remediation
+		 * rows backfill to the `'legacy-unverified'` sentinel — a value that
+		 * can never equal a real computed fingerprint, so any future replay
+		 * attempt against a legacy row fails closed into
+		 * `idempotency_conflict` (forcing a fresh idempotency key) instead of
+		 * silently treating an unverified legacy row as a match. */
+		requestFingerprint: text("request_fingerprint")
+			.default("legacy-unverified")
+			.notNull(),
 		ruleVersion: text("rule_version").notNull(),
 		schemaVersion: text("schema_version").notNull(),
 		tenantId: text("tenant_id").notNull(),

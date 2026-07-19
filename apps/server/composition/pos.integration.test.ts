@@ -504,10 +504,18 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 		const repository = createPosRepository(testPool);
 		// Tenant B cannot read tenant A's session by id at all — the lookup
 		// is indistinguishable from the id simply not existing.
-		expect(await repository.getSession(tenantB, openedA.id)).toBeNull();
 		expect(
-			await repository.getSession(tenantB, "session_missing_entirely")
-		).toEqual(await repository.getSession(tenantB, openedA.id));
+			await repository.getSession(tenantB, base.organizationId, openedA.id)
+		).toBeNull();
+		expect(
+			await repository.getSession(
+				tenantB,
+				base.organizationId,
+				"session_missing_entirely"
+			)
+		).toEqual(
+			await repository.getSession(tenantB, base.organizationId, openedA.id)
+		);
 
 		// Closing on the shared registerId under tenant B's context must only
 		// ever touch tenant B's own Open session, never tenant A's, even
@@ -520,10 +528,124 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 			tenantId: tenantB,
 		});
 		expect(closedB.state).toBe("Closed");
-		const tenantASession = await repository.getSession(tenantA, openedA.id);
+		const tenantASession = await repository.getSession(
+			tenantA,
+			base.organizationId,
+			openedA.id
+		);
 		expect(tenantASession?.state).toBe("Open");
-		const tenantBFromA = await repository.getSession(tenantA, closedB.id);
+		const tenantBFromA = await repository.getSession(
+			tenantA,
+			base.organizationId,
+			closedB.id
+		);
 		expect(tenantBFromA).toBeNull();
+	});
+
+	test("WS3 remediation R2, Finding B: two organizations and two locations in the SAME tenant — a caller cannot read or close another organization's register session via its real known id, and the other organization's session is left completely unchanged", async () => {
+		const pos = service();
+		const tenantId = "tenant_pos_org_isolation";
+		const orgA = "organization_pos_iso_a";
+		const orgB = "organization_pos_iso_b";
+		const locA = "location_pos_iso_a";
+		const locB = "location_pos_iso_b";
+		const registerA = "register_pos_iso_org_a";
+		const registerB = "register_pos_iso_org_b";
+
+		const openedA = await pos.openRegister({
+			actorUserId: base.actorUserId,
+			correlationId: base.correlationId,
+			currency: "GYD",
+			idempotencyKey: "org-isolation-open-a",
+			locationId: locA,
+			openingFloat: { amountMinor: 5000, currency: "GYD" },
+			organizationId: orgA,
+			registerId: registerA,
+			tenantId,
+		});
+		const openedB = await pos.openRegister({
+			actorUserId: base.actorUserId,
+			correlationId: base.correlationId,
+			currency: "GYD",
+			idempotencyKey: "org-isolation-open-b",
+			locationId: locB,
+			openingFloat: { amountMinor: 7000, currency: "GYD" },
+			organizationId: orgB,
+			registerId: registerB,
+			tenantId,
+		});
+
+		const repository = createPosRepository(testPool);
+
+		// READ: org A cannot see org B's session by its real, known id --
+		// same tenant, different organization -- and the result is
+		// indistinguishable from a truly nonexistent id (non-disclosing).
+		expect(await repository.getSession(tenantId, orgA, openedB.id)).toBeNull();
+		expect(
+			await repository.getSession(tenantId, orgA, "session_truly_missing")
+		).toEqual(await repository.getSession(tenantId, orgA, openedB.id));
+		// Same check in the other direction.
+		expect(await repository.getSession(tenantId, orgB, openedA.id)).toBeNull();
+
+		// READ, location-scoped: org A's OWN register, queried under org A
+		// but the WRONG location (locB, which belongs to org B), is also not
+		// found -- the location filter is a real additional constraint, not
+		// a no-op once an organizationId is supplied.
+		expect(
+			await repository.getOpenSession(tenantId, orgA, registerA, locB)
+		).toBeNull();
+		expect(
+			await repository.getOpenSession(tenantId, orgA, registerA, locA)
+		).not.toBeNull();
+
+		// MUTATION: org A attempts to close org B's SPECIFIC known register
+		// (registerB) while impersonating org A's own context. The lookup
+		// is organization-scoped, so this must be denied with the SAME
+		// governed "no open session" denial a genuinely unknown register
+		// gets -- never silently operate on org B's row just because both
+		// share a tenant.
+		const crossOrgClose = await captureError(
+			pos.closeRegister({
+				actorUserId: base.actorUserId,
+				correlationId: base.correlationId,
+				countedCash: { amountMinor: 7000, currency: "GYD" },
+				idempotencyKey: "org-isolation-cross-close",
+				organizationId: orgA,
+				registerId: registerB,
+				tenantId,
+			})
+		);
+		expect(crossOrgClose).toMatchObject({ code: "invalid_state" });
+
+		// Org B's session is completely unchanged by org A's attempt: still
+		// Open, same opening float, never closed.
+		const sessionBAfter = await repository.getSession(
+			tenantId,
+			orgB,
+			openedB.id
+		);
+		expect(sessionBAfter?.state).toBe("Open");
+		expect(sessionBAfter?.closedAt).toBeNull();
+		expect(sessionBAfter?.openingFloatMinor).toBe(7000);
+		const closedEventRows = await testPool.query<{ count: string }>(
+			"SELECT count(*)::text AS count FROM platform_event_outbox WHERE name = 'commerce.register.closed.v1' AND aggregate_id = $1",
+			[openedB.id]
+		);
+		expect(closedEventRows.rows[0]?.count).toBe("0");
+
+		// Closing org A's OWN register (registerA) under org A's own context
+		// still works normally -- the isolation fix does not also break
+		// legitimate same-organization closes.
+		const legitimateClose = await pos.closeRegister({
+			actorUserId: base.actorUserId,
+			correlationId: base.correlationId,
+			countedCash: { amountMinor: 5000, currency: "GYD" },
+			idempotencyKey: "org-isolation-legit-close",
+			organizationId: orgA,
+			registerId: registerA,
+			tenantId,
+		});
+		expect(legitimateClose.state).toBe("Closed");
 	});
 
 	test("denies before dispatch when permission is not granted, and dispatches once granted", async () => {
@@ -756,6 +878,7 @@ async function seedStock(input: {
 		adjustmentId: adjustment.id,
 		correlationId: `seed_correlation_${key}`,
 		idempotencyKey: `seed_approve_${key}`,
+		organizationId: input.organizationId,
 		tenantId: input.tenantId,
 		version: adjustment.version,
 	});
@@ -1119,9 +1242,15 @@ describe.serial(
 			});
 
 			const repository = createPosRepository(testPool);
-			expect(await repository.getSale(tenantB, saleA.id)).toBeNull();
 			expect(
-				await repository.getReceipt(tenantB, completedA.receiptId as string)
+				await repository.getSale(tenantB, saleBase.organizationId, saleA.id)
+			).toBeNull();
+			expect(
+				await repository.getReceipt(
+					tenantB,
+					saleBase.organizationId,
+					completedA.receiptId as string
+				)
 			).toBeNull();
 
 			const saleB = await pos.createSale({
@@ -1160,6 +1289,127 @@ describe.serial(
 				[tenantA, saleB.id]
 			);
 			expect(crossTenantRows.rows[0]?.count).toBe("0");
+		});
+
+		test("WS3 remediation R2, Finding B: two organizations and two locations in the SAME tenant — a caller cannot read another organization's sale, and cannot approve a price override that organization created, using their real known ids; the override and sale line are left completely unchanged", async () => {
+			const pos = saleService();
+			const tenantId = "tenant_pos_org_isolation_sale";
+			const orgA = "organization_pos_iso_sale_a";
+			const orgB = "organization_pos_iso_sale_b";
+			const locA = "location_pos_iso_sale_a";
+			const locB = "location_pos_iso_sale_b";
+			const registerA = "register_pos_iso_sale_a";
+			const registerB = "register_pos_iso_sale_b";
+
+			await pos.openRegister({
+				actorUserId: saleBase.actorUserId,
+				correlationId: saleBase.correlationId,
+				currency: "GYD",
+				idempotencyKey: "org-iso-sale-open-a",
+				locationId: locA,
+				openingFloat: { amountMinor: 100_000, currency: "GYD" },
+				organizationId: orgA,
+				registerId: registerA,
+				tenantId,
+			});
+			await pos.openRegister({
+				actorUserId: saleBase.actorUserId,
+				correlationId: saleBase.correlationId,
+				currency: "GYD",
+				idempotencyKey: "org-iso-sale-open-b",
+				locationId: locB,
+				openingFloat: { amountMinor: 100_000, currency: "GYD" },
+				organizationId: orgB,
+				registerId: registerB,
+				tenantId,
+			});
+			await seedStock({
+				locationId: locA,
+				organizationId: orgA,
+				productId: "product_pr2_cola_500ml",
+				quantity: "1000",
+				tenantId,
+			});
+
+			const saleA = await pos.createSale({
+				actorUserId: saleBase.actorUserId,
+				correlationId: saleBase.correlationId,
+				currency: "GYD",
+				idempotencyKey: "org-iso-sale-create-a",
+				lines: [saleLine()],
+				organizationId: orgA,
+				registerId: registerA,
+				tenantId,
+			});
+
+			const repository = createPosRepository(testPool);
+			// READ: org B cannot read org A's Open sale by its real known id,
+			// even though both organizations share the same tenant.
+			expect(await repository.getSale(tenantId, orgB, saleA.id)).toBeNull();
+
+			const requested = await pos.requestPriceOverride({
+				actorUserId: "org_iso_requester",
+				correlationId: saleBase.correlationId,
+				idempotencyKey: "org-iso-sale-override-request",
+				lineId: saleA.lines[0]?.id as string,
+				organizationId: orgA,
+				reason: "WS3 remediation R2, Finding B adversarial fixture",
+				requestedPrice: { amountMinor: 300, currency: "GYD" },
+				saleId: saleA.id,
+				tenantId,
+			});
+			expect(requested.lines[0]?.priceOverrideState).toBe("Pending");
+			const overrideId = requested.lines[0]?.priceOverrideId as string;
+
+			// MUTATION: org B attempts to approve org A's price override using
+			// its real known id, impersonating org B's own context (a
+			// DIFFERENT approver identity, so this is not merely a Finding C
+			// self-approval denial — it is the organization-scope lookup
+			// itself that must fail). Must be denied exactly like a
+			// genuinely nonexistent override id, non-disclosing.
+			const crossOrgApprove = await captureError(
+				pos.approvePriceOverride({
+					actorUserId: "org_iso_approver_wrong_org",
+					correlationId: saleBase.correlationId,
+					idempotencyKey: "org-iso-sale-override-cross-approve",
+					organizationId: orgB,
+					overrideId,
+					saleId: saleA.id,
+					tenantId,
+				})
+			);
+			expect(crossOrgApprove).toMatchObject({ code: "not_found" });
+
+			// Org A's override is completely unchanged: still Pending, never
+			// approved, and the sale line still carries its original price.
+			const overrideRow = await testPool.query<{ state: string }>(
+				"SELECT state FROM pos_price_override WHERE tenant_id = $1 AND id = $2",
+				[tenantId, overrideId]
+			);
+			expect(overrideRow.rows[0]?.state).toBe("Pending");
+			const saleLineRow = await testPool.query<{ unit_price_minor: string }>(
+				"SELECT unit_price_minor::text AS unit_price_minor FROM pos_sale_line WHERE tenant_id = $1 AND sale_id = $2 AND id = $3",
+				[tenantId, saleA.id, saleA.lines[0]?.id]
+			);
+			expect(saleLineRow.rows[0]?.unit_price_minor).toBe("500");
+
+			// The legitimate approval, from org A's OWN context with a
+			// DIFFERENT approver identity than the requester, still works
+			// normally afterward — the isolation fix does not also break a
+			// genuine same-organization approval.
+			const legitimateApprove = await pos.approvePriceOverride({
+				actorUserId: "org_iso_approver_correct_org",
+				correlationId: saleBase.correlationId,
+				idempotencyKey: "org-iso-sale-override-legit-approve",
+				organizationId: orgA,
+				overrideId,
+				saleId: saleA.id,
+				tenantId,
+			});
+			const approvedLine = legitimateApprove.lines.find(
+				(line) => line.id === saleA.lines[0]?.id
+			);
+			expect(approvedLine?.unitPrice.amountMinor).toBe(300);
 		});
 
 		test("denies sale completion before dispatch when permission is not granted, and dispatches once granted", async () => {

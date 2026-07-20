@@ -85,6 +85,9 @@
 - name: security
   color: "B60205"
   description: Security-relevant work
+- name: stale-branches
+  color: "cfd3d7"
+  description: Auto-opened by the scheduled stale/merged/abandoned remote-branch report
 - name: technical-debt
   color: "D93F0B"
   description: Recorded technical debt

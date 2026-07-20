@@ -17,10 +17,17 @@ on:
       - ".github/workflows/program-status-freshness.yml"
       - "scripts/validate_program_status.py"
       - "scripts/test_validate_program_status.py"
+  schedule:
+    # A path-triggered check only re-runs when PROGRAM_STATUS.md changes, so
+    # it goes blind when the world changes instead (an issue closes, a board
+    # is created). Twice weekly is enough to catch that drift without paging
+    # anyone for a document that changes on its own multi-day cadence.
+    - cron: "0 6 * * 1,4"
+  workflow_dispatch:
 
 permissions:
   contents: read
-  issues: read
+  issues: write
   pull-requests: read
 
 jobs:
@@ -68,3 +75,22 @@ jobs:
       - name: Fail when validation fails
         if: steps.validate.outputs.status != '0'
         run: exit 1
+
+      - name: Open or update a tracking issue on scheduled failure
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          existing=$(gh issue list --state open --label program-status-stale --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Scheduled Program Status Freshness check failed again: ${run_url}"
+          else
+            body=$'The scheduled (twice-weekly) Program Status Freshness workflow failed outside of any pull request or push to main, so no PR check surfaced it. See the run for the exact validator output: '"${run_url}"$'\n\nClose this issue once docs/project/PROGRAM_STATUS.md is refreshed and the workflow passes on its next scheduled or manual run.'
+            gh issue create \
+              --title "PROGRAM_STATUS.md failed the scheduled freshness check" \
+              --label program-status-stale \
+              --label documentation \
+              --body "$body"
+          fi

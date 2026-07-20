@@ -8,6 +8,7 @@ production readiness. GitHub state checks run when ``gh`` is authenticated and
 degrade to an explicit warning when external verification is unavailable.
 """
 
+import datetime
 import json
 import os
 import re
@@ -23,6 +24,8 @@ FIRST_SLICE_TESTS_FILE = REPO_ROOT / "registry" / "first-slice-tests.json"
 DEFAULT_REPOSITORY = "kareemschultz/platform-design-authority"
 EXPECTED_WORKSTREAMS = tuple(f"WS{index}" for index in range(8))
 STALE_QUALIFIERS = ("pending merge gate", "pending merge", "awaiting merge")
+LAST_UPDATED_WARN_DAYS = 7
+LAST_UPDATED_FAIL_DAYS = 14
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -94,6 +97,38 @@ def check_evidence_cutoff(text: str) -> None:
         return
     if run_git("merge-base", "--is-ancestor", sha, "HEAD").returncode != 0:
         fail(f"Evidence-cutoff commit {sha} is not an ancestor of the evaluated HEAD.")
+
+
+def check_last_updated_age(text: str, today: datetime.date | None = None) -> None:
+    """A status-tracking document that is only re-validated when it changes
+    goes blind the moment the world changes instead — an issue closes, a
+    board is created — with nothing to notice the document is now stale.
+    This check runs on the workflow's own `schedule:` trigger, independent
+    of whether PROGRAM_STATUS.md itself was touched, so staleness caused by
+    external state is still caught."""
+    match = re.search(r"\*\*Last updated:\*\*\s*(\d{4}-\d{2}-\d{2})", text)
+    if not match:
+        fail("Could not find a 'Last updated: YYYY-MM-DD' line.")
+        return
+    try:
+        last_updated = datetime.date.fromisoformat(match.group(1))
+    except ValueError:
+        fail(f"'Last updated' date {match.group(1)!r} is not a valid ISO date.")
+        return
+    today = today or datetime.date.today()
+    age_days = (today - last_updated).days
+    if age_days > LAST_UPDATED_FAIL_DAYS:
+        fail(
+            f"PROGRAM_STATUS.md was last updated {age_days} days ago "
+            f"({last_updated.isoformat()}), exceeding the "
+            f"{LAST_UPDATED_FAIL_DAYS}-day freshness limit."
+        )
+    elif age_days > LAST_UPDATED_WARN_DAYS:
+        warn(
+            f"PROGRAM_STATUS.md was last updated {age_days} days ago "
+            f"({last_updated.isoformat()}), past the {LAST_UPDATED_WARN_DAYS}-day "
+            "freshness guideline."
+        )
 
 
 def parse_workstream_rows(text: str) -> list[dict[str, Any]]:
@@ -367,6 +402,7 @@ def main() -> int:
         fail("Could not parse the governed status vocabulary.")
 
     check_evidence_cutoff(text)
+    check_last_updated_age(text)
     rows = parse_workstream_rows(text)
     check_workstream_rows(rows, text, allowed_statuses, standard_weights)
     check_evidence_coverage(

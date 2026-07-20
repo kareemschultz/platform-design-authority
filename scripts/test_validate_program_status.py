@@ -1,5 +1,6 @@
 """Regression tests for the program-status freshness validator."""
 
+import datetime
 import unittest
 from unittest.mock import patch
 
@@ -126,6 +127,49 @@ class ProgramStatusValidatorTests(unittest.TestCase):
         self.assertIsNone(validator.gh_json("repos/owner/repo/issues/1"))
         # check_github_state must degrade to a warning, not raise, when gh is absent.
         validator.check_github_state("PR #23", [])
+
+    def test_fresh_last_updated_produces_no_error_or_warning(self) -> None:
+        validator.check_last_updated_age(
+            "**Last updated:** 2026-07-15",
+            today=datetime.date(2026, 7, 20),
+        )
+        self.assertEqual(validator.errors, [])
+        self.assertEqual(validator.warnings, [])
+
+    def test_last_updated_past_warn_threshold_warns_not_fails(self) -> None:
+        validator.check_last_updated_age(
+            "**Last updated:** 2026-07-10",
+            today=datetime.date(2026, 7, 20),
+        )
+        self.assertEqual(validator.errors, [])
+        self.assertTrue(any("10 days ago" in warning for warning in validator.warnings))
+
+    def test_last_updated_past_fail_threshold_fails(self) -> None:
+        validator.check_last_updated_age(
+            "**Last updated:** 2026-06-01",
+            today=datetime.date(2026, 7, 20),
+        )
+        self.assertTrue(any("49 days ago" in error for error in validator.errors))
+
+    def test_missing_last_updated_line_is_an_error(self) -> None:
+        validator.check_last_updated_age("no such line here", today=datetime.date(2026, 7, 20))
+        self.assertTrue(any("Could not find" in error for error in validator.errors))
+
+    def test_malformed_last_updated_date_is_an_error(self) -> None:
+        validator.check_last_updated_age(
+            "**Last updated:** 2026-13-40", today=datetime.date(2026, 7, 20)
+        )
+        self.assertTrue(any("not a valid ISO date" in error for error in validator.errors))
+
+    def test_live_program_status_is_within_the_freshness_window(self) -> None:
+        """Regression guard: PROGRAM_STATUS.md itself must not already be
+        stale. Uses the real file's own 'Last updated' date against today's
+        real date rather than a fixed fixture, since that is exactly what
+        the scheduled CI run checks."""
+        validator.check_last_updated_age(self.status_text)
+        self.assertEqual(
+            [e for e in validator.errors if "Last updated" in e or "freshness" in e], []
+        )
 
 
 if __name__ == "__main__":

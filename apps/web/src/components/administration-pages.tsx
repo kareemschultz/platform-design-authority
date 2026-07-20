@@ -41,6 +41,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
+import { statusBadgeVariant } from "@/lib/status";
 import { orpc } from "@/utils/orpc";
 
 import { EmptyState, ListSkeleton, QueryFailure } from "./query-state";
@@ -50,9 +51,6 @@ interface Column<T> {
 	label: string;
 	render: (item: T) => React.ReactNode;
 }
-
-const POSITIVE_STATE = /active|success|trial/i;
-const NEGATIVE_STATE = /suspend|revoke|expired|failure|denied/i;
 
 function PageFrame({
 	children,
@@ -154,13 +152,11 @@ function useCursor() {
 }
 
 function stateBadge(state: string) {
-	let variant: "destructive" | "outline" | "secondary" = "outline";
-	if (POSITIVE_STATE.test(state)) {
-		variant = "secondary";
-	} else if (NEGATIVE_STATE.test(state)) {
-		variant = "destructive";
-	}
-	return <Badge variant={variant}>{state}</Badge>;
+	// WS3 remediation R3b, Item 11: was a second, independently-drifted
+	// regex classifier (POSITIVE_STATE = /active|success|trial/i matched
+	// "Inactive" via its "active" substring, coloring a deactivated Role
+	// success-green) — now delegates to the one exhaustive, shared map.
+	return <Badge variant={statusBadgeVariant(state)}>{state}</Badge>;
 }
 
 function QueryListState<T>({

@@ -87,6 +87,50 @@ export function formatMinorAsMajorInput(amountMinor: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// WS3 remediation R3b, Item 6 (validation closure — export date range).
+// `ExportCreatePage` previously called `new Date(value.periodStart)
+// .toISOString()` directly on unvalidated form input: an unparsable date
+// string (e.g. "not-a-date", or a value emptied mid-edit) produces
+// `Invalid Date`, and `Invalid Date#toISOString()` THROWS
+// `RangeError: Invalid time value` — an uncaught exception during
+// `onSubmit`, not a validation error. These helpers make date parsing safe
+// (never throw, always return null on anything unparsable) and let the
+// export form's zod schema enforce start <= end BEFORE ever constructing a
+// request body.
+// ---------------------------------------------------------------------------
+
+/** Parses a date-only or datetime input string into an ISO-8601 instant
+ * string, never throwing. Returns null for anything `Date` cannot parse
+ * into a finite time value (mirrors `Number.isFinite(date.getTime())`,
+ * the standard safe way to detect `Invalid Date` without relying on
+ * `toISOString()`'s own throw as control flow). */
+export function parseDateInputToIsoInstant(value: string): string | null {
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return null;
+	}
+	const date = new Date(trimmed);
+	if (!Number.isFinite(date.getTime())) {
+		return null;
+	}
+	return date.toISOString();
+}
+
+/** True only when both dates parse AND start is not after end. Bounds an
+ * export request to a well-formed, non-inverted period before it is ever
+ * sent — the server's own period validation remains authoritative, this is
+ * the client-side pre-check that stops an obviously-invalid range (and the
+ * `Invalid Date` throw) before a request is even built. */
+export function isValidExportDateRange(
+	periodStart: string,
+	periodEnd: string
+): boolean {
+	const start = parseDateInputToIsoInstant(periodStart);
+	const end = parseDateInputToIsoInstant(periodEnd);
+	return start !== null && end !== null && start <= end;
+}
+
+// ---------------------------------------------------------------------------
 // Register session: client-accumulated cash ledger. `RegisterSessionSchema`
 // and `CashMovementSchema` never return a running total, so the "running
 // expected cash" surface the stage spec requires is this browser tab's own

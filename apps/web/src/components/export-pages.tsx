@@ -8,7 +8,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { downloadAccountantHandoffExport } from "@/lib/pos";
+import {
+	downloadAccountantHandoffExport,
+	parseDateInputToIsoInstant,
+} from "@/lib/pos";
 import { orpc } from "@/utils/orpc";
 
 import { MutationError, OperationsPageFrame } from "./operations-shared";
@@ -16,17 +19,50 @@ import { PosCrossLink, PosSectionCard, PosTextField } from "./pos-shared";
 import { QueryFailure } from "./query-state";
 import { useWorkspace } from "./workspace-context";
 
-const ExportValuesSchema = z.object({
-	currency: z.string().regex(/^[A-Z]{3}$/, "3-letter currency code"),
-	legalEntityId: z
-		.string()
-		.min(12, "Legal entity ID must be at least 12 characters")
-		.max(64)
-		.regex(/^[A-Za-z0-9_-]+$/, "Letters, numbers, _ and - only"),
-	periodEnd: z.string().min(1, "Period end is required"),
-	periodStart: z.string().min(1, "Period start is required"),
-	timezone: z.string().min(1).max(100),
-});
+/** WS3 remediation R3b, Item 6: dates must parse safely (never reach an
+ * unguarded `new Date(...).toISOString()`, which throws on an unparsable
+ * value) and enforce start <= end BEFORE the request is built. Both checks
+ * live in one `.superRefine` so a bad end date and an inverted range each
+ * get their own field-scoped, persistent, accessibly-announced error
+ * (`PosTextField`'s `role="alert"` message) instead of an uncaught
+ * exception or a silently-accepted inverted range. */
+export const ExportValuesSchema = z
+	.object({
+		currency: z.string().regex(/^[A-Z]{3}$/, "3-letter currency code"),
+		legalEntityId: z
+			.string()
+			.min(12, "Legal entity ID must be at least 12 characters")
+			.max(64)
+			.regex(/^[A-Za-z0-9_-]+$/, "Letters, numbers, _ and - only"),
+		periodEnd: z.string().min(1, "Period end is required"),
+		periodStart: z.string().min(1, "Period start is required"),
+		timezone: z.string().min(1).max(100),
+	})
+	.superRefine((value, ctx) => {
+		const start = parseDateInputToIsoInstant(value.periodStart);
+		const end = parseDateInputToIsoInstant(value.periodEnd);
+		if (start === null) {
+			ctx.addIssue({
+				code: "custom",
+				message: "Enter a valid period start date.",
+				path: ["periodStart"],
+			});
+		}
+		if (end === null) {
+			ctx.addIssue({
+				code: "custom",
+				message: "Enter a valid period end date.",
+				path: ["periodEnd"],
+			});
+		}
+		if (start !== null && end !== null && start > end) {
+			ctx.addIssue({
+				code: "custom",
+				message: "Period end must not be before period start.",
+				path: ["periodEnd"],
+			});
+		}
+	});
 
 function ExportResult({
 	exportRecord,
@@ -76,12 +112,22 @@ export function ExportCreatePage() {
 			timezone: "America/Guyana",
 		},
 		onSubmit: async ({ value }) => {
+			// The schema's `superRefine` above already guarantees both dates
+			// parse and start <= end before `onSubmit` is ever invoked; these
+			// calls cannot return null here, but the safe parser is used
+			// (rather than a raw `new Date(...).toISOString()`) so this path
+			// can never throw even if that invariant is ever violated.
+			const periodStart = parseDateInputToIsoInstant(value.periodStart);
+			const periodEnd = parseDateInputToIsoInstant(value.periodEnd);
+			if (periodStart === null || periodEnd === null) {
+				return;
+			}
 			const exportRecord = await create.mutateAsync({
 				body: {
 					currency: value.currency,
 					legalEntityId: value.legalEntityId,
-					periodEnd: new Date(value.periodEnd).toISOString(),
-					periodStart: new Date(value.periodStart).toISOString(),
+					periodEnd,
+					periodStart,
 					timezone: value.timezone,
 				},
 				headers: {

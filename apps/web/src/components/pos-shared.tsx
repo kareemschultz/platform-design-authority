@@ -94,7 +94,18 @@ export function PosTextField({
 				value={field.state.value}
 			/>
 			{message ? (
-				<p className="text-destructive text-sm" id={`${fieldId}-error`}>
+				// WS3 remediation R3b, Item 6: a field validation error must be
+				// announced, not visual-only. `role="alert"` (an assertive live
+				// region) makes a screen reader announce this text the moment it
+				// mounts — including when it appears in place after a failed
+				// submit, not just on first paint — and it persists in the DOM
+				// until the field's own error clears (re-validates clean), so it
+				// is never a one-shot toast a user could miss.
+				<p
+					className="text-destructive text-sm"
+					id={`${fieldId}-error`}
+					role="alert"
+				>
 					{message}
 				</p>
 			) : null}
@@ -133,7 +144,11 @@ export function PosMoneyField({
 				value={field.state.value}
 			/>
 			{message ? (
-				<p className="text-destructive text-sm" id={`${fieldId}-error`}>
+				<p
+					className="text-destructive text-sm"
+					id={`${fieldId}-error`}
+					role="alert"
+				>
 					{message}
 				</p>
 			) : null}

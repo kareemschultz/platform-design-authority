@@ -32,6 +32,7 @@ import {
 	saveSaleWorkspace,
 	toSaleLineInput,
 } from "@/lib/pos";
+import { dedupedToastError } from "@/lib/toast";
 import { workspaceWorkState } from "@/lib/workspace-change";
 import { client, orpc } from "@/utils/orpc";
 import {
@@ -160,16 +161,27 @@ function ProductLookup({
 				toast.success(`${label} added`);
 				setScanAnnouncement(`${label} added to the cart.`);
 			} else if (outcome.kind === "no-match") {
-				toast.error(`No matching product for barcode ${scannedValue}`);
+				// WS3 remediation R3b, Item 11: a repeated scan of the SAME
+				// unmatched barcode (a genuinely likely cashier action — try
+				// again, assume it mis-scanned) must not stack duplicate
+				// identical toasts; `dedupedToastError` shows one per distinct
+				// message within its window.
+				dedupedToastError(
+					`No matching product for barcode ${scannedValue}`,
+					toast.error
+				);
 				setScanAnnouncement(`No matching product for barcode ${scannedValue}.`);
 			} else {
-				toast.error(`Barcode ${scannedValue} matched more than one product`);
+				dedupedToastError(
+					`Barcode ${scannedValue} matched more than one product`,
+					toast.error
+				);
 				setScanAnnouncement(
 					`Barcode ${scannedValue} matched more than one product. Use "Search by name or SKU" to find and add it.`
 				);
 			}
 		} catch {
-			toast.error("Product lookup failed. Scan again.");
+			dedupedToastError("Product lookup failed. Scan again.", toast.error);
 			setScanAnnouncement(
 				`Looking up barcode ${scannedValue} failed. Scan again.`
 			);
@@ -720,13 +732,34 @@ function PriceOverrideApproveSection({ saleId }: { saleId: string }) {
 	);
 }
 
-const CashTenderSchema = z.object({
-	tendered: z
-		.string()
-		.refine((value) => parseMoneyInputToMinor(value) !== null, {
-			message: "Enter a non-negative amount with up to 2 decimal places",
-		}),
-});
+/** WS3 remediation R3b, Item 6 (validation closure — insufficient tender).
+ * The sale total isn't known until render time, so the sufficiency check is
+ * built per-sale rather than a single module-level schema; this is what
+ * lets the same `.refine` chain surface a PERSISTENT, field-scoped,
+ * accessibly-announced error (via `PosMoneyField`'s `role="alert"`
+ * message, wired below) for BOTH failure modes — an unparsable amount and a
+ * parsable-but-insufficient one — instead of the prior behavior where an
+ * insufficient (but well-formed) tender silently no-opped `onSubmit` with
+ * no error shown at all. */
+export function buildCashTenderSchema(totalMinor: number) {
+	return z.object({
+		tendered: z
+			.string()
+			.refine((value) => parseMoneyInputToMinor(value) !== null, {
+				message: "Enter a non-negative amount with up to 2 decimal places",
+			})
+			.refine(
+				(value) => {
+					const minor = parseMoneyInputToMinor(value);
+					return minor === null || isSufficientCashTender(minor, totalMinor);
+				},
+				{
+					message:
+						"Cash tendered is less than the sale total. Enter an amount that covers the total.",
+				}
+			),
+	});
+}
 
 function SaleWorkspaceView({
 	onSaleChange,
@@ -749,6 +782,11 @@ function SaleWorkspaceView({
 	const form = useForm({
 		defaultValues: { tendered: "0.00" },
 		onSubmit: async ({ value }) => {
+			// The `buildCashTenderSchema` validator below already rejects an
+			// insufficient tender WITH a persistent, accessible field error
+			// before `onSubmit` is ever invoked (TanStack Form only calls
+			// `onSubmit` once `validators.onSubmit` passes) — this is a
+			// defense-in-depth guard, not the primary validation path.
 			const tenderedMinor = parseMoneyInputToMinor(value.tendered);
 			if (
 				tenderedMinor === null ||
@@ -784,7 +822,7 @@ function SaleWorkspaceView({
 				onSaleChange(completed);
 			}
 		},
-		validators: { onSubmit: CashTenderSchema },
+		validators: { onSubmit: buildCashTenderSchema(sale.total.amountMinor) },
 	});
 
 	async function holdSale() {

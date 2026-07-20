@@ -30,6 +30,33 @@ import { EmptyState } from "./query-state";
 import { useOnlineGatedMutation } from "./use-online-gated-mutation";
 import { useWorkspace } from "./workspace-context";
 
+/** WS3 remediation R3b, Item 6 (validation closure — return quantity). The
+ * HTML `max` attribute on this decimal-text input does nothing — the form
+ * is `noValidate` and the input isn't `type="number"` — so before this fix
+ * a cashier could type any quantity and the ONLY thing that stopped an
+ * over-quantity return was a round trip to the server (which does perform
+ * the real, authoritative cumulative check — see
+ * `packages/domains/pos/src/index.ts`'s `buildReturnLines`). This computes
+ * a real, immediate, persistent, accessible field-level error the moment
+ * the typed quantity exceeds this browser's best-known bound, disabling
+ * submission before any request fires. The server remains the
+ * authoritative gate for cross-browser prior returns this bound cannot see
+ * (disclosed below and in the page description) — the client bound is a
+ * pre-check, not a replacement. */
+export function returnQuantityError(
+	quantity: string,
+	max: number
+): string | null {
+	const parsed = Number.parseFloat(quantity);
+	if (!Number.isFinite(parsed) || parsed < 0) {
+		return "Enter a quantity of 0 or more.";
+	}
+	if (parsed > max) {
+		return `Return quantity cannot exceed the outstanding quantity of ${max} known to this browser.`;
+	}
+	return null;
+}
+
 function SaleLineReturnRow({
 	line,
 	onChange,
@@ -45,6 +72,8 @@ function SaleLineReturnRow({
 	// authoritative — commerce.return.create performs the real cumulative
 	// check server-side (frozen control plan §6.3).
 	const max = outstandingReturnableQuantity(line.quantity, "0");
+	const error = returnQuantityError(selected, max);
+	const errorId = `return-qty-${line.id}-error`;
 	return (
 		<li className="grid gap-2 rounded-xl border p-4 sm:grid-cols-[2fr_1fr] sm:items-end">
 			<div>
@@ -56,15 +85,22 @@ function SaleLineReturnRow({
 			</div>
 			<div className="grid gap-1">
 				<Label htmlFor={`return-qty-${line.id}`}>
-					Return quantity (0 = skip)
+					Return quantity (0 = skip, max {max})
 				</Label>
 				<Input
+					aria-describedby={error ? errorId : undefined}
+					aria-invalid={error !== null}
 					id={`return-qty-${line.id}`}
 					inputMode="decimal"
 					max={max}
 					onChange={(event) => onChange(event.target.value)}
 					value={selected}
 				/>
+				{error ? (
+					<p className="text-destructive text-sm" id={errorId} role="alert">
+						{error}
+					</p>
+				) : null}
 			</div>
 		</li>
 	);
@@ -115,10 +151,25 @@ export function ReturnNewPage() {
 	});
 	const sale: Sale | undefined = saleLookup.data;
 
+	// WS3 remediation R3b, Item 6: block submission client-side the same way
+	// each row's own field error already does, using the same bound — a
+	// belt-and-suspenders guard against submitting with an invalid quantity
+	// still showing (e.g. focus never left the field to trigger a re-render
+	// elsewhere). The server's cumulative check (buildReturnLines) remains
+	// the actual authority; this only prevents an already-visibly-invalid
+	// entry from being submitted.
+	const hasInvalidSelection = sale
+		? sale.lines.some((line) => {
+				const selected = selections[line.id] ?? "0";
+				const max = outstandingReturnableQuantity(line.quantity, "0");
+				return returnQuantityError(selected, max) !== null;
+			})
+		: false;
+
 	const form = useForm({
 		defaultValues: { reason: "" },
 		onSubmit: async ({ value }) => {
-			if (!sale) {
+			if (!sale || hasInvalidSelection) {
 				return;
 			}
 			const lines = Object.entries(selections)
@@ -253,7 +304,8 @@ export function ReturnNewPage() {
 								disabled={
 									create.isPending ||
 									!workspace.contextId ||
-									!workspace.isOnline
+									!workspace.isOnline ||
+									hasInvalidSelection
 								}
 								type="submit"
 							>

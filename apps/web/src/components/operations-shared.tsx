@@ -29,13 +29,9 @@ import {
 	parseCursorTrail,
 	previousCursorState,
 } from "@/lib/operations";
+import { statusBadgeVariant } from "@/lib/status";
 
 import { EmptyState, QueryFailure } from "./query-state";
-
-const POSITIVE_STATE_PATTERN =
-	/active|posted|approved|completed|reconciled|received/u;
-const NEGATIVE_STATE_PATTERN =
-	/failed|rejected|mismatch|reversed|exception|cancelled/u;
 
 export interface DataColumn<T> {
 	label: string;
@@ -230,14 +226,7 @@ export function CollectionState<T>({
 }
 
 export function StateBadge({ state }: { state: string }) {
-	const lowered = state.toLowerCase();
-	let variant: "destructive" | "outline" | "secondary" = "outline";
-	if (POSITIVE_STATE_PATTERN.test(lowered)) {
-		variant = "secondary";
-	} else if (NEGATIVE_STATE_PATTERN.test(lowered)) {
-		variant = "destructive";
-	}
-	return <Badge variant={variant}>{state}</Badge>;
+	return <Badge variant={statusBadgeVariant(state)}>{state}</Badge>;
 }
 
 export function FreshnessBadge({

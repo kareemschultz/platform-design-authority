@@ -27,7 +27,10 @@ Then read what matches the surface you are touching:
 - Navigation, command palette, search → `docs/blueprint/09-UX/NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`
 - Motion, animation, content/copy → `docs/blueprint/09-UX/ANIMATION_AND_MOTION_GUIDE.md`, `docs/blueprint/09-UX/CONTENT_DESIGN_LOCALIZATION_AND_MOTION.md`, `docs/blueprint/09-UX/ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md`
 - Disclosure/complexity decisions → `docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md`
-- First-slice scope questions → `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
+- Dense/advanced interactions (drag, virtualization, split panes, keyboard-heavy surfaces) → `docs/blueprint/09-UX/ADVANCED_INTERFACE_PATTERNS.md`
+- Changing the design system itself (tokens, primitives, versioning, deprecation) → `docs/blueprint/09-UX/DESIGN_SYSTEM_OPERATIONS.md`
+- Marketing/public website surfaces → `docs/blueprint/09-UX/MARKETING_WEBSITE_ARCHITECTURE.md`
+- First-slice scope questions → `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`; POS tender scope specifically → `docs/blueprint/09-UX/FIRST_SLICE_TENDER_SCOPE_CLARIFICATION.md`
 - Stories/visual regression → `docs/blueprint/09-UX/STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md`
 
 For architecture-level questions (page composition, state ownership, component boundaries), invoke the `frontend-architecture` skill first and plan before implementing.

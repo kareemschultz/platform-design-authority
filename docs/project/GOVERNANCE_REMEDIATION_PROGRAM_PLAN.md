@@ -44,6 +44,18 @@ Ordering: Phase 0 → PR-1 + sweep → **PR-2 (#75, hard blocker for Phases 4/6/
 - [ ] **PR-4** `chore(tracking)`: add `schedule:` cron + `workflow_dispatch` to `program-status-freshness.yml` with `GH_TOKEN` for closed-issue checks; auto-open/update a labeled issue on scheduled failure; add "Last updated" age gate to `validate_program_status.py` (warn >7 days, fail >14) with unit tests.
 - [ ] **PR-5** `chore(governance)`: `.github/CODEOWNERS`; `.github/labels.yml` exported from live labels + `scripts/sync_labels.py` + sync workflow; record the recommended branch-protection ruleset in the Projects guide (issue #61 remains a founder settings action).
 
+### Phase 3.5 — Developer-experience and correctness fixes
+
+Added 2026-07-20 after the Phase 2 merge surfaced three instances of one defect class and two avoidable integration costs. These make every later phase cheaper and touch no application code, so they are safe to land alongside live workstream branches.
+
+- [x] **PR-A** `feat(tooling)`: `scripts/run_gates.py` (`bun run gates`) runs the CI gate set in one command with a pass/fail table, plus `scripts/test_run_gates.py`, which derives the command set from `.github/workflows/` and fails when a CI gate is neither declared nor recorded as deliberately skipped. Reconstructing the gate list by hand cost two failed CI rounds on PR #75; `validate_docs.py` passing is not the same as a green branch.
+- [ ] **PR-B** `fix(tooling)`: audit the remaining tree-walking scripts for the filesystem-versus-git-index defect. Three instances are known — nested `biome.json` breaking `bun run check` (#113), `validate_document_indexes.py` reporting 6479 false errors (#115), and Playwright artifacts scanned by ultracite (found independently by the WS3 branch). Prefer enumerating through the git index, which is also the correct definition of "a repository artifact", over per-directory deny lists.
+- [ ] **PR-C** `feat(governance)`: fail a branch when a `document_id` it adds collides with one already on `origin/main`. Parallel branches each allocating the next free identifier produced eight collisions in the PR #75 merge, every one of which had to be reassigned by hand at integration time.
+- [ ] **PR-D** `feat(tooling)`: add a `--body-file` mode to `validate_pr_governance.py` so a pull-request body can be checked locally without fabricating a GitHub event payload with base and head SHAs.
+- [ ] **PR-E** `chore(tracking)`: report branches whose upstream is gone, and merged branches older than a threshold, on the Phase 3 schedule. A dead branch with a deleted upstream produced several audit findings that evaporated on re-verification against `origin/main`.
+
+Also worth a deliberate decision rather than a change: the per-cell partial-evidence feature now has **zero** live subjects, since no capability is `Partially Evidenced` after the WS2 closeout. That is why its regression test had drifted into asserting delivery progress. Confirm the feature still earns its complexity before extending it.
+
 ### Phase 4 — Instruction layer (after PR #75)
 
 - [ ] **PR-6** `docs(instructions)`: enforce CLAUDE.md ≡ AGENTS.md byte-identity in `validate_docs.py` ("one document, two filenames"); fix "agents" → "skills" terminology; replace the unsupported "lint-visible defects" claim with the real CI gate reference (PR-8); add a §8 paid-asset inventory bullet (shadcn Studio Pro and Mobbin Pro are owned subscriptions that must be searched before hand-building UI).

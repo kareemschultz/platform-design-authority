@@ -1,72 +1,218 @@
 ---
 title: Prototype API Reference
 description: Implemented Hono, oRPC, OpenAPI, and Better Auth surfaces
+owner: Developer Platform
+documentation_id: PDOC-0005
+content_class: api-reference
+audience: [developer, integrator]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
+last_verified: 2026-07-16
+implementation_evidence: [apps/server/src/router.ts, apps/server/src/router.test.ts, packages/contracts/platform-api/src/generated.ts]
+related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit, platform.events, catalog.products, inventory.adjustments, inventory.counts, inventory.stock-balances, inventory.transfers]
+permission_refs: [platform.organization.read, platform.organization.update, platform.user.read, platform.user.invite, platform.user.suspend, party.record.read, party.record.create, party.record.update, platform.role.read, platform.role.assign, platform.entitlement.read, platform.audit.read, platform.event.replay, catalog.product.read, catalog.product.create, catalog.product.update, catalog.product.activate, catalog.product.archive, inventory.adjustment.read, inventory.adjustment.create, inventory.adjustment.approve, inventory.adjustment.reverse, inventory.balance.read, inventory.count.read, inventory.count.create, inventory.count.submit, inventory.count.approve, inventory.transfer.read, inventory.transfer.create, inventory.transfer.dispatch, inventory.transfer.receive]
+contract_refs: [openapi/first-slice-v1.yaml, registry/endpoint-permissions.json]
+api_reference_mode: generated-canonical
+generated_reference_source: openapi/first-slice-v1.yaml
+document_class: product-documentation
+declared_depth: prototype-ready
+evidence_state: implemented
+applicable_dimensions: [purpose, authority-and-scope, contracts-and-compatibility, authority-controls, experience-and-accessibility, offline-and-degraded, failure-and-recovery, security-and-privacy, verification-and-evidence, references-and-traceability]
 ---
 
 # Prototype API surfaces
 
-This page documents the implemented controlled-prototype API surface. The repository now implements the WS1 identity, tenancy, Party, authorization, entitlement, session, and Audit foundations plus the bounded WS2 Catalog, Inventory, Event Backbone, import, and Numbering operations described by their evidence records. Root `openapi/first-slice-v1.yaml` remains the canonical contract and includes later first-slice work that is not implemented yet.
+This page contains two intentionally separate views: the implemented controlled-prototype runtime boundary and a generated canonical reference for the broader Draft first-slice contract. The generated table does not prove runtime binding, release support, pilot readiness, provider capability, or production availability. Runtime claims remain limited to the evidence revision and the implemented procedure families below.
 
 ## Base URL
 
-The local server listens at `http://localhost:3000` by default. Browser code does not call that cross-origin address directly: the web application keeps cookies and application requests on its own origin and proxies `/api/auth/*` and `/rpc/*` to the API. In Compose and private-network rendering, `PLATFORM_API_INTERNAL_URL` supplies the server-only destination, normally `http://server:3000`; it is never a browser-visible authority or URL.
+The local server listens at `http://localhost:3000` by default.
 
 | Surface | Path | Authentication | Purpose |
 |---|---|---|---|
 | Process health | `GET /` | None | Returns plain-text `OK` |
 | Better Auth | `GET|POST /api/auth/*` | Endpoint-dependent | Email/password and session endpoints |
 | oRPC transport | `/rpc/*` | Procedure-dependent | Type-safe application procedures |
-| oRPC OpenAPI handler | `/api-reference/*` | Procedure-dependent | Generated prototype schema/reference surface |
+| oRPC OpenAPI handler | `/api-reference/*` | Procedure-dependent | Runtime-derived reference for composed procedures; not the canonical first-slice contract |
 
-The HTTP shell allows the governed `DELETE`, `GET`, `PATCH`, `POST`, `PUT`, and `OPTIONS` methods from the exact configured `CORS_ORIGIN`. `PUT` and its `If-Match` precondition are required by the versioned Stock Count draft-line operation. Credentials are enabled only for the approved origin; the header allowlist remains exact and widening methods does not widen origins.
+The server allows `GET`, `POST`, and `OPTIONS` from the exact configured `CORS_ORIGIN`. Credentials are enabled for the approved browser origin.
 
-## Implemented procedures
+## Implemented procedure families
 
-### `healthCheck`
+| Family | Implemented scope | Authority boundary |
+|---|---|---|
+| `healthCheck` | Public process-health response | No business authority |
+| `privateData` | Authenticated scaffold response | Authentication only; returned user is not Party, membership, role, permission, or entitlement |
+| `identity` | Current identity and active-context selection | Current session and active membership are revalidated |
+| `organizations` | List/get/update organizations and list locations | `platform.organization.read` or `platform.organization.update` |
+| `users` | List, invite, and suspend memberships | `platform.user.read`, `.invite`, or `.suspend` |
+| `parties` | List/get/create/update Party records and create identity links | Party permissions; Better Auth identity remains separate |
+| `roles` | List roles and assign a role | `platform.role.read` or `platform.role.assign` |
+| `entitlements` | List tenant entitlements | `platform.entitlement.read`; entitlement is not actor permission |
+| `sessions` | List and revoke the current account's sessions | Authenticated account ownership, with idempotency on revocation |
+| `audit` | List tenant audit evidence | `platform.audit.read` and active tenant context |
+| `catalog.products` | Create, get, list, update, activate, and archive Product aggregates | Catalog Product permissions, version preconditions, idempotency for commands |
+| `inventory.adjustments` | Create, get, list, approve, and reverse adjustments | Inventory permissions; maker-checker and linked reversal rules |
+| `inventory.counts` | Create, get, list, submit, and approve blind counts | Inventory count permissions and current version |
+| `inventory.balances` | List derived stock balances | `inventory.balance.read`; projection is not the ledger authority |
+| `inventory.transfers` | Create, get, list, dispatch, and receive transfers | Transfer permissions, conservation, partial-receipt, and version rules |
+| `events` | Submit a bounded replay request for a registered consumer | `platform.event.replay`, current tenant context, idempotency, compatibility, retention, and Audit controls |
 
-- Classification: public prototype procedure
-- Input: none
-- Result: string `OK`
-- Used by: the web home-page connection indicator
-- Business authority: none
-
-### `privateData`
-
-- Classification: authenticated prototype procedure
-- Input: none
-- Result: a prototype message and current Better Auth user
-- Denial: unauthenticated requests are rejected by the protected procedure
-- Business authority: none
-
-The returned user is an authentication identity. It is not a Party, employee, customer, tenant membership, business role, permission set, or entitlement.
-
-### Governed business procedures
-
-Implemented protected procedures cover the WS1 Administration surface and bounded WS2 Product, balance, adjustment, Count, transfer, import, replay, and projection workflows. Each procedure is defined by the published contract and declares its context, input validation, typed errors, permission or explicit authenticated-context rule, and success status. The server resolves the current membership and active context, evaluates business permission and entitlement separately, and then retains tenant predicates and owner-state checks inside the application and repository boundaries.
-
-Better Auth remains authentication/session authority only. It does not become Party, a business role, a permission catalog, an entitlement, or tenant hierarchy. A generated client type, visible control, cached query, or successful authentication never grants business authority.
+The exact runtime composition is `apps/server/src/router.ts`. Its tests prove selected transport mappings and denial behavior. The generated contract package contains the broader Draft first-slice operation catalog and must not be mistaken for evidence that every operation is bound to an application implementation.
 
 ## Typed client use
 
-Web clients consume the generated `PlatformApiClient` through the repository oRPC/TanStack Query adapter. Browser requests use same-origin `/rpc`; server rendering uses the private API destination. Do not duplicate request or response shapes manually. New procedures must declare ownership, authentication, tenant context, permission or explicit authenticated context, validation, error behavior, idempotency where applicable, audit, and tests.
+Web clients consume the generated `AppRouterClient` through the repository oRPC/TanStack Query adapter. Do not duplicate request or response shapes manually. New procedures must declare ownership, authentication, tenant context, permission or explicit authenticated context, validation, error behavior, idempotency where applicable, audit, and tests.
 
 ## OpenAPI authority
 
-There are two distinct artifacts:
+There are three distinct artifacts:
 
-1. The generated oRPC reference reflects the currently composed controlled-prototype procedures.
-2. Root `openapi/first-slice-v1.yaml` is the governed draft contract for the complete planned first slice; generated TypeScript contracts and endpoint-permission registries are checked against it.
+1. The runtime-derived oRPC reference reflects the procedures composed at the evidence revision.
+2. Root `openapi/first-slice-v1.yaml` is the governed Draft contract for the planned vertical slice.
+3. `packages/contracts/platform-api/src/generated.ts` is generated from governed endpoint metadata and supplies typed contract definitions; generation does not prove runtime binding.
 
-Neither artifact proves production implementation. Generated reference pages must identify their source revision and must not become a separately edited contract.
+None of these artifacts proves production readiness. Generated reference pages must identify their source revision and must not become a separately edited contract.
+
+{/* GENERATED:OPENAPI-REFERENCE:START */}
+## Generated Draft contract operations
+
+This table is generated from the canonical Draft OpenAPI source. Inclusion proves contract registration, not runtime binding, release support, pilot readiness, provider capability, or production availability.
+
+- Source: `openapi/first-slice-v1.yaml`
+- Contract version: `0.5.0`
+- Operations: `116`
+- Authority join: `x-permission` or explicit `x-authorization` on every operation
+
+| Method | Path | `operationId` | Authority | Success |
+|---|---|---|---|---:|
+| `GET` | `/audit-records` | `getAuditRecords` | permission `platform.audit.read` | `200` |
+| `POST` | `/cash-variances/{varianceId}/approve` | `postCashVariancesByVarianceIdApprove` | permission `commerce.cash-variance.approve` | `200` |
+| `POST` | `/customer-imports` | `postCustomerImports` | permission `platform.import.create` | `200` |
+| `GET` | `/customers` | `getCustomers` | permission `crm.customer.read` | `200` |
+| `POST` | `/customers` | `postCustomers` | permission `crm.customer.create` | `200` |
+| `PATCH` | `/customers/{customerId}` | `patchCustomersByCustomerId` | permission `crm.customer.update` | `200` |
+| `POST` | `/deposit-reconciliations` | `postDepositReconciliations` | permission `finance.bank-reconciliation.create` | `200` |
+| `POST` | `/deposits` | `createDeposit` | permission `commerce.deposit.create` | `201` |
+| `POST` | `/deposits/{depositId}/confirm` | `postDepositsByDepositIdConfirm` | permission `commerce.deposit.confirm` | `200` |
+| `POST` | `/devices/enroll` | `enrollDevice` | permission `platform.device.enroll` | `201` |
+| `POST` | `/devices/{deviceId}/revoke` | `postDevicesByDeviceIdRevoke` | permission `platform.device.revoke` | `200` |
+| `GET` | `/entitlements` | `getEntitlements` | permission `platform.entitlement.read` | `200` |
+| `POST` | `/event-replays` | `createEventReplay` | permission `platform.event.replay` | `202` |
+| `POST` | `/exports/accountant-handoff` | `createAccountantHandoffExport` | permission `platform.export.create` | `202` |
+| `GET` | `/exports/{exportId}` | `getExportsByExportId` | permission `platform.export.read` | `200` |
+| `GET` | `/finance-handoff/posting-batches` | `getFinanceHandoffPostingBatches` | permission `finance.posting-batch.read` | `200` |
+| `GET` | `/inventory-adjustments` | `listInventoryAdjustments` | permission `inventory.adjustment.read` | `200` |
+| `POST` | `/inventory-adjustments` | `createInventoryAdjustment` | permission `inventory.adjustment.create` | `202` |
+| `GET` | `/inventory-adjustments/{id}` | `getInventoryAdjustment` | permission `inventory.adjustment.read` | `200` |
+| `POST` | `/inventory-adjustments/{id}/approve` | `postInventoryAdjustmentsByIdApprove` | permission `inventory.adjustment.approve` | `200` |
+| `POST` | `/inventory-adjustments/{id}/reverse` | `reverseInventoryAdjustment` | permission `inventory.adjustment.reverse` | `200` |
+| `GET` | `/locations` | `listLocations` | permission `platform.organization.read` | `200` |
+| `GET` | `/me` | `getCurrentIdentity` | authorization `authenticated_session` | `200` |
+| `POST` | `/offline-leases` | `issueOfflineLease` | permission `platform.offline-lease.issue` | `201` |
+| `GET` | `/opening-stock-imports` | `listOpeningStockImports` | permission `inventory.import.read` | `200` |
+| `POST` | `/opening-stock-imports` | `postOpeningStockImports` | permission `inventory.import.create` | `202` |
+| `GET` | `/opening-stock-imports/{importId}` | `getOpeningStockImport` | permission `inventory.import.read` | `200` |
+| `POST` | `/opening-stock-imports/{importId}/accept` | `acceptOpeningStockImport` | permission `inventory.import.approve` | `200` |
+| `POST` | `/opening-stock-imports/{importId}/approve` | `approveOpeningStockImport` | permission `inventory.import.approve` | `200` |
+| `POST` | `/opening-stock-imports/{importId}/cancel` | `cancelOpeningStockImport` | permission `inventory.import.approve` | `200` |
+| `GET` | `/opening-stock-imports/{importId}/correction-report` | `getOpeningStockImportCorrectionReport` | permission `inventory.import.download` | `200` |
+| `GET` | `/opening-stock-imports/{importId}/findings` | `getOpeningStockImportFindings` | permission `inventory.import.read` | `200` |
+| `POST` | `/opening-stock-imports/{importId}/purge-staging` | `purgeOpeningStockImportStaging` | permission `inventory.import.purge` | `200` |
+| `GET` | `/organizations` | `listOrganizations` | permission `platform.organization.read` | `200` |
+| `GET` | `/organizations/{organizationId}` | `getOrganization` | permission `platform.organization.read` | `200` |
+| `PATCH` | `/organizations/{organizationId}` | `updateOrganization` | permission `platform.organization.update` | `200` |
+| `GET` | `/parties` | `listParties` | permission `party.record.read` | `200` |
+| `POST` | `/parties/organizations` | `postPartiesOrganizations` | permission `party.record.create` | `201` |
+| `POST` | `/parties/persons` | `createPersonParty` | permission `party.record.create` | `201` |
+| `GET` | `/parties/{partyId}` | `getParty` | permission `party.record.read` | `200` |
+| `PATCH` | `/parties/{partyId}` | `patchPartiesByPartyId` | permission `party.record.update` | `200` |
+| `POST` | `/party-identity-links` | `createPartyIdentityLink` | permission `party.record.update` | `201` |
+| `POST` | `/payment-intents` | `createPaymentIntent` | permission `payment.intent.create` | `201` |
+| `GET` | `/payment-intents/{id}` | `getPaymentIntentsById` | permission `payment.intent.read` | `200` |
+| `POST` | `/payment-intents/{id}/refund` | `postPaymentIntentsByIdRefund` | permission `payment.intent.refund` | `200` |
+| `POST` | `/payment-intents/{id}/reverse` | `postPaymentIntentsByIdReverse` | permission `payment.intent.reverse` | `200` |
+| `POST` | `/payment-intents/{paymentIntentId}/confirm` | `confirmPaymentIntent` | permission `payment.intent.confirm` | `200` |
+| `POST` | `/payment-reconciliations` | `postPaymentReconciliations` | permission `payment.reconciliation.create` | `200` |
+| `POST` | `/privacy-actions/{id}/approve` | `postPrivacyActionsByIdApprove` | permission `security.privacy-action.approve` | `200` |
+| `POST` | `/privacy-requests` | `createPrivacyRequest` | permission `security.privacy-request.create` | `201` |
+| `GET` | `/privacy-requests/{id}` | `getPrivacyRequestsById` | permission `security.privacy-request.read` | `200` |
+| `POST` | `/privacy-requests/{id}/verify` | `postPrivacyRequestsByIdVerify` | permission `security.privacy-request.verify` | `200` |
+| `GET` | `/product-imports` | `listProductImports` | permission `catalog.import.read` | `200` |
+| `POST` | `/product-imports` | `postProductImports` | permission `catalog.import.create` | `202` |
+| `GET` | `/product-imports/{importId}` | `getProductImport` | permission `catalog.import.read` | `200` |
+| `POST` | `/product-imports/{importId}/accept` | `acceptProductImport` | permission `catalog.import.approve` | `200` |
+| `POST` | `/product-imports/{importId}/approve` | `postProductImportsByImportIdApprove` | permission `catalog.import.approve` | `200` |
+| `POST` | `/product-imports/{importId}/cancel` | `cancelProductImport` | permission `catalog.import.approve` | `200` |
+| `GET` | `/product-imports/{importId}/correction-report` | `getProductImportCorrectionReport` | permission `catalog.import.download` | `200` |
+| `GET` | `/product-imports/{importId}/findings` | `getProductImportFindings` | permission `catalog.import.read` | `200` |
+| `POST` | `/product-imports/{importId}/purge-staging` | `purgeProductImportStaging` | permission `catalog.import.purge` | `200` |
+| `GET` | `/products` | `listProducts` | permission `catalog.product.read` | `200` |
+| `POST` | `/products` | `createProduct` | permission `catalog.product.create` | `201` |
+| `GET` | `/products/{productId}` | `getProductsByProductId` | permission `catalog.product.read` | `200` |
+| `PATCH` | `/products/{productId}` | `patchProductsByProductId` | permission `catalog.product.update` | `200` |
+| `POST` | `/products/{productId}/activate` | `activateProduct` | permission `catalog.product.activate` | `200` |
+| `POST` | `/products/{productId}/archive` | `archiveProduct` | permission `catalog.product.archive` | `200` |
+| `GET` | `/receipts/{receiptId}` | `getReceiptsByReceiptId` | permission `commerce.receipt.read` | `200` |
+| `POST` | `/receipts/{receiptId}/reissue` | `postReceiptsByReceiptIdReissue` | permission `commerce.receipt.reissue` | `200` |
+| `POST` | `/receipts/{receiptId}/void` | `postReceiptsByReceiptIdVoid` | permission `commerce.receipt.void` | `200` |
+| `POST` | `/refunds` | `postRefunds` | permission `commerce.refund.create` | `200` |
+| `POST` | `/refunds/{refundId}/approve` | `postRefundsByRefundIdApprove` | permission `commerce.refund.approve` | `200` |
+| `POST` | `/registers/{registerId}/cash-movements` | `postRegistersByRegisterIdCashMovements` | permission `commerce.cash-movement.create` | `200` |
+| `POST` | `/registers/{registerId}/close` | `closeRegister` | permission `commerce.register.close` | `200` |
+| `POST` | `/registers/{registerId}/open` | `openRegister` | permission `commerce.register.open` | `200` |
+| `POST` | `/registers/{registerId}/safe-drops` | `postRegistersByRegisterIdSafeDrops` | permission `commerce.cash-movement.create` | `200` |
+| `POST` | `/returns` | `createReturn` | permission `commerce.return.create` | `201` |
+| `POST` | `/returns/{returnId}/approve` | `postReturnsByReturnIdApprove` | permission `commerce.return.approve` | `200` |
+| `POST` | `/role-assignments` | `postRoleAssignments` | permission `platform.role.assign` | `201` |
+| `GET` | `/roles` | `getRoles` | permission `platform.role.read` | `200` |
+| `POST` | `/sales` | `createSale` | permission `commerce.sale.create` | `201` |
+| `POST` | `/sales/{saleId}/complete` | `completeSale` | permission `commerce.sale.complete` | `200` |
+| `POST` | `/sales/{saleId}/hold` | `postSalesBySaleIdHold` | permission `commerce.sale.hold` | `200` |
+| `POST` | `/session/active-context` | `setActiveContext` | authorization `authenticated_membership` | `201` |
+| `GET` | `/sessions` | `listCurrentUserSessions` | authorization `authenticated_session` | `200` |
+| `DELETE` | `/sessions/{sessionId}` | `revokeCurrentUserSession` | authorization `authenticated_session` | `204` |
+| `GET` | `/stock-balances` | `listStockBalances` | permission `inventory.balance.read` | `200` |
+| `GET` | `/stock-counts` | `listStockCounts` | permission `inventory.count.read` | `200` |
+| `POST` | `/stock-counts` | `createStockCount` | permission `inventory.count.create` | `201` |
+| `GET` | `/stock-counts/{id}` | `getStockCount` | permission `inventory.count.read` | `200` |
+| `POST` | `/stock-counts/{id}/approve` | `postStockCountsByIdApprove` | permission `inventory.count.approve` | `200` |
+| `PUT` | `/stock-counts/{id}/draft-lines` | `saveStockCountDraftLines` | permission `inventory.count.create` | `200` |
+| `POST` | `/stock-counts/{id}/submit` | `postStockCountsByIdSubmit` | permission `inventory.count.submit` | `200` |
+| `GET` | `/stock-transfers` | `listStockTransfers` | permission `inventory.transfer.read` | `200` |
+| `POST` | `/stock-transfers` | `createStockTransfer` | permission `inventory.transfer.create` | `201` |
+| `GET` | `/stock-transfers/{id}` | `getStockTransfer` | permission `inventory.transfer.read` | `200` |
+| `POST` | `/stock-transfers/{id}/dispatch` | `dispatchStockTransfer` | permission `inventory.transfer.dispatch` | `200` |
+| `POST` | `/stock-transfers/{id}/receive` | `postStockTransfersByIdReceive` | permission `inventory.transfer.receive` | `200` |
+| `POST` | `/stored-value-instruments` | `issueStoredValueInstrument` | permission `commerce.stored-value.issue` | `201` |
+| `GET` | `/stored-value-instruments/{id}` | `getStoredValueInstrumentsById` | permission `commerce.stored-value.read` | `200` |
+| `POST` | `/stored-value-instruments/{id}/adjust` | `postStoredValueInstrumentsByIdAdjust` | permission `commerce.stored-value.adjust` | `200` |
+| `POST` | `/stored-value-instruments/{id}/load` | `postStoredValueInstrumentsByIdLoad` | permission `commerce.stored-value.load` | `200` |
+| `POST` | `/stored-value-instruments/{id}/suspend` | `postStoredValueInstrumentsByIdSuspend` | permission `commerce.stored-value.suspend` | `200` |
+| `POST` | `/stored-value-instruments/{instrumentId}/reserve` | `reserveStoredValue` | permission `commerce.stored-value.reserve` | `201` |
+| `POST` | `/stored-value-reconciliations` | `postStoredValueReconciliations` | permission `commerce.stored-value.reconcile` | `200` |
+| `POST` | `/stored-value-reservations/{id}/capture` | `postStoredValueReservationsByIdCapture` | permission `commerce.stored-value.redeem` | `200` |
+| `POST` | `/stored-value-reservations/{id}/release` | `postStoredValueReservationsByIdRelease` | permission `commerce.stored-value.reserve` | `200` |
+| `POST` | `/sync/batches` | `submitSyncBatch` | permission `platform.sync-batch.submit` | `202` |
+| `GET` | `/sync/status/{batchId}` | `getSyncStatusByBatchId` | permission `platform.sync-batch.read` | `200` |
+| `GET` | `/users` | `getUsers` | permission `platform.user.read` | `200` |
+| `POST` | `/users/invitations` | `postUsersInvitations` | permission `platform.user.invite` | `202` |
+| `POST` | `/users/{userId}/suspend` | `suspendTenantMembership` | permission `platform.user.suspend` | `200` |
+| `POST` | `/webhook-deliveries/{id}/replay` | `postWebhookDeliveriesByIdReplay` | permission `developer.webhook.replay` | `200` |
+| `GET` | `/webhook-subscriptions` | `getWebhookSubscriptions` | permission `developer.webhook.read` | `200` |
+| `POST` | `/webhook-subscriptions` | `createWebhookSubscription` | permission `developer.webhook.create` | `201` |
+| `PATCH` | `/webhook-subscriptions/{id}` | `patchWebhookSubscriptionsById` | permission `developer.webhook.update` | `200` |
+
+{/* GENERATED:OPENAPI-REFERENCE:END */}
 
 ## Error and security behavior
 
-- Server errors pass through the oRPC error boundary and are logged in the prototype process.
+- Runtime application failures map to typed problem details with a safe code, correlation ID, retryability, next action, and uncertainty marker where applicable.
 - Authentication cookies use hardened attributes according to environment.
 - Trusted origins must be exact URL origins.
-- Implemented business procedures use server-issued active context, current membership, separate permission and entitlement decisions, tenant-scoped repositories, allowlisted Audit evidence, and command idempotency where required.
-- Foreign-tenant and nonexistent identifiers retain the same non-disclosing behavior on governed operations.
-- Production rate-limit topology, production support access, penetration evidence, production error-observability policy, and broader first-slice procedures remain open.
+- Protected WS1/WS2 procedures revalidate active context and permissions at the server boundary; commands use idempotency keys and version preconditions where their contract requires them.
+- Production rate limits, full RLS topology, public support guarantees, and complete production error/telemetry evidence remain unresolved.
 
 Do not expose the prototype server to the public internet or use real tenant data.
 

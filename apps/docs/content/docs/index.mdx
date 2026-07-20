@@ -1,9 +1,23 @@
 ---
 title: Platform Documentation Prototype
 description: Controlled prototype documentation process
+owner: Developer Platform
+documentation_id: PDOC-0001
+content_class: landing
+audience: [administrator, developer, evaluator, operator, support, user]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
+last_verified: 2026-07-16
+implementation_evidence: [apps/docs/package.json, docs/project/PROGRAM_STATUS.md]
+related_capabilities: []
+permission_refs: []
+contract_refs: [docs/blueprint/07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md]
 ---
 
 These docs are controlled prototype evidence for ADR-0021. They do not replace the Platform Design Authority repository, root `CLAUDE.md`, the Constitution, accepted ADRs, specifications, registries, or canonical OpenAPI contracts.
+
+> **Evidence boundary:** internal prototype `0.0.4`, verified 2026-07-16 at `7202fc819b70982c013e1ca11a4fcc136e01e2de`. This is not a customer release, support commitment, accessibility conformance claim, security approval, or production-readiness statement.
 
 ## Information Classes
 
@@ -37,7 +51,8 @@ Product/user documentation is separated from architecture governance. Root `00-F
 - [Prototype API Reference](/docs/api) — understand implemented Hono, Better Auth, and oRPC surfaces.
 - [Developer Guide](/docs/developer) — work within repository governance and package boundaries.
 - [Database Migrations](/docs/migrations) — generate, test, apply, and recover schema changes.
+- [Event Backbone Operations](/docs/operations) — diagnose and recover bounded delivery, replay, and projection failures.
 - [Troubleshooting](/docs/troubleshooting) — diagnose common local failures without exposing protected data.
 - [Prototype Release Notes](/docs/release-notes) — see verified scope and explicit exclusions.
 
-These guides complete documentation for the behavior currently present in the scaffold. Planned first-slice business workflows receive task documentation only when implementation and review evidence exist.
+These guides cover the named prototype tasks at the evidence revision. They are not a completeness claim for every implemented contract or planned first-slice workflow. Catalog and Inventory APIs and the bounded Event Backbone worker have merged implementation evidence, while their user-facing web workflow, independent Operations evidence, and workstream closeout remain pending; additional task documentation is added with the corresponding reviewed UI and release evidence.

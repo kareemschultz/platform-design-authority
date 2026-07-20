@@ -1,11 +1,23 @@
 ---
 title: Getting Started
 description: Run and verify the controlled platform prototype locally
+owner: Developer Platform
+documentation_id: PDOC-0002
+content_class: getting-started
+audience: [developer, evaluator, operator]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
+last_verified: 2026-07-16
+implementation_evidence: [docker-compose.yml, apps/server/src/router.test.ts, apps/web/src/lib/shell.test.ts]
+related_capabilities: [platform.authentication, platform.organizations]
+permission_refs: []
+contract_refs: [docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md]
 ---
 
 # Run the controlled prototype
 
-This guide is for developers and reviewers evaluating the platform scaffold. It covers the implemented authentication, API health, protected dashboard, PostgreSQL, and documentation surfaces. It does not describe the unimplemented first-slice retail workflows.
+This guide is for developers and reviewers evaluating the platform scaffold. It covers implemented authentication, active organization context, the WS1 administration shell, API health, PostgreSQL, and documentation surfaces. Catalog and Inventory domain APIs exist at the evidence revision, but their web workflow and WS2 closeout do not; this guide does not present them as a user-ready retail application.
 
 ## Before you begin
 
@@ -43,7 +55,7 @@ bun run docker:up
 docker compose exec server bun run db:migrate
 ```
 
-The server container can reach the private Compose database and applies the committed owner-specific streams serially (`platform.identity`, then `platform.events`). Do not use Drizzle `push` against the baseline database: extension-owned `pg_stat_statements` views are outside the application schema.
+The server container can reach the private Compose database and applies committed owner-specific streams serially for Platform Identity, Tenancy, Entitlements, Audit, Events, Numbering, Party, Catalog, and Inventory. Do not use Drizzle `push` against the baseline database: extension-owned `pg_stat_statements` views are outside the application schema.
 
 The local surfaces are:
 
@@ -85,10 +97,11 @@ bun run dev
 3. Open **Sign In** and select the account-creation form.
 4. Enter a synthetic name, email address, and a password of at least eight characters.
 5. Confirm the browser opens `/dashboard`.
-6. Confirm the dashboard returns the protected API message.
-7. Sign out from the account menu and confirm the browser returns home.
+6. If the account has an active seeded or provisioned membership, open **Administration** and confirm the shell shows its server-validated organization and location context.
+7. Open the available Users, Roles, Entitlements, Sessions, and Audit pages. Results depend on the account's current permission and entitlement state; a visible link does not grant authority.
+8. Sign out from the account menu and confirm the browser returns home.
 
-There are no tenant, business-role, entitlement, or domain-workflow permissions in this scaffold yet. A Better Auth account is not a Party or business role.
+A newly created Better Auth account does not automatically receive a Party link, tenant membership, business role, permission, or entitlement. The Administration shell requires separately provisioned prototype data and revalidates authority on the server.
 
 ## Stop and clean up
 

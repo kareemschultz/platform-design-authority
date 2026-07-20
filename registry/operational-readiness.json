@@ -1,0 +1,279 @@
+{
+  "schema_version": "1.0.0",
+  "status": "draft",
+  "source_document": "docs/blueprint/15-Operations/SERVICE_CATALOG_AND_RUNBOOK_INDEX.md",
+  "runbook_document": "docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md",
+  "evidence_cutoff": {
+    "main_commit": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
+    "verified_on": "2026-07-16",
+    "merged_pull_requests": [74],
+    "excludes_open_pull_requests": []
+  },
+  "readiness_states": {
+    "requirements-only": "Requirements exist but no executable service procedure is registered.",
+    "procedure-draft": "A bounded procedure references merged behavior; review, telemetry, alert, escalation, or exercise evidence remains open.",
+    "reviewed": "The exact procedure version has service-owner and Operations review evidence but has not necessarily been exercised.",
+    "exercised": "A reviewed procedure has dated execution evidence with residual findings.",
+    "pilot-ready": "All required runbooks, dashboards, tested alerts, escalation, reconciliation, recovery, and exercises pass the pilot gate."
+  },
+  "services": [
+    {
+      "service_id": "OPS-SVC-001",
+      "name": "Controlled-prototype web application shell",
+      "owner": "Frontend Platform",
+      "escalation_owner": "Platform Operations",
+      "implementation_state": "merged-controlled-prototype",
+      "readiness_state": "procedure-draft",
+      "pilot_critical": true,
+      "pilot_ready": false,
+      "capabilities": ["platform.administration", "platform.authentication"],
+      "artifact_paths": [
+        "apps/web/Dockerfile",
+        "apps/web/src/app/administration/layout.tsx",
+        "docker-compose.yml"
+      ],
+      "runbook_paths": ["docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md"],
+      "review_evidence_paths": [],
+      "telemetry": {
+        "liveness_probes": ["Compose web healthcheck GET http://localhost:3001/"],
+        "business_checks": ["Synthetic authenticated Administration request with server-validated context"],
+        "dashboard_paths": [],
+        "tested_alert_evidence_paths": [],
+        "limitations": ["No telemetry backend, dashboard, alert route, or tested paging evidence"]
+      },
+      "exercise_evidence_paths": [],
+      "blockers": [
+        "Independent runbook review is absent",
+        "No live dashboard or tested alert exists",
+        "No named on-call escalation or dated outage exercise exists"
+      ]
+    },
+    {
+      "service_id": "OPS-SVC-002",
+      "name": "API, identity, tenancy, authority, Party, and Audit runtime",
+      "owner": "Platform Kernel",
+      "escalation_owner": "Platform Operations and Security",
+      "implementation_state": "merged-controlled-prototype",
+      "readiness_state": "procedure-draft",
+      "pilot_critical": true,
+      "pilot_ready": false,
+      "capabilities": [
+        "party.records",
+        "platform.administration",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.organizations",
+        "platform.tenancy",
+        "security.tenant-isolation"
+      ],
+      "artifact_paths": [
+        "apps/server/Dockerfile",
+        "apps/server/src/index.ts",
+        "apps/server/composition/application.ts",
+        "packages/platform/identity/src/index.ts",
+        "docker-compose.yml"
+      ],
+      "runbook_paths": ["docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md"],
+      "review_evidence_paths": [],
+      "telemetry": {
+        "liveness_probes": ["Compose server healthcheck GET http://localhost:3000/health; liveness only, no database round trip"],
+        "business_checks": ["Synthetic session, active-context, permitted-read, denied-read, and tenant non-disclosure checks"],
+        "dashboard_paths": [],
+        "tested_alert_evidence_paths": [],
+        "limitations": ["Unexpected errors use bounded stderr logging; structured production telemetry and alerting are absent"]
+      },
+      "exercise_evidence_paths": [],
+      "blockers": [
+        "Independent runbook and security review are absent",
+        "No authentication/authority SLI dashboard or tested alert exists",
+        "No provider-outage, session, authority, or tenant-isolation incident exercise exists"
+      ]
+    },
+    {
+      "service_id": "OPS-SVC-003",
+      "name": "Composition-owned PostgreSQL and migration runtime",
+      "owner": "Data Platform",
+      "escalation_owner": "Data Platform and Platform Operations",
+      "implementation_state": "merged-controlled-prototype",
+      "readiness_state": "procedure-draft",
+      "pilot_critical": true,
+      "pilot_ready": false,
+      "capabilities": [
+        "party.records",
+        "platform.audit",
+        "platform.authentication",
+        "platform.authorization",
+        "platform.entitlements",
+        "platform.events",
+        "platform.identity",
+        "platform.numbering",
+        "platform.organizations",
+        "platform.tenancy",
+        "catalog.products",
+        "catalog.variants",
+        "catalog.identifiers",
+        "catalog.barcodes",
+        "catalog.lifecycle",
+        "inventory.stock-ledger",
+        "inventory.stock-balances",
+        "inventory.availability",
+        "inventory.reservations",
+        "inventory.adjustments",
+        "inventory.transfers",
+        "inventory.counts",
+        "inventory.offline-movements"
+      ],
+      "artifact_paths": [
+        "apps/server/composition/migrate.ts",
+        "apps/server/composition/migrations.ts",
+        "apps/server/composition/postgres.ts",
+        "ops/postgres/README.md",
+        "docker-compose.yml"
+      ],
+      "runbook_paths": ["docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md"],
+      "review_evidence_paths": [],
+      "telemetry": {
+        "liveness_probes": ["Compose PostgreSQL pg_isready healthcheck"],
+        "business_checks": ["Serial migration completion, migration freshness, synthetic authenticated read, and owner integration suites"],
+        "dashboard_paths": [],
+        "tested_alert_evidence_paths": [],
+        "limitations": ["No production connection, storage, query, backup, replication, PITR, or failover dashboard"]
+      },
+      "exercise_evidence_paths": [],
+      "blockers": [
+        "Production role and RLS topology remains open under RR-007",
+        "No backup/restore, PITR, failover, capacity, RPO, or RTO exercise evidence exists",
+        "No live database dashboard or tested alert exists"
+      ]
+    },
+    {
+      "service_id": "OPS-SVC-004",
+      "name": "Catalog and Inventory owner behavior with transactional outbox storage",
+      "owner": "Product Catalog and Inventory",
+      "escalation_owner": "Domain owners, Data Platform, Security, and Platform Operations",
+      "implementation_state": "merged-controlled-prototype",
+      "readiness_state": "procedure-draft",
+      "pilot_critical": true,
+      "pilot_ready": false,
+      "capabilities": [
+        "catalog.products",
+        "catalog.variants",
+        "catalog.identifiers",
+        "catalog.barcodes",
+        "catalog.lifecycle",
+        "inventory.stock-ledger",
+        "inventory.stock-balances",
+        "inventory.availability",
+        "inventory.reservations",
+        "inventory.adjustments",
+        "inventory.transfers",
+        "inventory.counts",
+        "inventory.offline-movements",
+        "platform.events"
+      ],
+      "artifact_paths": [
+        "packages/domains/catalog/src/index.ts",
+        "packages/domains/inventory/src/index.ts",
+        "packages/persistence/catalog-postgres/src/index.ts",
+        "packages/persistence/inventory-postgres/src/index.ts",
+        "packages/persistence/platform-events-postgres/src/index.ts",
+        "evidence/first-slice/ws2-interim-capability-evidence.json"
+      ],
+      "runbook_paths": ["docs/blueprint/15-Operations/CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md"],
+      "review_evidence_paths": [],
+      "telemetry": {
+        "liveness_probes": ["API and PostgreSQL liveness are prerequisites but do not prove ledger correctness"],
+        "business_checks": ["Catalog identity/lifecycle invariants; Inventory conservation/reversal/rebuild; tenant non-disclosure; command receipt and outbox atomicity"],
+        "dashboard_paths": [],
+        "tested_alert_evidence_paths": [],
+        "limitations": ["No business-correctness dashboard, repair CLI, delivery worker, delivery-lag alert, or reconciliation job exists"]
+      },
+      "exercise_evidence_paths": [],
+      "blockers": [
+        "Catalog bulk import, online numbering workflow, UI, and formal accessibility evidence are absent",
+        "Event delivery is separately registered as OPS-SVC-005, but no reviewed cross-service correctness dashboard or delivery-lag alert exists",
+        "No reviewed operator repair tool, tested correctness alert, recovery exercise, or final WS2 audit exists"
+      ]
+    },
+    {
+      "service_id": "OPS-SVC-005",
+      "name": "Controlled-prototype Event Backbone delivery and projections",
+      "owner": "Platform Kernel",
+      "escalation_owner": "Platform Operations, Data Platform, Catalog, Inventory, and Security",
+      "implementation_state": "merged-controlled-prototype",
+      "readiness_state": "procedure-draft",
+      "pilot_critical": true,
+      "pilot_ready": false,
+      "capabilities": [
+        "platform.events",
+        "platform.audit",
+        "catalog.products",
+        "inventory.stock-ledger",
+        "inventory.stock-balances"
+      ],
+      "artifact_paths": [
+        "apps/worker/composition/delivery.ts",
+        "apps/worker/composition/main.ts",
+        "packages/platform/events/src/delivery.ts",
+        "packages/platform/events/src/replay.ts",
+        "packages/persistence/platform-events-postgres/src/delivery-store.ts",
+        "packages/persistence/platform-events-postgres/src/replay-store.ts",
+        "docs/blueprint/19-Appendices/WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md"
+      ],
+      "runbook_paths": [
+        "docs/blueprint/15-Operations/EVENT_BACKBONE_DELIVERY_RUNBOOK.md"
+      ],
+      "review_evidence_paths": [],
+      "telemetry": {
+        "liveness_probes": [
+          "Worker process lifecycle plus PostgreSQL reachability; no HTTP health endpoint exists"
+        ],
+        "business_checks": [
+          "Safe aggregate backlog health, claim lease recovery, bounded retry/dead-letter, authorized replay, consumer-receipt idempotency, Catalog projection freshness, and Inventory balance reconciliation"
+        ],
+        "dashboard_paths": [],
+        "tested_alert_evidence_paths": [],
+        "limitations": [
+          "Safe aggregate health exists, but no production telemetry backend, dashboard, tested alert route, or multi-replica capacity evidence exists"
+        ]
+      },
+      "exercise_evidence_paths": [],
+      "blockers": [
+        "Independent Operations review of the exact runbook version is absent",
+        "No production SLO, capacity, multi-replica, dashboard, tested alert, or named on-call evidence exists",
+        "No dated backlog, dead-letter, replay, projection-rebuild, database-recovery, privacy, or incident-communication exercise exists"
+      ]
+    }
+  ],
+  "deferred_services": [
+    {
+      "name": "Catalog and opening-stock import plus online numbering",
+      "reason": "WS2 PR5 issue #71 has not begun implementation.",
+      "admission_trigger": "After PR5 merges, register import, partial-failure, reconciliation, malware/resource, and numbering procedures."
+    },
+    {
+      "name": "Product and Inventory web workspace",
+      "reason": "WS2 PR6 issue #72 has not begun implementation.",
+      "admission_trigger": "After PR6 merges with formal UI and accessibility evidence, register operator-facing failure and recovery procedures."
+    },
+    {
+      "name": "Offline synchronization and device continuity",
+      "reason": "Only the Inventory verified-facts boundary exists; WS5 owns transport, leases, devices, tombstones, and reconciliation.",
+      "admission_trigger": "At WS5 implementation entry, bind runbooks to implemented device/sync telemetry and lab exercises."
+    },
+    {
+      "name": "Payments, stored value, Commerce, POS, fiscalization, and Finance handoff",
+      "reason": "These first-slice services are not implemented and retain founder/provider/professional gates.",
+      "admission_trigger": "Register each service only after its owning workstream, provider boundary, commands, telemetry, and reconciliation behavior exist."
+    },
+    {
+      "name": "Backup, restore, disaster recovery, and regional failover",
+      "reason": "Requirements and local dump examples exist, but no production backup system, protected deletion journal, or restore/failover exercise exists.",
+      "admission_trigger": "WS7 must register exact backup artifacts, restore tooling, RPO/RTO measurements, tenant/privacy checks, and dated exercises."
+    }
+  ]
+}

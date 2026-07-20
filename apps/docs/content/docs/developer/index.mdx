@@ -1,6 +1,18 @@
 ---
 title: Developer Guide
 description: Work safely in the governed platform prototype monorepo
+owner: Engineering
+documentation_id: PDOC-0006
+content_class: developer-guide
+audience: [developer, integrator]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
+last_verified: 2026-07-16
+implementation_evidence: [AGENTS.md, registry/architecture-rules.json, scripts/check_architecture.py]
+related_capabilities: []
+permission_refs: []
+contract_refs: [docs/blueprint/14-Engineering/ARCHITECTURE_DEPENDENCY_RULES.md, docs/blueprint/14-Engineering/ENGINEERING_HANDBOOK.md]
 ---
 
 # Develop the platform prototype
@@ -13,18 +25,17 @@ This implementation is controlled prototype evidence inside the Platform Design 
 apps/
     docs/       Fumadocs documentation portal on port 4000
     native/     Expo/React Native prototype
-    server/     Hono/oRPC transport and the server composition root
+    server/     Hono server with Bun and Node entries
     web/        Next.js web prototype on port 3001
-    worker/     event delivery and projection composition root
 packages/
-    contracts/  generated and published API, event, permission, and capability contracts
-    domains/    runtime-neutral Catalog, Inventory, and Party owners
-    foundation/ shared runtime-neutral primitives
-    persistence/ owner-specific PostgreSQL adapters, schemas, and migrations
-    platform/   runtime-neutral platform application/core packages
-    platform-clients/ generated API client surface
-    tooling/    shared configuration and validated environment access
-    ui-web/core/ platform-owned shadcn-derived web source
+    contracts/          generated and hand-owned API, capability, event, and permission contracts
+    domains/            runtime-neutral Catalog, Inventory, and Party behavior
+    foundation/         money, quantity, time, identifier, and result primitives
+    persistence/        owner-specific PostgreSQL adapters, schemas, and migration histories
+    platform/           identity, tenancy, authorization, entitlements, audit, events, and numbering
+    platform-clients/   typed client adapters
+    tooling/            shared configuration and validated environment schemas
+    ui-web/             platform-owned shadcn-derived web source
 ops/postgres/ local PostgreSQL prototype controls
 ```
 
@@ -39,10 +50,6 @@ bun run check-types
 bun run test
 bun run build
 bun audit
-python scripts/validate_docs.py
-python scripts/generate_registries.py --check
-python scripts/generate_contracts.py --check
-python scripts/check_architecture.py
 ```
 
 The CI workflow additionally verifies the Node fallback, registry freshness, prohibited surfaces, Compose configuration, PostgreSQL 18.4 baseline, and Docker images.
@@ -56,7 +63,7 @@ bun run dev:native
 bun run --filter docs dev
 ```
 
-Use `bun run dev` to start the Turbo development graph. Environment variables are validated through `@meridian/tooling-env` in `packages/tooling/env`; applications import the appropriate `server`, `worker`, `web`, or `native` entry instead of reading environment variables ad hoc. Do not bypass validation except in a narrowly controlled build step that cannot access runtime data.
+Use `bun run dev` to start the Turbo development graph. Environment variables are validated by `packages/tooling/env`; do not bypass validation except in a narrowly controlled build step that cannot access runtime data.
 
 ## Add an API procedure
 
@@ -68,11 +75,11 @@ Before implementation:
 4. Define tenant, actor, permission, entitlement, idempotency, audit, privacy, offline, and failure behavior.
 5. Use an application contract; never import another domain's private persistence.
 
-Start with `openapi/first-slice-v1.yaml`, then regenerate `packages/contracts/platform-api/src/generated.ts` with `bun run contracts:generate`. Published schemas and runtime-neutral application contracts live under `packages/contracts`, `packages/domains`, and `packages/platform`; transport procedures, request context, and the oRPC router live in `apps/server/src`. Concrete PostgreSQL adapters are bound only in `apps/server/composition` or the registered `apps/worker/composition` root. Provider SDKs and UI components must not become business abstractions.
+Application contracts belong in `packages/contracts/platform-api`; runtime-neutral behavior belongs to its owning Platform or Domain package. `apps/server` is the composition root that binds persistence, application implementations, request context, and oRPC/Hono transport. Provider SDKs and UI components must not become business abstractions.
 
 ## Add database state
 
-Each owner controls its adapter, Drizzle schema, and migration history in `packages/persistence/*-postgres`. Do not create cross-owner foreign persistence shortcuts or run migrations from `apps/worker`; the server composition root applies every registered owner stream in deterministic serial order. Use PostgreSQL-native features first and consult ADR-0024 before adding any extension.
+The owning domain controls its schema and migrations. Do not create cross-domain foreign persistence shortcuts. Use PostgreSQL-native features first and consult ADR-0024 before adding any extension.
 
 Generate and review migrations:
 
@@ -90,7 +97,7 @@ See [Migrations](/docs/migrations) for rollback and evidence requirements.
 
 ## Add UI source
 
-Shared web primitives live in `packages/ui-web/core` and are consumed through `@meridian/ui-web`. New shadcn source must use the pinned CLI, preserve the Base UI/Rhea configuration in both `packages/ui-web/core/components.json` and `apps/web/components.json`, record provenance, and be normalized to platform tokens and state conventions.
+Shared web primitives live in `packages/ui-web/core`. New shadcn source must use the pinned CLI, preserve Base UI/Rhea configuration, record provenance, and be normalized to platform tokens and state conventions.
 
 ```bash
 bunx shadcn@4.13.0 add dialog popover -c packages/ui-web/core
@@ -107,7 +114,9 @@ Run from the repository root:
 ```bash
 python scripts/validate_docs.py
 python scripts/generate_registries.py --check
-bun run --filter docs check-types
+python -m unittest scripts/test_validate_product_docs.py
+python scripts/validate_product_docs.py
+bun run --filter docs types:check
 bun run --filter docs build
 ```
 

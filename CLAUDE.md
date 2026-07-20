@@ -107,7 +107,7 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 
 `engine.<name>` registers a shared engine. Dedicated detailed families include `ai.*`, `payment.*`, `loyalty.*`, and `fiscalization.*`.
 
-"Meridian" is the internal engineering codename only (ADR-0026): it names the workspace, `@meridian/*` packages, services, and CI — never canonical identifiers, tenant-visible strings, receipts, or public API surfaces. The `@meridian/*` scope is provisional until npm/trademark checks are recorded; the commercial product name is a separate founder decision.
+"Meridian" is the internal engineering codename only (ADR-0026): it names the workspace, `@meridian/*` packages, services, and CI — never canonical identifiers, tenant-visible strings, receipts, or public API surfaces. The `@meridian/*` scope is provisional and private until npm/trademark checks are recorded; the commercial product name and publishing identity require FDR-011.
 
 ## 7. Money, Time, Quantity, and Identity
 
@@ -219,6 +219,8 @@ After editing:
 4. Run governance checks.
 5. Update dispositions.
 6. Do not claim readiness beyond evidence.
+
+Pull requests use `.github/PULL_REQUEST_TEMPLATE.md` and must pass `scripts/validate_pr_governance.py`: exactly one documentation-impact disposition, exactly one Changeset/release disposition, concrete evidence or rationale, an exact lifecycle statement, and the unsupported-readiness acknowledgement.
 7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
 8. Record documentation and release-note impact for user-visible, API, configuration, migration, permission, workflow, or troubleshooting changes.
 

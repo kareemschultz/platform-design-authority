@@ -8,6 +8,11 @@ created: YYYY-MM-DD
 last_reviewed: YYYY-MM-DD
 supersedes: null
 superseded_by: null
+related_adrs: []
+document_class: architecture-decision
+declared_depth: ownership-defined
+evidence_state: planned
+applicable_dimensions: [purpose, authority-and-scope, migration-and-extensibility, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # ADR-XXXX — Decision Title
@@ -84,6 +89,10 @@ Define tests, metrics, experiments, review evidence, and completion criteria.
 - Related specifications
 - Related ADRs
 - External standards or research
+
+## Applicability Record
+
+Map every class-required dimension to an exact section in `registry/document-class-adoption.json`, or record `not-applicable` with an artifact-specific reason. Registration does not accept the decision.
 
 ## Review Record
 

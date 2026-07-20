@@ -1,7 +1,7 @@
 ---
 document_id: PDA-OPS-018
 title: Event Backbone Delivery Runbook
-version: 0.1.2
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-16
@@ -12,7 +12,9 @@ related_adrs: [ADR-0014, ADR-0016, ADR-0027]
 
 ## Purpose and scope
 
-Operate the controlled-prototype internal Event Backbone for `platform.events`, Catalog search projection delivery, and Inventory balance reconciliation. This runbook covers backlog, stale claims, consumer failure, dead-letter review, bounded replay, projection rebuild, and shutdown/recovery. It does not cover Developer Platform webhooks, production SLOs, production PostgreSQL roles/RLS, or permission to edit authoritative owner tables.
+Operate registered service `OPS-SVC-005`, the controlled-prototype internal Event Backbone for `platform.events`, Catalog search projection delivery, and Inventory balance reconciliation. This runbook covers backlog, stale claims, consumer failure, dead-letter review, bounded replay, projection rebuild, and shutdown/recovery. It does not cover Developer Platform webhooks, production SLOs, production PostgreSQL roles/RLS, or permission to edit authoritative owner tables.
+
+PDA-APP-023 records the merged PR #74 implementation evidence at `main` `7202fc819b70982c013e1ca11a4fcc136e01e2de`. `registry/operational-readiness.json` classifies the service as `procedure-draft`: exact-head implementation review does not substitute for independent Operations review, a live dashboard, tested alert, named escalation, or a dated exercise.
 
 ## Ownership and safety boundaries
 
@@ -104,6 +106,7 @@ RR-007, production SLOs/alerts, multi-replica capacity, production roles/RLS, ba
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.2.0 | 2026-07-16 | Platform Design Authority | Registered the merged Event Backbone as `OPS-SVC-005` and separated implementation evidence from the still-open Operations review, telemetry, escalation, recovery, and exercise gates. |
 | 0.1.2 | 2026-07-16 | Platform Design Authority | Added replay-request receipt reconciliation so stale replay recovery skips already-completed events without suppressing a new authorized replay. |
 | 0.1.1 | 2026-07-16 | Platform Design Authority | Added bounded stale-running replay recovery under the reviewed single-worker prototype topology. |
 | 0.1.0 | 2026-07-15 | Platform Design Authority | Added controlled-prototype delivery, replay, projection, reconciliation, and safe recovery procedure for WS2 PR4. |

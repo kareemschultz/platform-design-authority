@@ -13,6 +13,8 @@ from typing import Any
 
 from jsonschema import validators
 
+from validate_codename_boundary import validate_codename_boundary
+
 from check_public_disclosure import validate_public_disclosure
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -675,8 +677,28 @@ def validate_contract_files() -> list[str]:
         if not (ROOT / relative).exists():
             errors.append(f"missing required contract: {relative}")
     openapi = ROOT / "openapi" / "first-slice-v1.yaml"
-    if openapi.exists() and "openapi: 3.1.0" not in openapi.read_text(encoding="utf-8"):
-        errors.append("openapi/first-slice-v1.yaml: expected OpenAPI 3.1.0 marker")
+    if openapi.exists():
+        openapi_text = openapi.read_text(encoding="utf-8")
+        if "openapi: 3.1.0" not in openapi_text:
+            errors.append("openapi/first-slice-v1.yaml: expected OpenAPI 3.1.0 marker")
+        if "https://api.example.invalid" in openapi_text or "description: Placeholder only" in openapi_text:
+            errors.append("openapi/first-slice-v1.yaml: active server entry must describe a real bounded environment")
+
+    cost_worksheet = ROOT / "docs" / "blueprint" / "12-Deployment" / "INFRASTRUCTURE_COST_WORKSHEET.md"
+    if cost_worksheet.exists():
+        worksheet_text = cost_worksheet.read_text(encoding="utf-8")
+        if re.search(r"\|\s*TBD\s*\|", worksheet_text, re.IGNORECASE):
+            errors.append(
+                "docs/blueprint/12-Deployment/INFRASTRUCTURE_COST_WORKSHEET.md: "
+                "unresolved cost cells require owner, evidence, and decision trigger"
+            )
+        required_cost_headers = ("Evidence required", "Accountable owner", "Decision trigger")
+        for header in required_cost_headers:
+            if header not in worksheet_text:
+                errors.append(
+                    "docs/blueprint/12-Deployment/INFRASTRUCTURE_COST_WORKSHEET.md: "
+                    f"missing cost-governance column {header}"
+                )
     return errors
 
 
@@ -857,6 +879,7 @@ def main() -> int:
         + validate_governance_exemptions()
         + validate_contract_files()
         + validate_founder_decision_register()
+        + validate_codename_boundary()
         + validate_repository_layout()
         + validate_skills()
         + validate_agent_contract_parity()

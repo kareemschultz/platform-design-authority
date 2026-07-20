@@ -1,24 +1,27 @@
 ---
 document_id: PDA-AI-001
 title: AI Platform Section Index
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # AI Platform
 
-## Current Specifications
+## Artifact Catalog
+
+- [First Slice AI Boundary](FIRST_SLICE_AI_BOUNDARY.md) — `PDA-AI-010` · Draft
+- [AI Platform Architecture](AI_PLATFORM_ARCHITECTURE.md) — `PDA-AI-011` · Draft
+- [Model Prompt Tool and Agent Registries](MODEL_PROMPT_TOOL_AND_AGENT_REGISTRIES.md) — `PDA-AI-012` · Draft
+- [AI Memory Retrieval and Context](MEMORY_RETRIEVAL_AND_CONTEXT.md) — `PDA-AI-013` · Draft
+- [AI Evaluation Red Team and Incident Response](EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md) — `PDA-AI-014` · Draft
+- [AI SDK Multi Agent and Mutating Agent Controls](AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md) — `PDA-AI-015` · Draft
+- [AI Registry Schemas and Provider Exit](AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md) — `PDA-AI-016` · Draft
+
+## Related Authority and Contracts
 
 - `docs/blueprint/03-Business-Engines/AI_ORCHESTRATION_ENGINE.md`
-- `AI_PLATFORM_ARCHITECTURE.md`
-- `MODEL_PROMPT_TOOL_AND_AGENT_REGISTRIES.md`
-- `AI_REGISTRY_SCHEMAS_AND_PROVIDER_EXIT.md`
-- `MEMORY_RETRIEVAL_AND_CONTEXT.md`
-- `EVALUATION_RED_TEAM_AND_INCIDENT_RESPONSE.md`
-- `AI_SDK_MULTI_AGENT_AND_MUTATING_AGENT_CONTROLS.md`
-- `FIRST_SLICE_AI_BOUNDARY.md`
 - `docs/blueprint/10-Data/SEARCH_RELEVANCE_AND_SEMANTIC_RETRIEVAL.md`
 - `docs/blueprint/10-Data/DATA_CLASSIFICATION_AND_HANDLING.md`
 - `docs/blueprint/11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`

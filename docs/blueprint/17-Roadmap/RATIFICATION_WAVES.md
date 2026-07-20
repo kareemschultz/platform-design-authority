@@ -1,7 +1,7 @@
 ---
 document_id: PDA-RDM-002
 title: Blueprint Ratification Waves
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-10
@@ -12,6 +12,8 @@ last_reviewed: 2026-07-10
 ## Purpose
 
 Define reviewable approval waves so the blueprint is not treated as one indivisible pull request and no draft document silently becomes implementation authority.
+
+PDA-RDM-010 defines the manifest, review, disposition, approval, and promotion evidence required to advance a wave. `registry/ratification-waves.json` records current preparation state. A scope list in this document is a plan, not review evidence.
 
 ## Principles
 
@@ -183,3 +185,5 @@ Each wave produces:
 - Final approval record
 - Deferred-items register
 - Next-wave dependency statement
+
+No wave may advance in the registry until these artifacts meet PDA-RDM-010. Empty or null evidence fields are mandatory while evidence does not exist; they must not be replaced with author or AI attestations.

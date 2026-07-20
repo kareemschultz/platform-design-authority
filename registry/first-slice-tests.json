@@ -1,10 +1,11 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "source_document": "docs/blueprint/16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
   "source_registry": "registry/first-slice.json",
   "evidence_sources": [
     "evidence/first-slice/ws1-capability-evidence.json",
-    "evidence/first-slice/ws2-capability-evidence.json"
+    "evidence/first-slice/ws2-capability-evidence.json",
+    "evidence/first-slice/ws2-interim-capability-evidence.json"
   ],
   "dimensions": [
     "happy_path",
@@ -274,6 +275,25 @@
       "command": "bun test packages/domains/catalog/src/index.test.ts"
     },
     {
+      "id": "ws2-catalog-authority",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts"
+    },
+    {
+      "id": "ws2-catalog-capacity",
+      "path": "apps/server/composition/ws2-ledger-spike.integration.test.ts",
+      "kind": "automated-integration-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18.4"
+      ],
+      "command": "docker compose exec -T server bun test composition/ws2-ledger-spike.integration.test.ts"
+    },
+    {
       "id": "ws2-catalog-delivery-observability",
       "path": "apps/worker/composition/delivery.integration.test.ts",
       "kind": "live-postgresql-test",
@@ -284,6 +304,15 @@
       "command": "bun test apps/worker/composition/delivery.integration.test.ts --timeout 30000"
     },
     {
+      "id": "ws2-catalog-domain",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts"
+    },
+    {
       "id": "ws2-catalog-lifecycle-core",
       "path": "packages/domains/catalog/src/index.test.ts",
       "kind": "automated-test",
@@ -291,6 +320,16 @@
         "Bun 1.3.14"
       ],
       "command": "bun test packages/domains/catalog/src/index.test.ts"
+    },
+    {
+      "id": "ws2-catalog-postgres",
+      "path": "apps/server/composition/catalog.integration.test.ts",
+      "kind": "automated-integration-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18.4"
+      ],
+      "command": "docker compose exec -T server bun test composition/catalog.integration.test.ts"
     },
     {
       "id": "ws2-catalog-postgres-isolation-recovery",
@@ -311,6 +350,15 @@
         "PostgreSQL 18"
       ],
       "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-contract-boundary",
+      "path": "packages/contracts/platform-api/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/contracts/platform-api/src/index.test.ts"
     },
     {
       "id": "ws2-count-interaction-budget",
@@ -362,6 +410,15 @@
       "command": "bun test packages/domains/inventory/src/index.test.ts"
     },
     {
+      "id": "ws2-inventory-authority",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts"
+    },
+    {
       "id": "ws2-inventory-closeout-budgets",
       "path": "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
       "kind": "live-postgresql-performance-test",
@@ -370,6 +427,53 @@
         "PostgreSQL 18"
       ],
       "command": "bun test apps/server/composition/ws2-closeout.inventory.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws2-inventory-domain",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts"
+    },
+    {
+      "id": "ws2-inventory-events",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts"
+    },
+    {
+      "id": "ws2-inventory-ledger-correctness",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "kind": "automated-integration-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18.4"
+      ],
+      "command": "docker compose exec -T server bun test composition/inventory.integration.test.ts"
+    },
+    {
+      "id": "ws2-inventory-offline-boundary",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "kind": "automated-integration-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18.4"
+      ],
+      "command": "docker compose exec -T server bun test composition/inventory.integration.test.ts"
+    },
+    {
+      "id": "ws2-inventory-permission",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts"
     },
     {
       "id": "ws2-inventory-reconciliation-observability",
@@ -392,6 +496,26 @@
       "command": "bun test apps/server/composition/ws2-closeout.inventory.integration.test.ts --timeout 30000"
     },
     {
+      "id": "ws2-inventory-workflows-postgres",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "kind": "automated-integration-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18.4"
+      ],
+      "command": "docker compose exec -T server bun test composition/inventory.integration.test.ts"
+    },
+    {
+      "id": "ws2-ledger-spike",
+      "path": "apps/server/composition/ws2-ledger-spike.integration.test.ts",
+      "kind": "automated-integration-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18.4"
+      ],
+      "command": "docker compose exec -T server bun test composition/ws2-ledger-spike.integration.test.ts"
+    },
+    {
       "id": "ws2-lifecycle-offline-fail-closed",
       "path": "apps/web/e2e/ws2-closeout.spec.ts",
       "kind": "live-browser-test",
@@ -401,6 +525,16 @@
         "PostgreSQL 18"
       ],
       "command": "bun run --cwd apps/web test:e2e"
+    },
+    {
+      "id": "ws2-node-runtime",
+      "path": "apps/server/composition/persistence.node-check.ts",
+      "kind": "automated-runtime-check",
+      "runtimes": [
+        "Node 24",
+        "PostgreSQL 18.4"
+      ],
+      "command": "bun run --cwd apps/server db:test:node"
     },
     {
       "id": "ws2-offline-command-boundary",
@@ -480,9 +614,12 @@
     }
   ],
   "coverage": {
+    "capabilities_declared": 25,
     "capabilities_evidenced": 25,
+    "capabilities_partially_evidenced": 0,
     "capabilities_total": 103,
     "required_cells_evidenced": 325,
+    "required_cells_planned": 969,
     "required_cells_total": 1294
   },
   "tests": [
@@ -508,28 +645,59 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres",
+          "ws2-node-runtime"
         ],
         "validation_and_denial": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-contract-boundary",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "tenant_isolation": [
           "ws2-catalog-aggregate-core",
-          "ws2-catalog-postgres-isolation-recovery"
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres",
+          "ws2-node-runtime"
         ],
         "permission_and_entitlement": [
-          "ws2-catalog-application-authority"
+          "ws2-catalog-application-authority",
+          "ws2-catalog-authority"
         ],
         "idempotency_and_duplicate": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "concurrency_and_conflict": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "events_jobs_and_projections": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "audit_and_observability": [
           "ws2-catalog-aggregate-core"
@@ -545,16 +713,22 @@
           "ws2-barcode-browser-accessibility"
         ],
         "performance_and_capacity": [
-          "ws2-catalog-query-budgets"
+          "ws2-catalog-query-budgets",
+          "ws2-catalog-capacity"
         ],
         "recovery_replay_and_reconciliation": [
-          "ws2-catalog-postgres-isolation-recovery"
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-postgres"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/catalog.integration.test.ts",
+        "apps/server/composition/persistence.node-check.ts",
+        "apps/server/composition/ws2-ledger-spike.integration.test.ts",
         "apps/web/e2e/ws2-closeout.spec.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/catalog/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -581,6 +755,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws2-import-workflow"
@@ -625,6 +814,7 @@
           "ws2-import-workflow"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/imports.integration.test.ts",
         "apps/server/src/router.test.ts",
@@ -656,28 +846,59 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres",
+          "ws2-node-runtime"
         ],
         "validation_and_denial": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-contract-boundary",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "tenant_isolation": [
           "ws2-catalog-aggregate-core",
-          "ws2-catalog-postgres-isolation-recovery"
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres",
+          "ws2-node-runtime"
         ],
         "permission_and_entitlement": [
-          "ws2-catalog-application-authority"
+          "ws2-catalog-application-authority",
+          "ws2-catalog-authority"
         ],
         "idempotency_and_duplicate": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "concurrency_and_conflict": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "events_jobs_and_projections": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "audit_and_observability": [
           "ws2-catalog-aggregate-core"
@@ -693,17 +914,23 @@
           "ws2-browser-workflow-accessibility"
         ],
         "performance_and_capacity": [
-          "ws2-catalog-aggregate-command-budgets"
+          "ws2-catalog-aggregate-command-budgets",
+          "ws2-catalog-capacity"
         ],
         "recovery_replay_and_reconciliation": [
-          "ws2-catalog-postgres-isolation-recovery"
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-postgres"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/catalog.integration.test.ts",
+        "apps/server/composition/persistence.node-check.ts",
+        "apps/server/composition/ws2-ledger-spike.integration.test.ts",
         "apps/web/e2e/ws2-closeout.spec.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/catalog/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -730,27 +957,55 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-catalog-lifecycle-core"
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "validation_and_denial": [
-          "ws2-catalog-lifecycle-core"
+          "ws2-catalog-lifecycle-core",
+          "ws2-contract-boundary",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "tenant_isolation": [
-          "ws2-catalog-postgres-isolation-recovery"
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "permission_and_entitlement": [
           "ws2-catalog-application-authority"
         ],
         "idempotency_and_duplicate": [
-          "ws2-catalog-lifecycle-core"
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "concurrency_and_conflict": [
-          "ws2-catalog-lifecycle-core"
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "events_jobs_and_projections": [
-          "ws2-catalog-lifecycle-core"
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "audit_and_observability": [
           "ws2-catalog-lifecycle-core"
@@ -769,14 +1024,17 @@
           "ws2-catalog-aggregate-command-budgets"
         ],
         "recovery_replay_and_reconciliation": [
-          "ws2-catalog-postgres-isolation-recovery"
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-postgres"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/catalog.integration.test.ts",
         "apps/web/e2e/ws2-closeout.spec.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/catalog/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -803,37 +1061,68 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws2-catalog-aggregate-core",
-          "ws2-catalog-lifecycle-core"
+          "ws2-catalog-lifecycle-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres",
+          "ws2-node-runtime"
         ],
         "validation_and_denial": [
           "ws2-catalog-aggregate-core",
-          "ws2-catalog-lifecycle-core"
+          "ws2-catalog-lifecycle-core",
+          "ws2-contract-boundary",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "tenant_isolation": [
           "ws2-catalog-aggregate-core",
           "ws2-catalog-postgres-isolation-recovery",
-          "ws2-catalog-delivery-observability"
+          "ws2-catalog-delivery-observability",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres",
+          "ws2-node-runtime"
         ],
         "permission_and_entitlement": [
-          "ws2-catalog-application-authority"
+          "ws2-catalog-application-authority",
+          "ws2-catalog-authority"
         ],
         "idempotency_and_duplicate": [
           "ws2-catalog-aggregate-core",
           "ws2-catalog-lifecycle-core",
-          "ws2-catalog-delivery-observability"
+          "ws2-catalog-delivery-observability",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "concurrency_and_conflict": [
           "ws2-catalog-aggregate-core",
           "ws2-catalog-lifecycle-core",
-          "ws2-catalog-delivery-observability"
+          "ws2-catalog-delivery-observability",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "events_jobs_and_projections": [
           "ws2-catalog-aggregate-core",
           "ws2-catalog-lifecycle-core",
-          "ws2-catalog-delivery-observability"
+          "ws2-catalog-delivery-observability",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "audit_and_observability": [
           "ws2-catalog-aggregate-core",
@@ -852,19 +1141,25 @@
           "ws2-browser-workflow-accessibility"
         ],
         "performance_and_capacity": [
-          "ws2-catalog-query-budgets"
+          "ws2-catalog-query-budgets",
+          "ws2-catalog-capacity"
         ],
         "recovery_replay_and_reconciliation": [
           "ws2-catalog-postgres-isolation-recovery",
-          "ws2-catalog-delivery-observability"
+          "ws2-catalog-delivery-observability",
+          "ws2-catalog-postgres"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/catalog.integration.test.ts",
+        "apps/server/composition/persistence.node-check.ts",
+        "apps/server/composition/ws2-ledger-spike.integration.test.ts",
         "apps/web/e2e/ws2-closeout.spec.ts",
         "apps/worker/composition/delivery.integration.test.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/catalog/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -891,28 +1186,59 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres",
+          "ws2-node-runtime"
         ],
         "validation_and_denial": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-contract-boundary",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "tenant_isolation": [
           "ws2-catalog-aggregate-core",
-          "ws2-catalog-postgres-isolation-recovery"
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres",
+          "ws2-node-runtime"
         ],
         "permission_and_entitlement": [
-          "ws2-catalog-application-authority"
+          "ws2-catalog-application-authority",
+          "ws2-catalog-authority"
         ],
         "idempotency_and_duplicate": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "concurrency_and_conflict": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "events_jobs_and_projections": [
-          "ws2-catalog-aggregate-core"
+          "ws2-catalog-aggregate-core",
+          "ws2-catalog-domain",
+          "ws2-catalog-postgres"
         ],
         "audit_and_observability": [
           "ws2-catalog-aggregate-core"
@@ -931,14 +1257,18 @@
           "ws2-catalog-aggregate-command-budgets"
         ],
         "recovery_replay_and_reconciliation": [
-          "ws2-catalog-postgres-isolation-recovery"
+          "ws2-catalog-postgres-isolation-recovery",
+          "ws2-catalog-postgres"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/catalog.integration.test.ts",
+        "apps/server/composition/persistence.node-check.ts",
         "apps/web/e2e/ws2-closeout.spec.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/catalog/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -965,6 +1295,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -980,6 +1325,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1005,6 +1365,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1020,6 +1395,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1045,6 +1435,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1060,6 +1465,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1085,6 +1505,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1100,6 +1535,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1125,6 +1575,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1140,6 +1605,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1165,6 +1645,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1180,6 +1675,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1205,6 +1715,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1220,6 +1745,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1245,6 +1785,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1260,6 +1815,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1285,6 +1855,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1300,6 +1885,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1325,6 +1925,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1340,6 +1955,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1365,6 +1995,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1380,6 +2025,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1405,6 +2065,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1420,6 +2095,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1445,6 +2135,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1460,6 +2165,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1485,6 +2205,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1500,6 +2235,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1525,6 +2275,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1540,6 +2305,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1565,6 +2345,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1580,6 +2375,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1605,6 +2415,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1620,6 +2445,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1645,6 +2485,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1660,6 +2515,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1685,6 +2555,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1700,6 +2585,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1725,6 +2625,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1740,6 +2655,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1765,6 +2695,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1780,6 +2725,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1805,6 +2765,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1820,6 +2795,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1845,6 +2835,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1860,6 +2865,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1885,6 +2905,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1900,6 +2935,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1925,6 +2975,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1940,6 +3005,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -1969,6 +3049,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -1984,6 +3079,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2009,6 +3116,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2024,6 +3146,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2049,6 +3186,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2064,6 +3216,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2089,6 +3256,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2104,6 +3286,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2133,6 +3330,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2148,6 +3360,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2173,6 +3397,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2188,6 +3427,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2213,6 +3467,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2228,6 +3497,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2253,6 +3537,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2268,6 +3567,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2293,6 +3607,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2308,6 +3637,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2337,6 +3681,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2352,6 +3711,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2381,6 +3752,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2396,6 +3782,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2425,6 +3823,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2440,6 +3853,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2469,6 +3894,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2484,6 +3924,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2513,6 +3965,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2528,6 +3995,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2557,6 +4036,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2572,6 +4066,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2601,6 +4107,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -2616,6 +4137,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -2641,28 +4174,53 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-adjustment-ledger"
+          "ws2-adjustment-ledger",
+          "ws2-inventory-domain",
+          "ws2-node-runtime"
         ],
         "validation_and_denial": [
-          "ws2-adjustment-ledger"
+          "ws2-adjustment-ledger",
+          "ws2-contract-boundary",
+          "ws2-inventory-domain"
         ],
         "tenant_isolation": [
-          "ws2-inventory-two-tenant"
+          "ws2-inventory-two-tenant",
+          "ws2-inventory-authority",
+          "ws2-node-runtime"
         ],
         "permission_and_entitlement": [
-          "ws2-inventory-application-authority"
+          "ws2-inventory-application-authority",
+          "ws2-inventory-permission"
         ],
         "idempotency_and_duplicate": [
-          "ws2-adjustment-ledger"
+          "ws2-adjustment-ledger",
+          "ws2-inventory-ledger-correctness"
         ],
         "concurrency_and_conflict": [
-          "ws2-adjustment-ledger"
+          "ws2-adjustment-ledger",
+          "ws2-inventory-ledger-correctness"
         ],
         "events_jobs_and_projections": [
           "ws2-adjustment-ledger",
-          "ws2-inventory-reconciliation-observability"
+          "ws2-inventory-reconciliation-observability",
+          "ws2-inventory-events"
         ],
         "audit_and_observability": [
           "ws2-adjustment-ledger",
@@ -2684,16 +4242,20 @@
         ],
         "recovery_replay_and_reconciliation": [
           "ws2-adjustment-ledger",
-          "ws2-inventory-reconciliation-observability"
+          "ws2-inventory-reconciliation-observability",
+          "ws2-inventory-ledger-correctness"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/persistence.node-check.ts",
         "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
         "apps/web/e2e/ws2-closeout.spec.ts",
         "apps/worker/composition/delivery.integration.test.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/inventory/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -2720,20 +4282,40 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
           "ws2-reservation-workflow-and-expiry",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-domain",
+          "ws2-inventory-workflows-postgres"
         ],
         "validation_and_denial": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
           "ws2-reservation-workflow-and-expiry",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-contract-boundary",
+          "ws2-inventory-domain",
+          "ws2-inventory-workflows-postgres"
         ],
         "tenant_isolation": [
           "ws2-offline-command-boundary",
@@ -2798,12 +4380,14 @@
           "ws2-inventory-reconciliation-observability"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/inventory.integration.test.ts",
         "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
         "apps/worker/composition/delivery.integration.test.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/inventory/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -2830,12 +4414,32 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-count-workflow"
+          "ws2-count-workflow",
+          "ws2-inventory-domain",
+          "ws2-inventory-workflows-postgres"
         ],
         "validation_and_denial": [
-          "ws2-count-workflow"
+          "ws2-count-workflow",
+          "ws2-contract-boundary",
+          "ws2-inventory-domain",
+          "ws2-inventory-workflows-postgres"
         ],
         "tenant_isolation": [
           "ws2-inventory-two-tenant"
@@ -2872,12 +4476,14 @@
           "ws2-count-workflow"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/inventory.integration.test.ts",
         "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
         "apps/web/e2e/ws2-closeout.spec.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/inventory/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -2904,25 +4510,46 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-domain"
         ],
         "validation_and_denial": [
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-contract-boundary",
+          "ws2-inventory-domain"
         ],
         "tenant_isolation": [
           "ws2-offline-command-boundary",
-          "ws2-inventory-two-tenant"
+          "ws2-inventory-two-tenant",
+          "ws2-inventory-authority"
         ],
         "permission_and_entitlement": [
           "ws2-seam-only-public-authority-boundary"
         ],
         "idempotency_and_duplicate": [
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-ledger-correctness"
         ],
         "concurrency_and_conflict": [
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-ledger-correctness"
         ],
         "events_jobs_and_projections": [
           "ws2-offline-command-boundary"
@@ -2936,7 +4563,8 @@
         ],
         "offline_and_degraded": [
           "ws2-offline-command-boundary",
-          "ws2-seam-only-public-authority-boundary"
+          "ws2-seam-only-public-authority-boundary",
+          "ws2-inventory-offline-boundary"
         ],
         "accessibility_and_responsive": [
           "ws2-seam-only-navigation-accessibility"
@@ -2945,15 +4573,18 @@
           "ws2-offline-command-boundary"
         ],
         "recovery_replay_and_reconciliation": [
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-ledger-correctness"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/inventory.integration.test.ts",
         "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
         "apps/web/src/lib/shell.test.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
-        "packages/contracts/platform-api/src/index.test.ts"
+        "packages/contracts/platform-api/src/index.test.ts",
+        "packages/domains/inventory/src/index.test.ts"
       ],
       "blocking_defects": []
     },
@@ -2979,12 +4610,32 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-reservation-workflow-and-expiry"
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-inventory-domain",
+          "ws2-inventory-workflows-postgres"
         ],
         "validation_and_denial": [
-          "ws2-reservation-workflow-and-expiry"
+          "ws2-reservation-workflow-and-expiry",
+          "ws2-contract-boundary",
+          "ws2-inventory-domain",
+          "ws2-inventory-workflows-postgres"
         ],
         "tenant_isolation": [
           "ws2-inventory-two-tenant"
@@ -3021,6 +4672,7 @@
           "ws2-reservation-workflow-and-expiry"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/inventory.integration.test.ts",
         "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
@@ -3053,22 +4705,42 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-domain",
+          "ws2-node-runtime"
         ],
         "validation_and_denial": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-contract-boundary",
+          "ws2-inventory-domain"
         ],
         "tenant_isolation": [
           "ws2-offline-command-boundary",
-          "ws2-inventory-two-tenant"
+          "ws2-inventory-two-tenant",
+          "ws2-node-runtime"
         ],
         "permission_and_entitlement": [
           "ws2-inventory-application-authority"
@@ -3077,13 +4749,16 @@
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-ledger-correctness"
         ],
         "concurrency_and_conflict": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-ledger-correctness",
+          "ws2-ledger-spike"
         ],
         "events_jobs_and_projections": [
           "ws2-adjustment-ledger",
@@ -3105,7 +4780,8 @@
           "ws2-owner-data-classification"
         ],
         "offline_and_degraded": [
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-offline-boundary"
         ],
         "accessibility_and_responsive": [
           "ws2-browser-workflow-accessibility"
@@ -3120,15 +4796,21 @@
           "ws2-count-workflow",
           "ws2-transfer-workflow",
           "ws2-offline-command-boundary",
-          "ws2-inventory-reconciliation-observability"
+          "ws2-inventory-reconciliation-observability",
+          "ws2-inventory-ledger-correctness",
+          "ws2-ledger-spike"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/persistence.node-check.ts",
         "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/server/composition/ws2-ledger-spike.integration.test.ts",
         "apps/worker/composition/delivery.integration.test.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/inventory/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -3155,22 +4837,42 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-domain",
+          "ws2-node-runtime"
         ],
         "validation_and_denial": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-contract-boundary",
+          "ws2-inventory-domain"
         ],
         "tenant_isolation": [
           "ws2-offline-command-boundary",
-          "ws2-inventory-two-tenant"
+          "ws2-inventory-two-tenant",
+          "ws2-node-runtime"
         ],
         "permission_and_entitlement": [
           "ws2-seam-only-public-authority-boundary"
@@ -3179,20 +4881,24 @@
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-ledger-correctness"
         ],
         "concurrency_and_conflict": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
-          "ws2-offline-command-boundary"
+          "ws2-offline-command-boundary",
+          "ws2-inventory-ledger-correctness",
+          "ws2-ledger-spike"
         ],
         "events_jobs_and_projections": [
           "ws2-adjustment-ledger",
           "ws2-count-workflow",
           "ws2-transfer-workflow",
           "ws2-offline-command-boundary",
-          "ws2-inventory-reconciliation-observability"
+          "ws2-inventory-reconciliation-observability",
+          "ws2-inventory-events"
         ],
         "audit_and_observability": [
           "ws2-adjustment-ledger",
@@ -3208,7 +4914,8 @@
         ],
         "offline_and_degraded": [
           "ws2-offline-command-boundary",
-          "ws2-seam-only-public-authority-boundary"
+          "ws2-seam-only-public-authority-boundary",
+          "ws2-inventory-offline-boundary"
         ],
         "accessibility_and_responsive": [
           "ws2-seam-only-navigation-accessibility"
@@ -3223,16 +4930,22 @@
           "ws2-count-workflow",
           "ws2-transfer-workflow",
           "ws2-offline-command-boundary",
-          "ws2-inventory-reconciliation-observability"
+          "ws2-inventory-reconciliation-observability",
+          "ws2-inventory-ledger-correctness",
+          "ws2-ledger-spike"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/inventory.integration.test.ts",
+        "apps/server/composition/persistence.node-check.ts",
         "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+        "apps/server/composition/ws2-ledger-spike.integration.test.ts",
         "apps/web/src/lib/shell.test.ts",
         "apps/worker/composition/delivery.integration.test.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
-        "packages/contracts/platform-api/src/index.test.ts"
+        "packages/contracts/platform-api/src/index.test.ts",
+        "packages/domains/inventory/src/index.test.ts"
       ],
       "blocking_defects": []
     },
@@ -3258,12 +4971,32 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
-          "ws2-transfer-workflow"
+          "ws2-transfer-workflow",
+          "ws2-inventory-domain",
+          "ws2-inventory-workflows-postgres"
         ],
         "validation_and_denial": [
-          "ws2-transfer-workflow"
+          "ws2-transfer-workflow",
+          "ws2-contract-boundary",
+          "ws2-inventory-domain",
+          "ws2-inventory-workflows-postgres"
         ],
         "tenant_isolation": [
           "ws2-inventory-two-tenant"
@@ -3300,12 +5033,14 @@
           "ws2-transfer-workflow"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/inventory.integration.test.ts",
         "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
         "apps/web/e2e/ws2-closeout.spec.ts",
         "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
         "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+        "packages/contracts/platform-api/src/index.test.ts",
         "packages/domains/inventory/src/index.test.ts"
       ],
       "blocking_defects": []
@@ -3332,6 +5067,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -3414,6 +5164,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/persistence.integration.test.ts",
         "apps/server/composition/ws1-critical.node-check.ts",
@@ -3450,6 +5201,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3465,6 +5231,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3490,6 +5271,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3505,6 +5301,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3530,6 +5341,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3545,6 +5371,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3574,6 +5415,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3589,6 +5445,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3618,6 +5486,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3633,6 +5516,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3658,6 +5553,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3673,6 +5583,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3698,6 +5623,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3713,6 +5653,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3738,6 +5693,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3753,6 +5723,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3782,6 +5767,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -3797,6 +5797,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -3822,6 +5834,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -3951,6 +5978,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/audit-session.integration.test.ts",
         "apps/server/composition/persistence.integration.test.ts",
@@ -3994,6 +6022,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -4094,6 +6137,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/audit-session.integration.test.ts",
         "apps/server/composition/persistence.integration.test.ts",
@@ -4132,6 +6176,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -4230,6 +6289,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/audit-session.integration.test.ts",
         "apps/server/composition/persistence.integration.test.ts",
@@ -4270,6 +6330,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -4366,6 +6441,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/persistence.integration.test.ts",
         "apps/server/composition/ws1-critical.node-check.ts",
@@ -4404,6 +6480,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -4419,6 +6510,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -4444,6 +6550,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -4459,6 +6580,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -4484,6 +6620,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -4499,6 +6650,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -4524,6 +6690,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -4602,6 +6783,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/persistence.integration.test.ts",
         "apps/server/composition/ws1-critical.node-check.ts",
@@ -4638,6 +6820,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -4733,6 +6930,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/audit-session.integration.test.ts",
         "apps/server/composition/persistence.integration.test.ts",
@@ -4770,6 +6968,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -4785,6 +6998,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -4814,6 +7042,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -4829,6 +7072,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -4854,6 +7109,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -4869,6 +7139,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -4894,6 +7179,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -5021,6 +7321,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/audit-session.integration.test.ts",
         "apps/server/composition/persistence.integration.test.ts",
@@ -5062,6 +7363,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5077,6 +7393,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5102,6 +7433,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5117,6 +7463,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5142,6 +7503,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5157,6 +7533,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5186,6 +7577,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5201,6 +7607,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5226,6 +7644,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5241,6 +7674,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5266,6 +7714,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5281,6 +7744,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5306,6 +7784,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -5395,6 +7888,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/persistence.integration.test.ts",
         "apps/server/composition/ws1-critical.node-check.ts",
@@ -5432,6 +7926,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5447,6 +7956,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5472,6 +7996,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5487,6 +8026,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5512,6 +8066,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5527,6 +8096,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5552,6 +8136,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5567,6 +8166,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5592,6 +8206,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5607,6 +8236,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5632,6 +8276,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5647,6 +8306,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5672,6 +8346,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -5772,6 +8461,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/persistence.integration.test.ts",
         "apps/server/composition/ws1-critical.node-check.ts",
@@ -5810,6 +8500,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5825,6 +8530,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5850,6 +8570,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5865,6 +8600,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5890,6 +8640,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5905,6 +8670,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5934,6 +8714,21 @@
         "performance_and_capacity": "The seam carries provisional limits; measured capacity evidence is required when an implementation is selected."
       },
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "deferred-by-depth",
+        "accessibility_and_responsive": "not-applicable",
+        "performance_and_capacity": "deferred-by-depth",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5949,6 +8744,18 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -5974,6 +8781,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -5989,6 +8811,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -6014,6 +8851,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -6029,6 +8881,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -6054,6 +8921,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -6069,6 +8951,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -6094,6 +8991,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -6109,6 +9021,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -6134,6 +9061,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Evidenced",
+      "dimension_status": {
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
+      },
       "dimension_evidence": {
         "happy_path": [
           "ws1-contract-parity",
@@ -6272,6 +9214,7 @@
           "ws1-architecture-boundaries"
         ]
       },
+      "unproven_required_dimensions": [],
       "evidence_paths": [
         "apps/server/composition/audit-session.integration.test.ts",
         "apps/server/composition/persistence.integration.test.ts",
@@ -6314,6 +9257,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -6329,6 +9287,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     },
@@ -6354,6 +9327,21 @@
       },
       "dimension_reasons": {},
       "evidence_status": "Planned",
+      "dimension_status": {
+        "happy_path": "planned",
+        "validation_and_denial": "planned",
+        "tenant_isolation": "planned",
+        "permission_and_entitlement": "planned",
+        "idempotency_and_duplicate": "planned",
+        "concurrency_and_conflict": "planned",
+        "events_jobs_and_projections": "planned",
+        "audit_and_observability": "planned",
+        "privacy_and_classification": "planned",
+        "offline_and_degraded": "planned",
+        "accessibility_and_responsive": "planned",
+        "performance_and_capacity": "planned",
+        "recovery_replay_and_reconciliation": "planned"
+      },
       "dimension_evidence": {
         "happy_path": [],
         "validation_and_denial": [],
@@ -6369,6 +9357,21 @@
         "performance_and_capacity": [],
         "recovery_replay_and_reconciliation": []
       },
+      "unproven_required_dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "permission_and_entitlement",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "offline_and_degraded",
+        "accessibility_and_responsive",
+        "performance_and_capacity",
+        "recovery_replay_and_reconciliation"
+      ],
       "evidence_paths": [],
       "blocking_defects": []
     }

@@ -39,11 +39,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 import { authClient } from "@/lib/auth-client";
 import { statusBadgeVariant } from "@/lib/status";
 import { orpc } from "@/utils/orpc";
 
+import { pageDocumentTitle } from "./operations-shared";
 import { EmptyState, ListSkeleton, QueryFailure } from "./query-state";
 import { useWorkspace } from "./workspace-context";
 
@@ -61,6 +63,12 @@ function PageFrame({
 	description: string;
 	title: string;
 }) {
+	// WS3 remediation R3b, Item 10: see operations-shared.tsx's
+	// `pageDocumentTitle` doc comment — same gap, same fix, for
+	// Administration's separate page-frame component.
+	useEffect(() => {
+		document.title = pageDocumentTitle(title);
+	}, [title]);
 	return (
 		<div className="mx-auto max-w-screen-2xl px-4 py-6">
 			<header className="mb-6 max-w-3xl">

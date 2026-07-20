@@ -96,6 +96,42 @@ export function useWorkspace(): WorkspaceValue {
 	return value;
 }
 
+/**
+ * WS3 remediation R3b, Item 10 (accessible route state).
+ *
+ * Before this fix, the loading branch below was a bare `<Skeleton>` with
+ * no heading and no accessible name at all — the WS1 workspace-context
+ * fix already ensures the EVENTUAL content is correct, but this loading
+ * WINDOW itself (which every hard navigation/reload into `/operations/*`
+ * or `/administration/*` passes through, since `identityQuery` always
+ * starts unresolved) rendered with ZERO `<h1>` anywhere in the DOM —
+ * `Header` has no h1, and the eventual page's own h1 (from
+ * `OperationsPageFrame` / administration's `PageFrame`) does not exist
+ * yet because `children` is not mounted during loading. This is the
+ * "intermittent missing-h1 landing state": intermittent because ordinary
+ * in-app navigation within the same layout subtree does not remount
+ * `WorkspaceProvider` (so most navigations never hit this window), but
+ * every fresh reload or deep link does, unconditionally.
+ *
+ * A separate, directly-testable component (matching `loader.tsx`'s own
+ * `renderToStaticMarkup`-tested pattern) so the exact markup asserted in
+ * `workspace-context.test.ts` is the exact markup actually rendered, not
+ * a re-implementation the test could drift from.
+ */
+export function WorkspaceLoadingState() {
+	return (
+		<div className="mx-auto max-w-screen-2xl px-4 py-10">
+			{/* A real (visually-hidden, not decorative) heading — guarantees
+			 * this window always has exactly one accessible h1, closing the
+			 * intermittent gap regardless of how long the window lasts. */}
+			<h1 className="sr-only">Loading workspace</h1>
+			<div aria-label="Loading workspace" className="grid gap-3" role="status">
+				<Skeleton className="h-24 w-full" />
+			</div>
+		</div>
+	);
+}
+
 export function useWorkspaceWorkGuard(state: WorkspaceWorkState) {
 	const { registerWorkState } = useWorkspace();
 	const key = useId();
@@ -439,9 +475,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 				// the user may already be mid-interaction with. Holding off
 				// until the identity query has actually settled means `children`
 				// only ever mounts once, against the already-resolved contextId.
-				<div className="mx-auto max-w-screen-2xl px-4 py-10">
-					<Skeleton className="h-24 w-full" />
-				</div>
+				<WorkspaceLoadingState />
 			) : (
 				<div key={contextId ?? "no-active-context"}>{children}</div>
 			)}

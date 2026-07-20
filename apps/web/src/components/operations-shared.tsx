@@ -20,6 +20,7 @@ import {
 import { ArrowLeft, ArrowRight, Clock3, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 import {
 	appendCursorTrail,
@@ -38,6 +39,25 @@ export interface DataColumn<T> {
 	render: (item: T) => React.ReactNode;
 }
 
+/** WS3 remediation R3b, Item 10 (accessible route state — route-specific
+ * titles). Before this fix, `apps/web/src/app/layout.tsx` declared a
+ * `title.template` ("%s | Platform Prototype") but NO `page.tsx` anywhere
+ * in the tree (checked directly — zero `export const metadata` /
+ * `generateMetadata` outside the root layout) ever supplied the "%s"
+ * part, so EVERY route — all 49 audited routes, not just POS — showed
+ * the exact same generic browser-tab title. Server-side
+ * `generateMetadata` can't easily know record-specific titles here (this
+ * app's content is client-fetched via TanStack Query, not
+ * server-rendered per route), so this mirrors the SAME string this
+ * component already renders as its own visible `<h1>` into
+ * `document.title` — one fix, applied where every POS/Operations page
+ * already flows through `OperationsPageFrame`, giving all of them a
+ * real, specific, already-correct-content title with no per-page
+ * changes needed. */
+export function pageDocumentTitle(title: string): string {
+	return `${title} | Platform Prototype`;
+}
+
 export function OperationsPageFrame({
 	actions,
 	children,
@@ -49,6 +69,9 @@ export function OperationsPageFrame({
 	description: string;
 	title: string;
 }) {
+	useEffect(() => {
+		document.title = pageDocumentTitle(title);
+	}, [title]);
 	return (
 		<div className="mx-auto max-w-screen-2xl px-4 py-6">
 			<header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

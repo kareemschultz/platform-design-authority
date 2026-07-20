@@ -9,7 +9,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { formatMoneyMinor, SALE_TAX_CATEGORY_LABELS } from "@/lib/pos";
+import {
+	addMinor,
+	changeDueMinor,
+	formatMoneyMinor,
+	SALE_TAX_CATEGORY_LABELS,
+} from "@/lib/pos";
 import { orpc } from "@/utils/orpc";
 
 import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
@@ -79,6 +84,25 @@ function ReceiptLayout({ receipt }: { receipt: Receipt }) {
 							{formatMoneyMinor(tender.amount.amountMinor, receipt.currency)}
 						</p>
 					))}
+					{/* WS3 remediation R4, P2 item 6: change due is derivable
+					 * from the receipt's own already-present `total`/`tenders`
+					 * (no new field invented) — shown only when a Cash tender
+					 * is present, since a card/stored-value tender never
+					 * produces physical change. Reuses the SAME
+					 * `changeDueMinor` the sale-completion cart builder already
+					 * uses (apps/web/src/lib/pos.ts), never negative. */}
+					{receipt.total && receipt.tenders.some((t) => t.type === "Cash") ? (
+						<p>
+							Change due:{" "}
+							{formatMoneyMinor(
+								changeDueMinor(
+									addMinor(...receipt.tenders.map((t) => t.amount.amountMinor)),
+									receipt.total.amountMinor
+								),
+								receipt.currency
+							)}
+						</p>
+					) : null}
 				</>
 			)}
 			<p className="text-muted-foreground text-xs">

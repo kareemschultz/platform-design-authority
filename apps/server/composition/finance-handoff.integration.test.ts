@@ -28,6 +28,7 @@ import Ajv2020 from "ajv/dist/2020";
 import addFormats from "ajv-formats";
 import { Pool } from "pg";
 
+import { validateExportPeriod } from "./finance-handoff";
 import { createDepositReferenceAllocator } from "./numbering";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
@@ -719,3 +720,54 @@ describe.serial(
 		});
 	}
 );
+
+/**
+ * WS3 remediation R4, P2 item 9 ("Validate export dates and start<=end
+ * before calling toISOString()"). Adversarial framing: before this fix,
+ * `financeHandoffTransportApplication.createAccountantHandoffExport`'s ONLY
+ * date check was `Number.isNaN(...)` on each date independently — a
+ * request with `periodStart` AFTER `periodEnd` (both individually valid
+ * ISO 8601 strings) passed that check and proceeded into the source query
+ * and the `toISOString()` response mapping unchecked. This block exercises
+ * the extracted `validateExportPeriod` directly — the EXACT function the
+ * real composition transport handler now calls — not a reimplementation.
+ * No live database is required for these specific assertions (the
+ * function throws before any repository/pool access), but they live in
+ * this file so they run under the SAME required `db:test` gate as every
+ * other WS3 finance-handoff assertion.
+ */
+describe("WS3 remediation R4, P2 item 9: export period validation", () => {
+	test("rejects periodStart AFTER periodEnd (both individually valid dates) — the pre-fix gap", () => {
+		expect(() =>
+			validateExportPeriod({
+				periodEnd: "2026-07-01T00:00:00.000Z",
+				periodStart: "2026-07-02T00:00:00.000Z",
+			})
+		).toThrow("periodStart must not be after periodEnd");
+	});
+
+	test("still rejects an individually-invalid date (pre-existing NaN guard preserved)", () => {
+		expect(() =>
+			validateExportPeriod({
+				periodEnd: "2026-07-02T00:00:00.000Z",
+				periodStart: "not-a-real-date",
+			})
+		).toThrow("periodStart/periodEnd must be valid ISO 8601 date-times");
+	});
+
+	test("accepts periodStart == periodEnd (a zero-width but well-ordered range) and periodStart before periodEnd", () => {
+		const equal = validateExportPeriod({
+			periodEnd: "2026-07-01T00:00:00.000Z",
+			periodStart: "2026-07-01T00:00:00.000Z",
+		});
+		expect(equal.periodStartUtc.getTime()).toBe(equal.periodEndUtc.getTime());
+
+		const ordered = validateExportPeriod({
+			periodEnd: "2026-07-02T00:00:00.000Z",
+			periodStart: "2026-07-01T00:00:00.000Z",
+		});
+		expect(ordered.periodStartUtc.getTime()).toBeLessThan(
+			ordered.periodEndUtc.getTime()
+		);
+	});
+});

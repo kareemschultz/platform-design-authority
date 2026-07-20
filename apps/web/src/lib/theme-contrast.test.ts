@@ -158,3 +158,67 @@ describe("light-mode primary/action contrast (WS3 remediation R3b, Item 12)", ()
 		expect(tokens.primary[2]).toBeCloseTo(258, 5);
 	});
 });
+
+// WS3 remediation R4, P2 item 10 / second-review item 13 (all-state axe
+// coverage). A live-Chromium axe scan of `ConsequencePreviewDialog`'s
+// populated preview surfaced two PLAIN-background pairings that no prior
+// WS3 a11y test ever scanned (every previous test scanned only initial-
+// render/happy-path states, never a dialog's OWN populated content):
+// `text-muted-foreground` on `background`/`popover`/`card`, and
+// `text-destructive` on `background`/`popover` (the plain pairing — the
+// SEPARATE `bg-destructive/10`-composited low-emphasis button pairing is
+// alpha-blended and cannot be verified by this pure-OKLCH-pair method;
+// that pairing is proven instead by the real live-Chromium axe scan in
+// `ws3-pos.spec.ts`'s "accessibility (all settled states)" close-register
+// test, which renders the actual composited button). These two plain-
+// pairing regressions ARE exactly this method's shape, so they get the
+// same deterministic, no-browser-required guard `primary` already has.
+describe("muted-foreground and destructive plain-background contrast (WS3 remediation R4)", () => {
+	function loadTokens() {
+		const source = readFileSync(
+			fileURLToPath(
+				new URL(
+					"../../../../packages/ui-web/core/src/styles/globals.css",
+					import.meta.url
+				)
+			),
+			"utf-8"
+		);
+		return parseRootOklchTokens(source);
+	}
+
+	test("text-muted-foreground on background/popover/card clears AA (4.5:1) with real margin", () => {
+		const tokens = loadTokens();
+		expect(tokens["muted-foreground"]).toBeDefined();
+		expect(tokens.background).toBeDefined();
+		expect(tokens.popover).toBeDefined();
+		expect(tokens.card).toBeDefined();
+		for (const backgroundToken of ["background", "popover", "card"] as const) {
+			const ratio = oklchContrast(
+				tokens["muted-foreground"],
+				tokens[backgroundToken]
+			);
+			expect(ratio).toBeGreaterThanOrEqual(4.5);
+		}
+		// Grayscale-only change (chroma 0, hue is degenerate/unused at chroma
+		// 0) — only lightness moved from the prior 0.556.
+		expect(tokens["muted-foreground"][0]).toBeLessThan(0.556);
+		expect(tokens["muted-foreground"][1]).toBeCloseTo(0, 5);
+	});
+
+	test("text-destructive on plain background/popover clears AA (4.5:1) with real margin (the composited bg-destructive/10 button pairing is proven separately by the live axe scan, not this pure-pair method)", () => {
+		const tokens = loadTokens();
+		expect(tokens.destructive).toBeDefined();
+		expect(tokens.background).toBeDefined();
+		expect(tokens.popover).toBeDefined();
+		for (const backgroundToken of ["background", "popover"] as const) {
+			const ratio = oklchContrast(tokens.destructive, tokens[backgroundToken]);
+			expect(ratio).toBeGreaterThanOrEqual(4.5);
+		}
+		// Same hue (27) as the governed destructive red — only lightness and
+		// chroma moved to clear the composited low-emphasis pairing; a
+		// regression here (someone re-theming destructive to a different hue)
+		// is exactly what this assertion is meant to catch.
+		expect(tokens.destructive[2]).toBeCloseTo(27, 5);
+	});
+});

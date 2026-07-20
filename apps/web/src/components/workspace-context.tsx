@@ -54,6 +54,21 @@ import { orpc } from "@/utils/orpc";
 import { useOnlineStatus } from "./use-online-status";
 
 interface WorkspaceValue {
+	/** WS3 remediation R4: the SAME "unsaved changes — leave anyway?"
+	 * question the in-app anchor-click guard (below) answers automatically
+	 * for `<a href>` navigation, exposed for a caller that triggers
+	 * navigation through something OTHER than a plain anchor click — the
+	 * mobile section `<select>` (`PosNavigation`/`OperationsNavigation`)
+	 * is exactly this case: its `onChange` calls `router.push` directly,
+	 * which the document-level anchor click-listener never sees at all
+	 * (confirmed: it only ever inspects `event.target.closest("a[href]")`),
+	 * so a dirty sale-cart draft silently discarded with zero warning on a
+	 * narrow viewport, while the identical navigation intent on a wide
+	 * viewport (an actual `<a>` click) already correctly warned. Returns
+	 * `true` when it is safe to proceed (nothing unsaved/in-flight, or the
+	 * user explicitly confirmed discarding it) and `false` when the caller
+	 * must NOT navigate (the user cancelled). */
+	confirmLeaveIfDirty: () => boolean;
 	contextId: string | null;
 	identity: CurrentIdentity | undefined;
 	isLoading: boolean;
@@ -227,6 +242,20 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		},
 		[]
 	);
+
+	// WS3 remediation R4: see `WorkspaceValue.confirmLeaveIfDirty`'s own
+	// doc comment for why this exists — the SAME synchronous `window.
+	// confirm` prompt the anchor click-guard below shows, exposed for a
+	// non-anchor navigation trigger.
+	const confirmLeaveIfDirty = useCallback(() => {
+		if (!shouldWarnBeforeLeaving(workStates.current.values())) {
+			return true;
+		}
+		// biome-ignore lint/suspicious/noAlert: synchronous confirmation required, matching the identical anchor-click and popstate guards elsewhere in this file
+		return window.confirm(
+			"You have unsaved changes in this workspace. Leave this page and discard them?"
+		);
+	}, []);
 
 	// Native `beforeunload` covers reload and tab/window close — the ONE
 	// exit path a client-side `popstate`/click-capture guard can never
@@ -477,6 +506,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	const value = useMemo<WorkspaceValue>(
 		() => ({
+			confirmLeaveIfDirty,
 			contextId,
 			identity: identityQuery.data,
 			isLoading: identityQuery.isLoading || setContext.isPending,
@@ -487,6 +517,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			registerWorkState,
 		}),
 		[
+			confirmLeaveIfDirty,
 			contextId,
 			identityQuery.data,
 			identityQuery.isLoading,

@@ -36,6 +36,93 @@ const REGISTER_LINE_PREFIX_PATTERN = /^Register:\s*/;
 const CONNECTION_REQUIRED_PATTERN = /connection/i;
 const RETURN_QUANTITY_LABEL_PATTERN = /^Return quantity \(0 = skip/;
 
+/** WS3 remediation R4, P2 item 10 / second-review item 13 ("all-state axe
+ * coverage after SETTLED state"): a transient Sonner toast (e.g. "Sale
+ * completed", "Register opened") mid-fade-out at the exact instant an axe
+ * scan runs can read as a real but spurious low-contrast violation (its
+ * own exit-animation opacity, not the toast's real resting style) —
+ * discovered by this run's own all-state axe additions surfacing it as a
+ * genuinely reproducible (not flaky) failure whose SPECIFIC flagged
+ * element differed run to run depending on exact toast timing, which is
+ * itself the signature of a transient-element measurement artifact rather
+ * than a fixed color defect. Waiting for the toast list to be empty before
+ * scanning is the same "settled state" discipline this remediation applies
+ * everywhere else, applied to axe's OWN precondition. */
+async function waitForToastsToClear(page: Page) {
+	await expect(page.locator("[data-sonner-toast]")).toHaveCount(0, {
+		timeout: 10_000,
+	});
+}
+
+/** Same "settled state" discipline as `waitForToastsToClear`, applied to
+ * the cursor: a prior `.click()` on a button (e.g. the previous state's
+ * submit) leaves the real OS mouse cursor resting on top of that control,
+ * so its genuine `:hover` style (a DIFFERENT, sometimes lower-contrast
+ * variant, e.g. `hover:bg-primary/80`) is what a scan immediately
+ * afterward measures — a real but narrow, mouse-position-dependent
+ * artifact, not that control's default presented appearance. Moving the
+ * cursor away scans the actual resting state every OTHER WS3 a11y test
+ * (which never clicked immediately before scanning the SAME page) already
+ * implicitly got for free. */
+async function moveMouseAwayFromControls(page: Page) {
+	await page.mouse.move(0, 0);
+}
+
+/** WS3 remediation R4 (P2 item 10 / second-review item 13, "all-state axe
+ * coverage after SETTLED state"): `AlertDialogContent`/`DialogContent`
+ * (packages/ui-web/core/src/components/alert-dialog.tsx,dialog.tsx) apply
+ * a real `data-open:fade-in-0 data-open:zoom-in-95 ... duration-100`
+ * entrance animation to the `[role="alertdialog"]` panel itself — the
+ * SAME element every "Review & close/approve/confirm/void ..." button
+ * opens, and the ONE the destructive commit control lives inside.
+ * Genuine reproduction of a real, transient color-contrast false
+ * positive this exact remediation stage's own live-Chromium/axe-core
+ * probing surfaced (not a token-value defect): scanning the instant the
+ * dialog's heading becomes visible — which Playwright's `toBeVisible()`
+ * does NOT wait for any CSS animation to finish — can catch the panel
+ * (and everything inside it, including the destructive button) MID
+ * fade/zoom, where axe-core's real pixel-aware contrast measurement
+ * genuinely reads a different, lower-contrast, transitioning color than
+ * the panel's own settled, fully-opaque resting state. This is the exact
+ * same "settled state" discipline `waitForToastsToClear` already applies
+ * to a transient toast, applied here to the dialog's OWN entrance
+ * animation — proven via the Web Animations API (`getAnimations()`),
+ * not a fixed sleep guess. */
+async function waitForDialogEntranceAnimationToSettle(page: Page) {
+	await page.waitForFunction(() => {
+		const panel = document.querySelector('[role="alertdialog"]');
+		if (!panel) {
+			return false;
+		}
+		return panel
+			.getAnimations()
+			.every((animation) => animation.playState !== "running");
+	});
+}
+
+/** WS3 remediation R4: `PosNavigation` (pos-navigation.tsx) renders the
+ * SAME cross-section navigation as a set of `role="link"` anchors at
+ * `sm:flex` and wider viewports, and as a single `<select id="pos-
+ * section">` combobox below `sm` (the narrower `chromium-mobile`
+ * project's own viewport) — both drive the identical `router.push`, so
+ * either genuinely completes the SAME in-app navigation the dirty-cart
+ * guard must intercept. A test written against the link-only desktop
+ * shape alone would time out waiting for a link that never renders on a
+ * narrow viewport. Tries the link first (present at `sm`+), falling back
+ * to the select (present below `sm`) only if the link truly is not
+ * visible — never both, since exactly one is ever actually in the DOM's
+ * visible layout for a given viewport. */
+async function navigateViaPosNav(page: Page, label: string) {
+	const link = page
+		.getByRole("navigation", { name: "POS" })
+		.getByRole("link", { name: label });
+	if (await link.isVisible().catch(() => false)) {
+		await link.click();
+		return;
+	}
+	await page.getByLabel("POS section").selectOption({ label });
+}
+
 /** Computes a valid GTIN-13 check digit for a 12-digit base, replicating
  * `packages/domains/catalog/src/index.ts`'s `gtinCheckDigitIsValid` exactly
  * (weight 3 on the digit immediately left of the check digit, alternating
@@ -723,6 +810,15 @@ test("full cash sale: open register, complete a sale, view the receipt, close th
 	);
 	await expect(
 		page.getByRole("heading", { exact: true, name: "Receipt" })
+	).toBeVisible();
+	// WS3 remediation R4, P2 item 6: the ISSUED receipt view (not just the
+	// pre-completion cart builder, already asserted above) also shows change
+	// due, derived from the receipt's own `total`/`tenders` — same
+	// GYD 50.00 tendered against the sale total as above.
+	await expect(
+		page.getByText(
+			`Change due: ${new Intl.NumberFormat("en-GY", { currency: "GYD", style: "currency" }).format((5000 - sale.total.amountMinor) / 100)}`
+		)
 	).toBeVisible();
 
 	// WS3 remediation R1, Finding A: a completed cash sale now posts its own
@@ -2008,9 +2104,24 @@ test("refund approval queue: an approver selects a pending refund instead of typ
 	).toBeVisible();
 	await queueResponsePromise;
 
+	// `ResponsiveDataList` (operations-shared.tsx) renders the SAME queue
+	// data as a `<table>`'s `<tr>` (implicit ARIA role "row") at >=`md`
+	// viewports, and as a `<li>` (implicit role "listitem") below `md` —
+	// this test's own viewport (whichever project it runs under, including
+	// the narrower `chromium-mobile` project) determines which one is
+	// actually in the DOM. `getByRole` (not a `[role="..."]` CSS attribute
+	// selector, which only matches an EXPLICIT `role` HTML attribute and
+	// therefore never matches a plain `<li>`'s IMPLICIT role) resolves
+	// either real ARIA role, combined with `.or()` since Playwright's
+	// `getByRole` takes exactly one role per call.
 	const queueRow = approverPage
 		.getByRole("row")
-		.filter({ hasText: createdRefund.json.id });
+		.filter({ hasText: createdRefund.json.id })
+		.or(
+			approverPage
+				.getByRole("listitem")
+				.filter({ hasText: createdRefund.json.id })
+		);
 	await expect(queueRow).toBeVisible();
 	// The manual entry field is never touched — proves selection alone
 	// drives the approval, not a value copied into it by this test.
@@ -2226,6 +2337,26 @@ test("receipt void reverses the sale through the receipt view", async ({
 	).toBeVisible();
 
 	await page.getByLabel("Reason (optional)").fill("Duplicate transaction");
+	// WS3 remediation R4: on the narrow `chromium-mobile` viewport, Sonner's
+	// fixed bottom-right toast region (the "Sale completed" toast this
+	// same test's own `Complete sale` click above just triggered) can
+	// genuinely overlap this button's real on-screen position — a
+	// reproducible pointer-event interception, not a flake (Playwright's
+	// own retrying-click log shows the exact toast element intercepting
+	// every attempt for the full 60s timeout). A SECOND, deeper cause
+	// compounds this on a real (non-isolated) run: Sonner PAUSES a
+	// toast's own auto-dismiss timer while the mouse cursor rests over
+	// it (a real, documented Sonner behavior) — the "Complete sale"
+	// click just above left the Playwright virtual cursor sitting
+	// exactly where that toast then renders on this narrow viewport, so
+	// the toast never dismissed on its own at all (confirmed: `locator
+	// resolved to 2 elements` persisted for the ENTIRE 10s
+	// `waitForToastsToClear` timeout, not merely a slow-but-eventual
+	// dismiss). `moveMouseAwayFromControls` — the same "settled state"
+	// discipline already applied to every WS3 remediation R4 axe scan —
+	// must run BEFORE waiting for the toast to clear, not after.
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
 	await page.getByRole("button", { name: "Review & void receipt" }).click();
 	await expect(
 		page.getByRole("heading", { name: "Void this receipt?" })
@@ -2323,6 +2454,8 @@ test("accessibility: register open, the sale cart builder, and the receipt view 
 	const registerId = `register_a11y_${Date.now()}`;
 	await signIn(page, "/operations/pos/registers/new");
 	await selectLocation(page, "Georgetown Browser Store");
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
 	const openFormResults = await new AxeBuilder({ page })
 		.withTags(WCAG_TAGS)
 		.analyze();
@@ -2337,6 +2470,8 @@ test("accessibility: register open, the sale cart builder, and the receipt view 
 		productName,
 		"9.00"
 	);
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
 	const saleResults = await new AxeBuilder({ page })
 		.withTags(WCAG_TAGS)
 		.analyze();
@@ -2353,6 +2488,8 @@ test("accessibility: register open, the sale cart builder, and the receipt view 
 	await expect(
 		page.getByRole("heading", { exact: true, name: "Receipt" })
 	).toBeVisible();
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
 	const receiptResults = await new AxeBuilder({ page })
 		.withTags(WCAG_TAGS)
 		.analyze();
@@ -2374,6 +2511,8 @@ test("accessibility: the return-creation, refund-request, and deposit-preparatio
 	await expect(
 		page.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
 	const returnResults = await new AxeBuilder({ page })
 		.withTags(WCAG_TAGS)
 		.analyze();
@@ -2383,6 +2522,8 @@ test("accessibility: the return-creation, refund-request, and deposit-preparatio
 	await expect(
 		page.getByRole("heading", { name: "Request a refund" })
 	).toBeVisible();
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
 	const refundResults = await new AxeBuilder({ page })
 		.withTags(WCAG_TAGS)
 		.analyze();
@@ -2392,6 +2533,8 @@ test("accessibility: the return-creation, refund-request, and deposit-preparatio
 	await expect(
 		page.getByRole("heading", { name: "Prepare a deposit" })
 	).toBeVisible();
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
 	const depositResults = await new AxeBuilder({ page })
 		.withTags(WCAG_TAGS)
 		.analyze();
@@ -2678,10 +2821,7 @@ test("dirty sale cart: an in-app navigation click while dirty is confirmed (canc
 	page.once("dialog", (dialog) => {
 		dialog.dismiss().catch(() => undefined);
 	});
-	await page
-		.getByRole("navigation", { name: "POS" })
-		.getByRole("link", { name: "Registers" })
-		.click();
+	await navigateViaPosNav(page, "Registers");
 	await expect(page.getByRole("heading", { name: "New sale" })).toBeVisible();
 	await expect(page.getByRole("list", { name: "Cart lines" })).toContainText(
 		productName
@@ -2700,10 +2840,7 @@ test("dirty sale cart: an in-app navigation click while dirty is confirmed (canc
 	page.once("dialog", (dialog) => {
 		dialog.accept().catch(() => undefined);
 	});
-	await page
-		.getByRole("navigation", { name: "POS" })
-		.getByRole("link", { name: "Registers" })
-		.click();
+	await navigateViaPosNav(page, "Registers");
 	await expect(
 		page.getByRole("heading", { exact: true, name: "Registers" })
 	).toBeVisible();
@@ -2789,4 +2926,310 @@ test("receipt print composition: chrome is hidden under print media, and a real 
 	expect(pdf.byteLength).toBeGreaterThan(1000);
 
 	await page.emulateMedia({ media: "screen" });
+});
+
+// ---------------------------------------------------------------------------
+// WS3 remediation R4, P2 item 10 / the second independent review's item 13
+// (verbatim, folded into R4's scope per REMEDIATION_DIRECTIVE.md Addendum
+// 2): "the existing 156/156 matrix and narrow axe scans do not establish
+// correctness or WCAG conformance. Add executable behavioral assertions,
+// all-state axe coverage after settled state, keyboard flows, 200%/400%
+// zoom, forced colors, reduced motion, scanner tests, and dated
+// manual-AT uncertainty."
+//
+// Scanner focus/announcement is ALREADY covered above (the "barcode scan
+// race" test asserts `barcodeInput` stays focused and the `aria-live`
+// announcement text after each outcome, not merely that the correct
+// product landed in the cart) — not duplicated here.
+//
+// The five tests below close the remaining deliverables, all against
+// close-register — REMEDIATION_DIRECTIVE.md's own text names this the
+// highest-consequence flow class (Finding I's five approval flows share
+// ONE `ConsequencePreviewDialog`; close-register is the one every cashier
+// shift ends on). The sixth deliverable (a dated, honest disclosure that
+// this is AUTOMATED evidence only, pending manual assistive-technology
+// review) is a documentation obligation, not a browser assertion — see
+// `evidence/first-slice/ws3-capability-evidence.json`'s
+// `accessibility_and_responsive` evidence entries.
+// ---------------------------------------------------------------------------
+
+test("accessibility (all settled states): close-register's empty form, validation-error, confirm-dialog-open, and success states each pass automated WCAG A/AA with zero violations", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const registerId = `register_a11y_states_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+
+	await page.goto(`/operations/pos/registers/${registerSessionId}/close`);
+	await expect(
+		page.getByRole("heading", { name: "Close register" })
+	).toBeVisible();
+	// State 1: empty form (settled — the heading assertion above already
+	// proved this, not merely "navigation resolved").
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
+	const emptyFormResults = await new AxeBuilder({ page })
+		.withTags(WCAG_TAGS)
+		.analyze();
+	expect(emptyFormResults.violations).toEqual([]);
+
+	// State 2: validation error, genuinely settled (the error text itself
+	// is awaited, not just the click that triggers it) — every OTHER WS3
+	// a11y test scans only a happy-path or initial-render state.
+	await page.getByLabel("Counted cash (GYD)").fill("not-a-number");
+	await page.getByRole("button", { name: "Review & close register" }).click();
+	await expect(
+		page.getByText("Enter a non-negative amount with up to 2 decimal places")
+	).toBeVisible();
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
+	const errorStateResults = await new AxeBuilder({ page })
+		.withTags(WCAG_TAGS)
+		.analyze();
+	expect(errorStateResults.violations).toEqual([]);
+
+	// State 3: the confirm dialog open, populated with the REAL
+	// server-derived preview (Finding I) — settled on the dialog's own
+	// heading, not the click that opened it.
+	await page.getByLabel("Counted cash (GYD)").fill("100.00");
+	await page.getByRole("button", { name: "Review & close register" }).click();
+	await expect(
+		page.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
+	await waitForDialogEntranceAnimationToSettle(page);
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
+	const dialogOpenResults = await new AxeBuilder({ page })
+		.withTags(WCAG_TAGS)
+		.analyze();
+	expect(dialogOpenResults.violations).toEqual([]);
+
+	// State 4: success, settled on the real post-commit heading.
+	const closeResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/registers/close")
+	);
+	await page
+		.getByRole("button", { exact: true, name: "Close register" })
+		.click();
+	const closeResponse = await closeResponsePromise;
+	expect(closeResponse.ok()).toBe(true);
+	await expect(
+		page.getByRole("heading", { name: "Register closed" })
+	).toBeVisible();
+	await moveMouseAwayFromControls(page);
+	await waitForToastsToClear(page);
+	const successResults = await new AxeBuilder({ page })
+		.withTags(WCAG_TAGS)
+		.analyze();
+	expect(successResults.violations).toEqual([]);
+});
+
+test("keyboard-only close-register: the approval commit itself completes with ZERO mouse clicks, landing on the destructive control only via Tab, never by default focus", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const registerId = `register_kbd_only_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+
+	await page.goto(`/operations/pos/registers/${registerSessionId}/close`);
+	await expect(
+		page.getByRole("heading", { name: "Close register" })
+	).toBeVisible();
+
+	await page.getByLabel("Counted cash (GYD)").focus();
+	// The field defaults to "0.00" — select-all via keyboard (Control+A)
+	// before typing so the real value becomes "100.00", not "0.00100.00"
+	// (an invalid, un-parsable append onto the default that would silently
+	// route this test into the validation-error state instead).
+	await page.keyboard.press("ControlOrMeta+a");
+	await page.keyboard.type("100.00");
+	// Tab past the optional Reason field to the submit button, then Enter —
+	// no `.click()` from here through the final "Register closed" heading.
+	await page.keyboard.press("Tab");
+	await page.keyboard.press("Tab");
+	await expect(
+		page.getByRole("button", { name: "Review & close register" })
+	).toBeFocused();
+	await page.keyboard.press("Enter");
+
+	await expect(
+		page.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
+	// WS3 remediation R3, Finding I's non-destructive-initial-focus
+	// guarantee: focus lands on Cancel, never the destructive commit
+	// control, when the dialog opens.
+	await expect(page.getByRole("button", { name: "Cancel" })).toBeFocused();
+	const confirmButton = page.getByRole("button", {
+		exact: true,
+		name: "Close register",
+	});
+	// The confirm control starts disabled while the server-derived preview
+	// (Finding I) loads — wait for it to become the real, focusable,
+	// enabled control before tabbing to it, matching the existing
+	// mouse-driven "full cash sale" test's own `toBeEnabled()` wait.
+	await expect(confirmButton).toBeEnabled();
+	await page.keyboard.press("Tab");
+	await expect(confirmButton).toBeFocused();
+	const closeResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/registers/close")
+	);
+	await page.keyboard.press("Enter");
+	const closeResponse = await closeResponsePromise;
+	expect(closeResponse.ok()).toBe(true);
+	await expect(
+		page.getByRole("heading", { name: "Register closed" })
+	).toBeVisible();
+});
+
+test("200% and 400% zoom reflow (WCAG 1.4.10): close-register's form and confirm dialog show no horizontal scroll and keep key controls reachable", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const registerId = `register_zoom_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+	await page.goto(`/operations/pos/registers/${registerSessionId}/close`);
+	await expect(
+		page.getByRole("heading", { name: "Close register" })
+	).toBeVisible();
+
+	// 200% zoom proxy: half the standard 1280px desktop viewport width.
+	// Playwright has no literal "browser zoom" control (a real desktop
+	// browser's zoom does not change device pixels, only the CSS pixel
+	// budget available to layout) — a reduced viewport at the SAME device
+	// pixel ratio is the standard reflow-testing proxy for this.
+	await page.setViewportSize({ height: 400, width: 640 });
+	await expect(
+		page.getByRole("heading", { name: "Close register" })
+	).toBeVisible();
+	await expect(page.getByLabel("Counted cash (GYD)")).toBeVisible();
+	const overflow200 = await page.evaluate(() => ({
+		clientWidth: document.documentElement.clientWidth,
+		scrollWidth: document.documentElement.scrollWidth,
+	}));
+	expect(overflow200.scrollWidth).toBeLessThanOrEqual(
+		overflow200.clientWidth + 1
+	);
+
+	// 400% zoom proxy: the standard WCAG 1.4.10 320 CSS px reflow width
+	// (what 400% zoom on a 1280px design effectively produces).
+	await page.setViewportSize({ height: 480, width: 320 });
+	await expect(
+		page.getByRole("heading", { name: "Close register" })
+	).toBeVisible();
+	await page.getByLabel("Counted cash (GYD)").fill("100.00");
+	await expect(
+		page.getByRole("button", { name: "Review & close register" })
+	).toBeVisible();
+	const overflow400 = await page.evaluate(() => ({
+		clientWidth: document.documentElement.clientWidth,
+		scrollWidth: document.documentElement.scrollWidth,
+	}));
+	expect(overflow400.scrollWidth).toBeLessThanOrEqual(
+		overflow400.clientWidth + 1
+	);
+
+	// The confirm dialog ALSO reflows correctly at 320px — the highest-risk
+	// surface (a fixed-position modal with a `max-w-md` cap that could
+	// still overflow a narrow viewport if not built responsively).
+	await page.getByRole("button", { name: "Review & close register" }).click();
+	await expect(
+		page.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
+	const dialogOverflow = await page.evaluate(() => ({
+		clientWidth: document.documentElement.clientWidth,
+		scrollWidth: document.documentElement.scrollWidth,
+	}));
+	expect(dialogOverflow.scrollWidth).toBeLessThanOrEqual(
+		dialogOverflow.clientWidth + 1
+	);
+	await expect(
+		page.getByRole("button", { exact: true, name: "Close register" })
+	).toBeVisible();
+});
+
+test("forced-colors mode (Windows High Contrast equivalent): close-register still renders and stays operable", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	await page.emulateMedia({ forcedColors: "active" });
+	const registerId = `register_forced_colors_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+	await page.goto(`/operations/pos/registers/${registerSessionId}/close`);
+	await expect(
+		page.getByRole("heading", { name: "Close register" })
+	).toBeVisible();
+	await page.getByLabel("Counted cash (GYD)").fill("100.00");
+	const submitButton = page.getByRole("button", {
+		name: "Review & close register",
+	});
+	await expect(submitButton).toBeVisible();
+	// The button must still be a real, in-layout, non-zero-size hit target
+	// under forced-colors — a `forced-color-adjust: none` misuse or a
+	// background-image-only affordance can render invisibly/unclickable
+	// under a real Windows High Contrast theme even though axe alone
+	// cannot detect that failure mode (system colors are undefined in a
+	// headless run), so this asserts real layout box presence instead.
+	const box = await submitButton.boundingBox();
+	expect(box).not.toBeNull();
+	expect((box as { height: number }).height).toBeGreaterThan(0);
+	expect((box as { width: number }).width).toBeGreaterThan(0);
+
+	await submitButton.click();
+	await expect(
+		page.getByRole("heading", { name: "Close this register?" })
+	).toBeVisible();
+	const confirmButton = page.getByRole("button", {
+		exact: true,
+		name: "Close register",
+	});
+	const confirmBox = await confirmButton.boundingBox();
+	expect(confirmBox).not.toBeNull();
+	expect((confirmBox as { height: number }).height).toBeGreaterThan(0);
+});
+
+test("prefers-reduced-motion actually suppresses the ConsequencePreviewDialog's real CSS animation, proven by comparing WITH vs WITHOUT the emulation on the SAME dialog element shape", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	async function openConfirmDialogAndReadAnimationDuration(): Promise<number> {
+		const registerId = `register_motion_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+		const registerSessionId = await openRegister(page, registerId, "100.00");
+		await page.goto(`/operations/pos/registers/${registerSessionId}/close`);
+		await expect(
+			page.getByRole("heading", { name: "Close register" })
+		).toBeVisible();
+		await page.getByLabel("Counted cash (GYD)").fill("100.00");
+		await page.getByRole("button", { name: "Review & close register" }).click();
+		const dialogHeading = page.getByRole("heading", {
+			name: "Close this register?",
+		});
+		await expect(dialogHeading).toBeVisible();
+		// Read the computed animation-duration off the dialog's OWN content
+		// panel (the element `dialog.tsx` applies `duration-100`/
+		// `data-open:animate-in` to), which is this heading's nearest
+		// `[role="alertdialog"]` ancestor.
+		return await page.evaluate(() => {
+			const panel = document.querySelector('[role="alertdialog"]');
+			if (!panel) {
+				throw new Error("alertdialog panel not found");
+			}
+			return Number.parseFloat(getComputedStyle(panel).animationDuration);
+		});
+	}
+
+	// WITHOUT emulation: the dialog's real, non-trivial open animation.
+	const normalDuration = await openConfirmDialogAndReadAnimationDuration();
+	expect(normalDuration).toBeGreaterThan(0.05);
+
+	// WITH `prefers-reduced-motion: reduce` emulated: the SAME dialog's
+	// animation-duration collapses to globals.css's `0.01ms !important`
+	// override — genuinely suppressed, not merely small by default.
+	await page.emulateMedia({ reducedMotion: "reduce" });
+	const reducedDuration = await openConfirmDialogAndReadAnimationDuration();
+	expect(reducedDuration).toBeLessThan(0.001);
+	expect(reducedDuration).toBeLessThan(normalDuration);
 });

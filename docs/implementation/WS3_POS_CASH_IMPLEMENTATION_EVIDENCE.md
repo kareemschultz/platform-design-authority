@@ -198,5 +198,118 @@ Every required cell of `WS3_POS_CASH_IMPLEMENTATION_PLAN.md` §11's per-capabili
 
 ## 12. Change log
 
+- 2026-07-20 — v0.2.0 WS3 remediation R4 (P2 items 11 and 13; see
+  `remediation-dispositions.md` for the full R4 disposition set):
+  **Item 13 (lint source-file count drift)**: §6's `475 files` cell above
+  is retained VERBATIM as the historical figure this stage's PR6 run
+  actually observed — not edited, per this run's own "preserve historical
+  claims through correction, do not erase" rule. That number is NOT an
+  executable assertion anywhere in the repository (confirmed: no script
+  or test compares `bun run check`'s reported file count against a fixed
+  literal) and was never intended as one; it drifts upward every time a
+  remediation stage adds a new source or test file (R1-R4 alone added
+  over a dozen), so it should be read as "the count observed at PR6's
+  original closeout," not a live target. As of this remediation stage
+  (R4, `claude/ws3-integration`), `bun run check` reports **496 files, 0
+  errors, 0 warnings** — that number will itself be stale by the next
+  stage for the same structural reason; the reproduction command
+  (`bun run check`) is the durable source of truth, not any hardcoded
+  digit in this document. No future stage should hardcode a new "current"
+  count here without the same caveat.
+  **Item 11 (bundle-size test mislabeling)**: `apps/web/e2e/
+  ws3-pos-perf.spec.ts`'s second test previously claimed "POS route JS
+  stays within the 350KB target" while actually summing EVERY
+  `_next/static/chunks/*.js` byte transferred on a fresh navigation — the
+  page's TOTAL first-load JavaScript (shared Next.js framework/vendor
+  chunks plus the route's own chunk), not the route-INCREMENTAL delta the
+  original claim implied. True route-incremental measurement requires
+  reading Next.js's build manifest to separate shared-by-all chunks from
+  a route's own chunk, which is not obtainable against this stack's baked
+  standalone `meridian-web` Docker image (no host-accessible `.next`
+  directory). Per the remediation directive's own stated alternative
+  ("rename the claim and record the real total/shared budget"), the test
+  and its `metric`/`measurementScope` fields were renamed to state plainly
+  that the number is a TOTAL, not an increment, and the row below is
+  corrected accordingly. This is a labeling fix only — the underlying
+  measured bytes and the already-disclosed MISS disposition (§8, §11
+  above) are unchanged; still an open, undisputed, disclosed gap, not
+  claimed as closure.
+
+| Signal | WS3 target | Retained result | Disposition |
+|---|---:|---|---|
+| POS route total first-load JS (renamed from "POS route JS" — see R4 change-log entry above; this is TOTAL bytes including shared framework/vendor chunks, not route-incremental) | ≤350KB route-incremental target (retained verbatim from §12 of the implementation plan for informational comparison only — not re-derived as an incremental figure) | Re-measured this stage: `/operations/pos/sales/new` and `/operations/pos/registers/new` total first-load JS, live Docker stack | MISS on the total-JS measurement (unchanged open gap); route-incremental split remains unmeasurable against this baked image — not claimed |
+
+- 2026-07-20 — v0.2.0 (continued) WS3 remediation R4 evidence-system repair
+  (`scripts/check_ws3_evidence.py` redesign): the prior **156/156**
+  required-cell claim (§10, and the "12 capabilities, 156 required cells"
+  figure quoted throughout this document's §6/§9) is **SUPERSEDED, not
+  erased** — it is retained above verbatim as the historical PR6/R1-R3b
+  figure, exactly as this section's own established practice already
+  treats other retracted claims (see the §6/§7 retraction notes). Two
+  independently-confirmed overclaim categories, both raised by a second
+  independent review and verified directly by this stage (not assumed),
+  are corrected as of this entry:
+  1. **Organization/location isolation** evidence previously cited ONLY
+     cross-TENANT tests under the `tenant_isolation` dimension (every
+     marker string in `ws3-livepg-register`/`ws3-livepg-sale`/
+     `ws3-livepg-return-refund-exchange` read "isolates two tenants...",
+     "cross-tenant isolation...", or similar — confirmed by direct
+     inspection, zero cross-organization or cross-location test names
+     were cited anywhere in the evidence source before this fix). WS3
+     remediation R2/R3b (Finding B) added REAL cross-organization and
+     cross-location adversarial tests, now cited directly: `pos.
+     integration.test.ts`'s "WS3 remediation R2, Finding B: two
+     organizations and two locations in the SAME tenant..." pair (register
+     and sale/price-override), `listCashVariances`/`listPriceOverrides`/
+     `getCashVariance`/`getRegisterSession`'s organization- and
+     location-scoped queue tests, `returns.integration.test.ts`'s
+     `listReturns`/`listRefunds`/`getReturn`/`getRefund` organization-scope
+     tests, and a new entry citing `deposits.integration.test.ts`'s
+     `getDeposit`/`listDeposits` organization-scope tests (deposits had NO
+     `tenant_isolation`-dimension evidence entry of their own before this
+     fix — a genuine gap, not merely a mislabeling, now closed).
+  2. **Audit evidence** previously cited maker/checker separation tests in
+     which the word "audit" appears in **zero** of the cited files
+     (confirmed: `grep -ic audit` on `packages/domains/pos/src/index.test.ts`,
+     `apps/server/composition/pos.integration.test.ts`, `returns.
+     integration.test.ts`, and `deposits.integration.test.ts` — all four
+     return `0`). This stage's own P2 item 3 fix
+     (`apps/server/composition/pos.ts`'s `withApprovalDenialAudit` +
+     `apps/server/composition/pos-denial-audit.integration.test.ts`) is the
+     FIRST genuine Platform Audit assertion WS3 has ever had: a real
+     `platform_audit_record` row, read back independently, for a denied
+     self-approval or permission attempt on the refund/return/cash-variance/
+     deposit-confirm/price-override approval flows. The `audit_and_
+     observability` dimension's evidence now points at that file for the
+     four capabilities it genuinely covers (`commerce.refunds`,
+     `commerce.returns`, `commerce.cash-management`, `commerce.pos`).
+
+     **WS3 remediation R4 audit-instrumentation disclosure**: `commerce.
+     register-management`, `commerce.shift-management`, `commerce.
+     order-management`, `commerce.exchanges`, `commerce.gift-receipts`,
+     `commerce.mobile-pos`, `commerce.offline-sales`, and `commerce.
+     receipts` do not yet write a dedicated Platform Audit record for their
+     own happy-path operations — only the five maker/checker denial flows
+     do, per P2 item 3's explicit scope (rejected authority/control
+     attempts, not every command). Extending Platform Audit coverage to
+     every happy-path WS3 command is a new subsystem decision (what is
+     audited, retention class, classification, volume) requiring its own
+     ADR/founder review under CLAUDE.md §13, not a silent instrumentation
+     addition inside this remediation stage. These eight capabilities'
+     `audit_and_observability` cells are recorded as **deferred-pending**
+     by the redesigned evidence checker — disclosed honestly, not silently
+     dropped and not fabricated with a thin test to force a green cell.
+
+  The net effect: the redesigned checker reports fewer than 156
+  cells as fully behaviorally-closed test evidence (the true, previously
+  unmeasured number), plus a disclosed governance-documented count
+  (`privacy_and_classification`, unchanged) and a disclosed deferred-pending
+  count (the 8 audit cells above) — every one of the 156 required cells
+  still carries SOME real, path-verified evidence (satisfying the
+  structural registry requirement), but the checker no longer conflates
+  "a cell has evidence" with "a cell is behaviorally proven," which is
+  exactly the distinction the prior 156/156 headline collapsed. This is a
+  disclosed correction, not a claim of new completeness.
+
 - 2026-07-19 — v0.1.0 initial WS3 PR6 closeout: registry-derived 12/12 capability, 156/156 required-cell matrix; five FIRST_SLICE_MANIFEST.md scenario demonstrations with two recorded partial-satisfaction boundaries (offline numbering PENDING WS5, mixed-tender PENDING WS6); worker no-consumer replay-safety evidence; full local gate suite green including Docker-stack Playwright validation (76/76); two real PR4/PR5 defects found and fixed (finance-handoff wall-clock time bomb, perf-test query-cache hang); DoD/Prototype-Evidence checklist; dimension-matrix verification. Not yet independently reviewed or merged.
 - 2026-07-19 — v0.1.1 remediation cycle 2 (documentation-only, reconciling this document with its own sibling commit `920479f` per CLAUDE.md §12): retracted the false §6 attribution of `authenticated-operations.spec.ts`'s Product-list failure to session-local Docker Postgres volume accumulation; that failure was in fact a 100%-reproducible PRODUCT defect (Catalog `listProducts` sorting by random-UUID `id` instead of recency), now recorded as defect #3 in §7 and cited to TECH-LESSON-053 and commit `920479f`. Updated the PR1-PR4 live-PG lane result from 118 pass/941 expect() calls to a freshly re-verified, genuinely clean 119 pass/0 fail/946 expect() calls across 13 files (four plain-invocation attempts on this contended host each hit a different host-load hook timeout, isolate-confirmed clean per file; a single re-run with `--timeout=30000 --max-concurrency=4` produced the clean aggregate recorded — see §6's re-verification note; the 13-file count is unchanged, `catalog.integration.test.ts` was a pre-existing file, not new), and corrected the matching DoD checklist row (§9) from 118/118 to 119/119. "Two real defects" is now three throughout §7.

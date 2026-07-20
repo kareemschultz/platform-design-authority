@@ -13,7 +13,7 @@
     "test": "bun test src/*.test.ts",
     "db:migrate": "bun run composition/migrate.ts",
     "db:test": "bun test composition/*.integration.test.ts",
-    "db:test:node": "node node_modules/tsx/dist/cli.mjs composition/persistence.node-check.ts && node node_modules/tsx/dist/cli.mjs composition/ws1-critical.node-check.ts",
+    "db:test:node": "node node_modules/tsx/dist/cli.mjs composition/persistence.node-check.ts && node node_modules/tsx/dist/cli.mjs composition/ws1-critical.node-check.ts && node node_modules/tsx/dist/cli.mjs composition/ws3-critical.node-check.ts",
     "e2e:seed": "bun run composition/web-experience.fixture.ts"
   },
   "dependencies": {

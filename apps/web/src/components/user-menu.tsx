@@ -41,9 +41,19 @@ export default function UserMenu() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger
-				render={<Button className="min-h-10" variant="outline" />}
+				render={<Button className="min-h-10 max-w-40" variant="outline" />}
 			>
-				{session.user.name}
+				{/* WS3 remediation R4, P2 item 10 / second-review item 13 (WCAG
+				 * 1.4.10 zoom reflow, discovered via close-register's new
+				 * 320-CSS-px reflow test): an unbounded, untruncated account
+				 * name in the Header (shared, platform-wide chrome, not
+				 * POS-specific) was the single largest contributor forcing
+				 * `document.documentElement.scrollWidth` past the viewport at
+				 * a 320px effective width — the accessible name (screen
+				 * readers, `aria-label`) is UNCHANGED by a purely visual
+				 * `truncate`; the full name remains reachable in the opened
+				 * dropdown menu's own content below. */}
+				<span className="truncate">{session.user.name}</span>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="bg-card">
 				<DropdownMenuGroup>

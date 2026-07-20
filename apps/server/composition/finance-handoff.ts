@@ -18,6 +18,35 @@ import { posService } from "./pos";
 import { databasePool } from "./postgres";
 import { tenancyService } from "./tenancy";
 
+/** WS3 remediation R4, P2 item 9 ("Validate export dates and start<=end
+ * before calling toISOString()"): extracted as a pure, independently
+ * testable function — before this fix, a reversed (start after end) pair
+ * of otherwise-individually-valid dates passed straight through into the
+ * source query and the `toISOString()` response mapping below. */
+export function validateExportPeriod(input: {
+	periodEnd: string;
+	periodStart: string;
+}): { periodEndUtc: Date; periodStartUtc: Date } {
+	const periodStartUtc = new Date(input.periodStart);
+	const periodEndUtc = new Date(input.periodEnd);
+	if (
+		Number.isNaN(periodStartUtc.getTime()) ||
+		Number.isNaN(periodEndUtc.getTime())
+	) {
+		throw new ExportError(
+			"validation",
+			"periodStart/periodEnd must be valid ISO 8601 date-times"
+		);
+	}
+	if (periodStartUtc.getTime() > periodEndUtc.getTime()) {
+		throw new ExportError(
+			"validation",
+			"periodStart must not be after periodEnd"
+		);
+	}
+	return { periodEndUtc, periodStartUtc };
+}
+
 function exportView(record: ExportJobRecord): AccountantHandoffExport {
 	return {
 		contentHash: record.contentHash,
@@ -170,17 +199,7 @@ export const financeHandoffTransportApplication = {
 			permission: "platform.export.create",
 			sessionId: input.sessionId,
 		});
-		const periodStartUtc = new Date(input.periodStart);
-		const periodEndUtc = new Date(input.periodEnd);
-		if (
-			Number.isNaN(periodStartUtc.getTime()) ||
-			Number.isNaN(periodEndUtc.getTime())
-		) {
-			throw new ExportError(
-				"validation",
-				"periodStart/periodEnd must be valid ISO 8601 date-times"
-			);
-		}
+		const { periodEndUtc, periodStartUtc } = validateExportPeriod(input);
 		const source = await posService.queryFinanceHandoffSourceData({
 			organizationId: context.organizationId,
 			periodEndUtc,

@@ -10,7 +10,10 @@ import { createPricingEngine } from "@meridian/engine-pricing";
 import { createTaxEngine } from "@meridian/engine-tax";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import { createPosRepository } from "@meridian/persistence-pos-postgres";
+import type { AppendAuditInput } from "@meridian/platform-audit";
+import { AuthorizationError } from "@meridian/platform-authorization";
 
+import { auditApplication } from "./audit";
 import { permissionAuthorizer } from "./authorization";
 import { catalogService } from "./catalog";
 import { entitlementEvaluator } from "./entitlements";
@@ -142,7 +145,7 @@ export const posService = createPosService({
 	unitOfWork,
 });
 
-export const posApplication = createPosApplication({
+const baseApplication = createPosApplication({
 	activeContexts: {
 		async requireActiveContext(input) {
 			const context = await tenancyService.requireContext(input);
@@ -165,6 +168,196 @@ export const posApplication = createPosApplication({
 	permissions: permissionAuthorizer,
 	service: posService,
 });
+
+// ---------------------------------------------------------------------------
+// WS3 remediation R4, P2 item 3 / Finding C's own closing criterion
+// ("denial produces the required Audit evidence but no business effect"):
+// every maker/checker approval flow persists a real Platform Audit record
+// with `outcome: "denied"` for a REJECTED authority/control attempt —
+// self-approval separation (`PosError` code `approval_separation`, thrown
+// by `posService`) or a denied permission (`AuthorizationError`, thrown by
+// `authorize()` inside `createPosApplication` before `posService` is ever
+// reached). Both branches never dispatch to the service/unit-of-work, so
+// no business event is ever emitted alongside the denial — the audit
+// record is the ONLY effect. A failure while WRITING the audit record
+// itself must never mask or replace the real denial the caller already
+// sees: it is caught and dropped, never rethrown in place of the original
+// error (CLAUDE.md §14 prohibits silent contradiction resolution, but this
+// is not resolving anything — the original denial still propagates
+// unchanged; only the best-effort evidence write is allowed to fail
+// quietly rather than turn a governed 403/409 into an unrelated 500).
+// ---------------------------------------------------------------------------
+
+interface ApprovalDenialInput {
+	actorUserId: string;
+	contextId: string;
+	correlationId: string;
+	sessionId: string;
+}
+
+export type DenialReasonCode = "approval_separation" | "permission_denied";
+
+export function classifyApprovalDenial(
+	error: unknown
+): DenialReasonCode | null {
+	if (error instanceof AuthorizationError) {
+		return "permission_denied";
+	}
+	if (error instanceof PosError && error.code === "approval_separation") {
+		return "approval_separation";
+	}
+	return null;
+}
+
+export interface DenialAuditPort {
+	append: (input: AppendAuditInput) => Promise<unknown>;
+}
+
+export interface DenialAuditContextResolver {
+	requireContext: (input: {
+		authUserId: string;
+		contextId: string;
+		sessionId: string;
+	}) => Promise<{
+		locationId?: string | null;
+		organizationId: string;
+		tenantId: string;
+	}>;
+}
+
+/** Exported for direct unit coverage of the classification/best-effort
+ * contract without a live database — the live-PG proof (a real Audit row,
+ * read back) lives in `pos.integration.test.ts` against this exact
+ * function, wired to a real `auditApplication`/`tenancyService`. */
+export function withApprovalDenialAudit<
+	TInput extends ApprovalDenialInput,
+	TResult,
+>(options: {
+	action: string;
+	audit: DenialAuditPort;
+	contexts: DenialAuditContextResolver;
+	fn: (input: TInput) => Promise<TResult>;
+	targetId: (input: TInput) => string;
+	targetType: string;
+}): (input: TInput) => Promise<TResult> {
+	return async (input: TInput): Promise<TResult> => {
+		try {
+			return await options.fn(input);
+		} catch (error) {
+			const reasonCode = classifyApprovalDenial(error);
+			if (reasonCode) {
+				await recordDenialBestEffort({
+					action: options.action,
+					audit: options.audit,
+					contexts: options.contexts,
+					input,
+					reasonCode,
+					targetId: options.targetId(input),
+					targetType: options.targetType,
+				});
+			}
+			throw error;
+		}
+	};
+}
+
+async function recordDenialBestEffort(params: {
+	action: string;
+	audit: DenialAuditPort;
+	contexts: DenialAuditContextResolver;
+	input: ApprovalDenialInput;
+	reasonCode: DenialReasonCode;
+	targetId: string;
+	targetType: string;
+}): Promise<void> {
+	try {
+		const context = await params.contexts.requireContext({
+			authUserId: params.input.actorUserId,
+			contextId: params.input.contextId,
+			sessionId: params.input.sessionId,
+		});
+		await params.audit.append({
+			action: params.action,
+			actorType: "human",
+			actorUserId: params.input.actorUserId,
+			classification: "Confidential",
+			correlationId: params.input.correlationId,
+			locationId: context.locationId ?? undefined,
+			metadata: { reasonCode: params.reasonCode },
+			occurredAt: new Date(),
+			organizationId: context.organizationId,
+			outcome: "denied",
+			reasonCode: params.reasonCode,
+			retentionClass: "platform-security-evidence",
+			scopeType: "Tenant",
+			sourceChannel: "api",
+			targetId: params.targetId,
+			targetType: params.targetType,
+			tenantId: context.tenantId,
+		});
+	} catch {
+		// Best-effort only — see the block comment above. The caller's
+		// original denial error is always rethrown regardless.
+	}
+}
+
+/** `posApplication` re-exported with the five maker/checker approval
+ * flows wrapped for denial-audit persistence. Every OTHER method on
+ * `baseApplication` (opens, creates, reads, closes, sale completion) is
+ * unchanged — audit coverage here is bounded to Finding C's five approval
+ * flows, not every POS operation, per the remediation directive's own
+ * scoping ("rejected authority/control attempts", read together with
+ * Finding C's specific closing criterion). */
+export const posApplication = {
+	...baseApplication,
+	approveCashVariance: withApprovalDenialAudit({
+		action: "commerce.cash-variance.approve.denied",
+		audit: auditApplication,
+		contexts: tenancyService,
+		fn: baseApplication.approveCashVariance,
+		targetId: (
+			input: Parameters<typeof baseApplication.approveCashVariance>[0]
+		) => input.registerSessionId,
+		targetType: "RegisterSession",
+	}),
+	approvePriceOverride: withApprovalDenialAudit({
+		action: "commerce.price-override.approve.denied",
+		audit: auditApplication,
+		contexts: tenancyService,
+		fn: baseApplication.approvePriceOverride,
+		targetId: (
+			input: Parameters<typeof baseApplication.approvePriceOverride>[0]
+		) => input.overrideId,
+		targetType: "PriceOverride",
+	}),
+	approveRefund: withApprovalDenialAudit({
+		action: "commerce.refund.approve.denied",
+		audit: auditApplication,
+		contexts: tenancyService,
+		fn: baseApplication.approveRefund,
+		targetId: (input: Parameters<typeof baseApplication.approveRefund>[0]) =>
+			input.refundId,
+		targetType: "Refund",
+	}),
+	approveReturn: withApprovalDenialAudit({
+		action: "commerce.return.approve.denied",
+		audit: auditApplication,
+		contexts: tenancyService,
+		fn: baseApplication.approveReturn,
+		targetId: (input: Parameters<typeof baseApplication.approveReturn>[0]) =>
+			input.returnId,
+		targetType: "Return",
+	}),
+	confirmDeposit: withApprovalDenialAudit({
+		action: "commerce.deposit.confirm.denied",
+		audit: auditApplication,
+		contexts: tenancyService,
+		fn: baseApplication.confirmDeposit,
+		targetId: (input: Parameters<typeof baseApplication.confirmDeposit>[0]) =>
+			input.depositId,
+		targetType: "Deposit",
+	}),
+};
 
 /**
  * `/registers/{registerId}/safe-drops` and `/registers/{registerId}/cash-

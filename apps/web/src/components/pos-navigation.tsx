@@ -38,6 +38,14 @@ export function PosNavigation() {
 	const pathname = usePathname();
 	const router = useRouter();
 	const workspace = useWorkspace();
+	// WS3 remediation R4: same fix as `OperationsNavigation` — the mobile
+	// `<select>` below calls `router.push` directly, bypassing the
+	// document-level unsaved-work guard (workspace-context.tsx), which
+	// only intercepts `<a href>` clicks. Without this, navigating away
+	// from a dirty sale-cart draft via this dropdown silently discarded
+	// it with zero warning, while the identical navigation via an actual
+	// link click already correctly warned.
+	const { confirmLeaveIfDirty } = workspace;
 	const { data: session } = authClient.useSession();
 	// `POS_NAVIGATION`'s "Overview" href (`/operations/pos`) is a path
 	// PREFIX of every other entry — `currentNavigationItem` (not each
@@ -64,7 +72,7 @@ export function PosNavigation() {
 								const destination = POS_NAVIGATION.find(
 									(item) => item.href === event.target.value
 								);
-								if (destination) {
+								if (destination && confirmLeaveIfDirty()) {
 									router.push(destination.href);
 								}
 							}}

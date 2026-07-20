@@ -5,9 +5,18 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { currentNavigationItem, OPERATIONS_NAVIGATION } from "@/lib/shell";
 
+import { useWorkspace } from "./workspace-context";
+
 export function OperationsNavigation() {
 	const pathname = usePathname();
 	const router = useRouter();
+	// WS3 remediation R4: the mobile `<select>` below drives navigation via
+	// `router.push` directly, which the document-level unsaved-work guard
+	// (workspace-context.tsx) never sees — it only intercepts `<a href>`
+	// clicks. Without this, a dirty draft was silently discarded with zero
+	// warning on a narrow viewport while the SAME navigation intent on a
+	// wide viewport (an actual link click) already correctly warned.
+	const { confirmLeaveIfDirty } = useWorkspace();
 	// WS3 remediation R3b, Item 9: resolves EXACTLY ONE current item (see
 	// `currentNavigationItem`'s doc comment) rather than each link
 	// independently re-deciding its own `aria-current` — both the mobile
@@ -30,7 +39,7 @@ export function OperationsNavigation() {
 							const destination = OPERATIONS_NAVIGATION.find(
 								(item) => item.href === event.target.value
 							);
-							if (destination) {
+							if (destination && confirmLeaveIfDirty()) {
 								router.push(destination.href);
 							}
 						}}

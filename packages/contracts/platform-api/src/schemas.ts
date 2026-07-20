@@ -478,17 +478,26 @@ export const TransitionReasonSchema = z.object({
 	reason: z.string().min(1).max(500),
 });
 
+// WS3 remediation R4, P2 item 1 ("quantity precision/digit limits"): the
+// integer part is bounded to at most 12 digits (0-999,999,999,999) — the
+// fraction part was already bounded to 6 digits. Neither bound existed
+// before this fix, so an unbounded numeric-string integer part could reach
+// the request boundary and only be rejected (or worse, silently truncated
+// by a later `Number(...)` parse) deep inside the domain layer instead of
+// at the Zod boundary CLAUDE.md §11 requires. No real POS/Inventory
+// quantity approaches this bound; it is a hardening ceiling, not a
+// business rule.
 export const DecimalQuantitySchema = z
 	.string()
-	.regex(/^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+	.regex(/^-?(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,6})?$/);
 
 export const PositiveDecimalQuantitySchema = z
 	.string()
-	.regex(/^(?!0(?:\.0{1,6})?$)(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+	.regex(/^(?!0(?:\.0{1,6})?$)(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,6})?$/);
 
 export const NonNegativeDecimalQuantitySchema = z
 	.string()
-	.regex(/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+	.regex(/^(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,6})?$/);
 
 export const QuantityLineSchema = z.object({
 	conversionSourceId: NullableIdentifierSchema.optional(),
@@ -682,8 +691,18 @@ export const StockTransferSchema = z.object({
 // minor-unit semantics per CLAUDE.md §7 — never binary floating point.
 // ---------------------------------------------------------------------------
 
+// WS3 remediation R4, P2 item 1 ("safe-integer money checks ... at every
+// relevant boundary"): `.safe()` (int + within [MIN_SAFE_INTEGER,
+// MAX_SAFE_INTEGER]) matches the SAME `Number.MAX_SAFE_INTEGER` ceiling
+// `packages/domains/pos/src/index.ts`'s `MAX_MINOR_AMOUNT` already
+// enforces deep inside the domain layer — before this fix, an
+// out-of-safe-range `amountMinor` passed THIS Zod boundary and only
+// failed several layers later. Sign is intentionally left unconstrained
+// here (direction is carried by a separate field, e.g. CashMovement's
+// `direction`, not by the sign of `amountMinor`) — this bounds magnitude
+// only, matching the domain layer's own non-negating check shape.
 export const MoneySchema = z.object({
-	amountMinor: z.number().int(),
+	amountMinor: z.number().safe(),
 	currency: z.string().regex(/^[A-Z]{3}$/),
 });
 
@@ -774,11 +793,15 @@ export const SaleLineInputSchema = z.object({
 	variantId: NullableIdentifierSchema.optional(),
 });
 
+// WS3 remediation R4, P2 item 1 ("bounded array lengths ... at every
+// relevant boundary"): matches the bound Inventory's
+// `ReceiveStockTransferLineSchema` array already carries (`.max(500)`) —
+// before this fix, `CreateSaleSchema.lines` had NO upper bound at all.
 export const CreateSaleSchema = z
 	.object({
 		currency: z.string().regex(/^[A-Z]{3}$/),
 		customerPartyId: NullableIdentifierSchema.optional(),
-		lines: z.array(SaleLineInputSchema).min(1),
+		lines: z.array(SaleLineInputSchema).min(1).max(500),
 		registerId: IdentifierSchema,
 	})
 	.strict();
@@ -796,7 +819,9 @@ export const CompleteSaleRequestSchema = z
 		 * same register. No dedicated exchange permission or endpoint
 		 * exists; omitting this field is an ordinary sale completion. */
 		exchangeOfReturnId: NullableIdentifierSchema.optional(),
-		tenders: z.array(TenderReferenceSchema).min(1),
+		// WS3 remediation R4, P2 item 1: bounded — a real split-tender sale
+		// never approaches this; before this fix `tenders` had no upper bound.
+		tenders: z.array(TenderReferenceSchema).min(1).max(20),
 	})
 	.strict();
 
@@ -912,7 +937,10 @@ export const ReturnLineInputSchema = z
 
 export const CreateReturnSchema = z
 	.object({
-		lines: z.array(ReturnLineInputSchema).min(1),
+		// WS3 remediation R4, P2 item 1: bounded to the SAME 500-line ceiling
+		// as `CreateSaleSchema.lines` — a return can never exceed its
+		// originating sale's own (now-bounded) line count.
+		lines: z.array(ReturnLineInputSchema).min(1).max(500),
 		reason: z.string().min(1).max(500),
 		saleId: IdentifierSchema,
 	})

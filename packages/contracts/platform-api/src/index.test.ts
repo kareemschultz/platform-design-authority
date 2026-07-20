@@ -4,10 +4,14 @@ import {
 	ActiveContextRequestSchema,
 	appApiContract,
 	CatalogSkuLookupSchema,
+	CompleteSaleRequestSchema,
 	CreateCashMovementRequestSchema,
 	CreateProductSchema,
+	CreateReturnSchema,
+	CreateSaleSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
+	MoneySchema,
 	PagedStockBalancesSchema,
 	PLATFORM_OPENAPI_OPERATION_METADATA,
 	PositiveDecimalQuantitySchema,
@@ -469,5 +473,106 @@ describe("WS3 POS Cash Workflow API contract", () => {
 		expect(operationIds).toContain("createDeposit");
 		expect(operationIds).toContain("postDepositsByDepositIdConfirm");
 		expect(operationIds).not.toContain("commerce.deposit.reject");
+	});
+
+	// WS3 remediation R4, P2 item 1 ("bounded array lengths, quantity
+	// precision/digit limits, safe-integer money checks ... at every
+	// relevant boundary"). Adversarial framing: every `.max(...)`/`.safe()`/
+	// digit-count bound below did NOT exist before this fix — each
+	// `rejects` assertion is a request shape that PASSED validation on the
+	// pre-fix schema (proven by constructing it one bound-unit past the new
+	// limit; removing the bound reproduces the pre-fix accept).
+	test("MoneySchema.amountMinor rejects an out-of-safe-integer-range amount but keeps ordinary negative amounts valid (sign is not the bound)", () => {
+		expect(
+			MoneySchema.safeParse({ amountMinor: 1000, currency: "GYD" }).success
+		).toBe(true);
+		expect(
+			MoneySchema.safeParse({ amountMinor: -1000, currency: "GYD" }).success
+		).toBe(true);
+		expect(
+			MoneySchema.safeParse({
+				amountMinor: Number.MAX_SAFE_INTEGER,
+				currency: "GYD",
+			}).success
+		).toBe(true);
+		expect(
+			MoneySchema.safeParse({
+				amountMinor: Number.MAX_SAFE_INTEGER + 2,
+				currency: "GYD",
+			}).success
+		).toBe(false);
+		expect(
+			MoneySchema.safeParse({
+				amountMinor: Number.MIN_SAFE_INTEGER - 2,
+				currency: "GYD",
+			}).success
+		).toBe(false);
+	});
+
+	test("PositiveDecimalQuantitySchema/NonNegativeDecimalQuantitySchema/DecimalQuantitySchema bound the integer part to 12 digits while still accepting realistic quantities", () => {
+		expect(
+			PositiveDecimalQuantitySchema.safeParse("999999999999").success
+		).toBe(true);
+		expect(
+			PositiveDecimalQuantitySchema.safeParse("9999999999999").success
+		).toBe(false);
+		expect(
+			PositiveDecimalQuantitySchema.safeParse("1000000000000.5").success
+		).toBe(false);
+		expect(PositiveDecimalQuantitySchema.safeParse("5.5").success).toBe(true);
+	});
+
+	test("CreateSaleSchema.lines is bounded to 500; CompleteSaleRequestSchema.tenders is bounded to 20; CreateReturnSchema.lines is bounded to 500", () => {
+		const saleLine = {
+			productId: "product_bound_test",
+			quantity: "1",
+			unit: "each",
+			unitPrice: { amountMinor: 100, currency: "GYD" },
+		};
+		expect(
+			CreateSaleSchema.safeParse({
+				currency: "GYD",
+				lines: Array.from({ length: 500 }, () => saleLine),
+				registerId: "register_bound_test",
+			}).success
+		).toBe(true);
+		expect(
+			CreateSaleSchema.safeParse({
+				currency: "GYD",
+				lines: Array.from({ length: 501 }, () => saleLine),
+				registerId: "register_bound_test",
+			}).success
+		).toBe(false);
+
+		const tender = {
+			amount: { amountMinor: 100, currency: "GYD" },
+			type: "Cash" as const,
+		};
+		expect(
+			CompleteSaleRequestSchema.safeParse({
+				tenders: Array.from({ length: 20 }, () => tender),
+			}).success
+		).toBe(true);
+		expect(
+			CompleteSaleRequestSchema.safeParse({
+				tenders: Array.from({ length: 21 }, () => tender),
+			}).success
+		).toBe(false);
+
+		const returnLine = { quantity: "1", saleLineId: "sale_line_bound_test" };
+		expect(
+			CreateReturnSchema.safeParse({
+				lines: Array.from({ length: 500 }, () => returnLine),
+				reason: "bound test",
+				saleId: "sale_bound_test",
+			}).success
+		).toBe(true);
+		expect(
+			CreateReturnSchema.safeParse({
+				lines: Array.from({ length: 501 }, () => returnLine),
+				reason: "bound test",
+				saleId: "sale_bound_test",
+			}).success
+		).toBe(false);
 	});
 });

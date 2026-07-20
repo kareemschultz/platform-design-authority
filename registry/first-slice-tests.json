@@ -480,6 +480,15 @@
       "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000"
     },
     {
+      "id": "ws3-audit-instrumentation-scope-disclosure",
+      "path": "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+      "kind": "deferred-pending",
+      "runtimes": [
+        "n/a (disclosed gap, not an executable runtime)"
+      ],
+      "command": "n/a — disclosed gap, not an executable test; see P2 item 3 scope and the cited change-log entry"
+    },
+    {
       "id": "ws3-browser-accessibility",
       "path": "apps/web/e2e/ws3-pos.spec.ts",
       "kind": "live-browser-test",
@@ -572,6 +581,27 @@
         "PostgreSQL 18"
       ],
       "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-denial-audit-evidence",
+      "path": "apps/server/composition/pos-denial-audit.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "PostgreSQL 18",
+        "Bun 1.3.14",
+        "Node.js (ws3-critical.node-check.ts)"
+      ],
+      "command": "bun run --cwd apps/server db:test -- pos-denial-audit.integration.test.ts"
+    },
+    {
+      "id": "ws3-deposit-org-location-isolation",
+      "path": "apps/server/composition/deposits.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "PostgreSQL 18",
+        "Bun 1.3.14"
+      ],
+      "command": "bun run --cwd apps/server db:test -- deposits.integration.test.ts"
     },
     {
       "id": "ws3-domain-application-authority",
@@ -1243,6 +1273,7 @@
         ],
         "tenant_isolation": [
           "ws3-livepg-register",
+          "ws3-deposit-org-location-isolation",
           "ws3-finance-handoff-cash-support",
           "ws3-closeout-tenant-isolation",
           "ws3-persistence-schema-tenant-scope"
@@ -1271,10 +1302,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-register-cash",
-          "ws3-domain-deposit",
-          "ws3-livepg-register",
-          "ws3-livepg-deposit"
+          "ws3-denial-audit-evidence"
         ],
         "privacy_and_classification": [
           "ws3-finance-handoff-cash-support",
@@ -1304,6 +1332,7 @@
       "evidence_paths": [
         "apps/server/composition/deposits.integration.test.ts",
         "apps/server/composition/finance-handoff.integration.test.ts",
+        "apps/server/composition/pos-denial-audit.integration.test.ts",
         "apps/server/composition/pos.integration.test.ts",
         "apps/server/composition/ws3-closeout.integration.test.ts",
         "apps/server/src/router.test.ts",
@@ -1371,8 +1400,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-return-refund-exchange",
-          "ws3-livepg-return-refund-exchange"
+          "ws3-audit-instrumentation-scope-disclosure"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -1399,6 +1427,7 @@
         "apps/server/src/router.test.ts",
         "apps/web/e2e/ws3-pos.spec.ts",
         "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
         "packages/domains/pos/src/index.test.ts",
         "packages/persistence/pos-postgres/src/index.test.ts",
         "packages/persistence/pos-postgres/src/schema.test.ts"
@@ -1497,8 +1526,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-return-refund-exchange",
-          "ws3-livepg-return-refund-exchange"
+          "ws3-audit-instrumentation-scope-disclosure"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -1524,6 +1552,7 @@
         "apps/server/src/router.test.ts",
         "apps/web/e2e/ws3-pos.spec.ts",
         "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
         "packages/domains/pos/src/index.test.ts",
         "packages/persistence/pos-postgres/src/index.test.ts",
         "packages/persistence/pos-postgres/src/schema.test.ts"
@@ -1591,9 +1620,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-sale",
-          "ws3-livepg-register",
-          "ws3-livepg-sale"
+          "ws3-audit-instrumentation-scope-disclosure"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -1621,6 +1648,7 @@
         "apps/server/composition/ws3-closeout.integration.test.ts",
         "apps/web/e2e/ws3-pos.spec.ts",
         "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
         "packages/domains/pos/src/index.test.ts",
         "packages/persistence/pos-postgres/src/index.test.ts",
         "packages/persistence/pos-postgres/src/schema.test.ts"
@@ -1684,8 +1712,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-sale",
-          "ws3-livepg-sale"
+          "ws3-audit-instrumentation-scope-disclosure"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -1713,6 +1740,7 @@
         "apps/web/e2e/ws3-pos.spec.ts",
         "apps/worker/composition/ws3-closeout.integration.test.ts",
         "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
         "packages/domains/pos/src/index.test.ts",
         "packages/persistence/pos-postgres/src/index.test.ts",
         "packages/persistence/pos-postgres/src/schema.test.ts"
@@ -1780,8 +1808,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-sale",
-          "ws3-livepg-sale"
+          "ws3-audit-instrumentation-scope-disclosure"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -1811,6 +1838,7 @@
         "apps/web/src/lib/pos.test.ts",
         "apps/worker/composition/ws3-closeout.integration.test.ts",
         "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
         "packages/domains/pos/src/index.test.ts",
         "packages/persistence/pos-postgres/src/index.test.ts",
         "packages/persistence/pos-postgres/src/schema.test.ts"
@@ -1866,6 +1894,7 @@
         "tenant_isolation": [
           "ws3-livepg-register",
           "ws3-livepg-sale",
+          "ws3-deposit-org-location-isolation",
           "ws3-persistence-schema-tenant-scope"
         ],
         "permission_and_entitlement": [
@@ -1898,12 +1927,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-register-cash",
-          "ws3-domain-sale",
-          "ws3-domain-deposit",
-          "ws3-livepg-register",
-          "ws3-livepg-sale",
-          "ws3-livepg-deposit"
+          "ws3-denial-audit-evidence"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -1932,6 +1956,7 @@
       },
       "evidence_paths": [
         "apps/server/composition/deposits.integration.test.ts",
+        "apps/server/composition/pos-denial-audit.integration.test.ts",
         "apps/server/composition/pos.integration.test.ts",
         "apps/server/composition/ws3-closeout.integration.test.ts",
         "apps/server/src/router.test.ts",
@@ -2013,10 +2038,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-sale",
-          "ws3-domain-return-refund-exchange",
-          "ws3-livepg-sale",
-          "ws3-livepg-return-refund-exchange"
+          "ws3-audit-instrumentation-scope-disclosure"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -2048,6 +2070,7 @@
         "apps/web/e2e/ws3-pos.spec.ts",
         "apps/web/src/lib/pos.test.ts",
         "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
         "packages/domains/pos/src/index.test.ts",
         "packages/persistence/pos-postgres/src/index.test.ts",
         "packages/persistence/pos-postgres/src/schema.test.ts"
@@ -2111,8 +2134,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-return-refund-exchange",
-          "ws3-livepg-return-refund-exchange"
+          "ws3-denial-audit-evidence"
         ],
         "privacy_and_classification": [
           "ws3-closeout-tenant-isolation",
@@ -2135,6 +2157,7 @@
         ]
       },
       "evidence_paths": [
+        "apps/server/composition/pos-denial-audit.integration.test.ts",
         "apps/server/composition/returns.integration.test.ts",
         "apps/server/composition/ws3-closeout.integration.test.ts",
         "apps/server/src/router.test.ts",
@@ -2205,8 +2228,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-register-cash",
-          "ws3-livepg-register"
+          "ws3-audit-instrumentation-scope-disclosure"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -2234,6 +2256,7 @@
         "apps/web/e2e/ws3-pos.spec.ts",
         "apps/web/src/lib/pos.test.ts",
         "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
         "packages/domains/pos/src/index.test.ts",
         "packages/persistence/pos-postgres/src/index.test.ts",
         "packages/persistence/pos-postgres/src/schema.test.ts"
@@ -2296,8 +2319,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-return-refund-exchange",
-          "ws3-livepg-return-refund-exchange"
+          "ws3-denial-audit-evidence"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -2319,6 +2341,7 @@
         ]
       },
       "evidence_paths": [
+        "apps/server/composition/pos-denial-audit.integration.test.ts",
         "apps/server/composition/returns.integration.test.ts",
         "apps/server/composition/ws3-closeout.integration.test.ts",
         "apps/server/src/router.test.ts",
@@ -2387,8 +2410,7 @@
           "ws3-browser-workflows"
         ],
         "audit_and_observability": [
-          "ws3-domain-register-cash",
-          "ws3-livepg-register"
+          "ws3-audit-instrumentation-scope-disclosure"
         ],
         "privacy_and_classification": [
           "ws3-owner-data-classification"
@@ -2415,6 +2437,7 @@
         "apps/server/src/router.test.ts",
         "apps/web/e2e/ws3-pos.spec.ts",
         "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
         "packages/domains/pos/src/index.test.ts",
         "packages/persistence/pos-postgres/src/index.test.ts",
         "packages/persistence/pos-postgres/src/schema.test.ts"

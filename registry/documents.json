@@ -7025,6 +7025,21 @@
       "applicable_dimensions": []
     },
     {
+      "document_id": "PDA-REV-025",
+      "path": "docs/reviews/PHASE8_BEST_PRACTICES_COVERAGE_AUDIT.md",
+      "title": "Phase 8 Best-Practices Coverage Audit",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-20",
+      "related_adrs": [],
+      "review_evidence": null,
+      "document_class": null,
+      "declared_depth": null,
+      "evidence_state": null,
+      "applicable_dimensions": []
+    },
+    {
       "document_id": "PDA-SEC-001",
       "path": "docs/blueprint/11-Security/README.md",
       "title": "Security Section Index",

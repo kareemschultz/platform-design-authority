@@ -27,6 +27,7 @@ This directory separates independent review evidence from the registrations and 
 - [Meridian Documentation Completion Audit Registration](MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_REGISTRATION.md) — `PDA-REV-024` · Draft
 - [Meridian Documentation Completion Audit Disposition V1](MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_DISPOSITION_V1.md) — `PDA-REV-021` · Draft
 - [Document Class Adoption Sample Review](DOCUMENT_CLASS_ADOPTION_SAMPLE_REVIEW-2026-07-16.md) — `PDA-REV-023` · Draft · author self-review, not independent closure evidence
+- [Phase 8 Best-Practices Coverage Audit](PHASE8_BEST_PRACTICES_COVERAGE_AUDIT.md) — `PDA-REV-025` · Draft · author self-audit, not independent closure evidence
 
 ## Immutable and Supporting Evidence
 

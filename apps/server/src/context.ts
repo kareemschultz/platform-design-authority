@@ -32,6 +32,7 @@ import type {
 	PagedImports,
 	Party,
 	PlatformIdentityLink,
+	PriceOverride,
 	Product,
 	Receipt,
 	ReceiveStockTransfer,
@@ -706,6 +707,62 @@ export interface PosApplication {
 		saleId: string;
 		sessionId: string;
 	}) => Promise<Sale>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.cash-variance.approve` exactly, the SAME permission
+	 * `getCashVariance` above already requires — no new identifier
+	 * invented. */
+	listCashVariances: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: {
+			cursor?: string;
+			limit: number;
+			locationId?: string;
+			state?: RegisterSession["state"];
+		};
+		sessionId: string;
+	}) => Promise<Page<RegisterSession>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.deposit.confirm` exactly, the SAME permission `getDeposit`
+	 * above already requires — no new identifier invented. */
+	listDeposits: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number; state?: Deposit["state"] };
+		sessionId: string;
+	}) => Promise<Page<Deposit>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.price-override.approve` exactly, the SAME permission
+	 * `approveSalePriceOverride` already requires — no new identifier
+	 * invented. */
+	listPriceOverrides: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: {
+			cursor?: string;
+			limit: number;
+			state?: PriceOverride["state"];
+		};
+		sessionId: string;
+	}) => Promise<Page<PriceOverride>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.refund.approve` exactly, the SAME permission `getRefund`
+	 * above already requires — no new identifier invented. */
+	listRefunds: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number; state?: Refund["state"] };
+		sessionId: string;
+	}) => Promise<Page<Refund>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.return.approve` exactly, the SAME permission `getReturn`
+	 * above already requires — no new identifier invented. */
+	listReturns: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number; state?: Return["state"] };
+		sessionId: string;
+	}) => Promise<Page<Return>>;
 	openRegister: (input: {
 		actorUserId: string;
 		contextId: string;

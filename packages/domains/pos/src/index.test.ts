@@ -11,6 +11,8 @@ import {
 	PosError,
 	type PosFinanceHandoffSourceData,
 	type PosIdFactory,
+	type PosPage,
+	type PosPageRequest,
 	type PosPermission,
 	type PosPricingPort,
 	type PosRepository,
@@ -155,6 +157,30 @@ describe("POS contract scaffold", () => {
 		expect(APPROVAL_STATES).toContain("Approved");
 	});
 });
+
+/** Mirrors the real Postgres repository's `gt(id) … orderBy asc(id) …
+ * limit + 1` cursor discipline exactly (see `packages/persistence/
+ * pos-postgres/src/index.ts`'s `listDeposits`/`listPriceOverrides`/
+ * `listRefunds`/`listReturns`/`listSessions`), so this in-memory fixture
+ * cannot silently diverge from the production pagination contract WS3
+ * remediation R3b, Item 7 relies on. */
+function paginateById<T extends { id: string }>(
+	items: T[],
+	page: PosPageRequest
+): PosPage<T> {
+	const sorted = [...items].sort((left, right) =>
+		left.id.localeCompare(right.id)
+	);
+	const afterCursor = page.cursor
+		? sorted.filter((item) => item.id > (page.cursor as string))
+		: sorted;
+	const pageItems = afterCursor.slice(0, page.limit);
+	return {
+		items: pageItems,
+		nextCursor:
+			afterCursor.length > page.limit ? (pageItems.at(-1)?.id ?? null) : null,
+	};
+}
 
 function createInMemoryRepository() {
 	const sessions = new Map<string, RegisterSessionRecord>();
@@ -332,6 +358,68 @@ function createInMemoryRepository() {
 					: null
 			);
 		},
+		listDeposits: (tenantId, organizationId, page, filters) =>
+			Promise.resolve(
+				paginateById(
+					[...deposits.values()].filter(
+						(record) =>
+							record.tenantId === tenantId &&
+							record.organizationId === organizationId &&
+							(filters?.state === undefined || record.state === filters.state)
+					),
+					page
+				)
+			),
+		listPriceOverrides: (tenantId, organizationId, page, filters) =>
+			Promise.resolve(
+				paginateById(
+					[...priceOverrides.values()].filter(
+						(record) =>
+							record.tenantId === tenantId &&
+							record.organizationId === organizationId &&
+							(filters?.state === undefined || record.state === filters.state)
+					),
+					page
+				)
+			),
+		listRefunds: (tenantId, organizationId, page, filters) =>
+			Promise.resolve(
+				paginateById(
+					[...refunds.values()].filter(
+						(record) =>
+							record.tenantId === tenantId &&
+							record.organizationId === organizationId &&
+							(filters?.state === undefined || record.state === filters.state)
+					),
+					page
+				)
+			),
+		listReturns: (tenantId, organizationId, page, filters) =>
+			Promise.resolve(
+				paginateById(
+					[...returns.values()].filter(
+						(record) =>
+							record.tenantId === tenantId &&
+							record.organizationId === organizationId &&
+							(filters?.state === undefined || record.state === filters.state)
+					),
+					page
+				)
+			),
+		listSessions: (tenantId, organizationId, page, filters) =>
+			Promise.resolve(
+				paginateById(
+					[...sessions.values()].filter(
+						(record) =>
+							record.tenantId === tenantId &&
+							record.organizationId === organizationId &&
+							(filters?.locationId === undefined ||
+								record.locationId === filters.locationId) &&
+							(filters?.state === undefined || record.state === filters.state)
+					),
+					page
+				)
+			),
 		lockSessionsForDeposit: (
 			tenantId,
 			organizationId,

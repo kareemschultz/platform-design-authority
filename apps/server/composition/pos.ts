@@ -206,6 +206,85 @@ export const posTransportApplication = {
 	getReturn: posApplication.getReturn,
 	getSaleForReturn: posApplication.getSaleForReturn,
 	holdSale: posApplication.holdSale,
+	// WS3 remediation R3b, Item 7 (server-backed discovery): each wrapper
+	// below reshapes the router's flat `input.query` (cursor/limit/state/
+	// locationId, matching `PageQuerySchema` in `packages/contracts/
+	// platform-api`) into the domain application layer's `{page, filters}`
+	// split — the SAME reshaping `listInventoryAdjustments` already does in
+	// this same pattern, applied to POS's five pending-approval/
+	// confirmation queues.
+	listCashVariances: (
+		input: Omit<
+			Parameters<typeof posApplication.listCashVariances>[0],
+			"filters" | "page"
+		> & {
+			page: {
+				cursor?: string;
+				limit: number;
+				locationId?: string;
+				state?: "Open" | "Closing" | "Closed";
+			};
+		}
+	) => {
+		const { locationId, state, ...page } = input.page;
+		return posApplication.listCashVariances({
+			...input,
+			filters: { locationId, state },
+			page,
+		});
+	},
+	listDeposits: (
+		input: Omit<
+			Parameters<typeof posApplication.listDeposits>[0],
+			"filters" | "page"
+		> & {
+			page: {
+				cursor?: string;
+				limit: number;
+				state?: "Prepared" | "Reconciled";
+			};
+		}
+	) => {
+		const { state, ...page } = input.page;
+		return posApplication.listDeposits({ ...input, filters: { state }, page });
+	},
+	listPriceOverrides: (
+		input: Omit<
+			Parameters<typeof posApplication.listPriceOverrides>[0],
+			"filters" | "page"
+		> & {
+			page: { cursor?: string; limit: number; state?: "Pending" | "Approved" };
+		}
+	) => {
+		const { state, ...page } = input.page;
+		return posApplication.listPriceOverrides({
+			...input,
+			filters: { state },
+			page,
+		});
+	},
+	listRefunds: (
+		input: Omit<
+			Parameters<typeof posApplication.listRefunds>[0],
+			"filters" | "page"
+		> & {
+			page: { cursor?: string; limit: number; state?: "Requested" | "Posted" };
+		}
+	) => {
+		const { state, ...page } = input.page;
+		return posApplication.listRefunds({ ...input, filters: { state }, page });
+	},
+	listReturns: (
+		input: Omit<
+			Parameters<typeof posApplication.listReturns>[0],
+			"filters" | "page"
+		> & {
+			page: { cursor?: string; limit: number; state?: "Pending" | "Completed" };
+		}
+	) => {
+		const { state, ...page } = input.page;
+		return posApplication.listReturns({ ...input, filters: { state }, page });
+	},
 	openRegister: posApplication.openRegister,
 	reissueReceipt: posApplication.reissueReceipt,
 	requestSalePriceOverride: posApplication.requestPriceOverride,

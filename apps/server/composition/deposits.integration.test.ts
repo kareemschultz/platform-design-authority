@@ -592,5 +592,78 @@ describe.serial(
 				state: "Prepared",
 			});
 		});
+
+		/** WS3 remediation R3b, Item 7 (server-backed discovery). Genuinely
+		 * new capability — `listDeposits` did not exist before this stage (a
+		 * compile error to call). Proven red-before-fix/green-after-fix by
+		 * temporarily removing the `eq(posDeposits.organizationId, ...)`
+		 * predicate from `packages/persistence/pos-postgres/src/index.ts`'s
+		 * `listDeposits` and re-running this exact test — it failed with
+		 * org B's Prepared deposit present in org A's confirmation queue
+		 * (RED), then passed once the filter was restored (GREEN). */
+		test("listDeposits is organization-scoped: the confirmation queue never leaks another organization's prepared deposit", async () => {
+			const tenantId = "tenant_deposits_list_isolation";
+			const orgA = "organization_deposits_list_a";
+			const orgB = "organization_deposits_list_b";
+			const pos = posService();
+			// `depositReference` uniqueness (`pos_deposit_tenant_reference_uidx`)
+			// is TENANT-wide even though the numbering sequence itself is
+			// organization-scoped (`createDepositReferenceAllocator`'s
+			// `sequence_deposit_${organizationId}`) — a pre-existing PR4
+			// numbering behavior, not something this stage touches. Going
+			// through `pos.createDeposit` for both orgs in the SAME tenant
+			// would collide on the allocator's first value for each ("DEP-
+			// 000001"). Inserting the fixture directly via the repository
+			// sidesteps that unrelated collision while still exercising the
+			// exact thing this test verifies: `listDeposits`'s SQL-level
+			// organization scoping.
+			const repository = createPosRepository(testPool);
+
+			function prepareOne(organizationId: string, keyPrefix: string) {
+				const now = new Date();
+				return repository.createDeposit({
+					amountMinor: 40_000,
+					confirmedAt: null,
+					confirmedByActorUserId: null,
+					confirmedByPartyId: null,
+					createdAt: now,
+					currency: "GYD",
+					depositReference: `DEP-LIST-ISO-${keyPrefix.toUpperCase()}`,
+					id: `deposit_${keyPrefix}`,
+					organizationId,
+					preparedAt: now,
+					preparedByActorUserId: depositsBase.actorUserId,
+					preparedByPartyId: `party_${depositsBase.actorUserId}`,
+					sourceShiftIds: [],
+					state: "Prepared",
+					tenantId,
+					updatedAt: now,
+					version: 1,
+				});
+			}
+
+			const preparedA = await prepareOne(orgA, "list-isolation-a");
+			const preparedB = await prepareOne(orgB, "list-isolation-b");
+
+			const pageA = await pos.listDeposits(
+				tenantId,
+				orgA,
+				{ limit: 50 },
+				{ state: "Prepared" }
+			);
+			const idsA = pageA.items.map((item) => item.id);
+			expect(idsA).toContain(preparedA.id);
+			expect(idsA).not.toContain(preparedB.id);
+
+			const pageB = await pos.listDeposits(
+				tenantId,
+				orgB,
+				{ limit: 50 },
+				{ state: "Prepared" }
+			);
+			const idsB = pageB.items.map((item) => item.id);
+			expect(idsB).toContain(preparedB.id);
+			expect(idsB).not.toContain(preparedA.id);
+		});
 	}
 );

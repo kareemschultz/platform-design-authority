@@ -59,7 +59,9 @@ import {
 	getStockTransferContract,
 	holdSaleContract,
 	listAuditRecordsContract,
+	listCashVariancesContract,
 	listCurrentUserSessionsContract,
+	listDepositsContract,
 	listEntitlementsContract,
 	listInventoryAdjustmentsContract,
 	listLocationsContract,
@@ -67,9 +69,12 @@ import {
 	listOpeningStockImportsContract,
 	listOrganizationsContract,
 	listPartiesContract,
+	listPriceOverridesContract,
 	listProductImportFindingsContract,
 	listProductImportsContract,
 	listProductsContract,
+	listRefundsContract,
+	listReturnsContract,
 	listRolesContract,
 	listStockBalancesContract,
 	listStockCountsContract,
@@ -1703,6 +1708,33 @@ const getCashVariance = implement(getCashVarianceContract)
 		}
 	});
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.cash-variance.approve` exactly, the SAME permission
+ * `getCashVariance` above already requires — no new identifier invented. */
+const listCashVariances = implement(listCashVariancesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-variance.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listCashVariances({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 /** WS3 remediation R3, Finding I: pre-commit consequence preview for
  * `commerce.register.close` (the closer's own upcoming action). */
 const getRegisterSession = implement(getRegisterSessionContract)
@@ -1880,6 +1912,34 @@ const approveSalePriceOverride = implement(approveSalePriceOverrideContract)
 		}
 	});
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.price-override.approve` exactly, the SAME permission
+ * `approveSalePriceOverride` above already requires — no new identifier
+ * invented. */
+const listPriceOverrides = implement(listPriceOverridesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.price-override.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listPriceOverrides({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const getReceipt = implement(getReceiptContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -2016,6 +2076,33 @@ const getReturn = implement(getReturnContract)
 		}
 	});
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.return.approve` exactly, the SAME permission `getReturn` above
+ * already requires — no new identifier invented. */
+const listReturns = implement(listReturnsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listReturns({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const approveReturn = implement(approveReturnContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -2087,6 +2174,33 @@ const getRefund = implement(getRefundContract)
 				actorUserId: session.user.id,
 				contextId: input.headers["x-active-context-id"],
 				refundId: input.params.refundId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.refund.approve` exactly, the SAME permission `getRefund` above
+ * already requires — no new identifier invented. */
+const listRefunds = implement(listRefundsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.refund.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listRefunds({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
 				sessionId: session.session.id,
 			});
 		} catch (error) {
@@ -2226,6 +2340,33 @@ const getDeposit = implement(getDepositContract)
 				actorUserId: session.user.id,
 				contextId: input.headers["x-active-context-id"],
 				depositId: input.params.depositId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.deposit.confirm` exactly, the SAME permission `getDeposit` above
+ * already requires — no new identifier invented. */
+const listDeposits = implement(listDepositsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.deposit.confirm",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listDeposits({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
 				sessionId: session.session.id,
 			});
 		} catch (error) {
@@ -2777,14 +2918,20 @@ const listAuditRecords = implement(listAuditRecordsContract)
  * shape (and `AppRouterClient`) is unchanged. */
 export const commerceRouter = {
 	cashMovements: { create: createCashMovement },
-	cashVariances: { approve: approveCashVariance, get: getCashVariance },
+	cashVariances: {
+		approve: approveCashVariance,
+		get: getCashVariance,
+		list: listCashVariances,
+	},
 	deposits: {
 		confirm: confirmDeposit,
 		create: createDeposit,
 		get: getDeposit,
+		list: listDeposits,
 	},
 	priceOverrides: {
 		approve: approveSalePriceOverride,
+		list: listPriceOverrides,
 		request: requestSalePriceOverride,
 	},
 	receipts: {
@@ -2797,6 +2944,7 @@ export const commerceRouter = {
 		approve: approveRefund,
 		create: createRefund,
 		get: getRefund,
+		list: listRefunds,
 	},
 	registerSessions: { get: getRegisterSession },
 	registers: {
@@ -2807,6 +2955,7 @@ export const commerceRouter = {
 		approve: approveReturn,
 		create: createReturn,
 		get: getReturn,
+		list: listReturns,
 	},
 	safeDrops: { create: createSafeDrop },
 	sales: {

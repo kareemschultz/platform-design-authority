@@ -178,16 +178,29 @@ export function PosSectionCard({
 	);
 }
 
-export function CopyableId({ id, label }: { id: string; label: string }) {
+export function CopyableId({
+	id,
+	label,
+	note,
+}: {
+	id: string;
+	label: string;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): this copy used
+	 * to unconditionally claim "no pending-approvals list is available in
+	 * this contract surface" — false now that a server-backed queue exists
+	 * for price overrides, returns, refunds, deposits, and cash variances.
+	 * Callers on those flows should pass an accurate replacement; anything
+	 * still true by default (e.g. a plain reference id with no queue) can
+	 * omit this and fall back to a neutral note. */
+	note?: string;
+}) {
 	return (
 		<p className="rounded-xl border bg-muted/40 p-3 text-sm">
 			<span className="font-medium">{label}:</span>{" "}
 			<span className="break-all font-mono">{id}</span>
 			<br />
 			<span className="text-muted-foreground text-xs">
-				Share this ID with the second authorized identity who will complete the
-				approval step; no pending-approvals list is available in this contract
-				surface.
+				{note ?? "Keep this ID for your own reference."}
 			</span>
 		</p>
 	);

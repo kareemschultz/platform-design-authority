@@ -4,6 +4,7 @@ import type { Deposit } from "@meridian/contracts-platform-api";
 import { Button } from "@meridian/ui-web/components/button";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,6 +20,8 @@ import { orpc } from "@/utils/orpc";
 
 import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
 import {
+	CollectionState,
+	type DataColumn,
 	MutationError,
 	OperationsPageFrame,
 	StateBadge,
@@ -102,7 +105,11 @@ export function DepositNewPage() {
 							created.amount.currency
 						)}
 					</p>
-					<CopyableId id={created.id} label="Deposit ID" />
+					<CopyableId
+						id={created.id}
+						label="Deposit ID"
+						note="A second authorized identity can find this deposit in the Confirm a deposit queue below — copying this ID is optional."
+					/>
 					<p className="text-muted-foreground text-sm">
 						A second authorized identity must confirm this deposit before the
 						safe-to-bank custody transfer posts.
@@ -153,6 +160,92 @@ export function DepositNewPage() {
 				</form>
 			</PosSectionCard>
 		</OperationsPageFrame>
+	);
+}
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.deposit.confirm` (the same permission the manual-entry field
+ * below already requires) via `commerce.deposits.list`, filtered to
+ * `state=Prepared` — the pending-confirmation queue. Cursor pagination
+ * follows WS2's own `cursor`/`cursorTrail` URL-param convention, the SAME
+ * `CollectionState` component Inventory's list pages already use. */
+function PendingDepositsQueue({
+	isOnline,
+	onSelect,
+}: {
+	isOnline: boolean;
+	onSelect: (deposit: Deposit) => void;
+}) {
+	const workspace = useWorkspace();
+	const searchParams = useSearchParams();
+	const cursor = searchParams.get("cursor") ?? undefined;
+	const pending = useQuery({
+		...orpc.commerce.deposits.list.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				query: { cursor, limit: 50, state: "Prepared" },
+			},
+		}),
+		enabled: Boolean(workspace.contextId),
+		retry: false,
+		staleTime: 15_000,
+	});
+	const columns: DataColumn<Deposit>[] = [
+		{
+			label: "Deposit",
+			render: (deposit) => (
+				<span className="break-all font-mono text-xs">{deposit.id}</span>
+			),
+		},
+		{ label: "Reference", render: (deposit) => deposit.depositReference },
+		{
+			label: "Amount",
+			render: (deposit) =>
+				formatMoneyMinor(deposit.amount.amountMinor, deposit.amount.currency),
+		},
+		{
+			label: "Prepared",
+			render: (deposit) =>
+				new Intl.DateTimeFormat(undefined, {
+					dateStyle: "medium",
+					timeStyle: "short",
+				}).format(new Date(deposit.preparedAt)),
+		},
+		{
+			label: "Action",
+			render: (deposit) => (
+				<Button
+					className="min-h-10"
+					disabled={!isOnline}
+					onClick={() => onSelect(deposit)}
+					type="button"
+					variant="outline"
+				>
+					Review
+				</Button>
+			),
+		},
+	];
+	return (
+		<PosSectionCard
+			description="Every deposit this identity is authorized to confirm, awaiting action. Select one instead of typing its ID."
+			title="Pending deposits"
+		>
+			<CollectionState
+				caption="Deposits awaiting confirmation"
+				columns={columns}
+				empty="No deposits are awaiting confirmation in this scope."
+				error={pending.error}
+				isError={pending.isError}
+				isFetching={pending.isFetching}
+				isLoading={pending.isLoading}
+				isOnline={isOnline}
+				items={pending.data?.items}
+				nextCursor={pending.data?.nextCursor}
+				onRetry={() => pending.refetch()}
+				rowKey={(deposit) => deposit.id}
+			/>
+		</PosSectionCard>
 	);
 }
 
@@ -225,76 +318,85 @@ export function DepositConfirmPage() {
 			description="commerce.deposit.confirm. The confirmer must be a different authorized identity than whoever prepared the deposit — self-approval is hidden in this browser when it prepared the deposit."
 			title="Confirm a deposit"
 		>
-			<PosSectionCard title="Confirm a prepared deposit">
-				{depositId && selfApproval ? (
-					<p className="rounded-xl border border-dashed p-4 text-muted-foreground text-sm">
-						This browser prepared this deposit, so it cannot confirm its own
-						request. Ask a second authorized identity to complete this step.
-					</p>
-				) : (
-					<div className="grid max-w-md gap-4">
-						<PosTextField
-							field={{
-								handleBlur: () => undefined,
-								handleChange: setDepositId,
-								name: "depositId",
-								state: { meta: { errors: [] }, value: depositId },
-							}}
-							label="Deposit ID"
-						/>
-						<Button
-							className="min-h-12 w-fit"
-							disabled={!(depositId && workspace.isOnline)}
-							onClick={() => setConfirmOpen(true)}
-							type="button"
-						>
-							Review &amp; confirm deposit
-						</Button>
-					</div>
-				)}
-				<ConsequencePreviewDialog
-					commitError={confirm.error}
-					confirming={confirm.isPending}
-					confirmLabel="Confirm deposit"
-					data={preview.data}
-					description="Confirming posts the safe-to-bank custody transfer atomically and cannot be undone from this screen."
-					error={preview.error}
-					isError={preview.isError}
-					isLoading={preview.isLoading}
+			<div className="grid gap-6">
+				<PendingDepositsQueue
 					isOnline={workspace.isOnline}
-					onConfirm={() => {
-						commitConfirmDeposit().catch(() => undefined);
+					onSelect={(deposit) => {
+						setDepositId(deposit.id);
+						setConfirmOpen(true);
 					}}
-					onOpenChange={setConfirmOpen}
-					open={confirmOpen}
-					renderPreview={(deposit) => (
-						<dl className="grid gap-1">
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">Deposit</dt>
-								<dd className="font-mono">{deposit.id}</dd>
-							</div>
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">Preparer (Party)</dt>
-								<dd className="font-mono">{deposit.preparerPartyId}</dd>
-							</div>
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">Amount</dt>
-								<dd>
-									{formatMoneyMinor(
-										deposit.amount.amountMinor,
-										deposit.amount.currency
-									)}
-								</dd>
-							</div>
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">State</dt>
-								<dd>{deposit.state}</dd>
-							</div>
-						</dl>
-					)}
-					title="Confirm this deposit?"
 				/>
-			</PosSectionCard>
+				<PosSectionCard title="Confirm a prepared deposit">
+					{depositId && selfApproval ? (
+						<p className="rounded-xl border border-dashed p-4 text-muted-foreground text-sm">
+							This browser prepared this deposit, so it cannot confirm its own
+							request. Ask a second authorized identity to complete this step.
+						</p>
+					) : (
+						<div className="grid max-w-md gap-4">
+							<PosTextField
+								field={{
+									handleBlur: () => undefined,
+									handleChange: setDepositId,
+									name: "depositId",
+									state: { meta: { errors: [] }, value: depositId },
+								}}
+								label="Deposit ID"
+							/>
+							<Button
+								className="min-h-12 w-fit"
+								disabled={!(depositId && workspace.isOnline)}
+								onClick={() => setConfirmOpen(true)}
+								type="button"
+							>
+								Review &amp; confirm deposit
+							</Button>
+						</div>
+					)}
+					<ConsequencePreviewDialog
+						commitError={confirm.error}
+						confirming={confirm.isPending}
+						confirmLabel="Confirm deposit"
+						data={preview.data}
+						description="Confirming posts the safe-to-bank custody transfer atomically and cannot be undone from this screen."
+						error={preview.error}
+						isError={preview.isError}
+						isLoading={preview.isLoading}
+						isOnline={workspace.isOnline}
+						onConfirm={() => {
+							commitConfirmDeposit().catch(() => undefined);
+						}}
+						onOpenChange={setConfirmOpen}
+						open={confirmOpen}
+						renderPreview={(deposit) => (
+							<dl className="grid gap-1">
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Deposit</dt>
+									<dd className="font-mono">{deposit.id}</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Preparer (Party)</dt>
+									<dd className="font-mono">{deposit.preparerPartyId}</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Amount</dt>
+									<dd>
+										{formatMoneyMinor(
+											deposit.amount.amountMinor,
+											deposit.amount.currency
+										)}
+									</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">State</dt>
+									<dd>{deposit.state}</dd>
+								</div>
+							</dl>
+						)}
+						title="Confirm this deposit?"
+					/>
+				</PosSectionCard>
+			</div>
 		</OperationsPageFrame>
 	);
 }

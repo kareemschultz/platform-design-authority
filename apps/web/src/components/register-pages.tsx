@@ -6,7 +6,7 @@ import { Label } from "@meridian/ui-web/components/label";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -31,6 +31,8 @@ import { orpc } from "@/utils/orpc";
 
 import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
 import {
+	CollectionState,
+	type DataColumn,
 	MutationError,
 	OperationsPageFrame,
 	StateBadge,
@@ -745,7 +747,11 @@ export function RegisterClosePage({
 								? formatMoneyMinor(variance.amountMinor, result.currency)
 								: "unknown"}
 						</p>
-						<CopyableId id={result.id} label="Variance / register session ID" />
+						<CopyableId
+							id={result.id}
+							label="Variance / register session ID"
+							note="A second authorized identity can find this variance in the Approve a pending variance queue below — copying this ID is optional."
+						/>
 						<p className="text-muted-foreground text-sm">
 							Version: <span className="font-mono">{result.version}</span>
 						</p>
@@ -926,6 +932,99 @@ export function RegisterClosePage({
 	);
 }
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.cash-variance.approve` (the same permission the manual-entry
+ * form below already requires) via `commerce.cashVariances.list`, filtered
+ * to `state=Closing` — a session only ever holds that state while a
+ * non-zero close variance awaits approval (see `listCashVariancesContract`'s
+ * doc comment in `packages/contracts/platform-api`), so that IS the pending
+ * queue. Unlike the other four queues, each `RegisterSession` row already
+ * carries its own `version` — the approve mutation's required `if-match`
+ * value — so selecting a row can go straight to the consequence-preview
+ * dialog with no separate version lookup. Cursor pagination follows WS2's
+ * own `cursor`/`cursorTrail` URL-param convention, the SAME `CollectionState`
+ * component Inventory's list pages already use. */
+function PendingVariancesQueue({
+	isOnline,
+	onSelect,
+}: {
+	isOnline: boolean;
+	onSelect: (session: RegisterSession) => void;
+}) {
+	const workspace = useWorkspace();
+	const searchParams = useSearchParams();
+	const cursor = searchParams.get("cursor") ?? undefined;
+	const pending = useQuery({
+		...orpc.commerce.cashVariances.list.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				query: { cursor, limit: 50, state: "Closing" },
+			},
+		}),
+		enabled: Boolean(workspace.contextId),
+		retry: false,
+		staleTime: 15_000,
+	});
+	const columns: DataColumn<RegisterSession>[] = [
+		{
+			label: "Register session",
+			render: (session) => (
+				<span className="break-all font-mono text-xs">{session.id}</span>
+			),
+		},
+		{
+			label: "Register",
+			render: (session) => (
+				<span className="break-all font-mono text-xs">
+					{session.registerId}
+				</span>
+			),
+		},
+		{
+			label: "Variance",
+			render: (session) =>
+				session.variance
+					? formatMoneyMinor(session.variance.amountMinor, session.currency)
+					: "unknown",
+		},
+		{
+			label: "Action",
+			render: (session) => (
+				<Button
+					className="min-h-10"
+					disabled={!isOnline}
+					onClick={() => onSelect(session)}
+					type="button"
+					variant="outline"
+				>
+					Review
+				</Button>
+			),
+		},
+	];
+	return (
+		<PosSectionCard
+			description="Every register-close variance this identity is authorized to approve, awaiting action. Select one instead of typing its register session ID and version."
+			title="Pending variances"
+		>
+			<CollectionState
+				caption="Variances awaiting approval"
+				columns={columns}
+				empty="No variances are awaiting approval in this scope."
+				error={pending.error}
+				isError={pending.isError}
+				isFetching={pending.isFetching}
+				isLoading={pending.isLoading}
+				isOnline={isOnline}
+				items={pending.data?.items}
+				nextCursor={pending.data?.nextCursor}
+				onRetry={() => pending.refetch()}
+				rowKey={(session) => session.id}
+			/>
+		</PosSectionCard>
+	);
+}
+
 function VarianceApprovalSection({
 	registerSessionId,
 }: {
@@ -1018,81 +1117,90 @@ function VarianceApprovalSection({
 	}
 
 	return (
-		<PosSectionCard
-			description="commerce.cash-variance.approve: use the register session ID and version the closer's screen displayed. The approver must be a different authorized identity than whoever closed the register — this control is not available in a browser that closed a pending variance itself."
-			title="Approve a pending variance"
-		>
-			{selfApproval ? (
-				<p className="rounded-xl border border-dashed p-4 text-muted-foreground text-sm">
-					This browser closed this register, so it cannot approve its own
-					variance. Ask a second authorized identity to complete this step.
-				</p>
-			) : (
-				<VarianceApproveForm
-					initialVarianceId={varianceId}
-					initialVersion=""
-					isOnline={workspace.isOnline}
-					onApprove={reviewVariance}
-					onVarianceIdChange={setVarianceId}
-					pending={approve.isPending}
-				/>
-			)}
-			<ConsequencePreviewDialog
-				commitError={approve.error}
-				confirming={approve.isPending}
-				confirmLabel="Approve variance"
-				data={preview.data}
-				description="Approving posts the register as Closed and emits commerce.register.closed.v1. This cannot be undone from this screen."
-				error={preview.error}
-				isError={preview.isError}
-				isLoading={preview.isLoading}
+		<div className="grid gap-6">
+			<PendingVariancesQueue
 				isOnline={workspace.isOnline}
-				onConfirm={() => {
-					commitApproveVariance().catch(() => undefined);
+				onSelect={(session) => {
+					setVarianceId(session.id);
+					reviewVariance(session.id, String(session.version));
 				}}
-				onOpenChange={setConfirmOpen}
-				open={confirmOpen}
-				renderPreview={(session) => (
-					<dl className="grid gap-1">
-						<div className="flex justify-between gap-4">
-							<dt className="text-muted-foreground">Register</dt>
-							<dd className="font-mono">{session.registerId}</dd>
-						</div>
-						<div className="flex justify-between gap-4">
-							<dt className="text-muted-foreground">Location</dt>
-							<dd className="font-mono">{session.locationId}</dd>
-						</div>
-						<div className="flex justify-between gap-4">
-							<dt className="text-muted-foreground">Counted cash</dt>
-							<dd>
-								{session.countedCash
-									? formatMoneyMinor(
-											session.countedCash.amountMinor,
-											session.currency
-										)
-									: "—"}
-							</dd>
-						</div>
-						<div className="flex justify-between gap-4">
-							<dt className="text-muted-foreground">Variance</dt>
-							<dd>
-								{session.variance
-									? formatMoneyMinor(
-											session.variance.amountMinor,
-											session.currency
-										)
-									: "—"}
-							</dd>
-						</div>
-						<div className="flex justify-between gap-4">
-							<dt className="text-muted-foreground">State</dt>
-							<dd>{session.state}</dd>
-						</div>
-					</dl>
-				)}
-				title="Approve this cash variance?"
 			/>
-		</PosSectionCard>
+			<PosSectionCard
+				description="commerce.cash-variance.approve: use the register session ID and version the closer's screen displayed. The approver must be a different authorized identity than whoever closed the register — this control is not available in a browser that closed a pending variance itself."
+				title="Approve a pending variance"
+			>
+				{selfApproval ? (
+					<p className="rounded-xl border border-dashed p-4 text-muted-foreground text-sm">
+						This browser closed this register, so it cannot approve its own
+						variance. Ask a second authorized identity to complete this step.
+					</p>
+				) : (
+					<VarianceApproveForm
+						initialVarianceId={varianceId}
+						initialVersion=""
+						isOnline={workspace.isOnline}
+						onApprove={reviewVariance}
+						onVarianceIdChange={setVarianceId}
+						pending={approve.isPending}
+					/>
+				)}
+				<ConsequencePreviewDialog
+					commitError={approve.error}
+					confirming={approve.isPending}
+					confirmLabel="Approve variance"
+					data={preview.data}
+					description="Approving posts the register as Closed and emits commerce.register.closed.v1. This cannot be undone from this screen."
+					error={preview.error}
+					isError={preview.isError}
+					isLoading={preview.isLoading}
+					isOnline={workspace.isOnline}
+					onConfirm={() => {
+						commitApproveVariance().catch(() => undefined);
+					}}
+					onOpenChange={setConfirmOpen}
+					open={confirmOpen}
+					renderPreview={(session) => (
+						<dl className="grid gap-1">
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Register</dt>
+								<dd className="font-mono">{session.registerId}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Location</dt>
+								<dd className="font-mono">{session.locationId}</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Counted cash</dt>
+								<dd>
+									{session.countedCash
+										? formatMoneyMinor(
+												session.countedCash.amountMinor,
+												session.currency
+											)
+										: "—"}
+								</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">Variance</dt>
+								<dd>
+									{session.variance
+										? formatMoneyMinor(
+												session.variance.amountMinor,
+												session.currency
+											)
+										: "—"}
+								</dd>
+							</div>
+							<div className="flex justify-between gap-4">
+								<dt className="text-muted-foreground">State</dt>
+								<dd>{session.state}</dd>
+							</div>
+						</dl>
+					)}
+					title="Approve this cash variance?"
+				/>
+			</PosSectionCard>
+		</div>
 	);
 }
 

@@ -12,6 +12,14 @@ export const OPENAPI_OPERATION_METADATA = [
 	},
 	{
 		method: "GET",
+		operationId: "listCashVariances",
+		path: "/v1/cash-variances",
+		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/PagedRegisterSessions",
+		successStatus: 200,
+	},
+	{
+		method: "GET",
 		operationId: "getCashVariancesByVarianceId",
 		path: "/v1/cash-variances/{varianceId}",
 		permission: "commerce.cash-variance.approve",
@@ -59,6 +67,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		operationId: "postDepositReconciliations",
 		path: "/v1/deposit-reconciliations",
 		permission: "finance.bank-reconciliation.create",
+		successStatus: 200,
+	},
+	{
+		method: "GET",
+		operationId: "listDeposits",
+		path: "/v1/deposits",
+		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/PagedDeposits",
 		successStatus: 200,
 	},
 	{
@@ -403,6 +419,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		successStatus: 200,
 	},
 	{
+		method: "GET",
+		operationId: "listPriceOverrides",
+		path: "/v1/price-overrides",
+		permission: "commerce.price-override.approve",
+		responseRef: "#/components/schemas/PagedPriceOverrides",
+		successStatus: 200,
+	},
+	{
 		method: "POST",
 		operationId: "postPrivacyActionsByIdApprove",
 		path: "/v1/privacy-actions/{id}/approve",
@@ -582,6 +606,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		successStatus: 200,
 	},
 	{
+		method: "GET",
+		operationId: "listRefunds",
+		path: "/v1/refunds",
+		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/PagedRefunds",
+		successStatus: 200,
+	},
+	{
 		method: "POST",
 		operationId: "postRefunds",
 		path: "/v1/refunds",
@@ -664,6 +696,14 @@ export const OPENAPI_OPERATION_METADATA = [
 		permission: "commerce.cash-movement.create",
 		requestRef: "#/components/schemas/CreateSafeDropRequest",
 		responseRef: "#/components/schemas/CashMovement",
+		successStatus: 200,
+	},
+	{
+		method: "GET",
+		operationId: "listReturns",
+		path: "/v1/returns",
+		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/PagedReturns",
 		successStatus: 200,
 	},
 	{

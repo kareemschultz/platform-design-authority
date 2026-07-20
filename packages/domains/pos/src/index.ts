@@ -364,6 +364,21 @@ export interface PosFinanceHandoffSourceData {
 	unresolvedVariances: PosFinanceHandoffUnresolvedVarianceFact[];
 }
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Cursor-page
+ * request/result shape, mirroring `packages/domains/inventory`'s
+ * `InventoryPageRequest`/`InventoryPage<T>` exactly — the same
+ * `gt(id) … orderBy asc(id) … limit + 1` cursor discipline
+ * `listAdjustments` already uses, applied to the five POS approval/
+ * confirmation queues below. */
+export interface PosPageRequest {
+	cursor?: string;
+	limit: number;
+}
+export interface PosPage<T> {
+	items: T[];
+	nextCursor: string | null;
+}
+
 export interface PosRepository {
 	acquireCommandLock: (
 		tenantId: string,
@@ -486,6 +501,63 @@ export interface PosRepository {
 		sessionId: string,
 		locationId?: string
 	) => Promise<RegisterSessionRecord | null>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery). Org-scoped
+	 * exactly like `getDeposit` above (`pos_deposit` carries no `locationId`
+	 * column — deposits draw custody from a set of register sessions, not
+	 * one location). Callers pass `state: "Prepared"` for the confirmation
+	 * queue. */
+	listDeposits: (
+		tenantId: string,
+		organizationId: string,
+		page: PosPageRequest,
+		filters?: { state?: DepositRecord["state"] }
+	) => Promise<PosPage<DepositRecord>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery). Org-scoped
+	 * exactly like `getPriceOverride` above (the `pos_price_override` table
+	 * carries no `locationId` column). Defaults to no state filter; callers
+	 * pass `state: "Pending"` for the approval queue. */
+	listPriceOverrides: (
+		tenantId: string,
+		organizationId: string,
+		page: PosPageRequest,
+		filters?: { state?: PriceOverrideRecord["state"] }
+	) => Promise<PosPage<PriceOverrideRecord>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery). Org-scoped
+	 * exactly like `getRefund` above. Callers pass `state: "Requested"` for
+	 * the approval queue (`RefundRecord`'s pending state is named
+	 * `"Requested"`, not `"Pending"`). */
+	listRefunds: (
+		tenantId: string,
+		organizationId: string,
+		page: PosPageRequest,
+		filters?: { state?: RefundRecord["state"] }
+	) => Promise<PosPage<RefundRecord>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery). Org-scoped
+	 * exactly like `getReturn` above. Callers pass `state: "Pending"` for
+	 * the approval queue. */
+	listReturns: (
+		tenantId: string,
+		organizationId: string,
+		page: PosPageRequest,
+		filters?: { state?: ReturnRecord["state"] }
+	) => Promise<PosPage<ReturnRecord>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery). Org- and
+	 * (optionally) location-scoped exactly like `getSession` above
+	 * (`pos_register_session` carries `locationId`, unlike Deposit/Return/
+	 * Refund/PriceOverride). Callers pass `state: "Closing"` for the
+	 * pending-variance-approval queue — a session only ever holds that
+	 * state while a non-zero close variance awaits `commerce.cash-variance.
+	 * approve` (see `listCashVariancesContract`'s doc comment in
+	 * `packages/contracts/platform-api`). */
+	listSessions: (
+		tenantId: string,
+		organizationId: string,
+		page: PosPageRequest,
+		filters?: {
+			locationId?: string;
+			state?: RegisterSessionRecord["state"];
+		}
+	) => Promise<PosPage<RegisterSessionRecord>>;
 	/** Locks EVERY referenced session row (SELECT ... FOR UPDATE), always in
 	 * ascending `id` order regardless of the caller's array order, so two
 	 * concurrent deposit preparations naming overlapping-but-differently-
@@ -1851,6 +1923,36 @@ export interface DepositView {
 	sourceShiftIds: string[];
 	state: DepositState;
 	version: number;
+}
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). */
+export interface PriceOverrideView {
+	approvedAt: string | null;
+	id: string;
+	lineId: string;
+	reason: string;
+	requestedAt: string;
+	requestedPrice: { amountMinor: number; currency: string };
+	saleId: string;
+	state: PriceOverrideRecord["state"];
+	version: number;
+}
+
+function priceOverrideView(record: PriceOverrideRecord): PriceOverrideView {
+	return {
+		approvedAt: record.approvedAt?.toISOString() ?? null,
+		id: record.id,
+		lineId: record.lineId,
+		reason: record.reason,
+		requestedAt: record.requestedAt.toISOString(),
+		requestedPrice: {
+			amountMinor: record.requestedPriceMinor,
+			currency: record.currency,
+		},
+		saleId: record.saleId,
+		state: record.state,
+		version: record.version,
+	};
 }
 
 export interface ReturnLineView {
@@ -4682,6 +4784,89 @@ export function createPosService(options: PosServiceOptions) {
 			});
 		},
 
+		/** WS3 remediation R3b, Item 7 (server-backed discovery). */
+		async listDeposits(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: { state?: DepositRecord["state"] }
+		): Promise<PosPage<DepositView>> {
+			const result = await options.unitOfWork.execute(({ repository }) =>
+				repository.listDeposits(tenantId, organizationId, page, filters)
+			);
+			return {
+				items: result.items.map(depositView),
+				nextCursor: result.nextCursor,
+			};
+		},
+
+		/** WS3 remediation R3b, Item 7 (server-backed discovery). */
+		async listPriceOverrides(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: { state?: PriceOverrideRecord["state"] }
+		): Promise<PosPage<PriceOverrideView>> {
+			const result = await options.unitOfWork.execute(({ repository }) =>
+				repository.listPriceOverrides(tenantId, organizationId, page, filters)
+			);
+			return {
+				items: result.items.map(priceOverrideView),
+				nextCursor: result.nextCursor,
+			};
+		},
+
+		/** WS3 remediation R3b, Item 7 (server-backed discovery). */
+		async listRefunds(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: { state?: RefundRecord["state"] }
+		): Promise<PosPage<RefundView>> {
+			const result = await options.unitOfWork.execute(({ repository }) =>
+				repository.listRefunds(tenantId, organizationId, page, filters)
+			);
+			return {
+				items: result.items.map(refundView),
+				nextCursor: result.nextCursor,
+			};
+		},
+
+		/** WS3 remediation R3b, Item 7 (server-backed discovery). */
+		async listReturns(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: { state?: ReturnRecord["state"] }
+		): Promise<PosPage<ReturnView>> {
+			const result = await options.unitOfWork.execute(({ repository }) =>
+				repository.listReturns(tenantId, organizationId, page, filters)
+			);
+			return {
+				items: result.items.map(returnView),
+				nextCursor: result.nextCursor,
+			};
+		},
+
+		/** WS3 remediation R3b, Item 7 (server-backed discovery). */
+		async listSessions(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: {
+				locationId?: string;
+				state?: RegisterSessionRecord["state"];
+			}
+		): Promise<PosPage<RegisterSessionView>> {
+			const result = await options.unitOfWork.execute(({ repository }) =>
+				repository.listSessions(tenantId, organizationId, page, filters)
+			);
+			return {
+				items: result.items.map(registerSessionView),
+				nextCursor: result.nextCursor,
+			};
+		},
+
 		async openRegister(input: {
 			actorUserId: string;
 			correlationId: string;
@@ -6000,6 +6185,140 @@ export function createPosApplication(options: {
 				saleId: input.saleId,
 				tenantId: context.tenantId,
 			});
+		},
+		/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+		 * `commerce.cash-variance.approve` exactly, the SAME permission
+		 * `getCashVariance` above already requires — no new identifier
+		 * invented. A session only ever holds `state="Closing"` while a
+		 * non-zero close variance awaits approval, so filtering to that
+		 * state IS the pending-variance queue (see
+		 * `listCashVariancesContract`'s doc comment in `packages/contracts/
+		 * platform-api`). */
+		async listCashVariances(input: {
+			actorUserId: string;
+			contextId: string;
+			filters?: {
+				locationId?: string;
+				state?: RegisterSessionRecord["state"];
+			};
+			page: PosPageRequest;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.register-management",
+				contextId: input.contextId,
+				permission: "commerce.cash-variance.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.listSessions(
+				context.tenantId,
+				context.organizationId,
+				input.page,
+				input.filters
+			);
+		},
+		/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+		 * `commerce.deposit.confirm` exactly, the SAME permission `getDeposit`
+		 * above already requires — no new identifier invented. */
+		async listDeposits(input: {
+			actorUserId: string;
+			contextId: string;
+			filters?: { state?: DepositRecord["state"] };
+			page: PosPageRequest;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.cash-management",
+				contextId: input.contextId,
+				permission: "commerce.deposit.confirm",
+				sessionId: input.sessionId,
+			});
+			return options.service.listDeposits(
+				context.tenantId,
+				context.organizationId,
+				input.page,
+				input.filters
+			);
+		},
+		/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+		 * `commerce.price-override.approve` exactly, the SAME permission
+		 * `approvePriceOverride` already requires — no new identifier
+		 * invented. */
+		async listPriceOverrides(input: {
+			actorUserId: string;
+			contextId: string;
+			filters?: { state?: PriceOverrideRecord["state"] };
+			page: PosPageRequest;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.order-management",
+				contextId: input.contextId,
+				permission: "commerce.price-override.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.listPriceOverrides(
+				context.tenantId,
+				context.organizationId,
+				input.page,
+				input.filters
+			);
+		},
+		/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+		 * `commerce.refund.approve` exactly, the SAME permission `getRefund`
+		 * above already requires — no new identifier invented. */
+		async listRefunds(input: {
+			actorUserId: string;
+			contextId: string;
+			filters?: { state?: RefundRecord["state"] };
+			page: PosPageRequest;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.refunds",
+				contextId: input.contextId,
+				permission: "commerce.refund.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.listRefunds(
+				context.tenantId,
+				context.organizationId,
+				input.page,
+				input.filters
+			);
+		},
+		/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+		 * `commerce.return.approve` exactly, the SAME permission `getReturn`
+		 * above already requires — no new identifier invented. */
+		async listReturns(input: {
+			actorUserId: string;
+			contextId: string;
+			filters?: { state?: ReturnRecord["state"] };
+			page: PosPageRequest;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Read",
+				authUserId: input.actorUserId,
+				capabilityId: "commerce.returns",
+				contextId: input.contextId,
+				permission: "commerce.return.approve",
+				sessionId: input.sessionId,
+			});
+			return options.service.listReturns(
+				context.tenantId,
+				context.organizationId,
+				input.page,
+				input.filters
+			);
 		},
 		async openRegister(input: {
 			actorUserId: string;

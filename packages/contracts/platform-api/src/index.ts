@@ -39,13 +39,18 @@ import {
 	OpenRegisterRequestSchema,
 	OrganizationSchema,
 	PagedAuditRecordsSchema,
+	PagedDepositsSchema,
 	PagedEntitlementsSchema,
 	PagedImportsSchema,
 	PagedInventoryAdjustmentsSchema,
 	PagedLocationsSchema,
 	PagedOrganizationsSchema,
 	PagedPartiesSchema,
+	PagedPriceOverridesSchema,
 	PagedProductsSchema,
+	PagedRefundsSchema,
+	PagedRegisterSessionsSchema,
+	PagedReturnsSchema,
 	PagedRolesSchema,
 	PagedSessionsSchema,
 	PagedStockBalancesSchema,
@@ -54,6 +59,7 @@ import {
 	PagedUsersSchema,
 	PartySchema,
 	PlatformIdentityLinkSchema,
+	PriceOverrideSchema,
 	ProblemSchema,
 	ProductSchema,
 	ProductStateSchema,
@@ -1165,6 +1171,29 @@ export const approveSalePriceOverrideContract = base
 	)
 	.output(SaleSchema);
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.price-override.approve` exactly — no new permission invented;
+ * an approver may, by definition, list what they can approve. Replaces the
+ * prior "type the Sale ID and Override ID your colleague read off their own
+ * screen" pattern `PriceOverrideApprovePage` disclosed as its only path. */
+export const listPriceOverridesContract = base
+	.route({ method: "GET", path: "/v1/price-overrides", successStatus: 200 })
+	.meta({
+		operationId: "listPriceOverrides",
+		permission: "commerce.price-override.approve",
+		responseRef: "#/components/schemas/PagedPriceOverrides",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: PriceOverrideSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedPriceOverridesSchema);
+
 export const getReceiptContract = base
 	.route({
 		method: "GET",
@@ -1327,6 +1356,30 @@ export const approveReturnContract = base
 	)
 	.output(ReturnSchema);
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.return.approve` exactly, the SAME permission `getReturnContract`
+ * above already requires — no new identifier invented. Callers filter to
+ * `state=Pending` for the approval queue; the server does not hardcode that
+ * filter so a completed-returns lookup remains possible with the same
+ * permission. */
+export const listReturnsContract = base
+	.route({ method: "GET", path: "/v1/returns", successStatus: 200 })
+	.meta({
+		operationId: "listReturns",
+		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/PagedReturns",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: ReturnSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedReturnsSchema);
+
 export const createRefundContract = base
 	.route({
 		method: "POST",
@@ -1388,6 +1441,29 @@ export const approveRefundContract = base
 		})
 	)
 	.output(RefundSchema);
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.refund.approve` exactly, the SAME permission `getRefundContract`
+ * above already requires — no new identifier invented. Callers filter to
+ * `state=Requested` for the approval queue (`RefundSchema`'s pending state
+ * is named `"Requested"`, not `"Pending"` — see `RefundSchema.state`). */
+export const listRefundsContract = base
+	.route({ method: "GET", path: "/v1/refunds", successStatus: 200 })
+	.meta({
+		operationId: "listRefunds",
+		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/PagedRefunds",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: RefundSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedRefundsSchema);
 
 export const reissueReceiptContract = base
 	.route({
@@ -1500,6 +1576,28 @@ export const confirmDepositContract = base
 	)
 	.output(DepositSchema);
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.deposit.confirm` exactly, the SAME permission `getDepositContract`
+ * above already requires — no new identifier invented. Callers filter to
+ * `state=Prepared` for the confirmation queue. */
+export const listDepositsContract = base
+	.route({ method: "GET", path: "/v1/deposits", successStatus: 200 })
+	.meta({
+		operationId: "listDeposits",
+		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/PagedDeposits",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: DepositSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedDepositsSchema);
+
 /** WS3 remediation R3, Finding I: pre-commit consequence preview for
  * `commerce.register.close` (the closer's own upcoming action). */
 export const getRegisterSessionContract = base
@@ -1550,6 +1648,35 @@ export const getCashVarianceContract = base
 		})
 	)
 	.output(RegisterSessionSchema);
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.cash-variance.approve` exactly, the SAME permission
+ * `getCashVarianceContract` above already requires — no new identifier
+ * invented. A "cash variance" has no separate table/id (`varianceId` IS the
+ * register session id, per `getCashVarianceContract`'s own doc comment); a
+ * session only ever holds `state="Closing"` while a non-zero close variance
+ * awaits approval (`registerClose`: `zeroVariance ? "Closed" : "Closing"`,
+ * and `cashVariances.approve` is the only transition out of `Closing`), so
+ * `state=Closing` is exactly the pending-variance queue — no separate
+ * `varianceApprovalRequired`/`varianceApprovedAt` filter is needed. */
+export const listCashVariancesContract = base
+	.route({ method: "GET", path: "/v1/cash-variances", successStatus: 200 })
+	.meta({
+		operationId: "listCashVariances",
+		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/PagedRegisterSessions",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				locationId: IdentifierSchema.optional(),
+				state: RegisterSessionSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedRegisterSessionsSchema);
 
 export const createAccountantHandoffExportContract = base
 	.route({
@@ -2057,14 +2184,17 @@ export const ws3PosApiContract = {
 		cashVariances: {
 			approve: approveCashVarianceContract,
 			get: getCashVarianceContract,
+			list: listCashVariancesContract,
 		},
 		deposits: {
 			confirm: confirmDepositContract,
 			create: createDepositContract,
 			get: getDepositContract,
+			list: listDepositsContract,
 		},
 		priceOverrides: {
 			approve: approveSalePriceOverrideContract,
+			list: listPriceOverridesContract,
 			request: requestSalePriceOverrideContract,
 		},
 		receipts: {
@@ -2077,6 +2207,7 @@ export const ws3PosApiContract = {
 			approve: approveRefundContract,
 			create: createRefundContract,
 			get: getRefundContract,
+			list: listRefundsContract,
 		},
 		registerSessions: { get: getRegisterSessionContract },
 		registers: {
@@ -2087,6 +2218,7 @@ export const ws3PosApiContract = {
 			approve: approveReturnContract,
 			create: createReturnContract,
 			get: getReturnContract,
+			list: listReturnsContract,
 		},
 		safeDrops: { create: createSafeDropContract },
 		sales: {
@@ -2252,6 +2384,15 @@ export const WS3_OPERATION_IDS = [
 	"getCashVariancesByVarianceId",
 	"getRegistersByRegisterIdReceiptsByReceiptNumber",
 	"getRegistersByRegisterIdReceiptsByReceiptNumberSale",
+	// WS3 remediation R3b, Item 7: server-backed pending-approval/
+	// confirmation queues, each reusing an already-registered commerce.*
+	// approve/confirm permission (no new identifier invented) — replaces
+	// copying an opaque ID between users/browsers.
+	"listPriceOverrides",
+	"listReturns",
+	"listRefunds",
+	"listDeposits",
+	"listCashVariances",
 ] as const;
 
 export const WS3_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(

@@ -817,6 +817,94 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 		expect(closedEventRows.rows[0]?.count).toBe("1");
 	});
 
+	/** WS3 remediation R3b, Item 7 (server-backed discovery). Genuinely
+	 * new capability — `listCashVariances`/`listSessions` did not exist
+	 * before this stage (a compile error to call). Proven
+	 * red-before-fix/green-after-fix by temporarily removing the
+	 * `eq(posRegisterSessions.organizationId, ...)` predicate from
+	 * `packages/persistence/pos-postgres/src/index.ts`'s `listSessions` and
+	 * re-running this exact test — it failed with org B's Closing session
+	 * present in org A's variance-approval queue (RED), then passed once
+	 * the filter was restored (GREEN). A session only ever holds
+	 * `state="Closing"` while a non-zero close variance awaits approval
+	 * (`registerClose`: `zeroVariance ? "Closed" : "Closing"`), so
+	 * `state=Closing` IS the pending queue — no separate
+	 * `varianceApprovalRequired` filter is exercised here. */
+	test("listCashVariances is organization-scoped: the variance-approval queue never leaks another organization's Closing session", async () => {
+		const pos = service();
+		const tenantId = "tenant_pos_variance_list_isolation";
+		const orgA = "organization_pos_variance_list_a";
+		const orgB = "organization_pos_variance_list_b";
+		const locA = "location_pos_variance_list_a";
+		const locB = "location_pos_variance_list_b";
+		const registerA = "register_pos_variance_list_a";
+		const registerB = "register_pos_variance_list_b";
+
+		async function openAndCreateVariance(
+			organizationId: string,
+			locationId: string,
+			registerId: string,
+			keyPrefix: string
+		) {
+			await pos.openRegister({
+				actorUserId: base.actorUserId,
+				correlationId: base.correlationId,
+				currency: "GYD",
+				idempotencyKey: `${keyPrefix}-open`,
+				locationId,
+				openingFloat: { amountMinor: 10_000, currency: "GYD" },
+				organizationId,
+				registerId,
+				tenantId,
+			});
+			const closing = await pos.closeRegister({
+				actorUserId: base.actorUserId,
+				correlationId: base.correlationId,
+				countedCash: { amountMinor: 9500, currency: "GYD" },
+				idempotencyKey: `${keyPrefix}-close`,
+				organizationId,
+				registerId,
+				tenantId,
+			});
+			return closing;
+		}
+
+		const closingA = await openAndCreateVariance(
+			orgA,
+			locA,
+			registerA,
+			"variance-list-isolation-a"
+		);
+		const closingB = await openAndCreateVariance(
+			orgB,
+			locB,
+			registerB,
+			"variance-list-isolation-b"
+		);
+		expect(closingA.state).toBe("Closing");
+		expect(closingB.state).toBe("Closing");
+
+		const pageA = await pos.listSessions(
+			tenantId,
+			orgA,
+			{ limit: 50 },
+			{ state: "Closing" }
+		);
+		const idsA = pageA.items.map((item) => item.id);
+		expect(idsA).toContain(closingA.id);
+		expect(idsA).not.toContain(closingB.id);
+
+		const pageB = await pos.listSessions(
+			tenantId,
+			orgB,
+			{ limit: 50 },
+			{ state: "Closing" }
+		);
+		const idsB = pageB.items.map((item) => item.id);
+		expect(idsB).toContain(closingB.id);
+		expect(idsB).not.toContain(closingA.id);
+	});
+
 	// -------------------------------------------------------------------
 	// WS3 remediation R3, Finding I: pre-commit consequence-preview reads.
 	// Before this stage `getRegisterSession`/`getCashVariance` did not
@@ -1568,6 +1656,108 @@ describe.serial(
 				(line) => line.id === saleA.lines[0]?.id
 			);
 			expect(approvedLine?.unitPrice.amountMinor).toBe(300);
+		});
+
+		/** WS3 remediation R3b, Item 7 (server-backed discovery). Genuinely
+		 * new capability — `listPriceOverrides` did not exist before this
+		 * stage (a compile error to call; no PriceOverride read endpoint
+		 * existed at all, standalone or listed). Proven red-before-fix/
+		 * green-after-fix by temporarily removing the
+		 * `eq(posPriceOverrides.organizationId, ...)` predicate from
+		 * `packages/persistence/pos-postgres/src/index.ts`'s
+		 * `listPriceOverrides` and re-running this exact test — it failed
+		 * with org B's Pending override present in org A's approval queue
+		 * (RED), then passed once the filter was restored (GREEN). */
+		test("listPriceOverrides is organization-scoped: the approval queue never leaks another organization's pending price override", async () => {
+			const pos = saleService();
+			const tenantId = "tenant_pos_override_list_isolation";
+			const orgA = "organization_pos_override_list_a";
+			const orgB = "organization_pos_override_list_b";
+			const locA = "location_pos_override_list_a";
+			const locB = "location_pos_override_list_b";
+			const registerA = "register_pos_override_list_a";
+			const registerB = "register_pos_override_list_b";
+
+			async function requestOne(
+				organizationId: string,
+				locationId: string,
+				registerId: string,
+				keyPrefix: string
+			) {
+				await pos.openRegister({
+					actorUserId: saleBase.actorUserId,
+					correlationId: saleBase.correlationId,
+					currency: "GYD",
+					idempotencyKey: `${keyPrefix}-open`,
+					locationId,
+					openingFloat: { amountMinor: 100_000, currency: "GYD" },
+					organizationId,
+					registerId,
+					tenantId,
+				});
+				await seedStock({
+					locationId,
+					organizationId,
+					productId: "product_pr2_cola_500ml",
+					quantity: "1000",
+					tenantId,
+				});
+				const sale = await pos.createSale({
+					actorUserId: saleBase.actorUserId,
+					correlationId: saleBase.correlationId,
+					currency: "GYD",
+					idempotencyKey: `${keyPrefix}-sale-create`,
+					lines: [saleLine()],
+					organizationId,
+					registerId,
+					tenantId,
+				});
+				const requested = await pos.requestPriceOverride({
+					actorUserId: `${keyPrefix}_requester`,
+					correlationId: saleBase.correlationId,
+					idempotencyKey: `${keyPrefix}-override-request`,
+					lineId: sale.lines[0]?.id as string,
+					organizationId,
+					reason: "R3b Item 7 list-isolation fixture",
+					requestedPrice: { amountMinor: 300, currency: "GYD" },
+					saleId: sale.id,
+					tenantId,
+				});
+				return requested.lines[0]?.priceOverrideId as string;
+			}
+
+			const overrideIdA = await requestOne(
+				orgA,
+				locA,
+				registerA,
+				"override-list-isolation-a"
+			);
+			const overrideIdB = await requestOne(
+				orgB,
+				locB,
+				registerB,
+				"override-list-isolation-b"
+			);
+
+			const pageA = await pos.listPriceOverrides(
+				tenantId,
+				orgA,
+				{ limit: 50 },
+				{ state: "Pending" }
+			);
+			const idsA = pageA.items.map((item) => item.id);
+			expect(idsA).toContain(overrideIdA);
+			expect(idsA).not.toContain(overrideIdB);
+
+			const pageB = await pos.listPriceOverrides(
+				tenantId,
+				orgB,
+				{ limit: 50 },
+				{ state: "Pending" }
+			);
+			const idsB = pageB.items.map((item) => item.id);
+			expect(idsB).toContain(overrideIdB);
+			expect(idsB).not.toContain(overrideIdA);
 		});
 
 		test("denies sale completion before dispatch when permission is not granted, and dispatches once granted", async () => {

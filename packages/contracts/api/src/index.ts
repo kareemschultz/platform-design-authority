@@ -151,6 +151,12 @@ export const ENDPOINTS = [
 	},
 	{
 		method: "GET",
+		operationId: "listCashVariances",
+		path: "/v1/cash-variances",
+		permission: "commerce.cash-variance.approve",
+	},
+	{
+		method: "GET",
 		operationId: "getCashVariancesByVarianceId",
 		path: "/v1/cash-variances/{varianceId}",
 		permission: "commerce.cash-variance.approve",
@@ -190,6 +196,12 @@ export const ENDPOINTS = [
 		operationId: "postDepositReconciliations",
 		path: "/v1/deposit-reconciliations",
 		permission: "finance.bank-reconciliation.create",
+	},
+	{
+		method: "GET",
+		operationId: "listDeposits",
+		path: "/v1/deposits",
+		permission: "commerce.deposit.confirm",
 	},
 	{
 		method: "POST",
@@ -444,6 +456,12 @@ export const ENDPOINTS = [
 		permission: "payment.reconciliation.create",
 	},
 	{
+		method: "GET",
+		operationId: "listPriceOverrides",
+		path: "/v1/price-overrides",
+		permission: "commerce.price-override.approve",
+	},
+	{
 		method: "POST",
 		operationId: "postPrivacyActionsByIdApprove",
 		path: "/v1/privacy-actions/{id}/approve",
@@ -576,6 +594,12 @@ export const ENDPOINTS = [
 		permission: "commerce.receipt.void",
 	},
 	{
+		method: "GET",
+		operationId: "listRefunds",
+		path: "/v1/refunds",
+		permission: "commerce.refund.approve",
+	},
+	{
 		method: "POST",
 		operationId: "postRefunds",
 		path: "/v1/refunds",
@@ -634,6 +658,12 @@ export const ENDPOINTS = [
 		operationId: "postRegistersByRegisterIdSafeDrops",
 		path: "/v1/registers/{registerId}/safe-drops",
 		permission: "commerce.cash-movement.create",
+	},
+	{
+		method: "GET",
+		operationId: "listReturns",
+		path: "/v1/returns",
+		permission: "commerce.return.approve",
 	},
 	{
 		method: "POST",

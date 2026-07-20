@@ -808,6 +808,24 @@ export const RequestPriceOverrideSchema = z
 	})
 	.strict();
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Surfaces the
+ * `pos_price_override` row `getPriceOverride`/`createPriceOverride` already
+ * persist (WS3 PR2) as a first-class read for `listPriceOverridesContract`
+ * — until this addition no endpoint ever returned a PriceOverride on its
+ * own; only the owning `Sale.lines[].priceOverrideId`/`priceOverrideState`
+ * disclosed its existence. */
+export const PriceOverrideSchema = z.object({
+	approvedAt: InstantSchema.nullable(),
+	id: IdentifierSchema,
+	lineId: IdentifierSchema,
+	reason: z.string(),
+	requestedAt: InstantSchema,
+	requestedPrice: MoneySchema,
+	saleId: IdentifierSchema,
+	state: z.enum(["Pending", "Approved"]),
+	version: z.number().int().min(1),
+});
+
 export const SaleLineSchema = z.object({
 	discount: MoneySchema,
 	gross: MoneySchema,
@@ -1192,6 +1210,14 @@ export const PagedInventoryAdjustmentsSchema = pageOf(
 );
 export const PagedStockCountsSchema = pageOf(StockCountSchema);
 export const PagedStockTransfersSchema = pageOf(StockTransferSchema);
+/** WS3 remediation R3b, Item 7 (server-backed discovery — pending
+ * approval/read queues). One `pageOf(...)` per approval/confirm surface
+ * that previously required copying an opaque ID between users/browsers. */
+export const PagedPriceOverridesSchema = pageOf(PriceOverrideSchema);
+export const PagedReturnsSchema = pageOf(ReturnSchema);
+export const PagedRefundsSchema = pageOf(RefundSchema);
+export const PagedDepositsSchema = pageOf(DepositSchema);
+export const PagedRegisterSessionsSchema = pageOf(RegisterSessionSchema);
 
 export type ActiveContext = z.infer<typeof ActiveContextSchema>;
 export type ActiveContextRequest = z.infer<typeof ActiveContextRequestSchema>;
@@ -1300,6 +1326,7 @@ export type ReissueReceiptRequest = z.infer<typeof ReissueReceiptRequestSchema>;
 export type VoidReceiptRequest = z.infer<typeof VoidReceiptRequestSchema>;
 export type CreateDeposit = z.infer<typeof CreateDepositSchema>;
 export type Deposit = z.infer<typeof DepositSchema>;
+export type PriceOverride = z.infer<typeof PriceOverrideSchema>;
 export type AccountantHandoffRequest = z.infer<
 	typeof AccountantHandoffRequestSchema
 >;

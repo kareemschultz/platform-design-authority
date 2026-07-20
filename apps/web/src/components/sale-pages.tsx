@@ -1,6 +1,10 @@
 "use client";
 
-import type { Product, Sale } from "@meridian/contracts-platform-api";
+import type {
+	PriceOverride,
+	Product,
+	Sale,
+} from "@meridian/contracts-platform-api";
 import { Button } from "@meridian/ui-web/components/button";
 import { Input } from "@meridian/ui-web/components/input";
 import { Label } from "@meridian/ui-web/components/label";
@@ -39,6 +43,8 @@ import { dedupedToastError } from "@/lib/toast";
 import { workspaceWorkState } from "@/lib/workspace-change";
 import { client, orpc } from "@/utils/orpc";
 import {
+	CollectionState,
+	type DataColumn,
 	MutationError,
 	OperationsPageFrame,
 	StateBadge,
@@ -674,46 +680,171 @@ function PriceOverrideRequestForm({
 	);
 }
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.price-override.approve` (the same permission the manual-entry
+ * fields below already require) via `commerce.priceOverrides.list`,
+ * filtered to `state=Pending` — the pending-approval queue. Unlike the
+ * other four queues, selecting a row here must populate BOTH the Sale ID
+ * and the Override ID fields (a price override has no standalone get
+ * endpoint — approval is keyed on the pair). Cursor pagination follows
+ * WS2's own `cursor`/`cursorTrail` URL-param convention, the SAME
+ * `CollectionState` component Inventory's list pages already use. */
+function PendingPriceOverridesQueue({
+	isOnline,
+	onSelect,
+}: {
+	isOnline: boolean;
+	onSelect: (override: PriceOverride) => void;
+}) {
+	const workspace = useWorkspace();
+	const searchParams = useSearchParams();
+	const cursor = searchParams.get("cursor") ?? undefined;
+	const pending = useQuery({
+		...orpc.commerce.priceOverrides.list.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				query: { cursor, limit: 50, state: "Pending" },
+			},
+		}),
+		enabled: Boolean(workspace.contextId),
+		retry: false,
+		staleTime: 15_000,
+	});
+	const columns: DataColumn<PriceOverride>[] = [
+		{
+			label: "Override",
+			render: (override) => (
+				<span className="break-all font-mono text-xs">{override.id}</span>
+			),
+		},
+		{
+			label: "Sale",
+			render: (override) => (
+				<span className="break-all font-mono text-xs">{override.saleId}</span>
+			),
+		},
+		{
+			label: "Requested price",
+			render: (override) =>
+				formatMoneyMinor(
+					override.requestedPrice.amountMinor,
+					override.requestedPrice.currency
+				),
+		},
+		{
+			label: "Requested",
+			render: (override) =>
+				new Intl.DateTimeFormat(undefined, {
+					dateStyle: "medium",
+					timeStyle: "short",
+				}).format(new Date(override.requestedAt)),
+		},
+		{
+			label: "Action",
+			render: (override) => (
+				<Button
+					className="min-h-10"
+					disabled={!isOnline}
+					onClick={() => onSelect(override)}
+					type="button"
+					variant="outline"
+				>
+					Review
+				</Button>
+			),
+		},
+	];
+	return (
+		<PosSectionCard
+			description="Every price override this identity is authorized to approve, awaiting action. Select one instead of typing its Sale ID and Override ID."
+			title="Pending price overrides"
+		>
+			<CollectionState
+				caption="Price overrides awaiting approval"
+				columns={columns}
+				empty="No price overrides are awaiting approval in this scope."
+				error={pending.error}
+				isError={pending.isError}
+				isFetching={pending.isFetching}
+				isLoading={pending.isLoading}
+				isOnline={isOnline}
+				items={pending.data?.items}
+				nextCursor={pending.data?.nextCursor}
+				onRetry={() => pending.refetch()}
+				rowKey={(override) => override.id}
+			/>
+		</PosSectionCard>
+	);
+}
+
 /** Standalone price-override approval surface: unlike the in-workspace
  * approve section rendered inside an already-loaded Sale (below), this
- * page needs only a Sale ID typed in — the ordinary case for the checker,
- * a genuinely different browser that never held this Sale locally (no
- * commerce.sale.* read endpoint exists to recover it any other way,
- * matching the return/refund/deposit approval pages' own ID-entry
- * pattern). */
+ * page works from a Sale ID and Override ID alone — the ordinary case for
+ * the checker, a genuinely different browser that never held this Sale
+ * locally (no `commerce.sale.*` read endpoint exists to recover it any
+ * other way). The pending-approvals queue above lets an approver SELECT
+ * both values instead of typing them; manual entry remains available. */
 export function PriceOverrideApprovePage() {
+	const workspace = useWorkspace();
 	const [saleId, setSaleId] = useState("");
+	const [initialOverrideId, setInitialOverrideId] = useState("");
 	return (
 		<OperationsPageFrame
-			description="Realizes commerce.price-override.approve. Enter the Sale ID and Price Override ID the requester's screen displayed."
+			description="Realizes commerce.price-override.approve. Select a pending override below, or enter the Sale ID and Price Override ID the requester's screen displayed."
 			title="Price override approval"
 		>
 			<div className="grid gap-6">
+				<PendingPriceOverridesQueue
+					isOnline={workspace.isOnline}
+					onSelect={(override) => {
+						setSaleId(override.saleId);
+						setInitialOverrideId(override.id);
+					}}
+				/>
 				<PosSectionCard title="Sale">
 					<PosTextField
 						field={{
 							handleBlur: () => undefined,
-							handleChange: setSaleId,
+							handleChange: (value) => {
+								setSaleId(value);
+								setInitialOverrideId("");
+							},
 							name: "saleId",
 							state: { meta: { errors: [] }, value: saleId },
 						}}
 						label="Sale ID"
 					/>
 				</PosSectionCard>
-				{saleId ? <PriceOverrideApproveSection saleId={saleId} /> : null}
+				{saleId ? (
+					<PriceOverrideApproveSection
+						// Remounts (resetting the section's own overrideId state)
+						// whenever the queue selection changes, so a second queue
+						// pick reliably replaces the first rather than merging
+						// with stale local state.
+						initialOverrideId={initialOverrideId}
+						key={`${saleId}:${initialOverrideId}`}
+						saleId={saleId}
+					/>
+				) : null}
 			</div>
 		</OperationsPageFrame>
 	);
 }
 
-function PriceOverrideApproveSection({ saleId }: { saleId: string }) {
+function PriceOverrideApproveSection({
+	initialOverrideId,
+	saleId,
+}: {
+	initialOverrideId?: string;
+	saleId: string;
+}) {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
 	const approve = useOnlineGatedMutation(
 		orpc.commerce.priceOverrides.approve.mutationOptions(),
 		workspace.isOnline
 	);
-	const [overrideId, setOverrideId] = useState("");
+	const [overrideId, setOverrideId] = useState(initialOverrideId ?? "");
 	const [approved, setApproved] = useState<Sale | null>(null);
 	const [selfApproval, setSelfApproval] = useState(false);
 	useEffect(() => {

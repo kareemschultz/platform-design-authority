@@ -34,6 +34,7 @@ const RECEIPT_HEADING_NAME_PATTERN = /^Receipt\s+\S+/;
 const RECEIPT_HEADING_PREFIX_PATTERN = /^Receipt\s+/;
 const REGISTER_LINE_PREFIX_PATTERN = /^Register:\s*/;
 const CONNECTION_REQUIRED_PATTERN = /connection/i;
+const RETURN_QUANTITY_LABEL_PATTERN = /^Return quantity \(0 = skip/;
 
 /** Computes a valid GTIN-13 check digit for a 12-digit base, replicating
  * `packages/domains/catalog/src/index.ts`'s `gtinCheckDigitIsValid` exactly
@@ -1154,12 +1155,14 @@ test("return flow: creating a return against a completed sale leaves it Pending 
 	await expect(
 		page.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await page.getByLabel("Register").fill(receiptReference.registerId);
+	await page
+		.getByLabel("Register", { exact: true })
+		.fill(receiptReference.registerId);
 	await page.getByLabel("Receipt number").fill(receiptReference.receiptNumber);
 	await expect(
 		page.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();
-	await page.getByLabel("Return quantity (0 = skip)").fill("1");
+	await page.getByLabel(RETURN_QUANTITY_LABEL_PATTERN).fill("1");
 	await page.getByLabel("Reason").fill("Customer changed mind");
 	const returnResponsePromise = page.waitForResponse(
 		(response) =>
@@ -1263,7 +1266,9 @@ test("receipt-to-return: a fresh browser with no prior session for the sale can 
 			response.request().method() === "POST" &&
 			response.url().endsWith("/rpc/commerce/sales/getForReturn")
 	);
-	await freshPage.getByLabel("Register").fill(printedReference.registerId);
+	await freshPage
+		.getByLabel("Register", { exact: true })
+		.fill(printedReference.registerId);
 	await freshPage
 		.getByLabel("Receipt number")
 		.fill(printedReference.receiptNumber);
@@ -1274,7 +1279,7 @@ test("receipt-to-return: a fresh browser with no prior session for the sale can 
 	).toBeVisible();
 	await expect(freshPage.getByText(productName)).toBeVisible();
 
-	await freshPage.getByLabel("Return quantity (0 = skip)").fill("1");
+	await freshPage.getByLabel(RETURN_QUANTITY_LABEL_PATTERN).fill("1");
 	await freshPage
 		.getByLabel("Reason")
 		.fill("Fresh-browser receipt-to-return verification");
@@ -1299,7 +1304,9 @@ test("receipt-to-return: an unknown register/receipt pair produces visible feedb
 	await expect(
 		page.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await page.getByLabel("Register").fill("register_does_not_exist_000000");
+	await page
+		.getByLabel("Register", { exact: true })
+		.fill("register_does_not_exist_000000");
 	await page.getByLabel("Receipt number").fill("RCPT-DOES-NOT-EXIST");
 	// Scoped past Next.js's own `role="alert"` route-announcer element
 	// (`#__next-route-announcer__`, always present in the DOM) to the
@@ -1351,14 +1358,16 @@ test("return approval by a second identity (approver != creator) posts the compe
 	await expect(
 		makerPage.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await makerPage.getByLabel("Register").fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Register", { exact: true })
+		.fill(receiptReference.registerId);
 	await makerPage
 		.getByLabel("Receipt number")
 		.fill(receiptReference.receiptNumber);
 	await expect(
 		makerPage.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();
-	await makerPage.getByLabel("Return quantity (0 = skip)").fill("1");
+	await makerPage.getByLabel(RETURN_QUANTITY_LABEL_PATTERN).fill("1");
 	await makerPage.getByLabel("Reason").fill("Damaged item");
 	const returnResponsePromise = makerPage.waitForResponse(
 		(response) =>
@@ -1454,14 +1463,16 @@ test("consequence preview: server-derived data, non-destructive focus, and Escap
 	);
 
 	await makerPage.goto("/operations/pos/returns/new");
-	await makerPage.getByLabel("Register").fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Register", { exact: true })
+		.fill(receiptReference.registerId);
 	await makerPage
 		.getByLabel("Receipt number")
 		.fill(receiptReference.receiptNumber);
 	await expect(
 		makerPage.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();
-	await makerPage.getByLabel("Return quantity (0 = skip)").fill("1");
+	await makerPage.getByLabel(RETURN_QUANTITY_LABEL_PATTERN).fill("1");
 	await makerPage.getByLabel("Reason").fill("Consequence preview verification");
 	const returnCreateResponsePromise = makerPage.waitForResponse(
 		(response) =>
@@ -1614,14 +1625,16 @@ test("offline reconnect never replays a rejected mutation: return approval requi
 	);
 
 	await makerPage.goto("/operations/pos/returns/new");
-	await makerPage.getByLabel("Register").fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Register", { exact: true })
+		.fill(receiptReference.registerId);
 	await makerPage
 		.getByLabel("Receipt number")
 		.fill(receiptReference.receiptNumber);
 	await expect(
 		makerPage.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();
-	await makerPage.getByLabel("Return quantity (0 = skip)").fill("1");
+	await makerPage.getByLabel(RETURN_QUANTITY_LABEL_PATTERN).fill("1");
 	await makerPage.getByLabel("Reason").fill("Offline replay verification");
 	const returnCreateResponsePromise = makerPage.waitForResponse(
 		(response) =>
@@ -1777,14 +1790,16 @@ test("refund create and approve: a second identity's approval posts the paid-out
 	await expect(
 		makerPage.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await makerPage.getByLabel("Register").fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Register", { exact: true })
+		.fill(receiptReference.registerId);
 	await makerPage
 		.getByLabel("Receipt number")
 		.fill(receiptReference.receiptNumber);
 	await expect(
 		makerPage.getByRole("heading", { name: "Lines to return" })
 	).toBeVisible();
-	await makerPage.getByLabel("Return quantity (0 = skip)").fill("1");
+	await makerPage.getByLabel(RETURN_QUANTITY_LABEL_PATTERN).fill("1");
 	await makerPage.getByLabel("Reason").fill("Wrong item");
 	const returnResponsePromise = makerPage.waitForResponse(
 		(response) =>
@@ -1872,6 +1887,166 @@ test("refund create and approve: a second identity's approval posts the paid-out
 	await refundCommitButton.click();
 	const refundApproveResponse = await refundApproveResponsePromise;
 	expect(refundApproveResponse.ok()).toBe(true);
+	await expect(
+		approverPage.getByRole("heading", { name: "Refund approved" })
+	).toBeVisible();
+});
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). The core
+ * deliverable: an approver reaches the SAME approval outcome the test above
+ * proves, but WITHOUT ever typing or pasting the Refund ID — selecting it
+ * from the server-backed "Pending refunds" queue instead. This is the one
+ * place type-checking cannot substitute for driving the real page: it
+ * exercises the queue's loading state, its populated state (the SAME
+ * `CollectionState` component Inventory's list pages already use), the
+ * "Review" action wiring `refundId` and opening the consequence-preview
+ * dialog, and proves the commit mutation fires with the SELECTED refund's
+ * id — never a manually-entered one, since the manual "Refund ID" field is
+ * never interacted with in this test at all. */
+test("refund approval queue: an approver selects a pending refund instead of typing its ID", async ({
+	browser,
+}) => {
+	test.setTimeout(60_000);
+	const makerContext = await browser.newContext();
+	const makerPage = await makerContext.newPage();
+	const registerId = `register_refund_queue_${Date.now()}`;
+	const registerSessionId = await openRegister(makerPage, registerId, "100.00");
+	const { name: productName } = await createActiveProduct(
+		makerPage,
+		"refundqueue"
+	);
+	await createSaleWithOneLine(
+		makerPage,
+		registerId,
+		registerSessionId,
+		productName,
+		"20.00"
+	);
+	await makerPage.getByLabel("Cash tendered (GYD)").fill("50.00");
+	const completeResponsePromise = makerPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().includes("/rpc/commerce/sales/complete")
+	);
+	await makerPage.getByRole("button", { name: "Complete sale" }).click();
+	const completeResponse = await completeResponsePromise;
+	const completed = (await completeResponse.json()) as {
+		json: { receiptId: string };
+	};
+	const receiptReference = await readPrintedReceiptReference(
+		makerPage,
+		completed.json.receiptId
+	);
+
+	await makerPage.goto("/operations/pos/returns/new");
+	await makerPage
+		.getByLabel("Register", { exact: true })
+		.fill(receiptReference.registerId);
+	await makerPage
+		.getByLabel("Receipt number")
+		.fill(receiptReference.receiptNumber);
+	await expect(
+		makerPage.getByRole("heading", { name: "Lines to return" })
+	).toBeVisible();
+	await makerPage.getByLabel(RETURN_QUANTITY_LABEL_PATTERN).fill("1");
+	await makerPage.getByLabel("Reason").fill("Wrong item");
+	const returnResponsePromise = makerPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/create")
+	);
+	await makerPage.getByRole("button", { name: "Create return" }).click();
+	const returnResponse = await returnResponsePromise;
+	const createdReturn = (await returnResponse.json()) as {
+		json: { id: string };
+	};
+
+	const approverContext = await browser.newContext();
+	const approverPage = await approverContext.newPage();
+	await signIn(approverPage, "/operations/pos/returns/approve", {
+		email: APPROVER_EMAIL,
+		password: APPROVER_PASSWORD,
+	});
+	await approverPage.getByLabel("Return ID").fill(createdReturn.json.id);
+	await approverPage
+		.getByRole("button", { name: "Review & approve return" })
+		.click();
+	const returnApproveResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/returns/approve")
+	);
+	await approverPage
+		.getByRole("button", { exact: true, name: "Approve return" })
+		.click();
+	await returnApproveResponsePromise;
+
+	await makerPage.goto("/operations/pos/refunds/new");
+	await makerPage.getByLabel("Approved return ID").fill(createdReturn.json.id);
+	const refundCreateResponsePromise = makerPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/refunds/create")
+	);
+	await makerPage.getByRole("button", { name: "Request refund" }).click();
+	const refundCreateResponse = await refundCreateResponsePromise;
+	const createdRefund = (await refundCreateResponse.json()) as {
+		json: { id: string };
+	};
+
+	// The approver navigates to the approval page and lets the SERVER-BACKED
+	// queue resolve, rather than typing the refund id the maker browser
+	// never disclosed to them out of band.
+	const queueResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/refunds/list")
+	);
+	await approverPage.goto("/operations/pos/refunds/approve");
+	await expect(
+		approverPage.getByRole("heading", { name: "Pending refunds" })
+	).toBeVisible();
+	await queueResponsePromise;
+
+	const queueRow = approverPage
+		.getByRole("row")
+		.filter({ hasText: createdRefund.json.id });
+	await expect(queueRow).toBeVisible();
+	// The manual entry field is never touched — proves selection alone
+	// drives the approval, not a value copied into it by this test.
+	await expect(approverPage.getByLabel("Refund ID")).toHaveValue("");
+	await queueRow.getByRole("button", { name: "Review" }).click();
+
+	const previewDialog = approverPage.getByRole("alertdialog");
+	await expect(
+		previewDialog.getByRole("heading", { name: "Approve this refund?" })
+	).toBeVisible();
+	// The dialog's own server-fetched preview shows the SELECTED refund's
+	// id, confirming the queue selection (not manual entry) drove which
+	// record is about to be approved. Scoped to the dialog itself — the
+	// queue table behind it still renders the same id in the DOM.
+	await expect(
+		previewDialog.getByText(createdRefund.json.id, { exact: false })
+	).toBeVisible();
+	const refundCommitButton = approverPage.getByRole("button", {
+		exact: true,
+		name: "Approve refund",
+	});
+	await expect(refundCommitButton).toBeEnabled();
+	const refundApproveResponsePromise = approverPage.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/refunds/approve")
+	);
+	await refundCommitButton.click();
+	const refundApproveResponse = await refundApproveResponsePromise;
+	expect(refundApproveResponse.ok()).toBe(true);
+	const approvedRefund = (await refundApproveResponse.json()) as {
+		json: { id: string };
+	};
+	// The record the server actually approved is the one selected from the
+	// queue, not an id this test typed anywhere.
+	expect(approvedRefund.json.id).toBe(createdRefund.json.id);
 	await expect(
 		approverPage.getByRole("heading", { name: "Refund approved" })
 	).toBeVisible();
@@ -2318,7 +2493,9 @@ test("online-only WS3 mutations fail closed and remain understandable when conne
 	await expect(
 		page.getByRole("heading", { name: "Create a return" })
 	).toBeVisible();
-	await page.getByLabel("Register").fill(returnReceiptReference.registerId);
+	await page
+		.getByLabel("Register", { exact: true })
+		.fill(returnReceiptReference.registerId);
 	await page
 		.getByLabel("Receipt number")
 		.fill(returnReceiptReference.receiptNumber);

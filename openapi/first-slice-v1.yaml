@@ -457,6 +457,21 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Sale'}
   /returns:
+    get:
+      tags: [Commerce]
+      operationId: listReturns
+      x-permission: commerce.return.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Pending, Completed]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-approval queue for commerce.return.approve, reusing that exact permission (no new identifier invented). Replaces copying an opaque Return ID between users/browsers.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedReturns'}
     post:
       tags: [Commerce]
       operationId: createReturn
@@ -475,6 +490,21 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Return'}
   /deposits:
+    get:
+      tags: [Commerce]
+      operationId: listDeposits
+      x-permission: commerce.deposit.confirm
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Prepared, Reconciled]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-confirmation queue for commerce.deposit.confirm, reusing that exact permission (no new identifier invented). Replaces copying an opaque Deposit ID between users/browsers.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedDeposits'}
     post:
       tags: [Commerce]
       operationId: createDeposit
@@ -1527,6 +1557,22 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Sale'}
+  /price-overrides:
+    get:
+      tags: [Commerce]
+      operationId: listPriceOverrides
+      x-permission: commerce.price-override.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Pending, Approved]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-approval queue for commerce.price-override.approve, reusing that exact permission (no new identifier invented). Replaces "type the Sale ID and Override ID your colleague read off their own screen".
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedPriceOverrides'}
   /returns/{returnId}:
     get:
       tags: [Commerce]
@@ -1555,6 +1601,21 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Return'}
   /refunds:
+    get:
+      tags: [Commerce]
+      operationId: listRefunds
+      x-permission: commerce.refund.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Requested, Posted]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-approval queue for commerce.refund.approve, reusing that exact permission (no new identifier invented). Replaces copying an opaque Refund ID between users/browsers.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedRefunds'}
     post:
       tags: [Commerce]
       operationId: postRefunds
@@ -1677,6 +1738,23 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/RegisterSession'}
+  /cash-variances:
+    get:
+      tags: [Commerce]
+      operationId: listCashVariances
+      x-permission: commerce.cash-variance.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: locationId, in: query, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: state, in: query, schema: {type: string, enum: [Open, Closing, Closed]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-approval queue for commerce.cash-variance.approve, reusing that exact permission (no new identifier invented). A session only holds state=Closing while a non-zero close variance awaits approval, so that is exactly the pending queue.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedRegisterSessions'}
   /cash-variances/{varianceId}:
     get:
       tags: [Commerce]
@@ -2899,6 +2977,12 @@ components:
         varianceApprovedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
         varianceApproverPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         version: {type: integer, minimum: 1}
+    PagedRegisterSessions:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/RegisterSession'}}
+        nextCursor: {type: [string, 'null']}
     CreateCashMovementRequest:
       type: object
       required: [amount, direction, reasonCode]
@@ -2964,6 +3048,25 @@ components:
         lineId: {$ref: '#/components/schemas/Identifier'}
         requestedPrice: {$ref: '#/components/schemas/Money'}
         reason: {type: string, minLength: 1, maxLength: 500}
+    PriceOverride:
+      type: object
+      required: [id, saleId, lineId, requestedPrice, reason, state, requestedAt, approvedAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        saleId: {$ref: '#/components/schemas/Identifier'}
+        lineId: {$ref: '#/components/schemas/Identifier'}
+        requestedPrice: {$ref: '#/components/schemas/Money'}
+        reason: {type: string}
+        state: {type: string, enum: [Pending, Approved]}
+        requestedAt: {type: string, format: date-time}
+        approvedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    PagedPriceOverrides:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/PriceOverride'}}
+        nextCursor: {type: [string, 'null']}
     TenderReference:
       type: object
       required: [type, amount]
@@ -3096,6 +3199,12 @@ components:
         createdAt: {type: string, format: date-time}
         approvedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
         version: {type: integer, minimum: 1}
+    PagedReturns:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Return'}}
+        nextCursor: {type: [string, 'null']}
     CreateRefund:
       type: object
       additionalProperties: false
@@ -3115,6 +3224,12 @@ components:
         requestedAt: {type: string, format: date-time}
         approvedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
         version: {type: integer, minimum: 1}
+    PagedRefunds:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Refund'}}
+        nextCursor: {type: [string, 'null']}
     ReissueReceiptRequest:
       type: object
       additionalProperties: false
@@ -3146,6 +3261,12 @@ components:
         confirmerPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         confirmedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
         version: {type: integer, minimum: 1}
+    PagedDeposits:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Deposit'}}
+        nextCursor: {type: [string, 'null']}
     CreatePaymentIntent:
       type: object
       required: [saleId, rail, amount]

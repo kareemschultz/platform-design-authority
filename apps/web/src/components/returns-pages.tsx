@@ -6,6 +6,7 @@ import { Input } from "@meridian/ui-web/components/input";
 import { Label } from "@meridian/ui-web/components/label";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -21,6 +22,8 @@ import { orpc } from "@/utils/orpc";
 
 import { ConsequencePreviewDialog } from "./consequence-preview-dialog";
 import {
+	CollectionState,
+	type DataColumn,
 	MutationError,
 	OperationsPageFrame,
 	StateBadge,
@@ -209,7 +212,11 @@ export function ReturnNewPage() {
 					<p>
 						<StateBadge state={created.state} />
 					</p>
-					<CopyableId id={created.id} label="Return ID" />
+					<CopyableId
+						id={created.id}
+						label="Return ID"
+						note="A second authorized identity can find this return in the Approve a return queue below — copying this ID is optional."
+					/>
 					<p className="text-muted-foreground text-sm">
 						A second authorized identity (not this browser) must approve this
 						return from the Returns page before compensating inventory posts.
@@ -319,6 +326,102 @@ export function ReturnNewPage() {
 	);
 }
 
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.return.approve` (the same permission the manual-entry field
+ * below already requires) via `commerce.returns.list`, filtered to
+ * `state=Pending` — the pending-approval queue. Cursor pagination follows
+ * WS2's own `cursor`/`cursorTrail` URL-param convention, the SAME
+ * `CollectionState` component Inventory's list pages already use. */
+function PendingReturnsQueue({
+	isOnline,
+	onSelect,
+}: {
+	isOnline: boolean;
+	onSelect: (returnRecord: Return) => void;
+}) {
+	const workspace = useWorkspace();
+	const searchParams = useSearchParams();
+	const cursor = searchParams.get("cursor") ?? undefined;
+	const pending = useQuery({
+		...orpc.commerce.returns.list.queryOptions({
+			input: {
+				headers: { "x-active-context-id": workspace.contextId ?? "" },
+				query: { cursor, limit: 50, state: "Pending" },
+			},
+		}),
+		enabled: Boolean(workspace.contextId),
+		retry: false,
+		staleTime: 15_000,
+	});
+	const columns: DataColumn<Return>[] = [
+		{
+			label: "Return",
+			render: (returnRecord) => (
+				<span className="break-all font-mono text-xs">{returnRecord.id}</span>
+			),
+		},
+		{
+			label: "Sale",
+			render: (returnRecord) => (
+				<span className="break-all font-mono text-xs">
+					{returnRecord.saleId}
+				</span>
+			),
+		},
+		{
+			label: "Refundable amount",
+			render: (returnRecord) =>
+				formatMoneyMinor(
+					returnRecord.totalRefundable.amountMinor,
+					returnRecord.currency
+				),
+		},
+		{
+			label: "Created",
+			render: (returnRecord) =>
+				new Intl.DateTimeFormat(undefined, {
+					dateStyle: "medium",
+					timeStyle: "short",
+				}).format(new Date(returnRecord.createdAt)),
+		},
+		{
+			label: "Action",
+			render: (returnRecord) => (
+				<Button
+					className="min-h-10"
+					disabled={!isOnline}
+					onClick={() => onSelect(returnRecord)}
+					type="button"
+					variant="outline"
+				>
+					Review
+				</Button>
+			),
+		},
+	];
+	return (
+		<PosSectionCard
+			description="Every return this identity is authorized to approve, awaiting action. Select one instead of typing its ID."
+			title="Pending returns"
+		>
+			<CollectionState
+				caption="Returns awaiting approval"
+				columns={columns}
+				empty="No returns are awaiting approval in this scope."
+				error={pending.error}
+				isError={pending.isError}
+				isFetching={pending.isFetching}
+				isLoading={pending.isLoading}
+				isOnline={isOnline}
+				items={pending.data?.items}
+				nextCursor={pending.data?.nextCursor}
+				onRetry={() => pending.refetch()}
+				rowKey={(returnRecord) => returnRecord.id}
+			/>
+		</PosSectionCard>
+	);
+}
+
 export function ReturnApprovePage() {
 	const workspace = useWorkspace();
 	const { identity } = workspace;
@@ -397,84 +500,93 @@ export function ReturnApprovePage() {
 			description="commerce.return.approve. The approver must be a different authorized identity than whoever created the return — self-approval is hidden in this browser when it created the return."
 			title="Approve a return"
 		>
-			<PosSectionCard title="Approve a pending return">
-				{selfApproval ? (
-					<p className="rounded-xl border border-dashed p-4 text-muted-foreground text-sm">
-						This browser created this return, so it cannot approve its own
-						request. Ask a second authorized identity to complete this step.
-					</p>
-				) : (
-					<div className="grid max-w-md gap-4">
-						<PosTextField
-							field={{
-								handleBlur: () => undefined,
-								handleChange: setReturnId,
-								name: "returnId",
-								state: { meta: { errors: [] }, value: returnId },
-							}}
-							label="Return ID"
-						/>
-						<Button
-							className="min-h-12 w-fit"
-							disabled={!(returnId && workspace.isOnline)}
-							onClick={() => setConfirmOpen(true)}
-							type="button"
-						>
-							Review &amp; approve return
-						</Button>
-					</div>
-				)}
-				<ConsequencePreviewDialog
-					commitError={approve.error}
-					confirming={approve.isPending}
-					confirmLabel="Approve return"
-					data={preview.data}
-					description="Approving posts the compensating Inventory movement and cannot be undone from this screen."
-					error={preview.error}
-					isError={preview.isError}
-					isLoading={preview.isLoading}
+			<div className="grid gap-6">
+				<PendingReturnsQueue
 					isOnline={workspace.isOnline}
-					onConfirm={() => {
-						commitApproveReturn().catch(() => undefined);
+					onSelect={(returnRecord) => {
+						setReturnId(returnRecord.id);
+						setConfirmOpen(true);
 					}}
-					onOpenChange={setConfirmOpen}
-					open={confirmOpen}
-					renderPreview={(returnRecord) => (
-						<dl className="grid gap-1">
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">Return</dt>
-								<dd className="font-mono">{returnRecord.id}</dd>
-							</div>
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">Sale</dt>
-								<dd className="font-mono">{returnRecord.saleId}</dd>
-							</div>
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">Register</dt>
-								<dd className="font-mono">{returnRecord.registerId}</dd>
-							</div>
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">Refundable amount</dt>
-								<dd>
-									{formatMoneyMinor(
-										returnRecord.totalRefundable.amountMinor,
-										returnRecord.currency
-									)}
-								</dd>
-							</div>
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">State</dt>
-								<dd>{returnRecord.state}</dd>
-							</div>
-							<div className="flex justify-between gap-4">
-								<dt className="text-muted-foreground">Reason</dt>
-								<dd>{returnRecord.reason}</dd>
-							</div>
-						</dl>
-					)}
-					title="Approve this return?"
 				/>
-			</PosSectionCard>
+				<PosSectionCard title="Approve a pending return">
+					{selfApproval ? (
+						<p className="rounded-xl border border-dashed p-4 text-muted-foreground text-sm">
+							This browser created this return, so it cannot approve its own
+							request. Ask a second authorized identity to complete this step.
+						</p>
+					) : (
+						<div className="grid max-w-md gap-4">
+							<PosTextField
+								field={{
+									handleBlur: () => undefined,
+									handleChange: setReturnId,
+									name: "returnId",
+									state: { meta: { errors: [] }, value: returnId },
+								}}
+								label="Return ID"
+							/>
+							<Button
+								className="min-h-12 w-fit"
+								disabled={!(returnId && workspace.isOnline)}
+								onClick={() => setConfirmOpen(true)}
+								type="button"
+							>
+								Review &amp; approve return
+							</Button>
+						</div>
+					)}
+					<ConsequencePreviewDialog
+						commitError={approve.error}
+						confirming={approve.isPending}
+						confirmLabel="Approve return"
+						data={preview.data}
+						description="Approving posts the compensating Inventory movement and cannot be undone from this screen."
+						error={preview.error}
+						isError={preview.isError}
+						isLoading={preview.isLoading}
+						isOnline={workspace.isOnline}
+						onConfirm={() => {
+							commitApproveReturn().catch(() => undefined);
+						}}
+						onOpenChange={setConfirmOpen}
+						open={confirmOpen}
+						renderPreview={(returnRecord) => (
+							<dl className="grid gap-1">
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Return</dt>
+									<dd className="font-mono">{returnRecord.id}</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Sale</dt>
+									<dd className="font-mono">{returnRecord.saleId}</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Register</dt>
+									<dd className="font-mono">{returnRecord.registerId}</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Refundable amount</dt>
+									<dd>
+										{formatMoneyMinor(
+											returnRecord.totalRefundable.amountMinor,
+											returnRecord.currency
+										)}
+									</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">State</dt>
+									<dd>{returnRecord.state}</dd>
+								</div>
+								<div className="flex justify-between gap-4">
+									<dt className="text-muted-foreground">Reason</dt>
+									<dd>{returnRecord.reason}</dd>
+								</div>
+							</dl>
+						)}
+						title="Approve this return?"
+					/>
+				</PosSectionCard>
+			</div>
 		</OperationsPageFrame>
 	);
 }

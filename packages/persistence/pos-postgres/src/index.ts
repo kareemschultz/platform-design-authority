@@ -6,6 +6,8 @@ import type {
 	DepositRecord,
 	PosCommandReceipt,
 	PosFinanceHandoffSourceData,
+	PosPage,
+	PosPageRequest,
 	PosRepository,
 	PriceOverrideRecord,
 	ReceiptRecord,
@@ -16,7 +18,7 @@ import type {
 	SaleLineRecord,
 	SaleRecord,
 } from "@meridian/domain-pos";
-import { and, eq, gte, inArray, lt, ne, sql } from "drizzle-orm";
+import { and, asc, eq, gt, gte, inArray, lt, ne, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool, PoolClient } from "pg";
@@ -919,6 +921,168 @@ export function createPosRepository(
 				.limit(1)
 				.for("update");
 			return rows[0] ? mapSession(rows[0]) : null;
+		},
+		/** WS3 remediation R3b, Item 7: org-scoped exactly like `getDeposit`
+		 * above; cursor discipline mirrors `listAdjustments` in
+		 * `packages/persistence/inventory-postgres` (`gt(id)` … `orderBy
+		 * asc(id)` … `limit + 1`). */
+		async listDeposits(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: { state?: DepositRecord["state"] }
+		): Promise<PosPage<DepositRecord>> {
+			const rows = await database
+				.select()
+				.from(posDeposits)
+				.where(
+					and(
+						eq(posDeposits.tenantId, tenantId),
+						eq(posDeposits.organizationId, organizationId),
+						filters?.state ? eq(posDeposits.state, filters.state) : undefined,
+						page.cursor ? gt(posDeposits.id, page.cursor) : undefined
+					)
+				)
+				.orderBy(asc(posDeposits.id))
+				.limit(page.limit + 1);
+			const pageRows = rows.slice(0, page.limit);
+			const items = await Promise.all(
+				pageRows.map(async (row) => {
+					const sourceShiftIds = await loadDepositSourceShiftIds(
+						tenantId,
+						row.id
+					);
+					return mapDeposit(row, sourceShiftIds);
+				})
+			);
+			return {
+				items,
+				nextCursor:
+					rows.length > page.limit ? (pageRows.at(-1)?.id ?? null) : null,
+			};
+		},
+		/** WS3 remediation R3b, Item 7: org-scoped exactly like
+		 * `getPriceOverride` above. */
+		async listPriceOverrides(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: { state?: PriceOverrideRecord["state"] }
+		): Promise<PosPage<PriceOverrideRecord>> {
+			const rows = await database
+				.select()
+				.from(posPriceOverrides)
+				.where(
+					and(
+						eq(posPriceOverrides.tenantId, tenantId),
+						eq(posPriceOverrides.organizationId, organizationId),
+						filters?.state
+							? eq(posPriceOverrides.state, filters.state)
+							: undefined,
+						page.cursor ? gt(posPriceOverrides.id, page.cursor) : undefined
+					)
+				)
+				.orderBy(asc(posPriceOverrides.id))
+				.limit(page.limit + 1);
+			return {
+				items: rows.slice(0, page.limit).map(mapPriceOverride),
+				nextCursor:
+					rows.length > page.limit ? (rows[page.limit - 1]?.id ?? null) : null,
+			};
+		},
+		/** WS3 remediation R3b, Item 7: org-scoped exactly like `getRefund`
+		 * above. No `.for("update")` — list reads for a queue view are not
+		 * part of an approval transaction. */
+		async listRefunds(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: { state?: RefundRecord["state"] }
+		): Promise<PosPage<RefundRecord>> {
+			const rows = await database
+				.select()
+				.from(posRefunds)
+				.where(
+					and(
+						eq(posRefunds.tenantId, tenantId),
+						eq(posRefunds.organizationId, organizationId),
+						filters?.state ? eq(posRefunds.state, filters.state) : undefined,
+						page.cursor ? gt(posRefunds.id, page.cursor) : undefined
+					)
+				)
+				.orderBy(asc(posRefunds.id))
+				.limit(page.limit + 1);
+			return {
+				items: rows.slice(0, page.limit).map(mapRefund),
+				nextCursor:
+					rows.length > page.limit ? (rows[page.limit - 1]?.id ?? null) : null,
+			};
+		},
+		/** WS3 remediation R3b, Item 7: org-scoped exactly like `getReturn`
+		 * above. Deliberately omits per-item `loadReturnLines` — a queue
+		 * listing does not need each return's full line detail, only enough
+		 * to let the actor pick the right one before opening the existing
+		 * server-derived `getReturn` consequence preview (Finding I). */
+		async listReturns(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: { state?: ReturnRecord["state"] }
+		): Promise<PosPage<ReturnRecord>> {
+			const rows = await database
+				.select()
+				.from(posReturns)
+				.where(
+					and(
+						eq(posReturns.tenantId, tenantId),
+						eq(posReturns.organizationId, organizationId),
+						filters?.state ? eq(posReturns.state, filters.state) : undefined,
+						page.cursor ? gt(posReturns.id, page.cursor) : undefined
+					)
+				)
+				.orderBy(asc(posReturns.id))
+				.limit(page.limit + 1);
+			return {
+				items: rows.slice(0, page.limit).map((row) => mapReturnHeader(row, [])),
+				nextCursor:
+					rows.length > page.limit ? (rows[page.limit - 1]?.id ?? null) : null,
+			};
+		},
+		/** WS3 remediation R3b, Item 7: org- and (optionally) location-scoped
+		 * exactly like `getSession` above. No `.for("update")` — list reads
+		 * for a queue view are not part of an approval transaction. */
+		async listSessions(
+			tenantId: string,
+			organizationId: string,
+			page: PosPageRequest,
+			filters?: {
+				locationId?: string;
+				state?: RegisterSessionRecord["state"];
+			}
+		): Promise<PosPage<RegisterSessionRecord>> {
+			const rows = await database
+				.select()
+				.from(posRegisterSessions)
+				.where(
+					and(
+						eq(posRegisterSessions.tenantId, tenantId),
+						eq(posRegisterSessions.organizationId, organizationId),
+						filters?.locationId
+							? eq(posRegisterSessions.locationId, filters.locationId)
+							: undefined,
+						filters?.state
+							? eq(posRegisterSessions.state, filters.state)
+							: undefined,
+						page.cursor ? gt(posRegisterSessions.id, page.cursor) : undefined
+					)
+				)
+				.orderBy(asc(posRegisterSessions.id))
+				.limit(page.limit + 1);
+			return {
+				items: rows.slice(0, page.limit).map(mapSession),
+				nextCursor:
+					rows.length > page.limit ? (rows[page.limit - 1]?.id ?? null) : null,
+			};
 		},
 		async lockSessionsForDeposit(
 			tenantId,

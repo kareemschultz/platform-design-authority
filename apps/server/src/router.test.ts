@@ -114,7 +114,9 @@ function context(input?: {
 			holdSale: () => Promise.reject(new Error("not used")),
 			inviteUser: () => Promise.reject(new Error("not used")),
 			listAuditRecords: async () => ({ items: [], nextCursor: null }),
+			listCashVariances: async () => ({ items: [], nextCursor: null }),
 			listCurrentUserSessions: async () => ({ items: [], nextCursor: null }),
+			listDeposits: async () => ({ items: [], nextCursor: null }),
 			listEntitlements: async () => ({ items: [], nextCursor: null }),
 			listImportFindings: () => Promise.reject(new Error("not used")),
 			listImports: async () => ({ items: [], nextCursor: null }),
@@ -122,7 +124,10 @@ function context(input?: {
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
 			listParties: async () => ({ items: [], nextCursor: null }),
+			listPriceOverrides: async () => ({ items: [], nextCursor: null }),
 			listProducts: async () => ({ items: [], nextCursor: null }),
+			listRefunds: async () => ({ items: [], nextCursor: null }),
+			listReturns: async () => ({ items: [], nextCursor: null }),
 			listRoles: async () => ({ items: [], nextCursor: null }),
 			listStockBalances: async () => ({ items: [], nextCursor: null }),
 			listStockCounts: async () => ({ items: [], nextCursor: null }),
@@ -229,6 +234,7 @@ describe("appRouter contract surface", () => {
 			"confirm",
 			"create",
 			"get",
+			"list",
 		]);
 		expect(Object.keys(appRouter.exports).sort()).toEqual([
 			"createAccountantHandoff",
@@ -255,6 +261,7 @@ describe("appRouter contract surface", () => {
 		expect(Object.keys(appRouter.commerce.cashVariances).sort()).toEqual([
 			"approve",
 			"get",
+			"list",
 		]);
 		expect(Object.keys(appRouter.commerce.sales).sort()).toEqual([
 			"complete",
@@ -264,6 +271,7 @@ describe("appRouter contract surface", () => {
 		]);
 		expect(Object.keys(appRouter.commerce.priceOverrides).sort()).toEqual([
 			"approve",
+			"list",
 			"request",
 		]);
 		expect(Object.keys(appRouter.commerce.receipts).sort()).toEqual([
@@ -276,11 +284,13 @@ describe("appRouter contract surface", () => {
 			"approve",
 			"create",
 			"get",
+			"list",
 		]);
 		expect(Object.keys(appRouter.commerce.returns).sort()).toEqual([
 			"approve",
 			"create",
 			"get",
+			"list",
 		]);
 		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
 			"activate",

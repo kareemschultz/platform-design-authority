@@ -1401,6 +1401,204 @@ describe.serial(
 			});
 		});
 
+		/** WS3 remediation R3b, Item 7 (server-backed discovery). Genuinely
+		 * new capability — `listReturns`/`listRefunds` did not exist before
+		 * this stage (calling them was a compile error), so "proven to fail
+		 * pre-fix" means: the org filter that makes this test pass was
+		 * temporarily removed from `packages/persistence/pos-postgres/src/
+		 * index.ts`'s `listReturns`/`listRefunds` `.where(...)` clauses and
+		 * this exact test was run against that build — it failed with org
+		 * B's return/refund present in org A's queue (RED), then passed
+		 * again once the filter was restored (GREEN). This is the same
+		 * two-organization-same-tenant isolation fixture Finding B's other
+		 * reads use, applied to the two new pending-approval list reads. */
+		test("listReturns and listRefunds are organization-scoped: a pending queue never leaks another organization's return/refund", async () => {
+			const tenantId = "tenant_returns_list_isolation";
+			const orgA = "organization_returns_list_a";
+			const orgB = "organization_returns_list_b";
+			const registerA = "register_returns_list_a";
+			const registerB = "register_returns_list_b";
+			const pos = posService();
+
+			async function buildPendingReturnAndRefund(
+				organizationId: string,
+				registerId: string,
+				keyPrefix: string
+			) {
+				await pos.openRegister({
+					actorUserId: returnsBase.actorUserId,
+					correlationId: returnsBase.correlationId,
+					currency: "GYD",
+					idempotencyKey: `${keyPrefix}-open`,
+					locationId: locationFor(registerId),
+					openingFloat: { amountMinor: 100_000, currency: "GYD" },
+					organizationId,
+					registerId,
+					tenantId,
+				});
+				const inventory = createInventoryService({
+					clock: () => new Date(),
+					ids: inventoryIds,
+					references: {
+						requireLocation: () => Promise.resolve(),
+						requireProduct: () => Promise.resolve(),
+					},
+					unitOfWork: createPostgresUnitOfWork(testPool, (client) => ({
+						events: createPostgresOutbox(client),
+						repository: createInventoryRepository(client),
+					})),
+				});
+				const seedAdjustment = await inventory.createAdjustment({
+					actorUserId: `${keyPrefix}_seeder`,
+					body: {
+						locationId: locationFor(registerId),
+						productId: RETURN_PRODUCT_ID,
+						quantity: "1000",
+						reason: "R3b Item 7 list-isolation stock seed",
+						unit: "each",
+					},
+					correlationId: `${keyPrefix}_seed`,
+					idempotencyKey: `${keyPrefix}_seed_create`,
+					organizationId,
+					tenantId,
+				});
+				await inventory.approveAdjustment({
+					actorUserId: `${keyPrefix}_seeder_approver`,
+					adjustmentId: seedAdjustment.id,
+					correlationId: `${keyPrefix}_seed`,
+					idempotencyKey: `${keyPrefix}_seed_approve`,
+					organizationId,
+					tenantId,
+					version: seedAdjustment.version,
+				});
+				const sale = await pos.createSale({
+					actorUserId: returnsBase.actorUserId,
+					correlationId: returnsBase.correlationId,
+					currency: "GYD",
+					idempotencyKey: `${keyPrefix}-sale-create`,
+					lines: [
+						{
+							productId: RETURN_PRODUCT_ID,
+							quantity: "1",
+							unit: "each",
+							unitPrice: { amountMinor: 100_000, currency: "GYD" },
+						},
+					],
+					organizationId,
+					registerId,
+					tenantId,
+				});
+				const completed = await pos.completeSale({
+					actorUserId: returnsBase.actorUserId,
+					correlationId: returnsBase.correlationId,
+					idempotencyKey: `${keyPrefix}-sale-complete`,
+					organizationId,
+					saleId: sale.id,
+					tenantId,
+					tenders: [
+						{
+							amountMinor: sale.total.amountMinor,
+							currency: "GYD",
+							type: "Cash",
+						},
+					],
+				});
+				const saleLineId = completed.lines[0]?.id as string;
+				const createdReturn = await pos.createReturn({
+					actorUserId: returnsBase.actorUserId,
+					correlationId: returnsBase.correlationId,
+					idempotencyKey: `${keyPrefix}-return-create`,
+					lines: [{ quantity: "1", saleLineId }],
+					organizationId,
+					reason: "R3b Item 7 list isolation",
+					saleId: completed.id,
+					tenantId,
+				});
+				const approvedReturn = await pos.approveReturn({
+					actorUserId: `${keyPrefix}_checker`,
+					correlationId: returnsBase.correlationId,
+					idempotencyKey: `${keyPrefix}-return-approve`,
+					organizationId,
+					returnId: createdReturn.id,
+					tenantId,
+				});
+				const refund = await pos.createRefund({
+					actorUserId: returnsBase.actorUserId,
+					correlationId: returnsBase.correlationId,
+					idempotencyKey: `${keyPrefix}-refund-create`,
+					organizationId,
+					returnId: approvedReturn.id,
+					tenantId,
+				});
+				return { refund, returnRecord: approvedReturn };
+			}
+
+			const a = await buildPendingReturnAndRefund(
+				orgA,
+				registerA,
+				"list-isolation-a"
+			);
+			// Org B's return is created in "Pending" state (not approved) --
+			// deliberately covers BOTH a Pending and a Completed return so the
+			// queue's state filter is exercised, not just its org filter.
+			await pos.openRegister({
+				actorUserId: returnsBase.actorUserId,
+				correlationId: returnsBase.correlationId,
+				currency: "GYD",
+				idempotencyKey: "list-isolation-b-open",
+				locationId: locationFor(registerB),
+				openingFloat: { amountMinor: 100_000, currency: "GYD" },
+				organizationId: orgB,
+				registerId: registerB,
+				tenantId,
+			});
+			const b = await buildPendingReturnAndRefund(
+				orgB,
+				registerB,
+				"list-isolation-b"
+			);
+
+			const returnsPageA = await pos.listReturns(
+				tenantId,
+				orgA,
+				{ limit: 50 },
+				{ state: "Completed" }
+			);
+			const returnIdsA = returnsPageA.items.map((item) => item.id);
+			expect(returnIdsA).toContain(a.returnRecord.id);
+			expect(returnIdsA).not.toContain(b.returnRecord.id);
+
+			const returnsPageB = await pos.listReturns(
+				tenantId,
+				orgB,
+				{ limit: 50 },
+				{ state: "Completed" }
+			);
+			const returnIdsB = returnsPageB.items.map((item) => item.id);
+			expect(returnIdsB).toContain(b.returnRecord.id);
+			expect(returnIdsB).not.toContain(a.returnRecord.id);
+
+			const refundsPageA = await pos.listRefunds(
+				tenantId,
+				orgA,
+				{ limit: 50 },
+				{ state: "Requested" }
+			);
+			const refundIdsA = refundsPageA.items.map((item) => item.id);
+			expect(refundIdsA).toContain(a.refund.id);
+			expect(refundIdsA).not.toContain(b.refund.id);
+
+			const refundsPageB = await pos.listRefunds(
+				tenantId,
+				orgB,
+				{ limit: 50 },
+				{ state: "Requested" }
+			);
+			const refundIdsB = refundsPageB.items.map((item) => item.id);
+			expect(refundIdsB).toContain(b.refund.id);
+			expect(refundIdsB).not.toContain(a.refund.id);
+		});
+
 		test("getReceiptByNumber (Finding J) resolves the printed receiptNumber+registerId to the Receipt's saleId, and is scoped to the register the number was issued on, not just the organization", async () => {
 			const tenantId = "tenant_returns_receipt_lookup";
 			const registerId = "register_returns_receipt_lookup";

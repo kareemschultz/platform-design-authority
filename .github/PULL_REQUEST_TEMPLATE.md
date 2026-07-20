@@ -38,7 +38,13 @@ Closes #
 
 ## UI/UX changes
 
-<!-- Routes, components, canonical states. Screenshots only when safe and useful — never include tenant data, credentials, or internal URLs. -->
+<!-- Routes, components, canonical states. Screenshots only when safe and useful — never include tenant data, credentials, or internal URLs.
+Delete this checklist only when this PR touches no route, component, style, or UI copy. -->
+
+- [ ] `ui-pattern-audit` run for any new or changed interaction pattern
+- [ ] `accessibility-review` run for any accessibility-sensitive change
+- [ ] Provenance recorded (`evidence/ui-provenance/`) for any imported or premium-derived component
+- [ ] No raw palette values (hex literals or Tailwind palette utility classes) introduced in `apps/**` or `packages/**`
 
 ## Risks and deferrals
 

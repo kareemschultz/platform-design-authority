@@ -76,6 +76,9 @@ jobs:
         if: github.event_name == 'pull_request'
         run: python scripts/validate_pr_governance.py --event-path "$GITHUB_EVENT_PATH"
 
+      - name: Test repository-root scanning invariant
+        run: python -m unittest scripts/test_repository_scanning.py
+
       - name: Test and validate canonical document indexes
         run: |
           python -m unittest scripts/test_validate_document_indexes.py

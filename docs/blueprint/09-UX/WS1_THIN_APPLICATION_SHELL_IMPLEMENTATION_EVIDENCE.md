@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-038
 title: WS1 Thin Application Shell Implementation Evidence
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Frontend Platform
 last_reviewed: 2026-07-14
@@ -9,6 +9,8 @@ related_adrs: [ADR-0005, ADR-0020, ADR-0026]
 ---
 
 # WS1 Thin Application Shell Implementation Evidence
+
+> **Point-in-time evidence.** Findings, verification results, and conclusions below reflect the platform, dependencies, and vendor catalogs as observed through this document's own dated evidence (most recently reviewed 2026-07-14). Nothing here is re-verified automatically on a later read; re-confirm current state before relying on a dated finding for a new decision. See ADR-0025's evidence-banner amendment for the convention.
 
 ## Evidence status
 

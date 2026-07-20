@@ -1,0 +1,23 @@
+# Code owners for this repository. See:
+# https://docs.github.com/articles/about-code-owners
+#
+# Later entries win, so specific-path rules must follow the default.
+
+* @kareemschultz
+
+# Machine-generated and machine-checked registries and contracts: changing
+# these without regenerating them from source produces drift the CI gates
+# will catch, but reviewer attention here should be on the source docs the
+# regeneration read from, not the generated output itself.
+/registry/ @kareemschultz
+/openapi/ @kareemschultz
+/schemas/ @kareemschultz
+
+# Governance and CI scripts: the validators and gates every PR runs through.
+/scripts/ @kareemschultz
+/.github/ @kareemschultz
+
+# Foundational authority documents.
+/docs/blueprint/00-Foundation/ @kareemschultz
+/docs/blueprint/18-Decisions/ @kareemschultz
+/docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md @kareemschultz

@@ -44,6 +44,10 @@ NOT_RUN_LOCALLY: dict[str, str] = {
     "python scripts/validate_pr_governance.py": (
         "validates a GitHub pull-request event payload, which only exists in CI"
     ),
+    "python scripts/sync_labels.py --apply": (
+        "mutates live GitHub labels; only runs on push to main or manual "
+        "dispatch via the labels-sync workflow, never as a passive local check"
+    ),
 }
 
 
@@ -170,6 +174,16 @@ def build_gates() -> list[Gate]:
     )
     gates.append(
         Gate("test_validate_pr_governance.py", _unittest("test_validate_pr_governance.py"), "status")
+    )
+
+    # Labels-as-code.
+    gates.append(Gate("test_sync_labels.py", _unittest("test_sync_labels.py"), "status"))
+    gates.append(
+        Gate(
+            "sync_labels.py --check",
+            [*_python("sync_labels.py"), "--check"],
+            "status",
+        )
     )
 
     # This runner's own parity with the workflow files.

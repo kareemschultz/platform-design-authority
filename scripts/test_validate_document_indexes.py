@@ -112,6 +112,14 @@ class DocumentIndexValidatorTests(unittest.TestCase):
         skill.mkdir(parents=True)
         (skill / "SKILL.md").write_text("# Skill\n", encoding="utf-8")
 
+        # Slash commands (.claude/commands/) are auxiliary too, not governed
+        # blueprint documents -- adding one without this must not fail
+        # artifact accounting the way COMPONENT_INTAKE_FAST_PATH.md's four
+        # sibling command files did before AUXILIARY_DOCUMENT_ROOTS covered them.
+        commands = self.root / ".claude" / "commands"
+        commands.mkdir(parents=True)
+        (commands / "cui.md").write_text("Call a tool...\n", encoding="utf-8")
+
         artifacts = discover_repository_artifacts(self.root)
         relative = {
             path.relative_to(self.root.resolve()).as_posix() for path in artifacts
@@ -119,6 +127,20 @@ class DocumentIndexValidatorTests(unittest.TestCase):
         self.assertNotIn(".codex/worktrees/issue-1/docs/COPY.md", relative)
         self.assertNotIn(".claude/worktrees/review-2/docs/COPY.md", relative)
         self.assertIn(".claude/skills/example/SKILL.md", relative)
+        self.assertIn(".claude/commands/cui.md", relative)
+
+    def test_claude_commands_are_accounted_as_auxiliary(self) -> None:
+        commands = self.root / ".claude" / "commands"
+        commands.mkdir(parents=True)
+        (commands / "cui.md").write_text("Call a tool...\n", encoding="utf-8")
+
+        errors = validate_artifact_accounting([], [], [], self.root)
+        self.assertEqual(
+            [e for e in errors if ".claude/commands/cui.md" in e],
+            [],
+            "a .claude/commands file must be accounted for as an auxiliary "
+            "workflow source, not flagged as unaccounted",
+        )
 
 
 if __name__ == "__main__":

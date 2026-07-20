@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "record": {
+    "id": "ui-source.shadcn-studio.empty-state-01",
+    "source_product": "shadcn/studio Pro",
+    "source_item": "Dashboard and Application > Empty State > empty-state-01",
+    "source_version": "Studio catalog entry dated 2026-03-13",
+    "retrieved_at": "2026-07-20",
+    "license_owner": null,
+    "permitted_entity": null,
+    "permitted_products": [],
+    "redistribution_status": "Verify",
+    "repository_paths": [
+      "packages/ui-web/core/src/components/metric-empty-state.tsx"
+    ],
+    "platform_component_name": "MetricEmptyState",
+    "modifications": [
+      "Renamed EmptyState to MetricEmptyState",
+      "Parameterized label, value, message, helperText, and icon as props; source hardcoded 'Total API requests' / '0' / a fixed message for one specific use case",
+      "Changed the Card import from the generic shadcn '@/components/ui/card' alias to the platform's owned '@meridian/ui-web/components/card'",
+      "Dropped the source's page.tsx route wrapper; this is a reusable component, not a standalone route"
+    ],
+    "dependencies_added": [],
+    "external_network_calls_removed": [],
+    "token_normalization": true,
+    "accessibility_review": null,
+    "responsive_review": null,
+    "reduced_motion_review": null,
+    "performance_review": null,
+    "security_review": null,
+    "dark_mode_review": null,
+    "white_label_review": null,
+    "visual_regression_story": null,
+    "upgrade_policy": "Manual review",
+    "reviewed_by": null,
+    "reviewed_at": null
+  }
+}

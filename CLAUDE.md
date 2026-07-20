@@ -55,6 +55,7 @@ Before inventing an identifier or boundary, consult:
 - `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
 - `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before creating, applying, changing, or recommending a shadcn preset, style, base/theme/chart color, font, icon library, radius, menu treatment, RTL, or density default
 - `docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md` before searching, importing, generating, adapting, approving, or replacing reusable components, blocks, animations, page compositions, or progressive-disclosure patterns
+- `docs/blueprint/09-UX/COMPONENT_INTAKE_FAST_PATH.md` (or the `component-intake` skill) when bringing one external component, block, or pattern into the repository
 - `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` before changing runtime, HTTP shell, transport, or Node fallback policy
 - `docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md` before selecting or changing durable/background workflow infrastructure
 - `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before changing the documentation platform or content-delivery architecture

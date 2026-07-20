@@ -1,0 +1,3 @@
+Call a tool get-ftc-instructions from a shadcn-studio mcp server with the following prompt #$ARGUMENTS and follow all the instructions provided in the response.
+
+Requires the Figma MCP server active alongside shadcn-studio-mcp. Before generating anything, the `component-intake` skill and `docs/blueprint/09-UX/COMPONENT_INTAKE_FAST_PATH.md` govern this repository's acquisition order, normalization, provenance, and catalog requirements — apply them on top of the Studio instructions, not instead of them. Do not rename Figma block-instance frame names before running this command; renamed frames cannot be matched to the Studio library.

@@ -40,6 +40,7 @@ last_reviewed: 2026-07-16
 - [Animation and Motion Guide](ANIMATION_AND_MOTION_GUIDE.md) — `PDA-UX-036` · Draft
 - [Progressive Disclosure Pattern Library](PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md) — `PDA-UX-037` · Draft
 - [WS1 Thin Application Shell Implementation Evidence](WS1_THIN_APPLICATION_SHELL_IMPLEMENTATION_EVIDENCE.md) — `PDA-UX-038` · Draft
+- [Component Intake Fast Path](COMPONENT_INTAKE_FAST_PATH.md) — `PDA-UX-040` · Draft
 
 ## Related Authority
 

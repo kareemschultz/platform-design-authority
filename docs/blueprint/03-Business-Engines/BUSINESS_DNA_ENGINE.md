@@ -1,14 +1,16 @@
 ---
 document_id: PDA-ENG-019
 title: Business DNA Engine
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-20
 related_adrs: [ADR-0008]
 ---
 
 # Business DNA Engine
+
+> **Disambiguation.** A second file also named `BUSINESS_DNA_ENGINE.md` exists at `docs/blueprint/20-Strategy/BUSINESS_DNA_ENGINE.md` (`PDA-STR-012`, titled "Business DNA Strategy Rationale"). This document (`PDA-ENG-019`) is the sole architectural and data-model authority; the 20-Strategy file is non-normative business rationale only and explicitly defers to this one on any conflict. Confirm the directory when citing either by filename alone.
 
 ## Purpose
 

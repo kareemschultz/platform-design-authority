@@ -18,10 +18,12 @@ import {
 	cartLineEstimatedSubtotalMinor,
 	cartSubtotalEstimateMinor,
 	changeDueMinor,
+	clearCartDraft,
 	formatMoneyMinor,
 	isKnownSelfApproval,
 	isSufficientCashTender,
 	isValidCartLineDraft,
+	loadCartDraft,
 	loadSaleWorkspace,
 	parseMoneyInputToMinor,
 	recordMakerActor,
@@ -29,6 +31,7 @@ import {
 	SALE_TAX_CATEGORIES,
 	SALE_TAX_CATEGORY_LABELS,
 	saleHasPendingPriceOverride,
+	saveCartDraft,
 	saveSaleWorkspace,
 	toSaleLineInput,
 } from "@/lib/pos";
@@ -397,6 +400,41 @@ function SaleCartBuilder({
 		workspaceWorkState(create.isPending, isDirty || lines.length > 0)
 	);
 
+	// WS3 remediation R3b, Item 8 (recoverable task state). Restores a
+	// draft scoped to THIS EXACT registerSessionId + workspace contextId
+	// pair, once, when the workspace context first becomes known (never
+	// before — restoring against a still-null `contextId` would either
+	// restore nothing or, worse, restore against the wrong scope key
+	// transiently). `hasRestoredDraft` gates the persist-on-change effect
+	// below so it can never fire (and overwrite/clear a real stored draft
+	// with an empty array) before the restore attempt has actually run.
+	const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
+	useEffect(() => {
+		if (hasRestoredDraft || !workspace.contextId) {
+			return;
+		}
+		const restored = loadCartDraft(registerSessionId, workspace.contextId);
+		if (restored && restored.length > 0) {
+			setLines(restored);
+			setIsDirty(true);
+			toast.success(
+				`Restored ${restored.length} unsaved cart line${restored.length === 1 ? "" : "s"} from this browser.`
+			);
+		}
+		setHasRestoredDraft(true);
+	}, [hasRestoredDraft, registerSessionId, workspace.contextId]);
+
+	useEffect(() => {
+		if (!(hasRestoredDraft && workspace.contextId)) {
+			return;
+		}
+		if (lines.length === 0) {
+			clearCartDraft(registerSessionId, workspace.contextId);
+			return;
+		}
+		saveCartDraft(registerSessionId, workspace.contextId, lines);
+	}, [hasRestoredDraft, lines, registerSessionId, workspace.contextId]);
+
 	const allValid =
 		lines.length > 0 && lines.every((line) => isValidCartLineDraft(line));
 	const estimate = cartSubtotalEstimateMinor(lines);
@@ -416,6 +454,13 @@ function SaleCartBuilder({
 				"x-active-context-id": workspace.contextId,
 			},
 		});
+		// Successful commit clears both the dirty-state guard (via
+		// `setLines([])`/`setIsDirty(false)` below driving
+		// `useWorkspaceWorkGuard` back to "clean") and the persisted draft —
+		// a stale draft must never survive its own successful sale.
+		clearCartDraft(registerSessionId, workspace.contextId);
+		setLines([]);
+		setIsDirty(false);
 		saveSaleWorkspace(sale);
 		router.push(`/operations/pos/sales/${encodeURIComponent(sale.id)}`);
 	}

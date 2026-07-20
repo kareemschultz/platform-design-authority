@@ -2453,3 +2453,81 @@ test("POS navigation persists on a direct deep link into an individual register 
 		page.getByRole("region", { name: "Current workspace" })
 	).toBeVisible();
 });
+
+/**
+ * WS3 remediation R3b, Item 8 (recoverable task state).
+ *
+ * PRE-FIX: `SaleCartBuilder`'s in-progress cart was plain React state
+ * with NO protection at all — clicking away to another page (including a
+ * click on the app's own persistent nav) silently discarded every line
+ * with no warning, and a reload lost the draft outright with nothing to
+ * recover.
+ *
+ * POST-FIX: this test exercises the two DOM-event-driven guard paths a
+ * unit test cannot reach — an in-app navigation click while dirty, and a
+ * reload while dirty — proving both a real native confirmation appears
+ * and that cancelling it genuinely keeps the cashier on the page with
+ * their draft intact, while a reload restores the SAME draft via the
+ * scoped sessionStorage persistence (`saveCartDraft`/`loadCartDraft`,
+ * unit-tested directly in `pos.test.ts` for the cross-scope leak
+ * requirement, since that part needs no browser).
+ */
+test("dirty sale cart: an in-app navigation click while dirty is confirmed (cancel keeps the draft, confirm discards it), and a reload while dirty restores the draft", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const registerId = `register_dirtyguard_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+	const { name: productName } = await createActiveProduct(page, "dirtyguard");
+	await page.goto(
+		`/operations/pos/sales/new?registerId=${encodeURIComponent(registerId)}&registerSessionId=${encodeURIComponent(registerSessionId)}`
+	);
+	await expect(page.getByRole("heading", { name: "New sale" })).toBeVisible();
+	const searchResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/catalog/products/list")
+	);
+	await page.getByLabel("Search by name or SKU").fill(productName);
+	await searchResponsePromise;
+	await page.getByRole("button", { name: "Add" }).first().click();
+	await expect(page.getByRole("list", { name: "Cart lines" })).toContainText(
+		productName
+	);
+
+	// Cancel path: an in-app nav click while dirty shows a native confirm;
+	// dismissing it must leave the cashier on the SAME page with the SAME
+	// draft still visible, not silently navigated away.
+	page.once("dialog", (dialog) => {
+		dialog.dismiss().catch(() => undefined);
+	});
+	await page
+		.getByRole("navigation", { name: "POS" })
+		.getByRole("link", { name: "Registers" })
+		.click();
+	await expect(page.getByRole("heading", { name: "New sale" })).toBeVisible();
+	await expect(page.getByRole("list", { name: "Cart lines" })).toContainText(
+		productName
+	);
+
+	// Reload path: the draft survives a real page reload, scoped to this
+	// exact register session + workspace context.
+	await page.reload();
+	await expect(page.getByRole("heading", { name: "New sale" })).toBeVisible();
+	await expect(page.getByRole("list", { name: "Cart lines" })).toContainText(
+		productName
+	);
+
+	// Confirm path: accepting the native confirm genuinely completes the
+	// navigation this time.
+	page.once("dialog", (dialog) => {
+		dialog.accept().catch(() => undefined);
+	});
+	await page
+		.getByRole("navigation", { name: "POS" })
+		.getByRole("link", { name: "Registers" })
+		.click();
+	await expect(
+		page.getByRole("heading", { exact: true, name: "Registers" })
+	).toBeVisible();
+});

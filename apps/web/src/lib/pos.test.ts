@@ -9,6 +9,7 @@ import {
 	cartLineUnitPriceMinor,
 	cartSubtotalEstimateMinor,
 	changeDueMinor,
+	clearCartDraft,
 	clearRegisterWorkspace,
 	clearSaleWorkspace,
 	downloadAccountantHandoffExport,
@@ -21,6 +22,7 @@ import {
 	ledgerEntryMinor,
 	listCreatedResources,
 	loadActiveRegisterWorkspaceId,
+	loadCartDraft,
 	loadRegisterWorkspace,
 	loadSaleWorkspace,
 	openingLedgerEntry,
@@ -31,6 +33,7 @@ import {
 	resolveBarcodeScan,
 	runningExpectedCashMinor,
 	saleHasPendingPriceOverride,
+	saveCartDraft,
 	saveRegisterWorkspace,
 	saveSaleWorkspace,
 	toSaleLineInput,
@@ -589,5 +592,74 @@ describe("accountant-handoff export download", () => {
 			},
 		]);
 		expect(revoked.url).toBe("blob:mock-url");
+	});
+});
+
+// WS3 remediation R3b, Item 8 (recoverable task state — cart draft
+// persistence, scoped so a foreign/stale draft can never silently
+// restore into the wrong context).
+describe("sale cart draft persistence (WS3 remediation R3b, Item 8)", () => {
+	test("pre-fix reproduction: an in-progress cart had no persistence mechanism at all", () => {
+		// The pre-fix `SaleCartBuilder` held `lines` in plain `useState` with
+		// no read/write to any storage — `loadCartDraft` did not exist, so
+		// there was nothing to restore after a reload, and nothing to leak
+		// either. This documents that absence structurally: a fresh
+		// register-session/context pair has no draft before any save call.
+		expect(loadCartDraft("register_session_fresh", "context_fresh")).toBeNull();
+	});
+
+	test("saves and restores a draft under the SAME registerSessionId + contextId pair", () => {
+		const lines = [cartLine({ key: "line_a" }), cartLine({ key: "line_b" })];
+		saveCartDraft("register_session_1", "context_1", lines);
+		const restored = loadCartDraft("register_session_1", "context_1");
+		expect(restored).toEqual(lines);
+	});
+
+	test("a draft saved under one register session/workspace context does NOT leak into a different session", () => {
+		const lines = [cartLine({ key: "line_a" })];
+		saveCartDraft("register_session_A", "context_1", lines);
+
+		// A DIFFERENT register session under the SAME workspace context.
+		expect(loadCartDraft("register_session_B", "context_1")).toBeNull();
+	});
+
+	test("a draft saved under one workspace context does NOT leak into a different context (e.g. after a workspace switch)", () => {
+		const lines = [cartLine({ key: "line_a" })];
+		saveCartDraft("register_session_1", "context_A", lines);
+
+		// The SAME register session id, but a DIFFERENT workspace context —
+		// simulates switching organization/location mid-draft.
+		expect(loadCartDraft("register_session_1", "context_B")).toBeNull();
+		// The original scope is unaffected and still restores correctly.
+		expect(loadCartDraft("register_session_1", "context_A")).toEqual(lines);
+	});
+
+	test("clearing a draft removes it from its exact scope only, leaving other scopes untouched", () => {
+		const linesA = [cartLine({ key: "line_a" })];
+		const linesB = [cartLine({ key: "line_b" })];
+		saveCartDraft("register_session_1", "context_1", linesA);
+		saveCartDraft("register_session_2", "context_1", linesB);
+
+		clearCartDraft("register_session_1", "context_1");
+
+		expect(loadCartDraft("register_session_1", "context_1")).toBeNull();
+		expect(loadCartDraft("register_session_2", "context_1")).toEqual(linesB);
+	});
+
+	test("ignores a tampered draft whose stored scope fields do not match the requested scope", () => {
+		// Directly writes a payload under session-1/context-1's storage key
+		// but with a MISMATCHED registerSessionId inside the payload itself
+		// (e.g. storage tampering, or a future bug that computes the wrong
+		// key but the right payload) — the defensive re-check inside
+		// `loadCartDraft` must still refuse to restore it.
+		sessionStorage.setItem(
+			"platform.pos.cart-draft.register_session_1.context_1",
+			JSON.stringify({
+				contextId: "context_1",
+				lines: [cartLine()],
+				registerSessionId: "register_session_DIFFERENT",
+			})
+		);
+		expect(loadCartDraft("register_session_1", "context_1")).toBeNull();
 	});
 });

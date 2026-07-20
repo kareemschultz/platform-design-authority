@@ -536,6 +536,97 @@ export function isValidCartLineDraft(line: CartLineDraft): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// WS3 remediation R3b, Item 8 (recoverable task state — sale cart draft).
+//
+// Before this fix, `SaleCartBuilder`'s in-progress cart (`lines` state)
+// was PLAIN React state with NO persistence at all: a reload, accidental
+// tab close, or unguarded in-app navigation away silently discarded every
+// line the cashier had entered, with no warning and nothing to recover.
+//
+// This mirrors `saveSaleWorkspace`/`loadSaleWorkspace`/`clearSaleWorkspace`'s
+// established pattern, but the storage KEY is scoped by BOTH
+// `registerSessionId` AND the active workspace `contextId` — a draft saved
+// under one register session / workspace context can only ever be loaded
+// back under that EXACT same pair. A different sale/session/workspace
+// (a different register session, or the same register session after a
+// workspace/organization switch) never sees another context's draft,
+// closing the "foreign/stale drafts cannot restore" requirement.
+// ---------------------------------------------------------------------------
+
+const CART_DRAFT_STORAGE_PREFIX = "platform.pos.cart-draft.";
+
+const CartLineDraftSchema = z.object({
+	discountAmountMinor: z.number().int(),
+	key: z.string().max(200),
+	productId: z.string().max(200),
+	productName: z.string().max(300),
+	quantity: z.string().max(40),
+	taxCategory: z.enum(SALE_TAX_CATEGORIES),
+	unit: z.string().max(40),
+	unitPriceInput: z.string().max(40),
+	variantId: z.string().max(200).nullable(),
+});
+
+const CartDraftSchema = z.object({
+	contextId: z.string().max(200),
+	lines: z.array(CartLineDraftSchema).max(500),
+	registerSessionId: z.string().max(200),
+});
+
+function cartDraftStorageKey(
+	registerSessionId: string,
+	contextId: string
+): string {
+	return `${CART_DRAFT_STORAGE_PREFIX}${registerSessionId}.${contextId}`;
+}
+
+export function saveCartDraft(
+	registerSessionId: string,
+	contextId: string,
+	lines: CartLineDraft[]
+): void {
+	writeJson(cartDraftStorageKey(registerSessionId, contextId), {
+		contextId,
+		lines,
+		registerSessionId,
+	});
+}
+
+/** Restores a draft ONLY when the stored `registerSessionId`/`contextId`
+ * pair EXACTLY matches the caller's current pair — the storage key
+ * already scopes this, but the stored payload's own fields are checked
+ * again defensively (never trust storage contents alone) rather than
+ * simply parsing whatever JSON happens to live at the computed key. */
+export function loadCartDraft(
+	registerSessionId: string,
+	contextId: string
+): CartLineDraft[] | null {
+	const parsed = CartDraftSchema.safeParse(
+		readJson(cartDraftStorageKey(registerSessionId, contextId))
+	);
+	if (!parsed.success) {
+		return null;
+	}
+	if (
+		parsed.data.registerSessionId !== registerSessionId ||
+		parsed.data.contextId !== contextId
+	) {
+		return null;
+	}
+	return parsed.data.lines;
+}
+
+export function clearCartDraft(
+	registerSessionId: string,
+	contextId: string
+): void {
+	if (!storageAvailable()) {
+		return;
+	}
+	sessionStorage.removeItem(cartDraftStorageKey(registerSessionId, contextId));
+}
+
+// ---------------------------------------------------------------------------
 // Generic maker-resource workspace: return/refund/deposit IDs this browser
 // created, kept ONLY so this tab can show "you created this" context and
 // cross-link to the matching approval-lookup form. Not a substitute for a

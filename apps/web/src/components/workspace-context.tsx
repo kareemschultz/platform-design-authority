@@ -42,7 +42,10 @@ import {
 
 import { ACTIVE_CONTEXT_STORAGE_KEY } from "@/lib/shell";
 import {
+	isGuardableInternalNavigation,
 	isLatestWorkspaceRequest,
+	isPlainLeftClick,
+	shouldWarnBeforeLeaving,
 	type WorkspaceWorkState,
 	workspaceSwitchDisposition,
 } from "@/lib/workspace-change";
@@ -189,6 +192,18 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, []);
 
+	// WS3 remediation R3b, Item 8 (recoverable task state — dirty carts and
+	// mutation forms must be protected across navigation, back, reload, and
+	// tab close, not just workspace change). Tracks whether an extra
+	// "sentinel" history entry is currently absorbing the browser Back
+	// button's next `popstate` — see the `popstate` effect below for the
+	// full mechanism. Reset to `false` whenever every registered work state
+	// returns to "clean" (including on a successful commit, which clears
+	// its own guard key), so a LATER dirty episode pushes a fresh sentinel
+	// rather than being silently skipped because a stale one was never
+	// reset.
+	const historySentinelPushedRef = useRef(false);
+
 	const registerWorkState = useCallback(
 		(key: string, state: WorkspaceWorkState) => {
 			if (state === "clean") {
@@ -196,10 +211,135 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			} else {
 				workStates.current.set(key, state);
 			}
+			if (shouldWarnBeforeLeaving(workStates.current.values())) {
+				if (!historySentinelPushedRef.current) {
+					historySentinelPushedRef.current = true;
+					window.history.pushState(
+						{ workGuardSentinel: true },
+						"",
+						window.location.href
+					);
+				}
+			} else {
+				historySentinelPushedRef.current = false;
+			}
 			return () => workStates.current.delete(key);
 		},
 		[]
 	);
+
+	// Native `beforeunload` covers reload and tab/window close — the ONE
+	// exit path a client-side `popstate`/click-capture guard can never
+	// intercept, since the page is actually about to be torn down.
+	useEffect(() => {
+		function handleBeforeUnload(event: BeforeUnloadEvent) {
+			if (shouldWarnBeforeLeaving(workStates.current.values())) {
+				event.preventDefault();
+				// Legacy requirement some browsers still honor for showing
+				// their own native "leave site?" prompt; the string itself is
+				// never actually displayed by modern browsers.
+				event.returnValue = "";
+			}
+		}
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+	}, []);
+
+	// In-app navigation guard: Next.js App Router exposes no built-in
+	// "confirm before navigating away" hook, so this intercepts real
+	// anchor clicks (which is what every `next/link` `<Link>` renders,
+	// including `PosNavigation`/`OperationsNavigation`'s own links) in the
+	// CAPTURE phase — before the Link's own bubble-phase click handler
+	// (which calls the router) ever runs — so `stopPropagation` here
+	// genuinely prevents the navigation, not just this listener's own view
+	// of it.
+	useEffect(() => {
+		function findGuardableAnchor(event: MouseEvent): HTMLAnchorElement | null {
+			const { target } = event;
+			if (!(target instanceof Element)) {
+				return null;
+			}
+			const anchor = target.closest("a[href]");
+			if (!(anchor instanceof HTMLAnchorElement)) {
+				return null;
+			}
+			const guardable = isGuardableInternalNavigation(
+				{
+					hasDownloadAttribute: anchor.hasAttribute("download"),
+					href: anchor.href,
+					target: anchor.target,
+				},
+				window.location.href
+			);
+			return guardable ? anchor : null;
+		}
+
+		function handleClick(event: MouseEvent) {
+			if (
+				!(
+					shouldWarnBeforeLeaving(workStates.current.values()) &&
+					isPlainLeftClick(event)
+				)
+			) {
+				return;
+			}
+			if (!findGuardableAnchor(event)) {
+				return;
+			}
+			// This must be a SYNCHRONOUS decision made inside the click
+			// handler itself, before the browser's own default navigation
+			// proceeds — a stateful/async dialog (e.g. the app's own Base UI
+			// AlertDialog, used everywhere else per CLAUDE.md §8) cannot
+			// answer in time to still call `preventDefault()` on THIS event.
+			// Matches the native `beforeunload` prompt this same guard
+			// already shows for the SAME question at a different exit point.
+			// biome-ignore lint/suspicious/noAlert: synchronous confirmation required, see comment above
+			const confirmed = window.confirm(
+				"You have unsaved changes in this workspace. Leave this page and discard them?"
+			);
+			if (!confirmed) {
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+		document.addEventListener("click", handleClick, true);
+		return () => document.removeEventListener("click", handleClick, true);
+	}, []);
+
+	// Browser Back/Forward guard: `registerWorkState` (above) pushes one
+	// extra history entry the moment work first becomes dirty/pending, so
+	// the user's next Back press pops THAT sentinel entry first (landing
+	// back on the SAME url) and fires `popstate` here instead of actually
+	// leaving. Confirmed => genuinely go back (one more `history.back()`,
+	// past the sentinel this handler's own pop just consumed). Cancelled
+	// => push the sentinel again so a repeated Back press is still guarded.
+	useEffect(() => {
+		function handlePopState() {
+			if (!shouldWarnBeforeLeaving(workStates.current.values())) {
+				return;
+			}
+			// See the click-guard effect's identical comment above — a
+			// `popstate` handler must answer synchronously too; the browser
+			// has already popped the history entry by the time this runs.
+			// biome-ignore lint/suspicious/noAlert: synchronous confirmation required, see comment above
+			const confirmed = window.confirm(
+				"You have unsaved changes in this workspace. Leave this page and discard them?"
+			);
+			if (confirmed) {
+				historySentinelPushedRef.current = false;
+				window.history.back();
+			} else {
+				historySentinelPushedRef.current = true;
+				window.history.pushState(
+					{ workGuardSentinel: true },
+					"",
+					window.location.href
+				);
+			}
+		}
+		window.addEventListener("popstate", handlePopState);
+		return () => window.removeEventListener("popstate", handlePopState);
+	}, []);
 
 	const activate = useCallback(
 		async (nextOrganizationId: string, locationId?: string | null) => {

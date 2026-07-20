@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.validate_document_indexes import (
+    discover_repository_artifacts,
     validate_artifact_accounting,
     validate_index_coverage,
 )
@@ -91,6 +92,33 @@ class DocumentIndexValidatorTests(unittest.TestCase):
             self.documents, exemptions, [], self.root
         )
         self.assertTrue(any("accounted by both" in error for error in errors))
+
+    def test_agent_worktree_checkouts_are_not_repository_artifacts(self) -> None:
+        """Agent scratch worktrees are gitignored working state, not content.
+
+        Each is a full repository checkout, so scanning them reports every
+        governed document again per worktree and makes the gate unusable on
+        any machine that uses them.
+        """
+        for scratch in (
+            self.root / ".codex" / "worktrees" / "issue-1" / "docs",
+            self.root / ".claude" / "worktrees" / "review-2" / "docs",
+        ):
+            scratch.mkdir(parents=True)
+            (scratch / "COPY.md").write_text("# Copy\n", encoding="utf-8")
+
+        # A governed auxiliary root under .claude must still be discovered.
+        skill = self.root / ".claude" / "skills" / "example"
+        skill.mkdir(parents=True)
+        (skill / "SKILL.md").write_text("# Skill\n", encoding="utf-8")
+
+        artifacts = discover_repository_artifacts(self.root)
+        relative = {
+            path.relative_to(self.root.resolve()).as_posix() for path in artifacts
+        }
+        self.assertNotIn(".codex/worktrees/issue-1/docs/COPY.md", relative)
+        self.assertNotIn(".claude/worktrees/review-2/docs/COPY.md", relative)
+        self.assertIn(".claude/skills/example/SKILL.md", relative)
 
 
 if __name__ == "__main__":

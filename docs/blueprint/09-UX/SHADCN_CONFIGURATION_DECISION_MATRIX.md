@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-028
 title: shadcn Configuration Decision Matrix
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-20
@@ -135,9 +135,11 @@ shadcn Studio Pro's theme generator and its `@ss-themes` registry are the **pref
 The governed fast path for a Studio-crafted theme — designed so the governed route is also the fastest route:
 
 1. **Craft** in the Studio theme generator (or select an `@ss-themes` entry as the starting point). Iterate freely there; nothing at this stage touches the repository.
-2. **Land as a candidate.** Export/fetch the theme's CSS variable values. They enter the repository only as remapped values on the platform's existing semantic roles in `packages/ui-web/core/src/styles/globals.css` (an allowlisted token source in `scripts/validate_ui_governance.py`) — Studio's own variable names are mapped, not adopted, the same rule Base Color: Neutral already applies to generator palettes.
+2. **Land as a candidate.** Export/fetch the theme's CSS variable values. They enter the repository only as remapped values on the platform's existing semantic roles in `packages/ui-web/core/src/styles/globals.css` (an allowlisted token source in `scripts/validate_ui_governance.py`) — Studio's own variable names are mapped, not adopted, the same rule Base Color: Neutral already applies to generator palettes. Alias *names* stay fixed to the platform's existing roles; a theme never introduces a new alias name into `globals.css` without adding it to `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md`'s alias-exception table, because `validate_docs.py`'s `validate_design_token_alias_exceptions()` gate only checks name presence, not value equality, and cannot catch an undocumented new name.
+   - **`status-*` roles are registry-synchronized**, per `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md`: a theme touching financial success, pending, warning, or error semantics lands its values in `registry/design-tokens.json` as well as `globals.css` — never `globals.css` alone. This is the one role family where CSS-registry divergence is not an accepted prototype exception.
+   - **Non-status roles** (`surface-*`, `action-primary*`, `text-*`, `focus-ring`, borders) carry an existing, deliberate controlled-prototype exception: CSS values may diverge from the registry's draft values while the registry itself stays draft. A Studio theme may land under this exception without also touching the registry — but see the Record step below.
 3. **Validate** before any adoption: contrast on every remapped role pair, light/dark/high-contrast/forced-colors behavior, and the status-color separation rules (an accent theme must not repaint financial success, pending, or error semantics). The existing Prototype Gates list is the reference checklist; a tenant-candidate theme additionally runs the "deliberately difficult white-label themes" gate.
-4. **Record** the decision as a row or amendment in this document (which theme, from what Studio source, for which scope — platform default vs. named tenant candidate), so the choice is reviewable and reversible. `evidence/ui-provenance/` records the source item when the theme derives from a paid `@ss-themes` entry.
+4. **Record** the decision as a row or amendment in this document (which theme, from what Studio source, for which scope — platform default vs. named tenant candidate), so the choice is reviewable and reversible. `evidence/ui-provenance/` records the source item when the theme derives from a paid `@ss-themes` entry. For non-status roles, state whether the landed values now match `registry/design-tokens.json` or continue the existing draft-registry divergence — an unstated theme change is exactly what leaves native and other document-based token consumers silently stale, since no automated gate checks value equality on those roles.
 5. **Never per-surface.** A theme applies at the token layer for a whole application (or a whole tenant), never as an inline install scoped to one page or component — that is the "ungoverned re-theming" failure mode this section exists to prevent, and it is what the skills' refinement guardrail routes here.
 
 The `/rui` theme-install capability and `npx shadcn add @ss-themes/<name>` are the *mechanics* of step 2, not a bypass of steps 3–4. An agent may run the full path end-to-end in one session — craft, land, validate, record — provided all four steps happen; what it may not do is stop after step 2.

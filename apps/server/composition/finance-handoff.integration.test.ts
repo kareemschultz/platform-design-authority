@@ -28,8 +28,10 @@ import Ajv2020 from "ajv/dist/2020";
 import addFormats from "ajv-formats";
 import { Pool } from "pg";
 
-import { validateExportPeriod } from "./finance-handoff";
-import { requireExportRecordScope } from "./legal-entity-scope";
+import {
+	readAccountantHandoffExportInScope,
+	validateExportPeriod,
+} from "./finance-handoff";
 import { createDepositReferenceAllocator } from "./numbering";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
@@ -651,36 +653,29 @@ describe.serial(
 				timezone: "America/Guyana",
 			});
 
-			// PRE-FIX REPRODUCTION (documented, not re-executed against a
-			// checkout): before this stage, `finance-handoff.ts`'s
-			// `getAccountantHandoffExport` fetched exactly this
-			// tenant-scoped-only record and returned `exportView(record)`
-			// UNCONDITIONALLY — no call of any shape compared
-			// `record.organizationId` to the caller's context. The tenant-scoped
-			// fetch below (`svc.getAccountantHandoffExport`, unchanged, still
-			// only scoped by `tenantId`) reproduces that exact pre-fix fetch and
-			// SUCCEEDS in returning organization A's real record to this
-			// same-tenant request — proving the leak surface still exists at
-			// this layer today. `requireExportRecordScope` is the new call
-			// `finance-handoff.ts`'s composition layer now makes immediately
-			// after this same fetch; asserting it throws for organization B's
-			// context is the post-fix proof for the exact record and fetch this
-			// test performed.
-			const fetchedByTenantOnly = await svc.getAccountantHandoffExport({
-				exportId: recordA.id,
-				tenantId,
-			});
-			expect(fetchedByTenantOnly.organizationId).toBe(organizationA);
-
+			// This calls `readAccountantHandoffExportInScope` — the EXACT
+			// function `finance-handoff.ts`'s `getAccountantHandoffExport`
+			// transport handler calls, not a reimplementation or a manual
+			// fetch-then-check — against this test's own isolated live-PG
+			// `exportService()` instance. If the `requireExportRecordScope` call
+			// were ever removed from inside `readAccountantHandoffExportInScope`
+			// itself, this exact assertion would observe organization B's
+			// request RESOLVE with organization A's real record instead of
+			// rejecting: verified directly by temporarily removing that call
+			// from `finance-handoff.ts` and re-running this exact test — it
+			// failed with "Expected promise that rejects, received: resolved"
+			// (organization A's real payload returned to organization B), then
+			// restoring the call made it pass again.
 			const organizationBContext = {
 				legalEntityId: undefined,
 				organizationId: organizationB,
 			};
 			let caught: unknown;
 			try {
-				requireExportRecordScope({
+				await readAccountantHandoffExportInScope(svc, {
 					context: organizationBContext,
-					record: fetchedByTenantOnly,
+					exportId: recordA.id,
+					tenantId,
 				});
 			} catch (error) {
 				caught = error;
@@ -691,26 +686,30 @@ describe.serial(
 				name: "ExportError",
 			});
 
-			// The record itself is untouched by the denied read: re-fetching
-			// under the legitimate organization still returns the identical
-			// content/state.
+			// The record itself is untouched by the denied read: a direct
+			// tenant-scoped fetch still returns the identical content/state
+			// organization A originally created.
 			const refetched = await svc.getAccountantHandoffExport({
 				exportId: recordA.id,
 				tenantId,
 			});
-			expect(refetched).toEqual(fetchedByTenantOnly);
+			expect(refetched.organizationId).toBe(organizationA);
+			expect(refetched.payload).toEqual(recordA.payload);
+			expect(refetched.contentHash).toBe(recordA.contentHash);
 
-			// A legitimate same-organization read still succeeds.
+			// A legitimate same-organization read still succeeds through the
+			// SAME real function.
 			const organizationAContext = {
 				legalEntityId: undefined,
 				organizationId: organizationA,
 			};
-			expect(() =>
-				requireExportRecordScope({
-					context: organizationAContext,
-					record: refetched,
-				})
-			).not.toThrow();
+			const legitimateRead = await readAccountantHandoffExportInScope(svc, {
+				context: organizationAContext,
+				exportId: recordA.id,
+				tenantId,
+			});
+			expect(legitimateRead.id).toBe(recordA.id);
+			expect(legitimateRead.organizationId).toBe(organizationA);
 		});
 
 		test("WS3 remediation R2, Finding D: same idempotency key + a genuinely different request (different period) is denied as a real live-PG idempotency_conflict, not a silent wrong export", async () => {

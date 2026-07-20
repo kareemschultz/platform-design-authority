@@ -48,6 +48,42 @@ export function validateExportPeriod(input: {
 	return { periodEndUtc, periodStartUtc };
 }
 
+/**
+ * WS3 remediation R4B, item 1 (export read isolation, lead-session finding).
+ * Extracted as its own seam, taking `service` as a PARAMETER rather than
+ * closing over the module-level production `exportService` singleton
+ * (which is bound to the process's single `databasePool`, itself bound to
+ * `env.DATABASE_URL` at import time) — precisely so a test can call this
+ * EXACT function (not a reimplementation of its logic) against its own
+ * isolated, ephemeral live-PG database instead of the shared singleton.
+ * `getAccountantHandoffExport` below calls this with the real production
+ * `exportService`; `finance-handoff.integration.test.ts` calls it with its
+ * own per-test `exportService()` instance. Either way, the fetch and the
+ * `requireExportRecordScope` scope check happen together in the ONE place
+ * a caller of this function can reach — a test exercising this function
+ * genuinely fails if the `requireExportRecordScope` call below is ever
+ * removed, unlike calling the guard function separately from a manually
+ * reimplemented fetch.
+ */
+export async function readAccountantHandoffExportInScope(
+	service: Pick<
+		ReturnType<typeof createExportService>,
+		"getAccountantHandoffExport"
+	>,
+	input: {
+		context: { legalEntityId?: string | null; organizationId: string };
+		exportId: string;
+		tenantId: string;
+	}
+): Promise<ExportJobRecord> {
+	const record = await service.getAccountantHandoffExport({
+		exportId: input.exportId,
+		tenantId: input.tenantId,
+	});
+	requireExportRecordScope({ context: input.context, record });
+	return record;
+}
+
 function exportView(record: ExportJobRecord): AccountantHandoffExport {
 	return {
 		contentHash: record.contentHash,
@@ -260,18 +296,16 @@ export const financeHandoffTransportApplication = {
 			permission: "platform.export.read",
 			sessionId: input.sessionId,
 		});
-		const record = await exportService.getAccountantHandoffExport({
+		// WS3 remediation R4B, item 1 (export read isolation, lead-session
+		// finding): `readAccountantHandoffExportInScope` fetches (scoped by
+		// `tenantId` only) AND checks organization/legal-entity scope together
+		// — see its own doc comment above for why this is a separate,
+		// independently testable seam rather than an inline fetch-then-check.
+		const record = await readAccountantHandoffExportInScope(exportService, {
+			context,
 			exportId: input.exportId,
 			tenantId: context.tenantId,
 		});
-		// WS3 remediation R4B, item 1 (export read isolation, lead-session
-		// finding): the repository lookup above is scoped by `tenantId` only.
-		// A same-tenant caller in a DIFFERENT organization who knows (or
-		// enumerates) another organization's real `exportId` must still be
-		// denied, non-disclosingly, exactly like a genuinely missing export —
-		// see `requireExportRecordScope`'s own doc comment in
-		// `./legal-entity-scope` for the full disposition.
-		requireExportRecordScope({ context, record });
 		return exportView(record);
 	},
 };

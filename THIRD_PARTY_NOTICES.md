@@ -63,6 +63,19 @@
   - `packages/ui-web/core/src/components/skeleton.tsx`
   - `packages/ui-web/core/src/components/sonner.tsx`
 
+### shadcn/studio Pro (source.shadcn-studio.empty-state-01)
+
+- Source/version: https://shadcnstudio.com — Studio catalog entry dated 2026-03-13, retrieved 2026-07-20 via MCP get-inspiration-block-content
+- Upstream-declared license: `NOASSERTION`
+- Public license evidence: not established for exact assets
+- Repository license conclusion: `NOASSERTION`
+- Permitted-use evidence: `not-established-for-exact-assets`
+- Distribution status: `legal-review-required`
+- Modifications: Studio Pro block empty-state-01 was normalized into a reusable platform component: renamed to MetricEmptyState, hardcoded content parameterized as props, Card import switched to the platform-owned package, and the source's route wrapper dropped. Full change list in the referenced UI provenance record.
+- Covered paths:
+
+  - `packages/ui-web/core/src/components/metric-empty-state.tsx`
+
 ### shadcn/ui CLI (source.shadcn.ui.4.13.0)
 
 - Source/version: https://github.com/shadcn-ui/ui/tree/d0fae528221011f75a8c64a917073904c2847493 — 4.13.0 / commit d0fae528221011f75a8c64a917073904c2847493

@@ -128,6 +128,7 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 - Specialized visualization libraries require a justified requirement and review.
 - Magic UI Pro and shadcn/studio premium assets follow the premium source policy and provenance template.
 - External components, blocks, animations, and page compositions remain candidates until `PREFERRED_COMPONENT_CATALOG.md` promotion gates pass; MCP availability or paid access never grants approval.
+- shadcn Studio Pro and Mobbin Pro are owned subscriptions. Search platform-owned source first, then Studio Pro, then Mobbin for pattern research, before hand-building any block, page, or novel pattern — the `frontend-implementation` skill routes this order automatically.
 - Agents must search platform-owned components first, record provenance, review diffs, avoid duplicate primitive systems, and never let imported UI redefine domain, permission, entitlement, payment, privacy, or workflow semantics.
 - Never commit premium credentials, license keys, private download URLs, or prohibited redistributable source.
 - Every component and workflow covers canonical states, accessibility, responsive behavior, offline behavior, performance, and white label.
@@ -209,7 +210,7 @@ Code conventions:
 - Tests are colocated `*.test.ts` using `bun:test` and assert real behavior — no placeholder assertions.
 - No `console.log` in committed code; use the structured logger. No commented-out code blocks.
 - Line endings are LF, enforced by `.gitattributes` — Windows contributors should not fight the formatter.
-- New UI follows the governed shadcn bootstrap (§8), preferred-component catalog, and semantic tokens; raw palette values in real components are lint-visible defects.
+- New UI follows the governed shadcn bootstrap (§8), preferred-component catalog, and semantic tokens; raw palette values in real components are prohibited. Until `scripts/validate_ui_governance.py` lands in CI, treat a violation as a review-blocking defect, not an advisory note — no lint rule enforces this yet.
 
 ## 12. Change Process
 

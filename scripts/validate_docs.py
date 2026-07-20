@@ -829,33 +829,23 @@ def validate_skills() -> list[str]:
 
 def validate_agent_contract_parity() -> list[str]:
     """Fifth-audit F-A-003 (FA4-015/FA4-030 reopen): AGENTS.md and CLAUDE.md
-    must both carry every authority-bearing rule. Sentinel phrases below are
-    normative markers; a phrase present in one contract but not the other is a
-    parity break."""
-    errors: list[str] = []
-    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
-    claude = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
-    sentinels = [
-        "PREFERRED_COMPONENT_CATALOG.md",
-        "Better Auth plugins are deny-by-default",
-        "technology-evidence-maintainer",
-        "one issue, branch, worktree, and pull request",
-        "## 13. ADR Triggers",
-        "## 14. Prohibited Behavior",
-        "## 15. Current Readiness",
-        "Editing independent audit evidence instead of writing a disposition",
-        "never scattered `process.env` reads",
-        "Colocated test files may set `process.env` fixtures",
-    ]
-    for sentinel in sentinels:
-        in_agents = sentinel in agents
-        in_claude = sentinel in claude
-        if in_agents != in_claude:
-            missing = "CLAUDE.md" if in_agents else "AGENTS.md"
-            errors.append(
-                f"agent-contract parity: {sentinel!r} missing from {missing}"
-            )
-    return errors
+    must both carry every authority-bearing rule.
+
+    A prior version of this check compared a hand-maintained list of
+    sentinel phrases, which requires remembering to add a new sentinel every
+    time either file gains a rule -- exactly the kind of silent-drift risk
+    this program's 2026-07-20 audit found across the rest of the repository.
+    The two files are meant to be "one document, two filenames"; the only
+    check that cannot go stale is byte-identity itself."""
+    agents = (ROOT / "AGENTS.md").read_bytes()
+    claude = (ROOT / "CLAUDE.md").read_bytes()
+    if agents != claude:
+        return [
+            "agent-contract parity: AGENTS.md and CLAUDE.md are not byte-identical "
+            "(they are governed as one document under two filenames; edit both "
+            "identically or neither)"
+        ]
+    return []
 
 
 def main() -> int:

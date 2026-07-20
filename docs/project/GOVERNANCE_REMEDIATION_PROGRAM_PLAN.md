@@ -94,20 +94,20 @@ Refined 2026-07-20 (Fable 5 planning pass) after grounding the original items ag
 
 Physical doc moves to 19-Appendices; dashboard/motion doc merges; Biome GritQL raw-color plugin; issue/PR→Project auto-add (requires founder click — API cannot mutate Projects views/workflows); branch-protection ruleset (#61, founder).
 
-## Implementation-agent briefing (updated 2026-07-20, post PR #150; Phases 0-6 complete)
+## Implementation-agent briefing (updated 2026-07-20, post PR #167; Phases 0-7 complete)
 
 Resume state for any agent continuing this program. Verify against live `origin/main` before acting — do not trust a session checkout, and treat every remaining plan item as a hypothesis to re-check against the repository first (both rules earned their place: see the two 2026-07-20 Engineering Notebook entries).
 
-**Merged so far:** #112 (plan + lessons), #114 (PR-1), #75 (PR-2), #118 (PR-A), #116 + #120 (PR-B), #122 (PR-8b), #124 (PR-8c), #126 (bookkeeping), #128 (PR-C), #130 (PR-D), #132 (PR-4), #134 (PR-5), #136 (PR-3), #138 (PR-E), #140 (PR-6), #142 (PR-7), #144 (PR-8), #146 (PR-9), #148 (PR-9 follow-up), #150 (implementation-session lessons). The branch/worktree sweep is complete. Phases 0 through 6 are done; only Phases 7 and 8 remain.
+**Merged so far:** #112 (plan + lessons), #114 (PR-1), #75 (PR-2), #118 (PR-A), #116 + #120 (PR-B), #122 (PR-8b), #124 (PR-8c), #126 (bookkeeping), #128 (PR-C), #130 (PR-D), #132 (PR-4), #134 (PR-5), #136 (PR-3), #138 (PR-E), #140 (PR-6), #142 (PR-7), #144 (PR-8), #146 (PR-9), #148 (PR-9 follow-up), #150 (implementation-session lessons), #152 (Phase 7-8 refinement), #154 (PR-9c), #156 (PR-9c gap-closure follow-up), #158 (Studio theme governance), #160 (Codex-flagged token-registry sync fix), #162 (PR-10), #164 (PR-11), #166 (Codex-flagged stale-reference fix), #167 (this briefing/checkoff bookkeeping). The branch/worktree sweep is complete. Phases 0 through 7 are done; only Phase 8 remains.
 
 **Next work, in order:**
 
-1. **PR-10** (Phase 7, 09-UX curation) — mechanical; scope refined above, including the worktree `.env` provisioning paragraph for the fast-path document.
-2. **PR-11** (Phase 7, registry gaps) — mechanical; remember the governance-exemptions cleanup noted in its scope, or the file will be accounted twice.
-3. **PR-12** (Phase 8 coverage audit) — the refined four-area anchor sets above make this executable without further discovery; output is a matrix plus issues, never new documents.
-4. **PR-13..n** — only matrix-confirmed "writable now" gaps; zero gaps is a recordable outcome, not a failure.
-5. **PR-14** — four mechanical edits making the competitive corpus load-bearing (AIR-### IDs are the citation currency).
-6. **Program closeout** — when PR-14 merges, follow the Maintenance section: record completion in `PROGRAM_STATUS.md` context and retire this plan to a completed state.
+1. **PR-12** (Phase 8 coverage audit) — the refined four-area anchor sets above make this executable without further discovery; output is a matrix plus issues, never new documents.
+2. **PR-13..n** — only matrix-confirmed "writable now" gaps; zero gaps is a recordable outcome, not a failure.
+3. **PR-14** — four mechanical edits making the competitive corpus load-bearing (AIR-### IDs are the citation currency).
+4. **Program closeout** — when PR-14 merges, follow the Maintenance section: record completion in `PROGRAM_STATUS.md` context and retire this plan to a completed state.
+
+**Documentation conventions established in Phase 7 (apply going forward):** a document superseded by another is tombstoned (`status: Superseded`, `superseded_by: <id>`, a dated blockquote after the H1, file retained not deleted, README row updated) rather than deleted, and every *active* governance reference to the loser is swept and repointed to the winner in the same change — Codex caught this exact gap twice (#162, again on #166's own predecessor) by grep-ing the repo for the superseded ID; do that sweep before opening the PR, not after review. Dated audit/evidence documents (not living guidance) carry a point-in-time-evidence banner instead, and their historical citations of a since-superseded document are left untouched — rewriting evidence to match current state misrepresents what was actually verified at the time. Both conventions are recorded in ADR-0025's 2026-07-20 amendment.
 
 **Studio Pro / Mobbin tooling facts (established Phases 5-6, needed by any UI work):** the `shadcn-studio-mcp` server is registered at the operator-account level and works in every worktree and checkout with zero setup — MCP content-fetch is the default agent route. The CLI registry route additionally needs a per-directory `.env` beside each `components.json` (`apps/web/`, `packages/ui-web/core/`), which is gitignored and never propagates via git; a new worktree self-serves via a plain `cp` of an existing `.env` (never read, never typed — an agent must never write credential values into any file, even gitignored, even on explicit request; state the path and content for the operator to paste themselves). Known third-party constraint: the Studio CLI can write a file into the *primary checkout's root* when invoked from a git worktree — prefer MCP from worktrees; details and mitigation in the fast-path document.
 

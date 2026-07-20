@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import subprocess
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
-from scripts.validate_pr_governance import validate_pr_body
+from scripts.validate_pr_governance import changed_paths_between, main, validate_pr_body
 
 
 VALID_BODY = """## Documentation impact disposition
@@ -86,6 +90,92 @@ class PullRequestGovernanceTests(unittest.TestCase):
     def test_rejects_stale_manual_head_pin(self) -> None:
         body = VALID_BODY + "\n- PR head: `bbbbbbb`\n"
         self.assertTrue(any("stale PR head" in message for message in self.messages(body)))
+
+
+def _run_git(repo: Path, *args: str) -> None:
+    subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True, text=True)
+
+
+class BodyFileModeTests(unittest.TestCase):
+    """`--body-file` lets a contributor check a draft PR body locally by
+    diffing real refs, instead of fabricating a GitHub pull_request event
+    with base/head SHAs."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name)
+        _run_git(self.repo, "init", "-q", "-b", "main")
+        _run_git(self.repo, "config", "user.email", "test@example.com")
+        _run_git(self.repo, "config", "user.name", "Test")
+        (self.repo / "docs").mkdir()
+        (self.repo / "docs" / "example.md").write_text("hello\n", encoding="utf-8")
+        _run_git(self.repo, "add", "-A")
+        _run_git(self.repo, "commit", "-q", "-m", "init")
+        _run_git(self.repo, "checkout", "-q", "-b", "feature")
+        (self.repo / "docs" / "example.md").write_text("hello world\n", encoding="utf-8")
+        _run_git(self.repo, "add", "-A")
+        _run_git(self.repo, "commit", "-q", "-m", "update doc")
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_changed_paths_between_reports_the_real_diff(self) -> None:
+        self.assertEqual(
+            changed_paths_between(self.repo, "main", "feature"), ["docs/example.md"]
+        )
+
+    def test_main_passes_when_body_matches_the_local_diff(self) -> None:
+        # The fixture diff only touches docs/example.md, so the disposition
+        # claimed here must match that: documentation updated, no Changeset.
+        body = VALID_BODY.replace("- [x] Changeset included", "- [ ] Changeset included")
+        body = body.replace("- [ ] No Changeset required", "- [x] No Changeset required")
+        body = body.replace("Evidence: .changeset/example.md", "Evidence: no package behavior changed")
+        body_file = self.repo / "pr-body.md"
+        body_file.write_text(body, encoding="utf-8")
+        with mock.patch("scripts.validate_pr_governance.ROOT", self.repo), mock.patch(
+            "sys.argv",
+            [
+                "validate_pr_governance.py",
+                "--body-file",
+                str(body_file),
+                "--base-ref",
+                "main",
+                "--head-ref",
+                "feature",
+            ],
+        ):
+            self.assertEqual(main(), 0)
+
+    def test_main_fails_when_body_claims_changes_the_local_diff_does_not_show(self) -> None:
+        body_file = self.repo / "pr-body.md"
+        body_file.write_text(VALID_BODY, encoding="utf-8")
+        with mock.patch("scripts.validate_pr_governance.ROOT", self.repo), mock.patch(
+            "sys.argv",
+            [
+                "validate_pr_governance.py",
+                "--body-file",
+                str(body_file),
+                "--base-ref",
+                "main",
+                "--head-ref",
+                "main",
+            ],
+        ):
+            self.assertEqual(main(), 1)
+
+    def test_event_path_and_body_file_are_mutually_exclusive(self) -> None:
+        with mock.patch(
+            "sys.argv",
+            [
+                "validate_pr_governance.py",
+                "--body-file",
+                "pr-body.md",
+                "--event-path",
+                "event.json",
+            ],
+        ):
+            with self.assertRaises(SystemExit):
+                main()
 
 
 if __name__ == "__main__":

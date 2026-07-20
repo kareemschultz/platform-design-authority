@@ -140,14 +140,7 @@ def validate_pr_body(
     return errors
 
 
-def changed_paths_for_event(event: dict[str, Any], root: Path) -> list[str]:
-    pull_request = event.get("pull_request")
-    if not isinstance(pull_request, dict):
-        return []
-    base = pull_request.get("base", {}).get("sha")
-    head = pull_request.get("head", {}).get("sha")
-    if not isinstance(base, str) or not isinstance(head, str):
-        raise ValueError("pull_request event is missing base/head SHA")
+def changed_paths_between(root: Path, base: str, head: str) -> list[str]:
     completed = subprocess.run(
         ["git", "diff", "--name-only", f"{base}...{head}"],
         cwd=root,
@@ -156,6 +149,17 @@ def changed_paths_for_event(event: dict[str, Any], root: Path) -> list[str]:
         text=True,
     )
     return [line.strip() for line in completed.stdout.splitlines() if line.strip()]
+
+
+def changed_paths_for_event(event: dict[str, Any], root: Path) -> list[str]:
+    pull_request = event.get("pull_request")
+    if not isinstance(pull_request, dict):
+        return []
+    base = pull_request.get("base", {}).get("sha")
+    head = pull_request.get("head", {}).get("sha")
+    if not isinstance(base, str) or not isinstance(head, str):
+        raise ValueError("pull_request event is missing base/head SHA")
+    return changed_paths_between(root, base, head)
 
 
 def validate_event(event: dict[str, Any], changed_paths: list[str]) -> list[str]:
@@ -170,19 +174,61 @@ def validate_event(event: dict[str, Any], changed_paths: list[str]) -> list[str]
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--event-path", type=Path, required=True)
+    parser = argparse.ArgumentParser(
+        description=(
+            "Validate a pull-request body against the governed documentation "
+            "and release dispositions. Use --event-path in CI against a real "
+            "GitHub pull_request event; use --body-file to check a draft PR "
+            "body locally against the working tree's actual changes, without "
+            "fabricating an event payload."
+        )
+    )
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--event-path", type=Path)
+    source.add_argument(
+        "--body-file",
+        type=Path,
+        help="Path to a Markdown file containing a draft PR body.",
+    )
+    parser.add_argument(
+        "--base-ref",
+        default="origin/main",
+        help="Base ref to diff against in --body-file mode (default: origin/main).",
+    )
+    parser.add_argument(
+        "--head-ref",
+        default="HEAD",
+        help="Head ref to diff in --body-file mode (default: HEAD).",
+    )
     args = parser.parse_args()
-    event = json.loads(args.event_path.read_text(encoding="utf-8"))
-    if not isinstance(event.get("pull_request"), dict):
-        print("Pull-request governance validation skipped for non-PR event.")
-        return 0
-    try:
-        changed_paths = changed_paths_for_event(event, ROOT)
-    except (subprocess.CalledProcessError, ValueError) as exc:
-        print(f"Pull-request governance validation failed: {exc}", file=sys.stderr)
-        return 1
-    errors = validate_event(event, changed_paths)
+
+    if args.body_file is not None:
+        body = args.body_file.read_text(encoding="utf-8")
+        try:
+            changed_paths = changed_paths_between(ROOT, args.base_ref, args.head_ref)
+            head_sha = subprocess.run(
+                ["git", "rev-parse", args.head_ref],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+        except subprocess.CalledProcessError as exc:
+            print(f"Pull-request governance validation failed: {exc}", file=sys.stderr)
+            return 1
+        errors = validate_pr_body(body, changed_paths, head_sha)
+    else:
+        event = json.loads(args.event_path.read_text(encoding="utf-8"))
+        if not isinstance(event.get("pull_request"), dict):
+            print("Pull-request governance validation skipped for non-PR event.")
+            return 0
+        try:
+            changed_paths = changed_paths_for_event(event, ROOT)
+        except (subprocess.CalledProcessError, ValueError) as exc:
+            print(f"Pull-request governance validation failed: {exc}", file=sys.stderr)
+            return 1
+        errors = validate_event(event, changed_paths)
+
     if errors:
         print("Pull-request governance validation failed:", file=sys.stderr)
         for error in sorted(set(errors)):

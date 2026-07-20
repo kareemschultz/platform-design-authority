@@ -178,6 +178,7 @@ test("scanned-item lookup (barcode Enter -> catalog.products.list -> exact produ
 	const cartLines = page.locator('[aria-label="Cart lines"] > li');
 
 	const samples: number[] = [];
+	let cdpBodyEvictionCount = 0;
 	// Each iteration MUST wait for the previous lookup's response before
 	// starting the next — this measures real round-trip latency, not
 	// throughput under concurrency, matching what "add-scanned-item lookup"
@@ -186,16 +187,57 @@ test("scanned-item lookup (barcode Enter -> catalog.products.list -> exact produ
 		const barcode = iterationBarcodes[iteration];
 		// biome-ignore lint/performance/noAwaitInLoops: sequential warm-iteration latency benchmark, not a throughput path.
 		await barcodeField.fill("");
-		const responsePromise = page.waitForResponse(
-			(response) =>
-				response.request().method() === "POST" &&
-				response.url().endsWith("/rpc/catalog/products/list")
-		);
-		const startedAt = Date.now();
+
+		// Read the response body EAGERLY, inside the `response` event
+		// handler itself, instead of via `waitForResponse()` followed by a
+		// LATER `.json()` call. WS3 remediation R4 cycle-2 (remediation-of-
+		// remediation) finding: under this host's disclosed sustained CPU
+		// contention (20+ concurrent claude.exe/codex.exe processes),
+		// Chromium's CDP buffer can evict a response body between the
+		// `response` event firing and a later `.json()` read, throwing
+		// "Network.getResponseBody: No data found for resource with given
+		// identifier". Reading inside the event handler closes almost all
+		// of that gap. This is a TEST-HARNESS timing change only — it does
+		// not touch what is measured (`elapsedMs` is still captured the
+		// instant the response event fires, before any body read) or what
+		// is asserted; it is not a budget/timeout change and does not fall
+		// under the directive's "do not raise budgets/timeouts" prohibition.
+		interface ListPayload {
+			json?: { items?: Array<{ name?: string }> };
+		}
+		interface Captured {
+			elapsedMs: number;
+			error: unknown;
+			payload: ListPayload | null;
+		}
+		let startedAt = 0;
+		const captured: Promise<Captured> = new Promise((resolve) => {
+			const handler = async (response: import("@playwright/test").Response) => {
+				if (
+					response.request().method() !== "POST" ||
+					!response.url().endsWith("/rpc/catalog/products/list")
+				) {
+					return;
+				}
+				page.off("response", handler);
+				const elapsedMs = Date.now() - startedAt;
+				try {
+					const payload = (await response.json()) as ListPayload;
+					resolve({ elapsedMs, error: null, payload });
+				} catch (error) {
+					resolve({ elapsedMs, error, payload: null });
+				}
+			};
+			page.on("response", handler);
+		});
+		startedAt = Date.now();
 		await barcodeField.fill(barcode);
 		await barcodeField.press("Enter");
-		const listResponse = await responsePromise;
-		const elapsedMs = Date.now() - startedAt;
+		const {
+			elapsedMs,
+			error: captureError,
+			payload: capturedPayload,
+		} = await captured;
 		if (iteration >= WARMUP_ITERATIONS) {
 			samples.push(elapsedMs);
 		}
@@ -205,20 +247,52 @@ test("scanned-item lookup (barcode Enter -> catalog.products.list -> exact produ
 		// zero or multiple results would have satisfied the pre-fix test
 		// identically). Everything below runs AFTER `elapsedMs` is already
 		// captured, so it cannot inflate the measured latency.
-		const listPayload = (await listResponse.json()) as {
-			json?: { items?: Array<{ name?: string }> };
-		};
-		const items = listPayload.json?.items ?? [];
-		expect(items).toHaveLength(1);
-		expect(items[0]?.name).toBe(iterationProductNames[iteration]);
+		//
+		// A residual CDP body-eviction throw (see comment above) is
+		// distinguished from every OTHER possible failure and, ONLY in
+		// that one known-transient case, falls back to the DOM-based proof
+		// below instead of failing the whole benchmark: the sale screen's
+		// own business rule is "Exact barcode lookup on Enter auto-adds a
+		// single unambiguous match" (visible in the page's own copy), so a
+		// single cart line appearing with THIS iteration's exact product
+		// name is independent, equally-authoritative proof that the exact
+		// match happened server-side — a wrong or absent match could not
+		// have produced it. Any OTHER capture error (a real network
+		// failure, a malformed payload, etc.) still fails the test loudly.
+		if (captureError) {
+			const message =
+				captureError instanceof Error
+					? captureError.message
+					: String(captureError);
+			if (!message.includes("No data found for resource")) {
+				throw captureError;
+			}
+			cdpBodyEvictionCount += 1;
+		} else {
+			const items = capturedPayload?.json?.items ?? [];
+			expect(items).toHaveLength(1);
+			expect(items[0]?.name).toBe(iterationProductNames[iteration]);
+		}
 
 		// "Cart line added exactly once": the local cart gains EXACTLY one
 		// new line, and it names THIS iteration's product — never the
-		// previous iteration's, never a stale/duplicate entry.
+		// previous iteration's, never a stale/duplicate entry. Asserted
+		// unconditionally (not only in the fallback branch above) so this
+		// remains the authoritative proof of "cart line added exactly
+		// once" on EVERY iteration, matching the directive's exact wording.
+		// Exact text (not a substring match) so this stays dispositive on
+		// its own in the CDP-fallback branch above, where it is the SOLE
+		// proof of the exact match — product names are constructed as
+		// "WS3 POS perf <N>" and are prefixes of one another across
+		// iterations (e.g. "...perf 2" is a substring of "...perf 24"), so
+		// a substring match would not by itself rule out a stale/adjacent
+		// line.
 		await expect(cartLines).toHaveCount(1);
-		await expect(cartLines.first()).toContainText(
-			iterationProductNames[iteration]
-		);
+		await expect(
+			cartLines.first().getByText(iterationProductNames[iteration], {
+				exact: true,
+			})
+		).toBeVisible();
 		// Remove the line so every iteration starts from the same clean
 		// zero-line cart state, keeping "added exactly once" a per-iteration
 		// fact rather than an end-of-loop cumulative count that could mask
@@ -231,6 +305,7 @@ test("scanned-item lookup (barcode Enter -> catalog.products.list -> exact produ
 	const disposition = computed.p95 <= LOOKUP_TARGET_P95_MS ? "PASS" : "MISS";
 	console.log(
 		JSON.stringify({
+			cdpBodyEvictionFallbackCount: cdpBodyEvictionCount,
 			disposition,
 			environment:
 				"live docker compose stack (postgres+server+web+worker), chromium via Playwright, Windows dev host (not representative production hardware)",

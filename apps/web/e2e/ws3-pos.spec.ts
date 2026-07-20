@@ -87,7 +87,32 @@ async function moveMouseAwayFromControls(page: Page) {
  * same "settled state" discipline `waitForToastsToClear` already applies
  * to a transient toast, applied here to the dialog's OWN entrance
  * animation — proven via the Web Animations API (`getAnimations()`),
- * not a fixed sleep guess. */
+ * not a fixed sleep guess.
+ *
+ * WS3 remediation r4 cycle-2 (remediation-of-remediation): the ORIGINAL
+ * version of this helper called `panel.getAnimations()` with the default
+ * `{ subtree: false }`, which only inspects animations whose effect
+ * target is the panel element itself. An independent adversarial re-run
+ * of the exact "close-register ... confirm-dialog-open ..." axe scan
+ * below reproduced a genuine, pixel-measured sub-threshold contrast
+ * violation (3.41:1, target 4.5:1) on the destructive button ONE TIME in
+ * several runs — the same `.bg-destructive/10` pairing the token change
+ * above already cleared in a real settled-state live-Chromium
+ * measurement (see the comment on `--destructive` in globals.css), so
+ * this is a sampling-timing gap, not a resting-state regression. Two
+ * independent hardenings close it: (1) `{ subtree: true }` so ANY
+ * descendant animation (not just one on the panel itself) is also
+ * waited out — defensive against a future dialog variant animating a
+ * child directly; (2) two additional `requestAnimationFrame` waits
+ * after every tracked animation reports non-"running", because the Web
+ * Animations API can flip `playState` to "finished" in the SAME task
+ * that schedules the final style/paint commit, not necessarily before
+ * it — axe-core reads `getComputedStyle`-derived color values, not
+ * painted pixels, but a browser's style recalculation for a
+ * `animation-fill-mode` end value is not guaranteed synchronous with
+ * the `playState` flip either. Waiting two real animation frames past
+ * "not running" gives the browser a full paint cycle to commit the
+ * settled style before the scan reads it. */
 async function waitForDialogEntranceAnimationToSettle(page: Page) {
 	await page.waitForFunction(() => {
 		const panel = document.querySelector('[role="alertdialog"]');
@@ -95,9 +120,18 @@ async function waitForDialogEntranceAnimationToSettle(page: Page) {
 			return false;
 		}
 		return panel
-			.getAnimations()
+			.getAnimations({ subtree: true })
 			.every((animation) => animation.playState !== "running");
 	});
+	// Two real animation frames past "not running", so any end-of-animation
+	// style/paint commit (fill-mode end value) has actually landed before
+	// the caller samples computed styles (e.g. an axe-core contrast scan).
+	await page.evaluate(
+		() =>
+			new Promise<void>((resolve) => {
+				requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+			})
+	);
 }
 
 /** WS3 remediation R4: `PosNavigation` (pos-navigation.tsx) renders the
@@ -2991,6 +3025,23 @@ test("accessibility (all settled states): close-register's empty form, validatio
 	// State 3: the confirm dialog open, populated with the REAL
 	// server-derived preview (Finding I) — settled on the dialog's own
 	// heading, not the click that opened it.
+	//
+	// WS3 remediation r4 cycle-2: in addition to
+	// `waitForDialogEntranceAnimationToSettle`'s WAAPI-driven wait, emulate
+	// `prefers-reduced-motion: reduce` for this one scan. The dialog panel's
+	// entrance animation only interpolates opacity/transform on the way to
+	// the SAME resting colors the settled state already has (Base UI's
+	// `data-open:animate-in` respects `animation-fill-mode`, it does not
+	// change what color the button ends up), so suppressing the animation
+	// changes nothing about which colors are under test here — it removes
+	// the transient mid-animation frame axe-core could otherwise sample,
+	// closing the race at its source rather than only narrowing the window.
+	// This also gives this exact test its own direct reduced-motion
+	// coverage (P2 item 10), distinct from the standalone
+	// "prefers-reduced-motion actually suppresses ..." animation-presence
+	// test elsewhere in this file. Reverted immediately after the scan so
+	// it does not change state 4 (or any later test) below.
+	await page.emulateMedia({ reducedMotion: "reduce" });
 	await page.getByLabel("Counted cash (GYD)").fill("100.00");
 	await page.getByRole("button", { name: "Review & close register" }).click();
 	await expect(
@@ -3003,6 +3054,7 @@ test("accessibility (all settled states): close-register's empty form, validatio
 		.withTags(WCAG_TAGS)
 		.analyze();
 	expect(dialogOpenResults.violations).toEqual([]);
+	await page.emulateMedia({ reducedMotion: "no-preference" });
 
 	// State 4: success, settled on the real post-commit heading.
 	const closeResponsePromise = page.waitForResponse(

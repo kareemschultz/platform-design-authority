@@ -106,3 +106,51 @@ export function resolveContextLegalEntityId(context: {
 }): string {
 	return context.legalEntityId || context.organizationId;
 }
+
+/**
+ * WS3 remediation R4B, item 1 (export read isolation, lead-session finding,
+ * not part of the original A-L directive). `getAccountantHandoffExport`
+ * fetched its `ExportJobRecord` scoped ONLY by `tenantId` (the
+ * `platform-import-export` repository layer's own scope) and then returned
+ * it to the caller UNCONDITIONALLY — it never compared the record's
+ * `organizationId`/`legalEntityId` against the caller's own active context.
+ * A same-tenant caller in organization B who knew (or enumerated) an export
+ * id that actually belonged to organization A could read organization A's
+ * full accountant handoff export: sales, refunds, cash and deposit
+ * reconciliation, tax summary — everything `AccountantHandoffPayload`
+ * carries.
+ *
+ * This closes that gap the same way `requireLegalEntityScope` already
+ * closes Finding K: fail CLOSED and non-disclosing. `organizationId` is
+ * compared directly (it is populated on every real record and every real
+ * context, unlike `legalEntityId`); `legalEntityId` is compared via
+ * `resolveContextLegalEntityId` for the same "single legal entity per
+ * organization is the deployed reality this branch proves" reason
+ * documented above `resolveContextLegalEntityId` itself — today that
+ * resolves to `context.organizationId` for every real session, so this is
+ * currently equivalent to (and a defense-in-depth duplicate of) the
+ * `organizationId` comparison; it stops being a duplicate, at no caller
+ * change, the day a real Legal Entity domain lets `setActiveContext`
+ * populate `legalEntityId` for real and an organization can legitimately
+ * span more than one legal entity.
+ *
+ * The denial reuses the EXACT `ExportError("not_found", "Export was not
+ * found")` shape `platform-import-export`'s own `getAccountantHandoffExport`
+ * throws when the row genuinely does not exist for the caller's tenant —
+ * deliberately indistinguishable from "this export id does not exist at
+ * all", so a same-tenant, wrong-organization caller cannot use the response
+ * to confirm another organization's export id is real (non-disclosing,
+ * matching the governed denial pattern used everywhere else in this
+ * codebase).
+ */
+export function requireExportRecordScope(input: {
+	context: { legalEntityId?: string | null; organizationId: string };
+	record: { legalEntityId: string; organizationId: string };
+}): void {
+	const inScope =
+		input.record.organizationId === input.context.organizationId &&
+		input.record.legalEntityId === resolveContextLegalEntityId(input.context);
+	if (!inScope) {
+		throw new ExportError("not_found", "Export was not found");
+	}
+}

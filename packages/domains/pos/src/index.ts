@@ -1091,6 +1091,30 @@ export interface PosPartyPort {
 	}) => Promise<string>;
 }
 
+/**
+ * WS3 remediation R4B, item 2 (idempotency replay scope, lead-session
+ * finding, NOT part of the original A-L directive). Every
+ * `requestFingerprint` computed below MUST include `tenantId`,
+ * `organizationId`, and (for a location-scoped command) `locationId` — not
+ * only the command's own business fields. `replay()` below runs BEFORE the
+ * org/location-scoped aggregate lookup (`repository.getSession`,
+ * `repository.getSale`, etc.), keyed only by `(tenantId, operation,
+ * idempotencyKey)`. Before this fix, the fingerprinted object covered only
+ * business fields (e.g. `{ sessionId, version }`) — so a same-tenant caller
+ * in a DIFFERENT organization or location who reused another caller's exact
+ * `idempotencyKey` AND happened to submit the same business-field values
+ * (both non-secret in this system's threat model, per R2's own adversarial
+ * findings) would fingerprint-match and receive that OTHER organization's/
+ * location's prior result straight out of the replay cache — never reaching
+ * the scoped lookup that would otherwise have denied it. Widening the
+ * fingerprint (not reordering replay-after-lookup) preserves the existing,
+ * deliberate "replay before lookup" control flow documented on `replay()`
+ * itself, while making a cross-org/cross-location fingerprint match
+ * impossible: two requests that differ in `organizationId` or `locationId`
+ * now always produce different fingerprints, so replay() can never return
+ * one organization's/location's result to another's request, regardless of
+ * what the caller supplies for the other fields.
+ */
 async function fingerprint(value: unknown): Promise<string> {
 	const digest = await crypto.subtle.digest(
 		"SHA-256",
@@ -2818,7 +2842,10 @@ export function createPosService(options: PosServiceOptions) {
 			version: number;
 		}): Promise<RegisterSessionView> {
 			const requestFingerprint = await fingerprint({
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				sessionId: input.sessionId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
@@ -2937,8 +2964,11 @@ export function createPosService(options: PosServiceOptions) {
 			tenantId: string;
 		}): Promise<SaleView> {
 			const requestFingerprint = await fingerprint({
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				overrideId: input.overrideId,
 				saleId: input.saleId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const prior = await replay<SaleView>(repository, {
@@ -3026,7 +3056,10 @@ export function createPosService(options: PosServiceOptions) {
 			tenantId: string;
 		}): Promise<RefundView> {
 			const requestFingerprint = await fingerprint({
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				refundId: input.refundId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<RefundView>(repository, {
@@ -3200,7 +3233,10 @@ export function createPosService(options: PosServiceOptions) {
 			tenantId: string;
 		}): Promise<ReturnView> {
 			const requestFingerprint = await fingerprint({
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				returnId: input.returnId,
+				tenantId: input.tenantId,
 			});
 			return options.returnUnitOfWork.execute(
 				async ({ events, inventory, numbering, repository }) => {
@@ -3329,8 +3365,11 @@ export function createPosService(options: PosServiceOptions) {
 			);
 			const requestFingerprint = await fingerprint({
 				countedCash: input.countedCash,
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				reason: input.reason ?? null,
 				registerId: input.registerId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<RegisterSessionView>(repository, {
@@ -3477,7 +3516,10 @@ export function createPosService(options: PosServiceOptions) {
 			requireCashOnlyTenders(input.tenders);
 			const requestFingerprint = await fingerprint({
 				exchangeOfReturnId: input.exchangeOfReturnId ?? null,
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				saleId: input.saleId,
+				tenantId: input.tenantId,
 				tenders: input.tenders,
 			});
 			return options.saleUnitOfWork.execute(
@@ -3815,6 +3857,8 @@ export function createPosService(options: PosServiceOptions) {
 		}): Promise<DepositView> {
 			const requestFingerprint = await fingerprint({
 				depositId: input.depositId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<DepositView>(repository, {
@@ -3936,10 +3980,13 @@ export function createPosService(options: PosServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				amount: input.amount,
 				direction: input.direction,
+				locationId: input.locationId ?? null,
 				note: input.note ?? null,
+				organizationId: input.organizationId,
 				reasonCode: input.reasonCode,
 				referenceId: input.referenceId ?? null,
 				registerId: input.registerId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<CashMovementView>(repository, {
@@ -4088,7 +4135,9 @@ export function createPosService(options: PosServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				countedAmountMinor: input.countedAmountMinor,
 				currency: input.currency,
+				organizationId: input.organizationId,
 				sourceShiftIds: sortedShiftIds,
+				tenantId: input.tenantId,
 			});
 			return options.depositUnitOfWork.execute(
 				async ({ events, numbering, repository }) => {
@@ -4216,7 +4265,9 @@ export function createPosService(options: PosServiceOptions) {
 			tenantId: string;
 		}): Promise<RefundView> {
 			const requestFingerprint = await fingerprint({
+				organizationId: input.organizationId,
 				returnId: input.returnId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<RefundView>(repository, {
@@ -4345,8 +4396,11 @@ export function createPosService(options: PosServiceOptions) {
 			}
 			const requestFingerprint = await fingerprint({
 				lines: input.lines,
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				reason: input.reason,
 				saleId: input.saleId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const prior = await replay<ReturnView>(repository, {
@@ -4468,7 +4522,10 @@ export function createPosService(options: PosServiceOptions) {
 				currency: input.currency,
 				customerPartyId: input.customerPartyId ?? null,
 				lines: input.lines,
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				registerId: input.registerId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const prior = await replay<SaleView>(repository, {
@@ -4717,8 +4774,11 @@ export function createPosService(options: PosServiceOptions) {
 			tenantId: string;
 		}): Promise<SaleView> {
 			const requestFingerprint = await fingerprint({
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				reason: input.reason ?? null,
 				saleId: input.saleId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<SaleView>(repository, {
@@ -4900,7 +4960,9 @@ export function createPosService(options: PosServiceOptions) {
 				currency: input.currency,
 				locationId: input.locationId,
 				openingFloat: input.openingFloat,
+				organizationId: input.organizationId,
 				registerId: input.registerId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<RegisterSessionView>(repository, {
@@ -5033,8 +5095,10 @@ export function createPosService(options: PosServiceOptions) {
 		}): Promise<ReceiptView> {
 			const priceSuppressed = input.priceSuppressed ?? false;
 			const requestFingerprint = await fingerprint({
+				organizationId: input.organizationId,
 				priceSuppressed,
 				receiptId: input.receiptId,
+				tenantId: input.tenantId,
 			});
 			return options.returnUnitOfWork.execute(
 				async ({ events, numbering, repository }) => {
@@ -5167,9 +5231,12 @@ export function createPosService(options: PosServiceOptions) {
 		}): Promise<SaleView> {
 			const requestFingerprint = await fingerprint({
 				lineId: input.lineId,
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				reason: input.reason,
 				requestedPrice: input.requestedPrice,
 				saleId: input.saleId,
+				tenantId: input.tenantId,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const prior = await replay<SaleView>(repository, {
@@ -5303,8 +5370,11 @@ export function createPosService(options: PosServiceOptions) {
 			tenantId: string;
 		}): Promise<ReturnView> {
 			const requestFingerprint = await fingerprint({
+				locationId: input.locationId ?? null,
+				organizationId: input.organizationId,
 				reason: input.reason ?? null,
 				receiptId: input.receiptId,
+				tenantId: input.tenantId,
 			});
 			return options.returnUnitOfWork.execute(
 				async ({ events, inventory, numbering, repository }) => {

@@ -4263,3 +4263,156 @@ describe("POS domain: Deposit (prepare/confirm)", () => {
 		]);
 	});
 });
+
+/**
+ * WS3 remediation R4B, item 2 (idempotency replay scope, lead-session
+ * finding, NOT part of the original A-L directive). Before this fix, every
+ * `requestFingerprint` below covered only the command's own business
+ * fields — never `organizationId`/`tenantId`/`locationId`. `replay()` looks
+ * up a prior command receipt by `(tenantId, operation, idempotencyKey)`
+ * ONLY (this in-memory repository's `getCommandReceipt` mirrors the real
+ * Postgres table's key exactly — see its own comment above), then compares
+ * fingerprints and returns the receipt's PRIOR RESULT if they match — all
+ * before the org/location-scoped aggregate lookup
+ * (`repository.getSession`/`getSale`/etc.) ever runs. So a same-tenant
+ * caller in a DIFFERENT organization who reused another organization's
+ * exact `idempotencyKey` AND the exact business-field values that feed the
+ * (pre-fix, narrow) fingerprint would fingerprint-match and receive that
+ * OTHER organization's result directly out of the replay cache.
+ *
+ * Each test below: (1) organization A completes a real command under a
+ * shared idempotency key, (2) organization B (same tenant) replays that
+ * EXACT idempotencyKey with the EXACT fingerprint-covered business fields
+ * from organization A's request, only `organizationId` differs. Post-fix,
+ * `organizationId` is now itself part of the fingerprint, so organization
+ * B's fingerprint can never match organization A's receipt — `replay()`
+ * throws `idempotency_conflict` (the SAME safe denial this file's existing
+ * "rejects a different request body reusing an already-claimed idempotency
+ * key" test already proves for an ordinary same-organization conflict),
+ * and organization A's real result is never handed to organization B.
+ *
+ * PRE-FIX REPRODUCTION (documented, not re-executed here against a
+ * checkout): with the pre-fix narrow fingerprint (`{ sessionId, version }`
+ * for `approveCashVariance`; `{ exchangeOfReturnId, saleId, tenders }` for
+ * `completeSale` — `organizationId` absent from both), organization B's
+ * request below would compute the IDENTICAL fingerprint to organization
+ * A's already-claimed receipt (nothing in the fingerprinted object differs
+ * between the two calls), so `replay()`'s `receipt.requestFingerprint !==
+ * input.requestFingerprint` check would be `false` and it would `return
+ * receipt.result as T` — organization A's real `RegisterSessionView`/
+ * `SaleView` — to organization B, without ever calling
+ * `repository.getSession`/`getSale` (which WOULD have denied organization
+ * B via the R2 Finding B tenant/organization scoping this same file's mock
+ * repository documents above). This was verified directly: temporarily
+ * reverting `packages/domains/pos/src/index.ts`'s two fingerprint call
+ * sites below to their pre-fix field lists and re-running these exact
+ * tests makes both `crossOrg...` calls RESOLVE with organization A's data
+ * (not reject) instead of throwing `idempotency_conflict`.
+ */
+describe("POS domain: WS3 remediation R4B item 2 (idempotency replay cannot cross organizations)", () => {
+	test("approveCashVariance: a same-tenant, different-organization replay of a real approved variance's exact idempotencyKey/sessionId/version is denied, never returns organization A's session", async () => {
+		const { service } = createHarness();
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "r4b-item2-cv-open-a",
+			openingFloat: { amountMinor: 1000, currency: "GYD" },
+			organizationId: "organization_r4b_cv_a",
+			registerId: "register_r4b_item2_cv",
+		});
+		const closingA = await service.closeRegister({
+			...base,
+			countedCash: { amountMinor: 900, currency: "GYD" },
+			idempotencyKey: "r4b-item2-cv-close-a",
+			organizationId: "organization_r4b_cv_a",
+			registerId: "register_r4b_item2_cv",
+		});
+		expect(closingA.state).toBe("Closing");
+
+		const sharedIdempotencyKey = "r4b-item2-cv-shared-idempotency-key";
+		const approvedA = await service.approveCashVariance({
+			actorUserId: "user_checker",
+			correlationId: base.correlationId,
+			idempotencyKey: sharedIdempotencyKey,
+			organizationId: "organization_r4b_cv_a",
+			sessionId: closingA.id,
+			tenantId: base.tenantId,
+			version: closingA.version,
+		});
+		expect(approvedA.state).toBe("Closed");
+		expect(approvedA.varianceApproverPartyId).toBe("party_user_checker");
+
+		// Organization B (same tenant) reuses the EXACT idempotencyKey AND the
+		// EXACT fingerprint-covered fields (sessionId, version) from
+		// organization A's request above — only `organizationId` differs, and
+		// organization B never actually owns `closingA.id`.
+		const crossOrgReplay = service.approveCashVariance({
+			actorUserId: "user_checker",
+			correlationId: base.correlationId,
+			idempotencyKey: sharedIdempotencyKey,
+			organizationId: "organization_r4b_cv_b",
+			sessionId: closingA.id,
+			tenantId: base.tenantId,
+			version: closingA.version,
+		});
+		await expect(crossOrgReplay).rejects.toMatchObject({
+			code: "idempotency_conflict",
+		});
+	});
+
+	test("completeSale: a same-tenant, different-organization replay of a real completed sale's exact idempotencyKey/saleId/tenders is denied, never returns organization A's sale", async () => {
+		const { service } = createHarness();
+		await service.openRegister({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "r4b-item2-sale-open-a",
+			openingFloat: { amountMinor: 0, currency: "GYD" },
+			organizationId: "organization_r4b_sale_a",
+			registerId: "register_r4b_item2_sale",
+		});
+		const sale = await service.createSale({
+			...base,
+			currency: "GYD",
+			idempotencyKey: "r4b-item2-sale-create-a",
+			lines: [
+				{
+					productId: "prod_r4b_item2",
+					quantity: "1",
+					taxCategory: "GY_EXEMPT",
+					unit: "each",
+					unitPrice: { amountMinor: 25, currency: "GYD" },
+				},
+			],
+			organizationId: "organization_r4b_sale_a",
+			registerId: "register_r4b_item2_sale",
+		});
+
+		const sharedIdempotencyKey = "r4b-item2-sale-shared-idempotency-key";
+		const sharedTenders = [
+			{ amountMinor: 25, currency: "GYD", type: "Cash" as const },
+		];
+		const completedA = await service.completeSale({
+			...base,
+			idempotencyKey: sharedIdempotencyKey,
+			organizationId: "organization_r4b_sale_a",
+			saleId: sale.id,
+			tenders: sharedTenders,
+		});
+		expect(completedA.state).toBe("Completed");
+
+		// Organization B (same tenant) reuses the EXACT idempotencyKey AND the
+		// EXACT fingerprint-covered fields (saleId, tenders) from organization
+		// A's request above — only `organizationId` differs, and organization
+		// B never actually owns `sale.id`.
+		const crossOrgReplay = service.completeSale({
+			...base,
+			idempotencyKey: sharedIdempotencyKey,
+			organizationId: "organization_r4b_sale_b",
+			saleId: sale.id,
+			tenders: sharedTenders,
+		});
+		await expect(crossOrgReplay).rejects.toMatchObject({
+			code: "idempotency_conflict",
+		});
+	});
+});

@@ -492,6 +492,18 @@ function itemKey(productId: string, variantId?: string | null): string {
 	return variantId ? `${productId}:${variantId}` : productId;
 }
 
+/**
+ * WS3 remediation R4B, item 2 (idempotency replay scope, lead-session
+ * finding, NOT part of the original A-L directive). Every
+ * `requestFingerprint` computed below MUST include `tenantId`,
+ * `organizationId`, and (for a location-scoped command) `locationId` — not
+ * only the command's own business fields. `replay()` below runs BEFORE the
+ * org/location-scoped aggregate lookup, keyed only by `(tenantId,
+ * operation, idempotencyKey)`. See the matching comment above
+ * `packages/domains/pos/src/index.ts`'s own `fingerprint()` for the full
+ * disposition — the same class of gap, fixed the same way, in this
+ * package's command set.
+ */
 async function fingerprint(value: unknown): Promise<string> {
 	const digest = await crypto.subtle.digest(
 		"SHA-256",
@@ -790,8 +802,10 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				facts: input.facts,
 				locationId: input.locationId,
+				organizationId: input.organizationId,
 				productId: input.productId,
 				quantity: input.quantity,
+				tenantId: input.tenantId,
 				unit: input.unit,
 				variantId: input.variantId ?? null,
 			});
@@ -865,6 +879,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		}): Promise<InventoryAdjustment> {
 			const requestFingerprint = await fingerprint({
 				adjustmentId: input.adjustmentId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
@@ -994,6 +1010,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		}): Promise<StockCount> {
 			const requestFingerprint = await fingerprint({
 				countId: input.countId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: count posting deliberately keeps validation, balance derivation, movement creation, and aggregate transition in one atomic command.
@@ -1152,7 +1170,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 					variantId: input.body.variantId,
 				}),
 			]);
-			const requestFingerprint = await fingerprint(input.body);
+			const requestFingerprint = await fingerprint({
+				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
+			});
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const prior = await replay<InventoryAdjustment>(repository, {
 					idempotencyKey: input.idempotencyKey,
@@ -1217,7 +1239,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				organizationId: input.organizationId,
 				tenantId: input.tenantId,
 			});
-			const requestFingerprint = await fingerprint(input.body);
+			const requestFingerprint = await fingerprint({
+				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
+			});
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const prior = await replay<StockCount>(repository, {
 					idempotencyKey: input.idempotencyKey,
@@ -1396,7 +1422,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			for (const line of input.body.lines) {
 				requirePositive(line.quantity);
 			}
-			const requestFingerprint = await fingerprint(input.body);
+			const requestFingerprint = await fingerprint({
+				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
+			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<StockTransfer>(repository, {
 					idempotencyKey: input.idempotencyKey,
@@ -1504,6 +1534,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			version: number;
 		}): Promise<StockTransfer> {
 			const requestFingerprint = await fingerprint({
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				transferId: input.transferId,
 				version: input.version,
 			});
@@ -1777,6 +1809,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		}): Promise<StockTransfer> {
 			const requestFingerprint = await fingerprint({
 				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				transferId: input.transferId,
 				version: input.version,
 			});
@@ -2106,8 +2140,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			reservation: InventoryReservationRecord;
 		}): Promise<InventoryReservationRecord> {
 			const requestFingerprint = await fingerprint({
+				locationId: input.reservation.locationId,
+				organizationId: input.reservation.organizationId,
 				reason: input.reason,
 				reservationId: input.reservation.id,
+				tenantId: input.reservation.tenantId,
 				version: input.reservation.version,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
@@ -2201,6 +2238,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				adjustmentId: input.adjustmentId,
 				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
@@ -2329,6 +2368,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				body: input.body,
 				countId: input.countId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {
@@ -2436,6 +2477,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				body: input.body,
 				countId: input.countId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {

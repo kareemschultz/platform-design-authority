@@ -11,6 +11,7 @@ import { auditApplication } from "./audit";
 import { permissionAuthorizer } from "./authorization";
 import { entitlementEvaluator } from "./entitlements";
 import {
+	requireExportRecordScope,
 	requireLegalEntityScope,
 	resolveContextLegalEntityId,
 } from "./legal-entity-scope";
@@ -263,6 +264,14 @@ export const financeHandoffTransportApplication = {
 			exportId: input.exportId,
 			tenantId: context.tenantId,
 		});
+		// WS3 remediation R4B, item 1 (export read isolation, lead-session
+		// finding): the repository lookup above is scoped by `tenantId` only.
+		// A same-tenant caller in a DIFFERENT organization who knows (or
+		// enumerates) another organization's real `exportId` must still be
+		// denied, non-disclosingly, exactly like a genuinely missing export —
+		// see `requireExportRecordScope`'s own doc comment in
+		// `./legal-entity-scope` for the full disposition.
+		requireExportRecordScope({ context, record });
 		return exportView(record);
 	},
 };

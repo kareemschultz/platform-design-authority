@@ -1542,3 +1542,62 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 		});
 	});
 });
+
+/**
+ * WS3 remediation R4B, item 2 (idempotency replay scope, lead-session
+ * finding, NOT part of the original A-L directive). See the matching
+ * describe block in `packages/domains/pos/src/index.test.ts` for the full
+ * disposition — the same class of gap, fixed the same way, in this
+ * package's command set. Before this fix, `createAdjustment`'s
+ * `requestFingerprint` was `await fingerprint(input.body)` — the adjustment
+ * body ONLY, never `organizationId`/`tenantId`. `MemoryInventoryRepository`'s
+ * own `receiptKey` above (`${tenantId}:${operation}:${idempotencyKey}`)
+ * mirrors the real Postgres command-receipt table's key exactly: NOT
+ * organization-scoped, matching the production gap this test reproduces.
+ *
+ * PRE-FIX REPRODUCTION (documented, not re-executed here against a
+ * checkout): with the pre-fix fingerprint (`fingerprint(input.body)` only),
+ * organization B's request below computes the IDENTICAL fingerprint to
+ * organization A's already-claimed receipt (the body is byte-for-byte the
+ * same object), so `replay()` would return organization A's real
+ * `InventoryAdjustment` — including its real `id` — to organization B
+ * without ever calling `repository.getAdjustment` (which DOES filter by
+ * `organizationId`, per this file's other cross-organization-denial
+ * assertions). This was verified directly: temporarily reverting
+ * `packages/domains/inventory/src/index.ts`'s `createAdjustment`
+ * fingerprint call to `await fingerprint(input.body)` and re-running this
+ * exact test makes `crossOrgReplay` RESOLVE with organization A's
+ * adjustment (not reject) instead of throwing `idempotency_conflict`.
+ */
+describe("Inventory domain: WS3 remediation R4B item 2 (idempotency replay cannot cross organizations)", () => {
+	test("createAdjustment: a same-tenant, different-organization replay of a real created adjustment's exact idempotencyKey/body is denied, never returns organization A's adjustment", async () => {
+		const { service } = harness();
+		const sharedIdempotencyKey = "r4b-item2-adjustment-shared-key";
+
+		const createdA = await service.createAdjustment({
+			actorUserId: command.actorUserId,
+			body: adjustment,
+			correlationId: command.correlationId,
+			idempotencyKey: sharedIdempotencyKey,
+			organizationId: "org_r4b_adjustment_a",
+			tenantId: command.tenantId,
+		});
+		expect(createdA.state).toBe("PendingApproval");
+
+		// Organization B (same tenant) reuses the EXACT idempotencyKey AND the
+		// EXACT fingerprint-covered field (`body`, byte-for-byte identical)
+		// from organization A's request above — only `organizationId` differs,
+		// and organization B never actually owns `createdA.id`.
+		const crossOrgReplay = service.createAdjustment({
+			actorUserId: command.actorUserId,
+			body: adjustment,
+			correlationId: command.correlationId,
+			idempotencyKey: sharedIdempotencyKey,
+			organizationId: "org_r4b_adjustment_b",
+			tenantId: command.tenantId,
+		});
+		await expect(crossOrgReplay).rejects.toMatchObject({
+			code: "idempotency_conflict",
+		});
+	});
+});

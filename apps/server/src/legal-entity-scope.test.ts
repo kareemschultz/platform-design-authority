@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+	requireExportRecordScope,
 	requireLegalEntityScope,
 	resolveContextLegalEntityId,
 } from "../composition/legal-entity-scope";
@@ -219,5 +220,92 @@ describe("legal-entity-scope: WS3 remediation R3 cycle 1 (transport-path outage 
 		expect(resolveContextLegalEntityId(context)).toBe(
 			"organization_ws2_browser_0001"
 		);
+	});
+});
+
+/**
+ * WS3 remediation R4B, item 1 (export read isolation, lead-session finding,
+ * NOT part of the original A-L directive). `requireExportRecordScope` is
+ * the exact function `finance-handoff.ts`'s `getAccountantHandoffExport`
+ * now calls after its tenant-scoped repository fetch, before returning the
+ * record to the caller.
+ *
+ * PRE-FIX REPRODUCTION: before this stage, `getAccountantHandoffExport`
+ * called NO function of this shape at all — it fetched the tenant-scoped
+ * record and returned `exportView(record)` unconditionally. The first test
+ * below proves the exact scenario the directive describes (same tenant,
+ * different organization, a real known export id) would have gone
+ * straight through with the pre-fix code: nothing in the pre-fix call
+ * chain ever compared `record.organizationId` to the caller's context, so
+ * there was no failure mode to reach — the read simply succeeded. This
+ * test demonstrates that `requireExportRecordScope` is what makes that
+ * scenario throw now; run it against the current (post-fix) code below to
+ * see the denial, and note that deleting the `requireExportRecordScope`
+ * call from `finance-handoff.ts` (the literal pre-fix state) makes this
+ * exact request path return the cross-org record with no error at all.
+ */
+describe("legal-entity-scope: WS3 remediation R4B item 1 (export read isolation)", () => {
+	test("THE FIX: denies a same-tenant, different-organization read of a real record with the SAME non-disclosing not_found shape a genuinely missing export uses", () => {
+		const record = {
+			legalEntityId: "organization_finance_handoff_org_a",
+			organizationId: "organization_finance_handoff_org_a",
+		};
+		const context = {
+			legalEntityId: undefined,
+			organizationId: "organization_finance_handoff_org_b",
+		};
+		let caught: unknown;
+		try {
+			requireExportRecordScope({ context, record });
+		} catch (error) {
+			caught = error;
+		}
+		expect(caught).toMatchObject({
+			code: "not_found",
+			message: "Export was not found",
+			name: "ExportError",
+		});
+	});
+
+	test("a legitimate same-organization read succeeds (no throw), record unchanged", () => {
+		const record = {
+			legalEntityId: "organization_finance_handoff_org_a",
+			organizationId: "organization_finance_handoff_org_a",
+		};
+		const context = {
+			legalEntityId: undefined,
+			organizationId: "organization_finance_handoff_org_a",
+		};
+		expect(() => requireExportRecordScope({ context, record })).not.toThrow();
+	});
+
+	test("denies when organizationId matches but legalEntityId (a real, distinct future value) does not — defense in depth beyond today's organizationId-only reality", () => {
+		const record = {
+			legalEntityId: "legal_entity_real_0002",
+			organizationId: "organization_finance_handoff_org_a",
+		};
+		const context = {
+			legalEntityId: "legal_entity_real_0001",
+			organizationId: "organization_finance_handoff_org_a",
+		};
+		let caught: unknown;
+		try {
+			requireExportRecordScope({ context, record });
+		} catch (error) {
+			caught = error;
+		}
+		expect(caught).toMatchObject({ code: "not_found", name: "ExportError" });
+	});
+
+	test("succeeds when both organizationId and a real context legalEntityId match the record", () => {
+		const record = {
+			legalEntityId: "legal_entity_real_0001",
+			organizationId: "organization_finance_handoff_org_a",
+		};
+		const context = {
+			legalEntityId: "legal_entity_real_0001",
+			organizationId: "organization_finance_handoff_org_a",
+		};
+		expect(() => requireExportRecordScope({ context, record })).not.toThrow();
 	});
 });

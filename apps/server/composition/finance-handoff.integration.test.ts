@@ -29,6 +29,7 @@ import addFormats from "ajv-formats";
 import { Pool } from "pg";
 
 import { validateExportPeriod } from "./finance-handoff";
+import { requireExportRecordScope } from "./legal-entity-scope";
 import { createDepositReferenceAllocator } from "./numbering";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
@@ -610,6 +611,106 @@ describe.serial(
 				tenantId: tenantA,
 			});
 			expect(foundOwnTenant.id).toBe(recordA.id);
+		});
+
+		test("WS3 remediation R4B, item 1 (export read isolation, lead-session finding): a SAME-tenant, different-organization caller with a real known exportId is denied by requireExportRecordScope, a legitimate same-org read still succeeds, and the underlying record is unchanged", async () => {
+			const tenantId = "tenant_finance_handoff_r4b_org_iso";
+			const organizationA = "organization_finance_handoff_r4b_org_a";
+			const organizationB = "organization_finance_handoff_r4b_org_b";
+			const pos = posService();
+			await openRegisterAndCompleteSale(pos, {
+				grossMinorPerUnit: 77_000,
+				idempotencyPrefix: "r4b-org-a",
+				quantity: "1",
+				registerId: "register_finance_handoff_r4b_org_a",
+				tenantId,
+			});
+
+			const periodStartUtc = new Date("2026-07-01T00:00:00.000Z");
+			const periodEndUtc = new Date("2026-08-01T00:00:00.000Z");
+			const sourceA = await pos.queryFinanceHandoffSourceData({
+				organizationId: organizationA,
+				periodEndUtc,
+				periodStartUtc,
+				tenantId,
+			});
+
+			const svc = exportService();
+			// The real row this test attacks: created under organization A, same
+			// tenant the attacker (organization B) also belongs to.
+			const recordA = await svc.createAccountantHandoffExport({
+				actorUserId: financeHandoffBase.actorUserId,
+				currency: "GYD",
+				idempotencyKey: "r4b-org-iso-export-a",
+				legalEntityId: organizationA,
+				organizationId: organizationA,
+				periodEndUtc,
+				periodStartUtc,
+				source: sourceA,
+				tenantId,
+				timezone: "America/Guyana",
+			});
+
+			// PRE-FIX REPRODUCTION (documented, not re-executed against a
+			// checkout): before this stage, `finance-handoff.ts`'s
+			// `getAccountantHandoffExport` fetched exactly this
+			// tenant-scoped-only record and returned `exportView(record)`
+			// UNCONDITIONALLY — no call of any shape compared
+			// `record.organizationId` to the caller's context. The tenant-scoped
+			// fetch below (`svc.getAccountantHandoffExport`, unchanged, still
+			// only scoped by `tenantId`) reproduces that exact pre-fix fetch and
+			// SUCCEEDS in returning organization A's real record to this
+			// same-tenant request — proving the leak surface still exists at
+			// this layer today. `requireExportRecordScope` is the new call
+			// `finance-handoff.ts`'s composition layer now makes immediately
+			// after this same fetch; asserting it throws for organization B's
+			// context is the post-fix proof for the exact record and fetch this
+			// test performed.
+			const fetchedByTenantOnly = await svc.getAccountantHandoffExport({
+				exportId: recordA.id,
+				tenantId,
+			});
+			expect(fetchedByTenantOnly.organizationId).toBe(organizationA);
+
+			const organizationBContext = {
+				legalEntityId: undefined,
+				organizationId: organizationB,
+			};
+			let caught: unknown;
+			try {
+				requireExportRecordScope({
+					context: organizationBContext,
+					record: fetchedByTenantOnly,
+				});
+			} catch (error) {
+				caught = error;
+			}
+			expect(caught).toMatchObject({
+				code: "not_found",
+				message: "Export was not found",
+				name: "ExportError",
+			});
+
+			// The record itself is untouched by the denied read: re-fetching
+			// under the legitimate organization still returns the identical
+			// content/state.
+			const refetched = await svc.getAccountantHandoffExport({
+				exportId: recordA.id,
+				tenantId,
+			});
+			expect(refetched).toEqual(fetchedByTenantOnly);
+
+			// A legitimate same-organization read still succeeds.
+			const organizationAContext = {
+				legalEntityId: undefined,
+				organizationId: organizationA,
+			};
+			expect(() =>
+				requireExportRecordScope({
+					context: organizationAContext,
+					record: refetched,
+				})
+			).not.toThrow();
 		});
 
 		test("WS3 remediation R2, Finding D: same idempotency key + a genuinely different request (different period) is denied as a real live-PG idempotency_conflict, not a silent wrong export", async () => {

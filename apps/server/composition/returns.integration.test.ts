@@ -1538,9 +1538,13 @@ describe.serial(
 				registerA,
 				"list-isolation-a"
 			);
-			// Org B's return is created in "Pending" state (not approved) --
-			// deliberately covers BOTH a Pending and a Completed return so the
-			// queue's state filter is exercised, not just its org filter.
+			// WS3 remediation R3b cycle 1 (adversarial re-review): corrected —
+			// `buildPendingReturnAndRefund` above always calls `approveReturn`
+			// internally, so org B's return ends up "Completed" exactly like
+			// org A's, not "Pending". Both isolation queries below filter on
+			// `state: "Completed"`, which is what this fixture actually
+			// exercises: state-filtered org isolation, not a Pending-vs-
+			// Completed state-coverage comparison.
 			await pos.openRegister({
 				actorUserId: returnsBase.actorUserId,
 				correlationId: returnsBase.correlationId,

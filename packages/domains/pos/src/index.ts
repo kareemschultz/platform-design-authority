@@ -4617,13 +4617,25 @@ export function createPosService(options: PosServiceOptions) {
 			return refundView(record);
 		},
 
+		/** WS3 remediation R3b cycle 1 (adversarial re-review): `locationId` is
+		 * optional and, like `approveCashVariance`'s identical parameter,
+		 * MUST be threaded by every caller that has an active
+		 * location-scoped context — `repository.getSession` already treats
+		 * `undefined` as a no-op filter (R2, Finding B), so an org-wide
+		 * caller passing nothing is unaffected. Before this fix neither
+		 * application-layer preview read below (`getCashVariance`,
+		 * `getRegisterSession`) could pass a location at all, so a
+		 * location-scoped approver could read (though not approve) another
+		 * location's full session detail — expected cash, variance amount —
+		 * by ID. */
 		async getRegisterSession(
 			tenantId: string,
 			organizationId: string,
-			sessionId: string
+			sessionId: string,
+			locationId?: string
 		): Promise<RegisterSessionView> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getSession(tenantId, organizationId, sessionId)
+				repository.getSession(tenantId, organizationId, sessionId, locationId)
 			);
 			if (!record) {
 				throw new PosError("not_found", "Register session was not found");
@@ -5991,7 +6003,8 @@ export function createPosApplication(options: {
 			return options.service.getRegisterSession(
 				context.tenantId,
 				context.organizationId,
-				input.varianceId
+				input.varianceId,
+				context.locationId
 			);
 		},
 		/** WS3 remediation R3, Finding I. */
@@ -6102,7 +6115,8 @@ export function createPosApplication(options: {
 			return options.service.getRegisterSession(
 				context.tenantId,
 				context.organizationId,
-				input.registerSessionId
+				input.registerSessionId,
+				context.locationId
 			);
 		},
 		/** WS3 remediation R3, Finding I: pre-commit consequence preview for
@@ -6193,7 +6207,24 @@ export function createPosApplication(options: {
 		 * non-zero close variance awaits approval, so filtering to that
 		 * state IS the pending-variance queue (see
 		 * `listCashVariancesContract`'s doc comment in `packages/contracts/
-		 * platform-api`). */
+		 * platform-api`).
+		 *
+		 * WS3 remediation R3b cycle 1 (adversarial re-review): unlike every
+		 * other by-ID read/write in this file, `pos_register_session` is the
+		 * ONE Item-7 queue resource that actually carries `locationId`
+		 * (`packages/persistence/pos-postgres/src/schema/pos.ts`), and
+		 * `approveCashVariance`'s own write path already threads
+		 * `context.locationId` into `repository.getSession` so a
+		 * location-scoped approver cannot approve another location's
+		 * session. This read path must enforce the identical boundary: when
+		 * the caller's active context IS location-scoped,
+		 * `context.locationId` — never a client-supplied value, which would
+		 * let a location-scoped actor simply ask for a different location —
+		 * ALWAYS wins. Only an org-wide actor (no `context.locationId`) may
+		 * use `input.filters.locationId` to narrow the queue; that is a
+		 * convenience narrowing, not a scope escalation, since such an actor
+		 * could already see every location's sessions with no filter at
+		 * all. */
 		async listCashVariances(input: {
 			actorUserId: string;
 			contextId: string;
@@ -6216,7 +6247,10 @@ export function createPosApplication(options: {
 				context.tenantId,
 				context.organizationId,
 				input.page,
-				input.filters
+				{
+					locationId: context.locationId ?? input.filters?.locationId,
+					state: input.filters?.state,
+				}
 			);
 		},
 		/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses

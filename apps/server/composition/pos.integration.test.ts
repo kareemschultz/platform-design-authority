@@ -905,6 +905,130 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 		expect(idsB).not.toContain(closingA.id);
 	});
 
+	/**
+	 * WS3 remediation R3b cycle 1 (adversarial re-review of Item 7): the
+	 * test above only exercises `pos.listSessions` — the SERVICE layer —
+	 * directly, never the `listCashVariances` APPLICATION handler where
+	 * `createPosApplication`'s `authorize()` resolves `context.locationId`
+	 * (the actual location-scoping mechanism). That handler previously
+	 * forwarded `input.filters` verbatim to `service.listSessions` and never
+	 * read `context.locationId` at all.
+	 *
+	 * RED (stated explicitly, not just asserted): before this fix, a
+	 * location-A-scoped actor calling `listCashVariances` with the UI's real
+	 * request shape — `{state:"Closing"}`, no client-supplied `locationId`,
+	 * exactly what `PendingVariancesQueue` sends — would have received BOTH
+	 * `closingA` and `closingB` in its queue, because the handler dropped
+	 * `context.locationId` on the floor and passed only the client filter
+	 * through. The first assertion below (`idsA` excluding `closingB`) is
+	 * the one that would have failed against the pre-fix handler.
+	 */
+	test("listCashVariances, called through the application layer with a location-scoped active context, excludes another location's Closing session in the SAME organization — and a client-supplied locationId filter cannot override the server-derived scope", async () => {
+		const pos = service();
+		const tenantId = "tenant_pos_variance_list_loc_isolation";
+		const organizationId = "organization_pos_variance_list_loc";
+		const locA = "location_pos_variance_list_loc_a";
+		const locB = "location_pos_variance_list_loc_b";
+		const registerA = "register_pos_variance_list_loc_a";
+		const registerB = "register_pos_variance_list_loc_b";
+
+		async function openAndCreateVariance(
+			locationId: string,
+			registerId: string,
+			keyPrefix: string
+		) {
+			await pos.openRegister({
+				actorUserId: base.actorUserId,
+				correlationId: base.correlationId,
+				currency: "GYD",
+				idempotencyKey: `${keyPrefix}-open`,
+				locationId,
+				openingFloat: { amountMinor: 10_000, currency: "GYD" },
+				organizationId,
+				registerId,
+				tenantId,
+			});
+			return pos.closeRegister({
+				actorUserId: base.actorUserId,
+				correlationId: base.correlationId,
+				countedCash: { amountMinor: 9500, currency: "GYD" },
+				idempotencyKey: `${keyPrefix}-close`,
+				organizationId,
+				registerId,
+				tenantId,
+			});
+		}
+
+		const closingA = await openAndCreateVariance(
+			locA,
+			registerA,
+			"variance-list-loc-isolation-a"
+		);
+		const closingB = await openAndCreateVariance(
+			locB,
+			registerB,
+			"variance-list-loc-isolation-b"
+		);
+		expect(closingA.state).toBe("Closing");
+		expect(closingB.state).toBe("Closing");
+
+		function applicationScopedTo(locationId?: string) {
+			return createPosApplication({
+				activeContexts: {
+					requireActiveContext: () =>
+						Promise.resolve({ locationId, organizationId, tenantId }),
+				},
+				entitlements: { requireEntitlement: () => Promise.resolve() },
+				permissions: { requirePermission: () => Promise.resolve() },
+				service: pos,
+			});
+		}
+
+		const appA = applicationScopedTo(locA);
+		const queueA = await appA.listCashVariances({
+			actorUserId: "variance_list_loc_actor_a",
+			contextId: "context_pos_variance_list_loc_a",
+			filters: { state: "Closing" },
+			page: { limit: 50 },
+			sessionId: "session_pos_variance_list_loc_a",
+		});
+		const idsA = queueA.items.map((item) => item.id);
+		expect(idsA).toContain(closingA.id);
+		expect(idsA).not.toContain(closingB.id);
+
+		// Escalation-proof: even when the actor's OWN client request
+		// explicitly asks for location B, the server-derived location-A
+		// scope still wins — this is what distinguishes the fix from merely
+		// "respecting whatever locationId filter the caller happens to
+		// send."
+		const queueAEscalation = await appA.listCashVariances({
+			actorUserId: "variance_list_loc_actor_a",
+			contextId: "context_pos_variance_list_loc_a_escalate",
+			filters: { locationId: locB, state: "Closing" },
+			page: { limit: 50 },
+			sessionId: "session_pos_variance_list_loc_a_escalate",
+		});
+		const idsAEscalation = queueAEscalation.items.map((item) => item.id);
+		expect(idsAEscalation).toContain(closingA.id);
+		expect(idsAEscalation).not.toContain(closingB.id);
+
+		// An org-wide actor (no active location scope) legitimately sees
+		// every location's pending variances — the fix narrows only when
+		// the ACTOR is location-scoped; it does not break org-wide
+		// visibility.
+		const appOrgWide = applicationScopedTo(undefined);
+		const queueOrgWide = await appOrgWide.listCashVariances({
+			actorUserId: "variance_list_loc_actor_org_wide",
+			contextId: "context_pos_variance_list_loc_org_wide",
+			filters: { state: "Closing" },
+			page: { limit: 50 },
+			sessionId: "session_pos_variance_list_loc_org_wide",
+		});
+		const idsOrgWide = queueOrgWide.items.map((item) => item.id);
+		expect(idsOrgWide).toContain(closingA.id);
+		expect(idsOrgWide).toContain(closingB.id);
+	});
+
 	// -------------------------------------------------------------------
 	// WS3 remediation R3, Finding I: pre-commit consequence-preview reads.
 	// Before this stage `getRegisterSession`/`getCashVariance` did not
@@ -960,6 +1084,107 @@ describe.serial("POS PostgreSQL controlled prototype", () => {
 			id: closing.id,
 			locationId: `${base.locationId}_a`,
 			registerId,
+			state: "Closing",
+		});
+	});
+
+	/**
+	 * WS3 remediation R3b cycle 1 (adversarial re-review of Item 7): the
+	 * test above only proves ORGANIZATION isolation for these two preview
+	 * reads (`service.getRegisterSession(tenantId, organizationId,
+	 * sessionId)` called directly, bypassing the application layer's
+	 * `authorize()`/`context.locationId` entirely). It never constructs a
+	 * location-scoped active CONTEXT and never proves the application
+	 * handlers `getCashVariance`/`getRegisterSession` deny a DIFFERENT
+	 * location's session within the SAME organization.
+	 *
+	 * RED (stated explicitly): before this fix, `service.getRegisterSession`
+	 * did not even accept a `locationId` parameter, and neither application
+	 * handler passed `context.locationId` to it — so a location-A-scoped
+	 * approver/closer reading location B's session by its real known id
+	 * would have received the full record (expected cash, variance amount)
+	 * instead of the governed not_found denial. The two `crossLocation*`
+	 * assertions below are what would have failed (in fact would not have
+	 * compiled, since `getRegisterSession` had no fourth parameter) against
+	 * the pre-fix code.
+	 */
+	test("getCashVariance and getRegisterSession (application-layer preview reads), under a location-scoped active context, deny another location's session by ID even within the SAME organization", async () => {
+		const pos = service();
+		const tenantId = "tenant_pos_preview_loc_isolation";
+		const organizationId = "organization_pos_preview_loc";
+		const locA = "location_pos_preview_loc_a";
+		const locB = "location_pos_preview_loc_b";
+		const registerId = "register_pos_preview_loc_isolation";
+
+		await pos.openRegister({
+			actorUserId: base.actorUserId,
+			correlationId: base.correlationId,
+			currency: "GYD",
+			idempotencyKey: "preview-loc-isolation-open",
+			locationId: locB,
+			openingFloat: { amountMinor: 20_000, currency: "GYD" },
+			organizationId,
+			registerId,
+			tenantId,
+		});
+		const closing = await pos.closeRegister({
+			actorUserId: base.actorUserId,
+			correlationId: base.correlationId,
+			countedCash: { amountMinor: 15_000, currency: "GYD" },
+			idempotencyKey: "preview-loc-isolation-close",
+			organizationId,
+			registerId,
+			tenantId,
+		});
+		expect(closing.state).toBe("Closing");
+
+		function applicationScopedTo(locationId: string) {
+			return createPosApplication({
+				activeContexts: {
+					requireActiveContext: () =>
+						Promise.resolve({ locationId, organizationId, tenantId }),
+				},
+				entitlements: { requireEntitlement: () => Promise.resolve() },
+				permissions: { requirePermission: () => Promise.resolve() },
+				service: pos,
+			});
+		}
+
+		const applicationA = applicationScopedTo(locA);
+		const crossLocationVariance = await captureError(
+			applicationA.getCashVariance({
+				actorUserId: "preview_loc_actor_a",
+				contextId: "context_pos_preview_loc_a_variance",
+				sessionId: "session_pos_preview_loc_a_variance",
+				varianceId: closing.id,
+			})
+		);
+		expect(crossLocationVariance).toMatchObject({ code: "not_found" });
+
+		const crossLocationClosePreview = await captureError(
+			applicationA.getRegisterSession({
+				actorUserId: "preview_loc_actor_a",
+				contextId: "context_pos_preview_loc_a_close",
+				registerSessionId: closing.id,
+				sessionId: "session_pos_preview_loc_a_close",
+			})
+		);
+		expect(crossLocationClosePreview).toMatchObject({ code: "not_found" });
+
+		// The SAME kind of actor, correctly scoped to the session's real
+		// location B, can still read it normally — the fix denies
+		// cross-location access, it does not break legitimate same-location
+		// access.
+		const applicationB = applicationScopedTo(locB);
+		const ownLocationVariance = await applicationB.getCashVariance({
+			actorUserId: "preview_loc_actor_b",
+			contextId: "context_pos_preview_loc_b_variance",
+			sessionId: "session_pos_preview_loc_b_variance",
+			varianceId: closing.id,
+		});
+		expect(ownLocationVariance).toMatchObject({
+			id: closing.id,
+			locationId: locB,
 			state: "Closing",
 		});
 	});

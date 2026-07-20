@@ -160,10 +160,13 @@ jobs:
           # Premium UI source credentials and private download/API URLs (shadcn
           # Studio Pro, Mobbin Pro, Magic UI Pro): CLAUDE.md/AGENTS.md §8
           # prohibits committing these; this is the enforcement, not a
-          # nonexistent lint rule. Scoped to a value assignment, not a bare
-          # mention, so ordinary license-text discussion in comments is not
-          # a false positive.
-          if grep -RInE "(shadcnstudio\.com/(api|download|private)|mobbin\.com/(api|token)|magicui(pro)?\.(com|design)/(download|license|api)|(MOBBIN|STUDIO)_(TOKEN|API|LICENSE)[_A-Z]*\s*[:=]|license[_-]?key\s*[:=])" \
+          # nonexistent lint rule. Scoped to an assigned value that is not a
+          # ${VAR} placeholder, so the governed components.json pattern of
+          # referencing these credentials via environment-variable
+          # interpolation (never a literal value) is not a false positive,
+          # and ordinary license-text discussion in comments is not either.
+          # LC_ALL=C.UTF-8 is required for grep -P (PCRE lookahead).
+          if LC_ALL=C.UTF-8 grep -RInP '(shadcnstudio\.com/(api|download|private)|mobbin\.com/(api|token)|magicui(pro)?\.(com|design)/(download|license|api)|(MOBBIN|STUDIO)_(TOKEN|API|LICENSE)[_A-Z]*"?\s*[:=]\s*(?:"(?!\$\{)|(?!\$|")\S)|license[_-]?key"?\s*[:=]\s*(?:"(?!\$\{)|(?!\$|")\S))' \
             --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.turbo \
             --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock --exclude='*.tsbuildinfo' \
             apps packages ops package.json biome.json turbo.json docker-compose.yml; then

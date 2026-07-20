@@ -356,6 +356,32 @@ A 2026-07-18 delta check found that Studio's public catalog and pinned MCP metad
 
 Preferred Candidate authorizes a bounded normalization prototype only.
 
+### Prototype Approved
+
+### MetricEmptyState
+
+- Status: Prototype Approved
+- User task: Communicate that a metric or dataset has no data yet, with an explanation and optional next-step guidance, on any dashboard or metric surface with a legitimate zero/empty state.
+- Surfaces and roles: Any authenticated dashboard, reporting, or metric-card surface; every role that can view metrics.
+- Risk class: Low — presentation-only, no data mutation, no domain authority.
+- Platform family: Empty, loading, error, and unavailable states (Data, operations, and analytics).
+- Preferred source: shadcn/studio Pro, Dashboard and Application > Empty State.
+- Source item and version: `empty-state-01` (Studio catalog entry dated 2026-03-13); retrieved 2026-07-20 via the shadcn-studio-mcp inspiration-content tool, not the CLI registry install — this repository's `components.json` has no private Studio registry URL configured, and none should ever be committed; the MCP content-fetch route is a sanctioned alternative installation method per Studio's own documentation.
+- Alternative candidates: `empty-state-02` through `empty-state-08` (automation, capacity, chart, and finance-specific variants) remain Researching; not evaluated for this generic metric use case.
+- Why preferred: Composed entirely from the platform's own `Card` primitive and semantic tokens (`text-muted-foreground`); `scripts/validate_ui_governance.py` confirms zero raw palette values.
+- Required modifications: recorded in `evidence/ui-provenance/metric-empty-state.json`'s `modifications` field — parameterized `label`/`value`/`message`/`helperText`/`icon` as props (source hardcoded one specific metric); imports the platform's owned `@meridian/ui-web/components/card` instead of the generic shadcn alias; dropped the source's `page.tsx` route wrapper, since this is a reusable component, not a standalone route.
+- Canonical states: Implements only the empty/no-data state; loading, error, and populated states remain the responsibility of whatever surface composes this component.
+- Accessibility evidence: Not yet performed; pending before Platform Approved promotion.
+- Responsive and density evidence: Not yet performed; pending before Platform Approved promotion.
+- Offline/degraded behavior: Not applicable — presentation-only, no network calls.
+- Performance evidence: Not yet performed; pending.
+- License/provenance record: `evidence/ui-provenance/metric-empty-state.json`.
+- Storybook stories: Not yet written; pending.
+- Tests: Not yet written; pending.
+- Owner: Platform Design Authority
+- Review date: 2026-07-20
+- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, and test evidence), or when a real dashboard surface adopts this component, whichever comes first.
+
 ### Researching
 
 | Candidate | Research value | Boundary before promotion |

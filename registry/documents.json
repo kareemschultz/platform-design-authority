@@ -8172,6 +8172,24 @@
       "declared_depth": null,
       "evidence_state": null,
       "applicable_dimensions": []
+    },
+    {
+      "document_id": "PDA-UX-040",
+      "path": "docs/blueprint/09-UX/COMPONENT_INTAKE_FAST_PATH.md",
+      "title": "Component Intake Fast Path",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-20",
+      "related_adrs": [
+        "ADR-0005",
+        "ADR-0022"
+      ],
+      "review_evidence": null,
+      "document_class": null,
+      "declared_depth": null,
+      "evidence_state": null,
+      "applicable_dimensions": []
     }
   ]
 }

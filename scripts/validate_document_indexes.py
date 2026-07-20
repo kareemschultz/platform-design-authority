@@ -21,7 +21,13 @@ PRODUCT_DOCUMENTATION = REPO_ROOT / "registry" / "product-documentation.json"
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 PUBLIC_ROOT_FILES = ("AGENTS.md", "CLAUDE.md", "README.md")
 PUBLIC_DOCUMENT_ROOTS = ("docs", "apps/docs", "ops")
-AUXILIARY_DOCUMENT_ROOTS = (".agents/skills", ".claude/skills", ".changeset", ".github")
+AUXILIARY_DOCUMENT_ROOTS = (
+    ".agents/skills",
+    ".claude/skills",
+    ".claude/commands",
+    ".changeset",
+    ".github",
+)
 IGNORED_DIRECTORY_NAMES = {
     ".git",
     ".next",

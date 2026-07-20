@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-034
 title: Component Discovery Audit
-version: 0.4.0
+version: 0.4.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-13
@@ -9,6 +9,8 @@ related_adrs: [ADR-0005, ADR-0022]
 ---
 
 # Component Discovery Audit
+
+> **Point-in-time evidence.** Findings, verification results, and conclusions below reflect the platform, dependencies, and vendor catalogs as observed through this document's own dated evidence (most recently reviewed 2026-07-13). Nothing here is re-verified automatically on a later read; re-confirm current state before relying on a dated finding for a new decision. See ADR-0025's evidence-banner amendment for the convention.
 
 ## Executive decision
 

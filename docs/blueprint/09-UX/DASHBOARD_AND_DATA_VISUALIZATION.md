@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-012
 title: Dashboard and Data Visualization
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-19
+last_reviewed: 2026-07-20
 ---
 
 # Dashboard and Data Visualization
@@ -12,6 +12,10 @@ last_reviewed: 2026-07-19
 ## Purpose
 
 Define how operational dashboards, KPI surfaces, charts, tables, alerts, and drill-downs translate business questions and data shape into fast, trustworthy decisions.
+
+## Scope relative to Interactive Analytics and Visualization
+
+This document governs dashboards, KPI surfaces, standard charts/tables, alerts, and drill-downs — the default operational reporting surface. `INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md` (PDA-UX-021) governs deeper interactive analytics (levels L3–L5: analytical canvases, comparison tools, exploratory drill paths) that sit outside the first-slice implementation registry. A surface that needs exploratory, canvas-style interaction beyond this document's baseline is scoped by PDA-UX-021.
 
 ## Core Rule: Data Drives Shape
 

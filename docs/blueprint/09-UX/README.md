@@ -15,7 +15,7 @@ last_reviewed: 2026-07-16
 - [Advanced Interface Patterns](ADVANCED_INTERFACE_PATTERNS.md) — `PDA-UX-011` · Draft
 - [Dashboard and Data Visualization](DASHBOARD_AND_DATA_VISUALIZATION.md) — `PDA-UX-012` · Draft
 - [Forms Selection and Multiselect](FORMS_SELECTION_AND_MULTISELECT.md) — `PDA-UX-013` · Draft
-- [Progressive Disclosure and Complexity Management](PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md) — `PDA-UX-014` · Draft
+- [Progressive Disclosure and Complexity Management](PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md) — `PDA-UX-014` · Superseded (see PDA-UX-037)
 - [Design Tokens and Visual System](DESIGN_TOKENS_AND_VISUAL_SYSTEM.md) — `PDA-UX-015` · Draft
 - [Design System Operations](DESIGN_SYSTEM_OPERATIONS.md) — `PDA-UX-016` · Draft
 - [Component Catalog and State Matrix](COMPONENT_CATALOG_AND_STATE_MATRIX.md) — `PDA-UX-017` · Draft

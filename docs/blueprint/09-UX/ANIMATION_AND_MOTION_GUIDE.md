@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-036
 title: Animation and Motion Guide
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-20
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -15,6 +15,10 @@ related_adrs: [ADR-0005, ADR-0022]
 Meridian motion communicates causality, continuity, status, hierarchy, or spatial change. It is never required to understand or complete an essential task, never substitutes for text or state, and never claims that an operation succeeded before authoritative confirmation.
 
 Operational surfaces default to restrained motion. Marketing may use richer motion within separate accessibility and performance budgets. Premium or generated animation remains Restricted until normalized and accepted.
+
+## Scope relative to Content Design, Localization, and Motion
+
+This document is the authoritative motion specification — timing, easing, causality, and the reduced-motion contract. `CONTENT_DESIGN_LOCALIZATION_AND_MOTION.md` (PDA-UX-018) restates motion's content-facing principle in one paragraph as part of its content/localization scope; where the two differ in phrasing, this document governs. PDA-UX-018 owns product language, terminology, errors, and localization — subjects this document does not cover.
 
 ## Token authority
 

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-021
 title: Interactive Analytics and Visualization
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-20
 ---
 
 # Interactive Analytics and Visualization
@@ -16,6 +16,10 @@ Interactive analytics levels L3–L5 are outside the first-slice implementation 
 Define responsive, accessible, interactive charts, graphs, analytical canvases, insight panels, drill paths, comparison tools, and visualization-to-action workflows across operational dashboards, reports, mobile experiences, and executive workspaces.
 
 This document extends `DASHBOARD_AND_DATA_VISUALIZATION.md`. Metric definitions and analytical ownership remain governed by the Data Platform semantic layer.
+
+## Scope relative to Dashboard and Data Visualization
+
+Standard operational dashboards, KPI surfaces, and first-slice charts/tables are governed by `DASHBOARD_AND_DATA_VISUALIZATION.md` (PDA-UX-012) — read this document only once a surface needs exploratory or canvas-level interaction beyond that baseline.
 
 ## Experience Principle
 

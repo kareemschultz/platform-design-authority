@@ -2370,3 +2370,86 @@ test("online-only WS3 mutations fail closed and remain understandable when conne
 	await page.context().setOffline(false);
 	await page.evaluate(() => window.dispatchEvent(new Event("online")));
 });
+
+/**
+ * WS3 remediation R3b, Item 9 (POS workspace/navigation).
+ *
+ * PRE-FIX: `/operations/pos` was entirely absent from
+ * `OPERATIONS_NAVIGATION`, and `POS_NAVIGATION` (the "Registers / Sales /
+ * Receipts / Returns / Refunds / Deposits / Handoff export" list) was
+ * rendered ONLY on the POS overview page's body as cross-link cards —
+ * never as a persistent nav bar. A cashier or manager reached a deep POS
+ * route (an individual register session or receipt) via a direct URL —
+ * exactly what this test does with `page.goto`, simulating a bookmark,
+ * a shared link, or a reload mid-workflow — with NO POS navigation
+ * rendered at all, and (per `shell.test.ts`'s reproduction) the broader
+ * Operations nav would have shown the wrong "current" section too.
+ *
+ * POST-FIX: `PosNavigation` (mounted once by the nested
+ * `apps/web/src/app/operations/pos/layout.tsx`, so it persists across
+ * in-app navigation within `/operations/pos/*`) is present on a direct
+ * deep link into EITHER route below, and marks EXACTLY ONE link
+ * `aria-current="page"` — the correct one for that specific route, not
+ * "Overview" (which is a path-prefix of every other POS section).
+ */
+test("POS navigation persists on a direct deep link into an individual register session AND an individual receipt, each with exactly one correct current item", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const registerId = `register_deeplink_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+	const { name: productName } = await createActiveProduct(page, "deeplink");
+	await createSaleWithOneLine(
+		page,
+		registerId,
+		registerSessionId,
+		productName,
+		"10.00"
+	);
+	await page.getByLabel("Cash tendered (GYD)").fill("50.00");
+	const completeResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().includes("/rpc/commerce/sales/complete")
+	);
+	await page.getByRole("button", { name: "Complete sale" }).click();
+	const completeResponse = await completeResponsePromise;
+	expect(completeResponse.ok()).toBe(true);
+	const completed = (await completeResponse.json()) as {
+		json: { receiptId: string };
+	};
+
+	// Deep link #1: a fresh navigation directly to the register session
+	// view (not reached by clicking through the app in this same page
+	// load).
+	await page.goto(`/operations/pos/registers/${registerSessionId}`);
+	await expect(
+		page.getByRole("heading", { name: `Register ${registerId}` })
+	).toBeVisible();
+	const posNavRegisters = page.getByRole("navigation", { name: "POS" });
+	await expect(posNavRegisters).toBeVisible();
+	const currentRegisters = posNavRegisters.locator("[aria-current='page']");
+	await expect(currentRegisters).toHaveCount(1);
+	await expect(currentRegisters).toHaveText("Registers");
+	// The persistent workspace shell (org/location context) also survives
+	// the deep link, not just the POS sub-nav.
+	await expect(
+		page.getByRole("region", { name: "Current workspace" })
+	).toBeVisible();
+
+	// Deep link #2: a fresh navigation directly to the receipt view.
+	await page.goto(
+		`/operations/pos/receipts/${encodeURIComponent(completed.json.receiptId)}`
+	);
+	await expect(
+		page.getByRole("heading", { exact: true, name: "Receipt" })
+	).toBeVisible();
+	const posNavReceipts = page.getByRole("navigation", { name: "POS" });
+	await expect(posNavReceipts).toBeVisible();
+	const currentReceipts = posNavReceipts.locator("[aria-current='page']");
+	await expect(currentReceipts).toHaveCount(1);
+	await expect(currentReceipts).toHaveText("Receipts");
+	await expect(
+		page.getByRole("region", { name: "Current workspace" })
+	).toBeVisible();
+});

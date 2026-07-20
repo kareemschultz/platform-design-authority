@@ -9,8 +9,18 @@ export const ADMINISTRATION_NAVIGATION = [
 	{ href: "/administration/audit", label: "Audit" },
 ] as const;
 
+// WS3 remediation R3b, Item 9 (POS workspace/navigation). Before this fix,
+// "/operations/pos" was ENTIRELY ABSENT from this list — every POS route
+// (registers, sales, receipts, returns, refunds, deposits, exports) had
+// no matching entry, so `OperationsNavigation`'s mobile `<select>` (which
+// falls back to `OPERATIONS_NAVIGATION[0]`, i.e. "Overview", whenever
+// nothing matches) showed the WRONG current section on any POS deep
+// route, and the desktop links showed NO current section at all — the
+// exact "exactly one correct current item on deep routes" gap this item
+// names.
 export const OPERATIONS_NAVIGATION = [
 	{ href: "/operations", label: "Overview" },
+	{ href: "/operations/pos", label: "POS" },
 	{ href: "/operations/products", label: "Products" },
 	{ href: "/operations/inventory", label: "Inventory" },
 	{ href: "/operations/imports", label: "Imports" },
@@ -105,4 +115,41 @@ export function isNavigationCurrent(pathname: string, href: string): boolean {
 	return href === "/administration" || href === "/operations" || href === "/"
 		? pathname === href
 		: pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/**
+ * WS3 remediation R3b, Item 9 (POS workspace/navigation — "exactly one
+ * correct current item on deep routes").
+ *
+ * `isNavigationCurrent` is a per-item prefix check: when a navigation
+ * list contains NESTED hrefs (e.g. `POS_NAVIGATION`'s "Overview" at
+ * `/operations/pos` is a path-prefix of every other POS section —
+ * `/operations/pos/sales`, `/operations/pos/returns`, etc.), calling it
+ * independently per item lets MULTIPLE items match the same pathname at
+ * once (a deep route like `/operations/pos/sales/abc123` matches BOTH
+ * "Overview" and "Sales"'s prefix check) — a nav bar that marked every
+ * matching link `aria-current="page"` would show more than one "current"
+ * item simultaneously, and a `<select>` naively picking the first match
+ * could show the wrong one.
+ *
+ * This resolves EXACTLY ONE current item per navigation list: among all
+ * items whose href matches (`isNavigationCurrent`), the one with the
+ * LONGEST (most specific) href wins — `/operations/pos/sales` beats
+ * `/operations/pos` for a `/operations/pos/sales/abc123` pathname. Falls
+ * back to `items[0]` (matching the prior fallback behavior) when nothing
+ * matches at all.
+ */
+export function currentNavigationItem<T extends { href: string }>(
+	pathname: string,
+	items: readonly T[]
+): T {
+	const matches = items.filter((item) =>
+		isNavigationCurrent(pathname, item.href)
+	);
+	if (matches.length === 0) {
+		return items[0];
+	}
+	return matches.reduce((longest, candidate) =>
+		candidate.href.length > longest.href.length ? candidate : longest
+	);
 }

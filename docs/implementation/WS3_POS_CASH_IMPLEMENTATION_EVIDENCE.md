@@ -198,6 +198,66 @@ Every required cell of `WS3_POS_CASH_IMPLEMENTATION_PLAN.md` §11's per-capabili
 
 ## 12. Change log
 
+- 2026-07-20 — v0.2.1 WS3 remediation R4 manual assistive-technology disclosure
+  (second independent review's item 13, verbatim: "the existing 156/156
+  matrix and narrow axe scans do not establish correctness or WCAG
+  conformance... add a dated entry... explicitly disclosing which
+  accessibility claims still rest on automated-only evidence pending a
+  real manual assistive-technology review"). This entry is that dated
+  disclosure. `apps/web/e2e/ws3-pos.spec.ts` gained five close-register
+  tests this stage — all-settled-states axe-core scans (empty form,
+  validation error, confirm-dialog-open, success), a keyboard-only
+  approval-commit flow (zero mouse clicks, `Tab`-only focus onto the
+  destructive control), a 200%/400% zoom reflow check (WCAG 1.4.10, no
+  horizontal scroll or lost controls), a `forced-colors: active`
+  render/operability check, and a `prefers-reduced-motion: reduce`
+  animation-suppression check comparing the SAME dialog element WITH and
+  WITHOUT the emulation — now cited directly by the
+  `ws3-browser-accessibility-hardened` evidence entry below. **Every one
+  of these five tests, and the pre-existing `ws3-browser-accessibility`
+  entry's two tests, is AUTOMATED evidence only** (`axe-core` via
+  `@axe-core/playwright`, Playwright's `page.emulateMedia`/viewport
+  emulation, and scripted Tab-key sequences) — none of it is, or is
+  claimed to be, a manual assistive-technology review. **No manual
+  assistive-technology review (a real screen reader such as NVDA/JAWS/
+  VoiceOver operated by a person, or a qualified external accessibility
+  auditor) has been performed against any WS3 surface as of this entry's
+  date.** This is the same open item WS1/WS2 already recorded and §11
+  above already lists ("qualified external accessibility/security review
+  remain open") — this entry exists to make the automated-vs-manual
+  distinction explicit and dated for accessibility specifically, per the
+  second review's own wording, rather than leave it implicit inside a
+  general residual-limits bullet. The `ws3-manual-at-review-disclosure`
+  evidence entry below is a `deferred-pending` disclosure attached
+  alongside the existing behavioral accessibility evidence — it does not
+  and must not downgrade the real, passing automated test coverage to
+  "deferred"; it discloses the SEPARATE, still-open manual-review gap
+  honestly, without claiming manual coverage that has not happened.
+
+  **Also noted while in this document (not re-derived, cited for
+  honesty):** §6's `PR5 Playwright e2e (WS3 spec files only)` row still
+  reads its original v0.1.0 `44/44` figure. `apps/web/e2e/ws3-pos.spec.ts`
+  and `ws3-pos-perf.spec.ts` now contain 39 unique tests (37 + 2, grep-
+  counted directly from the two files at this entry's date), which at two
+  Playwright projects (`chromium-desktop`/`chromium-mobile`) is **78, not
+  44** — R3b/R4/R4-cycle-2/R4-cycle-3 added tests across several stages
+  without anyone updating this specific §6 cell, the same class of drift
+  §12's own `475 files` entry already documents for a different lane. Per
+  this document's own "preserve historical claims through correction, do
+  not silently edit" rule, the `44/44` cell above is left as-is rather
+  than hand-edited to a number this entry did not itself freshly
+  reproduce end-to-end in the exact §6 table format; `78/78` is the
+  figure independently reproduced by this cycle's own combined
+  `bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts
+  ws3-pos-perf.spec.ts` run (see this stage's disposition in
+  `remediation-dispositions.md` for the exact reproduction). The
+  `Docker stack validation (full apps/web e2e...)` row's `76/76` is
+  additionally stale for the same structural reason but was not
+  re-derived here — re-deriving it requires running the FULL `apps/web`
+  e2e suite (every spec file, not just WS3's), which is outside the file
+  surface and gate list this cycle actually re-ran end-to-end; leaving it
+  unfixed rather than guessing.
+
 - 2026-07-20 — v0.2.0 WS3 remediation R4 (P2 items 11 and 13; see
   `remediation-dispositions.md` for the full R4 disposition set):
   **Item 13 (lint source-file count drift)**: §6's `475 files` cell above

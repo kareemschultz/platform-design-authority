@@ -716,6 +716,61 @@
       ]
     },
     {
+      "id": "ws3-browser-accessibility-hardened",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "contains": [
+        "accessibility (all settled states): close-register's empty form, validation-error, confirm-dialog-open, and success states each pass automated WCAG A/AA with zero violations",
+        "keyboard-only close-register: the approval commit itself completes with ZERO mouse clicks, landing on the destructive control only via Tab, never by default focus",
+        "200% and 400% zoom reflow (WCAG 1.4.10): close-register's form and confirm dialog show no horizontal scroll and keep key controls reachable",
+        "forced-colors mode (Windows High Contrast equivalent): close-register still renders and stays operable",
+        "prefers-reduced-motion actually suppresses the ConsequencePreviewDialog's real CSS animation, proven by comparing WITH vs WITHOUT the emulation on the SAME dialog element shape"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.register-management",
+        "commerce.shift-management"
+      ],
+      "dimensions": [
+        "accessibility_and_responsive"
+      ]
+    },
+    {
+      "id": "ws3-manual-at-review-disclosure",
+      "kind": "deferred-pending",
+      "path": "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+      "contains": [
+        "WS3 remediation R4 manual assistive-technology disclosure"
+      ],
+      "command": "n/a — disclosed gap, not an executable test; see the dated v0.2.1 change-log entry",
+      "runtimes": [
+        "n/a (disclosed gap, not an executable runtime)"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.mobile-pos",
+        "commerce.offline-sales",
+        "commerce.order-management",
+        "commerce.pos",
+        "commerce.receipts",
+        "commerce.refunds",
+        "commerce.register-management",
+        "commerce.returns",
+        "commerce.shift-management"
+      ],
+      "dimensions": [
+        "accessibility_and_responsive"
+      ]
+    },
+    {
       "id": "ws3-browser-offline",
       "kind": "live-browser-test",
       "path": "apps/web/e2e/ws3-pos.spec.ts",

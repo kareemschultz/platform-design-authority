@@ -103,6 +103,7 @@ def build_gates() -> list[Gate]:
         "test_validate_capability_readiness.py",
         "test_validate_ratification_waves.py",
         "test_validate_operational_readiness.py",
+        "test_repository_scanning.py",
     ):
         gates.append(Gate(script, _unittest(script), "docs-tests"))
 

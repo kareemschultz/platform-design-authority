@@ -3,13 +3,6 @@
   "status": "draft",
   "exemptions": [
     {
-      "path": "docs/blueprint/20-Strategy/BEACHHEAD_EVIDENCE_LOG.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional contributor, prototype, or evidence-log file.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
       "path": "CLAUDE.md",
       "rule": "document_front_matter",
       "reason": "Tool-discovery contract requires conventional root filename and minimal parser-safe content; authority is derived from linked governed documents.",

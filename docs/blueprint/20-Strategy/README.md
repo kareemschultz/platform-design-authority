@@ -35,6 +35,7 @@ last_reviewed: 2026-07-16
 - [Intellectual Property Licensing and Repository Policy](INTELLECTUAL_PROPERTY_LICENSING_AND_REPOSITORY_POLICY.md) — `PDA-STR-029` · Draft
 - [Beachhead Customer Evidence Collection Kit](BEACHHEAD_CUSTOMER_EVIDENCE_COLLECTION_KIT.md) — `PDA-STR-030` · Draft
 - [Third-Party Notices, SBOM, and Asset Provenance Baseline](THIRD_PARTY_NOTICES_SBOM_AND_ASSET_PROVENANCE.md) — `PDA-STR-031` · Draft
+- [Beachhead Evidence Log](BEACHHEAD_EVIDENCE_LOG.md) — `PDA-STR-033` · Draft
 
 ## Related Authority
 

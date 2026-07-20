@@ -4784,10 +4784,10 @@
       "document_id": "PDA-ENG-019",
       "path": "docs/blueprint/03-Business-Engines/BUSINESS_DNA_ENGINE.md",
       "title": "Business DNA Engine",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-20",
       "related_adrs": [
         "ADR-0008"
       ],
@@ -7259,10 +7259,10 @@
       "document_id": "PDA-STR-012",
       "path": "docs/blueprint/20-Strategy/BUSINESS_DNA_ENGINE.md",
       "title": "Business DNA Strategy Rationale",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-11",
+      "last_reviewed": "2026-07-20",
       "related_adrs": [],
       "review_evidence": null,
       "document_class": null,
@@ -7589,6 +7589,21 @@
         "external-dependencies",
         "references-and-traceability"
       ]
+    },
+    {
+      "document_id": "PDA-STR-033",
+      "path": "docs/blueprint/20-Strategy/BEACHHEAD_EVIDENCE_LOG.md",
+      "title": "Beachhead Evidence Log",
+      "version": "0.1.0",
+      "status": "Draft",
+      "owner": "Founder/Product",
+      "last_reviewed": "2026-07-18",
+      "related_adrs": [],
+      "review_evidence": null,
+      "document_class": null,
+      "declared_depth": null,
+      "evidence_state": null,
+      "applicable_dimensions": []
     },
     {
       "document_id": "PDA-TST-001",

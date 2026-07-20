@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0025
 title: Normalize the Monorepo and Documentation Layout
-version: 0.1.0
+version: 0.1.1
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-20
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0016, ADR-0020, ADR-0021]
@@ -132,6 +132,23 @@ Before merge, rollback means abandoning the migration branch. After merge, rever
 - Compose configuration, Docker image builds, live stack health, and synthetic authentication
 - Fumadocs navigation, type generation, and production build under `apps/docs`
 
+## Amendment (2026-07-20): Document Supersession and Point-in-Time Evidence Conventions
+
+This ADR governs where documentation lives; this amendment records two hygiene conventions for how a document's own front matter and body communicate its currency, adopted during the governance remediation program's Phase 7 curation pass (first applied to `PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md` and the `COMPONENT_DISCOVERY_AUDIT.md` / `SHADCN_STUDIO_EVALUATION.md` / `WS1_THIN_APPLICATION_SHELL_IMPLEMENTATION_EVIDENCE.md` trio).
+
+**Document supersession (tombstone).** When one document's content is folded into another and it stops being cited for current guidance:
+
+1. Set the losing document's front matter `status: Superseded` and add a `superseded_by: <document_id>` field naming the winning document.
+2. Add a blockquote immediately after the H1 stating the supersession date, the winning document's ID and filename, and what specifically moved.
+3. Retain the file — it is not deleted; historical citation and audit trail depend on it staying in place.
+4. Update the file's own README/index row to show `Superseded` in place of its prior lifecycle status.
+
+The winning document states, in its own prose, that it absorbed the loser and what changed as a result, so a reader arriving at either document understands the relationship without cross-referencing this ADR.
+
+**Point-in-time evidence banners.** An audit, evaluation, or implementation-evidence document (as distinct from living guidance) that records findings dated to a specific verification pass carries a blockquote immediately after its H1, noting that its conclusions reflect the platform and vendor catalogs as of its `last_reviewed` date and are not re-verified automatically on a later read. This does not change the document's `status` or lifecycle — it remains `Draft` evidence, dated and honest about its own currency, per CLAUDE.md §4's instruction not to promote status because a document is long, implemented, or generated.
+
+Neither convention promotes this ADR's own `Proposed` status, and neither claims founder, legal, or architecture-review authority beyond what this ADR already carries; they are documentation-hygiene practice, adopted the same way any 09-UX curation edit is.
+
 ## References
 
 - `docs/implementation/ROOT_DOCUMENT_MIGRATION_PROPOSAL.md`
@@ -153,3 +170,4 @@ Before merge, rollback means abandoning the migration branch. After merge, rever
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial proposed layout decision and migration controls |
+| 0.1.1 | 2026-07-20 | Platform Design Authority | Amendment recording the document-supersession (tombstone) and point-in-time-evidence-banner conventions |

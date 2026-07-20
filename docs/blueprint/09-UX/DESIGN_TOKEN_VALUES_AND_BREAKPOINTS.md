@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.2.2
+version: 0.2.3
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-20
 ---
 
 # Design Token Values and Breakpoints
@@ -14,6 +14,10 @@ last_reviewed: 2026-07-17
 Define provisional normative values for the first web and native design-system implementation. These values operationalize `DESIGN_TOKENS_AND_VISUAL_SYSTEM.md` and are represented machine-readably in `registry/design-tokens.json`.
 
 Values are pre-implementation defaults and may change through design-system governance after usability, accessibility, performance, and white-label testing.
+
+## Scope relative to Design Tokens and Visual System
+
+`DESIGN_TOKENS_AND_VISUAL_SYSTEM.md` (PDA-UX-015) owns the token roles and the principles behind them; it does not carry current values. This document owns the values themselves — read it for what a token role is currently set to, not for why the role exists.
 
 ## Token Format
 

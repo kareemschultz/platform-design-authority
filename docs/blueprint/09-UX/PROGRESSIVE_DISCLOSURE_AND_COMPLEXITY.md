@@ -1,13 +1,16 @@
 ---
 document_id: PDA-UX-014
 title: Progressive Disclosure and Complexity Management
-version: 0.1.0
-status: Draft
+version: 0.1.1
+status: Superseded
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-20
+superseded_by: PDA-UX-037
 ---
 
 # Progressive Disclosure and Complexity Management
+
+> Superseded on 2026-07-20 by PDA-UX-037 (`PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md`). This document's distinct content — general rules, data density, role/entitlement/personalization adaptation, onboarding, and evaluation — is folded into PDA-UX-037. This dated file remains historical evidence only; do not cite it for current guidance.
 
 ## Purpose
 

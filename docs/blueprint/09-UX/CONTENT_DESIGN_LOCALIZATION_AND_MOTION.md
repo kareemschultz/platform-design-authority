@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-018
 title: Content Design Localization and Motion
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-20
 ---
 
 # Content Design, Localization, and Motion
@@ -35,6 +35,8 @@ Externalize text, formats, currencies, units, names, addresses, dates, pluraliza
 Customer terminology and brand voice remain within approved meaning, legal, security, and accessibility constraints.
 
 ## Motion
+
+`ANIMATION_AND_MOTION_GUIDE.md` (PDA-UX-036) is the authoritative motion specification; this section states the content-facing principle only and defers to PDA-UX-036 on any conflict.
 
 Motion explains continuity, hierarchy, progress, or state change. It must not delay frequent work, imply success before confirmation, or ignore reduced-motion preferences.
 

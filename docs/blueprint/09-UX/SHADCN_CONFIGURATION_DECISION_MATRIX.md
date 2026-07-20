@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-028
 title: shadcn Configuration Decision Matrix
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-20
 verified_as_of: 2026-07-12
 related_adrs: [ADR-0005, ADR-0022]
 ---
@@ -127,6 +127,20 @@ Rhea's compactness is a component geometry starting point, not permission to shr
 | Touch/POS | POS, scanners, warehouses, tablets, coarse pointer | 48 px minimum frequent targets, larger totals/actions, glove/scanner tests, and no hover dependency. |
 
 Density is selected by surface and input context, not by globally scaling Tailwind spacing or browser detection alone. A user preference may increase density/size but cannot remove evidence, labels, state, or required controls.
+
+## Studio Theme Generator and Theme Intake (added 2026-07-20)
+
+shadcn Studio Pro's theme generator and its `@ss-themes` registry are the **preferred theme-crafting tools** for this platform — for evolving the platform default theme and for producing white-label tenant theme candidates alike. Heavy use is expected and encouraged. What they are not, and cannot become, is the design-system **authority**: §8's "a preset is not design-system authority" and this document's own purpose sentence apply to a Studio theme exactly as they apply to a shadcn/create preset. The platform's semantic token roles (`registry/design-tokens.json`, `packages/ui-web/core/src/styles/globals.css`) remain the product contract — which is precisely what makes white-label tenant theming possible at all: a theme is a set of values mapped into platform-owned roles, never a replacement for the roles themselves.
+
+The governed fast path for a Studio-crafted theme — designed so the governed route is also the fastest route:
+
+1. **Craft** in the Studio theme generator (or select an `@ss-themes` entry as the starting point). Iterate freely there; nothing at this stage touches the repository.
+2. **Land as a candidate.** Export/fetch the theme's CSS variable values. They enter the repository only as remapped values on the platform's existing semantic roles in `packages/ui-web/core/src/styles/globals.css` (an allowlisted token source in `scripts/validate_ui_governance.py`) — Studio's own variable names are mapped, not adopted, the same rule Base Color: Neutral already applies to generator palettes.
+3. **Validate** before any adoption: contrast on every remapped role pair, light/dark/high-contrast/forced-colors behavior, and the status-color separation rules (an accent theme must not repaint financial success, pending, or error semantics). The existing Prototype Gates list is the reference checklist; a tenant-candidate theme additionally runs the "deliberately difficult white-label themes" gate.
+4. **Record** the decision as a row or amendment in this document (which theme, from what Studio source, for which scope — platform default vs. named tenant candidate), so the choice is reviewable and reversible. `evidence/ui-provenance/` records the source item when the theme derives from a paid `@ss-themes` entry.
+5. **Never per-surface.** A theme applies at the token layer for a whole application (or a whole tenant), never as an inline install scoped to one page or component — that is the "ungoverned re-theming" failure mode this section exists to prevent, and it is what the skills' refinement guardrail routes here.
+
+The `/rui` theme-install capability and `npx shadcn add @ss-themes/<name>` are the *mechanics* of step 2, not a bypass of steps 3–4. An agent may run the full path end-to-end in one session — craft, land, validate, record — provided all four steps happen; what it may not do is stop after step 2.
 
 ## Scaffold and Monorepo Rules
 

@@ -131,6 +131,7 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 - Agents must search platform-owned components first, record provenance, review diffs, avoid duplicate primitive systems, and never let imported UI redefine domain, permission, entitlement, payment, privacy, or workflow semantics.
 - Never commit premium credentials, license keys, private download URLs, or prohibited redistributable source.
 - Every component and workflow covers canonical states, accessibility, responsive behavior, offline behavior, performance, and white label.
+- Every agent implementing or modifying frontend or UI/UX code invokes the `frontend-implementation` skill before writing it; `frontend-architecture` governs pre-implementation planning.
 - `ui-pattern-audit` reviews pattern selection; `accessibility-review` performs formal accessibility review.
 
 ## 9. First-Slice Scope

@@ -27,6 +27,13 @@ IGNORED_DIRECTORY_NAMES = {
     ".next",
     ".source",
     ".turbo",
+    # Coding agents create full repository checkouts under .codex/ and
+    # .claude/worktrees/. They are gitignored working state, not repository
+    # content, and each carries a complete copy of docs/ that would otherwise
+    # be reported thousands of times over. "worktrees" is pruned by name so
+    # that the governed .claude/skills auxiliary root is still scanned.
+    ".codex",
+    "worktrees",
     "coverage",
     "dist",
     "node_modules",

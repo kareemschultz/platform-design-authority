@@ -141,6 +141,11 @@ jobs:
       - name: Generated contract freshness
         run: python scripts/generate_contracts.py --check
 
+      - name: UI governance (provenance, catalog, palette)
+        run: |
+          python -m unittest scripts/test_validate_ui_governance.py
+          python scripts/validate_ui_governance.py
+
       - name: Secret and prohibited surface scan
         shell: bash
         run: |

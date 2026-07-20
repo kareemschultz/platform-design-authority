@@ -26,7 +26,7 @@ This document governs component-source selection and preferred implementation pa
 - `SHADCN_CONFIGURATION_DECISION_MATRIX.md` for the approved shadcn bootstrap
 - `TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md` for source, license, provenance, and normalization rules
 - `ADVANCED_INTERFACE_PATTERNS.md` for pattern choice
-- `PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md` for disclosure rules
+- `PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md` for disclosure rules
 - `DESIGN_TOKENS_AND_VISUAL_SYSTEM.md` and `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md` for visual authority
 - `STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md` for implementation evidence
 - `FIRST_SLICE_UX_AND_ACCESSIBILITY.md` for first-slice acceptance

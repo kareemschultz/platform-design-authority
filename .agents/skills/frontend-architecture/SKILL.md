@@ -22,7 +22,7 @@ Do not use undocumented `paths` metadata. Codex discovers project skills from `.
 - `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
 - `docs/blueprint/09-UX/ADVANCED_INTERFACE_PATTERNS.md`
 - `docs/blueprint/09-UX/FORMS_SELECTION_AND_MULTISELECT.md`
-- `docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
+- `docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md`
 - `docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
 - `docs/blueprint/09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md`
 - `docs/blueprint/09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`

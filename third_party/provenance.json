@@ -66,6 +66,26 @@
       ]
     },
     {
+      "id": "source.shadcn-studio.empty-state-01",
+      "kind": "copied-source",
+      "source_name": "shadcn/studio Pro",
+      "source_version": "Studio catalog entry dated 2026-03-13, retrieved 2026-07-20 via MCP get-inspiration-block-content",
+      "source_url": "https://shadcnstudio.com",
+      "declared_upstream_license": "NOASSERTION",
+      "upstream_license_url": null,
+      "license_conclusion": "NOASSERTION",
+      "notice_status": "included-in-generated-baseline",
+      "permitted_use_evidence": {
+        "status": "not-established-for-exact-assets",
+        "references": ["evidence/ui-provenance/metric-empty-state.json"]
+      },
+      "distribution_status": "legal-review-required",
+      "modifications": "Studio Pro block empty-state-01 was normalized into a reusable platform component: renamed to MetricEmptyState, hardcoded content parameterized as props, Card import switched to the platform-owned package, and the source's route wrapper dropped. Full change list in the referenced UI provenance record.",
+      "files": [
+        "packages/ui-web/core/src/components/metric-empty-state.tsx"
+      ]
+    },
+    {
       "id": "asset.expo-template.prototype-icons",
       "kind": "scaffold-asset",
       "source_name": "Expo template through Better-T-Stack",

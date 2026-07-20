@@ -70,6 +70,11 @@ jobs:
           python -m unittest scripts/test_generate_registries.py
           python scripts/generate_registries.py --check
 
+      - name: Test and validate UI governance (provenance, catalog, palette)
+        run: |
+          python -m unittest scripts/test_validate_ui_governance.py
+          python scripts/validate_ui_governance.py
+
       - name: Test and validate codename and public-brand boundary
         run: |
           python -m unittest scripts/test_validate_codename_boundary.py

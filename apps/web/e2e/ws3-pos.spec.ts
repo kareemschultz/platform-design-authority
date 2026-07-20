@@ -2531,3 +2531,85 @@ test("dirty sale cart: an in-app navigation click while dirty is confirmed (canc
 		page.getByRole("heading", { exact: true, name: "Registers" })
 	).toBeVisible();
 });
+
+/**
+ * WS3 remediation R3b, Item 12 (partial — print composition).
+ *
+ * PRE-FIX: the receipt view had NO print-specific hiding for the app's
+ * persistent chrome (Header, OperationsNavigation, PosNavigation, the
+ * workspace-context switcher bar) or for the receipt page's own
+ * developer-facing description text — only the Reissue/Void action
+ * sections were already `print:hidden`. A real print (or print-to-PDF)
+ * of this page would have included the site header, both navigation
+ * bars, and the workspace switcher alongside the receipt.
+ *
+ * POST-FIX: this test emulates PRINT media (Playwright's
+ * `page.emulateMedia`, which applies the SAME `@media print` CSS rules
+ * a real browser print dialog would) and asserts the chrome elements
+ * are genuinely not visible while the receipt content remains visible —
+ * then goes one step further than a CSS-only check by actually
+ * generating a real PDF via `page.pdf()` (a real Chromium print
+ * pipeline run, not a visual/screenshot inspection) and asserting it
+ * produced non-trivial output.
+ */
+test("receipt print composition: chrome is hidden under print media, and a real print-to-PDF succeeds", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const registerId = `register_print_${Date.now()}`;
+	const registerSessionId = await openRegister(page, registerId, "100.00");
+	const { name: productName } = await createActiveProduct(page, "printtest");
+	await createSaleWithOneLine(
+		page,
+		registerId,
+		registerSessionId,
+		productName,
+		"15.00"
+	);
+	await page.getByLabel("Cash tendered (GYD)").fill("50.00");
+	const completeResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().includes("/rpc/commerce/sales/complete")
+	);
+	await page.getByRole("button", { name: "Complete sale" }).click();
+	await completeResponsePromise;
+	await expect(
+		page.getByRole("heading", { exact: true, name: "Receipt" })
+	).toBeVisible();
+
+	// Screen media (before emulating print): chrome IS visible, proving
+	// the assertions below are actually exercising print-specific hiding,
+	// not elements that were already hidden for some unrelated reason.
+	await expect(page.locator("header").first()).toBeVisible();
+	await expect(
+		page.getByRole("region", { name: "Current workspace" })
+	).toBeVisible();
+	await expect(page.getByRole("navigation", { name: "POS" })).toBeVisible();
+
+	await page.emulateMedia({ media: "print" });
+
+	await expect(page.locator("header").first()).toBeHidden();
+	await expect(
+		page.getByRole("region", { name: "Current workspace" })
+	).toBeHidden();
+	await expect(page.getByRole("navigation", { name: "POS" })).toBeHidden();
+	await expect(
+		page.getByRole("navigation", { name: "Operations" })
+	).toBeHidden();
+	// The receipt's own developer-facing description is hidden too
+	// (`hideHeaderOnPrint`); the receipt's OWN content — the
+	// `ReceiptLayout` card, which prints its own "Receipt {number}"
+	// title — remains fully visible.
+	await expect(
+		page.getByText("Printable layout: use your browser's print function.")
+	).toBeHidden();
+	await expect(page.getByText(productName).first()).toBeVisible();
+
+	// A real print-to-PDF run through Chromium's actual print pipeline —
+	// not a visual/screenshot inspection of the screen view.
+	const pdf = await page.pdf();
+	expect(pdf.byteLength).toBeGreaterThan(1000);
+
+	await page.emulateMedia({ media: "screen" });
+});

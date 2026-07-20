@@ -1,1 +1,16 @@
 @import "@meridian/ui-web/globals.css";
+
+/* WS3 remediation R3b, Item 12 (print composition): a real print path for
+ * the receipt view (and any other page using `print:hidden` chrome
+ * classes) — tighter page margins than the browser default so a printed
+ * receipt reads as a receipt, not a webpage printout with excess
+ * whitespace. Application chrome itself is hidden per-component via
+ * Tailwind's `print:hidden` utility (Header, OperationsNavigation,
+ * PosNavigation, the workspace-context bar/alerts, and — opt-in via
+ * `OperationsPageFrame`'s `hideHeaderOnPrint` — the receipt page's own
+ * developer-facing header), not here. */
+@media print {
+	@page {
+		margin: 0.4in;
+	}
+}

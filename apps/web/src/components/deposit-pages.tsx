@@ -243,7 +243,7 @@ export function DepositConfirmPage() {
 							label="Deposit ID"
 						/>
 						<Button
-							className="w-fit"
+							className="min-h-12 w-fit"
 							disabled={!(depositId && workspace.isOnline)}
 							onClick={() => setConfirmOpen(true)}
 							type="button"

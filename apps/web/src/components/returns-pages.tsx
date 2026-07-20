@@ -415,7 +415,7 @@ export function ReturnApprovePage() {
 							label="Return ID"
 						/>
 						<Button
-							className="w-fit"
+							className="min-h-12 w-fit"
 							disabled={!(returnId && workspace.isOnline)}
 							onClick={() => setConfirmOpen(true)}
 							type="button"

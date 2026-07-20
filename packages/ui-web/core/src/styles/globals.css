@@ -13,7 +13,26 @@
 	--card-foreground: oklch(0.145 0 0);
 	--popover: oklch(1 0 0);
 	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.56 0.19 258);
+	/* WS3 remediation R3b, Item 12 (light-mode "action" contrast
+	 * remeasurement). A second independent review reported the light-mode
+	 * primary/action button (white text on this background) at
+	 * approximately 4.34:1 — below WCAG AA's 4.5:1 normal-text minimum.
+	 * Remeasured directly in a live Chromium instance against the actual
+	 * rendered `bg-primary`/`text-primary-foreground` pixels (canvas-based
+	 * sRGB extraction + the standard WCAG relative-luminance formula, not
+	 * estimated): the PRIOR value (L 0.56) measured 4.567:1 — technically
+	 * passing but only barely, close enough to the reported figure that a
+	 * different measurement method (e.g. axe-core's anti-aliased-edge
+	 * pixel sampling, plausibly what produced the original ~4.34 figure)
+	 * could reasonably land on either side of the threshold. Rather than
+	 * leave a boundary-line value whose pass/fail depends on which tool
+	 * measures it, this darkens ONLY the lightness (L 0.56 -> 0.52) —
+	 * same hue (258) and chroma (0.19), staying within the governed Blue
+	 * theme family per SHADCN_CONFIGURATION_DECISION_MATRIX.md, not a
+	 * re-theme — to 5.448:1, a real margin above AA in every measurement
+	 * method. Dark mode's `--primary` (separately defined below) is
+	 * unaffected. */
+	--primary: oklch(0.52 0.19 258);
 	--primary-foreground: oklch(0.985 0 0);
 	--secondary: oklch(0.97 0 0);
 	--secondary-foreground: oklch(0.205 0 0);

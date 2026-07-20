@@ -19,7 +19,10 @@ import UserMenu from "./user-menu";
 export default function Header() {
 	const pathname = usePathname();
 	return (
-		<header className="border-b bg-background">
+		// WS3 remediation R3b, Item 12 (print composition): the persistent
+		// header is application chrome — never part of a printed receipt or
+		// any other printed page.
+		<header className="border-b bg-background print:hidden">
 			<div className="mx-auto flex min-h-14 max-w-screen-2xl items-center justify-between gap-3 px-4">
 				<nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
 					{PRIMARY_NAVIGATION.map(({ href, label }) => (

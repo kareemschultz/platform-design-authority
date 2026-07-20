@@ -289,13 +289,19 @@ function ProductLookup({
 									{product.variants.length > 1 ? ` — ${variant.name}` : ""}
 								</span>
 								<Button
+									// WS3 remediation R3b, Item 12 (touch targets): the
+									// highest-frequency control on the whole POS
+									// screen (the add-to-cart action every product
+									// lookup ends in) was `size="sm"` (28px) with no
+									// override — applying the app's established 48px
+									// frequent-interaction density.
+									className="min-h-12"
 									onClick={() => {
 										onAdd(draftFromProduct(product, variant.id));
 										toast.success(`${product.name} added`);
 										setScanAnnouncement(`${product.name} added to the cart.`);
 										barcodeInputRef.current?.focus();
 									}}
-									size="sm"
 									type="button"
 									variant="outline"
 								>
@@ -512,6 +518,7 @@ function SaleCartBuilder({
 				</p>
 				<MutationError error={create.error} isOnline={workspace.isOnline} />
 				<Button
+					className="min-h-12"
 					disabled={
 						!allValid ||
 						create.isPending ||
@@ -764,6 +771,7 @@ function PriceOverrideApproveSection({ saleId }: { saleId: string }) {
 						label="Price override ID"
 					/>
 					<Button
+						className="min-h-12"
 						disabled={approve.isPending || !workspace.isOnline}
 						onClick={approveOverride}
 						type="button"
@@ -1004,6 +1012,7 @@ function SaleWorkspaceView({
 							isOnline={workspace.isOnline}
 						/>
 						<Button
+							className="min-h-12"
 							disabled={
 								complete.isPending ||
 								!workspace.contextId ||

@@ -48,7 +48,8 @@ export function PosNavigation() {
 	const current = currentNavigationItem(pathname, POS_NAVIGATION);
 
 	return (
-		<nav aria-label="POS" className="border-b bg-muted/20">
+		// WS3 remediation R3b, Item 12 (print composition): application chrome.
+		<nav aria-label="POS" className="border-b bg-muted/20 print:hidden">
 			<div className="mx-auto flex max-w-screen-2xl flex-col gap-2 px-4 py-2 lg:flex-row lg:items-center lg:justify-between">
 				<div className="sm:hidden">
 					<label

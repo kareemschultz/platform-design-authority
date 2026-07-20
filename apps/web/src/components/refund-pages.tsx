@@ -198,7 +198,7 @@ export function RefundApprovePage() {
 							label="Refund ID"
 						/>
 						<Button
-							className="w-fit"
+							className="min-h-12 w-fit"
 							disabled={!(refundId && workspace.isOnline)}
 							onClick={() => setConfirmOpen(true)}
 							type="button"

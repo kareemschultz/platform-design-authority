@@ -119,8 +119,22 @@ export function ConsequencePreviewDialog<TData>({
 				</div>
 				<MutationError error={commitError} isOnline={isOnline} />
 				<AlertDialogFooter>
-					<AlertDialogCancel ref={cancelRef}>Cancel</AlertDialogCancel>
+					{/* WS3 remediation R3b, Item 12 (touch targets): this ONE
+					 * dialog is the shared commit control for close-register,
+					 * refund-approve, deposit-confirm, return-approve,
+					 * variance-approve, and receipt-void — every "approve"
+					 * button this item names, in one place. Both controls were
+					 * at the Button component's DEFAULT 32px height
+					 * (`size="default"` = `h-8`); `min-h-12` applies the
+					 * already-established 48px density this app uses elsewhere
+					 * for frequent/touch-first interactions (e.g.
+					 * `OperationsNavigation`'s mobile section `<select>`,
+					 * `Header`'s mobile nav items). */}
+					<AlertDialogCancel className="min-h-12" ref={cancelRef}>
+						Cancel
+					</AlertDialogCancel>
 					<Button
+						className="min-h-12"
 						disabled={isLoading || isError || confirming || confirmDisabled}
 						onClick={onConfirm}
 						variant={confirmVariant}

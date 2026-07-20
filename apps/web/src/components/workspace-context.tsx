@@ -517,7 +517,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 	let connectivityAlert: React.ReactNode = null;
 	if (!isOnline) {
 		connectivityAlert = (
-			<Alert className="mx-auto my-3 max-w-screen-2xl" role="status">
+			<Alert
+				className="mx-auto my-3 max-w-screen-2xl print:hidden"
+				role="status"
+			>
 				<CloudOff />
 				<AlertTitle>Offline</AlertTitle>
 				<AlertDescription>
@@ -528,7 +531,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		);
 	} else if (identityQuery.isError && !storedContextId) {
 		connectivityAlert = (
-			<Alert className="mx-auto my-3 max-w-screen-2xl" variant="destructive">
+			<Alert
+				className="mx-auto my-3 max-w-screen-2xl print:hidden"
+				variant="destructive"
+			>
 				<CircleAlert />
 				<AlertTitle>Workspace unavailable</AlertTitle>
 				<AlertDescription>Refresh the page or sign in again.</AlertDescription>
@@ -538,9 +544,12 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	return (
 		<WorkspaceContext.Provider value={value}>
+			{/* WS3 remediation R3b, Item 12 (print composition): application
+			 * chrome — the workspace switcher bar never belongs on a printed
+			 * receipt or any other printed page. */}
 			<section
 				aria-label="Current workspace"
-				className="border-b bg-muted/30 px-4 py-3"
+				className="border-b bg-muted/30 px-4 py-3 print:hidden"
 			>
 				<div className="mx-auto flex max-w-screen-2xl flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
 					<div>
@@ -598,7 +607,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			</section>
 			{connectivityAlert}
 			{contextChangeMessage ? (
-				<Alert className="mx-auto my-3 max-w-screen-2xl" role="alert">
+				<Alert
+					className="mx-auto my-3 max-w-screen-2xl print:hidden"
+					role="alert"
+				>
 					<CircleAlert />
 					<AlertTitle>Workspace not changed</AlertTitle>
 					<AlertDescription>{contextChangeMessage}</AlertDescription>

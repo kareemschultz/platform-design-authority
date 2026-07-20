@@ -15,7 +15,8 @@ export function OperationsNavigation() {
 	// from this single source of truth.
 	const current = currentNavigationItem(pathname, OPERATIONS_NAVIGATION);
 	return (
-		<nav aria-label="Operations" className="border-b">
+		// WS3 remediation R3b, Item 12 (print composition): application chrome.
+		<nav aria-label="Operations" className="border-b print:hidden">
 			<div className="mx-auto max-w-screen-2xl px-4 py-2 sm:hidden">
 				<label
 					className="grid gap-1 font-medium text-sm"

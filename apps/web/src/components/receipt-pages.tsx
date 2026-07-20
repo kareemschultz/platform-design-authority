@@ -156,7 +156,7 @@ function VoidReceiptSection({ receipt }: { receipt: Receipt }) {
 					{(field) => <PosTextField field={field} label="Reason (optional)" />}
 				</form.Field>
 				<Button
-					className="w-fit"
+					className="min-h-12 w-fit"
 					disabled={voidMutation.isPending || !workspace.isOnline}
 					type="submit"
 					variant="destructive"
@@ -341,6 +341,7 @@ export function ReceiptViewPage({ receiptId }: { receiptId: string }) {
 	return (
 		<OperationsPageFrame
 			description="Realizes commerce.receipt.read. Printable layout: use your browser's print function."
+			hideHeaderOnPrint
 			title="Receipt"
 		>
 			<div className="grid gap-6 print:gap-3">

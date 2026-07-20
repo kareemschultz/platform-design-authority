@@ -831,7 +831,7 @@ export function RegisterClosePage({
 						>
 							{({ canSubmit, isSubmitting }) => (
 								<Button
-									className="min-h-10 w-fit"
+									className="min-h-12 w-fit"
 									disabled={
 										!canSubmit ||
 										isSubmitting ||
@@ -1147,7 +1147,11 @@ function VarianceApproveForm({
 					<PosTextField field={field} inputMode="numeric" label="Version" />
 				)}
 			</form.Field>
-			<Button className="w-fit" disabled={pending || !isOnline} type="submit">
+			<Button
+				className="min-h-12 w-fit"
+				disabled={pending || !isOnline}
+				type="submit"
+			>
 				Review &amp; approve variance
 			</Button>
 		</form>

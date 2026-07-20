@@ -62,11 +62,22 @@ export function OperationsPageFrame({
 	actions,
 	children,
 	description,
+	/** WS3 remediation R3b, Item 12 (print composition). Most pages want
+	 * their own `<h1>`/description IN the printed output (ordinary print
+	 * of an operations page is just printing that page's content). The
+	 * receipt view is the one exception this run scopes: its own internal,
+	 * developer-facing description text ("Realizes commerce.receipt.read
+	 * …") has no place on a printed receipt, and its `<h1>` ("Receipt") is
+	 * redundant with `ReceiptLayout`'s own title
+	 * (`Receipt {receiptNumber}`). Opt-in per page, not a global default —
+	 * this must never silently remove another page's printed title. */
+	hideHeaderOnPrint = false,
 	title,
 }: {
 	actions?: React.ReactNode;
 	children: React.ReactNode;
 	description: string;
+	hideHeaderOnPrint?: boolean;
 	title: string;
 }) {
 	useEffect(() => {
@@ -74,7 +85,13 @@ export function OperationsPageFrame({
 	}, [title]);
 	return (
 		<div className="mx-auto max-w-screen-2xl px-4 py-6">
-			<header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+			<header
+				className={
+					hideHeaderOnPrint
+						? "mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between print:hidden"
+						: "mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"
+				}
+			>
 				<div className="min-w-0 max-w-3xl">
 					<h1 className="break-words font-heading font-semibold text-2xl">
 						{title}

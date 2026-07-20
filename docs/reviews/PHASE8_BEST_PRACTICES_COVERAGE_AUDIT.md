@@ -1,7 +1,7 @@
 ---
 document_id: PDA-REV-025
 title: Phase 8 Best-Practices Coverage Audit
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-20
@@ -29,7 +29,7 @@ Anchors: AIR-003, AIR-006, AIR-007, AIR-008 (from `ADOPT_IMPROVE_REJECT_REGISTER
 | AIR-006 (shared inbox/review-queue mechanics) | **Gap: issue #169.** No operational document outside `19-Competitive-Research/` reflects the mechanic; `CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md` exists only in the research corpus. Generic "queue" mentions in 09-UX (workspace list items, alert fields) are unrelated vocabulary, not the governed assign/accept/delegate/snooze/escalate/reauthorize mechanic. |
 | AIR-007 (cross-domain suite navigation) | Covered: `NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`'s explicit "ERP maze" anti-pattern framing and the two-navigation-level cap rule. |
 | AIR-008 (analytics/dashboard delivery) | Covered for the UI/UX slice (governed metric, freshness, accessible alternative) — see Area 4 for the two sub-findings this anchor still has open. |
-| `CROSS_DOMAIN_WORKFLOW_PATTERNS.md` (shared mechanics: search/select, import mapping, review queue, approval, activity/history, correction, bulk action, offline work package) | Partial: 5 of 8 named mechanics have specific 09-UX counterparts (bulk action, import mapping, offline work package, correction, activity/history — see `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`, `COMPONENT_CATALOG_AND_STATE_MATRIX.md`). The review-queue mechanic is the same gap as AIR-006 (**issue #169**); the seven-step workflow grammar itself is not reproduced as a named structure anywhere. |
+| `CROSS_DOMAIN_WORKFLOW_PATTERNS.md` (shared mechanics: search/select, import mapping, review queue, approval, activity/history, correction, bulk action, offline work package) | Partial: 5 of 8 named mechanics have specific 09-UX counterparts (bulk action, import mapping, offline work package, correction, activity/history — see `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`, `COMPONENT_CATALOG_AND_STATE_MATRIX.md`). The review-queue mechanic is the same gap as AIR-006, and the seven-step workflow grammar (resolve context → capture intent → preview → approve → commit → propagate → recover) is also not reproduced as a named structure anywhere — **both gap: issue #169.** |
 | `COMMON_FAILURES_AND_PAIN_POINTS.md` (16 CFP entries, FAIL-007 cluster explicitly transferred to "proposed UX/accessibility review") | Covered for its own self-declared UX destination cluster: CFP-009/010/011 (bulk-action scope, infinite-scroll misuse, mobile task-shrinking) all have near-verbatim counterparts in `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md` and `ADVANCED_INTERFACE_PATTERNS.md`. CFP-001 (ERP maze) also lands specifically. CFPs belonging to other domains (permission identifiers, audit-log readability) are correctly absent from 09-UX and are not claimed as gaps here. |
 
 ## Area 2 — Deployment, cost, and self-host
@@ -75,7 +75,7 @@ Checked whether offline *design* documents (`docs/blueprint/01-Platform/OFFLINE_
 
 ## Gap issues opened
 
-- **#169** — shared review-queue/inbox mechanic (AIR-006, `CROSS_DOMAIN_WORKFLOW_PATTERNS.md`) has no operational home outside the research corpus.
+- **#169** — shared review-queue/inbox mechanic (AIR-006) and `CROSS_DOMAIN_WORKFLOW_PATTERNS.md`'s seven-step workflow grammar both have no operational home outside the research corpus.
 - **#170** — analytics delivery/export governance is shelf-ware, and drill-down reauthorization is missing from `INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md`.
 - **#171** — landed content in 09-UX, 10-Data, and 12-Deployment doesn't cite the AIR/`PDA-CIR`/#88 source it independently matches, so the transfer isn't traceable.
 

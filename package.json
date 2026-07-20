@@ -60,6 +60,8 @@
     "third-party:test": "python -m unittest scripts/test_generate_third_party.py",
     "third-party:check": "python scripts/generate_third_party.py --check",
     "architecture:check": "python scripts/check_architecture.py",
+    "gates": "python scripts/run_gates.py",
+    "gates:test": "python -m unittest scripts/test_run_gates.py",
     "ws1:evidence:check": "python scripts/check_ws1_evidence.py",
     "ws2:evidence:check": "python -m unittest scripts/test_check_ws2_evidence.py && python scripts/check_ws2_evidence.py",
     "changeset": "changeset",

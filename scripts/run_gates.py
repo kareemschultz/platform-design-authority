@@ -186,6 +186,12 @@ def build_gates() -> list[Gate]:
         )
     )
 
+    # Stale-branch reporting.
+    gates.append(
+        Gate("test_report_stale_branches.py", _unittest("test_report_stale_branches.py"), "status")
+    )
+    gates.append(Gate("report_stale_branches.py", _python("report_stale_branches.py"), "status"))
+
     # This runner's own parity with the workflow files.
     gates.append(Gate("test_run_gates.py", _unittest("test_run_gates.py"), "meta"))
 

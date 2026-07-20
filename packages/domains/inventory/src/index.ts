@@ -5,6 +5,7 @@ import type {
 	CreateStockTransfer,
 	InventoryAdjustment,
 	ReceiveStockTransfer,
+	SaveStockCountDraftLines,
 	StockBalance,
 	StockCount,
 	StockTransfer,
@@ -150,7 +151,8 @@ export interface InventoryReservationRecord {
 	version: number;
 }
 
-export interface InventoryAdjustmentRecord extends InventoryAdjustment {
+export interface InventoryAdjustmentRecord
+	extends Omit<InventoryAdjustment, "createdAt" | "postedAt" | "updatedAt"> {
 	approvedByUserId: string | null;
 	classification: "Confidential";
 	createdAt: Date;
@@ -179,7 +181,8 @@ export interface InventoryCountLineRecord {
 	variantId: string | null;
 }
 
-export interface InventoryCountRecord extends Omit<StockCount, "lines"> {
+export interface InventoryCountRecord
+	extends Omit<StockCount, "createdAt" | "lines" | "postedAt" | "updatedAt"> {
 	approvedByUserId: string | null;
 	classification: "Confidential";
 	createdAt: Date;
@@ -212,7 +215,11 @@ export interface InventoryTransferLineRecord {
 	variantId: string | null;
 }
 
-export interface InventoryTransferRecord extends Omit<StockTransfer, "lines"> {
+export interface InventoryTransferRecord
+	extends Omit<
+		StockTransfer,
+		"createdAt" | "dispatchedAt" | "lines" | "receivedAt" | "updatedAt"
+	> {
 	classification: "Confidential";
 	createdAt: Date;
 	createdByUserId: string;
@@ -256,6 +263,7 @@ export type InventoryCommandOperation =
 	| "inventory.adjustment.approve"
 	| "inventory.adjustment.reverse"
 	| "inventory.count.create"
+	| "inventory.count.draft.save"
 	| "inventory.count.submit"
 	| "inventory.count.approve"
 	| "inventory.transfer.create"
@@ -368,8 +376,10 @@ export interface InventoryRepository {
 	) => Promise<{ inserted: boolean; record: InventoryCommandReceipt }>;
 	releaseReservation: (input: {
 		id: string;
+		organizationId: string;
 		reason: string;
 		releasedAt: Date;
+		state: "Expired" | "Released";
 		tenantId: string;
 		version: number;
 	}) => Promise<InventoryReservationRecord | "version_conflict">;
@@ -475,16 +485,21 @@ function adjustmentView(
 	record: InventoryAdjustmentRecord
 ): InventoryAdjustment {
 	return {
+		approvedByUserId: record.approvedByUserId,
 		conversionSourceId: record.conversionSourceId ?? null,
+		createdAt: record.createdAt.toISOString(),
+		createdByUserId: record.createdByUserId,
 		id: record.id,
 		locationId: record.locationId,
 		movementId: record.movementId ?? null,
+		postedAt: record.postedAt?.toISOString() ?? null,
 		productId: record.productId,
 		quantity: record.quantity,
 		reason: record.reason,
 		reversalMovementId: record.reversalMovementId ?? null,
 		state: record.state,
 		unit: record.unit,
+		updatedAt: record.updatedAt.toISOString(),
 		variantId: record.variantId ?? null,
 		version: record.version,
 	};
@@ -492,7 +507,10 @@ function adjustmentView(
 
 function countView(record: InventoryCountRecord): StockCount {
 	return {
+		approvedByUserId: record.approvedByUserId,
 		blind: record.blind,
+		createdAt: record.createdAt.toISOString(),
+		createdByUserId: record.createdByUserId,
 		id: record.id,
 		lines: record.lines.map((line) => ({
 			conversionSourceId: line.conversionSourceId,
@@ -506,14 +524,21 @@ function countView(record: InventoryCountRecord): StockCount {
 			variantId: line.variantId,
 		})),
 		locationId: record.locationId,
+		postedAt: record.postedAt?.toISOString() ?? null,
 		state: record.state,
+		submittedByUserId: record.submittedByUserId,
+		updatedAt: record.updatedAt.toISOString(),
 		version: record.version,
 	};
 }
 
 function transferView(record: InventoryTransferRecord): StockTransfer {
 	return {
+		createdAt: record.createdAt.toISOString(),
+		createdByUserId: record.createdByUserId,
 		destinationLocationId: record.destinationLocationId,
+		dispatchedAt: record.dispatchedAt?.toISOString() ?? null,
+		dispatchedByUserId: record.dispatchedByUserId,
 		exceptionReason: record.exceptionReason,
 		id: record.id,
 		lines: record.lines.map((line) => ({
@@ -531,8 +556,11 @@ function transferView(record: InventoryTransferRecord): StockTransfer {
 			unit: line.unit,
 			variantId: line.variantId,
 		})),
+		receivedAt: record.receivedAt?.toISOString() ?? null,
+		receivedByUserId: record.receivedByUserId,
 		sourceLocationId: record.sourceLocationId,
 		state: record.state,
+		updatedAt: record.updatedAt.toISOString(),
 		version: record.version,
 	};
 }
@@ -1636,7 +1664,9 @@ export function createInventoryService(options: InventoryServiceOptions) {
 						onHand: balance.onHand,
 						productId: balance.productId,
 						reconciled: balance.reconciliationState === "Current",
+						reconciliationState: balance.reconciliationState,
 						reserved,
+						source: "InventoryLedgerProjection",
 						unit: balance.unit,
 						variantId: balance.variantId,
 					});
@@ -1898,10 +1928,25 @@ export function createInventoryService(options: InventoryServiceOptions) {
 					);
 				}
 				const now = options.clock();
+				const expiryInstant =
+					input.reservation.expiresAt instanceof Date
+						? input.reservation.expiresAt.getTime()
+						: Date.parse(String(input.reservation.expiresAt));
+				if (
+					input.reason === "Expired" &&
+					(!Number.isFinite(expiryInstant) || expiryInstant > now.getTime())
+				) {
+					throw new InventoryError(
+						"invalid_state",
+						"Reservation cannot expire before its expiry instant"
+					);
+				}
 				const saved = await repository.releaseReservation({
 					id: input.reservation.id,
+					organizationId: input.reservation.organizationId,
 					reason: input.reason,
 					releasedAt: now,
+					state: input.reason === "Expired" ? "Expired" : "Released",
 					tenantId: input.reservation.tenantId,
 					version: input.reservation.version,
 				});
@@ -2052,6 +2097,111 @@ export function createInventoryService(options: InventoryServiceOptions) {
 					{
 						idempotencyKey: input.idempotencyKey,
 						operation: "inventory.adjustment.reverse",
+						requestFingerprint,
+						resourceId: current.id,
+						tenantId: current.tenantId,
+					},
+					result,
+					now
+				);
+			});
+		},
+
+		async saveCountDraft(input: {
+			actorUserId: string;
+			body: SaveStockCountDraftLines;
+			countId: string;
+			idempotencyKey: string;
+			tenantId: string;
+			version: number;
+		}): Promise<StockCount> {
+			for (const line of input.body.lines) {
+				quantityToMinor(line.observedQuantity);
+				// biome-ignore lint/performance/noAwaitInLoops: published Catalog references are checked before the transaction begins.
+				await options.references.requireProduct({
+					productId: line.productId,
+					tenantId: input.tenantId,
+					variantId: line.variantId,
+				});
+			}
+			const requestFingerprint = await fingerprint({
+				body: input.body,
+				countId: input.countId,
+				version: input.version,
+			});
+			return options.unitOfWork.execute(async ({ repository }) => {
+				const prior = await replay<StockCount>(repository, {
+					idempotencyKey: input.idempotencyKey,
+					operation: "inventory.count.draft.save",
+					requestFingerprint,
+					tenantId: input.tenantId,
+				});
+				if (prior) {
+					return prior;
+				}
+				const current = await repository.getCount(
+					input.tenantId,
+					input.countId
+				);
+				if (!current) {
+					throw new InventoryError("not_found", "Stock Count was not found");
+				}
+				requireVersion(current, input.version);
+				if (current.state !== "Draft" && current.state !== "InProgress") {
+					throw new InventoryError(
+						"invalid_state",
+						"Only an open Stock Count draft can be changed"
+					);
+				}
+				const now = options.clock();
+				const seen = new Set<string>();
+				const lines = input.body.lines.map((line) => {
+					const key = `${itemKey(line.productId, line.variantId)}:${line.unit}`;
+					if (seen.has(key)) {
+						throw new InventoryError(
+							"invalid_reference",
+							"Stock Count contains a duplicate item and unit"
+						);
+					}
+					seen.add(key);
+					return {
+						classification: "Confidential" as const,
+						conversionSourceId: line.conversionSourceId ?? null,
+						countId: current.id,
+						createdAt: now,
+						expectedQuantity: null,
+						id: options.ids.create("count-line"),
+						itemKey: itemKey(line.productId, line.variantId),
+						movementId: null,
+						observedQuantity: line.observedQuantity,
+						productId: line.productId,
+						tenantId: current.tenantId,
+						unit: line.unit,
+						updatedAt: now,
+						varianceQuantity: null,
+						variantId: line.variantId ?? null,
+					};
+				});
+				const updated: InventoryCountRecord = {
+					...current,
+					lines,
+					state: lines.length > 0 ? "InProgress" : "Draft",
+					updatedAt: now,
+					version: current.version + 1,
+				};
+				const saved = await repository.updateCount(updated, current.version);
+				if (saved === "version_conflict") {
+					throw new InventoryError(
+						"version_conflict",
+						"Stock Count version is stale"
+					);
+				}
+				const result = countView(saved);
+				return recordResult(
+					repository,
+					{
+						idempotencyKey: input.idempotencyKey,
+						operation: "inventory.count.draft.save",
 						requestFingerprint,
 						resourceId: current.id,
 						tenantId: current.tenantId,
@@ -2216,6 +2366,8 @@ export type InventoryPermission =
 	| "inventory.count.create"
 	| "inventory.count.submit"
 	| "inventory.count.approve"
+	| "inventory.reservation.create"
+	| "inventory.reservation.release"
 	| "inventory.transfer.read"
 	| "inventory.transfer.create"
 	| "inventory.transfer.dispatch"
@@ -2236,6 +2388,7 @@ export interface InventoryEntitlementPort {
 			| "inventory.stock-balances"
 			| "inventory.adjustments"
 			| "inventory.counts"
+			| "inventory.reservations"
 			| "inventory.transfers";
 		organizationId: string;
 		tenantId: string;
@@ -2358,6 +2511,34 @@ export function createInventoryApplication(options: {
 				sessionId: input.sessionId,
 			});
 			return options.service.createCount({
+				...input,
+				organizationId: context.organizationId,
+				tenantId: context.tenantId,
+			});
+		},
+		async createReservation(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			expiresAt: Date;
+			idempotencyKey: string;
+			locationId: string;
+			productId: string;
+			quantity: DecimalQuantity;
+			sessionId: string;
+			sourceId?: string;
+			unit: string;
+			variantId?: string | null;
+		}) {
+			const context = await authorize({
+				access: "Write",
+				authUserId: input.actorUserId,
+				capabilityId: "inventory.reservations",
+				contextId: input.contextId,
+				permission: "inventory.reservation.create",
+				sessionId: input.sessionId,
+			});
+			return options.service.createReservation({
 				...input,
 				organizationId: context.organizationId,
 				tenantId: context.tenantId,
@@ -2565,6 +2746,31 @@ export function createInventoryApplication(options: {
 				tenantId: context.tenantId,
 			});
 		},
+		async releaseReservation(input: {
+			actorUserId: string;
+			contextId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			reason: "Fulfilled" | "Cancelled" | "Expired" | "Superseded";
+			reservation: InventoryReservationRecord;
+			sessionId: string;
+		}) {
+			const context = await authorize({
+				access: "Write",
+				authUserId: input.actorUserId,
+				capabilityId: "inventory.reservations",
+				contextId: input.contextId,
+				permission: "inventory.reservation.release",
+				sessionId: input.sessionId,
+			});
+			if (
+				input.reservation.tenantId !== context.tenantId ||
+				input.reservation.organizationId !== context.organizationId
+			) {
+				throw new InventoryError("not_found", "Reservation was not found");
+			}
+			return options.service.releaseReservation(input);
+		},
 		async reverseAdjustment(input: {
 			actorUserId: string;
 			adjustmentId: string;
@@ -2584,6 +2790,28 @@ export function createInventoryApplication(options: {
 				sessionId: input.sessionId,
 			});
 			return options.service.reverseAdjustment({
+				...input,
+				tenantId: context.tenantId,
+			});
+		},
+		async saveCountDraft(input: {
+			actorUserId: string;
+			body: SaveStockCountDraftLines;
+			contextId: string;
+			countId: string;
+			idempotencyKey: string;
+			sessionId: string;
+			version: number;
+		}) {
+			const context = await authorize({
+				access: "Write",
+				authUserId: input.actorUserId,
+				capabilityId: "inventory.counts",
+				contextId: input.contextId,
+				permission: "inventory.count.create",
+				sessionId: input.sessionId,
+			});
+			return options.service.saveCountDraft({
 				...input,
 				tenantId: context.tenantId,
 			});

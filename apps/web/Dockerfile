@@ -7,7 +7,9 @@ COPY . .
 RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
 
 ARG NEXT_PUBLIC_SERVER_URL
+ARG PLATFORM_API_INTERNAL_URL
 ENV NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
+ENV PLATFORM_API_INTERNAL_URL=${PLATFORM_API_INTERNAL_URL}
 ENV NODE_ENV=production
 RUN cd apps/web && bun run build
 # standalone output excludes public/; ensure it exists so the runner copy never fails

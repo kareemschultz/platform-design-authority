@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-009
 title: "WS2 Implementation Plan: Catalog and Inventory Ledger"
-version: 0.5.0
+version: 1.0.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
 ---
 
@@ -12,11 +12,11 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0014, ADR-0016, ADR-0020, ADR-0027]
 
 ## 1. Purpose, Authority, and Lifecycle
 
-This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section "WS2 — Catalog and Inventory Ledger (P2)" into the implementation-control plan for Technical Prototype 2. It defines the exact capability depth, owners, package boundaries, contract corrections, pull-request sequence, evidence, and exit gates required before WS2 can close.
+This document expands `FIRST_SLICE_IMPLEMENTATION_PLAN.md` (PDA-RDM-007) section "WS2 — Catalog and Inventory Ledger (P2)" into the implementation-control plan and final controlled-prototype record for Technical Prototype 2. It defines the exact capability depth, owners, package boundaries, contract corrections, pull-request sequence, evidence, and exit gates used to close WS2 at that depth.
 
-This is a **Draft plan for a controlled prototype**. It may guide only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, close FDR-004, establish a contractual service level, or claim the first slice is complete. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and WS2 stops for disposition.
+This remains a **Draft plan for a controlled prototype**. It may guide and record only the named prototype under the repository lifecycle rule. It does not ratify a Draft or Proposed source, authorize a pilot or production deployment, establish a contractual service level, or claim the first slice is complete. FDR-004 was separately ratified by the Founder in issue #81; that decision does not promote this Draft or remove any customer, legal, provider, security, accessibility, operational, or disclosure gate. If this plan conflicts with the Constitution, a ratified or accepted ADR, or a higher-authority approved specification, the higher-authority source wins and work stops for disposition.
 
-Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, issue #66 owns merged PR2 Catalog execution, closed issue #68 owns merged PR3 Inventory execution through PR #69, and closed issue #70 owns merged PR4 Event Backbone execution through PR #74. Issues #71–#73 own PR5–PR7. Issue #12 remains the parent WS2 implementation work item. Claude Code independently concurred on the corrected plan at PR #63 before PR1 began, on PR1 at PR #65 before merge, on PR2 at PR #67 before merge, and on PR3 at PR #69 before merge. PR4's independent audit returned Changes required at `ffadf60409111fba72a0829098cd0904e6e269c7`; remediation merged at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` through PR #74. Every remaining implementation PR still requires exact-head independent review before merge.
+Issue #62 owns the merged plan; issues #64, #66, #68, #70, #71, and #72 own merged PR1-PR6 execution evidence; issue #73 owns PR7 verification and closeout; and issue #12 is the parent WS2 implementation work item. Claude Code independently concurred on every implementation head through PR #78. PR #79 final head `22a3a38369d458d065d5fb2bc2216d09aec410de` then merged as `81e903b27bf41785106775afb33f9f88738e39b9` without recorded pre-merge concurrence. PDA-REV-013 independently audited that exact merged `main`, reproduced the WS2 evidence, and the Founder accepted it as the superseding WS2 review in issue #81, comment `5008157609`; PR #89 merged that decision record as `7de0688d11a80de950f0e0639ade84b23e790e59`. The missed pre-merge concurrence remains documented as F-A-001; the superseding review does not rewrite that history.
 
 ### 1.1 Implementation progress
 
@@ -25,20 +25,16 @@ Issue #62 owns the merged plan, issue #64 owns merged PR1 execution evidence, is
 | PR1 — governance, contracts, schemas, and spike | Merged after exact-head Claude Code concurrence | Retain as the contract/governance baseline; it does not prove later business behavior or delivery |
 | PR2 — Catalog core, persistence, API, and lifecycle | Merged as PR #67 after exact-head Claude Code concurrence | Retain Catalog domain/persistence/API, migration, atomic outbox, stable child identities, two-tenant, Bun/Node, and budget evidence |
 | PR3 — Inventory ledger and workflows | Merged as PR #69 after exact-head Claude Code concurrence | Retain Inventory core/persistence/API, immutable ledger/reversal, workflow, rebuild, concurrency, tenant-isolation, offline-boundary, Bun/Node, and PostgreSQL evidence; no PR4 delivery claim |
-| PR4 — durable delivery and projections | Merged as PR #74 at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26`; issue #70 closed | PDA-APP-023 plus exact-head independent concurrence and green CI close RR-006 at controlled-prototype depth. This does not close WS2, production capacity, RR-007, or later-phase evidence. |
-| PR5–PR7 | Not started; issues #71–#73 own the remaining phases | Execute in order; no later phase may be pre-closed by earlier evidence |
+| PR4 — durable delivery and projections | Merged as PR #74 after exact-head Claude Code concurrence | Merge commit `7202fc819b70982c013e1ca11a4fcc136e01e2de`; PDA-APP-023 plus final re-audit comment `4991097241` close RR-006 at controlled-prototype depth. RR-007 and production delivery gates remain open. |
+| PR5 — bounded imports and online Numbering | Merged as PR #76 after exact-head Claude Code concurrence | Merge commit `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`; retain bounded CSV, owner-command, atomic import-reference, strict online Numbering, tenant, recovery, and disclosed residual evidence in PDA-APP-024. |
+| PR6 — Product and Inventory web experience | Merged as PR #78 after exact-head Claude Code concurrence | Exact head `c69e5fb4415083affc40dc52f2d0ada78846252e`; merge `635fa3f1618d5c880585fdd3e86de7a16d0993ac`; retain PDA-APP-025's bounded UI, accessibility-target, browser, help, performance, and direct-denial evidence. |
+| PR7 — verification and controlled-prototype closeout | Merged as PR #79; controlled-prototype closeout independently verified on exact merged `main` | Final PR head `22a3a38369d458d065d5fb2bc2216d09aec410de` merged as `81e903b27bf41785106775afb33f9f88738e39b9` without pre-merge concurrence. PDA-IMPL-007 and the generated matrix record 14/14 capabilities and 182/182 executable required cells; PDA-REV-013 reproduced the evidence on the exact merge, and issue #81 accepts that audit as the superseding review while retaining the F-A-001 deviation. |
 
-### 1.2 Interim capability evidence checkpoint
-
-`evidence/first-slice/ws2-interim-capability-evidence.json` registers the merged PR2 head `1d99fffa5c59a9c90b821e3a9e07511a5d12c63a` and PR3 head `48a72cd5c75af5aa8c13bc68c7c72a55a0390ae7`. The generated matrix records 80 evidenced required cells: 13 WS2 capabilities are `Partially Evidenced`, unimplemented `catalog.bulk-import` remains `Planned`, and no WS2 capability satisfies all thirteen required dimensions.
-
-The source deliberately leaves PR4 delivery/projection behavior, PR5 import/numbering behavior, PR6 UI/accessibility behavior, and PR7 audit/closeout evidence as `planned`. Empty cells are not waived, and the interim registration does not advance the phase ledger or satisfy section 16.3.
-
-### 1.3 Governing sources
+### 1.2 Governing sources
 
 | Concern | Governing source |
 |---|---|
-| Authority and lifecycle | PDA-CON-001; repository `AGENTS.md` |
+| Authority and lifecycle | PDA-FND-002; repository `AGENTS.md` |
 | First-slice scope and depth | PDA-RDM-001, PDA-RDM-003, PDA-RDM-004, PDA-RDM-006, PDA-RDM-007, `registry/first-slice.json` |
 | Catalog ownership and events | PDA-DOM-002; `registry/capabilities.json`; `registry/events.json` |
 | Inventory ownership and events | PDA-DOM-003; `registry/capabilities.json`; `registry/events.json` |
@@ -52,7 +48,7 @@ The source deliberately leaves PR4 delivery/projection behavior, PR5 import/numb
 | UX and accessibility | PDA-UX-010, PDA-UX-017, PDA-UX-020, PDA-UX-028 |
 | Evidence | PDA-TST-013, `registry/first-slice-tests.json`, PDA-RDM-006 |
 | Work coordination | PDA-ENGR-014 and the GitHub Project |
-| Founder scope authority | FDR-004; still open and only provisionally adopted |
+| Founder scope authority | FDR-004; ratified on 2026-07-17 through issue #81, without promoting this Draft or satisfying external gates |
 
 ## 2. Verified Starting State and Review Disposition
 
@@ -84,6 +80,32 @@ The independent review on PR #63 found four plan-precision defects. All are acce
 | Transfer dispatch lacked an exact proposed permission ID | Accepted | P3 | G2 now proposes `inventory.transfer.dispatch`, subject to canonical PR1 propagation | PR1 adds it to PDA-PLT-027, OpenAPI endpoint metadata, generated registries/contracts, and authorization tests |
 | WS5 budget wording conflated lease duration, synchronization performance, and queue capacity | Accepted | P3 | Section 9 separates each PDA-RDM-006 measure and assigns its correct meaning | WS5, not WS2, supplies end-to-end measurement for those transport/lease budgets |
 
+### 2.2 PR5 exact-head audit disposition
+
+Claude Code audited PR #76 at exact head `26b70ab1e61bbf4877c5ba5b7c119e20b37fea1c` and withheld concurrence. The original review remains unchanged on GitHub. This matrix accepts the findings at their submitted priority and assigns closure; prose alone cannot close a behavioral row.
+
+| Finding | Disposition | Priority | Remediation owner/source | Exact closure criterion |
+|---|---|---:|---|---|
+| Numbering existed only as isolated code/tests | Accepted | P1 | Platform Import/Export + Numbering; PDA-PLT-023/024, ADR-0027 | Real import creation allocates the job reference inside the import transaction; allocation/version/job/both events commit or roll back together; retry and two-tenant tests pass |
+| Formula-prefix text could be persisted verbatim | Accepted | P1 | Platform Import/Export; PDA-PLT-024, PDA-DAT-019 | `=`, `+`, `-`, `@` non-quantity prefixes produce safe findings and the unsafe value is absent from normalized staging and owner commands |
+| Declared CRLF with bare LF could merge/drop rows | Accepted | P1 | Platform Import/Export parser | Exact LF/CRLF enforcement rejects mismatches; mixed-newline and malformed-quote tests prove no row merge or owner effect |
+| Late row checkpoint could revive terminal failure | Accepted | P1 | Import/Export persistence | State-guarded checkpoint returns conflict outside Approved/Committing; real concurrent late-checkpoint test leaves Failed/Cancelled terminal |
+| Reloadable lifecycle APIs were incomplete | Accepted | P2 | Platform contracts/API | Both targets expose create/list/status/paginated findings/approve/cancel/accept/report/purge with current context, permission/entitlement, cursor, version, idempotency, and non-disclosure tests |
+| Wire job omitted governed metadata | Accepted | P2 | Platform API contract | Manifest/scanner/source hash/reference/version and uploader/approver/canceller/acceptance metadata round-trip through generated contracts and HTTP tests |
+| Import owner lacked per-row target-effect receipts | Accepted | P2 | Platform Import/Export | Receipt key binds tenant/target/row fingerprint and opaque target ID; concurrent resume checks it before owner invocation and produces zero duplicate effects |
+| Retention purge was unreachable and wording conflicted | Accepted | P2 | Import/Export API + PDA-OPS-019 | Permissioned audited API enforces terminal state, 30-day cutoff, not-already-purged/idempotent receipt, and retained evidence; docs state that automated legal-hold/deletion-journal integration remains a production blocker |
+| Numbering lacked two-tenant proof | Accepted | P2 | Numbering persistence/integration | Same formatted value may exist under separate tenant scope without collision or disclosure; foreign allocation/sequence reads fail |
+| CSV/scanner/error security coverage was incomplete | Accepted | P2 | Import core/HTTP/integration tests | Byte/row/column/field bounds, BOM/header/quote/newline/control/formula cases, scanner blocked/unavailable/EICAR, malformed HTTP, and safe-error non-leakage all execute |
+| Serial persistence suite timed out intermittently | Accepted | P2 | Server persistence test lane | The final migration/persistence command completes repeatedly (minimum five consecutive runs) under its declared timeout and records exact environment/counts |
+| Import/Export owner had registry presence but no explicit ADR sign-off | Accepted | P3 | ADR-0027 v0.3.4 | Exact-head independent review concurs on owner-specific adapters, transaction boundary, migration ownership, and architecture denials before merge |
+| Allocations omitted sequence-definition version provenance | Accepted | P3 | Numbering schema/contracts | Positive `sequence_version` is persisted immutably, returned through allocation/import evidence, constrained in PostgreSQL, and tested |
+| Opening-stock actor attribution was ambiguous | Accepted with architectural correction | P3 | Inventory target adapter | Uploader remains the staged Adjustment initiator; the distinct current approver performs approval/posting. Both identities are retained, preserving Inventory's existing maker/checker rule rather than collapsing both roles into the approver. |
+| BOM handling was undeclared | Accepted | P3 | PDA-PLT-024/parser | One leading UTF-8 BOM is accepted before exact header comparison; BOM elsewhere remains ordinary invalid content and is tested |
+| Correction report lacked disposition/schema metadata | Accepted | P3 | Platform API/report | Response carries fixed schema version, safe filename, media type, `Content-Disposition`, and SHA-256 without raw values or public URL |
+| CSV boundary and locale/timezone semantics were thin | Accepted | P3 | PDA-PLT-024 + tests | Duplicate/wrong headers, blank/malformed rows, delimiter/newline/control cases execute; locale/timezone are explicitly provenance-only until a governed transformable field exists |
+
+No finding is closed merely by this matrix. Closure requires the final pushed head, green required gates, exact evidence in PDA-APP-024, and superseding independent concurrence.
+
 ## 3. Scope and Capability Depth
 
 WS2 owns exactly these 14 first-slice business capabilities.
@@ -99,7 +121,7 @@ WS2 owns exactly these 14 first-slice business capabilities.
 | `inventory.stock-ledger` | full | immutable, unit-aware, location-scoped movement facts with linked reversals |
 | `inventory.stock-balances` | full | rebuildable balance read model and reconciliation to ledger facts |
 | `inventory.availability` | full | clearly labeled availability projection with freshness and non-authority rules |
-| `inventory.reservations` | prototype | internal create/release seam, expiry policy, and no conflation with physical movement |
+| `inventory.reservations` | prototype | internal create/release application seam protected by `inventory.reservation.create` and `inventory.reservation.release`, expiry policy, and no conflation with physical movement; no public endpoint |
 | `inventory.adjustments` | full | create/approve/post, segregation of duties, reason/evidence, and reversal correction |
 | `inventory.transfers` | prototype | create, dispatch, in-transit, receive, exception, and linked transfer-out/transfer-in facts |
 | `inventory.counts` | full | draft/in-progress/submit/review/approve/post lifecycle and variance evidence |
@@ -163,6 +185,7 @@ ADR-0027's owner-specific adapter, logical ownership, transaction-scope, and run
 - PR4 begins by recording those reviews and remediating every Changes-required disposition; only after all three lenses independently concur at the remediated exact head may it register the worker root in PDA-ENGR-012 and construct the second process pool, and the same PR must prove the worker cannot run migrations;
 - each approved process owns at most one bounded pool and its transaction coordinator; pools are not shared through global service location, and no owner mutates another owner's private tables inside a shared transaction;
 - PR1 registers `catalog-postgres` to Catalog, `inventory-postgres` to Inventory, and `platform-numbering-postgres` to Platform Numbering in the authoritative Persistence ownership source, then regenerates `registry/architecture-rules.json` and adds negative ownership probes;
+- ADR-0027 v0.3.4 explicitly applies the owner-specific adapter decision to `platform.import-export` and `platform.numbering`; PR5 must obtain exact-head independent concurrence on those owner/transaction boundaries before merge rather than treating registry presence as architectural sign-off;
 - Inventory consumes published Catalog contracts and stable IDs, never Catalog repositories, tables, migrations, or implementation modules.
 
 ### G5 — Data, isolation, and classification before migration
@@ -248,7 +271,21 @@ PR1 adds the activation and archive commands in G2 and assigns their canonical O
 
 PR1 adds the dispatch command, its canonical OpenAPI path, and the minimum read surface described in G2. If list and detail operations use one read permission per resource, the proposed canonical IDs are `inventory.adjustment.read`, `inventory.count.read`, and `inventory.transfer.read`; they become authoritative only when added to PDA-PLT-027 and regenerated.
 
-### 7.3 Enforcement
+### 7.3 PR5 Import operations
+
+PR5 exposes the same nine-operation lifecycle for Product and opening-stock targets:
+
+| Operation family | Product authority | Opening-stock authority |
+|---|---|---|
+| create | `catalog.import.create` | `inventory.import.create` |
+| list, status, paginated findings | `catalog.import.read` | `inventory.import.read` |
+| approve, pre-commit cancel, reconciled acceptance | `catalog.import.approve` | `inventory.import.approve` |
+| correction-report download | `catalog.import.download` | `inventory.import.download` |
+| staging purge after retention/hold checks | `catalog.import.purge` | `inventory.import.purge` |
+
+Reconciliation is computed from durable row outcomes at completion and returned by list/status; it is not a caller-supplied result. Acceptance records review of a completed `Reconciled` job. Cancel/accept intentionally reuse approve authority, while purge is a distinct least-privilege operator action. The exact OpenAPI paths and generated endpoint-permission registry remain the contract source.
+
+### 7.4 Enforcement
 
 - Server-issued active context determines tenant and organization/location scope; request body or query tenant IDs never establish authority.
 - Permission and entitlement are evaluated separately at transport and application-command boundaries. UI visibility is advisory.
@@ -363,7 +400,7 @@ Every PR has one issue, branch, worktree, explicit owner, migration/API/security
 2. **PR2 — Catalog core, persistence, API, and lifecycle.** Implement `catalog.products`, `catalog.variants`, `catalog.identifiers`, `catalog.barcodes`, and prototype `catalog.lifecycle`; add owner migrations, state-plus-outbox atomicity, version conflicts, tenant isolation, barcode/search budgets, Bun/Node tests, and Catalog command events.
 3. **PR3 — Inventory ledger, balances, adjustments, counts, transfers, and offline command boundary.** Implement the Inventory core and owner persistence; immutable posting/reversal; reservations prototype; transfer dispatch/receipt; count variance posting; balance/availability representations; command receipts; two-tenant, concurrency, conservation, rebuild, and offline-origin tests.
 4. **PR4 — Durable event delivery and projections.** First record the three ADR-0027 prototype-scope reviews, remediate every Changes-required disposition, and obtain exact-head concurrence from all three lenses; only then register `apps/worker/composition`. After that gate, implementation commits may add the selected worker, claim/lease/retry/dead-letter/replay/observability, consumer receipts, Catalog search projection, Inventory availability/reconciliation consumers, rebuild tools, kill/recovery tests, and RR-006 disposition. Outbox-only evidence is insufficient.
-5. **PR5 — Imports and supporting numbering foundation.** Implement bounded Product and opening-stock import through domain commands with malware/file controls, dry run, row findings, approval, idempotent waves, correction report, reconciliation, and audit. Add the PDA-RDM-007-assigned Numbering core/adapter and prove atomic/idempotent online allocation without claiming WS5 offline range leasing.
+5. **PR5 — Imports and supporting numbering foundation.** Implement bounded Product and opening-stock import through domain commands with malware/file controls, strict BOM/newline/header/formula/control-character handling, dry run, cursor list/findings, approval, pre-commit cancellation, per-row receipts, computed reconciliation, acceptance, correction report, audited operator purge after the governed staging window, and audit. Add the PDA-RDM-007-assigned Numbering core/adapter and prove real-path atomic/idempotent online allocation plus sequence-version snapshots without claiming administration, WS5 offline range leasing, or fiscal numbering.
 6. **PR6 — Product and Inventory web experience.** Implement section 11 over generated clients and current authority. Include formal UI-pattern and accessibility reviews, responsive evidence, direct-API denial tests, projection freshness labels, and performance/bundle evidence.
 7. **PR7 — WS2 verification and controlled-prototype closeout.** Execute the complete section 14 matrix for all 14 capabilities; scenarios 2 and 8; Bun and approved Node paths; migration, delivery, recovery, performance, accessibility, security, and two-tenant evidence. Update PDA-RDM-007, PDA-RDM-004, the risk register, technology lessons, evidence sources, and program status without lifecycle overclaim.
 
@@ -386,6 +423,9 @@ Critical WS2 scenarios include:
 - replay delivered events and worker restarts with zero duplicate consumer effects;
 - process duplicate/reordered offline-origin commands through stable outcomes without claiming WS5 transport;
 - dry-run and approve a mixed Product/opening-stock import with valid, warning, rejected, duplicate, and replay rows;
+- reject declared-CRLF/bare-LF mismatches, formula prefixes, control characters, malformed quoting, scanner blocks/unavailability, and out-of-bound CSV without retaining unsafe values or leaking parser/owner details;
+- list and page imports/findings without cross-tenant disclosure; cancel only before commit; expose computed reconciliation; accept only a completed reconciled job; and purge staging only through current operator authority after the 30-day window and ADR-0014 hold/deletion-journal check;
+- issue the import reference through the real creation path and prove allocation, definition-version snapshot, import job, validation event, and number-issued event are atomic and tenant isolated;
 - prove direct API invocation is denied when the UI hides an action or an entitlement is absent.
 
 These scenarios cover PDA-ARC-015 scenario 8 directly and supply the Catalog/Inventory preconditions and event delivery needed by scenario 2. WS2 does not claim the full sale sequence because Commerce/POS belongs to WS3.
@@ -472,7 +512,7 @@ PR1 selects the following controlled-prototype answers, subject to exact-head in
 | Concurrency | Same-key posting uses owner-adapter row locking and one transaction; PDA-APP-021 records exact-decimal, 20-way concurrency, reversal, rebuild, atomicity, and 250k query-shape evidence. |
 | Event delivery | PDA-PLT-008 v0.3.0 selects a 30-second renewable claim lease, bounded jittered retry for at most 20 attempts/24 hours, tenant/producer/aggregate ordering, a provisional 30-day dead-letter review window, and audited `platform.event.replay`. |
 | Worker topology | ADR-0027 v0.3.1 selects a separate Event Backbone worker with one process-local bounded pool and no migrations, but PDA-ENGR-012 deliberately leaves its candidate root unregistered and executable-denied until PR4 records the required prototype architecture/data/security reviews. |
-| Import format | PDA-PLT-024 v0.2.0 selects server-side UTF-8 CSV for WS2; XLSX remains deferred pending streaming, formula/link, decompression, malware, resource-budget, and deterministic-type evidence. |
+| Import format | PDA-PLT-024 v0.4.0 selects bounded server-side UTF-8 CSV for WS2, including strict BOM/newline/header/formula/control handling and the reloadable lifecycle; XLSX remains deferred pending streaming, formula/link, decompression, malware, resource-budget, and deterministic-type evidence. |
 
 The selections close decision ambiguity only. They do not pre-close PR1's independent review, RR-006 delivery evidence, RR-007 production isolation, or any later WS2 exit gate.
 
@@ -480,7 +520,7 @@ The selections close decision ambiguity only. They do not pre-close PR1's indepe
 
 The following are not WS2 exit blockers unless implementation falsely claims them: rich categories/brands/assortments/media/localization, supplier catalog and costs, pricing calculation, lots/serials/expiry/quarantine depth, replenishment, financial valuation, warehouse execution, production global search, external webhooks, full offline synchronization, production RLS, production scale/failover, and contractual/pilot evidence.
 
-### 16.3 WS2 closes only when
+### 16.3 WS2 exit conditions and final disposition
 
 - G1–G6 are closed without an expired or contradictory exception;
 - all 14 capabilities have committed evidence for every required dimension at registered depth;
@@ -490,6 +530,7 @@ The following are not WS2 exit blockers unless implementation falsely claims the
 - the selected delivery process/pool topology is authorized by the amended or superseding ADR and enforced by generated architecture rules;
 - Catalog and Inventory cores remain runtime-neutral and concrete persistence remains owner-specific and composition-bound;
 - no cross-owner repository/table/migration import exists;
+- Platform Import/Export and Platform Numbering have explicit ADR-0027 controlled-prototype sign-off, and real import creation proves their composition-bound atomic reference boundary without widening cross-owner persistence authority;
 - all tenant-owned state, jobs, events, projections, imports, caches, and errors pass two-tenant denial tests;
 - ledger facts are append-only, corrections are linked reversals, and balance rebuild reports zero unexplained divergence;
 - permissions and entitlements are independently enforced at transport and application-command boundaries;
@@ -498,24 +539,37 @@ The following are not WS2 exit blockers unless implementation falsely claims the
 - Bun and the approved Node fallback execute the declared critical contracts, domains, migrations, event delivery, and API paths;
 - registry evidence, technology lessons, risk dispositions, runbooks, documentation, migrations, contracts, and all repository gates are green on the reviewed head.
 
-WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype depth. It does not close RR-007, FDR-004, broader first-slice work, or pilot/production gates.
+WS2 completion means Technical Prototype 2 is evidenced at controlled-prototype depth. It does not close RR-007, RR-009, broader first-slice work, external-evidence obligations, or pilot/production gates.
+
+PDA-IMPL-007 section 12 dispositions every item above as satisfied at controlled-prototype depth. The generated evidence gate reports exactly 14 of 14 WS2 capabilities and 182 of 182 executable required cells. Aggregate first-slice coverage reports 25 of 103 capabilities and 325 of 1,294 executable required cells. PDA-REV-013 independently reproduced that evidence on exact merged `main` `81e903b27bf41785106775afb33f9f88738e39b9`; the Founder accepted it as the superseding WS2 review after the missed PR #79 pre-merge concurrence. Open scale, RLS, provider, legal, customer, security, accessibility, pilot, production, external-review, and assistive-technology targets remain explicit gates or deferrals; they are not machine-evidence substitutes.
 
 ## 17. Review and Change Record
 
 | Reviewer | Perspective | Decision | Date | Notes |
 |---|---|---|---|---|
+| Claude Code / PDA-REV-013 | Fifth whole-project audit and superseding exact-`main` WS2 review | Concurred with WS2 implementation evidence; reported process deviation F-A-001 | 2026-07-17 | Audited exact merged `main` `81e903b27bf41785106775afb33f9f88738e39b9`, reproduced 14/14 WS2 capabilities and 182/182 required cells, and recorded that PR #79 had merged without pre-merge concurrence. The Founder accepted this audit as the superseding review in issue #81; no pre-merge concurrence is retroactively claimed. |
 | Codex | Author and cross-document reconciliation | Drafted for independent review | 2026-07-14 | Reconciled ADR-0027 ownership, current registry counts, missing lifecycle/dispatch/read contracts, RR-006, and the WS2/WS5 offline boundary. |
 | Claude Code | Independent architecture and registry consistency | Changes required on v0.1.0 | 2026-07-14 | Submitted one P1, one P2, and two P3 findings on worker/pool authority, Persistence owner registration, dispatch permission naming, and offline-budget meaning; all accepted and remediated in v0.1.1, with implementation closure still assigned to PR1/WS5. |
 | Claude Code | Independent plan concurrence | Concurred on PR #63 exact head | 2026-07-14 | Re-verified all four remediations in an isolated worktree, confirmed identifier non-collision and clean governance/CI, and declared G1 satisfied before PR1 began. |
 | Claude Code | PR4 pre-worker Platform Architecture, Data Platform, and Security review | Architecture concurred; Data and Security changes required — prototype scope | 2026-07-15 | Reviewed exact base `40454740838bba4426b9ca48b2e82811bc7b466d` in an isolated worktree. Accepted blockers: receipt-identity contradiction, missing delivery-state field classification, absent pool budget, and no internal replay enforcement point. v0.3.3 propagates the selected receipt identity, pool formula, classification gate, and authenticated replay contract; worker registration remains prohibited pending superseding exact-head concurrence. Evidence: issue #70 comment `4985693566`. |
 | Claude Code | PR4 pre-worker exact-head re-review | All three lenses concurred — prototype scope | 2026-07-15 | Re-reviewed remediated exact head `771cb493fce4040dc1edb501fed1005aec585d63`, confirmed the review-only checkpoint contained no worker or migration, reproduced repository and CI gates, and authorized literal worker-root registration subject to the retained implementation proof obligations. Evidence: PR #74 comment `4987122519`. |
 | Claude Code | PR4 implementation exact-head audit | Changes required — concurrence withheld | 2026-07-16 | Audited `ffadf60409111fba72a0829098cd0904e6e269c7` across six lenses. Confirmed topology, delivery mechanics, replay authorization, projection ownership, privacy, and most gates; required replay-request receipt/idempotency evidence, a real same-row concurrent claim, and executable server-only migration invocation. Remediated in v0.3.6 pending superseding exact-head review. Evidence: PR #74 comment `4989112444`. |
+| Claude Code | PR4 implementation re-audit | Concurred; no actionable finding | 2026-07-16 | Reproduced governance, 260/260 workspace tests, 12/48 live worker evidence, 36/91 event/replay evidence, same-row PostgreSQL contention, replay receipt constraints, and worker migration denial at exact head `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26`; PR #74 then merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de`. Evidence: comment `4991097241`. |
+| Claude Code | PR5 implementation exact-head audit | Changes required; concurrence withheld | 2026-07-16 | Audited exact head `26b70ab1e61bbf4877c5ba5b7c119e20b37fea1c`. Four P1 findings were accepted: Numbering was not on a real path, unsafe formula-prefix values could persist, CRLF declarations did not reject bare LF, and a late row checkpoint could revive a terminal failed job. P2/P3 dispositions require reloadable lifecycle APIs, complete wire fields, import-owner row receipts, reachable governed purge, security/tenant/race/stability evidence, explicit owner sign-off, sequence-version provenance, approver attribution, and report/BOM/control-character clarity. v0.6.0 assigns those closures without claiming concurrence. |
+| Claude Code | PR5 implementation exact-head re-audit | Concurred; residuals retained | 2026-07-16 | Re-audited exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be`, independently reproduced the four P1 closures and harder concurrent recovery, and recorded concurrence without merging. PR #76 then merged as `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`. The disclosed composition-timeout, Numbering database-isolation, security-coverage, attribution, shared-permission, and ADR-review residuals remain tracked rather than converted into production claims. Evidence: PR #76 comment `4995579814`. |
+| Claude Code | PR6 implementation exact-head audit | Changes required; concurrence withheld | 2026-07-16 | Audited exact head `aa74b70a958160cb050eddb77f1ac52f51bf6ddc`; required the Inventory Balance filter to reset its cursor trail and requested a direct regression. Two narrower transfer-receipt and SKU defense-in-depth residuals were also disclosed for remediation. Evidence: PR #78 comment `4997547018`. |
+| Claude Code | PR6 implementation exact-head re-audit | Concurred; no actionable finding | 2026-07-16 | Re-read the narrow remediation at exact head `c69e5fb4415083affc40dc52f2d0ada78846252e`, reproduced web unit 40/110 and isolated PostgreSQL import 9/38, and confirmed exact-head green CI. PR #78 then merged as `635fa3f1618d5c880585fdd3e86de7a16d0993ac`. Evidence: PR #78 comment `4998183817`. |
 
 | Version | Date | Author | Change |
 |---|---|---|---|
-| 0.5.0 | 2026-07-16 | Platform Design Authority | Recorded exact-head PR4 concurrence and merge, closed RR-006 at controlled-prototype depth through PDA-REV-009, and retained RR-007, production, capability-evidence, and WS2 exit gates. |
-| 0.4.1 | 2026-07-16 | Platform Design Authority | Reconciled current main after PR #74 merged, retained the PR4 audit/remediation history, and preserved the 80-cell interim PR2/PR3 evidence checkpoint without claiming WS2 closeout. |
-| 0.4.0 | 2026-07-16 | Platform Design Authority | Reconciled merged PR #69 and then-open PR #74 from live GitHub state; registered 80 interim PR2/PR3 evidence cells across 13 partial rows while leaving bulk import planned and WS2 closeout unchanged. |
+| 1.0.0 | 2026-07-17 | Platform Design Authority | Recorded PR #79's actual final-head/merge sequence, PDA-REV-013's superseding exact-`main` review, and the Founder disposition in issue #81; finalized WS2 at 14/14 capabilities and 182/182 required cells at controlled-prototype depth while preserving F-A-001, RR-007/RR-009, external, pilot, and production gates. |
+| 0.9.0 | 2026-07-16 | Platform Design Authority | Linked PDA-IMPL-007 and the registry-derived 14-capability/182-cell PR7 closeout candidate, reconciled every section 16.3 condition, and retained exact-head concurrence, merge, exact-main verification, whole-WS2 audit, RR-007/RR-009, external, pilot, and production gates. |
+| 0.8.0 | 2026-07-16 | Platform Design Authority | Recorded PR6 withheld-concurrence remediation, exact-head concurrence and merge; activated PR7 issue #73; corrected the Constitution ID; and retained exact-head, exact-main, whole-WS2, RR-007, external, pilot, and production gates. |
+| 0.7.0 | 2026-07-16 | Platform Design Authority | Recorded PR5 exact-head concurrence and merge, activated PR6 issue #72, linked PDA-APP-025, and retained PR7 plus every WS2 exit and production gate. |
+| 0.6.0 | 2026-07-16 | Platform Design Authority | Dispositioned the PR5 exact-head audit: bound real atomic import references, strict CSV defenses, guarded row receipts, reloadable lifecycle/reconciliation/purge APIs, ADR-0014 retention controls, explicit ADR-0027 owner sign-off, approver attribution, sequence-version/report provenance, and renewed exact-head evidence gates. |
+| 0.5.1 | 2026-07-16 | Platform Design Authority | Dispositioned PR5 review findings through schema-shaped Import/Numbering events, manifest-bound create idempotency, atomic terminal owner-rejection evidence, and aligned Numbering provenance/constraints; retained exact-head gates, independent concurrence, merge, and RR-007 as open. |
+| 0.5.0 | 2026-07-16 | Platform Design Authority | Recorded implemented PR5 bounded import and Strict Online Numbering scope, PDA-APP-024 evidence, PDA-OPS-019 recovery guidance, and retained exact-head review/merge plus RR-007 as open gates. |
+| 0.4.0 | 2026-07-16 | Platform Design Authority | Recorded PR4 exact-head concurrence and merge, closed RR-006 at controlled-prototype depth through the risk register, activated issue #71, and bound the PR5 import/Numbering contract and persistence ownership baseline without closing RR-007. |
 | 0.3.6 | 2026-07-16 | Platform Design Authority | Dispositioned the implementation audit and recorded replay-scoped receipts, same-row contention proof, executable worker-migration denial, literal optional coverage, and reproducible evidence commands; retained RR-006/RR-007. |
 | 0.3.5 | 2026-07-16 | Platform Design Authority | Recorded PR4 implementation and local evidence completion pending exact-head independent review and merge; linked PDA-APP-023 and retained RR-006/RR-007 plus every production gate. |
 | 0.3.4 | 2026-07-15 | Platform Design Authority | Recorded exact-head concurrence for all three PR4 pre-worker lenses and moved PR4 from review-only remediation to bounded worker implementation without closing RR-006/RR-007 or any delivery evidence gate. |

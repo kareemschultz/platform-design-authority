@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-002
 title: Founder Decision Register
-version: 0.6.0
+version: 0.7.1
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-18
 ---
 
 # Founder Decision Register
@@ -12,8 +12,6 @@ last_reviewed: 2026-07-16
 ## Purpose
 
 Record business decisions architecture cannot safely infer. Recommendations remain provisional until explicit founder ratification and required professional review.
-
-PDA-STR-030 supplies the supporting evidence and closure packet for every entry below: exact decision scope, safe current posture, alternatives, admissible evidence, affected capabilities/contracts, sequencing, propagation and closure tests. It prepares decisions but does not make them; this register remains the authoritative decision record.
 
 ## FDR-001 — Initial Tenant Payment Operating Model
 
@@ -53,17 +51,33 @@ Decide platform invoice currencies, bank and settlement currencies, FX source, r
 
 ## FDR-004 — First Retail Beachhead Scope
 
-**Status:** Open — recommended and provisionally adopted.
+**Status:** Ratified on 2026-07-17.
 
-Recommended first slice: POS, catalog, inventory, cash/register control, Party/customer basics, stored value, prototype tax pack, payment adapter seam, audit, entitlements, permissions, offline continuity, and Finance handoff.
+**Decision owner:** Founder.
+
+**Decision evidence:** [Issue #81, owner approval comment 5008157609](https://github.com/kareemschultz/platform-design-authority/issues/81#issuecomment-5008157609).
+
+The ratified first slice is the bounded Guyana retail foundation scope in `FIRST_SLICE_MANIFEST.md` (PDA-RDM-003) and `registry/first-slice.json` schema version 2.1.0: POS, catalog, inventory, cash/register control, Party/customer basics, stored value, prototype tax pack, payment adapter seam, audit, entitlements, permissions, offline continuity, and Finance handoff. The registry's `full`, `prototype`, and `seam` depths are target delivery depths; they are not claims of current implementation or production readiness.
 
 The production native storefront, customer recurring agreements, memberships, advanced loyalty, full General Ledger, financial statements, self-checkout, and autonomous AI are outside the first slice.
 
-**Ratification required before:** the first-slice package is marked In Review or implementation scope is contractually committed.
+This ratification closes the founder scope decision identified by F-L-003. It does not promote the Draft manifest or implementation plan, authorize a pilot or production deployment, or remove their legal, provider, security, accessibility, operational, and evidence gates.
+
+**WS3 entry condition:** P-W2a is merged and PDA-REV-019 records the FDR-005 repository disclosure review. WS3 still may not start until the customer-evidence gate records at least 8 structured interviews and 3 workflow observations across at least 3 businesses, as directed in the same founder approval. Issue #94 must establish restricted handling before raw customer evidence is retained. The customer evidence must be real-world evidence; agents cannot generate, simulate, infer, or waive it. FDR-012 (2026-07-18) records a bounded controlled-prototype implementation exception on isolated branch `claude/ws3-integration` without changing these entry, retention, or merge conditions.
 
 ## FDR-005 — Repository Visibility and Documentation License
 
-**Status:** Open — repository currently public.
+**Status:** Open — provisional public visibility approved on 2026-07-17; the controlled-prototype path review is recorded by PDA-REV-019; final visibility, ownership, licensing, and contribution ratification remain undecided.
+
+**Decision owner:** Founder.
+
+**Decision evidence:** [Issue #81, owner approval comment 5008157609](https://github.com/kareemschultz/platform-design-authority/issues/81#issuecomment-5008157609).
+
+**Current operating decision:** the repository may remain public only as a provisional disclosure posture while the required review is completed. Public availability is not evidence that every path has been classified for disclosure, that the documentation or source has been licensed for reuse, that security-sensitive detail is suitable for publication, or that public contribution is accepted.
+
+**Recorded path review:** PDA-REV-019 classifies the evaluated controlled-prototype tree as public or sanitized public while defining Restricted and Prohibited classes that must remain outside public collaboration surfaces. It records no confirmed current or historical live secret/customer/private-provider/premium-source exposure, closes public external contribution intake, and adds mechanical high-signal disclosure checks. Issues #92–#94 retain private security intake/scanning, third-party notice/SBOM/asset provenance, and restricted external-evidence storage. Completion of the path review satisfies only the issue #83/WS3 disclosure-review trigger; it does not ratify a license, public contribution model, external distribution, pilot, or production posture.
+
+Until final ratification, every change must continue to exclude secrets, customer or partner identities, private premium-source code, license keys, private download URLs, production credentials, exploitable production security detail, and material that contractual, legal, privacy, security, or licensing review has not cleared. A public repository does not waive copyright, confidentiality, trademark, privacy, or third-party license obligations.
 
 Decide:
 
@@ -75,6 +89,10 @@ Decide:
 - Security and roadmap redaction
 
 No secrets, customer identities, private premium-source code, license keys, or production security details may be committed regardless of visibility.
+
+**Ratification trigger:** complete and record a repository/path disclosure and redaction review before WS3 starts, before publishing a documentation or source license, before soliciting external contributions, and before intentionally adding customer, provider, production-topology, security-control-gap, or commercially sensitive roadmap detail. The review must identify public, restricted, and prohibited paths; assign an owner for ongoing classification; and disposition security, commercial, legal, privacy, trademark, premium-source, and contribution-policy concerns.
+
+If that review is not complete at the trigger, WS3 remains blocked and affected material must stay out of the public repository or move to an approved restricted location; provisional visibility is not automatic approval to disclose it.
 
 ## FDR-006 — Platform Payment Terminal Strategy
 
@@ -135,24 +153,48 @@ Until ratified, tenants may not treat platform staff, partners, resellers, or im
 
 **Ratification required before:** publishing a cash-payment option, appointing a collector, accepting physical funds, or implementing agent receivables.
 
-## FDR-011 — Commercial Product Brand and Publishing Identity
+## FDR-011 — Commercial Product Name and Public Package Scope
 
-**Status:** Open — the commercial product name and public publishing identity are undecided.
+**Status:** Open — internal codename accepted; commercial naming and public package scope remain unverified and undecided.
 
-Decide:
+**Decision owner:** Founder.
 
-- Commercial product name, legal owner, markets, languages, pronunciations, and permitted variants
-- Trademark search, clearance, filing, monitoring, opposition, renewal, and rebrand posture
-- Public domains, social/developer identities, npm organization or fallback scope, and anti-impersonation controls
-- App-store names, public bundle/package identifiers, documentation and API presentation, sender identities, and platform attribution
-- Relationship between the platform brand, partner/reseller brands, tenant brands, and full-white-label fallback behavior
-- Migration, redirects, package deprecation, customer communication, and exit behavior if the selected identity changes
+**Decision evidence:** [Issue #81, owner approval comment 5008157609](https://github.com/kareemschultz/platform-design-authority/issues/81#issuecomment-5008157609).
 
-Until ratified, “Meridian” remains an internal engineering codename under ADR-0026. Internal `@meridian/*` packages remain private; canonical identifiers remain brand-neutral; customer-visible strings use generic or configured branding; and public package publication, product-domain launch, app-store submission, or representation of the codename as the commercial brand is disabled.
+**Current operating decision:** accept ADR-0026's use of **Meridian** as the internal engineering codename and `@meridian/*` as a provisional private-workspace package scope. Neither is approved as a commercial product name, tenant-visible brand, public package scope, npm organization, domain, trademark, app-store identity, or public API namespace. Canonical capability, event, permission, schema, and public contract identifiers remain codename-independent.
 
-Required evidence: FDR-002 and FDR-005; qualified trademark and naming review in each intended market; domain, social, npm and app-store availability/ownership evidence; linguistic and accessibility review; phishing/confusion and competitor-collision analysis; white-label and partner impact; migration cost; and founder selection with an effective date.
+Decide and evidence:
 
-**Ratification required before:** adopting a commercial name, publishing a public package or documentation/product domain under that identity, submitting a branded app, issuing branded customer communications, or making a trademark or availability claim.
+- Commercial product and company-facing brand names, including white-label presentation rules
+- Trademark clearance in intended jurisdictions and relevant classes, with qualified legal review
+- Company, product, and defensive domain availability and registration authority
+- npm organization and package-scope availability, ownership, recovery, and publishing controls
+- Relevant source-hosting organization, app-store, social, and other public identity availability
+- Migration from `@meridian/*` if the provisional scope is unavailable or unsuitable
+
+The dated baseline in `PRODUCT_NAMING_AND_PACKAGE_SCOPE_AVAILABILITY-2026-07-17.md` (PDA-APP-026) records that none of these availability or clearance checks had been performed as of 2026-07-17. Absence of a recorded conflict is not evidence of availability or legal clearance.
+
+**Ratification triggers:** complete the relevant checks and record the selected name/scope before any commercial product-name announcement, tenant-visible use of "Meridian," domain registration or launch, public package publication, npm organization claim, public SDK naming, app-store submission, trademark filing, or external contract or marketing claim that depends on the name. Revisit the decision if a conflict, refusal, challenge, acquisition, market expansion, or white-label requirement changes the evidence.
+
+Until ratified, public packages must not be published under `@meridian/*`; a verified alternative scope may be selected without changing canonical identifiers or source-directory names.
+
+## FDR-012 — WS3 Controlled-Prototype Implementation Ahead of Evidence Gates
+
+**Status:** Decided (2026-07-18) — bounded controlled-prototype exception; the #94/#82 entry, retention, and merge gates are unchanged.
+
+**Decision owner:** Founder.
+
+**Decision evidence:** [Founder approval comment on PR #101](https://github.com/kareemschultz/platform-design-authority/pull/101#issuecomment-5010116100) (2026-07-18) together with the governed pull request recording this entry; the WS3 unblock plan on [issue #13](https://github.com/kareemschultz/platform-design-authority/issues/13) records the surrounding sequencing context.
+
+**Decision:** WS3 (POS cash workflow) implementation may proceed ahead of the issue #94 and issue #82 entry gates only as a controlled prototype on the isolated branch `claude/ws3-integration`, under all of the following recorded conditions:
+
+1. No WS3 change merges to `main`, and no consolidated WS3 pull request may merge, until issue #94 (restricted evidence store) and issue #82 (real customer evidence: 8 structured interviews and 3 direct workflow observations across at least 3 businesses) are closed with retained evidence. The evidence thresholds are unchanged and cannot be satisfied, simulated, inferred, or waived by agents.
+2. The full deterministic gate suite (types, tests, lint, documentation governance, registries, contracts, architecture, disclosure) is enforced at every stage boundary on the branch.
+3. The per-PR independent-review discipline is replaced, for this workstream only, by one consolidated independent review of the entire integration diff before any merge to `main`; findings from that review must be remediated before merge. This is a recorded deviation from the one-issue-one-PR-one-review practice, accepted for build velocity.
+4. WS3 completion, program-status percentages, and workstream state remain unchanged until the consolidated review concurs and the entry gates close; all run artifacts state `implemented-pending-gates-and-review`.
+5. If issue #82's customer evidence contradicts implemented WS3 scope, the evidence wins: the affected scope is reworked before merge, per PDA-STR-027's confirmed/contradicted synthesis.
+
+This decision does not promote any Draft document, does not record WS3 entry, and does not authorize pilot or production use.
 
 ## Governance
 
@@ -165,3 +207,8 @@ A decision closes only when:
 5. The decision is represented in implementation and customer claims.
 
 Architecture documents reference this register rather than inventing business facts.
+
+## Change Log
+
+- 2026-07-18 — v0.7.0 added FDR-012 (WS3 controlled-prototype implementation ahead of evidence gates, five recorded conditions) and cross-referenced it from FDR-004's WS3 entry condition.
+- 2026-07-18 — v0.7.1 cited the dedicated Founder approval comment on PR #101 as FDR-012's decision evidence and mirrored the FDR-012 review-process carve-out into CLAUDE.md/AGENTS.md §12 (Codex bot review P1/P2).

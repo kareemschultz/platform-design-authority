@@ -23,8 +23,8 @@ export default function Home() {
 				Controlled Prototype
 			</h1>
 			<p className="mt-1 text-muted-foreground text-sm">
-				Internal controlled prototype for the first identity, tenancy, Party,
-				authorization, entitlement, session, and audit slice.
+				Internal controlled prototype for identity and tenancy plus the WS2
+				Catalog, Inventory ledger, and governed import slice.
 			</p>
 			<div className="mt-6 grid gap-6">
 				<section
@@ -48,6 +48,15 @@ export default function Home() {
 			<div className="mt-6 flex flex-wrap gap-3">
 				<Link
 					className={buttonVariants({ className: "min-h-10" })}
+					href="/operations"
+				>
+					Open operations
+				</Link>
+				<Link
+					className={buttonVariants({
+						className: "min-h-10",
+						variant: "outline",
+					})}
 					href="/administration"
 				>
 					Open administration

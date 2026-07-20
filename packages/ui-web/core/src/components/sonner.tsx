@@ -34,6 +34,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
 			theme={theme as ToasterProps["theme"]}
 			toastOptions={{
 				classNames: {
+					actionButton: "bg-secondary! text-secondary-foreground!",
+					description: "text-foreground!",
 					toast: "cn-toast",
 				},
 			}}

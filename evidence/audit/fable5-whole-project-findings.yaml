@@ -1,0 +1,573 @@
+# Fable 5 Whole-Project Audit — Machine-Readable Finding Register
+# Source of truth for the finding set backing PDA-REV-013 (audit report).
+# Registration note: this file is an audit-evidence source, not a generated
+# registry. It must be registered through registry/documents.json's source and
+# regenerated (python scripts/generate_registries.py) by the owner; it is never
+# hand-copied into a generated file.
+audit:
+  id: PDA-REV-013
+  title: Fable 5 Whole-Project Architecture, Implementation, and Readiness Audit
+  audited_sha: 81e903b27bf41785106775afb33f9f88738e39b9
+  branch: main
+  audited_at: "2026-07-17"
+  environment:
+    bun: 1.3.14
+    node: v25.8.2
+    python: 3.14.6
+    docker: 29.6.1
+    postgres: 18.4
+    os: Windows 11 Pro 26200
+  verdict: >
+    Engineering core is strong and independently reproduced clean. No P0. Highest
+    confirmed defects are governance/process (closeout PR merged without its own
+    required exact-head concurrence) and program-management (external-evidence
+    gates unscheduled; internal build advancing against zero customer evidence),
+    plus latent architecture-guard and UX hardening. Controlled-prototype closure
+    of WS2 is technically supported by reproduced evidence but its governed
+    concurrence-before-merge gate was not satisfied for PR7. Pilot and production
+    remain correctly blocked.
+  # Third-review correction: the immutable report's summary line (FABLE5_FIFTH_AUDIT_V1.md:17)
+  # states "0 P0 · 3 P1 · 9 P2 · 15 P3 (27 findings)", undercounting by one P2 and one P3 finding
+  # against this register's actual 29 entries. The report is frozen per evidence-immutability
+  # rules and is not edited; the correction narrative lives in
+  # FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md's Implementation status section. This field is the
+  # machine-readable count and must equal the actual findings list;
+  # scripts/validate_docs.py's validate_audit_finding_counts() enforces that mechanically.
+  counts: { P0: 0, P1: 3, P2: 10, P3: 16 }
+
+findings:
+  - id: F-A-001
+    status: "founder-decision-recorded (issue #81; PR #89 concurrence comment 5008646684 and merge 7de0688); P-W2a implemented-pending-independent-review (issue #90)"
+    lens: A-governance
+    severity: P1
+    confidence: confirmed
+    title: WS2 PR7 (#79) merged without the recorded independent exact-head concurrence its own governed gate requires
+    files: [docs/implementation/WS2_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md:16, docs/blueprint/17-Roadmap/WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md:19, docs/project/PROGRAM_STATUS.md:74]
+    governing: PDA-IMPL-007 §1-2; PDA-RDM-009; WS2 concurrence-before-merge pattern
+    actual: HEAD is the PR7 merge; gh pr view 79 shows zero concurrence at final head 22a3a38; merge message says "closeout candidate"
+    expected: Exact-head independent concurrence recorded before merge, as for PR1-PR6
+    impact: Central integrity mechanism skipped on the closeout PR itself; blocks the WS2 100%/program 42% claim path
+    invalidates_evidence: false
+    reopens_risk: false
+    blocks: [controlled-prototype-closure-claim]
+    disposition: decide
+    remediation: Treat this whole-project audit as the superseding exact-main disposition, OR record a dedicated exact-main re-review; update PDA-IMPL-007 §2 PR7 row, WS2 plan, risk register with the actual sequence
+    closure_test: PDA-IMPL-007 §2 PR7 row names reviewed head = 22a3a38 or 81e903b with an independent disposition pointer; no governed doc still describes the gate as satisfied without that pointer
+    owner: Founder + independent reviewer
+    wave: W1
+
+  - id: F-L-001
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); external-evidence track remains open in issues #82-#88"
+    lens: L-roadmap
+    severity: P1
+    confidence: high
+    title: External-evidence gates have no roadmap lane, owner, or trigger point
+    files: [docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md, docs/reviews/ARCHITECTURE_RISK_REGISTER.md, docs/project/PROGRAM_STATUS.md]
+    governing: PROGRESS_MEASUREMENT_STANDARD measure 4; FA4 external gates
+    actual: Customer discovery, Guyana legal/tax/privacy, provider certification, pen test, independent accessibility exist only as risk rows/prose; no workstream, milestone, owner, or entry/exit gate initiates any
+    expected: A parallel external-evidence track (WSX) binding each external item to named M-gates
+    impact: The binding constraint (external gates) gets no schedule pressure; internal build can reach 100% with zero external progress
+    disposition: decide
+    remediation: Add an External-evidence workstream to FIRST_SLICE_IMPLEMENTATION_PLAN and measure 4; bind customer discovery + counsel engagement to M-gates; track in issues
+    closure_test: Each external gate has an owner, a start-by/finish-by milestone, and a tracking issue
+    owner: Founder
+    wave: W1
+
+  - id: F-L-002
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); WS3 customer-evidence gate remains open in issue #82"
+    lens: L-roadmap
+    severity: P1
+    confidence: high
+    title: Implementation at 37.8% against zero customer evidence with no validation checkpoint before WS7
+    files: [docs/blueprint/20-Strategy/MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md, docs/project/PROGRAM_STATUS.md, docs/reviews/ARCHITECTURE_RISK_REGISTER.md]
+    governing: TA-016; PDA-RDM-007 workstream gates
+    actual: Register honestly records TA-016, but roadmap permits WS3-WS7 (~54% weighted, incl POS, stored value, offline) with customer-evidence count still zero; no WS entry criterion references customer evidence
+    expected: A stated latest-safe-point (e.g. WS3/WS4 entry requires N structured retailer interviews/observations)
+    impact: Every UX budget and WS3-5 workflow shape is hypothesis-derived; wrong assumption discovered after WS5 forces rework of the most expensive layers
+    disposition: decide
+    remediation: Add a customer-evidence entry gate to WS3 (or WS4 latest); update or annotate the evidence log with who owns starting discovery
+    closure_test: A WS-entry gate cites a minimum customer-evidence bar; evidence log updated
+    owner: Founder
+    wave: W1
+
+  - id: F-A-002
+    status: "implemented-pending-independent-review (issue #90)"
+    lens: A-governance
+    severity: P2
+    confidence: confirmed
+    title: Merged HEAD internally contradicts itself; dashboards/plans/release notes describe the PR7 merge and its counts as pending
+    files: [docs/project/PROGRAM_STATUS.md:7, docs/project/PROGRAM_STATUS.md:20, apps/docs/content/docs/release-notes/index.mdx:14, docs/implementation/WS2_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md:37]
+    governing: PROGRAM_STATUS update rule; AGENTS.md §12 propagation
+    actual: At HEAD, registry first-slice-tests coverage says 25/103 capabilities/325 cells while dashboard says 11/103; four documents say a merge is pending that is the commit they sit in; evidence cutoff 635fa3f is one merge behind HEAD
+    expected: PR7 merge followed by a tracking sync moving cutoff to 81e903b and reconciling the 11-vs-25 split per the concurrence outcome
+    impact: Cross-document consistency defect at HEAD
+    disposition: fix
+    remediation: One docs(tracking) sync PR updating PROGRAM_STATUS, WS2 plan, PDA-IMPL-007 §2, release note, gated on F-A-001 disposition
+    closure_test: grep for "closeout candidate"/"final head pending"/"11/103" returns only text consistent with the recorded PR7 disposition; cutoff >= 81e903b
+    owner: PDA
+    wave: W2
+
+  - id: F-A-003
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: A-governance
+    severity: P2
+    confidence: confirmed
+    title: AGENTS.md and CLAUDE.md agent contracts have materially diverged, firing the reopen trigger of FA4-015/FA4-030
+    files: [AGENTS.md, CLAUDE.md, docs/reviews/FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md:48, docs/reviews/ARCHITECTURE_RISK_REGISTER.md:173]
+    governing: FA4-015/FA4-030 closure conditions (keep agent contracts in sync); register rule 4
+    actual: CLAUDE.md-only content (PREFERRED_COMPONENT_CATALOG lookup, Better Auth deny-by-default plugin rules, Base UI bootstrap, change-process steps 5-8); AGENTS.md-only content (§13 ADR Triggers, §14 Prohibited Behavior incl audit-evidence immutability, §15 Current Readiness)
+    expected: Parity in authority-bearing rules, or a recorded rationale for an intentional split
+    impact: The two contributor contracts grant different obligations depending on which tool reads which file
+    reopens_risk: true
+    reopened: [FA4-015, FA4-030]
+    disposition: fix
+    remediation: Restore parity (make one the normative superset with the other a pointer, or add missing sections to each) plus a scripted parity check; record reopen-and-reclose in the risk register
+    closure_test: Every authority-bearing rule appears in both files or one normatively includes the other; parity check or recorded exemption exists
+    owner: PDA
+    wave: W2
+
+  - id: F-B-001
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: B-architecture
+    severity: P2
+    confidence: high
+    title: Architecture checker has no unregistered-source detection under packages/ (only apps/ is covered)
+    files: [scripts/check_architecture.py:196, scripts/check_architecture.py:96, scripts/check_architecture.py:246]
+    governing: PDA-ENGR-012 Architecture Tests; ADR-0002/0003
+    actual: A .ts/.sql file under packages/ outside any package.json directory is never classified/scanned; could import pg, build pools, declare tables, hold migrations invisibly. Latent (NO STRAY SOURCES at this commit)
+    expected: Symmetric stray-source guard walking packages/ (as apps/ has)
+    impact: A future PR/scaffold can bypass all boundary/DB/ownership/runtime-neutrality rules with CI green
+    disposition: fix
+    remediation: Extend the stray-source loop to walk ROOT/packages and emit unregistered-package-source; add a negative probe
+    closure_test: Probe packages/__fixture__/src/x.ts importing pg fails the checker; baseline passes
+    owner: PDA
+    wave: W2
+
+  - id: F-B-002
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6); review corrections retained below"
+    lens: B-architecture
+    severity: P2
+    confidence: high
+    title: '"Worker cannot run migrations" enforced only by a camelCase regex; lowercase/aliased invocation evades it'
+    files: [scripts/check_architecture.py:58, scripts/check_architecture.py:253, registry/architecture-rules.json:257]
+    governing: PDA-ENGR-012 worker row; ADR-0027 item 4
+    actual: MIGRATION_INVOCATION_PATTERN matches only migrate[A-Z](; `import {migrate} from "drizzle-orm/.../migrator"; await migrate(db,...)` (lowercase) or aliased re-export evade it. Worker runtime is currently compliant
+    expected: Reject migrator-module import and aliased re-invocation from non-authorized paths regardless of casing, or document the name-convention scope
+    impact: A worker-side migration could be introduced without tripping CI, undermining the ADR-0027 single-authority gate the registry calls executable
+    disposition: fix
+    remediation: Flag drizzle-orm/*migrator* / drizzle-kit imports and persistence migrate* export imports from application paths outside migration_invocation_roots; add probes
+    closure_test: 'apps/worker/composition fixture importing migrate fails; same in apps/server/composition passes; second-review addition — apps/worker/composition namespace-import and dynamic-import fixtures with an aliased call site (const run = mod.migrateCatalog) also fail, per PERSISTENCE_MODULE_IMPORT_PATTERN + PERSISTENCE_MIGRATE_PROPERTY_ACCESS_PATTERN in scripts/check_architecture.py and their probes in scripts/test_architecture_checker.py; fourth-review addition — apps/worker/composition destructured-binding (const {migrateCatalog: run} = p), migrate-named re-export (export {migrateCatalog as run} from "@meridian/persistence-..."), bracket-access (p["migrateCatalog"]), and wildcard re-export (export * from "@meridian/persistence-...") fixtures all fail, while a same-form apps/server/composition fixture still passes. The per-access-syntax rules were consolidated into a token-reference rule (PERSISTENCE_MIGRATE_REFERENCE_PATTERN — any migrate<Name> token when a persistence module is imported, covering dot/bracket/destructure/bare access) plus PERSISTENCE_MIGRATE_REEXPORT_PATTERN and PERSISTENCE_WILDCARD_REEXPORT_PATTERN in scripts/check_architecture.py, with matching probes in scripts/test_architecture_checker.py'
+    owner: PDA
+    wave: W2
+    second_review_correction: "The first remediation pass's 'regardless of call-site casing or aliasing' claim did not hold for namespace imports (`import * as p from '@meridian/persistence-...'`) or dynamic imports (`await import('@meridian/persistence-...')`) combined with an aliased call site — live-confirmed at exact head 2cdfdcf via tsc --noEmit (compiles clean) and check_architecture.py (passed with the fixture present). Fixed in the second-review remediation PR; see ARCHITECTURE_DEPENDENCY_RULES.md changelog 1.6.0."
+    fourth_review_correction: "Codex's PR #80 review at exact head a0bfe12 found two residual evasions the second-review property-access rule missed: a destructured binding (`const {migrateCatalog: run} = p;`) has no `.migrate*` member access, and a migrate-named re-export (`export {migrateCatalog as run} from '@meridian/persistence-...'`) is an `export ... from`, not an `import`. Both live-confirmed passing (checker exit 0) at a0bfe12 before the fix. Closed by PERSISTENCE_MIGRATE_DESTRUCTURE_PATTERN + PERSISTENCE_MIGRATE_REEXPORT_PATTERN in scripts/check_architecture.py with matching failing worker fixtures and a passing server fixture in scripts/test_architecture_checker.py; full-tree check_architecture.py still passes with no new false positives."
+    fourth_review_correction_2: "The independent review of exact head 532a010 found the a0bfe12 fix still incomplete: bracket access (`p[\"migrateCatalog\"]`) evaded the dot-only property-access rule, and a wildcard re-export (`export * from '@meridian/persistence-...'`) carried no migrate token to match. Both live-confirmed passing (checker exit 0) at 532a010 before this pass. Rather than add yet another access-syntax rule, the dot/destructure patterns were consolidated into PERSISTENCE_MIGRATE_REFERENCE_PATTERN (matches any migrate<Name> token when a persistence module is imported — dot, bracket, destructure, and bare aliased access all contain the token), and PERSISTENCE_WILDCARD_REEXPORT_PATTERN was added for wholesale re-exports. Residual known limit: a token built by runtime string concatenation (`p['migr'+'ateCatalog']`) is out of scope for static text matching — recorded as contrived obfuscation, not an accidental violation."
+    fourth_review_correction_3: "The independent review of exact head 8b4ce85 found two further compiling bypasses (both reproduced, checker exit 0): CommonJS `require(\"@meridian/persistence-...\")`, and a two-file namespace laundering (file A `import * as p from persistence; export const x = p;` carries no migrate token; file B imports the local re-export and invokes `x.migrateCatalog` via an alias) — which no per-file text checker can catch, since it requires cross-file symbol resolution. Resolved not by another access-syntax rule but by an import-mode allowlist per PDA-ENGR-012 v1.7.0: outside migration_invocation_roots, @meridian/persistence-* may be acquired ONLY by a static named import with no migrate-prefixed name; PERSISTENCE_NAMESPACE_IMPORT_PATTERN / PERSISTENCE_DEFAULT_IMPORT_PATTERN / PERSISTENCE_DYNAMIC_IMPORT_PATTERN / PERSISTENCE_REQUIRE_PATTERN / PERSISTENCE_WILDCARD_REEXPORT_PATTERN / PERSISTENCE_MIGRATE_NAMED_PATTERN reject every other mode at the point of acquisition, closing the cross-file case at its source (file A's namespace import is rejected, so no second-file analysis is needed). Full-tree check_architecture.py still passes with no false positives (existing worker imports are static named adapter imports); the direct migrate*-invocation rule is retained as defense in depth. Regression probes added in scripts/test_architecture_checker.py for the namespace-laundering, aliased require, default/dynamic/wildcard forms, an allowed worker static named import, and equivalent forms passing inside apps/server/composition. Residual known limit unchanged: runtime string-concatenated specifiers/identifiers are outside static text matching."
+    fourth_review_correction_4: "The independent review of exact head 4acb743 confirmed the namespace-laundering and require() bypasses fixed but found one narrow remaining form: a no-substitution template-literal (backtick) specifier in dynamic import() — await import(`@meridian/persistence-catalog-postgres`) — evaded the quote-only specifier matcher (reproduced, checker exit 0). Fixed by extending PERSISTENCE_SPECIFIER to accept no-substitution backtick literals, so both dynamic import() and require() reject them (shared matcher); PDA-ENGR-012 bumped to v1.7.1. Added a failing worker probe (__architecture_worker_backtick_dynamic_import_fixture.ts) and preserved the allowed static named-import probe; verified an interpolated backtick (`${...}`) is NOT matched and remains explicitly out of scope, and the full-tree checker still passes with no false positives. Residual known limit narrowed and restated: runtime string-INTERPOLATED (`${...}`) or CONCATENATED specifiers/identifiers remain outside static text matching; no-substitution string and backtick literals are now covered."
+
+  - id: F-H-001
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: H-frontend
+    severity: P2
+    confidence: high
+    title: Shared QueryFailure hardcodes Administration navigation targets and is reused across all Operations routes
+    files: [apps/web/src/components/query-state.tsx:86, apps/web/src/components/operations-shared.tsx:33, apps/web/src/lib/shell.ts:86]
+    governing: shell safeReturnPath/safeOperationsReturn design; permission-denied-state discipline
+    actual: A session-expired/errored Operations query renders "Go to sign in" returning to /administration and "Return to overview" to /administration — a different section the operator may lack permission for
+    expected: Failure actions return to the section the user was in (returnTo = current safe path)
+    impact: Disorienting cross-section navigation post-reauth; can land a permission-limited Operations user on an Administration denial
+    disposition: fix
+    remediation: Give QueryFailure a returnHref/sectionHref prop validated via safeReturnPath, defaulting from current pathname
+    closure_test: 'Unit test asserts /operations/* failure emits returnTo=/operations (apps/web/src/lib/shell.test.ts); two Playwright lenses in apps/web/e2e/authenticated-operations.spec.ts (requires the live Docker/DB stack to execute): a client-contract lens injects an UNAUTHORIZED on an already-mounted Operations query and verifies the QueryFailure surface routes recovery to /operations, and a genuine-expiry lens signs in for real, clears the session credential, confirms the server resolves no session, then navigates into Operations and asserts the server-component layout redirects to /login?returnTo=/operations and never to /administration. Second-review addition: shell.test.ts also covers the /operations-evil near-prefix boundary defect found by two independent second-review passes.'
+    owner: PDA
+    wave: W3
+    fourth_review_correction: "Codex's PR #80 review at exact head a0bfe12 found the prior single Playwright test only injected a mocked 401 while the real Better Auth session stayed valid, so it exercised the client 401->reauth routing contract but not a genuine expiry (its name overclaimed). Fixed by renaming that test to the client-contract lens it actually is (with a comment on why a navigated full expiry cannot render QueryFailure — the Operations server-component layout redirects first) and adding a separate deterministic genuine-expiry lens that removes the session credential and asserts the layout redirect lands in Operations, not Administration."
+
+  - id: F-L-003
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); historical M0 provisional-adoption deviation retained"
+    lens: L-roadmap
+    severity: P2
+    confidence: high
+    title: Roadmap Phase 0 exit ("prototype slice founder-ratified") contradicted by FDR-004 being open while M0 passed
+    files: [docs/blueprint/17-Roadmap/BLUEPRINT_AND_DELIVERY_ROADMAP.md, docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md, docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md]
+    governing: PDA-RDM-001 Phase 0 exit criteria; FDR-004; TA-002
+    actual: WS0-WS2 merged while the Phase 0 exit criterion requiring founder ratification of the slice remains unmet; M0 passed 2026-07-13 without FDR-004 ratification or a recorded exception
+    expected: FDR-004 ratified at/before M0, or PDA-RDM-001 amended to match FDR-004's "provisionally adopted; ratification required before In Review"
+    impact: A prized authority gate silently waived; precedent weakens future gates
+    disposition: decide
+    remediation: One-line amendment to PDA-RDM-001 Phase 0 or a recorded founder ratification; note M0-passed-without-ratification in TA-002
+    closure_test: PDA-RDM-001 Phase 0 wording matches FDR-004 trigger, or ratification recorded
+    owner: Founder
+    wave: W2
+
+  - id: F-L-004
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); M3 and workstream-specific P4-P7 entry gates remain open"
+    lens: L-roadmap
+    severity: P2
+    confidence: medium-high
+    title: Prototypes 4-7 (WS4-WS7) scheduled with no recorded clearance analogous to FA4's clearance of Prototypes 1-3
+    files: [AGENTS.md, docs/blueprint/17-Roadmap/TECHNICAL_PROTOTYPE_PLAN.md, docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md]
+    governing: AGENTS.md §15; PDA-RDM-004
+    actual: Standing authorization names P1-P3 only; WS4 (stored value, strictest ledger), WS5 (offline), WS6 (provider), WS7 (recovery) have internal-only entry criteria; no doc states who clears P4-P7
+    expected: An explicit entry-clearance statement (e.g. charter checkpoint at M3) for P4-P7
+    impact: On WS3 exit agents will either stall or proceed on inferred authority — the failure mode the repo forbids — at the highest-stakes workstreams
+    disposition: decide
+    remediation: Extend PDA-RDM-004 and AGENTS.md §15 with P4-P7 entry conditions
+    closure_test: AGENTS.md §15 or PDA-RDM-004 names P4-P7 entry clearance
+    owner: Founder + PDA
+    wave: W2
+
+  - id: F-L-005
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: L-roadmap
+    severity: P2
+    confidence: high
+    title: Production-readiness gate tracking (progress-standard measure 4) mandated but not implemented
+    files: [docs/project/PROGRESS_MEASUREMENT_STANDARD.md, docs/project/PROGRAM_STATUS.md]
+    governing: PROGRESS_MEASUREMENT_STANDARD measure 4 (11 gate families)
+    actual: Standard requires per-gate tracking of 11 families; PROGRAM_STATUS publishes a single "Not claimed" cell; several families (retention/legal-hold, operational staffing, performance/capacity) have no tracking artifact anywhere
+    expected: A per-gate table with status/owner/evidence pointer per family
+    impact: The program's fourth measure is structurally unreportable; "Not claimed" masks unowned families
+    disposition: fix
+    remediation: Add the 11-row gate table to PROGRAM_STATUS with pointers to FDR/risk rows and explicit "no artifact yet"
+    closure_test: PROGRAM_STATUS enumerates all 11 gate families with owner/status
+    owner: PDA
+    wave: W2
+
+  - id: F-L-006
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); dated naming and availability checks remain open"
+    lens: L-roadmap
+    severity: P2
+    confidence: high
+    title: Product naming/trademark/@meridian npm-scope declared "a separate founder decision" but absent from the Founder Decision Register
+    files: [docs/blueprint/18-Decisions/ADR-0026-USE-MERIDIAN-AS-INTERNAL-PLATFORM-CODENAME.md, docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md, CLAUDE.md]
+    governing: ADR-0026; FDR discipline
+    actual: No FDR entry for product naming/trademark/domain/npm-org; the ADR-0026 "dated appendix" recording availability checks does not exist; TA-055 closed "FDR-001 through 010" so a later naming FDR is outside that closure
+    expected: FDR-011 with ratification triggers before any public marketing site, published package, pilot contract, or tenant-visible string
+    impact: The latest safe point (first public/publishing surface) has no guard
+    disposition: decide
+    remediation: Add FDR-011; record npm/trademark check status (even "not performed") as the dated appendix ADR-0026 promises
+    closure_test: FDR-011 exists with triggers; dated appendix present
+    owner: Founder
+    wave: W2
+
+  - id: F-L-007
+    status: "closed (PR #89 concurrence comment 5008646684 and merge 7de0688); repository disclosure/redaction gate remains open in issue #83"
+    lens: L-roadmap
+    severity: P2
+    confidence: medium
+    title: FDR-005 (repository visibility) open with no ratification trigger while the public repo accretes security-gap and competitive detail
+    files: [docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md]
+    governing: FDR discipline
+    actual: FDR-005 is the only open FDR with no "ratification required before" line; default (public) continues by inertia while the repo documents open RLS gap (RR-007), no pen test (RR-009), full roadmap, and provider-negotiation posture
+    expected: A decision, or at minimum a trigger line and a statement of knowingly-disclosed content classes
+    impact: Publicly documenting open security gaps alongside a public roadmap is a compounding cost of leaving FDR-005 undecided
+    disposition: decide
+    remediation: Add a ratification-trigger line to FDR-005 and a redaction-review item to the external-evidence track
+    closure_test: FDR-005 has a trigger and disclosure statement
+    owner: Founder
+    wave: W2
+
+  - id: F-B-003
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: B-architecture
+    severity: P3
+    confidence: confirmed
+    title: Architecture checker regression probes mutate the live workspace and leave residue directories
+    files: [scripts/test_architecture_checker.py:27, scripts/test_architecture_checker.py:98]
+    governing: PDA-ENGR-012 Architecture Tests; working-tree hygiene
+    actual: probe() mkdir's real dirs under apps/ and unlinks only files; empty apps/random-app, apps/worker-adjacent, apps/worker/migrations persist (reproduced in this worktree after running the CI probe step)
+    expected: probes clean up created directories in a finally block or run against a temp copy
+    impact: Misleading workspace state, false audit signals, workspace-glob interference, overlap race
+    disposition: fix
+    remediation: Track created dirs and rmtree them (if empty/created) in finally
+    closure_test: After a full run in a clean tree, no random-app/worker-adjacent/worker/migrations remnants
+    owner: PDA
+    wave: W2
+
+  - id: F-B-004
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: B-architecture
+    severity: P3
+    confidence: high
+    title: Test-file exemptions let worker-package tests run migrations and construct multiple pools; scope undocumented
+    files: [scripts/check_architecture.py:105, apps/worker/composition/delivery.integration.test.ts:61]
+    governing: PDA-ENGR-012 worker row; Registered Rule Allowances
+    actual: Executable prohibition applies only to non-test sources; worker integration tests legitimately migrate and open two pools, but neither PDA-ENGR-012 nor the registry records the test-source exemption
+    expected: Authoritative doc/registry states the *.test.* exemption explicitly
+    impact: Documentation/enforcement drift; over-claiming what CI proves
+    disposition: document
+    remediation: Add one sentence + registry note recording the exemption
+    closure_test: PDA-ENGR-012 and regenerated registry name the exemption; generate_registries --check passes
+    owner: PDA
+    wave: W2
+
+  - id: F-B-005
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: B-architecture
+    severity: P3
+    confidence: medium-high
+    title: Relative re-export path from composition into ordinary app source is unchecked (databasePool importable from apps/server/src)
+    files: [scripts/check_architecture.py:287, apps/server/composition/postgres.ts:5, apps/server/src/index.ts:10]
+    governing: PDA-ENGR-012 Applications / Prohibited Imports
+    actual: Family/binding rules key off package-name imports; relative ../composition/... specifiers resolve to no package and fall through, so src/foo.ts could import databasePool and query raw with no CI signal. Current src files consume only bound services
+    expected: Pool object not importable outside composition, or checker flags relative cross-imports into */composition/* from non-composition app paths
+    impact: Latent bypass allowing business code in src/ to acquire the raw pool
+    disposition: fix
+    remediation: Stop exporting databasePool to src-importable modules, or teach the checker to resolve and restrict such relative imports
+    closure_test: Fixture apps/server/src importing databasePool fails; existing wiring passes
+    owner: PDA
+    wave: W2
+
+  - id: F-B-006
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: B-architecture
+    severity: P3
+    confidence: high
+    title: process.env reads in three app test files outside @meridian/tooling-env; convention text admits no test exception
+    files: [apps/server/src/cors.test.ts, apps/web/src/components/inventory-balance-page.test.ts, apps/web/src/components/workspace-context.test.ts]
+    governing: AGENTS.md/CLAUDE.md §11
+    actual: Three tests read/mutate process.env directly (standard for env-dependent tests); the convention as written carves out no test exception
+    expected: §11 adds "tests may set process.env fixtures" or the two web tests inject config
+    impact: Letter-vs-practice drift only
+    disposition: document
+    remediation: Amend §11 or route web tests through injected config
+    closure_test: Convention text and grep results agree
+    owner: PDA
+    wave: W3
+
+  - id: F-H-002
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: H-frontend
+    severity: P3
+    confidence: high
+    title: Route-level loading spinner has no accessible status semantics
+    files: [apps/web/src/components/loader.tsx:3, apps/web/src/app/loading.tsx:3]
+    governing: WCAG 4.1.3 Status Messages; project canonical-state discipline
+    actual: Route transitions show a bare Loader2 icon, no role/name; ListSkeleton and CollectionState do it correctly
+    expected: role="status" + accessible label; aria-hidden on the icon
+    impact: Silent loading at app-router level for screen readers
+    disposition: fix
+    remediation: Wrap spinner in role="status" aria-label; mark icon aria-hidden
+    closure_test: 'Second-review closure delivered without introducing RTL infra (no component in this codebase uses RTL; the established pattern is bun:test for pure logic and Playwright for real-DOM assertions): apps/web/src/components/loader.test.tsx renders Loader via react-dom/server and asserts role="status", the accessible name, and aria-hidden on the icon (equivalent evidence to an RTL role+name assertion, verified passing locally); apps/web/e2e/public-shell.spec.ts adds an axe scan against the route-level loading state under artificial network delay (requires the live stack to execute, not run locally).'
+    owner: PDA
+    wave: W3
+
+  - id: F-H-003
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: H-frontend
+    severity: P3
+    confidence: medium
+    title: Semantic token values drift between registry/design-tokens.json and the shipped ui-web theme
+    files: [registry/design-tokens.json:150, packages/ui-web/core/src/styles/globals.css:10]
+    governing: §8 semantic tokens; design-token registry (status draft)
+    actual: surface/border/action/focus aliases resolve to shadcn-preset values != registry token values; only status-* roles are registry-synchronized with a provenance comment
+    expected: Aliases resolve to registry values, or the deliberate prototype mapping is recorded next to the aliases
+    impact: Two competing sources of truth for semantic color; a registry contrast/white-label fix silently fails to reach the product
+    disposition: document
+    remediation: Add provenance/decision note for non-status aliases (or reconcile); note in DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md
+    closure_test: 'Second-review closure — a script asserts every non-status semantic alias matches the registry or is in a recorded exception table: scripts/validate_docs.py:validate_design_token_alias_exceptions() parses the BEGIN/END-marked alias block in globals.css against registry/design-tokens.json and DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md''s new Recorded Non-Status Alias Exceptions table; wired into the validate_docs gate and verified to fail on an injected unrecorded alias before being removed.'
+    owner: PDA
+    wave: W3
+
+  - id: F-H-004
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: H-frontend
+    severity: P3
+    confidence: high
+    title: Dead legacy Dashboard component referencing a non-canonical endpoint
+    files: [apps/web/src/app/dashboard/dashboard.tsx:1, apps/web/src/app/dashboard/page.tsx:1]
+    governing: CLAUDE.md §11 dead-code hygiene
+    actual: dashboard.tsx imported by nothing, renders raw privateData output; page.tsx only redirects to /administration
+    expected: Dead scaffold removed
+    impact: Low; risk of resurrecting an ungoverned data surface without tenant context
+    disposition: fix
+    remediation: Delete apps/web/src/app/dashboard/dashboard.tsx
+    closure_test: File absent; check-types green
+    owner: PDA
+    wave: W3
+
+  - id: F-H-005
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: H-frontend
+    severity: P3
+    confidence: medium
+    title: Duplicate error-message element IDs possible in auth forms
+    files: [apps/web/src/components/sign-in-form.tsx:94, apps/web/src/components/sign-up-form.tsx]
+    governing: WCAG 1.3.1/4.1.2; valid ARIA association
+    actual: errors.map renders each <p> with the same id; aria-describedby resolves only the first. Latent (zod emits one message per field today)
+    expected: One container owning the id, or indexed ids all listed in aria-describedby
+    impact: Latent invalid ARIA if validators grow
+    disposition: fix
+    remediation: Wrap errors in a single <div id role="alert">
+    closure_test: 'Second-review closure delivered via Playwright (matching the codebase''s established test-authority split) instead of RTL: apps/web/e2e/public-shell.spec.ts submits the sign-up form empty, tripping all three field validators at once, and asserts the resulting role="alert" containers have unique DOM ids (requires the live stack to execute, not run locally).'
+    owner: PDA
+    wave: W3
+
+  - id: F-H-006
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: H-frontend
+    severity: P3
+    confidence: medium
+    title: Operations subnavigation lacks the horizontal-overflow guard the Administration subnavigation has
+    files: [apps/web/src/components/operations-navigation.tsx:44, apps/web/src/components/administration-navigation.tsx:12]
+    governing: WS1 PR9 reflow lesson
+    actual: Desktop Operations tab row uses shrink-0 items with no overflow-x-auto; fits today but any added section overflows the document (the exact 320px issue WS1 fixed for Administration)
+    expected: Same overflow-x-auto treatment
+    impact: Latent horizontal-scroll trap on first added Operations section
+    disposition: fix
+    remediation: Add overflow-x-auto to the desktop Operations nav container
+    closure_test: 'Playwright reflow (scrollWidth <= viewport) at 640px with >=6 items (apps/web/e2e/authenticated-operations.spec.ts, second-review addition). OPERATIONS_NAVIGATION currently registers only 4 items, so the test injects 4 cloned nav links via page.evaluate to reach >=6 and prove the container genuinely needs overflow-x-auto (container.scrollWidth > container.clientWidth) while the outer page still fits the viewport. Requires the live stack to execute, not run locally.'
+    owner: PDA
+    wave: W3
+
+  - id: F-H-007
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: H-frontend
+    severity: P3
+    confidence: high
+    title: PWA manifest colors are hardcoded literals outside the token system
+    files: [apps/web/src/app/manifest.ts:5]
+    governing: §8 white-label; token system
+    actual: background_color #ffffff, theme_color #000000 correspond to no registry token and ignore white-label direction (only raw hex in app source)
+    expected: Values derived from/documented against the token registry with a white-label-seam note
+    impact: Minor PWA splash mismatch; unmanaged white-label seam
+    disposition: document
+    remediation: Source from token registry (build-time) or record the exception
+    closure_test: Grep gate excludes manifest.ts only via recorded exception, or values match tokens
+    owner: PDA
+    wave: W3
+
+  - id: F-H-008
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: H-frontend
+    severity: P3
+    confidence: high
+    title: console.error in committed app code vs structured-logger convention
+    files: [apps/web/src/app/error.tsx:13]
+    governing: CLAUDE.md §11
+    actual: Client error boundary logs to console with a "prototype-only" comment
+    expected: A tracked deferral (issue/TD row) rather than a comment
+    impact: Convention drift; untracked production-readiness gap
+    disposition: document
+    remediation: Open/point to a tracked item for client error reporting
+    closure_test: Tracked-item reference in code or evidence
+    owner: PDA
+    wave: W3
+
+  - id: F-L-008
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: L-roadmap
+    severity: P3
+    confidence: high
+    title: Roadmap Phase 1 content list drifted from the WS0-WS7 decomposition that superseded it
+    files: [docs/blueprint/17-Roadmap/BLUEPRINT_AND_DELIVERY_ROADMAP.md, docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md]
+    governing: PDA-RDM-007 subordination clause
+    actual: PDA-RDM-001 still describes Phase 1 as one slice containing offline sync + restore, while execution defers those to WS5/WS7 after WS3; PDA-RDM-007 declaring itself subordinate makes the stale bundling literally authoritative
+    expected: PDA-RDM-001 Phase 1 references the P1-P7/WS0-WS7 decomposition
+    impact: Confusion only; no behavior contradiction (agents execute PDA-RDM-004/007)
+    disposition: fix
+    remediation: One-paragraph amendment pointing Phase 1 at PDA-RDM-004
+    closure_test: PDA-RDM-001 Phase 1 references the decomposition
+    owner: PDA
+    wave: W3
+
+  - id: F-L-009
+    status: "open (FDR-003 is required before WS4 PR1 schema freeze)"
+    lens: L-roadmap
+    severity: P3
+    confidence: high
+    title: FDR-003 single-currency-per-instrument assumption will harden into WS4 ledger schema; flag before schema freeze
+    files: [packages/foundation/core/src/money.ts, docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md]
+    governing: FDR-003
+    actual: GYD/USD seeded with a reversible registration seam; WS4 will embed single-currency-per-instrument into ledger schema; latest cheap reversal point is WS4 PR1
+    expected: Founder look at FDR-003 before WS4 schema freeze
+    impact: Post-WS4 reversal is expensive
+    disposition: decide
+    remediation: None now; flag FDR-003 for a founder decision before WS4 PR1
+    closure_test: FDR-003 dispositioned before WS4 schema work
+    owner: Founder
+    wave: W4
+
+  - id: F-L-010
+    status: "open (commercial offer and cost evidence is tracked in issue #88)"
+    lens: L-roadmap
+    severity: P3
+    confidence: medium-high
+    title: No producing work item for the Phase 3 "commercial offer and cost model" exit criterion
+    files: [docs/blueprint/17-Roadmap/BLUEPRINT_AND_DELIVERY_ROADMAP.md, docs/blueprint/12-Deployment/INFRASTRUCTURE_COST_WORKSHEET.md]
+    governing: PDA-RDM-001 Phase 3 exit
+    actual: Commercial layer defines mechanics but no priced offer, no cost model tied to a chosen production topology, no workstream/issue producing either; Wave 7 (Commercial) ratification has no trigger
+    expected: A commercial-offer-draft + populated-cost-worksheet item on the external/commercial track with a founder review before pilot recruitment
+    impact: Pilot conversations will have nothing to price against
+    disposition: decide
+    remediation: Add the item; cost model depends on the undecided production topology (register item 15)
+    closure_test: Commercial track has an owned offer/cost item with a milestone
+    owner: Founder + Commercial
+    wave: W4
+
+  - id: F-A-004
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6)"
+    lens: A-governance
+    severity: P3
+    confidence: medium
+    title: README authority model omits tiers 4-6 of the governed authority order and adds non-authority tiers
+    files: [README.md:19, AGENTS.md:9]
+    governing: AGENTS.md §1; governance-exemptions README record
+    actual: README ranks "Implementation documentation" and "Source code" as authority tiers (neither in the governed order) and omits Proposed ADRs/Draft specs/FDR — the tiers everything currently occupies
+    expected: Align README's list with AGENTS.md §1 or replace with a pointer
+    impact: Low; misleads readers who stop at README
+    disposition: fix
+    remediation: Align or defer to AGENTS.md §1
+    closure_test: README authority list matches or defers to AGENTS.md §1
+    owner: PDA
+    wave: W3
+
+  - id: F-I-001
+    status: "closed (PR #80 concurrence comment 5008076728 and merge 24d28e6); see FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md §Implementation status for the F-I-001 correction narrative (single source, this field only points to it)"
+    lens: I-ci-tests
+    severity: P3
+    confidence: confirmed
+    title: Script unit-test suites fail when run as documented plain scripts; only pass via -m unittest, and test_check_ws2_evidence has no direct CI step
+    files: [scripts/test_validate_program_status.py:6, scripts/test_check_ws2_evidence.py:10, AGENTS.md:66]
+    governing: AGENTS.md §4 invocation; CI workflows
+    actual: "`python scripts/test_validate_program_status.py` and `python scripts/test_check_ws2_evidence.py` raise ImportError (package-relative import); both pass via `python -m unittest`. CI uses -m unittest for program-status; ws2 test runs only via the root ws2:evidence:check script, not a workflow step"
+    expected: Docs/scripts invoked consistently; ws2 script test wired into a workflow or documented as local-only
+    impact: A contributor following the documented invocation sees a spurious failure; the ws2 script test is not a CI gate
+    disposition: fix
+    remediation: 'Add `if __name__ == "__main__": unittest.main()` guards or update docs to -m unittest; wire ws2 script test into CI or document scope'
+    closure_test: Documented invocation runs green; ws2 script-test coverage location is explicit
+    owner: PDA
+    wave: W2
+
+clean_areas_reproduced:
+  - id: CLEAN-gates
+    what: All governance + build + type + lint + unit gates reproduced green at the audited SHA
+    evidence: "validate_docs pass; generate_registries --check exit 0; generate_contracts --check (116/116 endpoints, 497 cap, 109 perm, 208 events); check_architecture (36 pkgs, 331 files); check-types 35 tasks; test 29 workspaces 0 fail; check 401 files clean; test_architecture_checker pass; program-status validator +8 tests; WS1 evidence 11/143; WS2 evidence 14/182"
+  - id: CLEAN-migrations
+    what: Owner migrations apply to a fresh empty database and repeat idempotently
+    evidence: "db:migrate against fresh audit database, then re-run — both exit 0"
+  - id: CLEAN-live-lanes
+    what: Live PostgreSQL 18 server + worker lanes and Node fallback lanes pass
+    evidence: "server db:test 67 pass/643 expect; worker db:test 13 pass/132 expect; server node-check pass; worker node-check pass on isolated event DB; perf JSON carries honest controlled-prototype disclaimers"
+  - id: CLEAN-authz
+    what: Current-state authorization on every protected command; live tenancy re-load overrides session/cached authority
+    evidence: "router.ts every protected op calls requireActiveIdentity + requirePermission; authorization.ts load=tenancyService.resolveAuthorizationState on every decide(); contextDenial checks membership.state Active + context expiry; org-substitution guard in inviteUser; tenant server-derived for audit/replay"
+  - id: CLEAN-outbox
+    what: Transactional outbox is atomic — owner repository and outbox bound to one client transaction
+    evidence: "postgres-unit-of-work.ts BEGIN..COMMIT/ROLLBACK on one PoolClient binding {events: outbox(client), repository(client)}"
+  - id: CLEAN-ledger
+    what: Immutable inventory movement ledger with derived balances; exact numeric money/quantity
+    evidence: "inventory-postgres numeric(38,6) for all quantities; balances = sum(movement.quantity); reconcileTenant rebuilds from movements"
+  - id: CLEAN-delivery
+    what: Event delivery uses claim/lease with SKIP LOCKED, lease expiry, backoff, dead-letter, per-aggregate ordering
+    evidence: "delivery-store.ts FOR UPDATE SKIP LOCKED; lease_expires_at stale recovery; attempt_count/next_attempt_at; status pending/retrying/claimed/delivered/dead_lettered; earlier-status ordering guard"
+  - id: CLEAN-secrets
+    what: No committed real secrets or committed dist
+    evidence: "git ls-files: only .env.example + doc files; source secret scan finds only labeled WS2 test fixtures; 0 committed dist paths"
+  - id: CLEAN-a11y-honesty
+    what: No conflation of automated axe scans with WCAG AA conformance anywhere in docs/evidence
+    evidence: "WS1/WS2 evidence explicitly disclaim conformance; e2e names 'no automated WCAG A/AA violations' not 'compliant'; TECH-LESSON-046"
+  - id: CLEAN-runtime-neutral
+    what: Core packages runtime-neutral; no cross-domain/cross-owner imports; no provider SDK as business abstraction
+    evidence: "greps for bun:/Bun./hono/orpc-server/drizzle/pg in foundation/contracts/platform/domains = 0; persistence one-to-one owner map; stripe/twilio/etc = 0"

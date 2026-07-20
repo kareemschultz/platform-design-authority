@@ -32,12 +32,16 @@ function context(input?: {
 }): Context {
 	return {
 		application: {
+			acceptImport: () => Promise.reject(new Error("not used")),
 			activateProduct: () => Promise.reject(new Error("not used")),
+			approveImport: () => Promise.reject(new Error("not used")),
 			approveInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			approveStockCount: () => Promise.reject(new Error("not used")),
 			archiveProduct: () => Promise.reject(new Error("not used")),
+			cancelImport: () => Promise.reject(new Error("not used")),
 			createEventReplay: () => Promise.reject(new Error("not used")),
 			createIdentityLink: () => Promise.reject(new Error("not used")),
+			createImport: () => Promise.reject(new Error("not used")),
 			createInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			createOrganizationParty: () => Promise.reject(new Error("not used")),
 			createPersonParty: () => Promise.reject(new Error("not used")),
@@ -67,6 +71,8 @@ function context(input?: {
 				partyId: null,
 				sessionId,
 			}),
+			getImport: () => Promise.reject(new Error("not used")),
+			getImportCorrectionReport: () => Promise.reject(new Error("not used")),
 			getInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			getOrganization: () => Promise.reject(new Error("not used")),
 			getParty: () => Promise.reject(new Error("not used")),
@@ -77,19 +83,23 @@ function context(input?: {
 			listAuditRecords: async () => ({ items: [], nextCursor: null }),
 			listCurrentUserSessions: async () => ({ items: [], nextCursor: null }),
 			listEntitlements: async () => ({ items: [], nextCursor: null }),
+			listImportFindings: () => Promise.reject(new Error("not used")),
+			listImports: async () => ({ items: [], nextCursor: null }),
 			listInventoryAdjustments: async () => ({ items: [], nextCursor: null }),
 			listLocations: async () => ({ items: [], nextCursor: null }),
 			listOrganizations: async () => ({ items: [], nextCursor: null }),
 			listParties: async () => ({ items: [], nextCursor: null }),
 			listProducts: async () => ({ items: [], nextCursor: null }),
 			listRoles: async () => ({ items: [], nextCursor: null }),
-			listStockBalances: async () => [],
+			listStockBalances: async () => ({ items: [], nextCursor: null }),
 			listStockCounts: async () => ({ items: [], nextCursor: null }),
 			listStockTransfers: async () => ({ items: [], nextCursor: null }),
 			listUsers: async () => ({ items: [], nextCursor: null }),
+			purgeImportStaging: async () => ({ findings: 0, rows: 0, waves: 0 }),
 			receiveStockTransfer: () => Promise.reject(new Error("not used")),
 			reverseInventoryAdjustment: () => Promise.reject(new Error("not used")),
 			revokeCurrentUserSession: () => Promise.resolve(),
+			saveStockCountDraft: () => Promise.reject(new Error("not used")),
 			setActiveContext: async ({ authUserId, body }) => ({
 				authUserId,
 				contextId: "context_unit_test_0001",
@@ -128,6 +138,20 @@ function context(input?: {
 	};
 }
 
+async function captureOrpcError(
+	operation: Promise<unknown>
+): Promise<ORPCError<string, unknown>> {
+	try {
+		await operation;
+		throw new Error("Expected an oRPC error");
+	} catch (error) {
+		if (error instanceof ORPCError) {
+			return error as ORPCError<string, unknown>;
+		}
+		throw error;
+	}
+}
+
 describe("appRouter contract surface", () => {
 	test("exposes the governed PR3 through PR7 procedure families", () => {
 		expect(Object.keys(appRouter).sort()).toEqual([
@@ -145,7 +169,10 @@ describe("appRouter contract surface", () => {
 			"sessions",
 			"users",
 		]);
-		expect(Object.keys(appRouter.catalog).sort()).toEqual(["products"]);
+		expect(Object.keys(appRouter.catalog).sort()).toEqual([
+			"imports",
+			"products",
+		]);
 		expect(Object.keys(appRouter.catalog.products).sort()).toEqual([
 			"activate",
 			"archive",
@@ -154,13 +181,36 @@ describe("appRouter contract surface", () => {
 			"list",
 			"update",
 		]);
+		expect(Object.keys(appRouter.catalog.imports).sort()).toEqual([
+			"accept",
+			"approve",
+			"cancel",
+			"correctionReport",
+			"create",
+			"findings",
+			"get",
+			"list",
+			"purgeStaging",
+		]);
 		expect(Object.keys(appRouter.entitlements).sort()).toEqual(["list"]);
 		expect(Object.keys(appRouter.events).sort()).toEqual(["createReplay"]);
 		expect(Object.keys(appRouter.inventory).sort()).toEqual([
 			"adjustments",
 			"balances",
 			"counts",
+			"imports",
 			"transfers",
+		]);
+		expect(Object.keys(appRouter.inventory.imports).sort()).toEqual([
+			"acceptOpeningStock",
+			"approveOpeningStock",
+			"cancelOpeningStock",
+			"createOpeningStock",
+			"getOpeningStock",
+			"listOpeningStock",
+			"openingStockCorrectionReport",
+			"openingStockFindings",
+			"purgeOpeningStockStaging",
 		]);
 		expect(Object.keys(appRouter.audit).sort()).toEqual(["list"]);
 		expect(Object.keys(appRouter.sessions).sort()).toEqual(["list", "revoke"]);
@@ -264,9 +314,13 @@ describe("appRouter contract surface", () => {
 						createProduct(input) {
 							received = input;
 							return Promise.resolve({
+								archivedAt: null,
+								archiveReason: null,
+								createdAt: "2026-07-13T12:00:00.000Z",
 								id: "product_unit_test_0001",
 								name: input.body.name,
 								state: "Draft",
+								updatedAt: "2026-07-13T12:00:00.000Z",
 								variants: [
 									{
 										id: "variant_unit_test_0001",
@@ -303,6 +357,48 @@ describe("appRouter contract surface", () => {
 		});
 	});
 
+	test("dispatches retention purge only through the dedicated current-context permission", async () => {
+		let received:
+			| Parameters<Context["application"]["purgeImportStaging"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.catalog.imports.purgeStaging,
+			{
+				headers: {
+					"idempotency-key": "idempotency-import-purge-0001",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { importId: "import_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						purgeImportStaging(input) {
+							received = input;
+							return Promise.resolve({ findings: 2, rows: 1, waves: 1 });
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toEqual({ findings: 2, rows: 1, waves: 1 });
+		expect(permission).toBe("catalog.import.purge");
+		expect(received).toMatchObject({
+			actorUserId: "user_unit_test_000001",
+			contextId: "context_unit_test_0001",
+			idempotencyKey: "idempotency-import-purge-0001",
+			importId: "import_unit_test_0001",
+			sessionId: "session_unit_test_0001",
+			target: "Product",
+		});
+	});
+
 	test("dispatches Inventory Adjustment only after current-context permission enforcement", async () => {
 		let received:
 			| Parameters<Context["application"]["createInventoryAdjustment"]>[0]
@@ -331,10 +427,15 @@ describe("appRouter contract surface", () => {
 							received = input;
 							return Promise.resolve({
 								...input.body,
+								approvedByUserId: null,
+								createdAt: "2026-07-13T12:00:00.000Z",
+								createdByUserId: input.actorUserId,
 								id: "adjustment_unit_0001",
 								movementId: null,
+								postedAt: null,
 								reversalMovementId: null,
 								state: "PendingApproval",
+								updatedAt: "2026-07-13T12:00:00.000Z",
 								version: 1,
 							});
 						},
@@ -357,6 +458,277 @@ describe("appRouter contract surface", () => {
 			contextId: "context_unit_test_0001",
 			idempotencyKey: "idempotency-inventory-unit-0001",
 			sessionId: "session_unit_test_0001",
+		});
+	});
+
+	test("denies a UI-hidden direct Adjustment approval before application dispatch", async () => {
+		let dispatched = false;
+		const error = await captureOrpcError(
+			call(
+				appRouter.inventory.adjustments.approve,
+				{
+					headers: {
+						"idempotency-key": "hidden-adjustment-approval-denied",
+						"if-match": "1",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { id: "adjustment_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						application: {
+							approveInventoryAdjustment: () => {
+								dispatched = true;
+								return Promise.reject(new Error("must not dispatch"));
+							},
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(dispatched).toBe(false);
+		expect(error).toMatchObject({
+			code: "FORBIDDEN",
+			data: {
+				code: "authorization",
+				detail: null,
+				safeMessageKey: "problem.authorization",
+				status: 403,
+				title: "Permission denied",
+			},
+		});
+		expect(JSON.stringify(error.data)).not.toContain(
+			"inventory.adjustment.approve"
+		);
+	});
+
+	test("maps a direct Adjustment entitlement denial without disclosing provisioning facts", async () => {
+		const error = await captureOrpcError(
+			call(
+				appRouter.inventory.adjustments.approve,
+				{
+					headers: {
+						"idempotency-key": "hidden-adjustment-entitlement-denied",
+						"if-match": "1",
+						"x-active-context-id": "context_unit_test_0001",
+					},
+					params: { id: "adjustment_hidden_unit_0001" },
+				},
+				{
+					context: context({
+						allowed: true,
+						application: {
+							approveInventoryAdjustment: () =>
+								Promise.reject({
+									code: "entitlement_denied",
+									message:
+										"tenant_secret_42 lacks inventory.adjustments under commercial plan premium-secret",
+								}),
+						},
+						session: authenticatedSession,
+					}),
+				}
+			)
+		);
+		expect(error).toMatchObject({
+			code: "FORBIDDEN",
+			data: {
+				code: "entitlement",
+				detail: null,
+				safeMessageKey: "problem.entitlement",
+				status: 403,
+				title: "Capability entitlement denied",
+			},
+		});
+		const serialized = JSON.stringify(error.data);
+		expect(serialized).not.toContain("tenant_secret_42");
+		expect(serialized).not.toContain("premium-secret");
+		expect(serialized).not.toContain("inventory.adjustments");
+	});
+
+	test("maps Import boundary failures to stable non-disclosing HTTP semantics", async () => {
+		const body = {
+			content:
+				"source_key,name,variant_name,sku,barcode,barcode_scheme\nrow-1,Tea,Default,SKU-1,,",
+			contentType: "text/csv" as const,
+			fileName: "sensitive-tenant-file.csv",
+			manifest: {
+				decimalSeparator: "." as const,
+				delimiter: "," as const,
+				encoding: "UTF-8" as const,
+				locale: "en-GY",
+				newline: "LF" as const,
+				quote: '"' as const,
+				timezone: "America/Guyana",
+			},
+			sha256: "a".repeat(64),
+		};
+		await Promise.all(
+			(["invalid_csv", "blocked_content"] as const).map(async (code) => {
+				const error = await captureOrpcError(
+					call(
+						appRouter.catalog.imports.create,
+						{
+							body,
+							headers: {
+								"idempotency-key": `safe-import-${code}`,
+								"x-active-context-id": "context_unit_test_0001",
+							},
+						},
+						{
+							context: context({
+								allowed: true,
+								application: {
+									createImport: () =>
+										Promise.reject({
+											code,
+											message:
+												"scanner-vendor-secret found EICAR-STANDARD-ANTIVIRUS-TEST-FILE in sensitive-tenant-file.csv",
+										}),
+								},
+								session: authenticatedSession,
+							}),
+						}
+					)
+				);
+				expect(error).toMatchObject({
+					code: "BAD_REQUEST",
+					data: {
+						code: "validation",
+						detail: null,
+						safeMessageKey: "problem.validation",
+						status: 400,
+						title: "Request is invalid",
+					},
+				});
+				const serialized = JSON.stringify(error.data);
+				expect(serialized).not.toContain("scanner-vendor-secret");
+				expect(serialized).not.toContain("EICAR");
+				expect(serialized).not.toContain(body.fileName);
+			})
+		);
+	});
+
+	test("returns paged stock balances without exposing repository cursors", async () => {
+		let received:
+			| Parameters<Context["application"]["listStockBalances"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.inventory.balances.list,
+			{
+				headers: { "x-active-context-id": "context_unit_test_0001" },
+				query: {
+					cursor: "sb1_b3BhcXVlLWN1cnNvcg",
+					limit: 25,
+					locationId: "location_unit_0001",
+				},
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						listStockBalances(input) {
+							received = input;
+							return Promise.resolve({
+								items: [
+									{
+										asOf: "2026-07-16T12:00:00.000Z",
+										available: "8",
+										locationId: "location_unit_0001",
+										onHand: "10",
+										productId: "product_unit_0001",
+										reconciled: true,
+										reconciliationState: "Current",
+										reserved: "2",
+										source: "InventoryLedgerProjection",
+										unit: "EA",
+									},
+								],
+								nextCursor: "sb1_bmV4dC1jdXJzb3I",
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({
+			items: [{ reconciled: true, source: "InventoryLedgerProjection" }],
+			nextCursor: "sb1_bmV4dC1jdXJzb3I",
+		});
+		expect(permission).toBe("inventory.balance.read");
+		expect(received?.query).toEqual({
+			cursor: "sb1_b3BhcXVlLWN1cnNvcg",
+			limit: 25,
+			locationId: "location_unit_0001",
+		});
+	});
+
+	test("dispatches versioned draft count lines through count-create authority", async () => {
+		let received:
+			| Parameters<Context["application"]["saveStockCountDraft"]>[0]
+			| undefined;
+		let permission: string | undefined;
+		const result = await call(
+			appRouter.inventory.counts.saveDraft,
+			{
+				body: {
+					lines: [
+						{
+							observedQuantity: "4.500001",
+							productId: "product_unit_0001",
+							unit: "EA",
+						},
+					],
+				},
+				headers: {
+					"idempotency-key": "count-draft-save-unit-0001",
+					"if-match": "3",
+					"x-active-context-id": "context_unit_test_0001",
+				},
+				params: { id: "count_unit_test_0001" },
+			},
+			{
+				context: context({
+					allowed: true,
+					application: {
+						saveStockCountDraft(input) {
+							received = input;
+							return Promise.resolve({
+								approvedByUserId: null,
+								blind: true,
+								createdAt: "2026-07-16T12:00:00.000Z",
+								createdByUserId: input.actorUserId,
+								id: input.countId,
+								lines: [],
+								locationId: "location_unit_0001",
+								postedAt: null,
+								state: "InProgress",
+								submittedByUserId: null,
+								updatedAt: "2026-07-16T12:05:00.000Z",
+								version: input.version + 1,
+							});
+						},
+					},
+					onDecide({ permission: decidedPermission }) {
+						permission = decidedPermission;
+					},
+					session: authenticatedSession,
+				}),
+			}
+		);
+		expect(result).toMatchObject({ state: "InProgress", version: 4 });
+		expect(permission).toBe("inventory.count.create");
+		expect(received).toMatchObject({
+			actorUserId: "user_unit_test_000001",
+			countId: "count_unit_test_0001",
+			idempotencyKey: "count-draft-save-unit-0001",
+			version: 3,
 		});
 	});
 

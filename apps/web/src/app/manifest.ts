@@ -1,5 +1,10 @@
 import type { MetadataRoute } from "next";
 
+// Web-manifest fields require literal colors. These two literals are a
+// recorded white-label seam (fifth-audit F-H-007): replace per tenant brand
+// when white-label packaging lands; registry/design-tokens.json remains the
+// governed source for in-app color.
+
 export default function manifest(): MetadataRoute.Manifest {
 	return {
 		background_color: "#ffffff",

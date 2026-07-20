@@ -10,21 +10,42 @@ import {
 	AlertDescription,
 	AlertTitle,
 } from "@meridian/ui-web/components/alert";
+import { Button } from "@meridian/ui-web/components/button";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@meridian/ui-web/components/dialog";
 import { Label } from "@meridian/ui-web/components/label";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	type QueryClient,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { CircleAlert, CloudOff } from "lucide-react";
 import {
 	createContext,
 	useCallback,
 	useContext,
 	useEffect,
+	useId,
 	useMemo,
 	useRef,
 	useState,
 } from "react";
 
 import { ACTIVE_CONTEXT_STORAGE_KEY } from "@/lib/shell";
+import {
+	isLatestWorkspaceRequest,
+	type WorkspaceWorkState,
+	workspaceSwitchDisposition,
+} from "@/lib/workspace-change";
 import { orpc } from "@/utils/orpc";
 
 import { useOnlineStatus } from "./use-online-status";
@@ -37,9 +58,35 @@ interface WorkspaceValue {
 	locations: Location[];
 	organizations: Organization[];
 	refresh: () => Promise<void>;
+	registerWorkState: (key: string, state: WorkspaceWorkState) => () => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceValue | null>(null);
+
+export async function recoverCancelledWorkspaceQueries(
+	queryClient: QueryClient,
+	requestSequence: number,
+	currentRequestSequence: number
+): Promise<boolean> {
+	if (!isLatestWorkspaceRequest(requestSequence, currentRequestSequence)) {
+		return false;
+	}
+
+	// Cancellation reverts an initial active query to pending/idle. If context
+	// activation then fails, explicitly restart those observers against the
+	// still-current workspace so the page cannot remain stranded indefinitely.
+	await Promise.allSettled([
+		queryClient.refetchQueries({
+			queryKey: orpc.catalog.key(),
+			type: "active",
+		}),
+		queryClient.refetchQueries({
+			queryKey: orpc.inventory.key(),
+			type: "active",
+		}),
+	]);
+	return true;
+}
 
 export function useWorkspace(): WorkspaceValue {
 	const value = useContext(WorkspaceContext);
@@ -49,12 +96,33 @@ export function useWorkspace(): WorkspaceValue {
 	return value;
 }
 
+export function useWorkspaceWorkGuard(state: WorkspaceWorkState) {
+	const { registerWorkState } = useWorkspace();
+	const key = useId();
+	useEffect(
+		() => registerWorkState(key, state),
+		[key, registerWorkState, state]
+	);
+}
+
+interface ContextTarget {
+	locationId?: string | null;
+	organizationId: string;
+}
+
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 	const queryClient = useQueryClient();
 	const isOnline = useOnlineStatus();
 	const [storedContextId, setStoredContextId] = useState<string | null>(null);
 	const storageLoaded = useRef(false);
 	const initialContextAttempted = useRef(false);
+	const contextRequestSequence = useRef(0);
+	const workStates = useRef(new Map<string, WorkspaceWorkState>());
+	const [pendingContextTarget, setPendingContextTarget] =
+		useState<ContextTarget | null>(null);
+	const [contextChangeMessage, setContextChangeMessage] = useState<
+		string | null
+	>(null);
 
 	useEffect(() => {
 		setStoredContextId(sessionStorage.getItem(ACTIVE_CONTEXT_STORAGE_KEY));
@@ -85,19 +153,84 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, []);
 
+	const registerWorkState = useCallback(
+		(key: string, state: WorkspaceWorkState) => {
+			if (state === "clean") {
+				workStates.current.delete(key);
+			} else {
+				workStates.current.set(key, state);
+			}
+			return () => workStates.current.delete(key);
+		},
+		[]
+	);
+
 	const activate = useCallback(
 		async (nextOrganizationId: string, locationId?: string | null) => {
-			const result = await setContext.mutateAsync({
-				body: {
-					locationId: locationId ?? null,
-					organizationId: nextOrganizationId,
-				},
-				headers: { "idempotency-key": crypto.randomUUID() },
-			});
+			contextRequestSequence.current += 1;
+			const requestSequence = contextRequestSequence.current;
+			setContextChangeMessage(null);
+			await Promise.all([
+				queryClient.cancelQueries({ queryKey: orpc.catalog.key() }),
+				queryClient.cancelQueries({ queryKey: orpc.inventory.key() }),
+			]);
+			const result = await setContext
+				.mutateAsync({
+					body: {
+						locationId: locationId ?? null,
+						organizationId: nextOrganizationId,
+					},
+					headers: { "idempotency-key": crypto.randomUUID() },
+				})
+				.catch(async (error: unknown) => {
+					await recoverCancelledWorkspaceQueries(
+						queryClient,
+						requestSequence,
+						contextRequestSequence.current
+					);
+					throw error;
+				});
+			if (
+				!isLatestWorkspaceRequest(
+					requestSequence,
+					contextRequestSequence.current
+				)
+			) {
+				return;
+			}
+			queryClient.removeQueries({ queryKey: orpc.catalog.key() });
+			queryClient.removeQueries({ queryKey: orpc.inventory.key() });
 			persistContext(result.contextId);
 			await queryClient.invalidateQueries({ queryKey: orpc.identity.key() });
 		},
 		[persistContext, queryClient, setContext]
+	);
+
+	const requestContextChange = useCallback(
+		(target: ContextTarget) => {
+			if (setContext.isPending) {
+				return;
+			}
+			const disposition = workspaceSwitchDisposition(
+				workStates.current.values()
+			);
+			if (disposition === "block") {
+				setContextChangeMessage(
+					"Wait for the current change to finish before switching workspace."
+				);
+				return;
+			}
+			if (disposition === "confirm") {
+				setPendingContextTarget(target);
+				return;
+			}
+			activate(target.organizationId, target.locationId).catch(() =>
+				setContextChangeMessage(
+					"The workspace could not be changed. Your current workspace is still active."
+				)
+			);
+		},
+		[activate, setContext.isPending]
 	);
 
 	useEffect(() => {
@@ -174,6 +307,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			locations: locationsQuery.data?.items ?? [],
 			organizations: organizationsQuery.data?.items ?? [],
 			refresh,
+			registerWorkState,
 		}),
 		[
 			contextId,
@@ -182,6 +316,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			isOnline,
 			locationsQuery.data,
 			organizationsQuery.data,
+			registerWorkState,
 			refresh,
 			setContext.isPending,
 		]
@@ -241,8 +376,13 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 								<Label htmlFor="organization-context">Organization</Label>
 								<select
 									className="min-h-10 min-w-56 rounded-xl border bg-background px-3 text-sm"
+									disabled={setContext.isPending}
 									id="organization-context"
-									onChange={(event) => activate(event.target.value)}
+									onChange={(event) =>
+										requestContextChange({
+											organizationId: event.target.value,
+										})
+									}
 									value={organizationId}
 								>
 									{value.organizations.map((organization) => (
@@ -256,10 +396,14 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 								<Label htmlFor="location-context">Location</Label>
 								<select
 									className="min-h-10 min-w-56 rounded-xl border bg-background px-3 text-sm"
+									disabled={setContext.isPending}
 									id="location-context"
 									onChange={(event) =>
 										organizationId &&
-										activate(organizationId, event.target.value || null)
+										requestContextChange({
+											locationId: event.target.value || null,
+											organizationId,
+										})
 									}
 									value={identityQuery.data?.activeContext?.locationId ?? ""}
 								>
@@ -276,7 +420,53 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 				</div>
 			</section>
 			{connectivityAlert}
-			{children}
+			{contextChangeMessage ? (
+				<Alert className="mx-auto my-3 max-w-screen-2xl" role="alert">
+					<CircleAlert />
+					<AlertTitle>Workspace not changed</AlertTitle>
+					<AlertDescription>{contextChangeMessage}</AlertDescription>
+				</Alert>
+			) : null}
+			<div key={contextId ?? "no-active-context"}>{children}</div>
+			<Dialog
+				onOpenChange={(open) => {
+					if (!open) {
+						setPendingContextTarget(null);
+					}
+				}}
+				open={Boolean(pendingContextTarget)}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Discard unsaved work and switch?</DialogTitle>
+						<DialogDescription>
+							Changing organization or location resets this workspace boundary.
+							Unsaved form values in the current workspace will be discarded.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<DialogClose render={<Button variant="outline" />}>
+							Keep working here
+						</DialogClose>
+						<Button
+							onClick={() => {
+								const target = pendingContextTarget;
+								setPendingContextTarget(null);
+								if (target) {
+									activate(target.organizationId, target.locationId).catch(() =>
+										setContextChangeMessage(
+											"The workspace could not be changed. Your current workspace is still active."
+										)
+									);
+								}
+							}}
+							variant="destructive"
+						>
+							Discard work and switch
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</WorkspaceContext.Provider>
 	);
 }

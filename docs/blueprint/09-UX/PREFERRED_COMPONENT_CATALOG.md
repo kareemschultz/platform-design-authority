@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.5.0
+version: 0.7.2
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-18
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -339,6 +339,8 @@ This priority list authorizes research only. It does not authorize installation 
 
 The 2026-07-13 metadata audit found 471 official shadcn registry entries and 61 Studio block families with 146 inspiration variants. The complete names and counting rules are in COMPONENT_SOURCE_MATRIX.md. None is Platform Approved.
 
+A 2026-07-18 delta check found that Studio's public catalog and pinned MCP metadata can move independently: the official component page advertises 58 families, 1,000+ variants, and a new 10-variant Autocomplete family, but the MCP component lookup could not resolve that family while still resolving the known 14-variant Combobox family. Studio's component documentation intentionally offers Base UI and Radix UI modes; Base UI is the default evaluation mode for new Meridian-owned work under ADR-0022. Onboarding Feed resolves as 5 MCP variants. AIDesk, Sprintrix, Promptly, and Brandly are advertised on first-party template pages but are not enumerated by the available MCP metadata tools. These items are recorded below as dated candidates, not added to the exhaustive 2026-07-13 MCP counts and not promoted by vendor claims.
+
 ### Preferred Candidate
 
 | Family | Preferred source direction | Required normalization |
@@ -348,10 +350,22 @@ The 2026-07-13 metadata audit found 471 official shadcn registry entries and 61 
 | Command palette and search interaction | Official Command/Combobox plus Meridian ranking and authority | Tenant and permission filtering, offline/no-results states, result provenance |
 | Application shell and dashboard composition | Official Sidebar/Dashboard plus selected Studio Application Shell/dashboard candidates | Meridian navigation, tenant context, landmarks, density, responsive and hydration budgets |
 | Account settings, form layout, multi-step form | Official form primitives plus selected Studio compositions | Application contracts, validation, draft/resume, review/confirm, accessibility |
+| Optional setup checklist and onboarding feed | Official Accordion/Progress/Form plus Studio Onboarding Feed 01 composition inspiration | Server-authoritative step state, skip/resume/recovery, no coercion, canonical loading/error/offline states, keyboard and announcement behavior |
 | Empty, loading, error, and unavailable states | Official Empty/Skeleton/Alert plus Studio Empty State inspiration | Canonical state language, recovery, announcements, offline and uncertainty semantics |
 | Ordinary operational charts and KPIs | Official chart/Recharts plus selected Studio visual inspiration | Governed metric IDs, source/freshness, text/table alternative, token and point budgets |
 
 Preferred Candidate authorizes a bounded normalization prototype only.
+
+### Researching
+
+| Candidate | Research value | Boundary before promotion |
+|---|---|---|
+| Studio Autocomplete 10 | Visual comparison for product, Party, location, and global-search inputs | The pinned MCP cannot currently resolve the family. Studio intentionally provides both Base UI and Radix UI documentation modes through its component-library selector. Evaluate new Meridian-owned work in the Base UI view (`?base=base`) under ADR-0022 and record the selected control, page URL, and `/preview/components/base/...` link together; use Radix only as comparison/fallback evidence. Only item-level source and dependency evidence may establish the acquired variant's primitive family, and primitive families must not be mixed inside one component. Keep official/owned Command and Combobox as the baseline; require a supported-client item review plus async cancellation, tenant/permission filtering, large-data, offline/degraded, keyboard, focus, and screen-reader evidence. |
+| Studio Onboarding Feed 02, 03, and 04 | Multi-step setup, progress/dialog, and readiness-history composition ideas | Review `@stepperize/react` before dependency adoption; completion and chronology remain application/audit authority, not local component state. Dialog actions require explicit consequence, cancellation, and recovery. |
+| AIDesk template | Inbox, support, contact, and knowledge-surface composition reference | No whole-template acquisition and no reuse of its authentication, ticket, contact, AI-agent, or role semantics. |
+| Sprintrix template | Saved views, filters, board, roadmap, and activity composition reference | No whole-template acquisition and no reuse of project-domain, team, security, billing, integration, or authorization behavior. |
+
+Researching authorizes metadata and visual analysis only. It does not authorize source retrieval, installation, dependency addition, or implementation.
 
 ### Custom Required
 
@@ -374,6 +388,8 @@ Custom Required means compose Meridian-owned behavior from accepted primitives, 
 ### Restricted
 
 - Studio marketing, authentication-page, Bento, timeline, portfolio, and eCommerce families.
+- Whole Studio templates, including Promptly and Brandly; AIDesk and Sprintrix remain visual research references only, not installable application foundations.
+- Studio Onboarding Feed 05 while it carries a `motion` dependency and unrelated privacy/billing demonstration semantics.
 - Official whole-page authentication, sidebar, dashboard, and chart blocks when used as more than composition evidence.
 - DataTable candidates when presented as an enterprise-grid solution.
 - Carousels, pie/radar/radial charts, novelty visualization, and decorative or continuous motion.
@@ -436,6 +452,7 @@ Agents and contributors must not:
 
 - Rotate the previously exposed Studio credential before any authenticated item-level work.
 - Re-run selected Studio item review in a vendor-supported client; Codex metadata interoperability is not vendor support.
+- Run a supported-client, item-level review for the named Autocomplete and Onboarding Feed candidates before retrieving source; preserve the official/owned fallback when the MCP cannot resolve a public catalog item.
 - Add a machine-readable candidate inventory only when an implementation consumer and freshness validator are defined.
 - Implement Storybook and the first platform-owned primitive set.
 - Prototype the strongest Preferred Candidates and the first Custom Required operational composites.

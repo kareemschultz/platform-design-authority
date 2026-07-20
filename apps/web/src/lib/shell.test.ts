@@ -4,7 +4,9 @@ import {
 	ADMINISTRATION_NAVIGATION,
 	classifyShellFailure,
 	isNavigationCurrent,
+	OPERATIONS_NAVIGATION,
 	safeReturnPath,
+	sectionOverviewPath,
 } from "./shell";
 
 describe("application shell", () => {
@@ -40,6 +42,7 @@ describe("application shell", () => {
 			"step-up-required"
 		);
 		expect(classifyShellFailure(new Error("network"), false)).toBe("offline");
+		expect(classifyShellFailure(null)).toBe("unavailable");
 	});
 
 	test("marks only the matching administration branch as current", () => {
@@ -49,5 +52,46 @@ describe("application shell", () => {
 		expect(
 			isNavigationCurrent("/administration/users", "/administration")
 		).toBe(false);
+		expect(isNavigationCurrent("/operations/products", "/operations")).toBe(
+			false
+		);
+		expect(
+			isNavigationCurrent("/operations/products/new", "/operations/products")
+		).toBe(true);
+	});
+
+	test("does not render dead navigation for seam-only Inventory capabilities", () => {
+		const navigation = OPERATIONS_NAVIGATION.map((item) =>
+			`${item.label} ${item.href}`.toLowerCase()
+		);
+		expect(navigation.some((item) => item.includes("reservation"))).toBe(false);
+		expect(navigation.some((item) => item.includes("offline"))).toBe(false);
+		expect(navigation.some((item) => item.includes("stock-ledger"))).toBe(
+			false
+		);
+		expect(classifyShellFailure(new Error("offline"), false)).toBe("offline");
+	});
+});
+
+describe("sectionOverviewPath", () => {
+	test("Operations routes recover into the Operations overview", () => {
+		expect(sectionOverviewPath("/operations/inventory/counts")).toBe(
+			"/operations"
+		);
+		expect(sectionOverviewPath("/operations")).toBe("/operations");
+	});
+
+	test("non-Operations and unknown routes recover into Administration", () => {
+		expect(sectionOverviewPath("/administration/users")).toBe(
+			"/administration"
+		);
+		expect(sectionOverviewPath(null)).toBe("/administration");
+		expect(sectionOverviewPath(undefined)).toBe("/administration");
+	});
+
+	test("near-prefix routes that only share the literal string do not collide with Operations (second-review F-H-001)", () => {
+		expect(sectionOverviewPath("/operations-evil")).toBe("/administration");
+		expect(sectionOverviewPath("/operationsx")).toBe("/administration");
+		expect(sectionOverviewPath("/operations-export")).toBe("/administration");
 	});
 });

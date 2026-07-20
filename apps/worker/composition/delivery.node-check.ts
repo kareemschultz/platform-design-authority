@@ -11,19 +11,16 @@ import { workerEnv } from "@meridian/tooling-env/worker";
 import { Pool } from "pg";
 
 const pool = new Pool({ connectionString: workerEnv.DATABASE_URL, max: 1 });
-const client = await pool.connect();
 const eventId = `event_node_${randomUUID()}`;
-let transactionOpen = false;
 
 try {
-	await client.query("BEGIN");
-	transactionOpen = true;
-	await client.query(
-		`UPDATE platform_event_outbox
-		 SET next_attempt_at = 'infinity'::timestamptz
-		 WHERE status IN ('pending', 'retrying', 'claimed')`
+	const existing = await pool.query<{ count: number }>(
+		"SELECT count(*)::int AS count FROM platform_event_outbox"
 	);
-	await createPostgresOutbox(client).append({
+	if (existing.rows[0]?.count !== 0) {
+		throw new Error("Node delivery check requires an isolated event database");
+	}
+	await createPostgresOutbox(pool).append({
 		aggregateId: `product_node_${randomUUID()}`,
 		classification: "Internal",
 		data: { productId: "product_node_check" },
@@ -37,7 +34,7 @@ try {
 		scopeType: "Tenant",
 		tenantId: "tenant_node_delivery_check",
 	});
-	const store = createPostgresDeliveryStore(client);
+	const store = createPostgresDeliveryStore(pool);
 	const claim = await store.claimNext({
 		claimToken: randomUUID(),
 		leaseExpiresAt: "2100-07-15T12:00:30.000Z",
@@ -56,7 +53,7 @@ try {
 	if (result !== "no_consumers") {
 		throw new Error("Node delivery check did not complete the event");
 	}
-	const verified = await client.query<{
+	const verified = await pool.query<{
 		status: string;
 		claim_token_digest: string | null;
 	}>(
@@ -69,12 +66,6 @@ try {
 	) {
 		throw new Error("Node delivery check left invalid delivery state");
 	}
-	await client.query("ROLLBACK");
-	transactionOpen = false;
 } finally {
-	if (transactionOpen) {
-		await client.query("ROLLBACK");
-	}
-	client.release();
 	await pool.end();
 }

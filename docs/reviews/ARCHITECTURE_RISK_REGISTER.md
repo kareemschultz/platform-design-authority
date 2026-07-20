@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.11.0
+version: 0.10.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-17
 ---
 
 # Architecture Risk Register
@@ -92,7 +92,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | ID | Title | Status | Evidence | Re-open trigger |
 |---|---|---|---|---|
 | TA-001 | First-slice event contract evades the event registry | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | Event registry drift recurs |
-| TA-002 | first-slice.json encodes a bigger slice than the manifest | Closed architecturally; Founder decision | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | FDR-004 decision |
+| TA-002 | first-slice.json encodes a bigger slice than the manifest | Closed architecturally; Founder decision recorded — FDR-004 Ratified; historical M0 provisional-adoption deviation retained | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical; FDR-004; issue #81 comment `5008157609`; PR #89 concurrence comment `5008646684` and merge `7de0688` | FDR-004 is superseded or implementation exceeds its bounded first-slice scope |
 | TA-003 | API contracts cover roughly half the flows | Closed architecturally | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | Implementation review finds contract gaps |
 | TA-004 | Permission catalog covers neither APIs nor capability set | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | Permission parity CI regresses |
 | TA-005 | Quality-gate system has zero numeric values | Closed architecturally | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Blocker and Critical | Measured evidence contradicts provisional budgets |
@@ -106,7 +106,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | TA-013 | Project skills: wrong portfolio; tool-restriction misunderstood | Closed architecturally | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §High Findings | Skill trigger/safety regressions |
 | TA-014 | AI guardrails real, mechanisms not | Closed architecturally | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §High Findings | SDK/multi-agent prototype contradicts controls |
 | TA-015 | Marketplace AI packs bypass AI governance pipeline | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §High Findings | Marketplace implementation bypasses registries |
-| TA-016 | Zero customer evidence behind present-tense beachhead | External evidence | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Corrections to Third-Audit Closure Claims | Customer discovery evidence recorded |
+| TA-016 | Zero customer evidence behind present-tense beachhead | External evidence — zero recorded; WS3 entry blocked by issue #82 | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Corrections to Third-Audit Closure Claims; MARKET_SEGMENTATION_AND_BEACHHEAD_EVIDENCE.md; issue #82 | Issue #82's real-customer evidence bar is met and independently accepted |
 | TA-017 | Permission-naming example violates 3-segment rule | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Medium Findings | New contradicting evidence |
 | TA-018 | Payments engine has no registered prefix | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Medium Findings | Namespace drift recurs |
 | TA-019 | Party capability id splits the Party namespace | Closed | FABLE5_THIRD_AUDIT_DISPOSITION_V1.md §Medium Findings | Deprecated alias reappears in implementation |
@@ -170,7 +170,7 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | FA4-012 | Superseded customer-account tender line unannotated | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | New contradicting evidence |
 | FA4-013 | Two live Business DNA specs; incomplete engine catalog | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | DNA authority split recurs |
 | FA4-014 | Marketplace payout surface not phase-gated at point of use | Closed architecturally; Founder decision | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | FDR-008 decision |
-| FA4-015 | AGENTS.md missing | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Agent contracts fall out of sync |
+| FA4-015 | AGENTS.md missing | Closed; reopened 2026-07-17 by fifth-audit F-A-003 (contract divergence) and re-closed the same day by the parity restoration plus the executable `validate_agent_contract_parity` gate in `scripts/validate_docs.py` | FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md; FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Parity gate fails or is removed |
 | FA4-016 | Four third-audit dispositions overclaimed | Closed honestly; External evidence | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Customer evidence or FDR-010 outcome |
 | FA4-017 | Identity doc softens deny-by-default plugin matrix | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | New method added without matrix disposition |
 | FA4-018 | pgvector wording bypasses ADR-0024 admission framing | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Admission trigger or prototype evidence |
@@ -185,41 +185,21 @@ Source dispositions sometimes combine classes (for example "Closed architectural
 | FA4-027 | Better Auth appendix refresh items; Bun cluster constraint | Recorded and propagated | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Vendor evidence changes at implementation lock |
 | FA4-028 | Bun preference override legitimate but rested on wrong arithmetic | Recorded note | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Prototype evidence or ADR review outcome |
 | FA4-029 | AMB-003 closure rationale superseded by ADR-0020 | Recorded rationale migration | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Prototype evidence changes ADR-0020 outcome |
-| FA4-030 | Three decision matrices ungated in CLAUDE.md lookups | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Agent-contract parity breaks |
+| FA4-030 | Three decision matrices ungated in CLAUDE.md lookups | Closed; reopened 2026-07-17 by fifth-audit F-A-003 and re-closed by the same parity restoration and executable gate as FA4-015 | FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md; FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Parity gate fails or is removed |
 | FA4-031 | ADR template drift (0017-0019 lack sections) | Closed for current material edit | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Material edit lands without required sections |
 | FA4-032 | All 24 ADRs Proposed and Constitution Draft; authority tiers empty | Recorded; ratification required | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Ratification waves complete or conflict unresolvable |
 | FA4-033 | Finance schema controlTotals lacked inventory fields | Closed architecturally | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Accountant/inventory prototype validation fails |
 | FA4-034 | Marketing/status/analytics docs lacked slice-boundary declarations | Closed | FABLE5_FOURTH_AUDIT_DISPOSITION_V1.md §Finding Dispositions | Scope admitted without scope-change process |
 
-## Documentation Completion Audit (DCA) — checkpoint `c9faa31` plus continuation
+## Fifth Audit (FA5) — checkpoint `81e903b` (P-W2a status pointers)
 
-The immutable audit defines DCA-001 through DCA-019. PDA-REV-014 is the living disposition. DCA-020 through DCA-023 are continuation findings discovered after the fixed cutoff and therefore do not alter the audit evidence.
+The immutable finding set and closure tests remain in `evidence/audit/fable5-whole-project-findings.yaml`. These rows record only the P-W2a findings whose status changes in issue #90; the FA4-015/FA4-030 reopen-and-reclose history remains recorded once in the Fourth Audit table above.
 
 | ID | Title | Status | Evidence | Re-open trigger |
 |---|---|---|---|---|
-| DCA-001 | No production-directing authority set | Open; ratification/external evidence | PDA-REV-014 §Finding Matrix | Required reviews, approvals and promotions complete |
-| DCA-002 | Binary completeness claims lacked depth semantics | Implemented in Draft; independent review open | PDA-REV-014 §Finding Matrix | Class/depth/evidence controls regress |
-| DCA-003 | Program and implementation status drift | Reconciled; refresh obligation | PDA-REV-014 §Finding Matrix | Main/project/evidence state changes |
-| DCA-004 | Generated registry and fresh-check evidence | Implemented; exact-head repetition required | PDA-REV-014 §Finding Matrix | Registry or CI freshness fails |
-| DCA-005 | Capability-family readiness incomplete | Partially implemented | PDA-REV-014 §Finding Matrix | Admitted family lacks declared depth/trigger/evidence |
-| DCA-006 | Document-class applicability absent | Implemented in Draft; independent review open | PDA-REV-014 §Finding Matrix | Class/template/validator semantics diverge |
-| DCA-007 | Research waves lacked durable registration | Structurally reduced; external/independent evidence open | PDA-REV-014 §Finding Matrix | Ledger/result/backlog parity fails |
-| DCA-008 | Requested enterprise research families incomplete | Partially accepted; direct/configured evidence open | PDA-REV-014 §Finding Matrix | Named family lacks reviewed output/evidence state |
-| DCA-009 | Orphan and navigation coverage | Implemented; independent review open | PDA-REV-014 §Finding Matrix | Any prose artifact loses its single inventory route |
-| DCA-010 | Product/API documentation governance | Implemented; independent review and release depth open | PDA-REV-014 §Finding Matrix | Manifest, MDX, API parity or release evidence fails |
-| DCA-011 | Pilot-critical operational procedures incomplete | Procedure drafts only | PDA-REV-014 §Finding Matrix | Implementation advances without reviewed/exercised operations |
-| DCA-012 | Duplicate capability-source authority | Implemented; independent review open | PDA-REV-014 §Finding Matrix | Multiple current sources or identifier drift recur |
-| DCA-013 | Ratification preparation absent | Prepared; all real reviews/promotions open | PDA-REV-014 §Finding Matrix | Lifecycle advances without manifest evidence |
-| DCA-014 | Technology evidence freshness | Open monitoring obligation | PDA-REV-014 §Finding Matrix | Version/compatibility claim lacks dated state/evidence |
-| DCA-015 | GitHub issue/project state contradicts repository | Open; owner-controlled reconciliation required | PDA-REV-014 §Finding Matrix | Issue #59/#71 and project state agree with merged reality |
-| DCA-016 | Governance validators lacked mutation evidence | Implemented; independent review open | PDA-REV-014 §Finding Matrix | Seeded defect passes a governed validator |
-| DCA-017 | Active placeholder/cost evidence defects | Implemented; independent review open | PDA-REV-014 §Finding Matrix | Filler or unowned cost assumption recurs |
-| DCA-018 | WS2 capability evidence registration incomplete | Interim registration; PR7 closeout open | PDA-REV-014 §Finding Matrix | Cells overclaim or PR7 reconciliation fails |
-| DCA-019 | Founder/professional/provider/customer evidence absent | Open blocker; packets prepared | PDA-REV-014 §Finding Matrix | Any decision/evidence gate is falsely inferred or genuinely closes |
-| DCA-020 | Required commercial-brand decision and codename boundary absent | Repository control implemented in Draft; FDR-011/external/independent evidence open | PDA-REV-014 §Finding Matrix | Codename leaks, private-package gate fails, or FDR-011 closes |
-| DCA-021 | Required PR documentation/release dispositions unenforced and active PR evidence stale | Repository control and PR-body reconciliation implemented; independent review open | PDA-REV-014 §Finding Matrix | Event validator regresses, disposition mismatches paths, or body evidence drifts |
-| DCA-022 | Operational readiness register omitted merged Event Backbone and retained a false PR #74 deferral | Merged cutoff, `OPS-SVC-005`, evidence/runbook links and validator mutations implemented; independent review open | PDA-REV-014 §Finding Matrix | An implemented service is absent, a merged PR remains deferred/excluded, or readiness exceeds evidence |
-| DCA-023 | Product portal evidence, release notes, and operator tasks lagged merged Event Backbone behavior | Ten-page `7202fc8` manifest, replay/runtime and release reconciliation, and PDOC-0010 operator guide implemented; independent review open | PDA-REV-014 §Finding Matrix | Product evidence baseline unintentionally lags merged behavior, or runtime/release/task content contradicts registered implementation and readiness |
+| F-A-001 | WS2 PR7 merged without its required pre-merge exact-head concurrence | Founder decision recorded; P-W2a implemented pending independent review | PDA-REV-013 exact-`main` audit at `81e903b`; issue #81 comment `5008157609`; PR #89 concurrence comment `5008646684` and merge `7de0688`; issue #90 | P-W2a fails independent review, the superseding-review decision is changed, or a governed source again claims PR #79 had pre-merge concurrence |
+| F-A-002 | Post-PR7 tracking sources contradict merged state and registry-derived counts | Implemented pending independent review | FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md §Implementation status; issue #90 | P-W2a fails independent review or merged tracking sources drift from the registry-derived evidence |
+| F-L-005 | Eleven production-readiness gate families were not individually tracked | Closed | PROGRAM_STATUS.md §Production-readiness gates; PR #80 concurrence comment `5008076728` and merge `24d28e6` | The eleven-family table loses a family, owner, status, or evidence pointer |
 
 ## Currently Open Risks
 
@@ -229,21 +209,18 @@ Consolidated list of every register entry not fully closed (status Partially clo
 |---|---|---|---|
 | SA-025 | Provider-certified refund/reversal/dispute matrices | External evidence | Provider selection and pilot payment scope |
 | SA-026 | Authoritative Guyana regulator and MMG review | External evidence | Pilot and production claims |
-| TA-002 | First-slice scope ratification (FDR-004) | Founder | First-slice specification ratification |
 | TA-007 | Qualified tax/accounting verification of the prototype tax pack | External evidence | Pilot |
 | TA-008 | Authoritative Guyana commencement/FX/tax/payment advice | External evidence | Pilot |
-| TA-016 | Customer discovery evidence (currently zero interviews) | External evidence | Hardening prototype investment into pilot commitments |
+| TA-016 | Customer discovery evidence (currently zero interviews; issue #82) | External evidence | WS3 entry and hardening prototype investment into pilot commitments |
 | TA-031 | Competitor baseline execution (Odoo, ERPNext, specialists) | External evidence | Experience-budget freeze |
 | TA-044 | Marketplace paid-phase settlement decision (FDR-008) | Founder | Paid marketplace phase |
 | TA-054 | Platform-SaaS cash receivables policy (FDR-010) | Founder | Platform Subscription cash collection |
-| TA-055 | FDR-001 through FDR-011 ratification | Founder | Pilot and production |
-| DCA-020 | Commercial product brand and publishing identity (FDR-011) | Founder, qualified trademark advisers, Platform Design Authority | Public product/package/domain/app/documentation identity and pilot/production claims |
-| DCA-021 | Pull-request documentation/release disposition and evidence freshness | Platform Engineering, Developer Platform, Release Management | Any PR merge or release claim without validated current dispositions |
-| DCA-022 | Operational service registration and merged-evidence cutoff consistency | Platform Operations, Platform Kernel, Data Platform | Any operational-readiness claim based on a stale cutoff or omitted implemented service |
-| DCA-023 | Product-documentation evidence and operator-task completeness | Developer Platform, Platform Operations, Release Management, UX | Any product/release claim that omits merged user/operator-visible behavior or exceeds its evidence/readiness baseline |
+| TA-055 | Remaining FDR-001–003 and FDR-005–010 ratification (FDR-004 is Ratified) | Founder | Pilot and production |
 | FA4-014 | Marketplace payout gating (FDR-008 plus legal/tax/provider review) | Founder | Paid marketplace phase |
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
 | FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |
+| F-A-001 | Superseding WS2 exact-`main` review tracking propagation | PDA + independent reviewer | P-W2a exact-head review and merge |
+| F-A-002 | Post-PR7 tracking synchronization | PDA + independent reviewer | P-W2a exact-head review and merge |
 | RR-001 | Expo auth plugin approval per the BETTER_AUTH plugin matrix | PDA | Native app authentication implementation |
 | RR-002 | PWA manifest theme-color tokens decision | PDA | Web app shell and PWA manifest implementation |
 | RR-003 | apps/native Biome lint exclusion | Implementation | Uniform lint enforcement across workspaces |
@@ -254,9 +231,11 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | RR-009 | Independent assistive-technology conformance, penetration testing, and production-content review remain open | External evidence | Pilot and production accessibility/security claims |
 | RR-010 | Party merge, rich identifiers/relationships, duplicate resolution, and privacy-request execution remain beyond WS1 prototype depth | Platform/Party | Any claim or workflow requiring full Party depth |
 
-**RR-011 — Closed.** PDA-REV-011 audited exact merge `8f9d93f` and found 0 P0/1 P1/5 P2/4 P3. PDA-REV-012 accepted and remediated all ten findings; PR #57 merged at exact-head-green CI, closing issue #56. Removed from the not-fully-closed list above per Register Rule 4; reopens only on new evidence invalidating PDA-REV-012's disposition.
+**RR-006 — Closed at controlled-prototype depth.** PR #74 merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de` after exact-head concurrence at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` and green Documentation Governance plus Meridian Prototype workflows. PDA-APP-023 proves bounded claim/lease recovery, retry/dead-letter behavior, replay authority and replay-scoped receipts, consumer idempotency, safe observability, tenant isolation, and rebuildable Catalog/Inventory consumers. Claude Code's final independent re-audit recorded zero remaining actionable findings in PR #74 comment `4991097241`. This closes only the missing controlled-prototype delivery-runtime risk; RR-007, production capacity/SLO/alerting, multi-replica topology, production retention, restore exercises, and external webhook delivery remain open under their named owners. Reopen RR-006 only if new evidence invalidates the merged delivery or idempotency controls.
 
-**RR-006 — Closed at controlled-prototype depth.** PDA-APP-023 records the Event Backbone worker, claim/lease/retry/dead-letter/replay, consumer-receipt, projection, safe-health, PostgreSQL, Bun/Node, and architecture evidence. The independent implementation audit withheld concurrence at `ffadf60409111fba72a0829098cd0904e6e269c7`; all three blocking findings and four coverage gaps were remediated and independently re-audited with concurrence at exact head `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26`. Both required CI workflows passed and PR #74 merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de` on 2026-07-16. Removed from the not-fully-closed list per Register Rule 4. This closure does not close RR-007, production capacity/SLO, external webhook, multi-region, provider, pilot, or production operations evidence; it reopens if new evidence invalidates the recorded controlled-prototype guarantees.
+**RR-007 — Open after the WS2 checkpoint.** WS2 extends the controlled-prototype evidence through tenant-scoped owner constraints, repository predicates, application-command revalidation, worker claims/receipts, projection/import/numbering scope, safe non-disclosure, and two-tenant tests. Those controls do not select or prove the production database-role topology, PostgreSQL Row-Level Security policies, pooler/session-variable behavior, migration/administration bypass roles, operational monitoring, or penetration evidence. Security and Data Platform retain ownership; pilot and production tenant-isolation defense in depth remains blocked until the separate topology and exercise are reviewed and evidenced.
+
+**RR-011 — Closed.** PDA-REV-011 audited exact merge `8f9d93f` and found 0 P0/1 P1/5 P2/4 P3. PDA-REV-012 accepted and remediated all ten findings; PR #57 merged at exact-head-green CI, closing issue #56. Removed from the not-fully-closed list above per Register Rule 4; reopens only on new evidence invalidating PDA-REV-012's disposition.
 
 ## Technical Debt Register
 
@@ -269,9 +248,14 @@ Distinct from risk: a debt entry records a deliberate suboptimal choice accepted
 | TD-003 | apps/native excluded from Biome linting | Better-T-Stack scaffold default; no native work is active yet | Native app work starts | Implementation |
 | TD-004 | Status-token CSS variables are hand-copied literals pending the token-generation pipeline | Pipeline (PDA-UX-023) not yet built; literals unblock UI work | Token-generation pipeline lands (PDA-UX-023) | Implementation |
 | TD-005 | Registry capability governance fields (packaging_class and similar) remain namespace defaults pending curation | Curated overlay exists but per-capability curation is deferred to workstream owners | Capability curation pass per workstream | PDA |
-| TD-006 | First-slice event schemas exist for only 4 of 197 events (schemas/ holds the finance/offline/events subset) | Representative-schema approach proves the envelope; full coverage deferred | Expand per workstream as events enter implementation | Implementation |
+| TD-008 | `apps/web/src/app/error.tsx` logs client errors to `console.error`; no structured client error-reporting sink exists | Prototype-only diagnostics; no reporting infrastructure is selected yet (fifth-audit F-H-008) | Client error-reporting decision at WS7 operational readiness, or first pilot-candidate build | Implementation |
+| TD-006 | 37 of 208 registered events currently resolve to owner JSON Schemas; WS2-family emitted events are covered, while later workstreams remain schema-deferred | Workstream-by-workstream schema completion preserves contract ownership without pretending future event payloads are designed | Expand and verify owner schemas as each later workstream enters implementation | Implementation |
 | TD-007 | **Closed 2026-07-13.** `packages/contracts/platform-api` now defines transport-neutral oRPC contracts derived from canonical OpenAPI metadata, a semantic-parity test compares route/method/operation/authority/schema metadata, and `packages/platform-clients/api-client` derives from that contract without importing `apps/server`. The former exception is removed and the path-aware architecture checker passes. Evidence: PDA-RDM-008 PR1 and PDA-IMPL-001. | Initial scaffold exposed only two procedures and accepted the temporary type-only import | WS1 PR1 contract-first closure | Implementation |
 
 ## Maintenance
 
 This register is updated in the same pull request as any disposition change: a status may not change in a disposition document without the corresponding row changing here, and every row change must carry its evidence pointer. The file is validated by the standard document-governance checks (front matter fields and internal link resolution); the audit reports and dispositions it indexes remain immutable, and corrections to them are recorded as new dated evidence rather than edits.
+
+## Change Log
+
+- **0.10.0 (2026-07-17):** Added the P-W2a fifth-audit status pointers for F-A-001, F-A-002, and F-L-005; recorded FDR-004 ratification on TA-002 while retaining the historical M0 deviation; preserved all external, pilot, and production blockers.

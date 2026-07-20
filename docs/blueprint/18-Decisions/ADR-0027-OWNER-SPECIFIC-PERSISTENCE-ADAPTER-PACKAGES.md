@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0027
 title: Owner-Specific Persistence Adapter Packages with Composition-Root Injection
-version: 0.3.3
+version: 0.3.5
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-13
-last_reviewed: 2026-07-15
+last_reviewed: 2026-07-16
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0024, ADR-0025]
@@ -18,6 +18,8 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0020, ADR-0024, ADR-0025]
 Proposed. This decision may guide the named controlled prototypes in PDA-RDM-008 and PDA-RDM-009, but it is not production authority. The three architecture-consistency review rows required before WS1 PR2 merged — Platform Architecture, Data Platform, and Security — are **recorded as Approved at prototype scope (2026-07-13)** against PR #37's CI-green implementation; that merge gate is satisfied. These were performed by Claude Code as the reviewer designated by the repository owner (one reviewer covering all three lenses, transparently attributed), not by three independent human specialists, and they do not constitute production acceptance. The Security row carries a forward caveat: DB-level tenant-isolation controls (RLS disposition, tenant-scoped constraints per PDA-SEC-011) remain an open gate for the PRs that introduce tenancy/domain tables.
 
 WS2 selects a second process only for the Event Backbone delivery runtime. Claude Code reviewed the exact pre-worker baseline at `40454740838bba4426b9ca48b2e82811bc7b466d` on 2026-07-15 through the Platform Architecture, Data Platform, and Security lenses. Platform Architecture concurred at prototype scope; Data Platform and Security required the contract, classification, pool-budget, and replay-authority remediations recorded in v0.3.2. Claude Code then independently re-reviewed the remediated exact head `771cb493fce4040dc1edb501fed1005aec585d63` and recorded prototype-scope concurrence for all three lenses in PR #74 comment `4987122519`. The pre-worker gate is satisfied. PDA-ENGR-012 v1.3.0 therefore registers only the literal `apps/worker/composition` root; implementation remains subject to the executable proof obligations in this ADR, and this concurrence is not production acceptance.
+
+WS2 PR5 applies this decision explicitly to the `platform.import-export` and `platform.numbering` owners. Their runtime-neutral cores and owner-specific PostgreSQL adapters are authorized only for PDA-RDM-009's controlled prototype and only through the server composition root. Claude Code independently re-reviewed exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be`, including the real import-reference transaction, owner separation, migration ownership, tenant isolation, and concurrent retry evidence, and recorded prototype-scope concurrence in PR #76 comment `4995579814`. PR #76 then merged as `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`. This is controlled-prototype sign-off only; the ADR remains Proposed and RR-007 plus production topology/capacity evidence remain open.
 
 ## Context
 
@@ -59,6 +61,7 @@ Adopt option C for owner-specific persistence and option F for the WS2 delivery 
 7. **Migrations are deterministic and serial.** A composition-owned runner invokes owner-specific migration streams in a fixed dependency-respecting order. A bare unfiltered `turbo run db:migrate` is insufficient.
 8. **Connection budgets cover the deployment topology.** Server and worker pool maxima are explicit, bounded, independently observable, and included with replica counts in the PostgreSQL connection budget. A worker drains claims, releases checked-out clients, and closes its own pool on shutdown. Neither process reaches into the other's lifecycle.
 9. **Worker authority remains narrow.** An event envelope supplies scope and causation for delivery, not current user authority. A consumer mutates authoritative state only through the target owner's published application command or an explicitly owned projection adapter. External webhooks remain Developer Platform ownership.
+10. **PR5 Platform owners are explicit.** `packages/platform/import-export` publishes import orchestration ports and `packages/persistence/platform-import-export-postgres` owns only `platform_import_*` schema/migrations. `packages/platform/numbering` publishes sequence-allocation ports and `packages/persistence/platform-numbering-postgres` owns only `platform_number_*` schema/migrations. Catalog and Inventory owner effects remain behind their published application commands; neither Platform adapter imports or mutates those owners' tables. The server composition root may bind Numbering into import creation over one checked-out client so the allocation, definition-version snapshot, import job, and both outbox records commit or roll back together without exposing the client to either core.
 
 For the named WS2 controlled prototype, the server pool maximum remains `10`, the proposed worker pool maximum is `5`, one server replica and one worker replica are assumed, and `10` connections are reserved for direct migration and administrative access. The binding budget is `(server_pool_max × server_replicas) + (worker_pool_max × worker_replicas) + reserve ≤ configured PostgreSQL max_connections`; the current prototype allocation is `10 + 5 + 10 = 25`. These values authorize no production capacity claim. Any replica, provider, pool, or connection-limit change triggers a new Data Platform review before deployment.
 
@@ -102,6 +105,7 @@ The `database-outside-persistence` forbidden pattern in `registry/architecture-r
 - When PR4 records those reviews and registers the worker root, prove only `apps/server/composition/**` and `apps/worker/composition/**` create/close application pools, each process creates at most one pool, and the worker cannot invoke migrations.
 - Prove database imports exist only in registered owner-specific persistence packages and the composition pool factory.
 - Prove a module state change and its outbox record commit or roll back together without another module's business-table mutation.
+- For WS2 PR5, prove Import/Export and Numbering each retain one migration owner; the real import-create path uses the Numbering port; allocation/import/event facts commit or roll back together; Catalog/Inventory writes still occur only through owner application commands; and direct cross-owner persistence imports remain denied.
 - Prove cross-domain completion does not share an unrestricted transaction.
 - Prove empty-database migration, representative upgrade, repeat run, failed-migration recovery, and freshness on the exact pinned Drizzle/`pg`/PostgreSQL locks recorded in PDA-ENGR-013.
 
@@ -147,11 +151,14 @@ PDA-REV-011 found that the validated Tooling environment schema's necessary `DAT
 | Claude Code (Platform Architecture perspective) | Exact worker root and modular-monolith boundary re-review | Concurred — prototype scope | 2026-07-15 | Re-reviewed exact head `771cb493fce4040dc1edb501fed1005aec585d63`; confirmed the architecture registry was unchanged at the review checkpoint, the worker remained executable-denied, and the original literal-root and negative-probe conditions were preserved. This supersedes no implementation proof obligation. Evidence: PR #74 comment `4987122519`. |
 | Claude Code (Data Platform perspective) | Delivery identity, storage classification, pool budget, ordering, and recovery re-review | Concurred — prototype scope | 2026-07-15 | Re-reviewed exact head `771cb493fce4040dc1edb501fed1005aec585d63`; confirmed one receipt identity `(consumer_id, event_id, consumer_schema_version)`, field-level classification for all five Event Backbone storage families, and the `10 + 5 + 10 = 25` controlled-prototype budget. Sequence, claim-token CAS, retry, ordering, and connection-budget assertions remain implementation-time proof obligations. Evidence: PR #74 comment `4987122519`. |
 | Claude Code (Security perspective) | Replay authority, tenant scope, classification, and minimization re-review | Concurred — prototype scope | 2026-07-15 | Re-reviewed exact head `771cb493fce4040dc1edb501fed1005aec585d63`; confirmed `POST /v1/event-replays` is the registered `platform.event.replay` enforcement point with bounded non-disclosing input and classified storage. Executable authorization, Audit, incompatible-schema, cross-tenant, range, and payload-minimization tests remain implementation-time gates. RR-007 stays open. Evidence: PR #74 comment `4987122519`. |
+| Claude Code | WS2 PR5 Import/Export and Numbering owner extension | Concurred — prototype scope | 2026-07-16 | Re-reviewed exact head `7a9e9edbfadfd59ed769d9d780c25fb71bbdb6be`; verified the two explicit owner-specific adapters, server-only composition binding, one-transaction import-reference boundary, separate Catalog/Inventory commands, tenant isolation, migration freshness, rollback behavior, and concurrent retry safety. PR #76 comment `4995579814`; merged as `f7d2a6bbd7ad6df20a08820ba4a65299017b4db5`. Production RLS/topology/capacity gates remain open. |
 
 ## Change Log
 
 | Version | Date | Author | Change |
 |---|---|---|---|
+| 0.3.5 | 2026-07-16 | Platform Design Authority | Recorded exact-head prototype-scope concurrence and merge for the Import/Export and Numbering owner extension without promoting the Proposed ADR or closing production isolation/capacity gates. |
+| 0.3.4 | 2026-07-16 | Platform Design Authority | Made the WS2 PR5 `platform.import-export` and `platform.numbering` owner-specific adapter decision explicit, bound their atomic composition boundary, preserved Catalog/Inventory ownership, and added an exact-head independent sign-off gate without claiming production acceptance. |
 | 0.3.3 | 2026-07-15 | Platform Design Authority | Recorded exact-head prototype-scope concurrence for all three WS2 pre-worker lenses and authorized only the literal worker composition-root registration while retaining every implementation proof obligation and production gate. |
 | 0.3.2 | 2026-07-15 | Platform Design Authority | Recorded the exact-commit PR4 Platform Architecture/Data Platform/Security review, retained the worker prohibition after two Changes-required dispositions, bound the controlled-prototype two-process connection budget, and linked the contract/classification/replay remediations required for re-review. |
 | 0.3.1 | 2026-07-14 | Platform Design Authority | Made the pre-worker review gate executable: the selected worker path remains unregistered and denied until the three pending review rows are recorded; added literal worker-candidate and unknown-app denial requirements. |

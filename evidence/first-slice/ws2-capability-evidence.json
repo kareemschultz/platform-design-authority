@@ -1,0 +1,587 @@
+{
+  "schema_version": "1.0.0",
+  "workstream_id": "WS2",
+  "status": "controlled-prototype-evidence",
+  "verified_on": "2026-07-16",
+  "capabilities": [
+    "catalog.barcodes",
+    "catalog.bulk-import",
+    "catalog.identifiers",
+    "catalog.lifecycle",
+    "catalog.products",
+    "catalog.variants",
+    "inventory.adjustments",
+    "inventory.availability",
+    "inventory.counts",
+    "inventory.offline-movements",
+    "inventory.reservations",
+    "inventory.stock-balances",
+    "inventory.stock-ledger",
+    "inventory.transfers"
+  ],
+  "evidence": [
+    {
+      "id": "ws2-catalog-aggregate-core",
+      "kind": "automated-test",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "contains": [
+        "creates an aggregate atomically and replays an idempotent command",
+        "creates a Variant without identifiers without fabricating an assignment",
+        "keeps normalized identifiers unique inside a tenant but isolated across tenants",
+        "preserves explicit child identities, emits only new assignments, and rejects implicit removal"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "catalog.barcodes",
+        "catalog.identifiers",
+        "catalog.products",
+        "catalog.variants"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability"
+      ]
+    },
+    {
+      "id": "ws2-catalog-lifecycle-core",
+      "kind": "automated-test",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "contains": [
+        "enforces optimistic concurrency and explicit lifecycle commands"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["catalog.lifecycle", "catalog.products"],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability"
+      ]
+    },
+    {
+      "id": "ws2-catalog-application-authority",
+      "kind": "automated-test",
+      "path": "packages/domains/catalog/src/index.test.ts",
+      "contains": [
+        "enforces permissions and entitlements at the direct application boundary",
+        "enforces lifecycle permission and entitlement pairs at the application boundary"
+      ],
+      "command": "bun test packages/domains/catalog/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "catalog.barcodes",
+        "catalog.identifiers",
+        "catalog.lifecycle",
+        "catalog.products",
+        "catalog.variants"
+      ],
+      "dimensions": ["permission_and_entitlement"]
+    },
+    {
+      "id": "ws2-catalog-postgres-isolation-recovery",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/catalog.integration.test.ts",
+      "contains": [
+        "enforces tenant isolation and tenant-local normalized uniqueness",
+        "does not disclose another tenant's barcode through lookup",
+        "rolls Product, receipt, and outbox state back together on append failure"
+      ],
+      "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "catalog.barcodes",
+        "catalog.identifiers",
+        "catalog.lifecycle",
+        "catalog.products",
+        "catalog.variants"
+      ],
+      "dimensions": [
+        "tenant_isolation",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws2-catalog-query-budgets",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/catalog.integration.test.ts",
+      "contains": [
+        "meets provisional warm barcode and text-query budgets on representative data"
+      ],
+      "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": ["catalog.barcodes", "catalog.products"],
+      "dimensions": ["performance_and_capacity"]
+    },
+    {
+      "id": "ws2-catalog-aggregate-command-budgets",
+      "kind": "live-postgresql-performance-test",
+      "path": "apps/server/composition/catalog.integration.test.ts",
+      "contains": [
+        "records bounded aggregate command samples for Variant, Identifier, and lifecycle paths"
+      ],
+      "command": "bun test apps/server/composition/catalog.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "catalog.identifiers",
+        "catalog.lifecycle",
+        "catalog.variants"
+      ],
+      "dimensions": ["performance_and_capacity"]
+    },
+    {
+      "id": "ws2-import-workflow",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/imports.integration.test.ts",
+      "contains": [
+        "dry-runs mixed Tenant A Product rows, commits accepted rows, and replays without duplicates",
+        "accepts a corrected Tenant B row without disclosing either tenant's import",
+        "keeps one owner effect and one row receipt under concurrent approval resumes",
+        "resumes after an owner effect/checkpoint crash and purges only terminal staging"
+      ],
+      "command": "bun test apps/server/composition/imports.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": ["catalog.bulk-import"],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation",
+        "performance_and_capacity"
+      ]
+    },
+    {
+      "id": "ws2-import-authority",
+      "kind": "automated-test",
+      "path": "apps/server/src/router.test.ts",
+      "contains": [
+        "dispatches retention purge only through the dedicated current-context permission",
+        "maps Import boundary failures to stable non-disclosing HTTP semantics"
+      ],
+      "command": "bun test apps/server/src/router.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["catalog.bulk-import"],
+      "dimensions": [
+        "validation_and_denial",
+        "permission_and_entitlement",
+        "privacy_and_classification"
+      ]
+    },
+    {
+      "id": "ws2-adjustment-ledger",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "contains": [
+        "posts and reverses immutable Adjustment movements with atomic receipts and events",
+        "serializes concurrent postings and rebuilds balances exactly from immutable movements",
+        "rolls owner state, movement, receipt, and outbox back together on append failure"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "inventory.adjustments",
+        "inventory.availability",
+        "inventory.stock-balances",
+        "inventory.stock-ledger"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws2-count-workflow",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "contains": [
+        "posts blind Count variance only after independent approval",
+        "persists draft Count lines atomically and replays a concurrent retry",
+        "enforces maker/checker separation in the live owner transaction"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "inventory.availability",
+        "inventory.counts",
+        "inventory.stock-balances",
+        "inventory.stock-ledger"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws2-transfer-workflow",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "contains": [
+        "denies negative source stock and does not persist a partial Transfer dispatch",
+        "conserves a Transfer across partial receipt and explained exception"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "inventory.availability",
+        "inventory.stock-balances",
+        "inventory.stock-ledger",
+        "inventory.transfers"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "recovery_replay_and_reconciliation",
+        "performance_and_capacity"
+      ]
+    },
+    {
+      "id": "ws2-reservation-workflow-and-expiry",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "contains": [
+        "keeps Reservations out of physical stock while reducing current availability",
+        "expires a Reservation deterministically without physical movement and restores availability"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": ["inventory.availability", "inventory.reservations"],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "recovery_replay_and_reconciliation",
+        "performance_and_capacity"
+      ]
+    },
+    {
+      "id": "ws2-offline-command-boundary",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/inventory.integration.test.ts",
+      "contains": [
+        "applies an offline-origin command exactly once from pre-verified lease facts",
+        "enforces tenant non-disclosure and database CHECK constraints"
+      ],
+      "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "inventory.availability",
+        "inventory.offline-movements",
+        "inventory.stock-balances",
+        "inventory.stock-ledger"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "offline_and_degraded",
+        "recovery_replay_and_reconciliation",
+        "performance_and_capacity"
+      ]
+    },
+    {
+      "id": "ws2-inventory-two-tenant",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+      "contains": [
+        "isolates balances, counts, transfers, reservations, offline receipts, and safe errors across two tenants"
+      ],
+      "command": "bun test apps/server/composition/ws2-closeout.inventory.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "inventory.adjustments",
+        "inventory.availability",
+        "inventory.counts",
+        "inventory.offline-movements",
+        "inventory.reservations",
+        "inventory.stock-balances",
+        "inventory.stock-ledger",
+        "inventory.transfers"
+      ],
+      "dimensions": ["tenant_isolation", "privacy_and_classification"]
+    },
+    {
+      "id": "ws2-inventory-application-authority",
+      "kind": "automated-test",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "contains": [
+        "evaluates active context, permission, and entitlement separately",
+        "fails closed at the application boundary for permission and entitlement denial",
+        "authorizes draft-line persistence with count create authority"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "inventory.adjustments",
+        "inventory.availability",
+        "inventory.counts",
+        "inventory.stock-balances",
+        "inventory.transfers"
+      ],
+      "dimensions": ["permission_and_entitlement"]
+    },
+    {
+      "id": "ws2-catalog-delivery-observability",
+      "kind": "live-postgresql-test",
+      "path": "apps/worker/composition/delivery.integration.test.ts",
+      "contains": [
+        "permits only one concurrent claim of the same row",
+        "deduplicates consumer receipts and rejects a cross-tenant receipt",
+        "reports safe aggregate delivery health without tenant or payload labels",
+        "rebuilds Catalog search projection without crossing tenant scope"
+      ],
+      "command": "bun test apps/worker/composition/delivery.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": ["catalog.products"],
+      "dimensions": [
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws2-inventory-reconciliation-observability",
+      "kind": "live-postgresql-test",
+      "path": "apps/worker/composition/delivery.integration.test.ts",
+      "contains": [
+        "marks an Inventory balance for review when it diverges from ledger facts"
+      ],
+      "command": "bun test apps/worker/composition/delivery.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "inventory.adjustments",
+        "inventory.availability",
+        "inventory.stock-balances",
+        "inventory.stock-ledger"
+      ],
+      "dimensions": [
+        "events_jobs_and_projections",
+        "audit_and_observability",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws2-browser-workflow-accessibility",
+      "kind": "live-browser-test-and-formal-review",
+      "path": "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+      "contains": [
+        "PR7 exact-stack accessibility and pattern re-audit",
+        "22/22",
+        "automated Chromium/scanner-keyboard evidence, not representative-user task-time or assistive-technology conformance"
+      ],
+      "command": "bun run --cwd apps/web test:e2e",
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
+      "capabilities": [
+        "catalog.bulk-import",
+        "catalog.identifiers",
+        "catalog.lifecycle",
+        "catalog.products",
+        "catalog.variants",
+        "inventory.adjustments",
+        "inventory.availability",
+        "inventory.counts",
+        "inventory.stock-balances",
+        "inventory.transfers"
+      ],
+      "dimensions": ["accessibility_and_responsive"]
+    },
+    {
+      "id": "ws2-barcode-browser-accessibility",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws2-closeout.spec.ts",
+      "contains": [
+        "Barcode entry and exact lookup preserve keyboard focus, reflow, and accessible Product evidence"
+      ],
+      "command": "bun run --cwd apps/web test:e2e",
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
+      "capabilities": ["catalog.barcodes"],
+      "dimensions": ["accessibility_and_responsive"]
+    },
+    {
+      "id": "ws2-count-interaction-budget",
+      "kind": "live-browser-performance-test",
+      "path": "docs/blueprint/19-Appendices/WS2_PR6_PRODUCT_AND_INVENTORY_WEB_EXPERIENCE_EVIDENCE-2026-07-16.md",
+      "contains": [
+        "desktop `n=5`",
+        "mobile `n=5`",
+        "below the governed 5-second median target"
+      ],
+      "command": "bun run --cwd apps/web test:e2e",
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
+      "capabilities": ["inventory.counts"],
+      "dimensions": ["performance_and_capacity"]
+    },
+    {
+      "id": "ws2-inventory-closeout-budgets",
+      "kind": "live-postgresql-performance-test",
+      "path": "apps/server/composition/ws2-closeout.inventory.integration.test.ts",
+      "contains": [
+        "measures Adjustment posting and current availability visibility with retained samples"
+      ],
+      "command": "bun test apps/server/composition/ws2-closeout.inventory.integration.test.ts --timeout 30000",
+      "runtimes": ["Bun 1.3.14", "PostgreSQL 18"],
+      "capabilities": [
+        "inventory.adjustments",
+        "inventory.availability",
+        "inventory.stock-balances",
+        "inventory.stock-ledger"
+      ],
+      "dimensions": ["performance_and_capacity"]
+    },
+    {
+      "id": "ws2-owner-data-classification",
+      "kind": "governance-validation",
+      "path": "docs/blueprint/10-Data/WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md",
+      "contains": [
+        "catalog_product",
+        "inventory_reservation",
+        "platform_import_job",
+        "classification is Confidential"
+      ],
+      "command": "python scripts/validate_docs.py",
+      "runtimes": ["Python 3.12", "GitHub Actions"],
+      "capabilities": [
+        "catalog.barcodes",
+        "catalog.bulk-import",
+        "catalog.identifiers",
+        "catalog.lifecycle",
+        "catalog.products",
+        "catalog.variants",
+        "inventory.adjustments",
+        "inventory.availability",
+        "inventory.counts",
+        "inventory.offline-movements",
+        "inventory.reservations",
+        "inventory.stock-balances",
+        "inventory.stock-ledger",
+        "inventory.transfers"
+      ],
+      "dimensions": ["privacy_and_classification"]
+    },
+    {
+      "id": "ws2-browser-offline-fail-closed",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws2-closeout.spec.ts",
+      "contains": [
+        "online-only WS2 mutations fail closed and remain understandable when connectivity drops"
+      ],
+      "command": "bun run --cwd apps/web test:e2e",
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
+      "capabilities": [
+        "catalog.barcodes",
+        "catalog.bulk-import",
+        "catalog.identifiers",
+        "catalog.products",
+        "catalog.variants",
+        "inventory.adjustments",
+        "inventory.counts",
+        "inventory.transfers"
+      ],
+      "dimensions": ["offline_and_degraded"]
+    },
+    {
+      "id": "ws2-lifecycle-offline-fail-closed",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws2-closeout.spec.ts",
+      "contains": [
+        "Product lifecycle activation and archival fail closed on the offline detail route"
+      ],
+      "command": "bun run --cwd apps/web test:e2e",
+      "runtimes": ["Chromium", "Next.js 16.2.10", "PostgreSQL 18"],
+      "capabilities": ["catalog.lifecycle"],
+      "dimensions": ["offline_and_degraded"]
+    },
+    {
+      "id": "ws2-seam-only-public-authority-boundary",
+      "kind": "automated-contract-test",
+      "path": "packages/contracts/platform-api/src/index.test.ts",
+      "contains": [
+        "keeps seam-only Reservation, offline movement, and raw ledger commands out of public transport"
+      ],
+      "command": "bun test packages/contracts/platform-api/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["inventory.offline-movements", "inventory.stock-ledger"],
+      "dimensions": ["permission_and_entitlement", "offline_and_degraded"]
+    },
+    {
+      "id": "ws2-reservation-public-transport-absence",
+      "kind": "automated-contract-test",
+      "path": "packages/contracts/platform-api/src/index.test.ts",
+      "contains": [
+        "keeps seam-only Reservation, offline movement, and raw ledger commands out of public transport"
+      ],
+      "command": "bun test packages/contracts/platform-api/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["inventory.reservations"],
+      "dimensions": ["offline_and_degraded"]
+    },
+    {
+      "id": "ws2-reservation-application-authority",
+      "kind": "automated-domain-test",
+      "path": "packages/domains/inventory/src/index.test.ts",
+      "contains": [
+        "authorizes internal Reservation create and release with separate permission and entitlement checks",
+        "fails Reservation commands closed before owner mutation on permission, entitlement, or context mismatch"
+      ],
+      "command": "bun test packages/domains/inventory/src/index.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": ["inventory.reservations"],
+      "dimensions": ["permission_and_entitlement"]
+    },
+    {
+      "id": "ws2-seam-only-navigation-accessibility",
+      "kind": "automated-ui-policy-test",
+      "path": "apps/web/src/lib/shell.test.ts",
+      "contains": [
+        "does not render dead navigation for seam-only Inventory capabilities"
+      ],
+      "command": "bun test apps/web/src/lib/shell.test.ts",
+      "runtimes": ["Bun 1.3.14"],
+      "capabilities": [
+        "inventory.offline-movements",
+        "inventory.reservations",
+        "inventory.stock-ledger"
+      ],
+      "dimensions": ["accessibility_and_responsive"]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { env } from "@meridian/tooling-env/server";
 
-import { closeDatabaseComposition } from "../composition/postgres";
+import { closeDatabaseComposition } from "../composition/lifecycle";
 import app from "./index";
 
 const port = env.PORT ?? 3000;

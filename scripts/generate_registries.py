@@ -551,9 +551,11 @@ def build_architecture_rules_registry() -> dict[str, Any]:
     rule_allowances: dict[str, list[str]] = {}
     composition_roots: list[str] = []
     migration_invocation_roots: list[str] = []
+    test_source_exempt_rules: list[str] = []
     in_owner_table = False
     in_allowance_table = False
     in_composition_table = False
+    in_test_exempt_table = False
     for line in source_path.read_text(encoding="utf-8").splitlines():
         if line == "### Registered Composition Roots":
             in_composition_table = True
@@ -562,9 +564,15 @@ def build_architecture_rules_registry() -> dict[str, Any]:
             in_composition_table = False
             in_owner_table = True
             continue
+        if line == "### Registered Test-Source-Exempt Rules":
+            in_composition_table = False
+            in_owner_table = False
+            in_test_exempt_table = True
+            continue
         if line == "### Registered Rule Allowances":
             in_composition_table = False
             in_owner_table = False
+            in_test_exempt_table = False
             in_allowance_table = True
             continue
         if in_owner_table and line.startswith("### "):
@@ -573,6 +581,8 @@ def build_architecture_rules_registry() -> dict[str, Any]:
             in_allowance_table = False
         if in_composition_table and line.startswith("### "):
             in_composition_table = False
+        if in_test_exempt_table and line.startswith("### "):
+            in_test_exempt_table = False
         if in_composition_table and line.startswith("| `"):
             cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
             if len(cells) != 5:
@@ -580,6 +590,12 @@ def build_architecture_rules_registry() -> dict[str, Any]:
             composition_roots.append(cells[0].strip("`"))
             if cells[3].startswith("Allowed"):
                 migration_invocation_roots.append(cells[0].strip("`"))
+            continue
+        if in_test_exempt_table and line.startswith("| `"):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if len(cells) != 2:
+                raise ValueError(f"invalid test-source-exempt-rule row: {line}")
+            test_source_exempt_rules.append(cells[0].strip("`"))
             continue
         if in_allowance_table and line.startswith("| `"):
             cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
@@ -617,9 +633,12 @@ def build_architecture_rules_registry() -> dict[str, Any]:
         raise ValueError("registered composition-root table is empty")
     if not migration_invocation_roots:
         raise ValueError("registered migration-invocation authority is empty")
+    if not test_source_exempt_rules:
+        raise ValueError("registered test-source-exempt-rule table is empty")
     apply_rule_allowances(data, rule_allowances)
     data["requirements"]["composition_roots"] = composition_roots
     data["requirements"]["migration_invocation_roots"] = migration_invocation_roots
+    data["test_source_exempt_rules"] = sorted(set(test_source_exempt_rules))
     data["persistence_owners"] = records
     return data
 

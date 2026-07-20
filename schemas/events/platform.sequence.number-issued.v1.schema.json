@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/platform.sequence.number-issued.v1.schema.json",
+  "title": "platform.sequence.number-issued.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "platform.sequence.number-issued.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sequenceId", "sequenceKey", "allocationId", "value", "sourceCommandId", "businessRecordId"],
+          "properties": {
+            "sequenceId": {"type": "string"},
+            "sequenceKey": {"type": "string", "maxLength": 100},
+            "allocationId": {"type": "string"},
+            "value": {"type": "string", "maxLength": 100},
+            "sourceCommandId": {"type": "string", "maxLength": 128},
+            "businessRecordId": {"type": ["string", "null"], "maxLength": 128}
+          }
+        }
+      }
+    }
+  ]
+}

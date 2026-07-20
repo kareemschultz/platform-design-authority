@@ -25,7 +25,8 @@ export const CATALOG_NORMALIZATION_VERSION = "catalog-identifier-v1";
 
 const DIGITS_PATTERN = /^\d+$/;
 
-export interface CatalogProductRecord extends Omit<Product, "variants"> {
+export interface CatalogProductRecord
+	extends Omit<Product, "archivedAt" | "createdAt" | "updatedAt" | "variants"> {
 	archivedAt: Date | null;
 	archiveReason: string | null;
 	classification: "Confidential";
@@ -82,6 +83,8 @@ export interface CatalogPageRequest {
 	cursor?: string;
 	limit: number;
 	query?: string;
+	sku?: string;
+	state?: ProductState;
 }
 
 export interface CatalogPage<T> {
@@ -296,6 +299,14 @@ function normalizeLookup(value: string): string {
 		: normalizeTenantIdentifier(value);
 }
 
+function normalizeSkuLookup(value: string): string {
+	const normalized = normalizeTenantIdentifier(value);
+	if (!normalized) {
+		throw new CatalogError("invalid_identifier", "SKU lookup is empty");
+	}
+	return normalized;
+}
+
 async function fingerprint(value: Record<string, unknown>): Promise<string> {
 	const bytes = new TextEncoder().encode(JSON.stringify(value));
 	const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -306,9 +317,13 @@ async function fingerprint(value: Record<string, unknown>): Promise<string> {
 
 function productView(record: CatalogProductRecord): Product {
 	return {
+		archivedAt: record.archivedAt?.toISOString() ?? null,
+		archiveReason: record.archiveReason,
+		createdAt: record.createdAt.toISOString(),
 		id: record.id,
 		name: record.name,
 		state: record.state,
+		updatedAt: record.updatedAt.toISOString(),
 		variants: record.variants.map((variant) => ({
 			id: variant.id,
 			identifiers: variant.identifiers.map((identifier) => ({
@@ -1078,6 +1093,9 @@ export function createCatalogService(options: CatalogServiceOptions) {
 				const result = await repository.listProducts(tenantId, {
 					...page,
 					...(page.barcode ? { barcode: normalizeLookup(page.barcode) } : {}),
+					...(page.sku === undefined
+						? {}
+						: { sku: normalizeSkuLookup(page.sku) }),
 				});
 				return { ...result, items: result.items.map(productView) };
 			});

@@ -1,0 +1,2 @@
+ALTER TABLE "platform_import_command_receipt" DROP CONSTRAINT "platform_import_command_receipt_operation_ck";--> statement-breakpoint
+ALTER TABLE "platform_import_command_receipt" ADD CONSTRAINT "platform_import_command_receipt_operation_ck" CHECK ("platform_import_command_receipt"."operation" IN ('create:Product','create:OpeningStock','approve:Product','approve:OpeningStock','commit:Product','commit:OpeningStock','accept:Product','accept:OpeningStock','cancel:Product','cancel:OpeningStock','purge:Product','purge:OpeningStock'));

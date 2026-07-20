@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "build": "next build --webpack",
+    "check-content": "bun run scripts/check-content.mjs",
     "dev": "next dev --webpack --port=4000",
     "start": "next start",
-    "check-types": "next typegen && fumadocs-mdx && tsc --noEmit",
+    "check-types": "bun run check-content && next typegen && fumadocs-mdx && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
     "lint": "biome check",
     "format": "biome format --write"

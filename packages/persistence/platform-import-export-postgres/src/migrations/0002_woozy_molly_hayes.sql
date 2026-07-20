@@ -1,0 +1,17 @@
+ALTER TABLE "platform_import_command_receipt" DROP CONSTRAINT "platform_import_command_receipt_operation_ck";--> statement-breakpoint
+ALTER TABLE "platform_import_job" DROP CONSTRAINT "platform_import_job_version_ck";--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD COLUMN "accepted_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD COLUMN "accepted_by_user_id" text;--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD COLUMN "cancelled_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD COLUMN "cancelled_by_user_id" text;--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD COLUMN "human_reference" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD COLUMN "number_allocation_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD COLUMN "number_sequence_version" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD COLUMN "reconciliation_state" text DEFAULT 'Pending' NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "platform_import_job_reference_uidx" ON "platform_import_job" USING btree ("tenant_id","organization_id","human_reference");--> statement-breakpoint
+ALTER TABLE "platform_import_command_receipt" ADD CONSTRAINT "platform_import_command_receipt_operation_ck" CHECK ("platform_import_command_receipt"."operation" IN ('create:Product','create:OpeningStock','approve:Product','approve:OpeningStock','commit:Product','commit:OpeningStock','accept:Product','accept:OpeningStock','cancel:Product','cancel:OpeningStock'));--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD CONSTRAINT "platform_import_job_reconciliation_state_ck" CHECK ("platform_import_job"."reconciliation_state" IN ('Pending','Reconciled','Mismatch','Accepted'));--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD CONSTRAINT "platform_import_job_acceptance_ck" CHECK (("platform_import_job"."reconciliation_state" = 'Accepted' AND "platform_import_job"."accepted_at" IS NOT NULL AND "platform_import_job"."accepted_by_user_id" IS NOT NULL) OR ("platform_import_job"."reconciliation_state" <> 'Accepted' AND "platform_import_job"."accepted_at" IS NULL AND "platform_import_job"."accepted_by_user_id" IS NULL));--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD CONSTRAINT "platform_import_job_cancellation_ck" CHECK (("platform_import_job"."state" = 'Cancelled' AND "platform_import_job"."cancelled_at" IS NOT NULL AND "platform_import_job"."cancelled_by_user_id" IS NOT NULL) OR ("platform_import_job"."state" <> 'Cancelled' AND "platform_import_job"."cancelled_at" IS NULL AND "platform_import_job"."cancelled_by_user_id" IS NULL));--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD CONSTRAINT "platform_import_job_reference_ck" CHECK (length("platform_import_job"."human_reference") BETWEEN 1 AND 100 AND length("platform_import_job"."number_allocation_id") BETWEEN 1 AND 128);--> statement-breakpoint
+ALTER TABLE "platform_import_job" ADD CONSTRAINT "platform_import_job_version_ck" CHECK ("platform_import_job"."version" > 0 AND "platform_import_job"."number_sequence_version" > 0);

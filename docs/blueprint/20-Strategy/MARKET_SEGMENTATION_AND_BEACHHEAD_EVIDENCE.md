@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-027
 title: Market Segmentation and Beachhead Evidence
-version: 0.2.0
+version: 0.3.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-18
 ---
 
 # Market Segmentation and Beachhead Evidence
@@ -13,7 +13,7 @@ last_reviewed: 2026-07-11
 
 Define how the company selects target segments and validates the Guyana-first retail beachhead with customer, workflow, commercial, and operational evidence.
 
-**Evidence status:** hypothesis only. As of 2026-07-12 the repository records zero completed customer interviews, zero workflow observations, zero willingness-to-pay confirmations, and no committed design partner. The criteria below describe what must be proven; they do not assert that the Guyana retail beachhead has those advantages today.
+**Evidence status:** hypothesis only. As of 2026-07-17 the repository records zero completed customer interviews, zero workflow observations, zero willingness-to-pay confirmations, and no committed design partner. FDR-004's scope ratification records what the bounded first slice includes; it does not validate the Guyana retail beachhead or replace customer evidence. The criteria below describe what must be proven; they do not assert that the beachhead has those advantages today.
 
 ## Segment Dimensions
 
@@ -47,7 +47,7 @@ A candidate beachhead must demonstrate:
 
 ## Required Research
 
-- Interviews and workflow observation
+- Interviews and workflow observation — instrument: `BEACHHEAD_CUSTOMER_EVIDENCE_COLLECTION_KIT.md` (PDA-STR-030), governed by issue #82
 - Current-system inventory
 - Implementation and migration analysis
 - Competitor and pricing research
@@ -58,6 +58,8 @@ A candidate beachhead must demonstrate:
 
 The beachhead moves from provisional to approved only after named pilot candidates, quantified pain, validated willingness to pay, implementation estimate, support plan, and founder approval.
 
+WS3 has a narrower but mandatory entry gate tracked by [issue #82](https://github.com/kareemschultz/platform-design-authority/issues/82): at least 8 structured retailer interviews and 3 direct workflow observations across at least 3 distinct businesses, with retained notes and a synthesis of confirmed, contradicted, and unresolved assumptions. The repository currently has none of that evidence. Agents cannot generate, simulate, infer, or waive it, and governance approval is not a substitute for it.
+
 ## Quality Measures
 
 Interview coverage, evidence confidence, pilot conversion, time to value, implementation variance, retention, support burden, and expansion potential.
@@ -67,3 +69,8 @@ Interview coverage, evidence confidence, pilot conversion, time to value, implem
 | Date | Evidence type | Participants | Result | Confidence | Decision impact |
 |---|---|---:|---|---|---|
 | 2026-07-12 | Repository baseline | 0 | No customer or design-partner evidence recorded | None | Keep FDR-004 open and all beachhead advantages provisional |
+| 2026-07-17 | Founder scope decision and WS3 evidence gate | 0 | FDR-004 ratified the bounded first-slice scope; no interview, observation, willingness-to-pay, or design-partner evidence was added | None | Keep the beachhead hypothesis provisional and block WS3 until issue #82's real-world threshold is satisfied |
+
+## Change Log
+
+- 2026-07-18 — v0.3.1 linked Draft instrument PDA-STR-030 to issue #82 without adding evidence, confirming a hypothesis, or changing the WS3 entry threshold.

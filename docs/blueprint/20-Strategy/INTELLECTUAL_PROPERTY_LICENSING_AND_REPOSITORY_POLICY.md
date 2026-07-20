@@ -1,10 +1,10 @@
 ---
 document_id: PDA-STR-029
 title: Intellectual Property Licensing and Repository Policy
-version: 0.1.0
+version: 0.4.1
 status: Draft
 owner: Founder
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-18
 ---
 
 # Intellectual Property, Licensing, and Repository Policy
@@ -32,7 +32,16 @@ Contracts must identify the entity owning platform IP, employee and contractor a
 
 Public content may support trust, recruiting, ecosystem growth, and thought leadership. Private content protects security details, commercial strategy, customer information, unreleased capabilities, and operational procedures.
 
-A visibility review classifies each repository or path before publication.
+FDR-005 records the current repository posture as **provisionally public**, not finally ratified. PDA-REV-019 retains issue [#83](https://github.com/kareemschultz/platform-design-authority/issues/83)'s path-level disclosure and redaction review. That review clears only the controlled-prototype WS3 disclosure gate after independent concurrence and merge; final public visibility, source/documentation licensing, contributions, and external distribution remain open.
+
+The review may allow architecture principles, approved public contracts, sanitized examples, non-sensitive implementation source, and public evidence summaries. It must exclude secrets and credentials, customer or provider confidential data, private negotiations, exploit-ready production security detail, protected premium assets or redistribution rights, and personal data without an approved basis. Moving a repository or path does not waive those prohibitions.
+
+PDA-REV-019 is the current classification ledger. Raw customer/external evidence uses the restricted system selected by issue #94. PDA-REV-020 records private security intake and native scanning subject to exact-head review and merge; issue #96 retains responder continuity, protected-main, and repository-level workflow enforcement. Dependency notices, SBOM, copied-source provenance, and asset rights remain tracked by issue #93, with a baseline inventory recorded in `THIRD_PARTY_NOTICES_SBOM_AND_ASSET_PROVENANCE.md` (PDA-STR-031). Public/source-visible material carries no reuse license meanwhile.
+
+## Change Log
+
+- **0.4.0 (2026-07-18):** Linked PDA-REV-020's private vulnerability intake/native scanning baseline and retained issue #96's responder, protected-main, and workflow-enforcement decisions without changing the provisional public or unlicensed posture.
+- **0.4.1 (2026-07-18):** Linked issue #93's baseline SBOM/notice/provenance inventory (`THIRD_PARTY_NOTICES_SBOM_AND_ASSET_PROVENANCE.md`, PDA-STR-031).
 
 ## Open Source
 
@@ -41,6 +50,8 @@ Dependencies and released components require license review, attribution, compat
 ## Contributions
 
 External contributions require contributor terms, code review, security review, tests, provenance, and documentation. Contribution does not automatically confer product direction or marketplace approval.
+
+External contributions are closed until FDR-005, FDR-002, contributor terms, licensing, provenance, private security intake, and repository controls are ratified. `CONTRIBUTING.md` states the current public boundary.
 
 ## Customer and Partner Content
 

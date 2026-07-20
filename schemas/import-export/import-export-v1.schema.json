@@ -3,6 +3,33 @@
   "$id": "https://schemas.example.invalid/import-export/import-export-v1.schema.json",
   "title": "Import and Export Contract V1",
   "$defs": {
+    "CsvImportManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delimiter", "quote", "newline", "encoding", "locale", "decimalSeparator", "timezone"],
+      "properties": {
+        "delimiter": {"type": "string", "enum": [",", ";", "\t", "|"]},
+        "quote": {"const": "\""},
+        "newline": {"type": "string", "enum": ["LF", "CRLF"]},
+        "encoding": {"const": "UTF-8"},
+        "locale": {"type": "string", "minLength": 2, "maxLength": 35},
+        "decimalSeparator": {"type": "string", "enum": [".", ","]},
+        "timezone": {"type": "string", "minLength": 1, "maxLength": 100},
+        "defaultUnit": {"type": "string", "minLength": 1, "maxLength": 50}
+      }
+    },
+    "CsvImportRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fileName", "contentType", "sha256", "content", "manifest"],
+      "properties": {
+        "fileName": {"type": "string", "minLength": 1, "maxLength": 200},
+        "contentType": {"const": "text/csv"},
+        "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+        "content": {"type": "string", "minLength": 1, "maxLength": 1048576},
+        "manifest": {"$ref": "#/$defs/CsvImportManifest"}
+      }
+    },
     "ImportManifest": {
       "type": "object",
       "additionalProperties": false,
@@ -84,6 +111,59 @@
         }
       }
     },
+    "ImportJob": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "target", "state", "version", "counts", "lastCompletedRow", "createdAt", "updatedAt"],
+      "properties": {
+        "id": {"type": "string"},
+        "target": {"type": "string", "enum": ["Product", "OpeningStock"]},
+        "state": {"type": "string", "enum": ["Uploaded", "Validating", "ReadyForApproval", "Approved", "Committing", "Completed", "Failed", "Cancelled"]},
+        "version": {"type": "integer", "minimum": 1},
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["total", "valid", "warning", "rejected", "applied", "skipped", "failed"],
+          "properties": {
+            "total": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "valid": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "warning": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "rejected": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "applied": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "skipped": {"type": "integer", "minimum": 0, "maximum": 1000},
+            "failed": {"type": "integer", "minimum": 0, "maximum": 1000}
+          }
+        },
+        "lastCompletedRow": {"type": "integer", "minimum": 0, "maximum": 1000},
+        "failureCode": {"type": ["string", "null"], "maxLength": 100},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "completedAt": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "ImportFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rowNumber", "sourceKey", "field", "code", "severity"],
+      "properties": {
+        "rowNumber": {"type": "integer", "minimum": 1, "maximum": 1000},
+        "sourceKey": {"type": "string", "minLength": 1, "maxLength": 128},
+        "field": {"type": ["string", "null"], "maxLength": 100},
+        "code": {"type": "string", "minLength": 1, "maxLength": 100},
+        "severity": {"type": "string", "enum": ["Info", "Warning", "Error"]}
+      }
+    },
+    "CorrectionReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fileName", "contentType", "sha256", "content"],
+      "properties": {
+        "fileName": {"type": "string", "minLength": 1, "maxLength": 220},
+        "contentType": {"const": "text/csv"},
+        "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+        "content": {"type": "string", "maxLength": 524288}
+      }
+    },
     "ExportManifest": {
       "type": "object",
       "additionalProperties": false,
@@ -135,8 +215,12 @@
     }
   },
   "oneOf": [
+    {"$ref": "#/$defs/CsvImportRequest"},
     {"$ref": "#/$defs/ImportManifest"},
     {"$ref": "#/$defs/ImportRowResult"},
+    {"$ref": "#/$defs/ImportJob"},
+    {"$ref": "#/$defs/ImportFinding"},
+    {"$ref": "#/$defs/CorrectionReport"},
     {"$ref": "#/$defs/ExportManifest"}
   ]
 }

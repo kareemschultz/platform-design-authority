@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { randomUUID } from "node:crypto";
 import {
 	createInventoryApplication,
@@ -5,7 +6,11 @@ import {
 	InventoryError,
 	type InventoryIdFactory,
 } from "@meridian/domain-inventory";
-import { createInventoryRepository } from "@meridian/persistence-inventory-postgres";
+import {
+	createInventoryRepository,
+	parseInventoryStockBalanceCursor,
+	serializeInventoryStockBalanceCursor,
+} from "@meridian/persistence-inventory-postgres";
 import { createPostgresOutbox } from "@meridian/persistence-platform-events-postgres";
 import { createTenancyRepository } from "@meridian/persistence-platform-tenancy-postgres";
 
@@ -20,6 +25,53 @@ const ids: InventoryIdFactory = {
 	create(kind) {
 		return `${kind}_${randomUUID().replaceAll("-", "")}`;
 	},
+};
+
+const STOCK_BALANCE_CURSOR_PREFIX = "sb1_";
+const STOCK_BALANCE_CURSOR_PATTERN = /^sb1_[A-Za-z0-9_-]+$/;
+
+export const encodeStockBalanceCursor = (
+	cursor: string | null
+): string | null => {
+	if (cursor === null) {
+		return null;
+	}
+	const value = parseInventoryStockBalanceCursor(cursor);
+	if (!value) {
+		throw new InventoryError(
+			"invalid_reference",
+			"Stock balance cursor is invalid"
+		);
+	}
+	const canonical = serializeInventoryStockBalanceCursor(value);
+	return `${STOCK_BALANCE_CURSOR_PREFIX}${Buffer.from(canonical, "utf8").toString("base64url")}`;
+};
+
+export const decodeStockBalanceCursor = (
+	cursor: string | undefined
+): string | undefined => {
+	if (cursor === undefined) {
+		return;
+	}
+	if (cursor.length > 1024 || !STOCK_BALANCE_CURSOR_PATTERN.test(cursor)) {
+		throw new InventoryError(
+			"invalid_reference",
+			"Stock balance cursor is invalid"
+		);
+	}
+	const encoded = cursor.slice(STOCK_BALANCE_CURSOR_PREFIX.length);
+	const decoded = Buffer.from(encoded, "base64url").toString("utf8");
+	const value = parseInventoryStockBalanceCursor(decoded);
+	if (
+		Buffer.from(decoded, "utf8").toString("base64url") !== encoded ||
+		!value
+	) {
+		throw new InventoryError(
+			"invalid_reference",
+			"Stock balance cursor is invalid"
+		);
+	}
+	return serializeInventoryStockBalanceCursor(value);
 };
 
 const unitOfWork = createPostgresUnitOfWork(databasePool, (client) => ({
@@ -113,7 +165,12 @@ export const inventoryTransportApplication = {
 	listStockBalances: async (input: {
 		authUserId: string;
 		contextId: string;
-		query: { locationId: string; productId?: string };
+		query: {
+			cursor?: string;
+			limit: number;
+			locationId: string;
+			productId?: string;
+		};
 		sessionId: string;
 	}) => {
 		const page = await inventoryApplication.listBalances({
@@ -123,10 +180,16 @@ export const inventoryTransportApplication = {
 				locationId: input.query.locationId,
 				productId: input.query.productId,
 			},
-			page: { limit: 5000 },
+			page: {
+				cursor: decodeStockBalanceCursor(input.query.cursor),
+				limit: input.query.limit,
+			},
 			sessionId: input.sessionId,
 		});
-		return page.items;
+		return {
+			items: page.items,
+			nextCursor: encodeStockBalanceCursor(page.nextCursor),
+		};
 	},
 	listStockCounts: (
 		input: Parameters<typeof inventoryApplication.listCounts>[0] & {
@@ -176,5 +239,6 @@ export const inventoryTransportApplication = {
 	},
 	receiveStockTransfer: inventoryApplication.receiveTransfer,
 	reverseInventoryAdjustment: inventoryApplication.reverseAdjustment,
+	saveStockCountDraft: inventoryApplication.saveCountDraft,
 	submitStockCount: inventoryApplication.submitCount,
 };

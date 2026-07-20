@@ -1,6 +1,11 @@
 <!--
 Fill in every section. Delete a section only when it is genuinely not
 applicable, and say so explicitly (e.g. "UI/UX changes: none").
+
+Never include secrets, customer or tenant data, private provider/legal/commercial
+material, exploit instructions, incident evidence, private URLs, or unredacted
+logs. Suspected vulnerabilities must not be reported through a public pull
+request; follow SECURITY.md.
 -->
 
 ## Linked issue

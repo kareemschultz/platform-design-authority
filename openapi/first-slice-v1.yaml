@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Business Operating Platform First Slice API
-  version: 0.4.0
+  version: 0.5.0
   description: >-
     Draft implementation-review contract for the Guyana Retail Foundation Slice.
     This is not a GA public API and does not assert production provider or jurisdiction certification.
@@ -222,6 +222,12 @@ paths:
         - name: barcode
           in: query
           schema: {type: string, maxLength: 64}
+        - name: sku
+          in: query
+          schema: {type: string, minLength: 1, maxLength: 64, pattern: '.*\S.*'}
+        - name: state
+          in: query
+          schema: {type: string, enum: [Draft, Active, Suspended, Discontinued, Archived]}
       responses:
         '200':
           description: Product results
@@ -256,6 +262,8 @@ paths:
       x-permission: inventory.balance.read
       parameters:
         - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
         - name: locationId
           in: query
           required: true
@@ -269,8 +277,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: {$ref: '#/components/schemas/StockBalance'}
+                $ref: '#/components/schemas/PagedStockBalances'
   /inventory-adjustments:
     get:
       tags: [Inventory]
@@ -950,6 +957,23 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /product-imports:
+    get:
+      tags: [Catalog]
+      operationId: listProductImports
+      x-permission: catalog.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Uploaded, Validating, ReadyForApproval, Approved, Committing, Completed, Failed, Cancelled]}}
+      responses:
+        '200':
+          description: Tenant and organization scoped Product import jobs
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedImports'}
+        default:
+          $ref: '#/components/responses/Error'
     post:
       tags: [Catalog]
       operationId: postProductImports
@@ -957,12 +981,53 @@ paths:
       parameters:
         - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateCsvImport'}
       responses:
-        '200':
+        '202':
           description: CSV Product import job accepted
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}:
+    get:
+      tags: [Catalog]
+      operationId: getProductImport
+      x-permission: catalog.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Tenant-scoped Product import status and reconciliation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}/findings:
+    get:
+      tags: [Catalog]
+      operationId: getProductImportFindings
+      x-permission: catalog.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Safe row and field findings for one Product import
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportFindings'}
+        default:
+          $ref: '#/components/responses/Error'
   /product-imports/{importId}/approve:
     post:
       tags: [Catalog]
@@ -979,6 +1044,77 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}/accept:
+    post:
+      tags: [Catalog]
+      operationId: acceptProductImport
+      x-permission: catalog.import.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      responses:
+        '200':
+          description: Reconciled Product import accepted at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}/cancel:
+    post:
+      tags: [Catalog]
+      operationId: cancelProductImport
+      x-permission: catalog.import.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      responses:
+        '200':
+          description: Unapproved Product import cancelled at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}/purge-staging:
+    post:
+      tags: [Catalog]
+      operationId: purgeProductImportStaging
+      x-permission: catalog.import.purge
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Expired terminal Product import staging purged under operator authority
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportPurgeResult'}
+        default:
+          $ref: '#/components/responses/Error'
+  /product-imports/{importId}/correction-report:
+    get:
+      tags: [Catalog]
+      operationId: getProductImportCorrectionReport
+      x-permission: catalog.import.download
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Bounded correction report without unrestricted source values
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportCorrectionReport'}
+        default:
+          $ref: '#/components/responses/Error'
   /customer-imports:
     post:
       tags: [Identity]
@@ -990,6 +1126,23 @@ paths:
         '200':
           description: Contract response; the owning specification defines state and error semantics
   /opening-stock-imports:
+    get:
+      tags: [Inventory]
+      operationId: listOpeningStockImports
+      x-permission: inventory.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Uploaded, Validating, ReadyForApproval, Approved, Committing, Completed, Failed, Cancelled]}}
+      responses:
+        '200':
+          description: Tenant and organization scoped opening-stock import jobs
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedImports'}
+        default:
+          $ref: '#/components/responses/Error'
     post:
       tags: [Inventory]
       operationId: postOpeningStockImports
@@ -997,12 +1150,140 @@ paths:
       parameters:
         - $ref: '#/components/parameters/RequiredActiveContextId'
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateCsvImport'}
       responses:
-        '200':
+        '202':
           description: CSV opening-stock import job accepted
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}:
+    get:
+      tags: [Inventory]
+      operationId: getOpeningStockImport
+      x-permission: inventory.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Tenant-scoped opening-stock import status and reconciliation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/findings:
+    get:
+      tags: [Inventory]
+      operationId: getOpeningStockImportFindings
+      x-permission: inventory.import.read
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Safe row and field findings for one opening-stock import
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportFindings'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/approve:
+    post:
+      tags: [Inventory]
+      operationId: approveOpeningStockImport
+      x-permission: inventory.import.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      responses:
+        '200':
+          description: Opening-stock import approved and committed through Inventory commands
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/accept:
+    post:
+      tags: [Inventory]
+      operationId: acceptOpeningStockImport
+      x-permission: inventory.import.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      responses:
+        '200':
+          description: Reconciled opening-stock import accepted at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/cancel:
+    post:
+      tags: [Inventory]
+      operationId: cancelOpeningStockImport
+      x-permission: inventory.import.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      responses:
+        '200':
+          description: Unapproved opening-stock import cancelled at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportJob'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/purge-staging:
+    post:
+      tags: [Inventory]
+      operationId: purgeOpeningStockImportStaging
+      x-permission: inventory.import.purge
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Expired terminal opening-stock import staging purged under operator authority
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportPurgeResult'}
+        default:
+          $ref: '#/components/responses/Error'
+  /opening-stock-imports/{importId}/correction-report:
+    get:
+      tags: [Inventory]
+      operationId: getOpeningStockImportCorrectionReport
+      x-permission: inventory.import.download
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: importId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: Bounded correction report without unrestricted source values
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImportCorrectionReport'}
+        default:
+          $ref: '#/components/responses/Error'
   /inventory-adjustments/{id}/approve:
     post:
       tags: [Inventory]
@@ -1074,6 +1355,27 @@ paths:
       responses:
         '200':
           description: Count submitted at the expected version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StockCount'}
+  /stock-counts/{id}/draft-lines:
+    put:
+      tags: [Inventory]
+      operationId: saveStockCountDraftLines
+      x-permission: inventory.count.create
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - {name: id, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ExpectedVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SaveStockCountDraftLines'}
+      responses:
+        '200':
+          description: Draft count lines durably replaced at the expected version
           content:
             application/json:
               schema: {$ref: '#/components/schemas/StockCount'}
@@ -1988,7 +2290,7 @@ components:
           items: {$ref: '#/components/schemas/ProductIdentifier'}
     Product:
       type: object
-      required: [id, name, state, variants, version]
+      required: [id, name, state, variants, version, archiveReason, archivedAt, createdAt, updatedAt]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         name: {type: string, minLength: 1, maxLength: 300}
@@ -1999,6 +2301,10 @@ components:
           maxItems: 50
           items: {$ref: '#/components/schemas/ProductVariant'}
         version: {type: integer, minimum: 1}
+        archiveReason: {type: [string, 'null'], maxLength: 500}
+        archivedAt: {type: [string, 'null'], format: date-time}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
     CreateProduct:
       type: object
       additionalProperties: false
@@ -2029,15 +2335,27 @@ components:
         nextCursor: {type: [string, 'null']}
     StockBalance:
       type: object
-      required: [productId, locationId, unit, onHand, available, asOf]
+      additionalProperties: false
+      required: [productId, locationId, unit, onHand, reserved, available, asOf, reconciled, reconciliationState, source]
       properties:
         productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         locationId: {$ref: '#/components/schemas/Identifier'}
         unit: {type: string}
         onHand: {$ref: '#/components/schemas/DecimalQuantity'}
+        reserved: {$ref: '#/components/schemas/NonNegativeDecimalQuantity'}
         available: {$ref: '#/components/schemas/DecimalQuantity'}
         asOf: {type: string, format: date-time}
         reconciled: {type: boolean}
+        reconciliationState: {type: string, enum: [Current, RequiresReview]}
+        source: {type: string, enum: [InventoryLedgerProjection]}
+    PagedStockBalances:
+      type: object
+      additionalProperties: false
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/StockBalance'}}
+        nextCursor: {type: [string, 'null']}
     DecimalQuantity:
       type: string
       pattern: '^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$'
@@ -2056,16 +2374,123 @@ components:
       required: [reason]
       properties:
         reason: {type: string, minLength: 1, maxLength: 500}
+    CsvImportManifest:
+      type: object
+      additionalProperties: false
+      required: [delimiter, quote, newline, encoding, locale, decimalSeparator, timezone]
+      properties:
+        delimiter: {type: string, enum: [',', ';', "\t", '|']}
+        quote: {type: string, enum: ['"']}
+        newline: {type: string, enum: [LF, CRLF]}
+        encoding: {type: string, enum: [UTF-8]}
+        locale: {type: string, minLength: 2, maxLength: 35}
+        decimalSeparator: {type: string, enum: ['.', ',']}
+        timezone: {type: string, minLength: 1, maxLength: 100}
+        defaultUnit: {type: string, minLength: 1, maxLength: 50}
+    CreateCsvImport:
+      type: object
+      additionalProperties: false
+      required: [fileName, contentType, sha256, content, manifest]
+      properties:
+        fileName: {type: string, minLength: 1, maxLength: 200}
+        contentType: {type: string, enum: [text/csv]}
+        sha256: {type: string, pattern: '^[A-Fa-f0-9]{64}$'}
+        content: {type: string, minLength: 1, maxLength: 1048576}
+        manifest: {$ref: '#/components/schemas/CsvImportManifest'}
+    ImportCounts:
+      type: object
+      additionalProperties: false
+      required: [total, valid, warning, rejected, applied, skipped, failed]
+      properties:
+        total: {type: integer, minimum: 0, maximum: 1000}
+        valid: {type: integer, minimum: 0, maximum: 1000}
+        warning: {type: integer, minimum: 0, maximum: 1000}
+        rejected: {type: integer, minimum: 0, maximum: 1000}
+        applied: {type: integer, minimum: 0, maximum: 1000}
+        skipped: {type: integer, minimum: 0, maximum: 1000}
+        failed: {type: integer, minimum: 0, maximum: 1000}
     ImportJob:
       type: object
       additionalProperties: false
-      required: [id, state, version]
+      required: [id, humanReference, numberAllocationId, numberSequenceVersion, target, state, reconciliationState, version, counts, lastCompletedRow, createdAt, createdByUserId, updatedAt, approvedAt, approvedByUserId, completedAt, cancelledAt, cancelledByUserId, acceptedAt, acceptedByUserId, failureCode, manifest, scannerResult, sourceFileName, sourceSha256]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
+        humanReference: {type: string, minLength: 1, maxLength: 100}
+        numberAllocationId: {$ref: '#/components/schemas/Identifier'}
+        numberSequenceVersion: {type: integer, minimum: 1}
+        target: {type: string, enum: [Product, OpeningStock]}
         state:
           type: string
           enum: [Uploaded, Validating, ReadyForApproval, Approved, Committing, Completed, Failed, Cancelled]
+        reconciliationState: {type: string, enum: [Pending, Reconciled, Mismatch, Accepted]}
         version: {type: integer, minimum: 1}
+        counts: {$ref: '#/components/schemas/ImportCounts'}
+        lastCompletedRow: {type: integer, minimum: 0, maximum: 1000}
+        failureCode: {type: [string, 'null'], maxLength: 100}
+        manifest: {$ref: '#/components/schemas/CsvImportManifest'}
+        scannerResult: {type: string, enum: [Clean, Blocked, Unavailable]}
+        sourceFileName: {type: string, minLength: 1, maxLength: 200}
+        sourceSha256: {type: string, pattern: '^[A-Fa-f0-9]{64}$'}
+        createdAt: {type: string, format: date-time}
+        createdByUserId: {$ref: '#/components/schemas/Identifier'}
+        updatedAt: {type: string, format: date-time}
+        approvedAt: {type: [string, 'null'], format: date-time}
+        approvedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        completedAt: {type: [string, 'null'], format: date-time}
+        cancelledAt: {type: [string, 'null'], format: date-time}
+        cancelledByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        acceptedAt: {type: [string, 'null'], format: date-time}
+        acceptedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    PagedImports:
+      type: object
+      additionalProperties: false
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          maxItems: 200
+          items: {$ref: '#/components/schemas/ImportJob'}
+        nextCursor: {type: [string, 'null']}
+    ImportFinding:
+      type: object
+      additionalProperties: false
+      required: [rowNumber, sourceKey, field, code, severity]
+      properties:
+        rowNumber: {type: integer, minimum: 1, maximum: 1000}
+        sourceKey: {type: string, minLength: 1, maxLength: 128}
+        field: {type: [string, 'null'], maxLength: 100}
+        code: {type: string, minLength: 1, maxLength: 100}
+        severity: {type: string, enum: [Info, Warning, Error]}
+    ImportFindings:
+      type: object
+      additionalProperties: false
+      required: [importId, items, nextCursor]
+      properties:
+        importId: {$ref: '#/components/schemas/Identifier'}
+        items:
+          type: array
+          maxItems: 200
+          items: {$ref: '#/components/schemas/ImportFinding'}
+        nextCursor: {type: [string, 'null']}
+    ImportCorrectionReport:
+      type: object
+      additionalProperties: false
+      required: [fileName, contentDisposition, contentType, schemaVersion, sha256, content]
+      properties:
+        fileName: {type: string, minLength: 1, maxLength: 220}
+        contentDisposition: {type: string, minLength: 1, maxLength: 300}
+        contentType: {type: string, enum: [text/csv]}
+        schemaVersion: {type: string, enum: ['1.0.0']}
+        sha256: {type: string, pattern: '^[A-Fa-f0-9]{64}$'}
+        content: {type: string, maxLength: 524288}
+    ImportPurgeResult:
+      type: object
+      additionalProperties: false
+      required: [findings, rows, waves]
+      properties:
+        findings: {type: integer, minimum: 0, maximum: 5000}
+        rows: {type: integer, minimum: 0, maximum: 1000}
+        waves: {type: integer, minimum: 0, maximum: 100}
     CreateInventoryAdjustment:
       type: object
       additionalProperties: false
@@ -2082,13 +2507,18 @@ components:
       allOf:
         - $ref: '#/components/schemas/CreateInventoryAdjustment'
         - type: object
-          required: [id, state, version]
+          required: [id, state, version, approvedByUserId, createdAt, createdByUserId, postedAt, updatedAt]
           properties:
             id: {$ref: '#/components/schemas/Identifier'}
             state: {type: string, enum: [Draft, PendingApproval, Approved, Posted, Reversed, Rejected]}
             version: {type: integer, minimum: 1}
             movementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
             reversalMovementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+            approvedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+            createdAt: {type: string, format: date-time}
+            createdByUserId: {$ref: '#/components/schemas/Identifier'}
+            postedAt: {type: [string, 'null'], format: date-time}
+            updatedAt: {type: string, format: date-time}
     PagedInventoryAdjustments:
       type: object
       required: [items, nextCursor]
@@ -2118,6 +2548,12 @@ components:
       required: [lines]
       properties:
         lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/SubmitStockCountLine'}}
+    SaveStockCountDraftLines:
+      type: object
+      additionalProperties: false
+      required: [lines]
+      properties:
+        lines: {type: array, maxItems: 5000, items: {$ref: '#/components/schemas/SubmitStockCountLine'}}
     StockCountLine:
       type: object
       additionalProperties: false
@@ -2135,7 +2571,7 @@ components:
     StockCount:
       type: object
       additionalProperties: false
-      required: [id, locationId, blind, lines, state, version]
+      required: [id, locationId, blind, lines, state, version, approvedByUserId, createdAt, createdByUserId, postedAt, submittedByUserId, updatedAt]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         locationId: {$ref: '#/components/schemas/Identifier'}
@@ -2143,6 +2579,12 @@ components:
         lines: {type: array, items: {$ref: '#/components/schemas/StockCountLine'}}
         state: {type: string, enum: [Draft, InProgress, Submitted, Approved, Posted, Rejected]}
         version: {type: integer, minimum: 1}
+        approvedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        createdAt: {type: string, format: date-time}
+        createdByUserId: {$ref: '#/components/schemas/Identifier'}
+        postedAt: {type: [string, 'null'], format: date-time}
+        submittedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        updatedAt: {type: string, format: date-time}
     PagedStockCounts:
       type: object
       required: [items, nextCursor]
@@ -2190,7 +2632,7 @@ components:
     StockTransfer:
       type: object
       additionalProperties: false
-      required: [id, sourceLocationId, destinationLocationId, lines, state, version]
+      required: [id, sourceLocationId, destinationLocationId, lines, state, version, createdAt, createdByUserId, dispatchedAt, dispatchedByUserId, receivedAt, receivedByUserId, updatedAt]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
         sourceLocationId: {$ref: '#/components/schemas/Identifier'}
@@ -2199,6 +2641,13 @@ components:
         state: {type: string, enum: [Draft, Dispatched, PartiallyReceived, Received, Exception, Cancelled]}
         version: {type: integer, minimum: 1}
         exceptionReason: {type: [string, 'null'], maxLength: 500}
+        createdAt: {type: string, format: date-time}
+        createdByUserId: {$ref: '#/components/schemas/Identifier'}
+        dispatchedAt: {type: [string, 'null'], format: date-time}
+        dispatchedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        receivedAt: {type: [string, 'null'], format: date-time}
+        receivedByUserId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        updatedAt: {type: string, format: date-time}
     PagedStockTransfers:
       type: object
       required: [items, nextCursor]

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-012
 title: Dashboard and Data Visualization
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-19
 ---
 
 # Dashboard and Data Visualization
@@ -37,6 +37,58 @@ Assign each dashboard element a weight:
 - Tertiary: low-frequency detail
 
 Critical and primary content receives the most prominent position and clearest action path. Tertiary content belongs in drill-downs, inspectors, tooltips, or secondary views.
+
+## Operational Visual Grammar
+
+Operational dashboards use a calm, information-dense visual grammar. The
+business state and next action carry the emphasis; containers remain quiet.
+
+- Use a neutral canvas and one restrained action accent. Status color remains
+  semantic and is never used as decoration.
+- Prefer subtle borders and surface contrast over decorative shadows.
+- Use one consistent radius and elevation profile across a workspace.
+- Align page context, metrics, filters, tables, and actions to a shared modular
+  grid rather than centering each card independently.
+- Reserve cards for meaningful grouping. Do not place every label, control, or
+  statistic in its own floating container.
+- Keep primary content visually continuous. Secondary evidence may use an
+  inspector, drawer, or lower-priority region without narrowing the main task
+  into an unusable strip.
+
+### Operational page frame
+
+Where the task supports a dashboard composition, use this order:
+
+1. Context strip: workspace, organization/location/legal entity, time range,
+   currency or unit, freshness, and connectivity.
+2. Attention summary: one primary result or warning plus the next governed
+   action.
+3. Compact KPI strip: normally three to five metrics with comparable visual
+   weight; exceptional metrics may receive stronger emphasis.
+4. Primary work area: chart, queue, table, or task workspace selected from the
+   decision the user must make.
+5. Evidence and drill layer: contributing records, explanations, source,
+   audit, and secondary analysis.
+
+This is a composition grammar, not a requirement to turn every task into a
+dashboard. Cashier, scanning, counting, and other frequent transactional
+workflows remain task-first and use the governed touch/POS density profile.
+
+### Compact KPI anatomy
+
+A compact KPI may combine label, value, unit/currency, comparison, and status
+in one scan line or small stack. It still includes the governed time window,
+comparison basis, freshness, and evidence link. Delta badges state direction
+and meaning in text; green or red alone is insufficient. Empty, partial,
+stale, and unavailable values use explicit language rather than a misleading
+zero.
+
+### Status treatment
+
+Status chips remain compact but include a readable label and, when useful, an
+icon or shape. Pastel fills do not excuse low-contrast text. Stable semantic
+meanings are shared across tables, cards, queues, and detail views and cannot
+be reassigned by a white-label theme.
 
 ## Four-Part Dashboard Structure
 
@@ -243,6 +295,13 @@ Mobile dashboards prioritize status and action over chart density.
 - Percent changes without denominator or base period
 - Hidden filters
 - Dashboards that reproduce entire reports in tiny panels
+
+## Change Log
+
+- 2026-07-19 — v0.2.0 codified a source-neutral calm operational visual
+  grammar after evaluation of the founder-selected BoardUI visual reference;
+  no external component, asset, license, or implementation dependency was
+  adopted.
 
 ## Dashboard Review
 

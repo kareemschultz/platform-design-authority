@@ -13,7 +13,7 @@ import {
 	identityHttpHandler,
 	identitySessionService,
 } from "../composition/identity";
-import { closeDatabaseComposition } from "../composition/postgres";
+import { closeDatabaseComposition } from "../composition/lifecycle";
 import { createContext } from "./context";
 import { appRouter } from "./router";
 
@@ -26,9 +26,10 @@ app.use(
 			"Authorization",
 			"Content-Type",
 			"Idempotency-Key",
+			"If-Match",
 			"X-Active-Context-Id",
 		],
-		allowMethods: ["DELETE", "GET", "PATCH", "POST", "OPTIONS"],
+		allowMethods: ["DELETE", "GET", "PATCH", "POST", "PUT", "OPTIONS"],
 		credentials: true,
 		maxAge: 600,
 		origin: env.CORS_ORIGIN,

@@ -16,6 +16,11 @@ on:
       - "bun.lock"
       - "docker-compose.yml"
       - "package.json"
+      - "LICENSE*"
+      - "LICENCE*"
+      - "COPYING*"
+      - "THIRD_PARTY_NOTICES.md"
+      - "third_party/**"
       - "tsconfig.json"
       - "turbo.json"
       - ".github/workflows/meridian-prototype.yml"
@@ -73,6 +78,9 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Install Chromium browser
+        run: bun run --cwd apps/web test:e2e:install
+
       - name: Prepare Changesets base ref
         run: |
           git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
@@ -92,10 +100,15 @@ jobs:
           bun run architecture:check
           python scripts/test_architecture_checker.py
 
+      - name: Third-party provenance baseline
+        run: |
+          bun run third-party:test
+          bun run third-party:check
+
       - name: Migration freshness
         run: |
           bun run db:generate
-          git diff --exit-code -- packages/persistence/platform-identity-postgres/src/migrations packages/persistence/platform-tenancy-postgres/src/migrations packages/persistence/platform-entitlements-postgres/src/migrations packages/persistence/platform-audit-postgres/src/migrations packages/persistence/platform-events-postgres/src/migrations packages/persistence/party-postgres/src/migrations packages/persistence/catalog-postgres/src/migrations packages/persistence/inventory-postgres/src/migrations
+          git diff --exit-code -- packages/persistence/platform-identity-postgres/src/migrations packages/persistence/platform-tenancy-postgres/src/migrations packages/persistence/platform-entitlements-postgres/src/migrations packages/persistence/platform-audit-postgres/src/migrations packages/persistence/platform-events-postgres/src/migrations packages/persistence/platform-import-export-postgres/src/migrations packages/persistence/platform-numbering-postgres/src/migrations packages/persistence/party-postgres/src/migrations packages/persistence/catalog-postgres/src/migrations packages/persistence/inventory-postgres/src/migrations
 
       - name: Tests
         run: bun run test
@@ -123,6 +136,7 @@ jobs:
         run: |
           python scripts/generate_registries.py --check
           bun run ws1:evidence:check
+          bun run ws2:evidence:check
 
       - name: Generated contract freshness
         run: python scripts/generate_contracts.py --check
@@ -197,10 +211,28 @@ jobs:
           [ "$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q web)")" = healthy ]
           [ "$(docker inspect --format '{{.State.Running}}' "$(docker compose ps -q worker)")" = true ]
           docker compose exec -T server bun run db:migrate
-          docker compose stop worker
-          docker compose run --rm worker bun run test:node
           docker compose exec -T server bun run db:test
           docker compose exec -T server bun run db:test:node
+          docker compose stop worker
           docker compose run --rm worker bun run db:test
+          worker_node_database=meridian_worker_node_check
+          worker_node_database_url="postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/${worker_node_database}"
+          docker compose exec -T postgres createdb -U postgres "$worker_node_database"
+          docker compose exec -T -e DATABASE_URL="$worker_node_database_url" server bun run db:migrate
+          docker compose run --rm -e DATABASE_URL="$worker_node_database_url" worker bun run test:node
+          docker compose exec -T postgres dropdb -U postgres --force "$worker_node_database"
           curl --fail --silent --show-error http://127.0.0.1:3000/ | grep -qx OK
           curl --fail --silent --show-error http://127.0.0.1:3001/ >/dev/null
+          docker compose exec -T server bun run e2e:seed
+          bun run --cwd apps/web test:e2e
+
+      - name: Retain browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-evidence
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+          retention-days: 14

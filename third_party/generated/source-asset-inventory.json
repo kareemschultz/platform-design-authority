@@ -1,0 +1,269 @@
+{
+  "build_time_references": [
+    {
+      "declared_upstream_license": "OFL-1.1",
+      "distribution_status": "artifact-review-required",
+      "id": "font.next.google.geist-inter",
+      "kind": "build-time-font-reference",
+      "license_conclusion": "NOASSERTION",
+      "limitation": "Font files are fetched and embedded during build and are not represented by the JavaScript lock inventory. Built output requires separate inspection.",
+      "permitted_use_evidence": {
+        "references": [
+          "apps/web/src/app/layout.tsx"
+        ],
+        "status": "public-upstream-license-observed-not-artifact-reviewed"
+      },
+      "reference_files": [
+        {
+          "path": "apps/web/src/app/layout.tsx",
+          "sha256": "a9c69376f6db026baf006fbb10c4b8fc928d086d37b1fc0de875533e97da83e4"
+        }
+      ],
+      "reference_paths": [
+        "apps/web/src/app/layout.tsx"
+      ],
+      "source_name": "Geist, Geist Mono, and Inter through next/font/google",
+      "source_url": "https://github.com/vercel/next.js",
+      "upstream_license_url": "https://github.com/vercel/geist-font/blob/main/OFL.txt"
+    }
+  ],
+  "distribution_authority": "none",
+  "files": [
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/native/assets/images/android-icon-background.png",
+      "record_id": "asset.expo-template.prototype-icons",
+      "sha256": "fb139c2dee362ebf2070e23b96da6fc0d43f8492de38b8af1fd7223e19b5861d"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/native/assets/images/android-icon-foreground.png",
+      "record_id": "asset.expo-template.prototype-icons",
+      "sha256": "9e3d0315a33c6799de601dd34cd8bf8cc3a8d16f3bf75592baec2ceb7240b391"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/native/assets/images/android-icon-monochrome.png",
+      "record_id": "asset.expo-template.prototype-icons",
+      "sha256": "6371fc2c12e33ad2215a86c281db3d682a81bebe7c957a842c13b8bf00cceb83"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/native/assets/images/favicon.png",
+      "record_id": "asset.expo-template.prototype-icons",
+      "sha256": "a4e030697a7571b3e95d31860e4da55d2f98e5e861e2b55e414f45a8556828ba"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/native/assets/images/icon.png",
+      "record_id": "asset.expo-template.prototype-icons",
+      "sha256": "119462bb78eb240a65c869fc067ee599639b3cb5a41953f25c07b17d2a8c7e0f"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/native/assets/images/splash-icon.png",
+      "record_id": "asset.expo-template.prototype-icons",
+      "sha256": "5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/web/public/favicon/apple-touch-icon.png",
+      "record_id": "asset.better-t-stack.prototype-favicons",
+      "sha256": "f29acf91ba219a2030d72ecd591aa2ece4116a99539cfe4f51731fb000ae7a49"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/web/public/favicon/favicon-96x96.png",
+      "record_id": "asset.better-t-stack.prototype-favicons",
+      "sha256": "500d1c37eb625b891e51b350b40810cbb9a76d1a73b37c8d7e718633bc82d026"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/web/public/favicon/favicon.svg",
+      "record_id": "asset.better-t-stack.prototype-favicons",
+      "sha256": "cf7a637f4dc43e7f88c3b48c7dad9c5584cfbcac3193ad03940d551c88e2d023"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/web/public/favicon/web-app-manifest-192x192.png",
+      "record_id": "asset.better-t-stack.prototype-favicons",
+      "sha256": "75156027a075dd31c5e1cc61367eac78b75460ddc470e8287241778d24868060"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/web/public/favicon/web-app-manifest-512x512.png",
+      "record_id": "asset.better-t-stack.prototype-favicons",
+      "sha256": "4d83b3b222a8fb4d0e9290149b099dca6a3adc0a73b4a96dab7440333e908b6d"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "replace-before-distribution",
+      "kind": "scaffold-asset",
+      "license_conclusion": "NOASSERTION",
+      "path": "apps/web/src/app/favicon.ico",
+      "record_id": "asset.better-t-stack.prototype-favicons",
+      "sha256": "2b8ad2d33455a8f736fc3a8ebf8f0bdea8848ad4c0db48a2833bd0f9cd775932"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/alert.tsx",
+      "record_id": "source.shadcn.ui.4.13.0",
+      "sha256": "6fbb781fdd693bd596ba21a1b430e46a7d0cec624fc4878fffff26b0e8d960de"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/badge.tsx",
+      "record_id": "source.shadcn.ui.4.13.0",
+      "sha256": "16d1816ff96cfe67685e68a298d10e5000799800fe64d2d5cfefdf678496a2bc"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/button.tsx",
+      "record_id": "source.better-t-stack.ui.3.36.3",
+      "sha256": "c0e0b7f7906dff4c31f5d1acb71982100912a95e39c077ca175dbfba8e51493d"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/card.tsx",
+      "record_id": "source.better-t-stack.ui.3.36.3",
+      "sha256": "03444345df376621d967bf15a3225a5095dc203691f36a9cfb0fff49ce44ffb6"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/checkbox.tsx",
+      "record_id": "source.better-t-stack.ui.3.36.3",
+      "sha256": "44af3b75e78b0ba703e5737face528b519b85a47c655920814681fa9cd7e3210"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/dialog.tsx",
+      "record_id": "source.shadcn.ui.4.13.0",
+      "sha256": "7410e255a7d618a4763fdabc2f597fbd0410849a43faa253f8dc760c9a75c15a"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/dropdown-menu.tsx",
+      "record_id": "source.better-t-stack.ui.3.36.3",
+      "sha256": "0117a2712c6fb74508797cab80bb1011f6590aaeed8aec5a1ef11b7f59604ff0"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/input.tsx",
+      "record_id": "source.better-t-stack.ui.3.36.3",
+      "sha256": "9c80498c89e64b6af81c90c8b313310d782cebf201b1024741896dea7bfdee83"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/label.tsx",
+      "record_id": "source.better-t-stack.ui.3.36.3",
+      "sha256": "8adb5135a5565a05c351d21dbc95342082f0243e1e181080c32156d0d7954c9d"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/separator.tsx",
+      "record_id": "source.shadcn.ui.4.13.0",
+      "sha256": "37fae265d26396a67f57e705adcbec2f467ad852bb55a414bde0a1b8a26c3b2a"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/sheet.tsx",
+      "record_id": "source.shadcn.ui.4.13.0",
+      "sha256": "731d4f59739d200c3c04d05b11243efece6135fb13c1b6e5be6a7f116cff9174"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/skeleton.tsx",
+      "record_id": "source.better-t-stack.ui.3.36.3",
+      "sha256": "1c5da93e5377f5d2028af485cf2485d1c617fc4d0610cc456e699776438c1fd6"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/sonner.tsx",
+      "record_id": "source.better-t-stack.ui.3.36.3",
+      "sha256": "4617880137171a38054d8e3349a5ebc614ac61376a0a3bbaccc883c83788acd9"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/table.tsx",
+      "record_id": "source.shadcn.ui.4.13.0",
+      "sha256": "d7e00281951229a9d7ece91d1364ece682cf1a3b9d36e7b5b65148b164d65e42"
+    }
+  ],
+  "generated_from": "third_party/provenance.json",
+  "schema_version": "1.0.0"
+}

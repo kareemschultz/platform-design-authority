@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing, check `docs/project/PROGRAM_STATUS.md` and the workstream's governing plan under `docs/blueprint/17-Roadmap/`.
+        Before filing, check `docs/project/PROGRAM_STATUS.md` and the workstream's governing plan under `docs/blueprint/17-Roadmap/`. Public-safe content only: never include secrets, customer data, private provider/legal/commercial material, exploit instructions, incident evidence, private URLs, or unredacted logs. Follow `SECURITY.md` for the security-reporting boundary.
   - type: input
     id: parent-workstream
     attributes:

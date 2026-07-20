@@ -281,20 +281,26 @@ class MemoryInventoryRepository implements InventoryRepository {
 	}
 	async releaseReservation(input: {
 		id: string;
+		organizationId: string;
 		reason: string;
 		releasedAt: Date;
+		state: "Expired" | "Released";
 		tenantId: string;
 		version: number;
 	}) {
 		const current = this.reservations.get(this.key(input.tenantId, input.id));
-		if (!current || current.version !== input.version) {
+		if (
+			!current ||
+			current.organizationId !== input.organizationId ||
+			current.version !== input.version
+		) {
 			return "version_conflict" as const;
 		}
 		const updated = {
 			...current,
 			reason: input.reason,
 			releasedAt: input.releasedAt,
-			state: "Released" as const,
+			state: input.state,
 			updatedAt: input.releasedAt,
 			version: current.version + 1,
 		};
@@ -510,6 +516,71 @@ describe("Inventory adjustment ledger", () => {
 });
 
 describe("Inventory blind counts", () => {
+	test("durably replaces open draft lines with version and idempotency guards", async () => {
+		const { repository, service } = harness();
+		const count = await service.createCount({
+			actorUserId: "counter_a",
+			body: { blind: true, locationId: "loc_a" },
+			idempotencyKey: "count-draft-create",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		const input = {
+			actorUserId: "counter_a",
+			body: {
+				lines: [
+					{ observedQuantity: "7.500001", productId: "prod_a", unit: "each" },
+				],
+			},
+			countId: count.id,
+			idempotencyKey: "count-draft-save",
+			tenantId: "tenant_a",
+			version: 1,
+		};
+		const saved = await service.saveCountDraft(input);
+		expect(saved).toMatchObject({ state: "InProgress", version: 2 });
+		expect(saved.lines[0]).toMatchObject({
+			expectedQuantity: null,
+			observedQuantity: "7.500001",
+			varianceQuantity: null,
+		});
+		expect(await service.getCount("tenant_a", count.id)).toEqual(saved);
+		expect(await service.saveCountDraft(input)).toEqual(saved);
+		expect(repository.counts.size).toBe(1);
+		await expect(
+			service.saveCountDraft({
+				...input,
+				body: {
+					lines: [{ observedQuantity: "8", productId: "prod_a", unit: "each" }],
+				},
+			})
+		).rejects.toMatchObject({ code: "idempotency_conflict" });
+		await expect(
+			service.saveCountDraft({
+				...input,
+				idempotencyKey: "count-draft-stale",
+			})
+		).rejects.toMatchObject({ code: "version_conflict" });
+		await expect(service.getCount("tenant_b", count.id)).rejects.toMatchObject({
+			code: "not_found",
+		});
+		const submitted = await service.submitCount({
+			actorUserId: "counter_a",
+			body: input.body,
+			countId: count.id,
+			idempotencyKey: "count-submit-after-draft",
+			tenantId: "tenant_a",
+			version: 2,
+		});
+		await expect(
+			service.saveCountDraft({
+				...input,
+				idempotencyKey: "count-draft-terminal",
+				version: submitted.version,
+			})
+		).rejects.toMatchObject({ code: "invalid_state" });
+	});
+
 	test("captures observations without expected stock and derives exact variances only at independent approval", async () => {
 		const { repository, service } = harness();
 		const seed = await service.createAdjustment({
@@ -737,6 +808,275 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 			"context",
 			"permission:inventory.adjustment.create",
 			"entitlement:inventory.adjustments",
+		]);
+	});
+
+	test("authorizes internal Reservation create and release with separate permission and entitlement checks", async () => {
+		const { repository, service } = harness();
+		const calls: string[] = [];
+		const application = createInventoryApplication({
+			activeContexts: {
+				async requireActiveContext() {
+					calls.push("context");
+					return { organizationId: "org_a", tenantId: "tenant_a" };
+				},
+			},
+			entitlements: {
+				async requireEntitlement(input) {
+					calls.push(`entitlement:${input.capabilityId}`);
+				},
+			},
+			permissions: {
+				async requirePermission(input) {
+					calls.push(`permission:${input.permission}`);
+				},
+			},
+			service,
+		});
+		const reservation = await application.createReservation({
+			actorUserId: "reservation_creator",
+			contextId: "context",
+			correlationId: "reservation-authority",
+			expiresAt: new Date("2026-07-15T13:00:00.000Z"),
+			idempotencyKey: "reservation-authority-create",
+			locationId: "loc_a",
+			productId: "prod_a",
+			quantity: "2",
+			sessionId: "session",
+			unit: "each",
+		});
+		expect(reservation).toMatchObject({
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		expect(calls).toEqual([
+			"context",
+			"permission:inventory.reservation.create",
+			"entitlement:inventory.reservations",
+		]);
+
+		calls.length = 0;
+		const released = await application.releaseReservation({
+			actorUserId: "reservation_releaser",
+			contextId: "context",
+			correlationId: "reservation-authority",
+			idempotencyKey: "reservation-authority-release",
+			reason: "Cancelled",
+			reservation,
+			sessionId: "session",
+		});
+		expect(released).toMatchObject({ state: "Released", tenantId: "tenant_a" });
+		expect(
+			repository.reservations.get(`tenant_a:${reservation.id}`)
+		).toMatchObject({ state: "Released" });
+		expect(calls).toEqual([
+			"context",
+			"permission:inventory.reservation.release",
+			"entitlement:inventory.reservations",
+		]);
+	});
+
+	test("fails Reservation commands closed before owner mutation on permission, entitlement, or context mismatch", async () => {
+		await Promise.all(
+			(["permission", "entitlement"] as const).map(async (deniedAt) => {
+				const { repository, service } = harness();
+				const application = createInventoryApplication({
+					activeContexts: {
+						async requireActiveContext() {
+							return { organizationId: "org_a", tenantId: "tenant_a" };
+						},
+					},
+					entitlements: {
+						async requireEntitlement() {
+							if (deniedAt === "entitlement") {
+								throw Object.assign(new Error("not provisioned"), {
+									code: "entitlement_denied",
+								});
+							}
+						},
+					},
+					permissions: {
+						async requirePermission() {
+							if (deniedAt === "permission") {
+								throw Object.assign(new Error("not assigned"), {
+									code: "authorization_denied",
+								});
+							}
+						},
+					},
+					service,
+				});
+				await expect(
+					application.createReservation({
+						actorUserId: "reservation_creator",
+						contextId: "context",
+						correlationId: "reservation-denial",
+						expiresAt: new Date("2026-07-15T13:00:00.000Z"),
+						idempotencyKey: `reservation-${deniedAt}-denial`,
+						locationId: "loc_a",
+						productId: "prod_a",
+						quantity: "2",
+						sessionId: "session",
+						unit: "each",
+					})
+				).rejects.toMatchObject({
+					code:
+						deniedAt === "permission"
+							? "authorization_denied"
+							: "entitlement_denied",
+				});
+				expect(repository.reservations.size).toBe(0);
+			})
+		);
+
+		const { repository, service } = harness();
+		const foreignReservation = await service.createReservation({
+			actorUserId: "foreign_creator",
+			correlationId: "reservation-context-denial",
+			expiresAt: new Date("2026-07-15T13:00:00.000Z"),
+			idempotencyKey: "foreign-reservation",
+			locationId: "loc_b",
+			organizationId: "org_b",
+			productId: "prod_b",
+			quantity: "1",
+			tenantId: "tenant_b",
+			unit: "each",
+		});
+		const application = createInventoryApplication({
+			activeContexts: {
+				async requireActiveContext() {
+					return { organizationId: "org_a", tenantId: "tenant_a" };
+				},
+			},
+			entitlements: {
+				async requireEntitlement() {
+					// Authorization succeeds so this branch isolates context non-disclosure.
+				},
+			},
+			permissions: {
+				async requirePermission() {
+					// Authorization succeeds so this branch isolates context non-disclosure.
+				},
+			},
+			service,
+		});
+		await expect(
+			application.releaseReservation({
+				actorUserId: "tenant_a_actor",
+				contextId: "context",
+				correlationId: "reservation-context-denial",
+				idempotencyKey: "foreign-reservation-release",
+				reason: "Cancelled",
+				reservation: foreignReservation,
+				sessionId: "session",
+			})
+		).rejects.toMatchObject({ code: "not_found" });
+		expect(
+			repository.reservations.get(`tenant_b:${foreignReservation.id}`)
+		).toMatchObject({ state: "Active" });
+	});
+
+	test("fails closed at the application boundary for permission and entitlement denial", async () => {
+		await Promise.all(
+			(["permission", "entitlement"] as const).map(async (deniedAt) => {
+				const { repository, service } = harness();
+				const calls: string[] = [];
+				const application = createInventoryApplication({
+					activeContexts: {
+						async requireActiveContext() {
+							calls.push("context");
+							return { organizationId: "org_a", tenantId: "tenant_a" };
+						},
+					},
+					entitlements: {
+						async requireEntitlement() {
+							calls.push("entitlement");
+							if (deniedAt === "entitlement") {
+								throw Object.assign(new Error("commercial plan secret"), {
+									code: "entitlement_denied",
+								});
+							}
+						},
+					},
+					permissions: {
+						async requirePermission() {
+							calls.push("permission");
+							if (deniedAt === "permission") {
+								throw Object.assign(new Error("role assignment secret"), {
+									code: "authorization_denied",
+								});
+							}
+						},
+					},
+					service,
+				});
+				await expect(
+					application.createAdjustment({
+						actorUserId: "direct_api_actor",
+						body: adjustment,
+						contextId: "context",
+						correlationId: "direct_api_denial",
+						idempotencyKey: `direct-api-${deniedAt}`,
+						sessionId: "session",
+					})
+				).rejects.toMatchObject({
+					code:
+						deniedAt === "permission"
+							? "authorization_denied"
+							: "entitlement_denied",
+				});
+				expect(repository.adjustments.size).toBe(0);
+				expect(calls).toEqual(
+					deniedAt === "permission"
+						? ["context", "permission"]
+						: ["context", "permission", "entitlement"]
+				);
+			})
+		);
+	});
+
+	test("authorizes draft-line persistence with count create authority", async () => {
+		const { service } = harness();
+		const count = await service.createCount({
+			actorUserId: "counter_a",
+			body: { blind: true, locationId: "loc_a" },
+			idempotencyKey: "count-app-create",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		const calls: string[] = [];
+		const application = createInventoryApplication({
+			activeContexts: {
+				async requireActiveContext() {
+					calls.push("context");
+					return { organizationId: "org_a", tenantId: "tenant_a" };
+				},
+			},
+			entitlements: {
+				async requireEntitlement(input) {
+					calls.push(`entitlement:${input.capabilityId}`);
+				},
+			},
+			permissions: {
+				async requirePermission(input) {
+					calls.push(`permission:${input.permission}`);
+				},
+			},
+			service,
+		});
+		await application.saveCountDraft({
+			actorUserId: "counter_a",
+			body: { lines: [] },
+			contextId: "context",
+			countId: count.id,
+			idempotencyKey: "count-app-save",
+			sessionId: "session",
+			version: 1,
+		});
+		expect(calls).toEqual([
+			"context",
+			"permission:inventory.count.create",
+			"entitlement:inventory.counts",
 		]);
 	});
 

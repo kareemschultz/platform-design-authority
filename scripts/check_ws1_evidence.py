@@ -35,7 +35,7 @@ AI_RUNTIME_MARKERS = ("@ai-sdk", "openai", "anthropic", "openrouter")
 EVIDENCE_SOURCE = ROOT / "evidence" / "first-slice" / "ws1-capability-evidence.json"
 
 
-def validate_source_claims(registry: dict[str, object]) -> int:
+def validate_source_claims(registry: dict[str, object]) -> tuple[int, set[str]]:
     source = json.loads(EVIDENCE_SOURCE.read_text(encoding="utf-8"))
     if source.get("schema_version") != "1.0.0" or source.get("workstream_id") != "WS1":
         raise AssertionError("WS1 evidence source has an unsupported identity or schema")
@@ -86,23 +86,18 @@ def validate_source_claims(registry: dict[str, object]) -> int:
         raise AssertionError(
             f"generated registry omits WS1 evidence: {sorted(evidence_ids - catalog_ids)}"
         )
-    return marker_count
+    return marker_count, evidence_ids
 
 
 def main() -> int:
     registry = json.loads(
         (ROOT / "registry" / "first-slice-tests.json").read_text(encoding="utf-8")
     )
-    marker_count = validate_source_claims(registry)
-    all_rows = {
+    marker_count, workstream_evidence_ids = validate_source_claims(registry)
+    rows = {
         str(row["capability_id"]): row
         for row in registry.get("tests", [])
-    }
-    rows = {
-        capability_id: all_rows[capability_id]
-        for capability_id in EXPECTED_CAPABILITIES
-        if capability_id in all_rows
-        and all_rows[capability_id].get("evidence_status") == "Evidenced"
+        if str(row.get("capability_id")) in EXPECTED_CAPABILITIES
     }
     if set(rows) != EXPECTED_CAPABILITIES:
         raise AssertionError(
@@ -111,6 +106,8 @@ def main() -> int:
 
     required_cells = 0
     for capability_id, row in rows.items():
+        if row.get("evidence_status") != "Evidenced":
+            raise AssertionError(f"{capability_id} is not Evidenced")
         blocking = row.get("blocking_defects", [])
         if blocking:
             raise AssertionError(f"{capability_id} has blocking defects: {blocking}")
@@ -119,17 +116,34 @@ def main() -> int:
             if status != "required":
                 continue
             required_cells += 1
-            if not dimension_evidence.get(dimension):
-                raise AssertionError(f"{capability_id}.{dimension} lacks evidence")
+            cell_evidence = {
+                str(value) for value in dimension_evidence.get(dimension, [])
+            }
+            if not cell_evidence & workstream_evidence_ids:
+                raise AssertionError(
+                    f"{capability_id}.{dimension} lacks WS1-owned evidence"
+                )
         for path_value in row.get("evidence_paths", []):
             if not (ROOT / str(path_value)).is_file():
                 raise AssertionError(
                     f"{capability_id} references missing evidence path {path_value}"
                 )
 
+    # The generated registry is an aggregate across every completed workstream.
+    # Validate that aggregate on its own terms instead of assuming WS1 is the
+    # only evidence source, while retaining the WS1-local row checks above.
+    generated_evidenced_cells = sum(
+        sum(
+            1
+            for status in row.get("dimensions", {}).values()
+            if status == "required"
+        )
+        for row in registry.get("tests", [])
+        if row.get("evidence_status") == "Evidenced"
+    )
     coverage = registry.get("coverage", {})
-    if int(coverage.get("required_cells_evidenced", 0)) < required_cells:
-        raise AssertionError("generated evidence-cell total omits WS1 evidence")
+    if coverage.get("required_cells_evidenced") != generated_evidenced_cells:
+        raise AssertionError("generated aggregate evidence-cell total is inconsistent")
 
     violations: list[str] = []
     for root in IMPLEMENTATION_ROOTS:

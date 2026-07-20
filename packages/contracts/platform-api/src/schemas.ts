@@ -449,9 +449,13 @@ export const ProductVariantSchema = z.object({
 });
 
 export const ProductSchema = z.object({
+	archivedAt: InstantSchema.nullable(),
+	archiveReason: z.string().max(500).nullable(),
+	createdAt: InstantSchema,
 	id: IdentifierSchema,
 	name: z.string().min(1).max(300),
 	state: ProductStateSchema,
+	updatedAt: InstantSchema,
 	variants: z.array(ProductVariantSchema).min(1).max(50),
 	version: z.number().int().min(1),
 });
@@ -500,8 +504,10 @@ export const StockBalanceSchema = z.object({
 	locationId: IdentifierSchema,
 	onHand: DecimalQuantitySchema,
 	productId: IdentifierSchema,
-	reconciled: z.boolean().optional(),
+	reconciled: z.boolean(),
+	reconciliationState: z.enum(["Current", "RequiresReview"]),
 	reserved: NonNegativeDecimalQuantitySchema,
+	source: z.literal("InventoryLedgerProjection"),
 	unit: z.string().min(1).max(50),
 	variantId: NullableIdentifierSchema.optional(),
 });
@@ -518,8 +524,12 @@ export const CreateInventoryAdjustmentSchema = z.object({
 
 export const InventoryAdjustmentSchema = CreateInventoryAdjustmentSchema.extend(
 	{
+		approvedByUserId: NullableIdentifierSchema,
+		createdAt: InstantSchema,
+		createdByUserId: IdentifierSchema,
 		id: IdentifierSchema,
 		movementId: NullableIdentifierSchema,
+		postedAt: InstantSchema.nullable(),
 		reversalMovementId: NullableIdentifierSchema,
 		state: z.enum([
 			"Draft",
@@ -529,6 +539,7 @@ export const InventoryAdjustmentSchema = CreateInventoryAdjustmentSchema.extend(
 			"Reversed",
 			"Rejected",
 		]),
+		updatedAt: InstantSchema,
 		version: z.number().int().min(1),
 	}
 );
@@ -554,6 +565,12 @@ export const SubmitStockCountSchema = z
 	})
 	.strict();
 
+export const SaveStockCountDraftLinesSchema = z
+	.object({
+		lines: z.array(SubmitStockCountLineSchema).max(5000),
+	})
+	.strict();
+
 export const StockCountLineSchema = SubmitStockCountLineSchema.extend({
 	expectedQuantity: DecimalQuantitySchema.nullable(),
 	id: IdentifierSchema,
@@ -562,8 +579,12 @@ export const StockCountLineSchema = SubmitStockCountLineSchema.extend({
 });
 
 export const StockCountSchema = CreateStockCountSchema.extend({
+	approvedByUserId: NullableIdentifierSchema,
+	createdAt: InstantSchema,
+	createdByUserId: IdentifierSchema,
 	id: IdentifierSchema,
 	lines: z.array(StockCountLineSchema),
+	postedAt: InstantSchema.nullable(),
 	state: z.enum([
 		"Draft",
 		"InProgress",
@@ -572,6 +593,8 @@ export const StockCountSchema = CreateStockCountSchema.extend({
 		"Posted",
 		"Rejected",
 	]),
+	submittedByUserId: NullableIdentifierSchema,
+	updatedAt: InstantSchema,
 	version: z.number().int().min(1),
 });
 
@@ -630,10 +653,16 @@ export const ReceiveStockTransferSchema = z
 	});
 
 export const StockTransferSchema = z.object({
+	createdAt: InstantSchema,
+	createdByUserId: IdentifierSchema,
 	destinationLocationId: IdentifierSchema,
+	dispatchedAt: InstantSchema.nullable(),
+	dispatchedByUserId: NullableIdentifierSchema,
 	exceptionReason: z.string().max(500).nullable(),
 	id: IdentifierSchema,
 	lines: z.array(StockTransferLineSchema).min(1),
+	receivedAt: InstantSchema.nullable(),
+	receivedByUserId: NullableIdentifierSchema,
 	sourceLocationId: IdentifierSchema,
 	state: z.enum([
 		"Draft",
@@ -643,11 +672,66 @@ export const StockTransferSchema = z.object({
 		"Exception",
 		"Cancelled",
 	]),
+	updatedAt: InstantSchema,
 	version: z.number().int().min(1),
 });
 
+export const CsvImportManifestSchema = z.object({
+	decimalSeparator: z.enum([".", ","]),
+	defaultUnit: z.string().min(1).max(50).optional(),
+	delimiter: z.enum([",", ";", "\t", "|"]),
+	encoding: z.literal("UTF-8"),
+	locale: z.string().min(2).max(35),
+	newline: z.enum(["LF", "CRLF"]),
+	quote: z.literal('"'),
+	timezone: z.string().min(1).max(100),
+});
+
+export const CreateCsvImportSchema = z.object({
+	content: z.string().min(1).max(1_048_576),
+	contentType: z.literal("text/csv"),
+	fileName: z.string().min(1).max(200),
+	manifest: CsvImportManifestSchema,
+	sha256: z.string().regex(/^[A-Fa-f0-9]{64}$/),
+});
+
+export const ImportCountsSchema = z.object({
+	applied: z.number().int().min(0).max(1000),
+	failed: z.number().int().min(0).max(1000),
+	rejected: z.number().int().min(0).max(1000),
+	skipped: z.number().int().min(0).max(1000),
+	total: z.number().int().min(0).max(1000),
+	valid: z.number().int().min(0).max(1000),
+	warning: z.number().int().min(0).max(1000),
+});
+
 export const ImportJobSchema = z.object({
+	acceptedAt: InstantSchema.nullable(),
+	acceptedByUserId: NullableIdentifierSchema,
+	approvedAt: InstantSchema.nullable(),
+	approvedByUserId: NullableIdentifierSchema,
+	cancelledAt: InstantSchema.nullable(),
+	cancelledByUserId: NullableIdentifierSchema,
+	completedAt: InstantSchema.nullable(),
+	counts: ImportCountsSchema,
+	createdAt: InstantSchema,
+	createdByUserId: IdentifierSchema,
+	failureCode: z.string().max(100).nullable(),
+	humanReference: z.string().min(1).max(100),
 	id: IdentifierSchema,
+	lastCompletedRow: z.number().int().min(0).max(1000),
+	manifest: CsvImportManifestSchema,
+	numberAllocationId: IdentifierSchema,
+	numberSequenceVersion: z.number().int().min(1),
+	reconciliationState: z.enum([
+		"Pending",
+		"Reconciled",
+		"Mismatch",
+		"Accepted",
+	]),
+	scannerResult: z.enum(["Clean", "Blocked", "Unavailable"]),
+	sourceFileName: z.string().min(1).max(200),
+	sourceSha256: z.string().regex(/^[A-Fa-f0-9]{64}$/),
 	state: z.enum([
 		"Uploaded",
 		"Validating",
@@ -658,7 +742,43 @@ export const ImportJobSchema = z.object({
 		"Failed",
 		"Cancelled",
 	]),
+	target: z.enum(["Product", "OpeningStock"]),
+	updatedAt: InstantSchema,
 	version: z.number().int().min(1),
+});
+
+export const PagedImportsSchema = z.object({
+	items: z.array(ImportJobSchema).max(200),
+	nextCursor: z.string().nullable(),
+});
+
+export const ImportFindingSchema = z.object({
+	code: z.string().min(1).max(100),
+	field: z.string().max(100).nullable(),
+	rowNumber: z.number().int().min(1).max(1000),
+	severity: z.enum(["Info", "Warning", "Error"]),
+	sourceKey: z.string().min(1).max(128),
+});
+
+export const ImportFindingsSchema = z.object({
+	importId: IdentifierSchema,
+	items: z.array(ImportFindingSchema).max(200),
+	nextCursor: z.string().nullable(),
+});
+
+export const ImportCorrectionReportSchema = z.object({
+	content: z.string().max(524_288),
+	contentDisposition: z.string().min(1).max(300),
+	contentType: z.literal("text/csv"),
+	fileName: z.string().min(1).max(220),
+	schemaVersion: z.literal("1.0.0"),
+	sha256: z.string().regex(/^[A-Fa-f0-9]{64}$/),
+});
+
+export const ImportPurgeResultSchema = z.object({
+	findings: z.number().int().min(0).max(5000),
+	rows: z.number().int().min(0).max(1000),
+	waves: z.number().int().min(0).max(100),
 });
 
 export const ProblemSchema = z.object({
@@ -718,6 +838,7 @@ export const PagedEntitlementsSchema = pageOf(EntitlementSchema);
 export const PagedPartiesSchema = pageOf(PartySchema);
 export const PagedAuditRecordsSchema = pageOf(AuditRecordSchema);
 export const PagedProductsSchema = pageOf(ProductSchema);
+export const PagedStockBalancesSchema = pageOf(StockBalanceSchema);
 export const PagedInventoryAdjustmentsSchema = pageOf(
 	InventoryAdjustmentSchema
 );
@@ -765,6 +886,7 @@ export type UpdateOrganizationRequest = z.infer<
 	typeof UpdateOrganizationRequestSchema
 >;
 export type CreateProduct = z.infer<typeof CreateProductSchema>;
+export type CreateCsvImport = z.infer<typeof CreateCsvImportSchema>;
 export type CreateProductVariant = z.infer<typeof CreateProductVariantSchema>;
 export type Product = z.infer<typeof ProductSchema>;
 export type ProductIdentifier = z.infer<typeof ProductIdentifierSchema>;
@@ -779,11 +901,23 @@ export type UpdateProductIdentifier = z.infer<
 >;
 export type UpdateProductVariant = z.infer<typeof UpdateProductVariantSchema>;
 export type InventoryAdjustment = z.infer<typeof InventoryAdjustmentSchema>;
+export type ImportCorrectionReport = z.infer<
+	typeof ImportCorrectionReportSchema
+>;
+export type ImportFinding = z.infer<typeof ImportFindingSchema>;
+export type ImportFindings = z.infer<typeof ImportFindingsSchema>;
+export type ImportJob = z.infer<typeof ImportJobSchema>;
+export type ImportPurgeResult = z.infer<typeof ImportPurgeResultSchema>;
+export type PagedImports = z.infer<typeof PagedImportsSchema>;
 export type CreateInventoryAdjustment = z.infer<
 	typeof CreateInventoryAdjustmentSchema
 >;
 export type CreateStockCount = z.infer<typeof CreateStockCountSchema>;
 export type CreateStockTransfer = z.infer<typeof CreateStockTransferSchema>;
+export type PagedStockBalances = z.infer<typeof PagedStockBalancesSchema>;
+export type SaveStockCountDraftLines = z.infer<
+	typeof SaveStockCountDraftLinesSchema
+>;
 export type StockBalance = z.infer<typeof StockBalanceSchema>;
 export type StockCount = z.infer<typeof StockCountSchema>;
 export type StockTransfer = z.infer<typeof StockTransferSchema>;

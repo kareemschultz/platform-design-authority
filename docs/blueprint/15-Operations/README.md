@@ -20,7 +20,7 @@ last_reviewed: 2026-07-16
 - [Status Page and Customer Communication](STATUS_PAGE_AND_CUSTOMER_COMMUNICATION.md) — `PDA-OPS-016` · Draft
 - [Tenant Migration Exit and Data Repair](TENANT_MIGRATION_EXIT_AND_DATA_REPAIR.md) — `PDA-OPS-017` · Draft
 - [Event Backbone Delivery Runbook](EVENT_BACKBONE_DELIVERY_RUNBOOK.md) — `PDA-OPS-018` · Draft
-- [Controlled-Prototype Service Runbooks](CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md) — `PDA-OPS-019` · Draft
+- [Controlled-Prototype Service Runbooks](CONTROLLED_PROTOTYPE_SERVICE_RUNBOOKS.md) — `PDA-OPS-020` · Draft
 
 ## Related Authority
 

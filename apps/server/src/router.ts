@@ -1,15 +1,23 @@
 import type { PermissionId } from "@meridian/contracts-permissions";
 import {
+	acceptOpeningStockImportContract,
+	acceptProductImportContract,
 	activateProductContract,
 	approveInventoryAdjustmentContract,
+	approveOpeningStockImportContract,
+	approveProductImportContract,
 	approveStockCountContract,
 	archiveProductContract,
+	cancelOpeningStockImportContract,
+	cancelProductImportContract,
 	createEventReplayContract,
 	createInventoryAdjustmentContract,
+	createOpeningStockImportContract,
 	createOrganizationPartyContract,
 	createPartyIdentityLinkContract,
 	createPersonPartyContract,
 	createProductContract,
+	createProductImportContract,
 	createRoleAssignmentContract,
 	createStockCountContract,
 	createStockTransferContract,
@@ -17,9 +25,13 @@ import {
 	dispatchStockTransferContract,
 	getCurrentIdentityContract,
 	getInventoryAdjustmentContract,
+	getOpeningStockImportContract,
+	getOpeningStockImportCorrectionReportContract,
 	getOrganizationContract,
 	getPartyContract,
 	getProductContract,
+	getProductImportContract,
+	getProductImportCorrectionReportContract,
 	getStockCountContract,
 	getStockTransferContract,
 	listAuditRecordsContract,
@@ -27,17 +39,24 @@ import {
 	listEntitlementsContract,
 	listInventoryAdjustmentsContract,
 	listLocationsContract,
+	listOpeningStockImportFindingsContract,
+	listOpeningStockImportsContract,
 	listOrganizationsContract,
 	listPartiesContract,
+	listProductImportFindingsContract,
+	listProductImportsContract,
 	listProductsContract,
 	listRolesContract,
 	listStockBalancesContract,
 	listStockCountsContract,
 	listStockTransfersContract,
 	listUsersContract,
+	purgeOpeningStockImportStagingContract,
+	purgeProductImportStagingContract,
 	receiveStockTransferContract,
 	reverseInventoryAdjustmentContract,
 	revokeCurrentUserSessionContract,
+	saveStockCountDraftLinesContract,
 	setActiveContextContract,
 	submitStockCountContract,
 	suspendTenantMembershipContract,
@@ -170,6 +189,24 @@ async function requireActiveIdentity(context: Context, contextId: string) {
 	return { activeContext: identity.activeContext, identity, session };
 }
 
+function validationProblemTitle(code: string): string {
+	if (code === "invalid_reference") {
+		return "Resource reference is invalid";
+	}
+	if (code === "invalid_quantity") {
+		return "Quantity is invalid";
+	}
+	if (
+		code === "validation" ||
+		code === "invalid_csv" ||
+		code === "hash_mismatch" ||
+		code === "blocked_content"
+	) {
+		return "Request is invalid";
+	}
+	return "Identifier is invalid";
+}
+
 function mapApplicationError(context: Context, error: unknown): never {
 	if (error instanceof ORPCError) {
 		throw error;
@@ -205,29 +242,23 @@ function mapApplicationError(context: Context, error: unknown): never {
 	if (
 		code === "invalid_identifier" ||
 		code === "invalid_quantity" ||
+		code === "invalid_csv" ||
+		code === "hash_mismatch" ||
+		code === "blocked_content" ||
 		code === "invalid_reference" ||
 		code === "validation"
 	) {
-		let validationTitle = "Identifier is invalid";
-		if (code === "validation") {
-			validationTitle = "Request is invalid";
-		}
-		if (code === "invalid_reference") {
-			validationTitle = "Resource reference is invalid";
-		}
-		if (code === "invalid_quantity") {
-			validationTitle = "Quantity is invalid";
-		}
 		throw new ORPCError("BAD_REQUEST", {
 			data: problem(context, {
 				code: "validation",
 				status: 400,
-				title: validationTitle,
+				title: validationProblemTitle(code),
 			}),
 		});
 	}
 	if (
 		code === "approval_separation" ||
+		code === "segregation_of_duties" ||
 		code === "invalid_state" ||
 		code === "negative_stock"
 	) {
@@ -864,6 +895,500 @@ const archiveProduct = implement(archiveProductContract)
 		}
 	});
 
+const createProductImport = implement(createProductImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createImport({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				target: "Product",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listProductImports = implement(listProductImportsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listImports({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				cursor: input.query.cursor,
+				limit: input.query.limit,
+				sessionId: session.session.id,
+				state: input.query.state,
+				target: "Product",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getProductImport = implement(getProductImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getImport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "Product",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listProductImportFindings = implement(listProductImportFindingsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listImportFindings({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				cursor: input.query.cursor,
+				importId: input.params.importId,
+				limit: input.query.limit,
+				sessionId: session.session.id,
+				target: "Product",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const acceptProductImport = implement(acceptProductImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.acceptImport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "Product",
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const cancelProductImport = implement(cancelProductImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.cancelImport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "Product",
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const purgeProductImportStaging = implement(purgeProductImportStagingContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.purge",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.purgeImportStaging({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "Product",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveProductImport = implement(approveProductImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveImport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "Product",
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getProductImportCorrectionReport = implement(
+	getProductImportCorrectionReportContract
+)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"catalog.import.download",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getImportCorrectionReport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "Product",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createOpeningStockImport = implement(createOpeningStockImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createImport({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				target: "OpeningStock",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listOpeningStockImports = implement(listOpeningStockImportsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listImports({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				cursor: input.query.cursor,
+				limit: input.query.limit,
+				sessionId: session.session.id,
+				state: input.query.state,
+				target: "OpeningStock",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getOpeningStockImport = implement(getOpeningStockImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getImport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "OpeningStock",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const listOpeningStockImportFindings = implement(
+	listOpeningStockImportFindingsContract
+)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listImportFindings({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				cursor: input.query.cursor,
+				importId: input.params.importId,
+				limit: input.query.limit,
+				sessionId: session.session.id,
+				target: "OpeningStock",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const acceptOpeningStockImport = implement(acceptOpeningStockImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.acceptImport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "OpeningStock",
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const cancelOpeningStockImport = implement(cancelOpeningStockImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.cancelImport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "OpeningStock",
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const purgeOpeningStockImportStaging = implement(
+	purgeOpeningStockImportStagingContract
+)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.purge",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.purgeImportStaging({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "OpeningStock",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveOpeningStockImport = implement(approveOpeningStockImportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveImport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "OpeningStock",
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getOpeningStockImportCorrectionReport = implement(
+	getOpeningStockImportCorrectionReportContract
+)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.import.download",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getImportCorrectionReport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				importId: input.params.importId,
+				sessionId: session.session.id,
+				target: "OpeningStock",
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const listStockBalances = implement(listStockBalancesContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -1084,6 +1609,33 @@ const createStockCount = implement(createStockCountContract)
 				contextId: input.headers["x-active-context-id"],
 				idempotencyKey: input.headers["idempotency-key"],
 				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const saveStockCountDraft = implement(saveStockCountDraftLinesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"inventory.count.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.saveStockCountDraft({
+				actorUserId: session.user.id,
+				body: input.body,
+				contextId: input.headers["x-active-context-id"],
+				countId: input.params.id,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
 			});
 		} catch (error) {
 			return mapApplicationError(context, error);
@@ -1391,6 +1943,17 @@ const listAuditRecords = implement(listAuditRecordsContract)
 export const appRouter = {
 	audit: { list: listAuditRecords },
 	catalog: {
+		imports: {
+			accept: acceptProductImport,
+			approve: approveProductImport,
+			cancel: cancelProductImport,
+			correctionReport: getProductImportCorrectionReport,
+			create: createProductImport,
+			findings: listProductImportFindings,
+			get: getProductImport,
+			list: listProductImports,
+			purgeStaging: purgeProductImportStaging,
+		},
 		products: {
 			activate: activateProduct,
 			archive: archiveProduct,
@@ -1421,7 +1984,19 @@ export const appRouter = {
 			create: createStockCount,
 			get: getStockCount,
 			list: listStockCounts,
+			saveDraft: saveStockCountDraft,
 			submit: submitStockCount,
+		},
+		imports: {
+			acceptOpeningStock: acceptOpeningStockImport,
+			approveOpeningStock: approveOpeningStockImport,
+			cancelOpeningStock: cancelOpeningStockImport,
+			createOpeningStock: createOpeningStockImport,
+			getOpeningStock: getOpeningStockImport,
+			listOpeningStock: listOpeningStockImports,
+			openingStockCorrectionReport: getOpeningStockImportCorrectionReport,
+			openingStockFindings: listOpeningStockImportFindings,
+			purgeOpeningStockStaging: purgeOpeningStockImportStaging,
 		},
 		transfers: {
 			create: createStockTransfer,

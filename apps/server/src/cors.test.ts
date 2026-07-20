@@ -3,21 +3,23 @@ import { spawnSync } from "bun";
 
 const corsProbeScript = `
 const { default: app } = await import("./index.ts");
-const response = await app.request("/v1/users/user_example_01/suspend", {
+const response = await app.request("/v1/stock-counts/count_example_01/draft-lines", {
   headers: {
-    "Access-Control-Request-Headers": "content-type,idempotency-key,x-active-context-id",
-    "Access-Control-Request-Method": "POST",
+    "Access-Control-Request-Headers": "content-type,idempotency-key,if-match,x-active-context-id",
+    "Access-Control-Request-Method": "PUT",
     Origin: process.env.CORS_ORIGIN,
   },
   method: "OPTIONS",
 });
 console.log(JSON.stringify({
   allowedHeaders: response.headers.get("Access-Control-Allow-Headers"),
+  allowedMethods: response.headers.get("Access-Control-Allow-Methods"),
+  allowedOrigin: response.headers.get("Access-Control-Allow-Origin"),
   status: response.status,
 }));
 `;
 
-test("CORS preflight allows governed context and idempotency headers", () => {
+test("CORS preflight allows governed conditional context writes without widening", () => {
 	const result = spawnSync({
 		cmd: [process.execPath, "--eval", corsProbeScript],
 		cwd: import.meta.dir,
@@ -39,10 +41,25 @@ test("CORS preflight allows governed context and idempotency headers", () => {
 	expect(result.exitCode, result.stderr.toString()).toBe(0);
 	const output = JSON.parse(result.stdout.toString()) as {
 		allowedHeaders: string;
+		allowedMethods: string;
+		allowedOrigin: string;
 		status: number;
 	};
 	expect(output.status).toBe(204);
-	const allowedHeaders = output.allowedHeaders.toLowerCase();
-	expect(allowedHeaders).toContain("idempotency-key");
-	expect(allowedHeaders).toContain("x-active-context-id");
+	expect(output.allowedOrigin).toBe("http://localhost:3001");
+	const allowedHeaders = output.allowedHeaders
+		.toLowerCase()
+		.split(",")
+		.map((header) => header.trim())
+		.sort();
+	expect(allowedHeaders).toEqual(
+		[
+			"authorization",
+			"content-type",
+			"idempotency-key",
+			"if-match",
+			"x-active-context-id",
+		].sort()
+	);
+	expect(output.allowedMethods.toUpperCase()).toContain("PUT");
 }, 10_000);

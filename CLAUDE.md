@@ -49,6 +49,7 @@ Before inventing an identifier or boundary, consult:
 - `registry/architecture-rules.json`
 - `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for technology, version, compatibility, and workaround claims
 - `docs/blueprint/14-Engineering/WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md` before creating or handing off parallel work
+- `docs/blueprint/14-Engineering/ENGINEERING_NOTEBOOK.md` for accumulated working practice — including the multi-agent independent review discipline any reviewing agent should reproduce — that is not authority but is too valuable to rediscover from scratch
 - `docs/blueprint/07-Developer-Platform/PRODUCT_DOCUMENTATION_AND_KNOWLEDGE_ARCHITECTURE.md` for user, developer, release, or in-app help changes
 - `docs/blueprint/02-Architecture/POSTGRESQL_18_EXTENSION_DECISION_MATRIX.md` before adding a database extension, preload library, or background worker
 - `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
@@ -192,7 +193,7 @@ Code conventions:
 - TypeScript strict everywhere; every workspace carries a working `check-types` script.
 - Core packages stay runtime-neutral per ADR-0020 and `ARCHITECTURE_DEPENDENCY_RULES.md`: no Bun globals, `bun:*` imports, Hono context types, oRPC transport objects, or database adapters in domain, application, contract, or authorization code.
 - All external input is validated with zod v4 schemas at the boundary; oRPC procedures declare typed errors.
-- Environment access goes only through `@meridian/tooling-env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed.
+- Environment access goes only through `@meridian/tooling-env`'s validated schema — never scattered `process.env` reads; secrets have no dev defaults and are never committed. Colocated test files may set `process.env` fixtures to exercise env-dependent behavior; runtime sources may not.
 - Database changes go through Drizzle schema + `db:generate`; committed migrations are never hand-edited (CI enforces migration freshness).
 - Tests are colocated `*.test.ts` using `bun:test` and assert real behavior — no placeholder assertions.
 - No `console.log` in committed code; use the structured logger. No commented-out code blocks.
@@ -208,7 +209,7 @@ Before editing:
 3. Determine ADR or founder-decision needs.
 4. Check downstream impact across contracts, UI, security, privacy, offline, operations, testing, Commercial, and first-slice scope.
 5. For technology or version claims, invoke `technology-evidence-maintainer`, verify current primary sources, and consult the living technology ledger. Never rely solely on model memory.
-6. Claim one issue, branch, worktree, and pull request per independently mergeable change; record overlap and dependencies before parallel work.
+6. Claim one issue, branch, worktree, and pull request per independently mergeable change; record overlap and dependencies before parallel work. Exception: work on FDR-012's WS3 controlled-prototype branch follows that decision's recorded consolidated-review deviation (one integration branch, one consolidated review before any merge to `main`) instead of per-change pull requests.
 
 After editing:
 
@@ -222,3 +223,34 @@ After editing:
 Pull requests use `.github/PULL_REQUEST_TEMPLATE.md` and must pass `scripts/validate_pr_governance.py`: exactly one documentation-impact disposition, exactly one Changeset/release disposition, concrete evidence or rationale, an exact lifecycle statement, and the unsupported-readiness acknowledgement.
 7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
 8. Record documentation and release-note impact for user-visible, API, configuration, migration, permission, workflow, or troubleshooting changes.
+
+## 13. ADR Triggers
+
+Create or amend an ADR for ownership, boundaries, stack, persistence, offline semantics, public contracts, extension execution, deployment, security, privacy, payments, settlement, commercial runtime, or platform-wide lifecycle changes.
+
+Business facts architecture cannot infer belong in the Founder Decision Register.
+
+## 14. Prohibited Behavior
+
+- Silent contradiction resolution
+- Cross-domain persistence shortcuts
+- Business rules in UI, provider adapters, or prompts
+- Provider SDKs as platform abstractions
+- Unscoped administrator, support, extension, or AI authority
+- Secret or protected-data exposure
+- False lifecycle promotion
+- Scope expansion for feature count
+- Assumed provider capabilities
+- Unsupported legal, tax, privacy, fiscal, security, accessibility, or regulatory claims
+- Treating AI, search, cache, analytics, or offline projections as current authority
+- Editing independent audit evidence instead of writing a disposition
+
+## 15. Current Readiness
+
+The repository targets one constrained vertical-slice implementation after named blockers. Technical Prototypes 1–3 retain the controlled-prototype clearance recorded by the fourth audit (reviews family FA4) and its disposition; the monorepo scaffold under `apps/` and `packages/` is that prototype surface. WS2 is complete at controlled-prototype depth through the P-W2a synchronization in issue #90. PDA-REV-019 records issue #83's repository disclosure/redaction review. Under FDR-012, WS3 implementation may proceed only as a controlled prototype on the isolated branch `claude/ws3-integration`; merging WS3 to `main`, recording WS3 entry or completion, and advancing program status remain blocked until issue #94 establishes restricted raw-evidence handling and issue #82 retains at least 8 structured interviews and 3 direct workflow observations across at least 3 distinct businesses. Agents cannot substitute for the real-world evidence in #82.
+
+P4–P7 implementation is not cleared until the M3 standing-audit charter checkpoint records the general entry disposition against completed P3 evidence. Each prototype's stricter founder-decision, ADR, provider, security, and external-evidence gates continue to apply.
+
+Pilot and production remain blocked on founder decisions, customer evidence, qualified Guyana review, provider certification, implementation tests, penetration testing, accessibility evidence, and operational exercises.
+
+When uncertain, stop and record the missing decision or evidence rather than inventing it.

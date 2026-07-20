@@ -11,6 +11,7 @@ These documents are deliberately outside the governed document registry and are 
 - `BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md` — bounded evidence for declaring the implementation-start baseline complete.
 - `STATUS_UPDATE_TEMPLATE.md` — evidence checklist for a workstream-stage or readiness-gate update.
 - `GITHUB_PROJECTS_OPERATING_GUIDE.md` — deployed tracking metadata, permission limitations, and the target GitHub Projects design; it must distinguish configured state from planned state.
+- `GOVERNANCE_REMEDIATION_PROGRAM_PLAN.md` — the founder-approved 2026-07-20 remediation program for enforcement gaps, doc fragmentation, stranded work, and tracking automation; checked off only on merged evidence.
 
 ## Authority
 

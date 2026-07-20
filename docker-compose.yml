@@ -10,6 +10,7 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+        PLATFORM_API_INTERNAL_URL: http://server:3000
     init: true
     ports:
       - "127.0.0.1:3001:3001"

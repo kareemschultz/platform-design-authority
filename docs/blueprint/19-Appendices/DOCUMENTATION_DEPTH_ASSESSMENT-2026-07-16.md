@@ -1,5 +1,5 @@
 ---
-document_id: PDA-APP-024
+document_id: PDA-APP-027
 title: Documentation Depth and Readiness Assessment 2026-07-16
 version: 0.19.0
 status: Draft

@@ -1,5 +1,5 @@
 ---
-document_id: PDA-REV-016
+document_id: PDA-REV-023
 title: Document Class Adoption Sample Review
 version: 0.1.0
 status: Draft

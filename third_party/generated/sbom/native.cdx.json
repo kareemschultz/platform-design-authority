@@ -1,0 +1,844 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:npm/%40expo/ui@57.0.4",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "414a2d98a7dbec69957fe1521ef01d1dea282fb24d498396defe1ac5a8a1e390071a641550ace1e7cbb3703e22da7ddf78af6d9455432131ca0330456a09893a"
+        }
+      ],
+      "name": "@expo/ui",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@expo/ui"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@expo/ui\",\"selector\":\"~57.0.1\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40expo/ui@57.0.4",
+      "type": "library",
+      "version": "57.0.4"
+    },
+    {
+      "bom-ref": "pkg:npm/%40expo/vector-icons@15.1.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "22ed9591ca08e6fca06ed627826ee36f889fc4494d557418743ad8913ed408422228b7969d0634c1fd9984767e5aba3a49ce536ae9a92943aa0d1a4b8b9ae4bf"
+        }
+      ],
+      "name": "@expo/vector-icons",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@expo/vector-icons"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@expo/vector-icons\",\"selector\":\"^15.1.1\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40expo/vector-icons@15.1.1",
+      "type": "library",
+      "version": "15.1.1"
+    },
+    {
+      "bom-ref": "pkg:npm/%40orpc/client@1.14.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "ff296833debfe99dea9661205b8fd53185278715db0abea520988a4879acbe180a730ad43ce3c9acbde9d19a48b73e52295b504b05c8853e4a713ff7bdafc07b"
+        }
+      ],
+      "name": "@orpc/client",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@orpc/client"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@orpc/client\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40orpc/client@1.14.7",
+      "type": "library",
+      "version": "1.14.7"
+    },
+    {
+      "bom-ref": "pkg:npm/%40orpc/tanstack-query@1.14.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "70d39d1f0c60ebe087384f50a95b5a5843cc3102ef633b35f71648b395faf5482611e856cbfcebb6612b6f10ddcddedada94c27195c370557b92497fd7691ed1"
+        }
+      ],
+      "name": "@orpc/tanstack-query",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@orpc/tanstack-query"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@orpc/tanstack-query\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40orpc/tanstack-query@1.14.7",
+      "type": "library",
+      "version": "1.14.7"
+    },
+    {
+      "bom-ref": "pkg:npm/%40stardazed/streams-text-encoding@1.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7f6675e4121ddede386bfbb6d72612197140902c8aa1c980c9dba8032eecc27678c487db69994e5ac825cbf8c334d3ae8fa85840def651a0517b767fb4e1dfaa"
+        }
+      ],
+      "name": "@stardazed/streams-text-encoding",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@stardazed/streams-text-encoding"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@stardazed/streams-text-encoding\",\"selector\":\"^1.0.2\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40stardazed/streams-text-encoding@1.0.2",
+      "type": "library",
+      "version": "1.0.2"
+    },
+    {
+      "bom-ref": "pkg:npm/%40tanstack/react-query@5.101.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b1e0e4afa9331b35f5a2469a4ed64fb6003af3c0833e55d4cf50bac52834112aa7d3856e73cb65ad89acd6cddd7bece706a84f5711517e901f51ffba5ef7cf5a"
+        }
+      ],
+      "name": "@tanstack/react-query",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@tanstack/react-query"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@tanstack/react-query\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40tanstack/react-query@5.101.2",
+      "type": "library",
+      "version": "5.101.2"
+    },
+    {
+      "bom-ref": "pkg:npm/%40ungap/structured-clone@1.3.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "eb461169e9c241c56360428e706f36e3e0d1186210dd5284adc0680040c9673e5b288b36646f97fc7f4d93e43a115930264e50340a716eb73942d052c2dad702"
+        }
+      ],
+      "name": "@ungap/structured-clone",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "@ungap/structured-clone"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"@ungap/structured-clone\",\"selector\":\"^1.3.2\"}]"
+        }
+      ],
+      "purl": "pkg:npm/%40ungap/structured-clone@1.3.3",
+      "type": "library",
+      "version": "1.3.3"
+    },
+    {
+      "bom-ref": "pkg:npm/dotenv@17.4.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "9c8e14dd3a2db4a01c003f4b2ee77809bedbd90ced40c5047c76ef8531f4f5ba974f19d289ef169e33c02d5fd6302ac967a515fea1c9e8bd373aa3b72dc75867"
+        }
+      ],
+      "name": "dotenv",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "dotenv"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"dotenv\",\"selector\":\"catalog:\"}]"
+        }
+      ],
+      "purl": "pkg:npm/dotenv@17.4.2",
+      "type": "library",
+      "version": "17.4.2"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-constants@57.0.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "06085b665cf0167036d811b4096bfa5b6f73c7cc35f45a3360f7d2799dc78cc8ada32e1a02617516715b6e3612999cfa1c75d74d639fab0a1b38421a8257f3c6"
+        }
+      ],
+      "name": "expo-constants",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-constants"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-constants\",\"selector\":\"~57.0.2\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-constants@57.0.3",
+      "type": "library",
+      "version": "57.0.3"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-crypto@57.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "bddd247543b5e21f4280f720cdc47c9e6cbfc20cf7cd23a1426b9c9db0ddca7ff3f5e01e476201e4129a0ef3db83f96b213f8ac1e180579225acae4f645a9449"
+        }
+      ],
+      "name": "expo-crypto",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-crypto"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-crypto\",\"selector\":\"~57.0.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-crypto@57.0.0",
+      "type": "library",
+      "version": "57.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-font@57.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cc5f89ed6acd163ab20000f076f0e0905128210bfd0ea723279ec756cb4d107effed3c754e13c484aadaa1d1103b04a33185a2acffb8058b156dd6fefd9af841"
+        }
+      ],
+      "name": "expo-font",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-font"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-font\",\"selector\":\"~57.0.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-font@57.0.0",
+      "type": "library",
+      "version": "57.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-linking@57.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "03bf75d8dc42e226c38afedf37606e1160ab4c29a659d683f9b41ae2235d74f0ce6b74afb35603a1675b849b779a789268087d02750a4b631d15b3b8ce4f33f9"
+        }
+      ],
+      "name": "expo-linking",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-linking"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-linking\",\"selector\":\"~57.0.1\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-linking@57.0.2",
+      "type": "library",
+      "version": "57.0.2"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-network@57.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c5ddd3c57f2a205b3cc8bb36d829c8d0a727baf2520f2210349483f3fedc006a1efe90d4258ae67b58e591b01b82a823569db33a0f021b2bacf4ef866f323205"
+        }
+      ],
+      "name": "expo-network",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-network"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-network\",\"selector\":\"~57.0.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-network@57.0.0",
+      "type": "library",
+      "version": "57.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-router@57.0.4",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "255500c5a98e415ee81bfba8fe2b4bb91f202e2377f82d346e0fc93d4fa9fe0ffc331dcf71e6783206bfdf870b98c73e4444e98b91230bff80374989273396df"
+        }
+      ],
+      "name": "expo-router",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-router"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-router\",\"selector\":\"~57.0.2\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-router@57.0.4",
+      "type": "library",
+      "version": "57.0.4"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-splash-screen@57.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c727e5f93c25e448852b160b2a5a1f262febee6bddc70affc3da2551660be2f8841296023c2be3d98cd942d3e9b6bff03057b81be5fded6e36b115aaeb37527c"
+        }
+      ],
+      "name": "expo-splash-screen",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-splash-screen"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-splash-screen\",\"selector\":\"~57.0.1\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-splash-screen@57.0.2",
+      "type": "library",
+      "version": "57.0.2"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-status-bar@57.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c2ad5f0d50237ebcc28faee139cbc4906a6046b6fac5523ba120376dfb10d3c48593c8a5eef1a2c49abec7211bb5d72b23d08388d290ad3dd9223827c866db04"
+        }
+      ],
+      "name": "expo-status-bar",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-status-bar"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-status-bar\",\"selector\":\"~57.0.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-status-bar@57.0.0",
+      "type": "library",
+      "version": "57.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-system-ui@57.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8e4191634450b2770485a08f76888d6d108f01ef2ae6416bacc6e488bafba74a0530c63c2cebe248a0695172e7bb0cccd601c2fc9e77d6d9edae18fe9f0a4564"
+        }
+      ],
+      "name": "expo-system-ui",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-system-ui"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-system-ui\",\"selector\":\"~57.0.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-system-ui@57.0.0",
+      "type": "library",
+      "version": "57.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/expo-web-browser@57.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "27e91002a6c7e36dc67ba617ad04d52a4987f9c4b64928e773ba1ca110e38667d9dbe5d20575f73a076ce7f6842a334a51eece6ed3cc915abdb966d726fe011b"
+        }
+      ],
+      "name": "expo-web-browser",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo-web-browser"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo-web-browser\",\"selector\":\"~57.0.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo-web-browser@57.0.0",
+      "type": "library",
+      "version": "57.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/expo@57.0.4",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e705b4491e8e9c6521f943dbdc95a515300bdb622005c5f7e91aa87e32c01f602e16ac40229608770afd05847d5a5df1c887b4b7d942a0c408665008654350be"
+        }
+      ],
+      "name": "expo",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "expo"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"expo\",\"selector\":\"~57.0.1\"}]"
+        }
+      ],
+      "purl": "pkg:npm/expo@57.0.4",
+      "type": "library",
+      "version": "57.0.4"
+    },
+    {
+      "bom-ref": "pkg:npm/react-dom@19.2.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c842eee1698b3f0e4caff966784a68c79af0dd111369c13ef89807a90cddd9d83e61b26e6adde31f88a781cf963d98716a817376ff72df71be17b365e4ed0606"
+        }
+      ],
+      "name": "react-dom",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "native/react-dom"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-dom\",\"selector\":\"19.2.3\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-dom@19.2.3",
+      "type": "library",
+      "version": "19.2.3"
+    },
+    {
+      "bom-ref": "pkg:npm/react-native-gesture-handler@2.32.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b9820c38a94a10d391ab6480044fa32236cf53e87923fb1029cab6bf5eb346af38f27c04a757d6455c0c2f8416aa28dcf14717242db9a39e12f0641de0c7f638"
+        }
+      ],
+      "name": "react-native-gesture-handler",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-native-gesture-handler"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-native-gesture-handler\",\"selector\":\"~2.32.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-native-gesture-handler@2.32.0",
+      "type": "library",
+      "version": "2.32.0"
+    },
+    {
+      "bom-ref": "pkg:npm/react-native-reanimated@4.5.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "fa23dfbcadf83ca2983ffa7fe136819621646dfbe318322f5ee8a26b1bc848fe62a7bb167a0be569cc14fee015eb3343492997d2d0f2111ecfbab3cc2860e2a4"
+        }
+      ],
+      "name": "react-native-reanimated",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-native-reanimated"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-native-reanimated\",\"selector\":\"4.5.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-native-reanimated@4.5.0",
+      "type": "library",
+      "version": "4.5.0"
+    },
+    {
+      "bom-ref": "pkg:npm/react-native-safe-area-context@5.7.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "ffdfccb50cfc383a618ec2dd67e199008702fd1b68a96f4479285fed4be77e09bfa7362b27be72dcf57f275c2e015d53e43c9ee7282ae04016db446806ad0005"
+        }
+      ],
+      "name": "react-native-safe-area-context",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-native-safe-area-context"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-native-safe-area-context\",\"selector\":\"~5.7.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-native-safe-area-context@5.7.0",
+      "type": "library",
+      "version": "5.7.0"
+    },
+    {
+      "bom-ref": "pkg:npm/react-native-screens@4.25.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "d4d8f57eeb0577eac830a53fa82f7218a546fb7a1f875d5ddce74140a2f5895bd07cabdc07cbe1bd31907f64e47f15b76da9b137e8426485e636e5349919320e"
+        }
+      ],
+      "name": "react-native-screens",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-native-screens"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-native-screens\",\"selector\":\"4.25.2\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-native-screens@4.25.2",
+      "type": "library",
+      "version": "4.25.2"
+    },
+    {
+      "bom-ref": "pkg:npm/react-native-web@0.21.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "48edadf7fd7bccce2212716f96ed8303d8ea35bccd86850ff8022d92808ec8598330e8549c10739c10c260df767c675f0247d0956ccfa1ecfafb32f114db1912"
+        }
+      ],
+      "name": "react-native-web",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-native-web"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-native-web\",\"selector\":\"~0.21.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-native-web@0.21.2",
+      "type": "library",
+      "version": "0.21.2"
+    },
+    {
+      "bom-ref": "pkg:npm/react-native-worklets@0.10.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "26113a2310dfea269b0b4aaedfe4c0280e2ff51965b979a822780f417eff4140727fbe657ebb0767afdd421ca31169e9d441108b0cf3f02a5ec35e3465c7b00f"
+        }
+      ],
+      "name": "react-native-worklets",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-native-worklets"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-native-worklets\",\"selector\":\"0.10.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-native-worklets@0.10.0",
+      "type": "library",
+      "version": "0.10.0"
+    },
+    {
+      "bom-ref": "pkg:npm/react-native@0.86.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "d7b00b87f75de803b8a6039598e3b9031965e4f6c4ac4a375c5c8ba24cb35babacca2f8e4a12043f0516dbac0b3e585589f8123887c40821f458dfb422ab49d7"
+        }
+      ],
+      "name": "react-native",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "react-native"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react-native\",\"selector\":\"0.86.0\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react-native@0.86.0",
+      "type": "library",
+      "version": "0.86.0"
+    },
+    {
+      "bom-ref": "pkg:npm/react@19.2.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "2aefe18586d58ce4275c3645bf6f9189b98b146c0575e78a1c570e4e5aedef1a65067c9ae4e1a7fe12110eca8389251c7ce46c0c2ecc3f1c28ae4f23070b0858"
+        }
+      ],
+      "name": "react",
+      "properties": [
+        {
+          "name": "pda:license-conclusion",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:lock-key",
+          "value": "native/react"
+        },
+        {
+          "name": "pda:declared-dependencies-json",
+          "value": "[{\"name\":\"react\",\"selector\":\"19.2.3\"}]"
+        }
+      ],
+      "purl": "pkg:npm/react@19.2.3",
+      "type": "library",
+      "version": "19.2.3"
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "incomplete",
+      "assemblies": [
+        "urn:pda:workspace:apps/native"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:npm/%40expo/ui@57.0.4",
+        "pkg:npm/%40expo/vector-icons@15.1.1",
+        "pkg:npm/%40orpc/client@1.14.7",
+        "pkg:npm/%40orpc/tanstack-query@1.14.7",
+        "pkg:npm/%40stardazed/streams-text-encoding@1.0.2",
+        "pkg:npm/%40tanstack/react-query@5.101.2",
+        "pkg:npm/%40ungap/structured-clone@1.3.3",
+        "pkg:npm/dotenv@17.4.2",
+        "pkg:npm/expo-constants@57.0.3",
+        "pkg:npm/expo-crypto@57.0.0",
+        "pkg:npm/expo-font@57.0.0",
+        "pkg:npm/expo-linking@57.0.2",
+        "pkg:npm/expo-network@57.0.0",
+        "pkg:npm/expo-router@57.0.4",
+        "pkg:npm/expo-splash-screen@57.0.2",
+        "pkg:npm/expo-status-bar@57.0.0",
+        "pkg:npm/expo-system-ui@57.0.0",
+        "pkg:npm/expo-web-browser@57.0.0",
+        "pkg:npm/expo@57.0.4",
+        "pkg:npm/react-dom@19.2.3",
+        "pkg:npm/react-native-gesture-handler@2.32.0",
+        "pkg:npm/react-native-reanimated@4.5.0",
+        "pkg:npm/react-native-safe-area-context@5.7.0",
+        "pkg:npm/react-native-screens@4.25.2",
+        "pkg:npm/react-native-web@0.21.2",
+        "pkg:npm/react-native-worklets@0.10.0",
+        "pkg:npm/react-native@0.86.0",
+        "pkg:npm/react@19.2.3"
+      ],
+      "ref": "urn:pda:workspace:apps/native"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "urn:pda:workspace:apps/native",
+      "name": "native",
+      "properties": [
+        {
+          "name": "pda:distribution-authority",
+          "value": "none"
+        },
+        {
+          "name": "pda:inventory-scope",
+          "value": "direct-declared-runtime-dependencies"
+        },
+        {
+          "name": "pda:sbom-type",
+          "value": "declared-manifest"
+        },
+        {
+          "name": "pda:not-post-build-or-artifact-sbom",
+          "value": "true"
+        },
+        {
+          "name": "pda:license-conclusions",
+          "value": "NOASSERTION"
+        },
+        {
+          "name": "pda:source-lockfile",
+          "value": "bun.lock"
+        },
+        {
+          "name": "pda:serial-number-policy",
+          "value": "omitted-for-byte-reproducible-source-baseline;artifact-boms-must-mint-rfc4122"
+        }
+      ],
+      "type": "application",
+      "version": "1.0.0"
+    }
+  },
+  "specVersion": "1.6",
+  "version": 1
+}

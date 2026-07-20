@@ -1,5 +1,6 @@
 {
   "name": "server",
+  "private": true,
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
@@ -12,7 +13,8 @@
     "test": "bun test src/*.test.ts",
     "db:migrate": "bun run composition/migrate.ts",
     "db:test": "bun test composition/*.integration.test.ts",
-    "db:test:node": "node node_modules/tsx/dist/cli.mjs composition/persistence.node-check.ts && node node_modules/tsx/dist/cli.mjs composition/ws1-critical.node-check.ts"
+    "db:test:node": "node node_modules/tsx/dist/cli.mjs composition/persistence.node-check.ts && node node_modules/tsx/dist/cli.mjs composition/ws1-critical.node-check.ts",
+    "e2e:seed": "bun run composition/web-experience.fixture.ts"
   },
   "dependencies": {
     "@meridian/contracts-capabilities": "workspace:*",
@@ -31,10 +33,13 @@
     "@meridian/persistence-platform-audit-postgres": "workspace:*",
     "@meridian/persistence-platform-entitlements-postgres": "workspace:*",
     "@meridian/persistence-platform-identity-postgres": "workspace:*",
+    "@meridian/persistence-platform-import-export-postgres": "workspace:*",
     "@meridian/persistence-platform-numbering-postgres": "workspace:*",
     "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
     "@meridian/persistence-party-postgres": "workspace:*",
     "@meridian/platform-events": "workspace:*",
+    "@meridian/platform-import-export": "workspace:*",
+    "@meridian/platform-numbering": "workspace:*",
     "@meridian/platform-audit": "workspace:*",
     "@meridian/platform-tenancy": "workspace:*",
     "@meridian/tooling-env": "workspace:*",

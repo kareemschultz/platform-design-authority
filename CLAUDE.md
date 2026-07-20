@@ -186,7 +186,17 @@ bun run db:start            # local PostgreSQL 18 via Docker
 bun run db:migrate          # apply committed Drizzle migrations
 ```
 
-Every change must leave ALL gates green before a PR: `check-types`, `test`, `check`, `python scripts/validate_docs.py`, and `python scripts/generate_registries.py --check`. CI additionally runs the live Docker stack, migration freshness, and API/web health probes — do not merge on a red or skipped gate.
+Every change must leave ALL gates green before a PR. Run them with one command:
+
+```bash
+bun run gates                    # the whole CI gate set, with a pass/fail table
+bun run gates -- --group docs    # only one group (docs, generated, workspace, …)
+bun run gates -- --list          # what runs, and what CI runs that this cannot
+```
+
+`bun run check-types`, `test`, `check`, `python scripts/validate_docs.py`, and `python scripts/generate_registries.py --check` are a subset. CI runs more than twenty validators — document indexes, product documentation, document classes, capability readiness, operational readiness, ratification waves, research registration, and others — so passing `validate_docs.py` alone does not mean a branch is green. `scripts/test_run_gates.py` keeps the runner in step with the workflow files.
+
+CI additionally runs the live Docker stack, migration freshness, and API/web health probes, which `bun run gates` reports as not run locally — do not merge on a red or skipped gate.
 
 Code conventions:
 

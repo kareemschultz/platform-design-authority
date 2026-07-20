@@ -79,6 +79,9 @@ jobs:
       - name: Test repository-root scanning invariant
         run: python -m unittest scripts/test_repository_scanning.py
 
+      - name: Test local gate-runner parity with these workflows
+        run: python -m unittest scripts/test_run_gates.py
+
       - name: Test and validate canonical document indexes
         run: |
           python -m unittest scripts/test_validate_document_indexes.py

@@ -1,0 +1,126 @@
+# Labels-as-code source of truth for this repository.
+#
+# scripts/sync_labels.py reconciles GitHub's live labels to exactly this
+# file (create missing, update color/description drift, warn on any label
+# present on GitHub but not listed here — it does not delete unlisted
+# labels, since a label attached to open issues/PRs is real repository
+# state this file should catch up to, not silently erase).
+#
+# To add or change a label: edit this file, then run
+#   python scripts/sync_labels.py --apply
+# Exported from live GitHub state on 2026-07-20.
+
+- name: backend
+  color: "1D76DB"
+  description: Backend implementation work
+- name: blocked
+  color: "B60205"
+  description: Cannot proceed until a dependency clears
+- name: bug
+  color: "d73a4a"
+  description: Something isn't working
+- name: contracts
+  color: "1D76DB"
+  description: Contract, schema, or registry work
+- name: controlled-prototype
+  color: "0E8A16"
+  description: Scoped to controlled-prototype depth only
+- name: data
+  color: "1D76DB"
+  description: Persistence or data-model work
+- name: documentation
+  color: "0075ca"
+  description: Improvements or additions to documentation
+- name: duplicate
+  color: "cfd3d7"
+  description: This issue or pull request already exists
+- name: enhancement
+  color: "a2eeef"
+  description: New feature or request
+- name: external-gate
+  color: "5319E7"
+  description: Blocked on a founder, legal, provider, or customer gate
+- name: founder-decision
+  color: "5319E7"
+  description: Blocked on a Founder Decision Register entry
+- name: frontend
+  color: "1D76DB"
+  description: Frontend implementation work
+- name: good first issue
+  color: "7057ff"
+  description: Good for newcomers
+- name: help wanted
+  color: "008672"
+  description: Extra attention is needed
+- name: infrastructure
+  color: "1D76DB"
+  description: Infrastructure or platform-ops work
+- name: invalid
+  color: "e4e669"
+  description: This doesn't seem right
+- name: native
+  color: "1D76DB"
+  description: Native/Expo implementation work
+- name: operations
+  color: "1D76DB"
+  description: Operational or runbook work
+- name: production-readiness
+  color: "5319E7"
+  description: Production-readiness gate, separate from implementation completion
+- name: program-status-stale
+  color: "B60205"
+  description: Auto-opened when the scheduled Program Status Freshness check fails outside a PR/push context
+- name: question
+  color: "d876e3"
+  description: Further information is requested
+- name: research
+  color: "1D76DB"
+  description: Research or discovery-only work
+- name: risk
+  color: "D93F0B"
+  description: Tracked project risk
+- name: risk-register
+  color: "D93F0B"
+  description: Tracked in ARCHITECTURE_RISK_REGISTER
+- name: security
+  color: "B60205"
+  description: Security-relevant work
+- name: technical-debt
+  color: "D93F0B"
+  description: Recorded technical debt
+- name: testing
+  color: "1D76DB"
+  description: Test coverage or quality-gate work
+- name: ux
+  color: "1D76DB"
+  description: UX/design-system work
+- name: wontfix
+  color: "ffffff"
+  description: This will not be worked on
+- name: workstream
+  color: "0E8A16"
+  description: First-slice implementation workstream
+- name: ws0
+  color: "0E8A16"
+  description: Workstream 0 — Scaffold and contracts
+- name: ws1
+  color: "0E8A16"
+  description: Workstream 1 — Identity, tenancy, Party, authorization
+- name: ws2
+  color: "0E8A16"
+  description: Workstream 2 — Catalog and inventory
+- name: ws3
+  color: "0E8A16"
+  description: Workstream 3 — POS cash
+- name: ws4
+  color: "0E8A16"
+  description: Workstream 4 — Stored value
+- name: ws5
+  color: "0E8A16"
+  description: Workstream 5 — Offline sync
+- name: ws6
+  color: "0E8A16"
+  description: Workstream 6 — Provider adapter
+- name: ws7
+  color: "0E8A16"
+  description: Workstream 7 — Recovery and operations

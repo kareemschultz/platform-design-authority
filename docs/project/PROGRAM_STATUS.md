@@ -4,9 +4,9 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at `15417950925b78ad267e54fe6b3550010a46f60d`, which includes WS2 PR7 merged as `81e903b27bf41785106775afb33f9f88738e39b9`, the independent exact-`main` whole-project audit PDA-REV-013, PR #80's audited remediation, PR #89's founder-decision recording, and PR #91's independently concurred P-W2a closeout synchronization
+**Evidence cutoff:** `main` at `5e0fc149b3636561c1ff90e7fbd900101d48a41e`, which includes WS2 PR7 merged as `81e903b27bf41785106775afb33f9f88738e39b9`, the independent exact-`main` whole-project audit PDA-REV-013, PR #80's audited remediation, PR #89's founder-decision recording, PR #91's independently concurred P-W2a closeout synchronization, the competitive-intelligence and domain-research program (PR #75), and the governance-remediation program's tooling and documentation PRs (#112–#134)
 
-**Last updated:** 2026-07-17
+**Last updated:** 2026-07-20 — re-verified against this cutoff: all 15 issue numbers this document cites were checked live and every closed/open state matches; no workstream stage, capability-evidence count, or weighted percentage changed, since the intervening PRs are governance tooling and research documentation, not workstream implementation.
 
 This dashboard is a non-authoritative program-control summary. It is subordinate to the authority order in `AGENTS.md`, and it cannot ratify a document, close a risk, or replace evidence in an ADR, approved specification, registry, review disposition, issue, or pull request.
 

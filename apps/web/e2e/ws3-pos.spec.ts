@@ -136,6 +136,99 @@ test("register open renders and completes a real commerce.register.open round-tr
 	).toBeVisible();
 });
 
+/**
+ * WS3 remediation R3, Finding G, closing the gap the R3 lead session's own
+ * verification pass found AFTER the directive's six named ungated controls
+ * were fixed: `RegisterOpenPage` still called TanStack Query's raw
+ * `useMutation` directly (pre-fix), relying solely on the submit button's
+ * `disabled={... || !workspace.isOnline}` attribute as the correctness
+ * boundary. That is a real gap, not defense-in-depth theater — `disabled`
+ * is a React re-render away from `workspace.isOnline`'s own state update
+ * (the `offline`/`online` window events it listens for), so a submit fired
+ * in that window, or by any future regression that drops the `disabled`
+ * clause, would still hit `networkMode: 'online'`'s default PAUSE-and-
+ * auto-replay-on-reconnect behavior with no further confirmation.
+ *
+ * This test proves the fix by bypassing the disabled button entirely —
+ * `HTMLFormElement.requestSubmit()` fires the form's real submit event
+ * (and therefore `useForm`'s `onSubmit` -> `open.mutateAsync`) regardless
+ * of any particular submit control's `disabled` state, exactly simulating
+ * "the disabled attribute did not prevent this call" for the code path
+ * `useOnlineGatedMutation` is supposed to make unreachable-with-effect.
+ * PRE-FIX (raw `useMutation`), this exact sequence pauses a real mutation
+ * in the cache and auto-fires a genuine `commerce.registers.open` call the
+ * instant `setOffline(false)` + the `online` event fire below — this test
+ * asserts zero calls, both immediately after the offline submit and again
+ * after reconnecting, then proves a real online retry still succeeds.
+ */
+test("offline reconnect never replays a rejected mutation: register open requires a real online retry, not automatic execution on reconnect", async ({
+	page,
+}) => {
+	test.setTimeout(60_000);
+	const registerId = `register_offline_open_${Date.now()}`;
+	await signIn(page, "/operations/pos/registers/new");
+	await selectLocation(page, "Georgetown Browser Store");
+	await expect(
+		page.getByRole("heading", { name: "Open register" })
+	).toBeVisible();
+	await page.getByLabel("Register ID").fill(registerId);
+	await page.getByLabel("Opening float (GYD)").fill("60.00");
+
+	let openCallCount = 0;
+	await page.route("**/rpc/commerce/registers/open", async (route) => {
+		openCallCount += 1;
+		await route.continue();
+	});
+
+	await page.context().setOffline(true);
+	await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+	await expect(
+		page.getByText("Offline", { exact: true }).first()
+	).toBeVisible();
+	// The button itself is disabled (asserted by the sibling
+	// "online-only WS3 mutations fail closed" test) — this bypasses it to
+	// exercise the mutation-level gate directly, the actual guarantee.
+	await page.evaluate(() => {
+		document
+			.querySelector<HTMLFormElement>("#register-open-form")
+			?.requestSubmit();
+	});
+	await expect(
+		page.getByRole("alert").filter({ hasText: CONNECTION_REQUIRED_PATTERN })
+	).toBeVisible();
+	// Still on the open-register form — a rejected offline submit never
+	// advances to the "Register opened" success view.
+	await expect(
+		page.getByRole("heading", { name: "Open register" })
+	).toBeVisible();
+	expect(openCallCount).toBe(0);
+
+	await page.context().setOffline(false);
+	await page.evaluate(() => window.dispatchEvent(new Event("online")));
+	// Bounded wait for any reconnection-triggered auto-replay to have had a
+	// real chance to fire before asserting it did not.
+	await page.waitForTimeout(1500);
+	expect(openCallCount).toBe(0);
+	await expect(
+		page.getByRole("heading", { name: `Register ${registerId}` })
+	).toHaveCount(0);
+
+	// A real online retry from here still works — offline rejection is a
+	// deliberate gate, not a permanent lockout.
+	const openResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/commerce/registers/open")
+	);
+	await page.getByRole("button", { name: "Open register" }).click();
+	const openResponse = await openResponsePromise;
+	expect(openResponse.ok()).toBe(true);
+	expect(openCallCount).toBe(1);
+	await expect(
+		page.getByRole("heading", { name: `Register ${registerId}` })
+	).toBeVisible();
+});
+
 test("register session view records a cash movement and updates the running expected-cash tally", async ({
 	page,
 }) => {

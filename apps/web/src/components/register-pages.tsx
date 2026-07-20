@@ -5,7 +5,7 @@ import { Button } from "@meridian/ui-web/components/button";
 import { Label } from "@meridian/ui-web/components/label";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -61,7 +61,10 @@ const RegisterOpenValuesSchema = z.object({
 export function RegisterOpenPage() {
 	const workspace = useWorkspace();
 	const router = useRouter();
-	const open = useMutation(orpc.commerce.registers.open.mutationOptions());
+	const open = useOnlineGatedMutation(
+		orpc.commerce.registers.open.mutationOptions(),
+		workspace.isOnline
+	);
 	const [isDirty, setIsDirty] = useState(false);
 	const intentRef = useRef<ReturnType<typeof stableIntentKey> | null>(null);
 	const [opened, setOpened] = useState<RegisterSession | null>(null);

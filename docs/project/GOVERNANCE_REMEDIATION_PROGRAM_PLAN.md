@@ -26,17 +26,17 @@ Ordering: Phase 0 → PR-1 + sweep → **PR-2 (#75, hard blocker for Phases 4/6/
 
 ### Phase 0 — Retire the dead branch, baseline on `main` (local, no PR)
 
-- [ ] Delete local `chore/project-tracking-and-status-automation` (upstream gone; content superseded by main via PR #58+).
-- [ ] Remove `err.log`; establish a green gate baseline on `main` (`check-types`, `test`, `check`, `validate_docs.py`, `generate_registries.py --check`, `validate_program_status.py`).
+- [x] Delete local `chore/project-tracking-and-status-automation` (upstream gone; content superseded by main via PR #58+). Done 2026-07-20.
+- [x] Remove `err.log`; establish a green gate baseline on `main` (`check-types`, `test`, `check`, `validate_docs.py`, `generate_registries.py --check`, `validate_program_status.py`). Done 2026-07-20; the lint baseline was red until PR #114 (see PR-1).
 
 ### Phase 1 — Repo hygiene: everything lands on `main`
 
-- [ ] **PR-1** `chore(hygiene)`: gitignore `.codex/` and `.claude/worktrees/` (not all of `.claude/` — skills and settings stay tracked).
+- [x] **PR-1** `chore(hygiene)`: gitignore `.codex/` and `.claude/worktrees/` (not all of `.claude/` — skills and settings stay tracked). Merged as PR #114; it also fixed the then-broken local `bun run check` (nested worktree `biome.json` roots).
 - [ ] **Sweep** (checklist in PR-1's issue): classify every branch/worktree (`git branch --merged origin/main`, `gh pr list --state all --head`); remove worktrees and local branches confirmed merged; delete confirmed-merged remote branches. **Keep live WS3 work**: `claude/ws3-integration` and the `ws3-entry-authorization` worktree are governed by FDR-012 and are not debris.
 
 ### Phase 2 — Land PR #75 (competitive-intelligence corpus)
 
-- [ ] **PR-2**: determine why #75 stalled (`gh pr checks 75`); rebase onto `main` keeping CLAUDE.md and AGENTS.md byte-identical; reconcile with `docs/blueprint/20-Strategy/COMPETITIVE_INTELLIGENCE_AND_BENCHMARKING.md` and `docs/blueprint/20-Strategy/COMPETITOR_BENCHMARK_SCORECARD.md` (framework in 20-Strategy, corpus in 19-Competitive-Research, one operating register); regenerate registries; merge. If the rebase is unmanageable, split corpus-only from instruction/workflow edits.
+- [x] **PR-2**: merged 2026-07-20 as PR #75 after a full `main` merge-reconciliation: 29 conflicts resolved, eight duplicate `document_id` allocations reassigned above their family maxima (the direct motivation for PR-C), one delivery-state-coupled regression test decoupled onto controlled fixtures, and the richer program-status row format retained with `main`'s current numbers. Original scope for the record: determine why #75 stalled (`gh pr checks 75`); rebase onto `main` keeping CLAUDE.md and AGENTS.md byte-identical; reconcile with `docs/blueprint/20-Strategy/COMPETITIVE_INTELLIGENCE_AND_BENCHMARKING.md` and `docs/blueprint/20-Strategy/COMPETITOR_BENCHMARK_SCORECARD.md` (framework in 20-Strategy, corpus in 19-Competitive-Research, one operating register); regenerate registries; merge. If the rebase is unmanageable, split corpus-only from instruction/workflow edits.
 
 ### Phase 3 — Tracking automation completion
 
@@ -48,8 +48,8 @@ Ordering: Phase 0 → PR-1 + sweep → **PR-2 (#75, hard blocker for Phases 4/6/
 
 Added 2026-07-20 after the Phase 2 merge surfaced three instances of one defect class and two avoidable integration costs. These make every later phase cheaper and touch no application code, so they are safe to land alongside live workstream branches.
 
-- [x] **PR-A** `feat(tooling)`: `scripts/run_gates.py` (`bun run gates`) runs the CI gate set in one command with a pass/fail table, plus `scripts/test_run_gates.py`, which derives the command set from `.github/workflows/` and fails when a CI gate is neither declared nor recorded as deliberately skipped. Reconstructing the gate list by hand cost two failed CI rounds on PR #75; `validate_docs.py` passing is not the same as a green branch.
-- [ ] **PR-B** `fix(tooling)`: audit the remaining tree-walking scripts for the filesystem-versus-git-index defect. Three instances are known — nested `biome.json` breaking `bun run check` (#113), `validate_document_indexes.py` reporting 6479 false errors (#115), and Playwright artifacts scanned by ultracite (found independently by the WS3 branch). Prefer enumerating through the git index, which is also the correct definition of "a repository artifact", over per-directory deny lists.
+- [x] **PR-A** (merged as PR #118) `feat(tooling)`: `scripts/run_gates.py` (`bun run gates`) runs the CI gate set in one command with a pass/fail table, plus `scripts/test_run_gates.py`, which derives the command set from `.github/workflows/` and fails when a CI gate is neither declared nor recorded as deliberately skipped. Reconstructing the gate list by hand cost two failed CI rounds on PR #75; `validate_docs.py` passing is not the same as a green branch.
+- [x] **PR-B** `fix(tooling)`: audit the remaining tree-walking scripts for the filesystem-versus-git-index defect. Outcome (PRs #116 and #120): the audit of all nine tree-walking scripts found **no further live instances** — `validate_document_indexes.py` was fixed in #116, and the other two root-walking scripts were protected only by accidental dot-directory pruning. #120 therefore records the exclusion as a named invariant with `scripts/test_repository_scanning.py`, adversarially verified (stripping a prune makes the guard fail naming the file) and self-retiring (it fails with removal instructions if no script walks the root any more).
 - [ ] **PR-C** `feat(governance)`: fail a branch when a `document_id` it adds collides with one already on `origin/main`. Parallel branches each allocating the next free identifier produced eight collisions in the PR #75 merge, every one of which had to be reassigned by hand at integration time.
 - [ ] **PR-D** `feat(tooling)`: add a `--body-file` mode to `validate_pr_governance.py` so a pull-request body can be checked locally without fabricating a GitHub event payload with base and head SHAs.
 - [ ] **PR-E** `chore(tracking)`: report branches whose upstream is gone, and merged branches older than a threshold, on the Phase 3 schedule. A dead branch with a deleted upstream produced several audit findings that evaporated on re-verification against `origin/main`.
@@ -63,7 +63,9 @@ Also worth a deliberate decision rather than a change: the per-cell partial-evid
 ### Phase 5 — UI/UX enforcement (link to issue #110)
 
 - [ ] **PR-7** `ci(ui)`: extend the prohibited-surface grep in `meridian-prototype.yml` with premium-license/private-URL patterns (tuned against false positives, scope unchanged); add a required "UI changes" checklist to the PR template (ui-pattern-audit run, accessibility-review run, provenance recorded, no raw palette values).
-- [ ] **PR-8** `feat(governance)`: new `scripts/validate_ui_governance.py` + tests + `evidence/ui-provenance/` contract — (1) provenance JSON conformance to the registry template, (2) catalog "Platform Approved" entries must cite provenance + acceptance evidence, (3) raw-palette grep over `apps/**` and `packages/ui/**` with an honestly seeded allowlist burned down under #110. Wire into both workflows.
+- [ ] **PR-8** `feat(governance)`: new `scripts/validate_ui_governance.py` + tests + `evidence/ui-provenance/` contract — (1) provenance JSON conformance to the registry template, (2) catalog "Platform Approved" entries must cite provenance + acceptance evidence, (3) raw-palette grep over `apps/**` and `packages/**` with an honestly seeded allowlist burned down under #110. Wire into both workflows, and register each new workflow step in `scripts/run_gates.py` or the parity gate fails (proved on PR #120).
+  - **Seed evidence, audited 2026-07-20 on `main`:** zero Tailwind palette utility classes (`bg-red-500` style) anywhere in `apps/` or `packages/`; hex literals only in `apps/native/lib/constants.ts`, `apps/web/src/app/manifest.ts`, and `packages/ui-web/core/src/styles/globals.css`. Those three files are the entire initial allowlist — they are token/config sources, not components. The validator can therefore start strict with no burn-down debt.
+- [ ] **PR-8b** `docs(skill)`: harden the `frontend-architecture` skill (both `.claude/skills/` and `.agents/skills/` mirrors) with the visual-token/palette discipline, the audited baseline above, and the paid-asset component-acquisition order (platform-owned → shadcn Studio Pro MCP → Mobbin Pro → hand-build, with provenance). Delivered on the raw-palette audit branch alongside this plan update; check off with that PR's number on merge.
 
 ### Phase 6 — Component intake fast path
 
@@ -83,6 +85,23 @@ Also worth a deliberate decision rather than a change: the per-cell partial-evid
 ### Deferred (file as issues, not PRs)
 
 Physical doc moves to 19-Appendices; dashboard/motion doc merges; Biome GritQL raw-color plugin; issue/PR→Project auto-add (requires founder click — API cannot mutate Projects views/workflows); branch-protection ruleset (#61, founder).
+
+## Implementation-agent briefing (updated 2026-07-20, post PR #120)
+
+Resume state for any agent continuing this program. Verify against live `origin/main` before acting — do not trust a session checkout (see the 2026-07-20 Engineering Notebook entry).
+
+**Merged so far:** #112 (this plan + lessons), #114 (PR-1), #75 (PR-2), #118 (PR-A), #116 + #120 (PR-B). CLAUDE.md and AGENTS.md are byte-identical on `main` as of PR #120's merge — an earlier "drifted again post-#75" observation was an artifact of a stale checkout, which is exactly why PR-6's automated parity gate is still wanted.
+
+**Next work, in order:**
+
+1. **Phase 1 sweep** — still pending; roughly 26 worktrees and their branches remain. Cautions: `claude/ws3-integration` and `ws3-entry-authorization` are live FDR-012 work (an active agent session has pushed to ws3-integration as recently as 2026-07-20) — never remove or edit them; `codex/issue-93-third-party-baseline` held staged work for open issue #93 — re-check before deleting; `git worktree remove` needs `--force` for `node_modules` leftovers; confirm merged state via `gh pr list --state merged --head <branch>` before deleting any remote branch.
+2. **PR-C, PR-D, PR-E** (Phase 3.5 remainder) — independent of each other; PR-C first, since every parallel docs branch risks the collision class it prevents.
+3. **PR-3/4/5** (Phase 3 tracking automation) — parallel-safe.
+4. **PR-6** (Phase 4 parity gate + terminology fixes).
+5. **PR-7/PR-8** (Phase 5) — the palette allowlist is already audited and seeded above; PR-8 needs no discovery work, only implementation.
+6. **PR-9 onward** as planned.
+
+**Operating rules for implementers:** follow §12 discipline (one issue + branch + PR per change; `bun run gates` before every PR; Codex bot review checked, verified, and resolved after every push). New CI workflow steps must be registered in `scripts/run_gates.py` in the same PR. Standing founder authorization covers merging this program's PRs on green CI; readiness-state changes, WS3 actions, and application behaviour still require an explicit ask. The WS3 remediation running on `claude/ws3-integration` is a separate program with its own review gates — do not fold its items into this plan or vice versa. Known residue: `biome.json` on `main` still sets `vcs.useIgnoreFile: false`, so gitignored generated artifacts (Playwright reports) fail `bun run check` when present on disk; the config fix rides the WS3 branch — until it lands, delete `apps/web/playwright-report` and `apps/web/test-results` before running the lint gate.
 
 ## Verification standard (every PR)
 

@@ -66,3 +66,43 @@ export function requireLegalEntityScope(input: {
 		);
 	}
 }
+
+/**
+ * WS3 remediation R3, cycle 1 (remediation-of-remediation). `requireLegal
+ * EntityScope` above is unchanged and still fails closed on a falsy
+ * `contextLegalEntityId` — that policy is correct and frozen. The bug was
+ * one layer up, in what `finance-handoff.ts`'s `requireExportContext` PASSED
+ * as `contextLegalEntityId`: it read `context.legalEntityId` directly, and
+ * NO code path in this system can ever populate that field for a real
+ * session. `packages/platform/tenancy/src/index.ts`'s `setActiveContext` —
+ * the only writer of an `ActiveContextRecord` — unconditionally throws
+ * `TenancyError("not_found", "Legal-entity and branch context are not
+ * implemented in PR3")` the instant a caller supplies `legalEntityId`, so
+ * `context.legalEntityId` is always `undefined` in production, dev, and
+ * every e2e/browser session today. The R2 fix therefore rejected every real
+ * call to `createAccountantHandoffExport`, not merely unverified ones — a
+ * total outage of the transport path, invisible to R2's own DB-free
+ * pure-function unit test of `requireLegalEntityScope` alone (which never
+ * exercises `requireExportContext`'s wiring).
+ *
+ * This function is the fix: derive the effective legal-entity scope from
+ * `context.organizationId` whenever `context.legalEntityId` is unset. This
+ * is the directive's own documented alternative for Finding K ("prove the
+ * requested legal entity belongs to the active organization and actor
+ * authority") and matches `finance-handoff.ts`'s long-standing comment that
+ * "single legal entity per organization is the deployed reality this
+ * branch proves." `context.organizationId` is populated on every real
+ * active context (it is not optional, unlike `legalEntityId`) and cannot be
+ * forged by the caller — it comes from the verified tenancy context, never
+ * from request input — so a caller-supplied `legalEntityId` that does not
+ * match their own organization is still rejected by `requireLegalEntity
+ * Scope` exactly as R2 intended. If a real Legal Entity domain later lets
+ * `setActiveContext` populate `legalEntityId` for real, that value is
+ * preferred first and this fallback becomes a no-op automatically.
+ */
+export function resolveContextLegalEntityId(context: {
+	legalEntityId?: string | null;
+	organizationId: string;
+}): string {
+	return context.legalEntityId || context.organizationId;
+}

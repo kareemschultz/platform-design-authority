@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { requireLegalEntityScope } from "../composition/legal-entity-scope";
+import {
+	requireLegalEntityScope,
+	resolveContextLegalEntityId,
+} from "../composition/legal-entity-scope";
 
 /**
  * WS3 remediation R2, Finding K (legal-entity export scope). Deliberately a
@@ -104,5 +107,117 @@ describe("legal-entity-scope: WS3 remediation R2, Finding K", () => {
 			message: expect.stringContaining("legalEntityId is required"),
 			name: "ExportError",
 		});
+	});
+});
+
+/**
+ * WS3 remediation R3, cycle 1 (remediation-of-remediation). The R2 fix
+ * above is correct in isolation, but `finance-handoff.ts`'s
+ * `requireExportContext` fed it `context.legalEntityId` DIRECTLY — and no
+ * code path in this system can ever populate that field for a real
+ * session (`packages/platform/tenancy/src/index.ts`'s `setActiveContext`,
+ * the only writer of an active-context row, unconditionally throws when a
+ * caller supplies `legalEntityId`: "Legal-entity and branch context are
+ * not implemented in PR3"). So the R2 fix rejected 100% of real
+ * `createAccountantHandoffExport` calls, not just unverified ones — a
+ * total outage on the transport path
+ * (`financeHandoffTransportApplication` -> `requireExportContext`), caught
+ * by this stage's e2e lane (`apps/web/e2e/ws3-pos.spec.ts` "handoff
+ * export"), not by R2's own coverage: the tests above exercise
+ * `requireLegalEntityScope` as a pure function and never touch the wiring
+ * that decides WHAT gets passed as `contextLegalEntityId`.
+ *
+ * `resolveContextLegalEntityId` is the fix: derive the scope from
+ * `context.organizationId` (always populated, never caller-forgeable)
+ * whenever `context.legalEntityId` is unset. These tests reproduce the
+ * exact call `requireExportContext` now makes end to end, proving both
+ * that the fix restores the feature for a legitimate same-organization
+ * caller AND that it does not resurrect Finding K's original hole (an
+ * arbitrary spoofed value still gets rejected).
+ */
+describe("legal-entity-scope: WS3 remediation R3 cycle 1 (transport-path outage fix)", () => {
+	test("PRE-FIX REPRODUCTION: feeding context.legalEntityId directly (R2's wiring) throws for EVERY real session, matching legalEntityId or not — this is the outage", () => {
+		const context = {
+			legalEntityId: undefined,
+			organizationId: "organization_ws2_browser_0001",
+		};
+		let caught: unknown;
+		try {
+			requireLegalEntityScope({
+				// The R2 wiring, reproduced verbatim: reads context.legalEntityId
+				// directly instead of resolving it.
+				contextLegalEntityId: context.legalEntityId,
+				requestLegalEntityId: context.organizationId,
+			});
+		} catch (error) {
+			caught = error;
+		}
+		expect(caught).toMatchObject({
+			code: "validation",
+			message: expect.stringContaining("Legal-entity scope is required"),
+			name: "ExportError",
+		});
+	});
+
+	test("THE FIX: a context with no legalEntityId (every real session today) resolves to organizationId, and a request matching the caller's own organization now succeeds", () => {
+		const context = {
+			legalEntityId: undefined,
+			organizationId: "organization_ws2_browser_0001",
+		};
+		expect(() =>
+			requireLegalEntityScope({
+				contextLegalEntityId: resolveContextLegalEntityId(context),
+				requestLegalEntityId: "organization_ws2_browser_0001",
+			})
+		).not.toThrow();
+	});
+
+	test("THE FIX preserves Finding K's original protection: a legalEntityId that does not match the caller's own organization is still rejected (fails closed), not silently accepted as it was before R2", () => {
+		const context = {
+			legalEntityId: undefined,
+			organizationId: "organization_ws2_browser_0001",
+		};
+		let caught: unknown;
+		try {
+			requireLegalEntityScope({
+				contextLegalEntityId: resolveContextLegalEntityId(context),
+				requestLegalEntityId: "legal_entity_spoofed_by_attacker",
+			});
+		} catch (error) {
+			caught = error;
+		}
+		expect(caught).toMatchObject({
+			code: "validation",
+			message: expect.stringContaining("does not match the active context"),
+			name: "ExportError",
+		});
+	});
+
+	test("forward compatibility: a real (future) context.legalEntityId is preferred over organizationId, unchanged from R2 behavior", () => {
+		const context = {
+			legalEntityId: "legal_entity_real_0001",
+			organizationId: "organization_ws2_browser_0001",
+		};
+		expect(resolveContextLegalEntityId(context)).toBe("legal_entity_real_0001");
+	});
+
+	test("resolveContextLegalEntityId falls back to organizationId for null legalEntityId too, matching requireLegalEntityScope's own null handling", () => {
+		const context = {
+			legalEntityId: null,
+			organizationId: "organization_ws2_browser_0001",
+		};
+		expect(resolveContextLegalEntityId(context)).toBe(
+			"organization_ws2_browser_0001"
+		);
+	});
+
+	test("resolveContextLegalEntityId falls back to organizationId for an empty-string legalEntityId too", () => {
+		const context = {
+			legalEntityId: "",
+			organizationId: "organization_ws2_browser_0001",
+		};
+		expect(resolveContextLegalEntityId(context)).toBe(
+			"organization_ws2_browser_0001"
+		);
 	});
 });

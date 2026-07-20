@@ -4,7 +4,7 @@ import type { AccountantHandoffExport } from "@meridian/contracts-platform-api";
 import { Button } from "@meridian/ui-web/components/button";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -65,6 +65,7 @@ export function ExportCreatePage() {
 		orpc.exports.createAccountantHandoff.mutationOptions()
 	);
 	const [created, setCreated] = useState<AccountantHandoffExport | null>(null);
+	const [legalEntityIdTouched, setLegalEntityIdTouched] = useState(false);
 
 	const form = useForm({
 		defaultValues: {
@@ -94,6 +95,24 @@ export function ExportCreatePage() {
 		validators: { onSubmit: ExportValuesSchema },
 	});
 
+	// WS3 remediation R3, cycle 1 (remediation-of-remediation): the server
+	// now derives the authoritative legal-entity scope for this export from
+	// the caller's own active-context organizationId (see
+	// `apps/server/composition/legal-entity-scope.ts`
+	// `resolveContextLegalEntityId` and `finance-handoff.ts`
+	// `requireExportContext`) — a value that does not match it is rejected.
+	// Prefilling from the same organizationId means an ordinary user no
+	// longer has to know or guess a value to type; the field stays editable
+	// (not read-only) so a caller who intentionally needs to prove the
+	// rejection path can still do so.
+	const activeOrganizationId =
+		workspace.identity?.activeContext?.organizationId;
+	useEffect(() => {
+		if (activeOrganizationId && !legalEntityIdTouched) {
+			form.setFieldValue("legalEntityId", activeOrganizationId);
+		}
+	}, [activeOrganizationId, legalEntityIdTouched, form]);
+
 	if (created) {
 		return (
 			<OperationsPageFrame
@@ -120,7 +139,20 @@ export function ExportCreatePage() {
 					}}
 				>
 					<form.Field name="legalEntityId">
-						{(field) => <PosTextField field={field} label="Legal entity ID" />}
+						{(field) => (
+							<PosTextField
+								field={{
+									handleBlur: field.handleBlur,
+									handleChange: (value: string) => {
+										setLegalEntityIdTouched(true);
+										field.handleChange(value);
+									},
+									name: field.name,
+									state: field.state,
+								}}
+								label="Legal entity ID"
+							/>
+						)}
 					</form.Field>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<form.Field name="periodStart">

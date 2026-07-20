@@ -1984,7 +1984,19 @@ test("handoff export: generating an accountant export triggers a real download",
 	page,
 }) => {
 	await signIn(page, "/operations/pos/exports");
-	await page.getByLabel("Legal entity ID").fill(`legal_entity_${Date.now()}`);
+	// WS3 remediation R3, cycle 1 (remediation-of-remediation): this used to
+	// fill an arbitrary fabricated value (`legal_entity_${Date.now()}`) that
+	// was never bound to the signed-in session's active context. That was
+	// never valid to begin with — no code path in this system can ever bind
+	// a `legalEntityId` to an active context (`setActiveContext` throws if
+	// one is supplied; "not implemented in PR3") — so this stage's own
+	// Finding K hardening (`requireLegalEntityScope`, now fed a value
+	// derived from `context.organizationId` — see
+	// `apps/server/composition/legal-entity-scope.ts`
+	// `resolveContextLegalEntityId`) correctly rejects ANY value that is not
+	// the caller's own organization ID. `ORGANIZATION_ID` is exactly that
+	// value for the signed-in `FIXTURE_EMAIL` identity.
+	await page.getByLabel("Legal entity ID").fill(ORGANIZATION_ID);
 	await page.getByLabel("Period start (date)").fill("2026-07-01");
 	await page.getByLabel("Period end (date)").fill("2026-07-18");
 	const createResponsePromise = page.waitForResponse(
@@ -2004,6 +2016,36 @@ test("handoff export: generating an accountant export triggers a real download",
 	expect(download.suggestedFilename()).toMatch(
 		EXPORT_DOWNLOAD_FILENAME_PATTERN
 	);
+});
+
+test("handoff export: a legalEntityId that does not match the signed-in session's own organization is rejected, not silently accepted", async ({
+	page,
+}) => {
+	// WS3 remediation R3, cycle 1 adversarial coverage: proves the R3 fix
+	// (deriving legal-entity scope from context.organizationId) did not
+	// resurrect Finding K's original hole, where ANY caller-supplied
+	// legalEntityId — matching or spoofed — was silently accepted and
+	// stamped onto the export record unverified. A spoofed value distinct
+	// from the signed-in session's real organization must still be denied
+	// through the real transport path (real browser, real server, real DB —
+	// not a mocked/unit-level reproduction).
+	await signIn(page, "/operations/pos/exports");
+	await page
+		.getByLabel("Legal entity ID")
+		.fill("organization_spoofed_by_attacker_0001");
+	await page.getByLabel("Period start (date)").fill("2026-07-01");
+	await page.getByLabel("Period end (date)").fill("2026-07-18");
+	const createResponsePromise = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			response.url().endsWith("/rpc/exports/createAccountantHandoff")
+	);
+	await page.getByRole("button", { name: "Generate export" }).click();
+	const createResponse = await createResponsePromise;
+	expect(createResponse.ok()).toBe(false);
+	await expect(
+		page.getByRole("heading", { name: "Handoff export generated" })
+	).toHaveCount(0);
 });
 
 test("accessibility: register open, the sale cart builder, and the receipt view have no automated WCAG A/AA violations", async ({

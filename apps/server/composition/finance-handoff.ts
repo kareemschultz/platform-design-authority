@@ -10,7 +10,10 @@ import {
 import { auditApplication } from "./audit";
 import { permissionAuthorizer } from "./authorization";
 import { entitlementEvaluator } from "./entitlements";
-import { requireLegalEntityScope } from "./legal-entity-scope";
+import {
+	requireLegalEntityScope,
+	resolveContextLegalEntityId,
+} from "./legal-entity-scope";
 import { posService } from "./pos";
 import { databasePool } from "./postgres";
 import { tenancyService } from "./tenancy";
@@ -112,9 +115,35 @@ async function requireExportContext(input: {
 	// `requireLegalEntityScope` itself now rejects an empty-string
 	// `requestLegalEntityId` as a defense-in-depth backstop to the
 	// transport-level `IdentifierSchema` regex that already blocks one.
+	//
+	// WS3 remediation R3, cycle 1 (remediation-of-remediation): the R2 fix
+	// above compared against `context.legalEntityId` DIRECTLY, which is a
+	// total outage on the real transport path — `packages/platform/tenancy/
+	// src/index.ts`'s `setActiveContext` unconditionally THROWS when a
+	// caller supplies `legalEntityId` ("Legal-entity and branch context are
+	// not implemented in PR3"), and it is the only writer of an active-
+	// context row, so `context.legalEntityId` can never be non-empty for
+	// any real session today. Every real call to `createAccountantHandoff
+	// Export` was therefore being rejected, not just requests carrying an
+	// unverified value — the R2 stage's only coverage was a DB-free pure-
+	// function unit test that never exercised this wiring, so the outage
+	// shipped undetected until this stage's e2e lane caught it. Fixed by
+	// deriving the scope from `context.organizationId` whenever `context.
+	// legalEntityId` is unset — the directive's own documented alternative
+	// resolution for Finding K ("prove the requested legal entity belongs
+	// to the active organization and actor authority"), and consistent
+	// with the "single legal entity per organization" simplification noted
+	// above. `context.organizationId` cannot be forged by the caller (it
+	// comes from the verified active context, not request input), so a
+	// spoofed `legalEntityId` is still rejected exactly as R2 intended —
+	// only a value matching the caller's OWN organization now succeeds.
+	// If a real Legal Entity domain later lets `setActiveContext` populate
+	// `legalEntityId` for real, that value takes precedence unconditionally
+	// (`resolveContextLegalEntityId` prefers it first) and this fallback
+	// becomes a no-op without any caller change.
 	if (input.legalEntityId !== undefined) {
 		requireLegalEntityScope({
-			contextLegalEntityId: context.legalEntityId,
+			contextLegalEntityId: resolveContextLegalEntityId(context),
 			requestLegalEntityId: input.legalEntityId,
 		});
 	}

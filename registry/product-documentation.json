@@ -10,7 +10,14 @@
       "route": "/docs",
       "title": "Platform Documentation Prototype",
       "content_class": "landing",
-      "audience": ["administrator", "developer", "evaluator", "operator", "support", "user"],
+      "audience": [
+        "administrator",
+        "developer",
+        "evaluator",
+        "operator",
+        "support",
+        "user"
+      ],
       "owner": "Developer Platform",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -32,7 +39,11 @@
       "route": "/docs/getting-started",
       "title": "Getting Started",
       "content_class": "getting-started",
-      "audience": ["developer", "evaluator", "operator"],
+      "audience": [
+        "developer",
+        "evaluator",
+        "operator"
+      ],
       "owner": "Developer Platform",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -58,7 +69,11 @@
       "route": "/docs/user-guides",
       "title": "Prototype User Guide",
       "content_class": "user-guide",
-      "audience": ["administrator", "evaluator", "user"],
+      "audience": [
+        "administrator",
+        "evaluator",
+        "user"
+      ],
       "owner": "Platform Experience",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -90,12 +105,50 @@
       ]
     },
     {
+      "documentation_id": "PDOC-0011",
+      "path": "apps/docs/content/docs/inventory/index.mdx",
+      "route": "/docs/inventory",
+      "title": "Operate Products and Inventory",
+      "content_class": "user-guide",
+      "audience": [
+        "administrator",
+        "evaluator",
+        "operator",
+        "user"
+      ],
+      "owner": "Platform Experience",
+      "publication_state": "internal-prototype",
+      "applicable_version": "0.0.4-controlled-prototype",
+      "evidence_revision": "7202fc819b70982c013e1ca11a4fcc136e01e2de",
+      "last_verified": "2026-07-16",
+      "implementation_evidence": [
+        "docs/implementation/WS2_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md"
+      ],
+      "related_capabilities": [
+        "catalog.products",
+        "inventory.stock-ledger"
+      ],
+      "permission_refs": [
+        "catalog.product.read",
+        "inventory.balance.read"
+      ],
+      "contract_refs": [
+        "openapi/first-slice-v1.yaml",
+        "registry/endpoint-permissions.json"
+      ]
+    },
+    {
       "documentation_id": "PDOC-0004",
       "path": "apps/docs/content/docs/administration/index.mdx",
       "route": "/docs/administration",
       "title": "Prototype Administration",
       "content_class": "administrator-guide",
-      "audience": ["administrator", "developer", "operator", "support"],
+      "audience": [
+        "administrator",
+        "developer",
+        "operator",
+        "support"
+      ],
       "owner": "Platform Administration",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -132,7 +185,10 @@
       "route": "/docs/api",
       "title": "Prototype API Reference",
       "content_class": "api-reference",
-      "audience": ["developer", "integrator"],
+      "audience": [
+        "developer",
+        "integrator"
+      ],
       "owner": "Developer Platform",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -203,7 +259,10 @@
       "route": "/docs/developer",
       "title": "Developer Guide",
       "content_class": "developer-guide",
-      "audience": ["developer", "integrator"],
+      "audience": [
+        "developer",
+        "integrator"
+      ],
       "owner": "Engineering",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -227,7 +286,10 @@
       "route": "/docs/migrations",
       "title": "Database Migrations",
       "content_class": "migration-guide",
-      "audience": ["developer", "operator"],
+      "audience": [
+        "developer",
+        "operator"
+      ],
       "owner": "Engineering",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -238,7 +300,9 @@
         "apps/server/composition/migrations.ts",
         "packages/persistence/platform-identity-postgres/src/schema.test.ts"
       ],
-      "related_capabilities": ["platform.data-migration"],
+      "related_capabilities": [
+        "platform.data-migration"
+      ],
       "permission_refs": [],
       "contract_refs": [
         "docs/blueprint/01-Platform/IMPORT_EXPORT_AND_DATA_MIGRATION.md",
@@ -251,7 +315,11 @@
       "route": "/docs/operations",
       "title": "Event Backbone Operations",
       "content_class": "operator-guide",
-      "audience": ["developer", "operator", "support"],
+      "audience": [
+        "developer",
+        "operator",
+        "support"
+      ],
       "owner": "Platform Operations",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -267,7 +335,9 @@
         "catalog.products",
         "inventory.stock-ledger"
       ],
-      "permission_refs": ["platform.event.replay"],
+      "permission_refs": [
+        "platform.event.replay"
+      ],
       "contract_refs": [
         "openapi/first-slice-v1.yaml",
         "registry/events.json",
@@ -281,7 +351,11 @@
       "route": "/docs/troubleshooting",
       "title": "Troubleshooting",
       "content_class": "troubleshooting",
-      "audience": ["developer", "operator", "support"],
+      "audience": [
+        "developer",
+        "operator",
+        "support"
+      ],
       "owner": "Support and Engineering",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",
@@ -292,7 +366,9 @@
         "packages/tooling/env/src/server.test.ts",
         "docker-compose.yml"
       ],
-      "related_capabilities": ["platform.authentication"],
+      "related_capabilities": [
+        "platform.authentication"
+      ],
       "permission_refs": [],
       "contract_refs": [
         "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md"
@@ -304,7 +380,14 @@
       "route": "/docs/release-notes",
       "title": "Prototype Release Notes",
       "content_class": "release-note",
-      "audience": ["administrator", "developer", "evaluator", "operator", "support", "user"],
+      "audience": [
+        "administrator",
+        "developer",
+        "evaluator",
+        "operator",
+        "support",
+        "user"
+      ],
       "owner": "Release Management",
       "publication_state": "internal-prototype",
       "applicable_version": "0.0.4-controlled-prototype",

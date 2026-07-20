@@ -81,8 +81,8 @@ None of these artifacts proves production readiness. Generated reference pages m
 This table is generated from the canonical Draft OpenAPI source. Inclusion proves contract registration, not runtime binding, release support, pilot readiness, provider capability, or production availability.
 
 - Source: `openapi/first-slice-v1.yaml`
-- Contract version: `0.4.0`
-- Operations: `100`
+- Contract version: `0.5.0`
+- Operations: `116`
 - Authority join: `x-permission` or explicit `x-authorization` on every operation
 
 | Method | Path | `operationId` | Authority | Success |
@@ -111,7 +111,15 @@ This table is generated from the canonical Draft OpenAPI source. Inclusion prove
 | `GET` | `/locations` | `listLocations` | permission `platform.organization.read` | `200` |
 | `GET` | `/me` | `getCurrentIdentity` | authorization `authenticated_session` | `200` |
 | `POST` | `/offline-leases` | `issueOfflineLease` | permission `platform.offline-lease.issue` | `201` |
-| `POST` | `/opening-stock-imports` | `postOpeningStockImports` | permission `inventory.import.create` | `200` |
+| `GET` | `/opening-stock-imports` | `listOpeningStockImports` | permission `inventory.import.read` | `200` |
+| `POST` | `/opening-stock-imports` | `postOpeningStockImports` | permission `inventory.import.create` | `202` |
+| `GET` | `/opening-stock-imports/{importId}` | `getOpeningStockImport` | permission `inventory.import.read` | `200` |
+| `POST` | `/opening-stock-imports/{importId}/accept` | `acceptOpeningStockImport` | permission `inventory.import.approve` | `200` |
+| `POST` | `/opening-stock-imports/{importId}/approve` | `approveOpeningStockImport` | permission `inventory.import.approve` | `200` |
+| `POST` | `/opening-stock-imports/{importId}/cancel` | `cancelOpeningStockImport` | permission `inventory.import.approve` | `200` |
+| `GET` | `/opening-stock-imports/{importId}/correction-report` | `getOpeningStockImportCorrectionReport` | permission `inventory.import.download` | `200` |
+| `GET` | `/opening-stock-imports/{importId}/findings` | `getOpeningStockImportFindings` | permission `inventory.import.read` | `200` |
+| `POST` | `/opening-stock-imports/{importId}/purge-staging` | `purgeOpeningStockImportStaging` | permission `inventory.import.purge` | `200` |
 | `GET` | `/organizations` | `listOrganizations` | permission `platform.organization.read` | `200` |
 | `GET` | `/organizations/{organizationId}` | `getOrganization` | permission `platform.organization.read` | `200` |
 | `PATCH` | `/organizations/{organizationId}` | `updateOrganization` | permission `platform.organization.update` | `200` |
@@ -131,8 +139,15 @@ This table is generated from the canonical Draft OpenAPI source. Inclusion prove
 | `POST` | `/privacy-requests` | `createPrivacyRequest` | permission `security.privacy-request.create` | `201` |
 | `GET` | `/privacy-requests/{id}` | `getPrivacyRequestsById` | permission `security.privacy-request.read` | `200` |
 | `POST` | `/privacy-requests/{id}/verify` | `postPrivacyRequestsByIdVerify` | permission `security.privacy-request.verify` | `200` |
-| `POST` | `/product-imports` | `postProductImports` | permission `catalog.import.create` | `200` |
+| `GET` | `/product-imports` | `listProductImports` | permission `catalog.import.read` | `200` |
+| `POST` | `/product-imports` | `postProductImports` | permission `catalog.import.create` | `202` |
+| `GET` | `/product-imports/{importId}` | `getProductImport` | permission `catalog.import.read` | `200` |
+| `POST` | `/product-imports/{importId}/accept` | `acceptProductImport` | permission `catalog.import.approve` | `200` |
 | `POST` | `/product-imports/{importId}/approve` | `postProductImportsByImportIdApprove` | permission `catalog.import.approve` | `200` |
+| `POST` | `/product-imports/{importId}/cancel` | `cancelProductImport` | permission `catalog.import.approve` | `200` |
+| `GET` | `/product-imports/{importId}/correction-report` | `getProductImportCorrectionReport` | permission `catalog.import.download` | `200` |
+| `GET` | `/product-imports/{importId}/findings` | `getProductImportFindings` | permission `catalog.import.read` | `200` |
+| `POST` | `/product-imports/{importId}/purge-staging` | `purgeProductImportStaging` | permission `catalog.import.purge` | `200` |
 | `GET` | `/products` | `listProducts` | permission `catalog.product.read` | `200` |
 | `POST` | `/products` | `createProduct` | permission `catalog.product.create` | `201` |
 | `GET` | `/products/{productId}` | `getProductsByProductId` | permission `catalog.product.read` | `200` |
@@ -163,6 +178,7 @@ This table is generated from the canonical Draft OpenAPI source. Inclusion prove
 | `POST` | `/stock-counts` | `createStockCount` | permission `inventory.count.create` | `201` |
 | `GET` | `/stock-counts/{id}` | `getStockCount` | permission `inventory.count.read` | `200` |
 | `POST` | `/stock-counts/{id}/approve` | `postStockCountsByIdApprove` | permission `inventory.count.approve` | `200` |
+| `PUT` | `/stock-counts/{id}/draft-lines` | `saveStockCountDraftLines` | permission `inventory.count.create` | `200` |
 | `POST` | `/stock-counts/{id}/submit` | `postStockCountsByIdSubmit` | permission `inventory.count.submit` | `200` |
 | `GET` | `/stock-transfers` | `listStockTransfers` | permission `inventory.transfer.read` | `200` |
 | `POST` | `/stock-transfers` | `createStockTransfer` | permission `inventory.transfer.create` | `201` |

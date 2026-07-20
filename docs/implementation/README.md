@@ -29,5 +29,6 @@ The active delivery sequence is governed by [First Slice Implementation Plan](..
 - [Implementation Conflicts](IMPLEMENTATION_CONFLICTS.md)
 - [Root Document Migration Proposal](ROOT_DOCUMENT_MIGRATION_PROPOSAL.md)
 - [Scaffold README](SCAFFOLD_README.md)
+- [WS2 Verification and Controlled-Prototype Closeout](WS2_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md) — `PDA-IMPL-007` · Draft
 
 These three files are explicitly classified in `registry/governance-exemptions.json`; exemption from document frontmatter does not grant authority.

@@ -209,6 +209,41 @@
       "owner": "Platform Design Authority",
       "review_date": "2027-07-17",
       "registration_document": "docs/reviews/FABLE5_FIFTH_AUDIT_REGISTRATION.md"
+    },
+    {
+      "path": "docs/project/GOVERNANCE_REMEDIATION_PROGRAM_PLAN.md",
+      "rule": "document_front_matter",
+      "reason": "Program-control plan in the non-authoritative docs/project plane, consistent with its sibling documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional repository contributor file; GitHub requires the root filename and plain content.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "SECURITY.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional repository security-policy file; GitHub requires the root filename and plain content.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "rule": "document_front_matter",
+      "reason": "Generated third-party attribution notice; content is produced by the third-party tooling, not authored governance.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "third_party/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor file describing vendored third-party asset handling.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
     }
   ]
 }

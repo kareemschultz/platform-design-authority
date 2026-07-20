@@ -152,6 +152,19 @@ jobs:
             echo "Prohibited secret or generated example surface found" >&2
             exit 1
           fi
+          # Premium UI source credentials and private download/API URLs (shadcn
+          # Studio Pro, Mobbin Pro, Magic UI Pro): CLAUDE.md/AGENTS.md §8
+          # prohibits committing these; this is the enforcement, not a
+          # nonexistent lint rule. Scoped to a value assignment, not a bare
+          # mention, so ordinary license-text discussion in comments is not
+          # a false positive.
+          if grep -RInE "(shadcnstudio\.com/(api|download|private)|mobbin\.com/(api|token)|magicui(pro)?\.(com|design)/(download|license|api)|(MOBBIN|STUDIO)_(TOKEN|API|LICENSE)[_A-Z]*\s*[:=]|license[_-]?key\s*[:=])" \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.turbo \
+            --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock --exclude='*.tsbuildinfo' \
+            apps packages ops package.json biome.json turbo.json docker-compose.yml; then
+            echo "Prohibited premium-license credential or private download URL found" >&2
+            exit 1
+          fi
           if grep -RIn "@latest" --include='*.json' --include='*.jsonc' --include='*.yml' --include='*.yaml' \
             --exclude=bts.jsonc --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.turbo \
             apps packages package.json biome.json turbo.json docker-compose.yml; then

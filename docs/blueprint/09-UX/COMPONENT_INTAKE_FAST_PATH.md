@@ -43,6 +43,14 @@ In practice, this means the MCP content-fetch route remains the agent's actual w
 
 The `/cui`, `/iui`, `/rui`, and `/ftc` slash commands (`.claude/commands/`) route directly to Studio's own instruction tools and are safe to use as-is; each carries a short addendum pointing back to this document and the `component-intake` skill so the governed acquisition order and post-generation verification still apply on top of Studio's own generation instructions. Per Studio's own guidance: generate one block per command rather than a whole page in one shot, and always run the platform's own gates (`bun run check-types`, `bun run check`, `python scripts/validate_ui_governance.py`) after Studio's own recommended lint-fix pass, since Studio's linting guidance targets its own conventions, not this repository's.
 
+`apps/web` and `packages/ui-web/core` each carry their own `components.json`; each needs its own `.env` alongside it (copy, don't move, if you need the CLI to work from both — the two directories are independent invocation contexts as far as the CLI's own env loading is concerned).
+
+**Known constraint, confirmed 2026-07-20: the CLI `add` command can write a file outside the intended repository entirely when run from inside a git worktree.** Landing a `ui`-aliased single-file component (e.g. `button`, `badge` — anything resolved through the `ui` alias rather than the `components` alias) from a worktree nested under `.claude/worktrees/<name>/` produced a stray file at the *primary checkout's root*, not inside the worktree, twice in direct succession with two different components. The workspace symlink resolution itself is correct (`node_modules/@meridian/ui-web` correctly points inside the worktree); the CLI appears to compute the write target using a relative-path assumption that does not account for the extra `.claude/worktrees/<name>/` nesting a worktree adds versus a normal checkout. This is a third-party tool behavior, not something this repository's configuration can fix directly. Mitigation until Studio ships a fix or a root cause is confirmed upstream:
+
+- Prefer the MCP content-fetch route (`get-block-meta-content`, `get-inspiration-block-content`) over the CLI `add` command when working from a git worktree — the agent places the fetched content itself, so there is no third-party write-target computation to escape.
+- If the CLI route is used from a worktree anyway, check `git status` at the *primary checkout's root* immediately afterward, not only inside the worktree, and remove anything unexpected found there before it is mistaken for real work.
+- The CLI route is safe to use without this check when run from the primary checkout directly (not a worktree).
+
 ## Step 2 — Normalize (six steps)
 
 Every acquired component passes through all six before any catalog promotion above `Preferred Candidate`:

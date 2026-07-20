@@ -1,10 +1,10 @@
 ---
 document_id: PDA-ENGR-016
 title: Engineering Notebook
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-20
 ---
 
 # Engineering Notebook
@@ -44,3 +44,13 @@ Pattern, when one agent (author) hands a governance document, a documentation-on
 - **Pair every doc patch with an issue/RR-###/TD-### reference.** A silent edit to a governance document, even a correct one, loses the "why" that later review depends on.
 - **After every push, check for `chatgpt-codex-connector` bot review comments and act on legitimate findings without being asked**, then reply and resolve the thread.
 - **The reviewer never merges.** Findings and concurrence are posted for the human or the PR owner to act on.
+
+### 2026-07-20 — Whole-repo governance audit: stale-state and enforcement-drift lessons
+Author: Claude (Fable 5 planning session). Context: the audit behind `docs/project/GOVERNANCE_REMEDIATION_PROGRAM_PLAN.md`. Observations worth keeping visible:
+
+- **Audit from `origin/main`, never from the session's checkout.** A three-agent audit initially "found" CLAUDE/AGENTS drift, stale PROGRAM_STATUS rows, and an unclosed risk row — all artifacts of auditing a dead branch that had forked a week earlier. Every finding was re-verified against `origin/main` before planning; roughly a third evaporated. First step of any repo audit: `git fetch` and diff the checkout against `origin/main`; treat a branch whose upstream reads `[gone]` (`git for-each-ref --format='%(upstream:track)'`) as dead until proven otherwise.
+- **Unmerged research effectively does not exist.** The entire competitive-intelligence corpus (~100 files, PR #75) sat unmerged for four days, and the founder's working belief became "that research was never done." Research and audit output must merge promptly — its value decays to zero while stranded, and later sessions re-plan work that already exists.
+- **Worktree sprawl has a concrete failure mode:** a scratch worktree holding `main` checked out blocks `git checkout main` in the primary tree, and `git worktree remove` refuses on untracked leftovers (`node_modules`). Workaround: branch new work directly off `origin/main` (`git checkout -b <branch> origin/main`) without touching local `main`; keep agent scratch-worktree directories gitignored so they never look like repo content.
+- **Path-triggered freshness checks cannot catch externally-induced staleness.** A status validator that only runs when the status file changes goes blind when the world changes instead (an issue closes, a board is created). Freshness gates need a `schedule:` trigger and an explicit last-updated age bound, and scheduled failures need to open an issue — a red run on `main` that nobody watches is not a gate.
+- **Prose that claims enforcement is a defect class of its own.** "Raw palette values are lint-visible defects" was written while no lint rule existed; "agents" named as reviewers were actually optional Skills that no gate requires. Extends the 2026-07-12 registry-first lesson: when a normative sentence says "is enforced/lint-visible/required," CI must be able to point at the enforcing step, or the sentence must say "should be."
+- **The `docs/project` link validator treats backticked path-like strings as internal references.** Naming a planned-but-not-yet-created document with a backticked path ending in ".md" fails `validate_docs.py` (this very entry originally did so); name future documents in prose (directory in backticks, filename bare) until they exist.

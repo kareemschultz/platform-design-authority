@@ -61,6 +61,7 @@ Before inventing an identifier or boundary, consult:
 - `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before changing the documentation platform or content-delivery architecture
 - `docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md` plus the owning domain's competitive capability matrix and workflow reference before designing a domain surface or workstream plan
 
 Do not edit generated registries manually. Update sources and run:
 

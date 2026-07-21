@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-019
 title: Enterprise Table and Data Grid Standard
-version: 0.6.1
+version: 0.6.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-21
@@ -234,7 +234,7 @@ Prefer task-focused lists, cards, or one-record-at-a-time workflows. A full grid
 - shadcn/ui provides source-owned table, menu, checkbox, popover, command, and overlay primitives.
 - TanStack Table supplies headless sorting, filtering, grouping, pagination, visibility, and selection state.
 - TanStack Virtual may support row or column virtualization.
-- Where a virtualized collection needs list/grid keyboard and selection semantics beyond what TanStack Table/Virtual provide, `ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md`'s React Aria hook exception supplies that behavior layer, composed with — not replacing — TanStack Virtual's DOM windowing: the hooks own selection/keyboard/ARIA, TanStack Virtual owns which rows are actually rendered. Use `@react-aria/gridlist`+`@react-stately/list` (the ARIA grid pattern) when rows contain interactive children such as row-action buttons, checkboxes, or menus — the common case for a data grid; `@react-aria/listbox`+`@react-stately/list` (the ARIA listbox pattern) is for static-content-only rows and is the wrong contract for interactive rows (a Codex review of ADR-0022's amendment caught this row-actions case naming only listbox).
+- Where a virtualized collection needs list/grid keyboard and selection semantics beyond what TanStack Table/Virtual provide, `ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md`'s React Aria hook exception supplies that behavior layer, composed with — not replacing — TanStack Virtual's DOM windowing: the hooks own selection/keyboard/ARIA, TanStack Virtual owns which rows are actually rendered. **For an actual multi-column data grid/table** — headers, cells, column navigation, sorting — use `@react-aria/table`+`@react-stately/table`; React Aria's own docs describe `GridList` as a single-column collection without header, column, or sort infrastructure, so it drops those semantics for exactly the tabular case this document governs (a Codex review caught an earlier draft of this line routing tabular grids to `gridlist` instead). `@react-aria/gridlist`+`@react-stately/list` (the ARIA grid pattern) remains correct for a genuinely single-column, non-tabular collection whose rows contain interactive children (buttons, checkboxes, menus); `@react-aria/listbox`+`@react-stately/list` (the ARIA listbox pattern) is for single-column, static-content-only rows.
 
 The platform owns the resulting interaction contract, accessibility, persistence, tests, and state semantics.
 

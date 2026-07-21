@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.8.1
+version: 0.8.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-21
@@ -132,7 +132,7 @@ Preferred primitive families include:
 - Toast, inline alert, banner, status indicator, progress
 - Calendar, date picker, date range, time input
 - Avatar, badge, card, separator, skeleton, scroll area
-- Tree/hierarchical selection, virtualized-collection keyboard and selection behavior — sourced per ADR-0022's React Aria hook exception (`@react-aria/tree`+`@react-stately/tree` for tree; `@react-aria/listbox`+`@react-stately/list` for static-content virtualized collections, `@react-aria/gridlist`+`@react-stately/list` for virtualized collections with interactive row children — these are different ARIA role/keyboard contracts, not interchangeable), since neither Base UI nor Radix ships a first-party primitive for either family; composed under fully owned, Tailwind-token-styled DOM, never the pre-styled `react-aria-components` package
+- Tree/hierarchical selection, virtualized-collection keyboard and selection behavior — sourced per ADR-0022's React Aria hook exception (`@react-aria/tree`+`@react-stately/tree` for tree; for virtualized collections, `@react-aria/listbox`+`@react-stately/list` for static-content single-column collections, `@react-aria/gridlist`+`@react-stately/list` for single-column collections with interactive row children, `@react-aria/table`+`@react-stately/table` for actual multi-column tabular data with headers/sort — three different ARIA role/keyboard contracts, not interchangeable), since neither Base UI nor Radix ships a first-party primitive for any of these three families; composed under fully owned, Tailwind-token-styled DOM, never the pre-styled `react-aria-components` package
 
 Primitive source may change only through a reviewed decision. New work should not mix primitive systems casually within the same interaction family.
 

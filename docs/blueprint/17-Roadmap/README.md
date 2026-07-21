@@ -1,10 +1,10 @@
 ---
 document_id: PDA-RDM-005
 title: Roadmap Section Index
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-16
+last_reviewed: 2026-07-21
 ---
 
 # Roadmap
@@ -20,6 +20,7 @@ last_reviewed: 2026-07-16
 - [WS1 Implementation Plan: Identity, Tenancy, Party, Authorization](WS1_IDENTITY_TENANCY_PARTY_AUTHORIZATION_PLAN.md) — `PDA-RDM-008` · Draft
 - [WS2 Implementation Plan: Catalog and Inventory Ledger](WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md) — `PDA-RDM-009` · Draft
 - [Ratification Wave Manifest and Review Standard](RATIFICATION_WAVE_MANIFEST_AND_REVIEW_STANDARD.md) — `PDA-RDM-010` · Draft
+- [WS4 Implementation Plan: Stored Value](WS4_STORED_VALUE_IMPLEMENTATION_PLAN.md) — `PDA-RDM-011` · Draft (preparatory; WS4 entry not recorded)
 
 ## Related Authority and Contracts
 

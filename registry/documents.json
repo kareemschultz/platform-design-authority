@@ -6552,10 +6552,10 @@
       "document_id": "PDA-RDM-005",
       "path": "docs/blueprint/17-Roadmap/README.md",
       "title": "Roadmap Section Index",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-16",
+      "last_reviewed": "2026-07-21",
       "related_adrs": [],
       "review_evidence": null,
       "document_class": null,
@@ -6673,6 +6673,30 @@
         "external-dependencies",
         "references-and-traceability"
       ]
+    },
+    {
+      "document_id": "PDA-RDM-011",
+      "path": "docs/blueprint/17-Roadmap/WS4_STORED_VALUE_IMPLEMENTATION_PLAN.md",
+      "title": "WS4 Implementation Plan: Stored Value",
+      "version": "0.6.1",
+      "status": "Draft",
+      "owner": "Platform Design Authority",
+      "last_reviewed": "2026-07-21",
+      "related_adrs": [
+        "ADR-0002",
+        "ADR-0003",
+        "ADR-0009",
+        "ADR-0013",
+        "ADR-0014",
+        "ADR-0016",
+        "ADR-0020",
+        "ADR-0027"
+      ],
+      "review_evidence": null,
+      "document_class": null,
+      "declared_depth": null,
+      "evidence_state": null,
+      "applicable_dimensions": []
     },
     {
       "document_id": "PDA-REV-002",

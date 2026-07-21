@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-037
 title: Progressive Disclosure Pattern Library
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-20
@@ -110,6 +110,14 @@ Tooltips, hover cards, animation, color, icons, and marketing copy cannot carry 
 - Redaction and insufficient-authority states remain explicit.
 - Financial exceptions disclose source amounts, currency, status, reconciliation, and correction method.
 - Raw provider data is protected and never exposed merely because an advanced section is open.
+
+### Human tasks and review queues
+
+- A shared review queue or inbox aggregating tasks from multiple owning domains (accounting, payments, inventory, service, AI) shows filter/sort/group/saved-view controls without exposing unauthorized counts or autocomplete suggestions.
+- Assign, accept, delegate, snooze, and escalate are explicit interactions with a visible SLA effect — never an implicit side effect of opening or closing an item.
+- Opening a queue item previews the underlying source-domain command; committing it reauthorizes against the current record version rather than trusting the queue's own cached copy. A "resolve" control that only marks a notification read, without executing the underlying command, is a prohibited design.
+- Stale, already-resolved, permission-lost, partially-failed, provider-unknown, and conflicted outcomes are distinct, explicit states — never folded into a generic error.
+- The queue is a shared *presentation*; it never becomes a cross-domain super-permission or a copy of the source domain's authority. See `WORKFLOW_ENGINE.md` (Rule 10) for the architectural rule this pattern implements, and `CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md` (`PDA-CIR-085`) and AIR-006 for the source specification.
 
 ### AI-assisted work
 
@@ -231,3 +239,4 @@ Review this library when canonical states, first-slice workflows, navigation arc
 ## Change Log
 
 - 2026-07-20 — v0.2.0 absorbed PDA-UX-014 (Progressive Disclosure and Complexity Management) on its supersession: added General rules, Data density, Role/entitlement/personalization adaptation, Onboarding, and Evaluation sections. PDA-UX-014 is retained as a superseded historical document, not deleted.
+- 2026-07-20 — v0.2.1 added a "Human tasks and review queues" domain pattern (AIR-006, `CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md`), closing the gap the coverage audit (PDA-REV-025) found — this pattern previously existed only in the competitive-research corpus.

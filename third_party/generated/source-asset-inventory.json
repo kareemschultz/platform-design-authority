@@ -223,6 +223,15 @@
       "distribution_status": "legal-review-required",
       "kind": "copied-source",
       "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/metric-card.tsx",
+      "record_id": "source.shadcn-studio.statistics-card-03",
+      "sha256": "33d0f7562ea1a3c0443336f905c26e180e0636271b7d8b89d0fc56a15dbbc9ef"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/metric-empty-state.tsx",
       "record_id": "source.shadcn-studio.empty-state-01",
       "sha256": "8f4025a67d7113c031d2846152964f5c2a153ee314953cf7623f8520672d1d62"

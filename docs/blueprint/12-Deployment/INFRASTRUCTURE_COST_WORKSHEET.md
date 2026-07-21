@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DEP-015
 title: Infrastructure Cost Worksheet
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-20
 ---
 
 # Infrastructure Cost Worksheet
@@ -40,8 +40,8 @@ Every unresolved value is an evidence state, not a zero-cost assumption. The acc
 | Network | Egress, CDN, inter-region traffic | Traffic model, topology, and selected-region calculator or quote | Platform Operations | Pilot regions and delivery topology selected | Unresolved — evidence not yet available |
 | Backups and recovery | Storage, replication, exercise runtime | Backup inventory, recovery design, exercise measurements, and selected-region quote | Site Reliability Engineering | Pilot recovery design approved and exercised | Unresolved — evidence not yet available |
 | Security tooling | Scanning, WAF, secrets, SIEM | Approved security control set and contract or deployment cost model | Security | Pilot security architecture and vendors selected | Unresolved — evidence not yet available |
-| Providers | Auth, payments, messaging, AI, tax | Approved provider capabilities, commercial terms, and usage forecast | Product Operations | Each provider passes its founder, legal, security, and capability gate | Unresolved — evidence not yet available |
-| Support labor | Hours by service level | Approved support model, staffing assumptions, and internal loaded-cost method | Service Operations | Pilot service levels and support hours approved | Unresolved — evidence not yet available |
+| Providers | Auth, payments, messaging, AI, tax | Approved provider capabilities, commercial terms, and usage forecast | Product Operations | Each provider passes its founder, legal, security, and capability gate (issue #88 owns the commercial offer/cost package) | Unresolved — evidence not yet available |
+| Support labor | Hours by service level | Approved support model, staffing assumptions, and internal loaded-cost method | Service Operations | Pilot service levels and support hours approved (issue #88 owns the commercial offer/cost package) | Unresolved — evidence not yet available |
 
 ## Unit Economics
 

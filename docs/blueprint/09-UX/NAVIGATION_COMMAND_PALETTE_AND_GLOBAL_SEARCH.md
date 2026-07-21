@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-020
 title: Navigation Command Palette and Global Search
-version: 0.4.0
+version: 0.4.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-14
+last_reviewed: 2026-07-20
 ---
 
 # Navigation, Command Palette, and Global Search
@@ -15,7 +15,7 @@ This document owns interaction behavior. Search/index architecture is governed b
 
 Define how users move across workspaces, records, actions, recent items, saved views, and search without exposing the platform's full complexity.
 
-More nested menus are not automatically simpler. The failure mode this document guards against is the classic ERP maze — menu → submenu → submenu → screen → tab → hidden drawer — where users spelunk for a destination rather than recognizing it. Simplicity comes from a shallow, predictable structure plus fast accelerators (search, command palette, recents, favorites), not from hiding depth behind more layers.
+More nested menus are not automatically simpler. The failure mode this document guards against is the classic ERP maze — menu → submenu → submenu → screen → tab → hidden drawer — where users spelunk for a destination rather than recognizing it. Simplicity comes from a shallow, predictable structure plus fast accelerators (search, command palette, recents, favorites), not from hiding depth behind more layers. This operationalizes AIR-007 ("cross-domain suite navigation," `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md`) and `COMMON_FAILURES_AND_PAIN_POINTS.md`'s CFP-001 finding.
 
 ## Navigation Model
 
@@ -56,7 +56,7 @@ The palette supports navigation, record lookup, and approved actions. Actions sh
 
 ## Global Search
 
-Search groups results by type and provides safe previews, scope, freshness, and navigation target. Counts and suggestions must not leak protected records.
+Search groups results by type and provides safe previews, scope, freshness, and navigation target. Counts and suggestions must not leak protected records. This operationalizes AIR-003 ("fast search, saved views and command navigation," `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md`).
 
 ## Quality Gates
 

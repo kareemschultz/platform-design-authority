@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-017
 title: Component Catalog and State Matrix
-version: 0.3.0
+version: 0.3.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-20
 ---
 
 # Component Catalog and State Matrix
@@ -62,7 +62,7 @@ Define the minimum web and native component families and the states each must su
 - Key-value inspector
 - Tree
 
-Interactive chart components follow `INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md` and must support exact-value inspection, responsive sizing, accessible alternatives, active-filter visibility, drill context, freshness, partial data, and live-update behavior where applicable.
+Interactive chart components follow `INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md` and must support exact-value inspection, responsive sizing, accessible alternatives, active-filter visibility, drill context, freshness, partial data, and live-update behavior where applicable. This operationalizes AIR-008 ("analytics/dashboard delivery," `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md`).
 
 ## POS and Retail Components
 

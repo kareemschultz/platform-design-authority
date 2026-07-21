@@ -1,10 +1,10 @@
 ---
 document_id: PDA-DAT-014
 title: Analytics Semantic Layer and Metric Governance
-version: 0.1.0
+version: 0.1.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-20
 ---
 
 # Analytics Semantic Layer and Metric Governance
@@ -15,7 +15,7 @@ Define certified metrics, dimensional models, semantic definitions, analytical a
 
 ## Metric Record
 
-Every metric declares identifier, business definition, formula, grain, source owner, dimensions, time semantics, currency, unit, filters, exclusions, freshness, certification, and steward.
+Every metric declares identifier, business definition, formula, grain, source owner, dimensions, time semantics, currency, unit, filters, exclusions, freshness, certification, and steward. This operationalizes `docs/blueprint/19-Competitive-Research/ANALYTICS_COMPETITIVE_CAPABILITY_MATRIX.md` (`PDA-CIR-072`), which identifies "same label, different formula" as the core risk a governed metric record prevents.
 
 ## Semantic Layer
 

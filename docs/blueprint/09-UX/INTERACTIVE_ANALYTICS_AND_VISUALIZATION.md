@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-021
 title: Interactive Analytics and Visualization
-version: 0.1.1
+version: 0.1.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-20
@@ -118,7 +118,7 @@ Supported comparisons may include:
 - Peer location or category
 - Before and after a known event
 
-The comparison definition must remain visible. Percent change shows its denominator, base period, and handling of zero or missing values.
+The comparison definition must remain visible. Percent change shows its denominator, base period, and handling of zero or missing values. This operationalizes AIR-008 and `docs/blueprint/19-Competitive-Research/ANALYTICS_WORKFLOW_REFERENCE.md` (`PDA-CIR-073`).
 
 ### Annotations
 

@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-012
 title: Dashboard and Data Visualization
-version: 0.2.1
+version: 0.2.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-20
@@ -226,7 +226,7 @@ Each metric defines:
 - Certification state
 - Responsible owner
 
-A visually polished dashboard cannot compensate for ambiguous metric definitions.
+A visually polished dashboard cannot compensate for ambiguous metric definitions. This operationalizes AIR-008 and `docs/blueprint/19-Competitive-Research/ANALYTICS_COMPETITIVE_CAPABILITY_MATRIX.md` (`PDA-CIR-072`).
 
 ## Alerts and Exceptions
 

@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "record": {
+    "id": "ui-source.shadcn-studio.statistics-card-03",
+    "source_product": "shadcn/studio Pro",
+    "source_item": "Dashboard and Application > statistics-component > statistics-card-03",
+    "source_version": "Studio inspiration-block catalog retrieved via MCP",
+    "retrieved_at": "2026-07-21",
+    "license_owner": null,
+    "permitted_entity": null,
+    "permitted_products": [],
+    "redistribution_status": "Verify",
+    "repository_paths": [
+      "packages/ui-web/core/src/components/metric-card.tsx"
+    ],
+    "platform_component_name": "MetricCard",
+    "modifications": [
+      "Renamed StatisticsCard to MetricCard",
+      "Replaced the source's Avatar/AvatarFallback icon chip with a plain styled span carrying the same token classes; the platform does not own an Avatar primitive and one icon chip does not justify importing a new primitive system",
+      "Separated the source's single trend prop into trend (arrow direction, a fact) and tone (positive/negative/neutral interpretation) so a falling defect count can trend down with a positive tone; tone maps to the governed status-role tokens (text-status-success/critical), never raw palette",
+      "Added the canonical states the source lacks: loading (owned Skeleton with sr-only announcement and aria-busy), errorText (explicit unavailable language, role=status), and stale (visible 'Stale' text annotation per the compact-KPI grammar's explicit-language rule)",
+      "Added sr-only trend direction text ('increase'/'decrease'/'no change') so delta direction is stated in words, not color or icon alone, per DASHBOARD_AND_DATA_VISUALIZATION.md's compact-KPI anatomy",
+      "Renamed badgeContent to periodText (the governed time window/comparison basis) and added optional freshnessText, both required by the compact-KPI anatomy",
+      "Changed Card/Badge/Skeleton imports from generic shadcn '@/components/ui/*' aliases to the platform's owned '@meridian/ui-web/components/*'",
+      "Extracted the value/loading/error branch into a MetricCardValue helper to satisfy the platform's noNestedTernary lint rule",
+      "Dropped the source's page.tsx route wrapper and hardcoded demo data; this is a reusable primitive, not a standalone route"
+    ],
+    "dependencies_added": [],
+    "external_network_calls_removed": [],
+    "token_normalization": true,
+    "accessibility_review": null,
+    "responsive_review": null,
+    "reduced_motion_review": null,
+    "performance_review": null,
+    "security_review": null,
+    "dark_mode_review": null,
+    "white_label_review": null,
+    "visual_regression_story": null,
+    "upgrade_policy": "Manual review",
+    "reviewed_by": null,
+    "reviewed_at": null
+  }
+}

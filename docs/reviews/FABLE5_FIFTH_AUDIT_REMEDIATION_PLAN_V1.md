@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-014
 title: Fable 5 Fifth Audit Disposition and Remediation Plan
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-21
 review_evidence: docs/reviews/FABLE5_FIFTH_AUDIT_V1.md
 ---
 
@@ -39,7 +39,7 @@ WSX tracking is explicit and non-duplicative: #82 customer discovery, #83 reposi
 
 ### PR boundaries and current P-W2a status
 
-PR #89 recorded P-W1 founder authority and its named governing sources only; it did not change product code, claim external evidence, or perform the tracking sync. That deliberate boundary was independently verified before PR #89 merged. P-W2a is now implemented separately under issue #90: PROGRAM_STATUS, the WS2 closeout ledger/plan, release-note language, Architecture Risk Register, and status pointers are synchronized without product/runtime changes. P-W2a is **implemented-pending-independent-review**, not closed; its exact head must receive independent concurrence and merge green before F-A-001/F-A-002 tracking closure is recorded.
+PR #89 recorded P-W1 founder authority and its named governing sources only; it did not change product code, claim external evidence, or perform the tracking sync. That deliberate boundary was independently verified before PR #89 merged. P-W2a is now implemented separately under issue #90: PROGRAM_STATUS, the WS2 closeout ledger/plan, release-note language, Architecture Risk Register, and status pointers are synchronized without product/runtime changes. P-W2a is **closed**: PR #91 (its tracking-sync PR) received independent exact-head concurrence (comment `5009220014`, reviewed head `ff9816e`) and merged at `1541795`, an ancestor of every later `main` commit, fulfilling the mandatory concurrence-plus-green-merge condition; F-A-001/F-A-002 tracking closure is recorded on that evidence in the Architecture Risk Register.
 
 ## Per-finding disposition
 
@@ -57,7 +57,7 @@ All 29 findings (third-review correction: this line previously said "27" and its
 ## Risk-register propagation
 
 - FA4-015/FA4-030 already carry their fifth-audit reopen-and-reclose history in the Fourth Audit table; P-W2a does not duplicate those rows.
-- P-W2a adds concise status pointers for F-A-001 and F-A-002 and synchronizes the W2/W3 status pointers to PR #80's independently concurred merge. F-A-001/F-A-002 remain implemented pending P-W2a independent review and merge; the W2/W3 findings are closed only at their finding-specific closure-test depth, with no founder, external, pilot, or production claim.
+- P-W2a adds concise status pointers for F-A-001 and F-A-002 and synchronizes the W2/W3 status pointers to PR #80's independently concurred merge. F-A-001/F-A-002 are closed on PR #91's independent concurrence and merge (see "PR boundaries and current P-W2a status" above); the W2/W3 findings are closed only at their finding-specific closure-test depth, with no founder, external, pilot, or production claim.
 - P-W1 records the external-evidence track (F-L-001), customer-evidence gate (F-L-002), P4–P7 clearance (F-L-004), naming FDR (F-L-006), and FDR-005 trigger (F-L-007). Their external or later-workstream evidence gates remain open where stated.
 - RR-006/RR-007/RR-009/RR-011 remain as recorded — this audit re-verified their closure/openness claims as accurate.
 
@@ -78,9 +78,10 @@ The founder authorized immediate remediation of all non-founder-gated findings. 
 - **PR #80 review and merge:** independent exact-head concurrence was recorded for `9da2c217858270ec0fc1222921e8944f48a3307e` in comment `5008076728`; the PR then merged at `24d28e68cd7766a50523bee871efa3d2582b88c3`. The concurrence explicitly closes the reviewed W2/W3 remediation evidence, so their machine-readable status pointers are synchronized to closed. Every closure remains limited to its finding-specific test; no founder, external, pilot, or production gate is implied.
 - **Correction (F-I-001):** the audit's claim that `test_check_ws2_evidence.py` "has no direct CI step" is a **partial false positive** — CI runs it via `bun run ws2:evidence:check` (`meridian-prototype.yml:129`), which chains `python -m unittest scripts/test_check_ws2_evidence.py`. The invocation-inconsistency half of the finding was real and is fixed. This is the narrative record of the correction, kept here (not in the immutable report) per evidence-immutability rules. A one-line pointer to this section also lives in `evidence/audit/fable5-whole-project-findings.yaml`'s F-I-001 `status` field, since that file is the machine-readable finding index and every finding's status is expected to be discoverable there without cross-referencing this plan first; the two are not competing narratives, this plan is the authoritative prose and the YAML field is a pointer to it (second-review correction — a prior review found the YAML line restating the correction in full, which read as a second independent narrative; it now only points here).
 - **Founder W1 authority:** issue #81 records approval of F-A-001 and F-L-001/002/003/004/006/007. PR #89 recorded those decisions in governed sources, received independent exact-head concurrence for `43c1519a9c9c097733b397f8cbf96c1928a4b281` in comment `5008646684`, and merged at `7de0688d11a80de950f0e0639ade84b23e790e59`. Their finding-specific external and later-workstream evidence conditions still apply. F-L-009/010 and other external/founder gates remain open at their named latest-safe points.
-- **P-W2a tracking sync:** issue #90 implements the F-A-001 decision propagation and F-A-002 tracking correction. Its status is **implemented-pending-independent-review**; neither finding is closed by this draft/status update, and exact-head concurrence plus a green merge remain mandatory.
+- **P-W2a tracking sync:** issue #90 implements the F-A-001 decision propagation and F-A-002 tracking correction. Its status is **closed**: PR #91 received independent exact-head concurrence (comment `5009220014`, reviewed head `ff9816e`) and merged at `1541795`, satisfying the mandatory concurrence-plus-green-merge condition; both findings are recorded Closed in the Architecture Risk Register and `evidence/audit/fable5-whole-project-findings.yaml` on that evidence.
 - **Correction (finding-count drift):** the immutable report's summary line (`FABLE5_FIFTH_AUDIT_V1.md:17`) states "0 P0 · 3 P1 · 9 P2 · 15 P3 (27 findings)"; the register (`evidence/audit/fable5-whole-project-findings.yaml`) has always contained 29 findings at 0 P0/3 P1/10 P2/16 P3 — the report's summary line undercounts by one P2 and one P3 finding, a drafting-time miscount not caused by any later edit (no finding was added, removed, or resevered by remediation; the id sequence F-A-001…004/F-B-001…006/F-H-001…008/F-I-001/F-L-001…010 has always been exactly 29 with no gaps). The report is not edited per evidence-immutability rules. The register's `audit.counts` field is corrected to the true 29-count and `scripts/validate_docs.py`'s `validate_audit_finding_counts()` mechanically enforces that field against the actual `findings` list going forward, so this specific drift cannot recur silently even though the report's own prose line is permanently frozen at the wrong number.
 
 ## Change Log
 
+- **0.5.0 (2026-07-21):** Closed P-W2a and F-A-001/F-A-002 on PR #91's independent exact-head concurrence (comment `5009220014`, reviewed head `ff9816e`) and merge (`1541795`) — surfaced by Codex review of PR #194 pointing out this plan still read "implemented-pending-independent-review" after the Architecture Risk Register and findings YAML were already updated to Closed, leaving two governed sources in opposite states. Reconciliation only; no new review commissioned.
 - **0.4.0 (2026-07-17):** Recorded the independently concurred merges of PR #80 and PR #89; marked P-W2a as implemented-pending-independent-review; distinguished F-L-005 closure from the still-pending F-A-001/F-A-002 tracking sync.

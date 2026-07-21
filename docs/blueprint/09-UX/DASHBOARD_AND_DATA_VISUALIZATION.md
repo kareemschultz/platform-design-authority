@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-012
 title: Dashboard and Data Visualization
-version: 0.2.2
+version: 0.2.3
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-20
@@ -251,12 +251,13 @@ An exported or scheduled dashboard snapshot declares:
 - Recipient
 - Purpose
 - Snapshot timestamp
+- Expiration
 - Retention period
 - Audit trail entry
 
-Every scheduled delivery is revocable — a recipient's access, and a running schedule itself, can be withdrawn without waiting for the next send cycle. A scheduled export is a governed, standing grant, not a one-time action; it carries the same accountability as any other permission grant until it is revoked or expires.
+Expiration and revocation are distinct controls. Expiration is a declared end date the schedule or access grant carries from creation — it lapses on its own even if nobody acts. Revocation is an explicit action that ends access before that date. Every scheduled delivery supports both: a recipient's access, and a running schedule itself, can be withdrawn at any time without waiting for the next send cycle, and every grant also carries an expiration so a forgotten schedule does not stand indefinitely. A scheduled export is a governed, standing grant, not a one-time action; it carries the same accountability as any other permission grant until it is revoked or expires.
 
-This operationalizes `docs/blueprint/19-Competitive-Research/ANALYTICS_WORKFLOW_REFERENCE.md`'s (`PDA-CIR-073`) required-evidence list, which names "scheduled-delivery revocation" alongside metric-definition review and tenant isolation as implementation evidence a delivered analytics workflow must produce.
+This operationalizes `docs/blueprint/19-Competitive-Research/ANALYTICS_COMPETITIVE_CAPABILITY_MATRIX.md`'s (`PDA-CIR-072`) delivery-capability finding ("purpose, recipient, expiration, snapshot time and audit") and `ANALYTICS_WORKFLOW_REFERENCE.md`'s (`PDA-CIR-073`) required-evidence list, which names "scheduled-delivery revocation" alongside metric-definition review and tenant isolation as implementation evidence a delivered analytics workflow must produce.
 
 ## Progressive Disclosure
 

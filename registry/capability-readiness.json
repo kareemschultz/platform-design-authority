@@ -63,16 +63,21 @@
     {
       "namespace": "commerce",
       "owner": "Commerce",
-      "readiness_state": "contract-planned",
-      "admission_trigger": "Prototype 3 admits the exact POS, register, cash, return, receipt, stored-value, and offline capability subset after WS2 closure.",
+      "readiness_state": "prototype-evidenced",
+      "admission_trigger": "Admit Commerce capabilities beyond the evidenced first-slice POS/register/cash/return/receipt subset only after a workstream names their contract, persistence, and evidence obligations; stored-value (WS4) remains explicitly out of this subset.",
       "blockers": [
-        "Prototype 3 workstream has not started",
-        "Provider, fiscal, offline, UI, accessibility, and recovery evidence remain open"
+        "This is a controlled-prototype evidence record on the isolated `claude/ws3-integration` branch, not a WS3 entry or merge to `main` — both remain blocked on issues #94 and #82 per FDR-012",
+        "Mixed-tender/provider-rail payment, offline-safe numbering, and stored-value scope remain deferred to WS4/WS5/WS6",
+        "Controlled-prototype evidence is not pilot or production readiness"
       ],
       "evidence_refs": [
         "docs/blueprint/04-Business-Domains/COMMERCE_DOMAIN.md",
         "docs/blueprint/17-Roadmap/FIRST_SLICE_IMPLEMENTATION_PLAN.md",
-        "openapi/first-slice-v1.yaml"
+        "docs/blueprint/17-Roadmap/WS3_POS_CASH_IMPLEMENTATION_PLAN.md",
+        "evidence/first-slice/ws3-capability-evidence.json",
+        "registry/first-slice-tests.json",
+        "openapi/first-slice-v1.yaml",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md"
       ]
     },
     {

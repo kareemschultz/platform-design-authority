@@ -100,6 +100,7 @@
 - Modifications: CLI-generated components were copied into repository-maintained source paths and normalized for Base UI and the governed design system.
 - Covered paths:
 
+  - `packages/ui-web/core/src/components/alert-dialog.tsx`
   - `packages/ui-web/core/src/components/alert.tsx`
   - `packages/ui-web/core/src/components/badge.tsx`
   - `packages/ui-web/core/src/components/dialog.tsx`

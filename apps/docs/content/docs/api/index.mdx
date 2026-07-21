@@ -82,19 +82,23 @@ This table is generated from the canonical Draft OpenAPI source. Inclusion prove
 
 - Source: `openapi/first-slice-v1.yaml`
 - Contract version: `0.5.0`
-- Operations: `116`
+- Operations: `130`
 - Authority join: `x-permission` or explicit `x-authorization` on every operation
 
 | Method | Path | `operationId` | Authority | Success |
 |---|---|---|---|---:|
 | `GET` | `/audit-records` | `getAuditRecords` | permission `platform.audit.read` | `200` |
+| `GET` | `/cash-variances` | `listCashVariances` | permission `commerce.cash-variance.approve` | `200` |
+| `GET` | `/cash-variances/{varianceId}` | `getCashVariancesByVarianceId` | permission `commerce.cash-variance.approve` | `200` |
 | `POST` | `/cash-variances/{varianceId}/approve` | `postCashVariancesByVarianceIdApprove` | permission `commerce.cash-variance.approve` | `200` |
 | `POST` | `/customer-imports` | `postCustomerImports` | permission `platform.import.create` | `200` |
 | `GET` | `/customers` | `getCustomers` | permission `crm.customer.read` | `200` |
 | `POST` | `/customers` | `postCustomers` | permission `crm.customer.create` | `200` |
 | `PATCH` | `/customers/{customerId}` | `patchCustomersByCustomerId` | permission `crm.customer.update` | `200` |
 | `POST` | `/deposit-reconciliations` | `postDepositReconciliations` | permission `finance.bank-reconciliation.create` | `200` |
+| `GET` | `/deposits` | `listDeposits` | permission `commerce.deposit.confirm` | `200` |
 | `POST` | `/deposits` | `createDeposit` | permission `commerce.deposit.create` | `201` |
+| `GET` | `/deposits/{depositId}` | `getDepositsByDepositId` | permission `commerce.deposit.confirm` | `200` |
 | `POST` | `/deposits/{depositId}/confirm` | `postDepositsByDepositIdConfirm` | permission `commerce.deposit.confirm` | `200` |
 | `POST` | `/devices/enroll` | `enrollDevice` | permission `platform.device.enroll` | `201` |
 | `POST` | `/devices/{deviceId}/revoke` | `postDevicesByDeviceIdRevoke` | permission `platform.device.revoke` | `200` |
@@ -135,6 +139,7 @@ This table is generated from the canonical Draft OpenAPI source. Inclusion prove
 | `POST` | `/payment-intents/{id}/reverse` | `postPaymentIntentsByIdReverse` | permission `payment.intent.reverse` | `200` |
 | `POST` | `/payment-intents/{paymentIntentId}/confirm` | `confirmPaymentIntent` | permission `payment.intent.confirm` | `200` |
 | `POST` | `/payment-reconciliations` | `postPaymentReconciliations` | permission `payment.reconciliation.create` | `200` |
+| `GET` | `/price-overrides` | `listPriceOverrides` | permission `commerce.price-override.approve` | `200` |
 | `POST` | `/privacy-actions/{id}/approve` | `postPrivacyActionsByIdApprove` | permission `security.privacy-action.approve` | `200` |
 | `POST` | `/privacy-requests` | `createPrivacyRequest` | permission `security.privacy-request.create` | `201` |
 | `GET` | `/privacy-requests/{id}` | `getPrivacyRequestsById` | permission `security.privacy-request.read` | `200` |
@@ -157,19 +162,28 @@ This table is generated from the canonical Draft OpenAPI source. Inclusion prove
 | `GET` | `/receipts/{receiptId}` | `getReceiptsByReceiptId` | permission `commerce.receipt.read` | `200` |
 | `POST` | `/receipts/{receiptId}/reissue` | `postReceiptsByReceiptIdReissue` | permission `commerce.receipt.reissue` | `200` |
 | `POST` | `/receipts/{receiptId}/void` | `postReceiptsByReceiptIdVoid` | permission `commerce.receipt.void` | `200` |
+| `GET` | `/refunds` | `listRefunds` | permission `commerce.refund.approve` | `200` |
 | `POST` | `/refunds` | `postRefunds` | permission `commerce.refund.create` | `200` |
+| `GET` | `/refunds/{refundId}` | `getRefundsByRefundId` | permission `commerce.refund.approve` | `200` |
 | `POST` | `/refunds/{refundId}/approve` | `postRefundsByRefundIdApprove` | permission `commerce.refund.approve` | `200` |
+| `GET` | `/register-sessions/{sessionId}` | `getRegisterSessionsBySessionId` | permission `commerce.register.close` | `200` |
 | `POST` | `/registers/{registerId}/cash-movements` | `postRegistersByRegisterIdCashMovements` | permission `commerce.cash-movement.create` | `200` |
 | `POST` | `/registers/{registerId}/close` | `closeRegister` | permission `commerce.register.close` | `200` |
 | `POST` | `/registers/{registerId}/open` | `openRegister` | permission `commerce.register.open` | `200` |
+| `GET` | `/registers/{registerId}/receipts/{receiptNumber}` | `getRegistersByRegisterIdReceiptsByReceiptNumber` | permission `commerce.receipt.read` | `200` |
+| `GET` | `/registers/{registerId}/receipts/{receiptNumber}/sale` | `getRegistersByRegisterIdReceiptsByReceiptNumberSale` | permission `commerce.return.create` | `200` |
 | `POST` | `/registers/{registerId}/safe-drops` | `postRegistersByRegisterIdSafeDrops` | permission `commerce.cash-movement.create` | `200` |
+| `GET` | `/returns` | `listReturns` | permission `commerce.return.approve` | `200` |
 | `POST` | `/returns` | `createReturn` | permission `commerce.return.create` | `201` |
+| `GET` | `/returns/{returnId}` | `getReturnsByReturnId` | permission `commerce.return.approve` | `200` |
 | `POST` | `/returns/{returnId}/approve` | `postReturnsByReturnIdApprove` | permission `commerce.return.approve` | `200` |
 | `POST` | `/role-assignments` | `postRoleAssignments` | permission `platform.role.assign` | `201` |
 | `GET` | `/roles` | `getRoles` | permission `platform.role.read` | `200` |
 | `POST` | `/sales` | `createSale` | permission `commerce.sale.create` | `201` |
 | `POST` | `/sales/{saleId}/complete` | `completeSale` | permission `commerce.sale.complete` | `200` |
 | `POST` | `/sales/{saleId}/hold` | `postSalesBySaleIdHold` | permission `commerce.sale.hold` | `200` |
+| `POST` | `/sales/{saleId}/price-overrides` | `requestSalePriceOverride` | permission `commerce.price-override.request` | `201` |
+| `POST` | `/sales/{saleId}/price-overrides/{overrideId}/approve` | `approveSalePriceOverride` | permission `commerce.price-override.approve` | `200` |
 | `POST` | `/session/active-context` | `setActiveContext` | authorization `authenticated_membership` | `201` |
 | `GET` | `/sessions` | `listCurrentUserSessions` | authorization `authenticated_session` | `200` |
 | `DELETE` | `/sessions/{sessionId}` | `revokeCurrentUserSession` | authorization `authenticated_session` | `204` |

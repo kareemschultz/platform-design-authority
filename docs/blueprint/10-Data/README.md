@@ -22,6 +22,7 @@ last_reviewed: 2026-07-11
 - [Party Prototype Schema Classification and Isolation](PARTY_PROTOTYPE_SCHEMA_CLASSIFICATION_AND_ISOLATION.md) — `PDA-DAT-017` · Draft
 - [Audit and Session Revocation Prototype Schema Classification and Isolation](AUDIT_AND_SESSION_REVOCATION_PROTOTYPE_SCHEMA_CLASSIFICATION_AND_ISOLATION.md) — `PDA-DAT-018` · Draft
 - [WS2 Catalog Inventory and Numbering Schema Classification](WS2_CATALOG_INVENTORY_AND_NUMBERING_SCHEMA_CLASSIFICATION.md) — `PDA-DAT-019` · Draft
+- [WS3 POS Cash Schema Classification](WS3_POS_CASH_SCHEMA_CLASSIFICATION.md) — `PDA-DAT-020` · Draft (controlled prototype on `claude/ws3-integration`)
 
 ## Related Authority and Contracts
 

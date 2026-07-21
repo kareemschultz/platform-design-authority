@@ -162,6 +162,7 @@ def build_gates() -> list[Gate]:
     )
     gates.append(Gate("bun run ws1:evidence:check", ["bun", "run", "ws1:evidence:check"], "evidence"))
     gates.append(Gate("bun run ws2:evidence:check", ["bun", "run", "ws2:evidence:check"], "evidence"))
+    gates.append(Gate("bun run ws3:evidence:check", ["bun", "run", "ws3:evidence:check"], "evidence"))
 
     # Program status tracking.
     gates.append(

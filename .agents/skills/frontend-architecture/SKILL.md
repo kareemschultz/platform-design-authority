@@ -22,10 +22,15 @@ Do not use undocumented `paths` metadata. Codex discovers project skills from `.
 - `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
 - `docs/blueprint/09-UX/ADVANCED_INTERFACE_PATTERNS.md`
 - `docs/blueprint/09-UX/FORMS_SELECTION_AND_MULTISELECT.md`
-- `docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
+- `docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md`
 - `docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
 - `docs/blueprint/09-UX/INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md`
 - `docs/blueprint/09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
+- `docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md`
+- `docs/blueprint/09-UX/COMPONENT_ACQUISITION_POLICY.md`
+- `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md`
+- `docs/blueprint/09-UX/DASHBOARD_AND_DATA_VISUALIZATION.md`
+- `docs/blueprint/09-UX/ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`
 - `docs/blueprint/00-Foundation/UX_PHILOSOPHY.md`
 
 ## Architecture Rules
@@ -42,6 +47,24 @@ Do not use undocumented `paths` metadata. Codex discovers project skills from `.
 10. Every route and component respects tenant, permission, entitlement, classification, and connectivity state.
 11. Essential workflows remain usable without AI.
 12. Provider, premium-block, or framework source must not become the business abstraction.
+
+## Visual Token and Palette Discipline
+
+- Components and pages use semantic tokens only. Raw palette values — hex literals or Tailwind palette utility classes such as `bg-red-500` — are defects in `apps/**` and `packages/**` component code.
+- Audited baseline (2026-07-20, `main`): zero Tailwind palette classes anywhere in `apps/` or `packages/`, and hex literals only in three token-bearing files — `apps/native/lib/constants.ts`, `apps/web/src/app/manifest.ts`, and `packages/ui-web/core/src/styles/globals.css`. A plan that would add a fourth hex location must justify it as a token source, never a component.
+- Status colors, spacing, radius, and typography come from the governed token set (`docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`, `docs/blueprint/09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md`) and the operational visual grammar recorded in the dashboard, token, and data-grid standards.
+- Automated enforcement is scheduled as remediation-plan PR-8 (a UI-governance validator wired into CI). Until it lands, treat violations as review-blocking defects, not advisory notes.
+
+## Component Acquisition Order
+
+Search in this order and record the outcome in the plan:
+
+1. Platform-owned source: `docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md` and the owned UI packages under `packages/`.
+2. shadcn Studio Pro via its MCP server — an owned subscription; search it before designing any block, page, or composite by hand.
+3. Mobbin Pro — an owned subscription; use it for pattern research on novel surfaces.
+4. Hand-build, as the last resort.
+
+Imported or premium-derived UI requires a provenance record following `registry/premium-ui-provenance-template.json` (stored under the evidence directory the remediation plan's PR-8 establishes), normalization into platform tokens and owned primitives, and the component acceptance checklist. Never record premium credentials, license keys, or private download URLs. Imported UI never redefines domain, permission, entitlement, payment, privacy, or workflow semantics.
 
 ## Page Composition
 

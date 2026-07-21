@@ -1,10 +1,10 @@
 ---
 document_id: PDA-TST-013
 title: First Slice Capability Test Matrix
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # First Slice Capability Test Matrix
@@ -35,11 +35,13 @@ Every first-slice capability declares all thirteen dimensions:
 12. Performance and capacity
 13. Recovery, replay, and reconciliation
 
-The generated registry currently supports only `required`. For a seam, `required` means contract, failure, and integration evidence at seam depth rather than full UI or load proof. Future overrides require an approved source, reason, owner, and generator support.
+The generated registry supports `required`, `not-applicable`, and `deferred-by-depth`. Depth defaults and their reasons come only from `registry/capability-metadata.json`; an evidence source cannot waive a required cell. A seam still requires contract, failure, and integration evidence for every cell left `required` at seam depth.
 
 ## Evidence Sources
 
-Workstream evidence is declared under `evidence/first-slice/` and consumed by the registry generator. A declaration names reviewed capability IDs, dimensions, evidence identifiers, repository paths, marker text, commands, and runtimes. Generation fails when a capability or dimension is unknown, a referenced file is absent, marker text is stale, or a required cell for a declared evidenced capability has no evidence.
+Workstream evidence is declared under `evidence/first-slice/` and consumed by the registry generator. A declaration names reviewed capability IDs, dimensions, evidence identifiers, repository paths, marker text, commands, and runtimes. Generation fails when a capability or dimension is unknown, a referenced file is absent, or marker text is stale.
+
+Evidence is cell-granular. `Planned` means no required cell has evidence, `Partially Evidenced` means at least one but not all required cells have evidence, and `Evidenced` means every required cell has evidence. Unproven required cells stay `planned`; they are never inferred from a source-level status. `not-applicable` and `deferred-by-depth` are visible cell states with governed reasons and do not count as executable evidence.
 
 An `Evidenced` row means every required cell at that capability's registered depth has one or more linked evidence identifiers and no blocking defect in the generated row. It does not promote the capability beyond its `full`, `prototype`, or `seam` first-slice depth, and it does not imply pilot or production readiness.
 
@@ -54,6 +56,8 @@ Each generated record includes:
 - Reasons for every `not-applicable` dimension and explanatory reasons for depth deferrals
 - Required golden scenarios
 - Evidence status and per-dimension evidence identifiers
+- Per-dimension state: `evidenced`, `planned`, `not-applicable`, or `deferred-by-depth`
+- Explicit list of required dimensions that remain unproven
 - Deduplicated evidence paths
 - Responsible owner
 - Blocking defects

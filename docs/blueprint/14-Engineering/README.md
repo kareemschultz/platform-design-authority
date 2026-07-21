@@ -1,23 +1,26 @@
 ---
 document_id: PDA-ENGR-001
 title: Engineering Section Index
-version: 0.6.0
+version: 0.7.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-16
 ---
 
 # Engineering
 
-## Current Specifications
+## Artifact Catalog
 
-- `TECHNOLOGY_LIFECYCLE_AND_LESSONS.md`
-- `WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md`
-- `ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md`
-- `ENGINEERING_HANDBOOK.md`
-- `IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md`
-- `ARCHITECTURE_DEPENDENCY_RULES.md`
-- `ENGINEERING_NOTEBOOK.md`
+- [Engineering Handbook](ENGINEERING_HANDBOOK.md) — `PDA-ENGR-010` · Draft
+- [Implementation Recipes and Scaffolding](IMPLEMENTATION_RECIPES_AND_SCAFFOLDING.md) — `PDA-ENGR-011` · Draft
+- [Architecture Dependency Rules](ARCHITECTURE_DEPENDENCY_RULES.md) — `PDA-ENGR-012` · Draft
+- [Technology Lifecycle Compatibility and Lessons Ledger](TECHNOLOGY_LIFECYCLE_AND_LESSONS.md) — `PDA-ENGR-013` · Draft
+- [Worktree Change and Release Coordination](WORKTREE_CHANGE_AND_RELEASE_COORDINATION.md) — `PDA-ENGR-014` · Draft
+- [Advanced Frontend Technique Catalog](ADVANCED_FRONTEND_TECHNIQUE_CATALOG.md) — `PDA-ENGR-015` · Draft
+- [Engineering Notebook](ENGINEERING_NOTEBOOK.md) — `PDA-ENGR-016` · Draft
+
+## Related Authority and Contracts
+
 - `registry/architecture-rules.json`
 - `docs/blueprint/07-Developer-Platform/SDK_CLI_AND_SCAFFOLDING.md`
 - `docs/blueprint/07-Developer-Platform/PROJECT_AGENT_SKILLS.md`

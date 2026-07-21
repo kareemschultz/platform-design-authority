@@ -1,13 +1,15 @@
 ---
 document_id: PDA-STR-012
 title: Business DNA Strategy Rationale
-version: 0.2.0
+version: 0.2.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-20
 ---
 
 # Business DNA Strategy Rationale
+
+> **Disambiguation.** A second file also named `BUSINESS_DNA_ENGINE.md` exists at `docs/blueprint/03-Business-Engines/BUSINESS_DNA_ENGINE.md` (`PDA-ENG-019`, titled "Business DNA Engine") — that is the architectural and data-model authority; this file (`PDA-STR-012`) is the non-normative strategy rationale. Confirm the directory when citing either by filename alone.
 
 ## Purpose
 

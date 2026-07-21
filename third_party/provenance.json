@@ -22,7 +22,9 @@
       "notice_status": "included-in-generated-baseline",
       "permitted_use_evidence": {
         "status": "public-upstream-license-observed-not-legally-reviewed",
-        "references": ["docs/implementation/SCAFFOLD_README.md"]
+        "references": [
+          "docs/implementation/SCAFFOLD_README.md"
+        ]
       },
       "distribution_status": "legal-review-required",
       "modifications": "Scaffold-generated components were normalized into repository-maintained TypeScript source paths and subsequently modified for the governed UI system.",
@@ -66,6 +68,28 @@
       ]
     },
     {
+      "id": "source.shadcn-studio.empty-state-01",
+      "kind": "copied-source",
+      "source_name": "shadcn/studio Pro",
+      "source_version": "Studio catalog entry dated 2026-03-13, retrieved 2026-07-20 via MCP get-inspiration-block-content",
+      "source_url": "https://shadcnstudio.com",
+      "declared_upstream_license": "NOASSERTION",
+      "upstream_license_url": null,
+      "license_conclusion": "NOASSERTION",
+      "notice_status": "included-in-generated-baseline",
+      "permitted_use_evidence": {
+        "status": "not-established-for-exact-assets",
+        "references": [
+          "evidence/ui-provenance/metric-empty-state.json"
+        ]
+      },
+      "distribution_status": "legal-review-required",
+      "modifications": "Studio Pro block empty-state-01 was normalized into a reusable platform component: renamed to MetricEmptyState, hardcoded content parameterized as props, Card import switched to the platform-owned package, and the source's route wrapper dropped. Full change list in the referenced UI provenance record.",
+      "files": [
+        "packages/ui-web/core/src/components/metric-empty-state.tsx"
+      ]
+    },
+    {
       "id": "asset.expo-template.prototype-icons",
       "kind": "scaffold-asset",
       "source_name": "Expo template through Better-T-Stack",
@@ -77,7 +101,9 @@
       "notice_status": "included-in-generated-baseline",
       "permitted_use_evidence": {
         "status": "not-established-for-exact-assets",
-        "references": ["docs/implementation/SCAFFOLD_README.md"]
+        "references": [
+          "docs/implementation/SCAFFOLD_README.md"
+        ]
       },
       "distribution_status": "replace-before-distribution",
       "modifications": "Retained only for local controlled-prototype operation; exact asset rights and trademark disposition have not been established.",
@@ -102,7 +128,9 @@
       "notice_status": "included-in-generated-baseline",
       "permitted_use_evidence": {
         "status": "not-established-for-exact-assets",
-        "references": ["docs/implementation/SCAFFOLD_README.md"]
+        "references": [
+          "docs/implementation/SCAFFOLD_README.md"
+        ]
       },
       "distribution_status": "replace-before-distribution",
       "modifications": "Retained because no explicit reference is not sufficient proof of non-use by browser metadata conventions; replace with owned assets before distribution.",
@@ -114,55 +142,329 @@
         "apps/web/public/favicon/web-app-manifest-512x512.png",
         "apps/web/src/app/favicon.ico"
       ]
+    },
+    {
+      "id": "source.shadcn-studio.statistics-card-03",
+      "kind": "copied-source",
+      "source_name": "shadcn/studio Pro",
+      "source_version": "Studio inspiration-block catalog entry, retrieved 2026-07-21 via MCP get-inspiration-block-content",
+      "source_url": "https://shadcnstudio.com",
+      "declared_upstream_license": "NOASSERTION",
+      "upstream_license_url": null,
+      "license_conclusion": "NOASSERTION",
+      "notice_status": "included-in-generated-baseline",
+      "permitted_use_evidence": {
+        "status": "not-established-for-exact-assets",
+        "references": [
+          "evidence/ui-provenance/metric-card.json"
+        ]
+      },
+      "distribution_status": "legal-review-required",
+      "modifications": "Studio Pro statistics-component variant statistics-card-03 was normalized into a reusable platform component: renamed to MetricCard, trend (arrow direction) split from tone (positive/negative/neutral interpretation, rendered as visible text, not color alone), unowned Avatar primitive replaced with a styled span, loading/error/stale canonical states added via one persistent aria-live announcement region, Card and Badge imports switched to the platform-owned package with a newly added owned Skeleton import for the new loading state, and the source's route wrapper and demo data dropped. Full change list in the referenced UI provenance record.",
+      "files": [
+        "packages/ui-web/core/src/components/metric-card.tsx"
+      ]
     }
   ],
   "license_observation_scope": "Dated installed-package-manifest observations from the Windows controlled-prototype install. They identify review cases but are not a complete cross-platform license inventory or legal conclusion.",
   "license_review_required_identities": [
-    {"package":"@biomejs/biome","version":"2.5.2"},
-    {"package":"@biomejs/biome","version":"2.5.3"},
-    {"package":"@biomejs/cli-win32-x64","version":"2.5.2"},
-    {"package":"@biomejs/cli-win32-x64","version":"2.5.3"},
-    {"package":"@expo-google-fonts/material-symbols","version":"0.4.38"},
-    {"package":"@img/sharp-win32-x64","version":"0.34.5"},
-    {"package":"fb-dotslash","version":"0.5.8"},
-    {"package":"node-forge","version":"1.4.0"},
-    {"package":"type-fest","version":"0.21.3"},
-    {"package":"type-fest","version":"0.7.1"},
-    {"package":"type-fest","version":"5.8.0"},
-    {"package":"@yuku-codegen/binding-win32-x64","version":"0.6.1"},
-    {"package":"@yuku-parser/binding-win32-x64","version":"0.6.1"},
-    {"package":"spawndamnit","version":"3.0.1"},
-    {"package":"big-integer","version":"1.6.52"},
-    {"package":"stream-buffers","version":"2.2.0"},
-    {"package":"@axe-core/playwright","version":"4.12.1"},
-    {"package":"axe-core","version":"4.12.1"},
-    {"package":"lightningcss","version":"1.32.0"},
-    {"package":"lightningcss-win32-x64-msvc","version":"1.32.0"},
-    {"package":"caniuse-lite","version":"1.0.30001805"}
+    {
+      "package": "@biomejs/biome",
+      "version": "2.5.2"
+    },
+    {
+      "package": "@biomejs/biome",
+      "version": "2.5.3"
+    },
+    {
+      "package": "@biomejs/cli-win32-x64",
+      "version": "2.5.2"
+    },
+    {
+      "package": "@biomejs/cli-win32-x64",
+      "version": "2.5.3"
+    },
+    {
+      "package": "@expo-google-fonts/material-symbols",
+      "version": "0.4.38"
+    },
+    {
+      "package": "@img/sharp-win32-x64",
+      "version": "0.34.5"
+    },
+    {
+      "package": "fb-dotslash",
+      "version": "0.5.8"
+    },
+    {
+      "package": "node-forge",
+      "version": "1.4.0"
+    },
+    {
+      "package": "type-fest",
+      "version": "0.21.3"
+    },
+    {
+      "package": "type-fest",
+      "version": "0.7.1"
+    },
+    {
+      "package": "type-fest",
+      "version": "5.8.0"
+    },
+    {
+      "package": "@yuku-codegen/binding-win32-x64",
+      "version": "0.6.1"
+    },
+    {
+      "package": "@yuku-parser/binding-win32-x64",
+      "version": "0.6.1"
+    },
+    {
+      "package": "spawndamnit",
+      "version": "3.0.1"
+    },
+    {
+      "package": "big-integer",
+      "version": "1.6.52"
+    },
+    {
+      "package": "stream-buffers",
+      "version": "2.2.0"
+    },
+    {
+      "package": "@axe-core/playwright",
+      "version": "4.12.1"
+    },
+    {
+      "package": "axe-core",
+      "version": "4.12.1"
+    },
+    {
+      "package": "lightningcss",
+      "version": "1.32.0"
+    },
+    {
+      "package": "lightningcss-win32-x64-msvc",
+      "version": "1.32.0"
+    },
+    {
+      "package": "caniuse-lite",
+      "version": "1.0.30001805"
+    }
   ],
   "license_review_observation_count": 21,
   "license_review_observations": [
-    {"package":"@biomejs/biome","version":"2.5.2","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
-    {"package":"@biomejs/biome","version":"2.5.3","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
-    {"package":"@biomejs/cli-win32-x64","version":"2.5.2","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Windows optional package; select and record the applicable branch."},
-    {"package":"@biomejs/cli-win32-x64","version":"2.5.3","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Windows optional package; select and record the applicable branch."},
-    {"package":"@expo-google-fonts/material-symbols","version":"0.4.38","observed_expression":"MIT AND Apache-2.0","expression_kind":"and-conjunctive","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"AND is cumulative; both obligations require disposition."},
-    {"package":"@img/sharp-win32-x64","version":"0.34.5","observed_expression":"Apache-2.0 AND LGPL-3.0-or-later","expression_kind":"and-conjunctive","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Windows optional binary; artifact reachability and cumulative obligations require review."},
-    {"package":"fb-dotslash","version":"0.5.8","observed_expression":"MIT OR Apache-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
-    {"package":"node-forge","version":"1.4.0","observed_expression":"BSD-3-Clause OR GPL-2.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
-    {"package":"type-fest","version":"0.21.3","observed_expression":"MIT OR CC0-1.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
-    {"package":"type-fest","version":"0.7.1","observed_expression":"MIT OR CC0-1.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
-    {"package":"type-fest","version":"5.8.0","observed_expression":"MIT OR CC0-1.0","expression_kind":"or-choice","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Select and record the applicable branch before distribution."},
-    {"package":"@yuku-codegen/binding-win32-x64","version":"0.6.1","observed_expression":null,"expression_kind":"metadata-missing","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Published package manifest omitted a license field; do not inherit a parent license without evidence."},
-    {"package":"@yuku-parser/binding-win32-x64","version":"0.6.1","observed_expression":null,"expression_kind":"metadata-missing","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Published package manifest omitted a license field; do not inherit a parent license without evidence."},
-    {"package":"spawndamnit","version":"3.0.1","observed_expression":"SEE LICENSE IN LICENSE","expression_kind":"license-file-pointer","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Preserve and review the bundled license text; the pointer is not an SPDX conclusion."},
-    {"package":"big-integer","version":"1.6.52","observed_expression":"Unlicense","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Qualified acceptance is required before distribution."},
-    {"package":"stream-buffers","version":"2.2.0","observed_expression":"Unlicense","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Qualified acceptance is required before distribution."},
-    {"package":"@axe-core/playwright","version":"4.12.1","observed_expression":"MPL-2.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Artifact reachability, modifications, and notice/source obligations require review."},
-    {"package":"axe-core","version":"4.12.1","observed_expression":"MPL-2.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Artifact reachability, modifications, and notice/source obligations require review."},
-    {"package":"lightningcss","version":"1.32.0","observed_expression":"MPL-2.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Artifact reachability, modifications, and notice/source obligations require review."},
-    {"package":"lightningcss-win32-x64-msvc","version":"1.32.0","observed_expression":"MPL-2.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Windows optional binary; artifact reachability and obligations require review."},
-    {"package":"caniuse-lite","version":"1.0.30001805","observed_expression":"CC-BY-4.0","expression_kind":"obligation-review","review_status":"qualified-review-required","license_conclusion":"NOASSERTION","source_context":"installed-package-manifest-observation-windows-2026-07-18","limitation":"Attribution applies if the dataset is present in a distributed artifact."}
+    {
+      "package": "@biomejs/biome",
+      "version": "2.5.2",
+      "observed_expression": "MIT OR Apache-2.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Select and record the applicable branch before distribution."
+    },
+    {
+      "package": "@biomejs/biome",
+      "version": "2.5.3",
+      "observed_expression": "MIT OR Apache-2.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Select and record the applicable branch before distribution."
+    },
+    {
+      "package": "@biomejs/cli-win32-x64",
+      "version": "2.5.2",
+      "observed_expression": "MIT OR Apache-2.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Windows optional package; select and record the applicable branch."
+    },
+    {
+      "package": "@biomejs/cli-win32-x64",
+      "version": "2.5.3",
+      "observed_expression": "MIT OR Apache-2.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Windows optional package; select and record the applicable branch."
+    },
+    {
+      "package": "@expo-google-fonts/material-symbols",
+      "version": "0.4.38",
+      "observed_expression": "MIT AND Apache-2.0",
+      "expression_kind": "and-conjunctive",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "AND is cumulative; both obligations require disposition."
+    },
+    {
+      "package": "@img/sharp-win32-x64",
+      "version": "0.34.5",
+      "observed_expression": "Apache-2.0 AND LGPL-3.0-or-later",
+      "expression_kind": "and-conjunctive",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Windows optional binary; artifact reachability and cumulative obligations require review."
+    },
+    {
+      "package": "fb-dotslash",
+      "version": "0.5.8",
+      "observed_expression": "MIT OR Apache-2.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Select and record the applicable branch before distribution."
+    },
+    {
+      "package": "node-forge",
+      "version": "1.4.0",
+      "observed_expression": "BSD-3-Clause OR GPL-2.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Select and record the applicable branch before distribution."
+    },
+    {
+      "package": "type-fest",
+      "version": "0.21.3",
+      "observed_expression": "MIT OR CC0-1.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Select and record the applicable branch before distribution."
+    },
+    {
+      "package": "type-fest",
+      "version": "0.7.1",
+      "observed_expression": "MIT OR CC0-1.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Select and record the applicable branch before distribution."
+    },
+    {
+      "package": "type-fest",
+      "version": "5.8.0",
+      "observed_expression": "MIT OR CC0-1.0",
+      "expression_kind": "or-choice",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Select and record the applicable branch before distribution."
+    },
+    {
+      "package": "@yuku-codegen/binding-win32-x64",
+      "version": "0.6.1",
+      "observed_expression": null,
+      "expression_kind": "metadata-missing",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Published package manifest omitted a license field; do not inherit a parent license without evidence."
+    },
+    {
+      "package": "@yuku-parser/binding-win32-x64",
+      "version": "0.6.1",
+      "observed_expression": null,
+      "expression_kind": "metadata-missing",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Published package manifest omitted a license field; do not inherit a parent license without evidence."
+    },
+    {
+      "package": "spawndamnit",
+      "version": "3.0.1",
+      "observed_expression": "SEE LICENSE IN LICENSE",
+      "expression_kind": "license-file-pointer",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Preserve and review the bundled license text; the pointer is not an SPDX conclusion."
+    },
+    {
+      "package": "big-integer",
+      "version": "1.6.52",
+      "observed_expression": "Unlicense",
+      "expression_kind": "obligation-review",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Qualified acceptance is required before distribution."
+    },
+    {
+      "package": "stream-buffers",
+      "version": "2.2.0",
+      "observed_expression": "Unlicense",
+      "expression_kind": "obligation-review",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Qualified acceptance is required before distribution."
+    },
+    {
+      "package": "@axe-core/playwright",
+      "version": "4.12.1",
+      "observed_expression": "MPL-2.0",
+      "expression_kind": "obligation-review",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Artifact reachability, modifications, and notice/source obligations require review."
+    },
+    {
+      "package": "axe-core",
+      "version": "4.12.1",
+      "observed_expression": "MPL-2.0",
+      "expression_kind": "obligation-review",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Artifact reachability, modifications, and notice/source obligations require review."
+    },
+    {
+      "package": "lightningcss",
+      "version": "1.32.0",
+      "observed_expression": "MPL-2.0",
+      "expression_kind": "obligation-review",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Artifact reachability, modifications, and notice/source obligations require review."
+    },
+    {
+      "package": "lightningcss-win32-x64-msvc",
+      "version": "1.32.0",
+      "observed_expression": "MPL-2.0",
+      "expression_kind": "obligation-review",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Windows optional binary; artifact reachability and obligations require review."
+    },
+    {
+      "package": "caniuse-lite",
+      "version": "1.0.30001805",
+      "observed_expression": "CC-BY-4.0",
+      "expression_kind": "obligation-review",
+      "review_status": "qualified-review-required",
+      "license_conclusion": "NOASSERTION",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "limitation": "Attribution applies if the dataset is present in a distributed artifact."
+    }
   ],
   "build_time_references": [
     {
@@ -173,9 +475,16 @@
       "declared_upstream_license": "OFL-1.1",
       "upstream_license_url": "https://github.com/vercel/geist-font/blob/main/OFL.txt",
       "license_conclusion": "NOASSERTION",
-      "permitted_use_evidence": {"status":"public-upstream-license-observed-not-artifact-reviewed","references":["apps/web/src/app/layout.tsx"]},
+      "permitted_use_evidence": {
+        "status": "public-upstream-license-observed-not-artifact-reviewed",
+        "references": [
+          "apps/web/src/app/layout.tsx"
+        ]
+      },
       "distribution_status": "artifact-review-required",
-      "reference_paths": ["apps/web/src/app/layout.tsx"],
+      "reference_paths": [
+        "apps/web/src/app/layout.tsx"
+      ],
       "limitation": "Font files are fetched and embedded during build and are not represented by the JavaScript lock inventory. Built output requires separate inspection."
     }
   ]

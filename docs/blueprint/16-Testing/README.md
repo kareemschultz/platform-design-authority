@@ -1,20 +1,23 @@
 ---
 document_id: PDA-TST-001
 title: Testing Section Index
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # Testing
 
-## Current Specifications
+## Artifact Catalog
 
-- `PLATFORM_TESTING_STRATEGY.md`
-- `SPECIALIST_TESTING_STANDARDS.md`
-- `TEST_DATA_ENVIRONMENTS_AND_RELEASE_EVIDENCE.md`
-- `FIRST_SLICE_CAPABILITY_TEST_MATRIX.md`
+- [Platform Testing Strategy](PLATFORM_TESTING_STRATEGY.md) — `PDA-TST-010` · Draft
+- [Specialist Testing Standards](SPECIALIST_TESTING_STANDARDS.md) — `PDA-TST-011` · Draft
+- [Test Data Environments and Release Evidence](TEST_DATA_ENVIRONMENTS_AND_RELEASE_EVIDENCE.md) — `PDA-TST-012` · Draft
+- [First Slice Capability Test Matrix](FIRST_SLICE_CAPABILITY_TEST_MATRIX.md) — `PDA-TST-013` · Draft
+
+## Related Authority and Contracts
+
 - `registry/first-slice-tests.json`
 - `docs/blueprint/11-Security/THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
 - `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
@@ -28,11 +31,13 @@ last_reviewed: 2026-07-11
 
 Every first-slice capability declares thirteen mandatory dimensions covering happy paths, denial, isolation, permissions, entitlements, idempotency, concurrency, events, audit, privacy, offline behavior, accessibility, performance, recovery, replay, and reconciliation.
 
+The generated matrix currently records 11 fully evidenced WS1 capabilities, 13 partially evidenced WS2 capabilities, and 223 of 1,294 required cells; WS2 bulk import remains wholly planned. A partial row is progress evidence only; every unproven required cell remains `planned` and blocks capability/workstream closeout.
+
 The synthetic Demerara Retail Test Group fixture defines representative tenants, locations, roles, products, inventory, Commerce, stored value, privacy, security, devices, and provider-failure scenarios.
 
 ## Remaining Implementation Evidence
 
-- Executable test harnesses
+- Executable harnesses for WS3–WS7 and remaining WS2 cells
 - Provider simulators
 - Tenant-isolation property tests
 - Ledger model-based tests

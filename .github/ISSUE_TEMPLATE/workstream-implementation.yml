@@ -21,6 +21,13 @@ body:
     validations:
       required: true
   - type: textarea
+    id: competitive-references
+    attributes:
+      label: Competitive references consulted
+      description: AIR-### IDs from `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md`, plus the owning domain's competitive capability matrix and workflow reference document names. Enter "None applicable" with rationale if this surface has no competitive-research coverage yet.
+    validations:
+      required: true
+  - type: textarea
     id: scope
     attributes:
       label: Scope

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-037
 title: Progressive Disclosure Pattern Library
-version: 0.1.0
+version: 0.2.2
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-20
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -14,7 +14,22 @@ related_adrs: [ADR-0005, ADR-0022]
 
 Progressive disclosure reduces cognitive load by sequencing optional detail, not by hiding truth, consequence, authority, or recovery. Meridian chooses a disclosure pattern from the user's task, risk, data shape, device, and interruption model. A visually available block does not choose the pattern.
 
-This library operationalizes PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md and ADVANCED_INTERFACE_PATTERNS.md. Where either conflicts, those broader specifications govern.
+This library operationalizes ADVANCED_INTERFACE_PATTERNS.md, which governs where either conflicts. It also absorbs `PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md` (PDA-UX-014), superseded by this document as of 2026-07-20: that document's distinct content — general rules, data density, role/entitlement/personalization adaptation, onboarding, and evaluation — is folded in below. PDA-UX-014 remains on file as superseded historical evidence; this document is current guidance.
+
+## General rules
+
+These absorb PDA-UX-014's foundational rules. Where a rule is elaborated by a more specific section below, this is the compact form; follow the cross-reference for the full behavior.
+
+1. Hidden content remains discoverable — a disclosure control is never the only route to something the user is entitled to find.
+2. A disclosure control's label describes what it reveals; a generic "More" that hides consequence is not a valid label.
+3. Disclosure state persists only when it helps resume a task, never into unsafe client storage for secret or protected content (see Offline, stale, and interrupted work).
+4. A required field cannot look optional because its section is collapsed.
+5. Errors inside a closed section surface in that section's summary (see Accessibility requirements).
+6. Advanced configuration uses safe defaults and explains what it inherits, not only what it overrides.
+7. Expert shortcuts such as the command palette supplement the guided path; they do not replace or bypass it.
+8. Disclosure changes what is visible, never what is authorized — collapsing or expanding a section cannot grant or hide a permission decision.
+9. Search may reveal where a setting lives; it does not reveal a protected value the searching user cannot otherwise see.
+10. Responsive and mobile disclosure preserves task order and state (see Responsive transformation).
 
 ## Disclosure layers
 
@@ -96,12 +111,65 @@ Tooltips, hover cards, animation, color, icons, and marketing copy cannot carry 
 - Financial exceptions disclose source amounts, currency, status, reconciliation, and correction method.
 - Raw provider data is protected and never exposed merely because an advanced section is open.
 
+### Human tasks and review queues
+
+- A shared review queue or inbox aggregating tasks from multiple owning domains (accounting, payments, inventory, service) shows filter/sort/group/saved-view controls without exposing unauthorized counts or autocomplete suggestions. AI-generated items are proposals routed to an owning domain for review, never an owning domain themselves — `AI_ORCHESTRATION_ENGINE.md` is domain-neutral and owns no authoritative business records.
+- Assign, accept, delegate, snooze, and escalate are explicit interactions with a visible SLA effect — never an implicit side effect of opening or closing an item.
+- Opening a queue item previews the underlying source-domain command; committing it reauthorizes against the current record version rather than trusting the queue's own cached copy. A "resolve" control that only marks a notification read, without executing the underlying command, is a prohibited design.
+- Stale, already-resolved, permission-lost, partially-failed, provider-unknown, and conflicted outcomes are distinct, explicit states — never folded into a generic error.
+- The queue is a shared *presentation*; it never becomes a cross-domain super-permission or a copy of the source domain's authority. See `WORKFLOW_ENGINE.md` (Rule 10) for the architectural rule this pattern implements, and `CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md` (`PDA-CIR-085`) and AIR-006 for the source specification.
+
 ### AI-assisted work
 
 - The AI sidebar may disclose citations, provenance, assumptions, and tool details progressively, but the proposed action, affected scope, authority check, approval requirement, and uncertainty remain visible.
 - Expanded technical details must not replace a plain-language consequence summary.
 - AI explanations do not alter or conceal deterministic controls.
 - Essential first-slice work remains operable with AI disabled.
+
+## Data density
+
+Dense information is appropriate when users need comparison and precision — accounting grids, inventory ledgers, audit review. Manage density with:
+
+- Prioritized columns
+- Saved views
+- Grouping
+- Row expansion
+- Inspector panels
+- Sticky identifiers
+- Summary and detail modes
+- Keyboard navigation
+- Virtualization
+
+Do not replace useful density with decorative spacing that forces excessive scrolling; a compact grid is a legitimate Layer 2/3 destination, not a defect to soften.
+
+## Role, entitlement, and personalization adaptation
+
+Navigation and controls are composed from permissions, entitlements, workspace, and context — see also "Permissions, roles, and tenancy" above. A hidden, unavailable capability should not create dead-end clutter; when it is relevant to an administrator specifically, the UI may show a clear upgrade or request-access path, but ordinary users should not be repeatedly distracted by inaccessible features.
+
+Defaults should reflect common tasks, not the most advanced possible configuration. Personalization may remember column visibility, saved filters, dashboard layout, preferred workspace, and expanded advanced sections. It must never hide required compliance information, change permissions, or make a shared procedure impossible for a colleague to support from the same screen.
+
+## Onboarding
+
+Use progressive onboarding, not a long tour:
+
+- Explain the first task in context, not as an abstract product overview.
+- Provide sample data or guided setup where safe.
+- Reveal help when the user encounters a new capability, not before.
+- Allow experienced users to skip guidance entirely.
+
+## Evaluation
+
+A screen is not successful merely because it looks clean. Measure whether the right depth of information reached the user at the right time:
+
+- Time to locate a control
+- Completion rate
+- Error rate
+- Advanced-section usage
+- Help usage
+- Abandonment
+- Training time
+- Support questions
+- Whether users notice critical states without prompting
 
 ## Responsive transformation
 
@@ -167,3 +235,8 @@ Official shadcn accordion, collapsible, tabs, popover, tooltip, dialog, alert-di
 ## Recheck
 
 Review this library when canonical states, first-slice workflows, navigation architecture, primitive foundation, accessibility evidence, device targets, or offline semantics change.
+
+## Change Log
+
+- 2026-07-20 — v0.2.0 absorbed PDA-UX-014 (Progressive Disclosure and Complexity Management) on its supersession: added General rules, Data density, Role/entitlement/personalization adaptation, Onboarding, and Evaluation sections. PDA-UX-014 is retained as a superseded historical document, not deleted.
+- 2026-07-20 — v0.2.1 added a "Human tasks and review queues" domain pattern (AIR-006, `CROSS_DOMAIN_REVIEW_QUEUE_STANDARD.md`), closing the gap the coverage audit (PDA-REV-025) found — this pattern previously existed only in the competitive-research corpus.

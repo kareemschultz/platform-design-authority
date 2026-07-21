@@ -1,45 +1,49 @@
 ---
 document_id: PDA-UX-001
 title: UX and Design System Section Index
-version: 1.0.0
+version: 1.1.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-13
+last_reviewed: 2026-07-16
 ---
 
 # UX and Design System
 
-## Current Specifications
+## Artifact Catalog
 
-- `FIRST_SLICE_UX_AND_ACCESSIBILITY.md`
-- `FIRST_SLICE_TENDER_SCOPE_CLARIFICATION.md`
-- `ADVANCED_INTERFACE_PATTERNS.md`
-- `DASHBOARD_AND_DATA_VISUALIZATION.md`
-- `INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md`
-- `FORMS_SELECTION_AND_MULTISELECT.md`
-- `PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md`
-- `DESIGN_TOKENS_AND_VISUAL_SYSTEM.md`
-- `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md`
-- `DESIGN_SYSTEM_OPERATIONS.md`
-- `COMPONENT_CATALOG_AND_STATE_MATRIX.md`
-- `PREFERRED_COMPONENT_CATALOG.md`
-- `COMPONENT_SOURCE_MATRIX.md`
-- `COMPONENT_DISCOVERY_AUDIT.md`
-- `SHADCN_STUDIO_EVALUATION.md`
-- `ANIMATION_AND_MOTION_GUIDE.md`
-- `PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md`
-- `COMPONENT_ACQUISITION_POLICY.md`
-- `COMPONENT_NORMALIZATION_STANDARD.md`
-- `COMPONENT_ACCEPTANCE_CHECKLIST.md`
-- `CONTENT_DESIGN_LOCALIZATION_AND_MOTION.md`
-- `ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md`
-- `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`
-- `NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md`
-- `STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md`
-- `TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
-- `SHADCN_CONFIGURATION_DECISION_MATRIX.md`
-- `WS1_THIN_APPLICATION_SHELL_IMPLEMENTATION_EVIDENCE.md`
-- `MARKETING_WEBSITE_ARCHITECTURE.md`
+- [First Slice UX and Accessibility](FIRST_SLICE_UX_AND_ACCESSIBILITY.md) — `PDA-UX-010` · Draft
+- [Advanced Interface Patterns](ADVANCED_INTERFACE_PATTERNS.md) — `PDA-UX-011` · Draft
+- [Dashboard and Data Visualization](DASHBOARD_AND_DATA_VISUALIZATION.md) — `PDA-UX-012` · Draft
+- [Forms Selection and Multiselect](FORMS_SELECTION_AND_MULTISELECT.md) — `PDA-UX-013` · Draft
+- [Progressive Disclosure and Complexity Management](PROGRESSIVE_DISCLOSURE_AND_COMPLEXITY.md) — `PDA-UX-014` · Superseded (see PDA-UX-037)
+- [Design Tokens and Visual System](DESIGN_TOKENS_AND_VISUAL_SYSTEM.md) — `PDA-UX-015` · Draft
+- [Design System Operations](DESIGN_SYSTEM_OPERATIONS.md) — `PDA-UX-016` · Draft
+- [Component Catalog and State Matrix](COMPONENT_CATALOG_AND_STATE_MATRIX.md) — `PDA-UX-017` · Draft
+- [Content Design Localization and Motion](CONTENT_DESIGN_LOCALIZATION_AND_MOTION.md) — `PDA-UX-018` · Draft
+- [Enterprise Table and Data Grid Standard](ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md) — `PDA-UX-019` · Draft
+- [Navigation Command Palette and Global Search](NAVIGATION_COMMAND_PALETTE_AND_GLOBAL_SEARCH.md) — `PDA-UX-020` · Draft
+- [Interactive Analytics and Visualization](INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md) — `PDA-UX-021` · Draft
+- [Tailwind shadcn and Premium UI Source Policy](TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md) — `PDA-UX-022` · Draft
+- [Design Token Values and Breakpoints](DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md) — `PDA-UX-023` · Draft
+- [Marketing Website Architecture](MARKETING_WEBSITE_ARCHITECTURE.md) — `PDA-UX-024` · Draft
+- [Storybook and Visual Regression Standard](STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md) — `PDA-UX-025` · Draft
+- [Iconography Terminology and Product Content](ICONOGRAPHY_TERMINOLOGY_AND_PRODUCT_CONTENT.md) — `PDA-UX-026` · Draft
+- [First Slice Tender Scope Clarification](FIRST_SLICE_TENDER_SCOPE_CLARIFICATION.md) — `PDA-UX-027` · Draft
+- [shadcn Configuration Decision Matrix](SHADCN_CONFIGURATION_DECISION_MATRIX.md) — `PDA-UX-028` · Draft
+- [Preferred Component Catalog](PREFERRED_COMPONENT_CATALOG.md) — `PDA-UX-029` · Draft
+- [Component Acquisition Policy](COMPONENT_ACQUISITION_POLICY.md) — `PDA-UX-030` · Draft
+- [Component Normalization Standard](COMPONENT_NORMALIZATION_STANDARD.md) — `PDA-UX-031` · Draft
+- [Component Acceptance Checklist](COMPONENT_ACCEPTANCE_CHECKLIST.md) — `PDA-UX-032` · Draft
+- [Component Source Matrix](COMPONENT_SOURCE_MATRIX.md) — `PDA-UX-033` · Draft
+- [Component Discovery Audit](COMPONENT_DISCOVERY_AUDIT.md) — `PDA-UX-034` · Draft
+- [Shadcn Studio Evaluation](SHADCN_STUDIO_EVALUATION.md) — `PDA-UX-035` · Draft
+- [Animation and Motion Guide](ANIMATION_AND_MOTION_GUIDE.md) — `PDA-UX-036` · Draft
+- [Progressive Disclosure Pattern Library](PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md) — `PDA-UX-037` · Draft
+- [WS1 Thin Application Shell Implementation Evidence](WS1_THIN_APPLICATION_SHELL_IMPLEMENTATION_EVIDENCE.md) — `PDA-UX-038` · Draft
+- [Component Intake Fast Path](COMPONENT_INTAKE_FAST_PATH.md) — `PDA-UX-040` · Draft
+
+## Related Authority
+
 - `docs/blueprint/10-Data/SEARCH_AND_COMMAND_RANKING_POLICY.md`
 - `docs/blueprint/20-Strategy/DESIGN_HANDBOOK.md`
 - `docs/blueprint/20-Strategy/PLATFORM_EXPERIENCE_INDEX.md`

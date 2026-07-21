@@ -1,11 +1,15 @@
 ---
 document_id: PDA-DEV-010
 title: Product Documentation and Knowledge Architecture
-version: 0.1.0
+version: 0.6.0
 status: Draft
 owner: Developer Platform
-last_reviewed: 2026-07-12
-related_adrs: [ADR-0016, ADR-0021, ADR-0022]
+last_reviewed: 2026-07-16
+related_adrs: [ADR-0016, ADR-0021, ADR-0022, ADR-0026]
+document_class: specification
+declared_depth: architecture-specified
+evidence_state: documented
+applicable_dimensions: [purpose, authority-and-scope, data-and-integrity, contracts-and-compatibility, authority-controls, experience-and-accessibility, offline-and-degraded, failure-and-recovery, security-and-privacy, migration-and-extensibility, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # Product Documentation and Knowledge Architecture
@@ -61,13 +65,15 @@ packages/
 
 ## Change and Release Integration
 
-Every feature pull request declares documentation impact. User-visible, API, permission, migration, configuration, workflow, or troubleshooting changes update documentation in the same pull request or link a blocking documentation issue.
+Every feature pull request declares documentation impact. User-visible, API, permission, migration, configuration, workflow, or troubleshooting changes update documentation in the same pull request or link a blocking documentation issue. The governed PR body checks exactly one documentation disposition and supplies `Evidence:`; `scripts/validate_pr_governance.py` rejects a claimed in-PR update when no governed documentation path changed and rejects a blocking disposition without an issue number.
+
+The parallel Changeset/release disposition makes release metadata explicit without treating a Changeset as product documentation. `Changeset included` requires a changed Markdown record under `.changeset/`; `No Changeset required` requires reviewable rationale; and `Blocking Changeset issue` requires a numbered issue. Reviewers remain responsible for deciding whether the selected disposition matches the behavioral and publication impact.
 
 Use Changesets for package/release metadata in an implementation monorepo. Generate package changelogs and GitHub releases from approved changesets; curate user-facing release notes by audience. ADRs remain the architecture record and are not replaced by changelog entries.
 
 ## Contextual Help
 
-- Assign stable documentation IDs independent of routes.
+- Assign stable `PDOC-NNNN` documentation IDs independent of routes.
 - Map route, capability, role, and state to a documentation ID.
 - Show short, non-blocking guidance in product surfaces and open the full page in a new context.
 - Never infer permission from documentation visibility.
@@ -89,6 +95,33 @@ The initial product portal uses self-hosted Orama search. Index only content the
 - Preview deployment and editorial approval
 - Customer/support feedback and failed-search review
 
+## Product Documentation Manifest
+
+`registry/product-documentation.json` is the curated publication and evidence manifest for MDX product content. It is intentionally separate from `registry/documents.json`, which indexes governed architecture documents. `schemas/documentation/product-documentation-manifest-v1.schema.json` defines its machine contract.
+
+Every manifest entry binds one MDX page to:
+
+- its stable `PDOC-NNNN` identifier, route, title, content class, audience, and owner;
+- publication state and applicable product/prototype version;
+- an immutable Git evidence revision and last-verification date;
+- implementation evidence paths;
+- relevant capability IDs, permission IDs, and contract paths;
+- API-reference mode where applicable.
+
+Content classes are purpose-specific contracts, not styling labels. `getting-started`, `user-guide`, `administrator-guide`, `developer-guide`, `migration-guide`, `operator-guide`, `troubleshooting`, `api-reference`, `release-note`, and `landing` are the admitted prototype classes. An operator guide must name the service or workflow boundary, prerequisites and authority, observable states, safe containment and recovery, offline/degraded behavior, security/privacy constraints, escalation, evidence collection, verification, and unresolved production gates. It must not expose protected diagnostics or turn infrastructure access into application authority.
+
+The allowed publication states are `internal-prototype`, `release-preview`, `published`, and `retired`. `internal-prototype` is not a customer release. Promotion to `release-preview` or `published` requires a named release record, current implementation evidence, editorial/product review, security classification, accessibility review appropriate to the content, and green MDX metadata/link/build gates.
+
+Promotion to `release-preview` or `published` also enforces the ADR-0026 codename boundary. Product pages, navigation, metadata, generated API presentation, screenshots, downloads and externally visible source references use approved platform/partner/tenant branding or neutral language, never the internal codename. Commercial brand presentation additionally requires FDR-011; neutral publication does not imply that decision. Internal-prototype content may name private implementation paths or operational labels only when necessary to execute the prototype and must be re-reviewed before promotion.
+
+API content declares either `boundary-overview` or `generated-canonical`. A boundary overview may explain implemented and canonical surfaces but must not claim complete operation parity. A generated canonical reference names `generated_reference_source`; its marked operation table is generated by `scripts/generate_api_reference.py` and must contain exactly the operation IDs from canonical OpenAPI. The page may retain a separately labeled implemented-runtime boundary, but generated Draft contract inclusion never proves runtime binding or release support.
+
+`scripts/generate_api_reference.py --check` rejects a stale generated table. `scripts/validate_product_docs.py` validates the manifest schema, MDX/manifest parity, stable ID and route uniqueness, metadata equality, evidence-revision ancestry, evidence/contract paths, registered capabilities and permissions, internal documentation links, and content-derived API operation parity. Fumadocs' Zod schema enforces the same page metadata at MDX build time. The repository typecheck and build remain the rendering/compilation gates.
+
+The controlled-prototype manifest currently binds ten pages to `main` evidence revision `7202fc819b70982c013e1ca11a4fcc136e01e2de`. PDOC-0010 translates registered service `OPS-SVC-005` and PDA-OPS-018 into a task-oriented Event Backbone operator guide while retaining `procedure-draft` readiness. Release notes and the implemented-runtime API view cover merged PR4 replay behavior at the same baseline; the generated canonical table remains a separately labeled Draft contract view.
+
+This Draft metadata contract introduces no public API and changes no domain or lifecycle authority, so no ADR is triggered. An ADR review is required before `PDOC-*` identifiers or manifest semantics become a supported external API or a cross-deployment compatibility promise.
+
 ## Ownership
 
 Developer Platform owns the publishing system and API reference pipeline. Product/domain owners own behavioral accuracy. UX owns information design and accessibility. Support owns troubleshooting feedback. Security/privacy classify content. Release Management owns release-note completeness.
@@ -100,3 +133,4 @@ Developer Platform owns the publishing system and API reference pipeline. Produc
 - Screenshot automation and redaction tooling
 - Search-index size threshold for a hosted provider review
 - Documentation support windows for self-hosted releases
+- Release-record and editorial-approval system of record beyond the controlled prototype

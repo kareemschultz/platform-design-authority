@@ -1,10 +1,10 @@
 ---
 document_id: PDA-FND-011
 title: Document Governance
-version: 0.1.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
+last_reviewed: 2026-07-16
 ---
 
 # Document Governance
@@ -24,6 +24,8 @@ This document defines how blueprint documents are created, reviewed, approved, r
 
 A lower-authority document may not silently override a higher-authority document.
 
+Document lifecycle, content depth, evidence state, and applicability are independent. PDA-FND-017 defines the depth/readiness vocabulary and completion-claim rules; file existence or length never promotes lifecycle or readiness.
+
 ## Required Metadata
 
 Every authoritative document must include:
@@ -38,6 +40,8 @@ Every authoritative document must include:
 - `superseded_by` where applicable
 
 Additional metadata may include reviewers, dependencies, effective date, review cadence, classification, and related ADRs.
+
+Artifacts admitted to the PDA-FND-017 class-adoption register additionally require `document_class`, `declared_depth`, `evidence_state`, and `applicable_dimensions`. These fields are opt-in during the backward-compatible migration and do not promote lifecycle.
 
 ## Lifecycle
 
@@ -155,6 +159,8 @@ Blueprint pull requests should include:
 - Documents are never deleted solely to hide prior decisions
 - Sensitive customer data, secrets, credentials, or private keys must never be committed
 - Generated copies may exist, but Markdown source remains authoritative unless explicitly changed
+- Every governed document appears in the generated document registry and one canonical section index unless a reviewed exemption applies
+- Current completeness claims use PDA-FND-017 depth/evidence semantics rather than file-count or subject-presence shorthand
 
 ## Document-ID Allocation Clarification
 

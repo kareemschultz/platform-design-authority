@@ -1,19 +1,22 @@
 ---
 document_id: PDA-MKT-001
 title: Marketplace Section Index
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # Marketplace
 
-## Current Specifications
+## Artifact Catalog
 
-- `MARKETPLACE_ARCHITECTURE.md`
-- `PUBLISHER_REVIEW_AND_EXTENSION_LIFECYCLE.md`
-- `MARKETPLACE_COMMERCIAL_PHASING.md`
+- [Marketplace Architecture](MARKETPLACE_ARCHITECTURE.md) — `PDA-MKT-010` · Draft
+- [Publisher Review and Extension Lifecycle](PUBLISHER_REVIEW_AND_EXTENSION_LIFECYCLE.md) — `PDA-MKT-011` · Draft
+- [Marketplace Commercial Phasing](MARKETPLACE_COMMERCIAL_PHASING.md) — `PDA-MKT-012` · Draft
+
+## Related Authority
+
 - `docs/blueprint/07-Developer-Platform/EXTENSION_PLUGIN_AND_SANDBOX_ARCHITECTURE.md`
 - `docs/blueprint/18-Decisions/ADR-0019-PHASED-EXTENSION-EXECUTION-MODEL.md`
 - `docs/blueprint/13-Commercial/PARTNER_RESELLER_AND_MARKETPLACE_MODEL.md`

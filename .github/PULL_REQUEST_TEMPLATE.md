@@ -38,11 +38,35 @@ Closes #
 
 ## UI/UX changes
 
-<!-- Routes, components, canonical states. Screenshots only when safe and useful — never include tenant data, credentials, or internal URLs. -->
+<!-- Routes, components, canonical states. Screenshots only when safe and useful — never include tenant data, credentials, or internal URLs.
+Delete this checklist only when this PR touches no route, component, style, or UI copy. -->
+
+- [ ] `ui-pattern-audit` run for any new or changed interaction pattern
+- [ ] `accessibility-review` run for any accessibility-sensitive change
+- [ ] Provenance recorded (`evidence/ui-provenance/`) for any imported or premium-derived component
+- [ ] No raw palette values (hex literals or Tailwind palette utility classes) introduced in `apps/**` or `packages/**`
 
 ## Risks and deferrals
 
 <!-- Link an existing RR-### / TD-### entry, or note a new one this PR creates -->
+
+## Documentation impact disposition
+
+<!-- Check exactly one option and replace Evidence with paths, rationale, or a blocking issue. -->
+
+- [ ] Updated in this PR
+- [ ] No documentation impact
+- [ ] Blocking documentation issue
+Evidence: TBD
+
+## Changeset and release impact disposition
+
+<!-- Check exactly one option and replace Evidence with Changeset paths, rationale, or a blocking issue. -->
+
+- [ ] Changeset included
+- [ ] No Changeset required
+- [ ] Blocking Changeset issue
+Evidence: TBD
 
 ## Test evidence
 
@@ -57,6 +81,11 @@ Closes #
 
 - [ ] `python scripts/validate_docs.py` passes
 - [ ] `python scripts/generate_registries.py --check` passes (no drift)
+- [ ] `python -m unittest scripts/test_validate_document_indexes.py` and `python scripts/validate_document_indexes.py` pass
+- [ ] `python -m unittest scripts/test_validate_product_docs.py` and `python scripts/validate_product_docs.py` pass when product documentation, contracts, permissions, or evidence changes
+- [ ] `python -m unittest scripts/test_validate_research_registration.py` and `python scripts/validate_research_registration.py` pass when competitive-research outputs, backlog states, ledger entries, or source records change
+- [ ] `python -m unittest scripts/test_validate_capability_readiness.py` and `python scripts/validate_capability_readiness.py` pass when capabilities, namespaces, first-slice scope, contracts, evidence, or admission states change
+- [ ] `python -m unittest scripts/test_validate_ratification_waves.py` and `python scripts/validate_ratification_waves.py` pass when review, approval, ratification, or lifecycle-promotion evidence changes
 - [ ] `python scripts/generate_contracts.py --check` passes (when contracts changed)
 - [ ] `python -m unittest scripts/test_validate_program_status.py` and `python scripts/validate_program_status.py` pass (when project-status tracking changed)
 

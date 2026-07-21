@@ -1,5 +1,5 @@
 ---
-document_id: PDA-RDM-010
+document_id: PDA-RDM-012
 title: "WS3 Implementation Plan: POS Cash Workflow"
 version: 0.1.1
 status: Draft
@@ -334,7 +334,7 @@ Minimum provisional budgets from `FIRST_SLICE_IMPLEMENTATION_PLAN.md` §WS3 and 
 - `apps/server/composition/migrations.ts` gains `WS3_MIGRATION_STREAMS` (the empty `pos` stream) folded into `ALL_MIGRATION_STREAMS`.
 - `.github/workflows/meridian-prototype.yml`'s migration-freshness diff-check list gains `packages/persistence/pos-postgres/src/migrations`.
 - `apps/server/package.json` gains `@meridian/domain-pos` and `@meridian/persistence-pos-postgres` dependencies.
-- `python scripts/generate_registries.py` regenerates `registry/permissions.json`, `registry/events.json`, `registry/documents.json` (this document as `PDA-RDM-010`), and `registry/architecture-rules.json` from their sources; `--check` must pass with no diff.
+- `python scripts/generate_registries.py` regenerates `registry/permissions.json`, `registry/events.json`, `registry/documents.json` (this document as `PDA-RDM-012`), and `registry/architecture-rules.json` from their sources; `--check` must pass with no diff.
 - `python scripts/generate_contracts.py` regenerates the TypeScript contract packages from `openapi/first-slice-v1.yaml` + `registry/endpoint-permissions.json`; `--check` must pass with no diff.
 
 ## 14. Review and Change Record

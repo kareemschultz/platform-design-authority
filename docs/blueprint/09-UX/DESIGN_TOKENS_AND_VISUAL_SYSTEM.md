@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-015
 title: Design Tokens and Visual System
-version: 0.3.0
+version: 0.3.1
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-19
+last_reviewed: 2026-07-20
 ---
 
 # Design Tokens and Visual System
@@ -12,6 +12,10 @@ last_reviewed: 2026-07-19
 ## Purpose
 
 Define the constrained visual language that makes the platform coherent, accessible, white-label capable, and visually quiet across web, Expo, native controls, documents, dashboards, and partner experiences.
+
+## Scope relative to Design Token Values and Breakpoints
+
+This document defines the token *system* — roles, principles, and the visual-language contract: what each token role means and why it exists. `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md` (PDA-UX-023) defines this system's provisional *normative values* and breakpoints, machine-represented in `registry/design-tokens.json`. Read this document for the role's meaning; read PDA-UX-023 for its current value and implementation status.
 
 ## Principle: Invisible Consistency
 

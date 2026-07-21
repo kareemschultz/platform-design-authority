@@ -55,11 +55,13 @@ Before inventing an identifier or boundary, consult:
 - `docs/blueprint/01-Platform/BETTER_AUTH_PLUGIN_AND_FEATURE_DECISION_MATRIX.md` before enabling or recommending a Better Auth core option, plugin, managed-infrastructure integration, partner integration, or community plugin
 - `docs/blueprint/09-UX/SHADCN_CONFIGURATION_DECISION_MATRIX.md` before creating, applying, changing, or recommending a shadcn preset, style, base/theme/chart color, font, icon library, radius, menu treatment, RTL, or density default
 - `docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md` before searching, importing, generating, adapting, approving, or replacing reusable components, blocks, animations, page compositions, or progressive-disclosure patterns
+- `docs/blueprint/09-UX/COMPONENT_INTAKE_FAST_PATH.md` (or the `component-intake` skill) when bringing one external component, block, or pattern into the repository
 - `docs/blueprint/02-Architecture/BUN_HONO_ORPC_DECISION_MATRIX.md` before changing runtime, HTTP shell, transport, or Node fallback policy
 - `docs/blueprint/02-Architecture/WORKFLOW_RUNTIME_DECISION_MATRIX.md` before selecting or changing durable/background workflow infrastructure
 - `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFORM_DECISION_MATRIX.md` before changing the documentation platform or content-delivery architecture
 - `docs/blueprint/04-Business-Domains/DOMAIN_DEPENDENCY_MATRIX.md`
 - `docs/blueprint/20-Strategy/FOUNDER_DECISION_REGISTER.md`
+- `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md` plus the owning domain's competitive capability matrix and workflow reference before designing a domain surface or workstream plan
 
 Do not edit generated registries manually. Update sources and run:
 
@@ -107,7 +109,7 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 
 `engine.<name>` registers a shared engine. Dedicated detailed families include `ai.*`, `payment.*`, `loyalty.*`, and `fiscalization.*`.
 
-"Meridian" is the internal engineering codename only (ADR-0026): it names the workspace, `@meridian/*` packages, services, and CI — never canonical identifiers, tenant-visible strings, receipts, or public API surfaces. The `@meridian/*` scope is provisional until npm/trademark checks are recorded; the commercial product name is a separate founder decision.
+"Meridian" is the internal engineering codename only (ADR-0026): it names the workspace, `@meridian/*` packages, services, and CI — never canonical identifiers, tenant-visible strings, receipts, or public API surfaces. The `@meridian/*` scope is provisional and private until npm/trademark checks are recorded; the commercial product name and publishing identity require FDR-011.
 
 ## 7. Money, Time, Quantity, and Identity
 
@@ -128,9 +130,11 @@ Use `Platform Subscription` for the platform SaaS contract and `Recurring Agreem
 - Specialized visualization libraries require a justified requirement and review.
 - Magic UI Pro and shadcn/studio premium assets follow the premium source policy and provenance template.
 - External components, blocks, animations, and page compositions remain candidates until `PREFERRED_COMPONENT_CATALOG.md` promotion gates pass; MCP availability or paid access never grants approval.
+- shadcn Studio Pro and Mobbin Pro are owned subscriptions. Search platform-owned source first, then Studio Pro, then Mobbin for pattern research, before hand-building any block, page, or novel pattern — the `frontend-implementation` skill routes this order automatically.
 - Agents must search platform-owned components first, record provenance, review diffs, avoid duplicate primitive systems, and never let imported UI redefine domain, permission, entitlement, payment, privacy, or workflow semantics.
 - Never commit premium credentials, license keys, private download URLs, or prohibited redistributable source.
 - Every component and workflow covers canonical states, accessibility, responsive behavior, offline behavior, performance, and white label.
+- Every agent implementing or modifying frontend or UI/UX code invokes the `frontend-implementation` skill before writing it; `frontend-architecture` governs pre-implementation planning.
 - `ui-pattern-audit` reviews pattern selection; `accessibility-review` performs formal accessibility review.
 
 ## 9. First-Slice Scope
@@ -186,7 +190,17 @@ bun run db:start            # local PostgreSQL 18 via Docker
 bun run db:migrate          # apply committed Drizzle migrations
 ```
 
-Every change must leave ALL gates green before a PR: `check-types`, `test`, `check`, `python scripts/validate_docs.py`, and `python scripts/generate_registries.py --check`. CI additionally runs the live Docker stack, migration freshness, and API/web health probes — do not merge on a red or skipped gate.
+Every change must leave ALL gates green before a PR. Run them with one command:
+
+```bash
+bun run gates                    # the whole CI gate set, with a pass/fail table
+bun run gates -- --group docs    # only one group (docs, generated, workspace, …)
+bun run gates -- --list          # what runs, and what CI runs that this cannot
+```
+
+`bun run check-types`, `test`, `check`, `python scripts/validate_docs.py`, and `python scripts/generate_registries.py --check` are a subset. CI runs more than twenty validators — document indexes, product documentation, document classes, capability readiness, operational readiness, ratification waves, research registration, and others — so passing `validate_docs.py` alone does not mean a branch is green. `scripts/test_run_gates.py` keeps the runner in step with the workflow files.
+
+CI additionally runs the live Docker stack, migration freshness, and API/web health probes, which `bun run gates` reports as not run locally — do not merge on a red or skipped gate.
 
 Code conventions:
 
@@ -198,7 +212,7 @@ Code conventions:
 - Tests are colocated `*.test.ts` using `bun:test` and assert real behavior — no placeholder assertions.
 - No `console.log` in committed code; use the structured logger. No commented-out code blocks.
 - Line endings are LF, enforced by `.gitattributes` — Windows contributors should not fight the formatter.
-- New UI follows the governed shadcn bootstrap (§8), preferred-component catalog, and semantic tokens; raw palette values in real components are lint-visible defects.
+- New UI follows the governed shadcn bootstrap (§8), preferred-component catalog, and semantic tokens; raw palette values in real components are prohibited. Until `scripts/validate_ui_governance.py` lands in CI, treat a violation as a review-blocking defect, not an advisory note — no lint rule enforces this yet.
 
 ## 12. Change Process
 
@@ -219,6 +233,8 @@ After editing:
 4. Run governance checks.
 5. Update dispositions.
 6. Do not claim readiness beyond evidence.
+
+Pull requests use `.github/PULL_REQUEST_TEMPLATE.md` and must pass `scripts/validate_pr_governance.py`: exactly one documentation-impact disposition, exactly one Changeset/release disposition, concrete evidence or rationale, an exact lifecycle statement, and the unsupported-readiness acknowledgement.
 7. Update the technology ledger and lessons when a dependency, compatibility assumption, workaround, fallback, or breaking change is discovered.
 8. Record documentation and release-note impact for user-visible, API, configuration, migration, permission, workflow, or troubleshooting changes.
 

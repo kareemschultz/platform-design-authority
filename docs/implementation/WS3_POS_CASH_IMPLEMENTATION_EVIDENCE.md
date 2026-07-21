@@ -1,5 +1,5 @@
 ---
-document_id: PDA-IMPL-008
+document_id: PDA-IMPL-009
 title: WS3 POS Cash Implementation Evidence
 version: 0.1.1
 status: Draft
@@ -14,7 +14,7 @@ related_adrs: [ADR-0002, ADR-0003, ADR-0013, ADR-0014, ADR-0016, ADR-0017, ADR-0
 
 WS3 (Technical Prototype 3 — POS Cash Workflow) is **implemented at controlled-prototype depth, pending consolidated review and merge gates**. This document records real, reproduced evidence for PR0-PR6 as built on the isolated branch `claude/ws3-integration`. It does **not** claim WS3 is complete, does not claim CI is green (branch pushes run no CI by design under FDR-012), does not record WS3 entry or program-status progress, and does not close any founder, legal, regulatory, or evidence gate.
 
-Per `docs/blueprint/17-Roadmap/WS3_POS_CASH_IMPLEMENTATION_PLAN.md` (PDA-RDM-010) §1.2's recorded deviation:
+Per `docs/blueprint/17-Roadmap/WS3_POS_CASH_IMPLEMENTATION_PLAN.md` (PDA-RDM-012) §1.2's recorded deviation:
 
 - All WS3 stages (PR0-PR6) land on one integration branch, not individually reviewed and merged branches.
 - No stage in this plan has exact-head independent concurrence; that concurrence is deferred to a single consolidated review the orchestrator records at run end.
@@ -37,7 +37,7 @@ WS3 implementation remains gated by `docs/blueprint/00-Foundation/CONSTITUTION.m
 
 ## 3. Machine-readable matrix
 
-`evidence/first-slice/ws3-capability-evidence.json` is the WS3 evidence source `scripts/generate_registries.py` consumes (auto-discovered from `evidence/first-slice/*-capability-evidence.json`, no code change required to register it). `scripts/check_ws3_evidence.py` (with its `scripts/test_check_ws3_evidence.py` regression companion, exactly parallel to `check_ws1_evidence.py`/`check_ws2_evidence.py`) derives the WS3 capability set as a **literal, explicitly enumerated 12-capability set** — not namespace-derived, because the `commerce.*` namespace also carries four WS4-owned capabilities (`commerce.gift-cards`, `commerce.store-credit`, `commerce.stored-value`, `commerce.stored-value-ledger`) registered `first_slice: true` but explicitly out of WS3 scope per PDA-RDM-010 §5.
+`evidence/first-slice/ws3-capability-evidence.json` is the WS3 evidence source `scripts/generate_registries.py` consumes (auto-discovered from `evidence/first-slice/*-capability-evidence.json`, no code change required to register it). `scripts/check_ws3_evidence.py` (with its `scripts/test_check_ws3_evidence.py` regression companion, exactly parallel to `check_ws1_evidence.py`/`check_ws2_evidence.py`) derives the WS3 capability set as a **literal, explicitly enumerated 12-capability set** — not namespace-derived, because the `commerce.*` namespace also carries four WS4-owned capabilities (`commerce.gift-cards`, `commerce.store-credit`, `commerce.stored-value`, `commerce.stored-value-ledger`) registered `first_slice: true` but explicitly out of WS3 scope per PDA-RDM-012 §5.
 
 After generation, `registry/first-slice-tests.json` records:
 
@@ -46,7 +46,7 @@ After generation, `registry/first-slice-tests.json` records:
 - all thirteen dimensions required for every WS3 row (both `full` and `prototype` depth leave `registry/capability-metadata.json`'s `test_dimension_defaults` empty — no dimension is waived by dominance);
 - no blocking defect on an evidenced WS3 row.
 
-The WS3 registered set: `commerce.pos`, `commerce.register-management`, `commerce.shift-management`, `commerce.cash-management` (full depth); `commerce.order-management`, `commerce.exchanges`, `commerce.gift-receipts`, `commerce.mobile-pos` (prototype depth); `commerce.receipts`, `commerce.returns`, `commerce.refunds`, `commerce.offline-sales` (full depth). `commerce.shift-management` is realized AS the RegisterSession lifecycle PR1 implements (PDA-RDM-010 §5 — no dedicated permission/event exists, none invented) and therefore shares its evidence rows exactly with `commerce.register-management`.
+The WS3 registered set: `commerce.pos`, `commerce.register-management`, `commerce.shift-management`, `commerce.cash-management` (full depth); `commerce.order-management`, `commerce.exchanges`, `commerce.gift-receipts`, `commerce.mobile-pos` (prototype depth); `commerce.receipts`, `commerce.returns`, `commerce.refunds`, `commerce.offline-sales` (full depth). `commerce.shift-management` is realized AS the RegisterSession lifecycle PR1 implements (PDA-RDM-012 §5 — no dedicated permission/event exists, none invented) and therefore shares its evidence rows exactly with `commerce.register-management`.
 
 An `Evidenced` row means executable evidence exists at registered depth, verified by real marker-substring presence in the named source file (26 evidence entries, 110 markers, every marker independently confirmed present via a standalone Python check before registry generation, and again by the generator itself). Open scale, production, external, representative-user, and offline-safe-numbering targets remain named deferrals outside this 156-cell controlled-prototype matrix; prose does not satisfy a required cell and no deferral is counted as a pass.
 
@@ -60,7 +60,7 @@ Each scenario definition is quoted **verbatim** from `docs/blueprint/17-Roadmap/
 
 Assertion set (`Scenario 3 (...)`, one named test): opens a real register, completes a real cash sale that decrements the real Inventory ledger synchronously in the sale's own transaction (`10.000000` → `7.000000` on-hand, one `inventory_stock_movement` row with `source_type = 'Sale'`), then attempts a mixed-tender (`Cash` + `StoredValue`) completion on a second sale and asserts it is explicitly denied (`code: "validation"`) with the stock ledger left unmoved by the denied attempt.
 
-**PARTIAL SATISFACTION, recorded honestly**: the manifest's "mixed-tender" clause is demonstrated as an explicit, non-silent denial, not as a completed capability. WS3 proves **GYD cash only**; electronic-tender/mixed-tender orchestration through a payment provider rail is WS6 (Provider Adapter) scope per PDA-RDM-010 §5's `payment.refunds` row and the frozen control plan's own framing. This scenario is not claimed fully satisfied on this branch.
+**PARTIAL SATISFACTION, recorded honestly**: the manifest's "mixed-tender" clause is demonstrated as an explicit, non-silent denial, not as a completed capability. WS3 proves **GYD cash only**; electronic-tender/mixed-tender orchestration through a payment provider rail is WS6 (Provider Adapter) scope per PDA-RDM-012 §5's `payment.refunds` row and the frozen control plan's own framing. This scenario is not claimed fully satisfied on this branch.
 
 ### Scenario 4 — receipt numbering
 
@@ -68,7 +68,7 @@ Assertion set (`Scenario 3 (...)`, one named test): opens a real register, compl
 
 Assertion set (`Scenario 4 (...)`, one named test): three sequential sale completions each receive a receipt via `pos.getReceipt`, and the three `receiptNumber` values are asserted distinct (`Set` size 3) and monotonically non-decreasing (sorted order unchanged).
 
-**PARTIAL SATISFACTION, recorded honestly**: numbering is demonstrated **online-only** on this branch, via `platform/numbering`'s allocator (consumed, not re-owned, per PDA-RDM-010 §5.1). The manifest's "offline-safe" property is **PENDING WS5** — device enrollment, lease issuance, signed batch transport, and offline-safe sequence allocation remain WS5 ownership. This scenario is not claimed fully satisfied on this branch.
+**PARTIAL SATISFACTION, recorded honestly**: numbering is demonstrated **online-only** on this branch, via `platform/numbering`'s allocator (consumed, not re-owned, per PDA-RDM-012 §5.1). The manifest's "offline-safe" property is **PENDING WS5** — device enrollment, lease issuance, signed batch transport, and offline-safe sequence allocation remain WS5 ownership. This scenario is not claimed fully satisfied on this branch.
 
 ### Scenario 6 — return
 
@@ -76,7 +76,7 @@ Assertion set (`Scenario 4 (...)`, one named test): three sequential sale comple
 
 Assertion set (`Scenario 6 (...)`, one named test): completes a 2-unit sale (`on_hand` 5 → 3), creates a return referencing one unit (`Pending`, no inventory effect yet — `on_hand` still 3), approves the return with a different actor (`Completed`, compensating movement posts — `on_hand` 3 → 4), creates a refund referencing the approved return (`Requested`), and approves the refund with a third actor (`Posted`, a `PaidOut`/`Refund` cash movement posts on the still-open register). This demonstrates return **to original tender (cash)** end to end.
 
-Store-credit return is Commerce-owned stored value — WS4 scope, not demonstrated here (PDA-RDM-010 §5's deferred-with-existing-authority list).
+Store-credit return is Commerce-owned stored value — WS4 scope, not demonstrated here (PDA-RDM-012 §5's deferred-with-existing-authority list).
 
 ### Scenario 9 — register close / deposit / variance
 
@@ -176,7 +176,7 @@ One row per item of the Technical Prototype Plan's Evidence section and repo DoD
 | Contract parity | `python scripts/generate_contracts.py --check` | 118 endpoints / 118 OpenAPI operations joined, no drift (§6) |
 | Unconditional technology-ledger/lessons entry | `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` v0.26.0, TECH-LESSON-050/051/052 | Present (§7) — TECH-LESSON-052 is the "no dependency change" record the DoD requires even absent a new dependency |
 | Risk-register / FDR dispositions | FDR-012 (this run's authorization) fully cited §1; no new risk-register row opened or closed by this stage — WS3's residual gates (§10) are the risk surface, already tracked at PR0 | n/a this stage; no register edit made |
-| Documentation / release-note impact | This document itself (PDA-IMPL-008); `WS3_POS_CASH_SCHEMA_CLASSIFICATION.md` (PDA-DAT-020); no user-facing release note — branch is unmerged and undeployed | Recorded here; no release note published (nothing shipped) |
+| Documentation / release-note impact | This document itself (PDA-IMPL-009); `WS3_POS_CASH_SCHEMA_CLASSIFICATION.md` (PDA-DAT-020); no user-facing release note — branch is unmerged and undeployed | Recorded here; no release note published (nothing shipped) |
 | GitHub CI | **Explicitly PENDING** — branch pushes run no CI by design under FDR-012 §1.2; every gate above was run locally against this exact worktree, not asserted from a CI badge | Never implied green |
 
 ## 10. Dimension-matrix verification (PR0's per-capability/per-dimension matrix)
@@ -188,11 +188,11 @@ Every required cell of `WS3_POS_CASH_IMPLEMENTATION_PLAN.md` §11's per-capabili
 - **Offline numbering: PENDING WS5.** Demonstrated online-only (scenario 4, §4); device enrollment, lease issuance, signed batch transport, and offline-safe sequence allocation are WS5 scope.
 - **Mixed-tender sales: PENDING WS6.** Demonstrated as an explicit denial boundary (scenario 3, §4), not a completed capability; electronic-tender orchestration through a payment provider rail is WS6 (Provider Adapter) scope.
 - **Store-credit returns: WS4 scope**, not demonstrated (Commerce-owned stored value).
-- **`engine.pricing` full-depth completion is NOT claimed by WS3** — PDA-RDM-010 §10.1 records prototype-equivalent fidelity (line price × quantity plus declared discounts) against the registered full-depth capability as an explicit, disclosed gap.
-- **`engine.documents` full-depth evidence is NOT produced by WS3** — receipt rendering lives directly inside `packages/domains/pos`, per PDA-RDM-010 §5.1.
+- **`engine.pricing` full-depth completion is NOT claimed by WS3** — PDA-RDM-012 §10.1 records prototype-equivalent fidelity (line price × quantity plus declared discounts) against the registered full-depth capability as an explicit, disclosed gap.
+- **`engine.documents` full-depth evidence is NOT produced by WS3** — receipt rendering lives directly inside `packages/domains/pos`, per PDA-RDM-012 §5.1.
 - **`payment.refunds` prototype-depth evidence involving an actual provider rail is NOT produced by WS3** — cash refunds only.
 - **POS route JS bundle size** exceeds the 350 KB target by roughly 4×, an open PR5 bundle-size gap this stage measured but did not remediate (out of PR6's evidence-verification scope).
-- **No cash-variance deny/reject path is registered** — a variance that is never approved simply stays `Closing` pending re-count or escalation; PDA-RDM-010 §10.3 records this as an accepted prototype-depth limit, not a silent scope reduction.
+- **No cash-variance deny/reject path is registered** — a variance that is never approved simply stays `Closing` pending re-count or escalation; PDA-RDM-012 §10.3 records this as an accepted prototype-depth limit, not a silent scope reduction.
 - Production RLS roles/policies, 99.9%/99.95%/99.99% operational denominators, multi-tenant noisy-neighbor load, backup/restore exercises, penetration testing, and qualified external accessibility/security review remain open exactly as WS1/WS2 recorded them — not re-litigated or re-opened by this document.
 - **Consolidated review pending; #94/#82 gates open; branch unmerged.** This document records controlled-prototype implementation evidence only.
 

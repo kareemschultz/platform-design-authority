@@ -17,7 +17,9 @@
       "!**/.expo",
       "!apps/native",
       "!apps/web/public/favicon",
-      "!**/.source"
+      "!**/.source",
+      "!**/.codex",
+      "!**/.claude"
     ]
   },
   "formatter": {

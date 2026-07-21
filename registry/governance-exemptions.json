@@ -3,69 +3,6 @@
   "status": "draft",
   "exemptions": [
     {
-      "path": "docs/blueprint/00-Foundation/README.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional navigation file; authority derives from linked documents.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "docs/blueprint/01-Platform/README.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional navigation file; authority derives from linked documents.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "docs/blueprint/02-Architecture/README.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional navigation file; authority derives from linked documents.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "docs/blueprint/03-Business-Engines/README.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional navigation file; authority derives from linked documents.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "docs/blueprint/04-Business-Domains/README.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional navigation file; authority derives from linked documents.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "docs/blueprint/05-Industry-Packs/README.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional navigation file; authority derives from linked documents.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "docs/blueprint/13-Commercial/README.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional navigation file; authority derives from linked documents.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "docs/blueprint/18-Decisions/README.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional navigation file; authority derives from linked documents.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
-      "path": "docs/blueprint/20-Strategy/BEACHHEAD_EVIDENCE_LOG.md",
-      "rule": "document_front_matter",
-      "reason": "Conventional contributor, prototype, or evidence-log file.",
-      "owner": "Platform Design Authority",
-      "review_date": "2026-10-12"
-    },
-    {
       "path": "CLAUDE.md",
       "rule": "document_front_matter",
       "reason": "Tool-discovery contract requires conventional root filename and minimal parser-safe content; authority is derived from linked governed documents.",
@@ -115,6 +52,90 @@
       "review_date": "2026-10-11"
     },
     {
+      "path": "docs/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional repository-documentation navigation file; authority derives from its governed links.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/project/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional navigation for explicitly non-authoritative program-control material.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/project/BLUEPRINT_BASELINE_COMPLETION_CHECKLIST.md",
+      "rule": "document_front_matter",
+      "reason": "Non-authoritative program-control assessment whose governing authority and bounded claim are stated in the file.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/project/GITHUB_PROJECTS_OPERATING_GUIDE.md",
+      "rule": "document_front_matter",
+      "reason": "Non-authoritative operating summary of owner-controlled GitHub state and target configuration.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/project/PROGRAM_STATUS.md",
+      "rule": "document_front_matter",
+      "reason": "Non-authoritative status projection validated against governed evidence and a dated merged-main cutoff.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/project/PROGRESS_MEASUREMENT_STANDARD.md",
+      "rule": "document_front_matter",
+      "reason": "Provisional non-authoritative reporting convention subordinate to governed roadmap and evidence sources.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/project/STATUS_UPDATE_TEMPLATE.md",
+      "rule": "document_front_matter",
+      "reason": "Non-authoritative program-control authoring template; blank evidence fields are intentional prompts.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/templates/ADR_TEMPLATE.md",
+      "rule": "document_front_matter",
+      "reason": "Authoring template; placeholder metadata is intentional and creates no authority until instantiated and registered.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/templates/DOCUMENT_CLASS_APPLICABILITY_TEMPLATE.md",
+      "rule": "document_front_matter",
+      "reason": "Authoring template; placeholder metadata is intentional and creates no authority until instantiated and registered.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/templates/REVIEW_TEMPLATE.md",
+      "rule": "document_front_matter",
+      "reason": "Authoring template; placeholder metadata is intentional and creates no authority until instantiated and registered.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/templates/RUNBOOK_TEMPLATE.md",
+      "rule": "document_front_matter",
+      "reason": "Authoring template; placeholder metadata is intentional and creates no authority until instantiated and registered.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
+      "path": "docs/templates/SPEC_TEMPLATE.md",
+      "rule": "document_front_matter",
+      "reason": "Authoring template; placeholder metadata is intentional and creates no authority until instantiated and registered.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-16"
+    },
+    {
       "path": "AGENTS.md",
       "rule": "document_front_matter",
       "reason": "Cross-agent repository contract requires the conventional root filename and parser-safe Markdown; authority is derived from governed sources.",
@@ -146,6 +167,14 @@
       "registration_document": "docs/reviews/CLAUDE_CODE_WS1_CONSOLIDATED_AUDIT_REGISTRATION.md"
     },
     {
+      "path": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_V1.md",
+      "rule": "document_front_matter",
+      "reason": "Immutable independent documentation-completion audit evidence registered through PDA-REV-013 rather than edited after delivery.",
+      "owner": "Platform Design Authority",
+      "review_date": "2027-07-16",
+      "registration_document": "docs/reviews/MERIDIAN_DOCUMENTATION_COMPLETION_AUDIT_REGISTRATION.md"
+    },
+    {
       "path": "docs/reviews/FABLE5_MASTER_REPOSITORY_AUDIT_PROMPT.md",
       "rule": "document_front_matter",
       "reason": "Historical independent-audit prompt retained as evidence, not an authoritative specification.",
@@ -173,6 +202,48 @@
       "owner": "Platform Design Authority",
       "review_date": "2027-07-17",
       "registration_document": "docs/reviews/FABLE5_FIFTH_AUDIT_REGISTRATION.md"
+    },
+    {
+      "path": "docs/project/GOVERNANCE_REMEDIATION_PROGRAM_PLAN.md",
+      "rule": "document_front_matter",
+      "reason": "Program-control plan in the non-authoritative docs/project plane, consistent with its sibling documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional repository contributor file; GitHub requires the root filename and plain content.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "SECURITY.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional repository security-policy file; GitHub requires the root filename and plain content.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "rule": "document_front_matter",
+      "reason": "Generated third-party attribution notice; content is produced by the third-party tooling, not authored governance.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "third_party/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor file describing vendored third-party asset handling.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
+    },
+    {
+      "path": "evidence/ui-provenance/README.md",
+      "rule": "document_front_matter",
+      "reason": "Conventional contributor file describing the public-safe UI-provenance evidence contract scripts/validate_ui_governance.py enforces.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-20"
     }
   ]
 }

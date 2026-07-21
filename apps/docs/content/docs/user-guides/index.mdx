@@ -1,13 +1,23 @@
 ---
 title: Prototype User Guide
-description: Use the implemented prototype web authentication and dashboard surfaces
+description: Use authentication, active context, and the WS1 administration shell safely
+owner: Platform Experience
+documentation_id: PDOC-0003
+content_class: user-guide
+audience: [administrator, evaluator, user]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
+last_verified: 2026-07-16
+implementation_evidence: [apps/web/src/components/administration-pages.tsx, apps/web/src/lib/shell.test.ts, docs/implementation/WS1_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md]
+related_capabilities: [platform.authentication, platform.organizations, platform.party, platform.authorization, platform.entitlements, platform.audit]
+permission_refs: [platform.organization.read, party.record.read, platform.role.read, platform.entitlement.read, platform.audit.read]
+contract_refs: [openapi/first-slice-v1.yaml, registry/endpoint-permissions.json]
 ---
 
 # Use the current web prototype
 
-The current prototype includes the WS1 administration shell and a controlled WS2 Product and Inventory workspace. These surfaces are implementation evidence, not a pilot or production retail application.
-
-For Product, balance, adjustment, count, transfer, and bounded-import procedures, use [Operate Products and Inventory](/docs/inventory) (stable help ID `PDA-DOC-001`).
+The current prototype demonstrates connectivity, email-and-password authentication, current tenant context, Party linkage, role and entitlement inspection, session revocation, audit inspection, responsive administrative navigation, and server-side permission enforcement. It is not a released retail application. Catalog and Inventory web workflows are not present at this evidence revision.
 
 ## Available actions
 
@@ -17,11 +27,17 @@ For Product, balance, adjustment, count, transfer, and bounded-import procedures
 | Create a prototype account | Not required | Creates a Better Auth user and session |
 | Sign in | Not required | Starts a session for an existing account |
 | Open the dashboard | Required | Redirects unauthenticated visitors to `/login` |
-| Read protected prototype data | Required | Returns the signed-in user through oRPC context |
+| Open Administration | Required plus active membership | Establishes a server-validated organization/location context |
+| Inspect Party identity | `party.record.read` | Shows the Party linked to the active membership when available |
+| List tenant users | `platform.user.read` | Shows authentication and membership summaries without merging those concepts |
+| List roles | `platform.role.read` | Shows tenant roles and the count of assigned permissions |
+| List entitlements | `platform.entitlement.read` | Shows provisioned capabilities separately from actor permission |
+| List audit evidence | `platform.audit.read` | Shows tenant-scoped append-only evidence without expanding classified metadata |
+| Review or revoke own sessions | Required | Lists the current account's sessions and supports idempotent revocation |
 | Change color mode | Not required | Changes the local light/dark/system presentation |
 | Sign out | Required | Ends the session and returns home |
 
-No business permission, entitlement, tenant, organization, Party, or domain role is assigned by these actions.
+Account creation does not assign a tenant, organization, Party, domain role, permission, or entitlement. Prototype provisioning is a separate controlled setup step.
 
 ## Create an account
 
@@ -43,11 +59,13 @@ On success, the application opens the dashboard and displays a success notificat
 
 The application opens `/dashboard` after a successful sign-in. A failed attempt remains on the form and displays an error.
 
-## Use the dashboard
+## Use the dashboard and Administration
 
-The dashboard requires a current session. It shows the signed-in name and calls the protected `privateData` prototype procedure. If the session is absent, the server redirects to `/login`.
+The dashboard requires a current session. The Administration shell additionally requires an active membership and establishes a server-validated context. Use the organization and location selectors only to choose among authorized scopes; changing context never broadens authority.
 
-The dashboard links to implemented WS1 administration and controlled WS2 Product/Inventory workflows. Sales, register, customer, reporting, broad offline, and financial workflows remain governed first-slice requirements, not implemented behavior.
+Administration separates authentication identity, Party, membership, role, permission, and entitlement. It distinguishes permission denial, unavailable entitlement, additional verification, approval, reauthentication, and offline failure. Invitations, membership suspension, and role assignment have governed API seams but no shell forms at this revision.
+
+The web application does not yet provide sales, Catalog, Inventory, register, customer, reporting, offline transaction, or financial workflows. Those remain governed requirements or API-only prototype behavior, not released user tasks.
 
 ## Sign out
 
@@ -65,9 +83,9 @@ The forms use labels, native input types, inline validation text, disabled submi
 
 - Authentication and the protected dashboard require the server and database.
 - The home page reports a disconnected API when the health query fails.
-- The PWA seam does not authorize offline business transactions.
+- The PWA seam does not authorize offline business transactions or administration mutations.
 - Do not treat cached presentation as current authority.
 
 ## Data and support boundaries
 
-Use synthetic data only. This prototype has no customer-support workflow, production account-recovery/provider evidence, privacy request UI, or production retention policy. Tenant administration and prototype factor/session controls are implemented only at the evidence-bounded depth described by the WS1 documentation. Reset disposable local data only through the operator procedure in [Administration](/docs/administration).
+Use synthetic data only. This prototype has no customer-support workflow, account recovery, production email/OTP delivery, privacy request UI, or production retention policy. Tenant administration is inspection-oriented and incomplete. Reset disposable local data only through the operator procedure in [Administration](/docs/administration).

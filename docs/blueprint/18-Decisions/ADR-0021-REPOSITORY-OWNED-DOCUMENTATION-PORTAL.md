@@ -1,14 +1,18 @@
 ---
 document_id: ADR-0021
 title: Use a Repository-Owned Fumadocs Documentation Portal
-version: 0.2.0
+version: 0.3.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-16
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0005, ADR-0016, ADR-0022, ADR-0025]
+document_class: architecture-decision
+declared_depth: contract-specified
+evidence_state: documented
+applicable_dimensions: [purpose, authority-and-scope, migration-and-extensibility, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # ADR-0021 — Use a Repository-Owned Fumadocs Documentation Portal
@@ -70,6 +74,7 @@ Fumadocs scored highest in `docs/blueprint/02-Architecture/DOCUMENTATION_PLATFOR
 - Validate links, front matter, accessibility, navigation, OpenAPI freshness, search indexing, redirects, and static/container builds in CI.
 - Preview every documentation pull request.
 - Require a documentation-impact disposition in feature pull requests.
+- Validate the documentation-impact, Changeset/release, lifecycle, and unsupported-readiness dispositions against the pull-request event and actual changed paths; a syntactically valid Changeset alone is not the disposition.
 - Keep internal security findings, threat models, provider evidence, and protected operational material out of the public portal.
 - Require review before enabling an interactive API proxy; never forward ambient cookies or authorization headers to untrusted origins.
 
@@ -87,6 +92,7 @@ Begin with getting-started, task guides, administration, developer/API, troubles
 - Broken-link, redirect, metadata, screenshot, and code-example tests
 - White-label token and responsive behavior
 - Contributor and non-engineer authoring trial
+- Seeded PR-body mutations for missing, contradictory, unsupported, blocking-without-issue, stale-head, and path-mismatch dispositions
 
 ## References
 
@@ -109,3 +115,4 @@ Begin with getting-started, task guides, administration, developer/API, troubles
 |---|---|---|---|
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial proposal |
 | 0.2.0 | 2026-07-12 | Platform Design Authority | Align the selected documentation application path with the normalized root monorepo under ADR-0025 |
+| 0.3.0 | 2026-07-16 | Platform Design Authority | Enforce the existing documentation-impact requirement with explicit documentation, Changeset/release, lifecycle and readiness dispositions |

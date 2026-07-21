@@ -219,6 +219,24 @@
       "sha256": "8adb5135a5565a05c351d21dbc95342082f0243e1e181080c32156d0d7954c9d"
     },
     {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/metric-card.tsx",
+      "record_id": "source.shadcn-studio.statistics-card-03",
+      "sha256": "d29af0afdb168b44e43acbcf03d935c9055badbdd9571474774261601f3bc03c"
+    },
+    {
+      "declared_upstream_license": "NOASSERTION",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/metric-empty-state.tsx",
+      "record_id": "source.shadcn-studio.empty-state-01",
+      "sha256": "8f4025a67d7113c031d2846152964f5c2a153ee314953cf7623f8520672d1d62"
+    },
+    {
       "declared_upstream_license": "MIT",
       "distribution_status": "legal-review-required",
       "kind": "copied-source",

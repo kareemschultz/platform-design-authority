@@ -1,0 +1,139 @@
+---
+title: Event Backbone Operations
+description: Diagnose and recover controlled-prototype event delivery, replay, and projections
+owner: Platform Operations
+documentation_id: PDOC-0010
+content_class: operator-guide
+audience: [developer, operator, support]
+publication_state: internal-prototype
+applicable_version: 0.0.4-controlled-prototype
+evidence_revision: 7202fc819b70982c013e1ca11a4fcc136e01e2de
+last_verified: 2026-07-16
+implementation_evidence: [apps/worker/composition/delivery.ts, apps/server/composition/events.ts, docs/blueprint/19-Appendices/WS2_PR4_EVENT_DELIVERY_EVIDENCE-2026-07-15.md]
+related_capabilities: [platform.events, catalog.products, inventory.stock-ledger]
+permission_refs: [platform.event.replay]
+contract_refs: [openapi/first-slice-v1.yaml, registry/events.json, registry/operational-readiness.json, docs/blueprint/15-Operations/EVENT_BACKBONE_DELIVERY_RUNBOOK.md]
+document_class: product-documentation
+declared_depth: prototype-ready
+evidence_state: implemented
+applicable_dimensions: [purpose, authority-and-scope, data-and-integrity, contracts-and-compatibility, authority-controls, experience-and-accessibility, offline-and-degraded, failure-and-recovery, security-and-privacy, migration-and-extensibility, verification-and-evidence, references-and-traceability]
+---
+
+# Operate the Event Backbone prototype
+
+Use this guide to inspect, contain, and recover the controlled-prototype Event Backbone service `OPS-SVC-005`. The expected outcome is an advancing bounded delivery queue, one durable consumer effect per receipt identity, and Catalog or Inventory projections that agree with their authoritative owner state or remain explicitly marked for review.
+
+This page translates the governed PDA-OPS-018 runbook into prototype tasks. It is not a production SLO, an authorization grant, a database-repair procedure, or evidence of pilot readiness. External webhook delivery belongs to the Developer Platform and is outside this guide.
+
+## Prerequisites and authority
+
+- Use only a disposable or access-controlled environment with synthetic data.
+- Check out evidence revision `7202fc819b70982c013e1ca11a4fcc136e01e2de` when reproducing the documented behavior.
+- Start PostgreSQL, the server, and the worker with the validated environment schema. The worker never owns migrations.
+- Obtain incident or change authorization before pausing a tenant or requesting replay.
+- Replay requires an authenticated session, a current tenant context, `platform.event.replay`, an idempotency key, and a recorded operational purpose. Infrastructure access does not imply this application permission.
+
+Platform Kernel owns Event Backbone attempts, claims, dead letters, replay requests, and consumer receipts. Catalog owns its Product and search-projection data. Inventory owns immutable stock movements and derived balances. Never edit an event envelope, receipt, movement, Product, replay row, or projection row to make an incident appear resolved.
+
+## Confirm process health
+
+```bash
+docker compose ps
+docker compose logs --since=15m --tail=200 worker
+docker compose exec -T postgres pg_isready -U postgres
+```
+
+The worker deliberately suppresses payloads, SQL exceptions, tenant data, and credentials from its process output. A running container and reachable database prove process availability only; they do not prove queue progress, correct ordering, or projection convergence.
+
+The implementation provides a safe aggregate health snapshot with pending, retrying, claimed, dead-lettered, recent attempt/failure/delivery counts, and oldest eligible age. The prototype does not yet expose that snapshot through a supported operator UI, CLI, or dashboard. Use it only through a reviewed, access-controlled diagnostic harness; do not substitute ad hoc payload queries. This missing surface is an open production gate.
+
+## Interpret delivery state
+
+| Observation | Meaning | Safe response |
+|---|---|---|
+| Pending or retrying grows while delivery is flat | Worker, database, consumer, or stream-order failure | Confirm process/database health, then identify the opaque event, consumer, reason code, and blocking stream |
+| Claimed item outlives its renewable lease | Worker stopped or lost ownership | Stop the unhealthy replica and allow lease expiry; never clear the claim manually |
+| Dead letter appears | Attempts or time bound was exhausted, or the event is incompatible | Preserve minimized evidence, correct producer/consumer code or schema, then use authorized replay |
+| Catalog source version exceeds projection version | Search projection is stale | Verify the same-tenant Product and replay the registered Catalog consumer |
+| Inventory balance is `RequiresReview` | Derived balance diverges from signed movement facts | Retain review state, reconcile movement sums, and correct business facts only by reversal or compensation |
+| Replay remains `Running` for 15 minutes in the reviewed single-worker topology | Replay execution may have stopped after partial durable work | Verify receipts and effects, correct the cause, then use the bounded idempotent recovery path |
+
+Capture only correlation ID, opaque event or replay ID, consumer ID/version, safe state or reason code, bounded sequence range, counts, and timestamps. Tenant IDs and event names may be access-controlled diagnostic filters but must not become metric labels.
+
+## Recover a stopped or stale worker
+
+1. Record the affected service, evidence revision, time window, sanitized symptom, and safe aggregate counts.
+2. Stop only the unhealthy worker replica and wait beyond the 30-second claim lease.
+3. Restart the worker gracefully; a healthy worker may claim the item with a new token.
+4. Confirm the stale token cannot renew, release, or complete the item and that the receipt identity `(consumer_id, event_id, consumer_schema_version)` remains unique.
+5. Verify stream order, backlog movement, and the affected projection before closing the incident.
+
+Do not expose claim-token digests or clear claim fields with SQL. Retry uses full jitter with a one-second base and five-minute cap, and terminates at the earlier of 20 attempts or 24 hours.
+
+## Pause and resume one tenant
+
+The only prototype pause seam is the validated `WORKER_PAUSED_TENANT_IDS` environment variable. It accepts a comma-separated list of opaque tenant IDs.
+
+1. Obtain and record authorization, purpose, start time, affected tenant, and current safe counts.
+2. Set the variable and restart the worker gracefully.
+3. Confirm the target tenant stops advancing while an unaffected tenant or Platform-scoped event still advances.
+4. Diagnose and correct the underlying failure without changing authoritative facts.
+5. Remove the tenant ID, restart, verify ordered progress and reconciliation, and record the end time and result.
+
+This seam is not a customer-facing feature or production control plane. A configuration mistake can delay work, so every change needs peer review and rollback instructions.
+
+## Request a bounded replay
+
+Use the governed `POST /v1/event-replays` command only after the cause is corrected and retention/privacy policy permits replay. The request supplies:
+
+- registered `consumerId` and semantic `consumerSchemaVersion`;
+- inclusive positive `firstSequence` and `lastSequence`, with at most 1,000 positions;
+- one to 25 unique compatible canonical event names;
+- a specific operational `purpose` of at most 500 characters;
+- the current active-context header and a unique 16–128 character idempotency key.
+
+The available prototype consumers are `catalog-search-projection@1.0.0` and `inventory-availability-reconciliation@1.0.0`. Their exact accepted event names and retention classes are governed in `packages/platform/events/src/consumers.ts` and `registry/events.json`; never infer compatibility from a similar event or provider.
+
+An accepted command returns `202` with a replay state of `Pending`, `Running`, `Completed`, `PartiallyCompleted`, `Rejected`, or `Failed`. Acceptance means the bounded request passed current authority and compatibility evaluation; it does not prove completion. Audit evidence records the request without copying payloads or the full purpose into unrestricted metadata.
+
+If replay fails, retain the failed request as evidence. Correct the cause, re-check permission, tenant, consumer version, event compatibility, range, and retention, then submit a new idempotent request. Never insert or requeue repository rows directly.
+
+## Reconcile projections
+
+For Catalog, verify the authoritative Product in the same tenant and replay `catalog-search-projection@1.0.0`. Confirm that the projection records the source event/version and projection time. Reads and later commands must still revalidate current Catalog authority.
+
+For Inventory, compare the derived balance with the signed sum of immutable movement facts. Keep `RequiresReview` until they agree or an owner-approved investigation remains open. Replay can re-run reconciliation; it cannot create a missing movement or authorize a quantity edit. Financial, inventory, cash, payroll, stored-value, and Audit corrections use governed reversal or compensation.
+
+## Offline and degraded behavior
+
+Event delivery and replay are server-only. There is no offline operator queue, lease, or replay authority. An offline client may display stale projection data and must preserve that uncertainty rather than claiming current balance or replay completion. After connectivity returns, refresh current authority and projection state before taking a dependent action.
+
+During database loss, retain outbox and receipt state and allow bounded retry after reachability returns. The worker must not apply migrations, bypass owner migration streams, or claim recovery evidence. Backup, restore, point-in-time recovery, failover, multi-replica capacity, and disaster-recovery behavior remain unevidenced production gates.
+
+## Security, privacy, and escalation
+
+Never place event payloads, Party PII, secrets, database URLs, cookies, authorization headers, SQL exceptions, claim tokens, unrestricted purpose text, or raw Audit metadata in logs, tickets, screenshots, metrics, or AI tools. Shorter source or privacy retention always overrides the prototype's maximum 30-day dead-letter review window.
+
+Escalate immediately for suspected cross-tenant delivery, ledger-integrity failure, privacy/deletion conflict, unauthorized replay, duplicated business effect, or evidence tampering. Escalate producer-schema defects to the owning domain and infrastructure failures to Platform Operations; keep Catalog and Inventory fact repair with their owners.
+
+## Verification and closure
+
+For a disposable PostgreSQL environment with migrations already applied, the focused evidence commands are:
+
+```bash
+bun run --cwd apps/worker db:test
+bun test packages/platform/events/src
+bun test apps/server/src/router.test.ts
+bun run check-types
+```
+
+An incident closes only when bounded backlog progress is restored, affected streams advance in order, no duplicate consumer effect exists, projections reconcile or remain explicitly `RequiresReview`, Audit/correlation evidence is retained, and the recovery is reproducible. Record the revision, sanitized evidence, commands and exit codes, reviewer, and follow-up issue.
+
+## Related guidance
+
+- [Prototype API Reference](/docs/api) for the generated replay contract and runtime boundary.
+- [Database Migrations](/docs/migrations) for server-owned migration authority.
+- [Troubleshooting](/docs/troubleshooting) for local process and environment failures.
+- [Prototype Release Notes](/docs/release-notes) for the exact included and excluded evidence scope.
+
+The governing architecture sources are PDA-PLT-008 (Event Backbone), PDA-OPS-018 (delivery runbook), PDA-APP-023 (PR4 implementation disposition), ADR-0016 (names and events), ADR-0027 (implementation boundary), and the canonical capability, event, permission, endpoint, operational-readiness, and first-slice registries.

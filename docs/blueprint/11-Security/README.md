@@ -1,26 +1,29 @@
 ---
 document_id: PDA-SEC-001
 title: Security Section Index
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-16
 ---
 
 # Security
 
-## Current Specifications
+## Artifact Catalog
 
-- `SECURITY_ARCHITECTURE_AND_CONTROL_FRAMEWORK.md`
-- `THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md`
-- `CRYPTOGRAPHY_KEY_AND_SECRET_LIFECYCLE.md`
-- `SECURE_SOFTWARE_SUPPLY_CHAIN_AND_VULNERABILITY_MANAGEMENT.md`
-- `API_WEBHOOK_EXTENSION_AND_DEVICE_SECURITY.md`
-- `PROVIDER_RISK_ASSESSMENT_TEMPLATE.md`
-- `SECURITY_CONTROL_EVIDENCE_AND_LEGAL_HOLD_MATRIX.md`
-- `PRIVACY_RIGHTS_AND_RETENTION.md`
-- `PII_ERASURE_AND_PSEUDONYMIZATION.md`
-- `RISK_FRAUD_AND_ANOMALY.md`
+- [Privacy Rights and Retention](PRIVACY_RIGHTS_AND_RETENTION.md) — `PDA-SEC-002` · Draft
+- [Risk Fraud and Anomaly Management](RISK_FRAUD_AND_ANOMALY.md) — `PDA-SEC-003` · Draft
+- [PII Erasure and Pseudonymization](PII_ERASURE_AND_PSEUDONYMIZATION.md) — `PDA-SEC-010` · Draft
+- [Threat Model and Tenant Isolation Strategy](THREAT_MODEL_AND_TENANT_ISOLATION_STRATEGY.md) — `PDA-SEC-011` · Draft
+- [Security Architecture and Control Framework](SECURITY_ARCHITECTURE_AND_CONTROL_FRAMEWORK.md) — `PDA-SEC-012` · Draft
+- [Cryptography Key and Secret Lifecycle](CRYPTOGRAPHY_KEY_AND_SECRET_LIFECYCLE.md) — `PDA-SEC-013` · Draft
+- [Secure Software Supply Chain and Vulnerability Management](SECURE_SOFTWARE_SUPPLY_CHAIN_AND_VULNERABILITY_MANAGEMENT.md) — `PDA-SEC-014` · Draft
+- [API Webhook Extension and Device Security](API_WEBHOOK_EXTENSION_AND_DEVICE_SECURITY.md) — `PDA-SEC-015` · Draft
+- [Provider Risk Assessment Template](PROVIDER_RISK_ASSESSMENT_TEMPLATE.md) — `PDA-SEC-016` · Draft
+- [Security Control Evidence and Legal Hold Matrix](SECURITY_CONTROL_EVIDENCE_AND_LEGAL_HOLD_MATRIX.md) — `PDA-SEC-017` · Draft
+
+## Related Authority
+
 - `docs/blueprint/15-Operations/SECURITY_OPERATIONS_AND_FORENSICS.md`
 - `docs/blueprint/15-Operations/OPERATIONAL_EXERCISE_TEMPLATES.md`
 - `docs/blueprint/01-Platform/BETTER_AUTH_IDENTITY_ARCHITECTURE.md`

@@ -63,3 +63,11 @@ test-results
 tmp
 temp
 *.tsbuildinfo
+
+# Agent scratch worktrees
+# Coding agents create full repo checkouts here. They are working state, never
+# repo content: each carries its own biome.json/package.json, so they must also
+# stay outside tool scans (see biome.json files.includes).
+# Note .claude/skills and .claude/settings*.json remain tracked.
+.codex/
+.claude/worktrees/

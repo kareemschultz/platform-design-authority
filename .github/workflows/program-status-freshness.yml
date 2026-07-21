@@ -17,10 +17,17 @@ on:
       - ".github/workflows/program-status-freshness.yml"
       - "scripts/validate_program_status.py"
       - "scripts/test_validate_program_status.py"
+  schedule:
+    # A path-triggered check only re-runs when PROGRAM_STATUS.md changes, so
+    # it goes blind when the world changes instead (an issue closes, a board
+    # is created). Twice weekly is enough to catch that drift without paging
+    # anyone for a document that changes on its own multi-day cadence.
+    - cron: "0 6 * * 1,4"
+  workflow_dispatch:
 
 permissions:
   contents: read
-  issues: read
+  issues: write
   pull-requests: read
 
 jobs:
@@ -58,7 +65,7 @@ jobs:
 
       - name: Upload validation diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: program-status-validation-report
           path: program-status-validation-report.txt
@@ -68,3 +75,69 @@ jobs:
       - name: Fail when validation fails
         if: steps.validate.outputs.status != '0'
         run: exit 1
+
+      - name: Report merged, closed-unmerged, and stale-with-no-PR branches
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        id: stale-branches
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          python scripts/report_stale_branches.py > stale-branches-report.txt
+          if [ -s stale-branches-report.txt ] && ! grep -q "^No fully merged" stale-branches-report.txt; then
+            echo "has_findings=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_findings=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open or update a tracking issue for stale branches
+        if: steps.stale-branches.outputs.has_findings == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          report=$(cat stale-branches-report.txt)
+          body=$'This is a reviewed-action report, not an automatic deletion. See '"${run_url}"$' for the run.\n\n'"${report}"
+          existing=$(gh issue list --state open --label stale-branches --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body "$body"
+          else
+            gh issue create \
+              --title "Stale/merged/abandoned remote branches to review" \
+              --label stale-branches \
+              --label documentation \
+              --body "$body"
+          fi
+
+      - name: Close the stale-branches issue when nothing remains to report
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.stale-branches.outputs.has_findings == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          existing=$(gh issue list --state open --label stale-branches --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "No fully merged, closed-unmerged, or stale-with-no-PR branches remain."
+            gh issue close "$existing"
+          fi
+
+      - name: Open or update a tracking issue on scheduled failure
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          existing=$(gh issue list --state open --label program-status-stale --json number --jq '.[0].number' || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Scheduled Program Status Freshness check failed again: ${run_url}"
+          else
+            body=$'The scheduled (twice-weekly) Program Status Freshness workflow failed outside of any pull request or push to main, so no PR check surfaced it. See the run for the exact validator output: '"${run_url}"$'\n\nClose this issue once docs/project/PROGRAM_STATUS.md is refreshed and the workflow passes on its next scheduled or manual run.'
+            gh issue create \
+              --title "PROGRAM_STATUS.md failed the scheduled freshness check" \
+              --label program-status-stale \
+              --label documentation \
+              --body "$body"
+          fi

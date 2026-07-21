@@ -2,11 +2,76 @@ import { metaSchema, pageSchema } from "fumadocs-core/source/schema";
 import { defineConfig, defineDocs } from "fumadocs-mdx/config";
 import { z } from "zod";
 
-const productPageSchema = pageSchema.extend({
-	documentationId: z
-		.string()
-		.regex(/^PDA-DOC-\d{3}$/u, "Use a stable PDA-DOC-NNN identifier")
+const productDocumentationSchema = pageSchema.extend({
+	api_reference_mode: z
+		.enum(["boundary-overview", "generated-canonical"])
 		.optional(),
+	applicable_dimensions: z.array(z.string()).optional(),
+	applicable_version: z.string().min(1),
+	audience: z
+		.array(
+			z.enum([
+				"administrator",
+				"developer",
+				"evaluator",
+				"integrator",
+				"operator",
+				"support",
+				"user",
+			])
+		)
+		.min(1),
+	content_class: z.enum([
+		"administrator-guide",
+		"api-reference",
+		"developer-guide",
+		"getting-started",
+		"landing",
+		"migration-guide",
+		"operator-guide",
+		"release-note",
+		"troubleshooting",
+		"user-guide",
+	]),
+	contract_refs: z.array(z.string()).default([]),
+	declared_depth: z
+		.enum([
+			"indexed",
+			"ownership-defined",
+			"architecture-specified",
+			"contract-specified",
+			"prototype-ready",
+			"implementation-ready",
+			"operationally-evidenced",
+		])
+		.optional(),
+	document_class: z.enum(["product-documentation"]).optional(),
+	documentation_id: z.string().regex(/^PDOC-\d{4}$/),
+	evidence_revision: z.string().regex(/^[0-9a-f]{40}$/),
+	evidence_state: z
+		.enum([
+			"planned",
+			"documented",
+			"observed",
+			"implemented",
+			"verified",
+			"externally-gated",
+			"contradicted",
+			"superseded",
+		])
+		.optional(),
+	generated_reference_source: z.string().min(1).optional(),
+	implementation_evidence: z.array(z.string()).min(1),
+	last_verified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+	owner: z.string().min(1),
+	permission_refs: z.array(z.string()).default([]),
+	publication_state: z.enum([
+		"internal-prototype",
+		"release-preview",
+		"published",
+		"retired",
+	]),
+	related_capabilities: z.array(z.string()).default([]),
 });
 
 // You can customize Zod schemas for frontmatter and `meta.json` here
@@ -17,7 +82,7 @@ export const docs = defineDocs({
 		postprocess: {
 			includeProcessedMarkdown: true,
 		},
-		schema: productPageSchema,
+		schema: productDocumentationSchema,
 	},
 	meta: {
 		schema: metaSchema,

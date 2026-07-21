@@ -1,7 +1,7 @@
 ---
 document_id: PDA-MKT-010
 title: Marketplace Architecture
-version: 0.2.0
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-11
@@ -15,6 +15,8 @@ related_adrs: [ADR-0016]
 Define publishing, review, discovery, purchase, installation, permissions, compatibility, billing, support, suspension, removal, and settlement for the platform marketplace.
 
 ## Capability Family
+
+PDA-DOM-021 is the canonical current capability-list source. The scoped identifiers are repeated here to define Marketplace architecture, not as a second registry-generator input.
 
 - `marketplace.publishers`
 - `marketplace.listings`

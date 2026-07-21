@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-012
 title: Dashboard and Data Visualization
-version: 0.2.0
+version: 0.2.3
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-19
+last_reviewed: 2026-07-20
 ---
 
 # Dashboard and Data Visualization
@@ -12,6 +12,10 @@ last_reviewed: 2026-07-19
 ## Purpose
 
 Define how operational dashboards, KPI surfaces, charts, tables, alerts, and drill-downs translate business questions and data shape into fast, trustworthy decisions.
+
+## Scope relative to Interactive Analytics and Visualization
+
+This document governs dashboards, KPI surfaces, standard charts/tables, alerts, and drill-downs — the default operational reporting surface. `INTERACTIVE_ANALYTICS_AND_VISUALIZATION.md` (PDA-UX-021) governs deeper interactive analytics (levels L3–L5: analytical canvases, comparison tools, exploratory drill paths) that sit outside the first-slice implementation registry. A surface that needs exploratory, canvas-style interaction beyond this document's baseline is scoped by PDA-UX-021.
 
 ## Core Rule: Data Drives Shape
 
@@ -222,7 +226,7 @@ Each metric defines:
 - Certification state
 - Responsible owner
 
-A visually polished dashboard cannot compensate for ambiguous metric definitions.
+A visually polished dashboard cannot compensate for ambiguous metric definitions. This operationalizes AIR-008 and `docs/blueprint/19-Competitive-Research/ANALYTICS_COMPETITIVE_CAPABILITY_MATRIX.md` (`PDA-CIR-072`).
 
 ## Alerts and Exceptions
 
@@ -239,6 +243,21 @@ Operational alerts show:
 - Resolution state
 
 Avoid turning every unusual value into an alert. Use thresholds, persistence, correlation, and user role to control noise.
+
+## Scheduled Delivery and Export
+
+An exported or scheduled dashboard snapshot declares:
+
+- Recipient
+- Purpose
+- Snapshot timestamp
+- Expiration
+- Retention period
+- Audit trail entry
+
+Expiration and revocation are distinct controls. Expiration is a declared end date the schedule or access grant carries from creation — it lapses on its own even if nobody acts. Revocation is an explicit action that ends access before that date. Every scheduled delivery supports both: a recipient's access, and a running schedule itself, can be withdrawn at any time without waiting for the next send cycle, and every grant also carries an expiration so a forgotten schedule does not stand indefinitely. A scheduled export is a governed, standing grant, not a one-time action; it carries the same accountability as any other permission grant until it is revoked or expires.
+
+This operationalizes `docs/blueprint/19-Competitive-Research/ANALYTICS_COMPETITIVE_CAPABILITY_MATRIX.md`'s (`PDA-CIR-072`) delivery-capability finding ("purpose, recipient, expiration, snapshot time and audit") and `ANALYTICS_WORKFLOW_REFERENCE.md`'s (`PDA-CIR-073`) required-evidence list, which names "scheduled-delivery revocation" alongside metric-definition review and tenant isolation as implementation evidence a delivered analytics workflow must produce.
 
 ## Progressive Disclosure
 

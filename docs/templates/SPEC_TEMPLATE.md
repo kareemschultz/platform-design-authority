@@ -7,6 +7,10 @@ owner: TBD
 last_reviewed: YYYY-MM-DD
 depends_on: []
 related_adrs: []
+document_class: specification
+declared_depth: ownership-defined
+evidence_state: planned
+applicable_dimensions: [purpose, authority-and-scope, data-and-integrity, contracts-and-compatibility, authority-controls, experience-and-accessibility, offline-and-degraded, failure-and-recovery, security-and-privacy, migration-and-extensibility, verification-and-evidence, external-dependencies, references-and-traceability]
 ---
 
 # Specification Title
@@ -159,6 +163,10 @@ Describe authoritative entities, identifiers, lifecycle, retention, precision, c
 ## Open Questions
 
 - Question
+
+## Applicability Record
+
+Map every class-required dimension to an exact section in `registry/document-class-adoption.json`, or record `not-applicable` with an artifact-specific reason. Do not use this section to claim adoption before the artifact is registered and validated.
 
 ## Review Record
 

@@ -142,6 +142,11 @@ jobs:
       - name: Generated contract freshness
         run: python scripts/generate_contracts.py --check
 
+      - name: UI governance (provenance, catalog, palette)
+        run: |
+          python -m unittest scripts/test_validate_ui_governance.py
+          python scripts/validate_ui_governance.py
+
       - name: Secret and prohibited surface scan
         shell: bash
         run: |
@@ -151,6 +156,22 @@ jobs:
             --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock --exclude='*.tsbuildinfo' \
             apps packages ops package.json biome.json turbo.json docker-compose.yml; then
             echo "Prohibited secret or generated example surface found" >&2
+            exit 1
+          fi
+          # Premium UI source credentials and private download/API URLs (shadcn
+          # Studio Pro, Mobbin Pro, Magic UI Pro): CLAUDE.md/AGENTS.md §8
+          # prohibits committing these; this is the enforcement, not a
+          # nonexistent lint rule. Scoped to an assigned value that is not a
+          # ${VAR} placeholder, so the governed components.json pattern of
+          # referencing these credentials via environment-variable
+          # interpolation (never a literal value) is not a false positive,
+          # and ordinary license-text discussion in comments is not either.
+          # LC_ALL=C.UTF-8 is required for grep -P (PCRE lookahead).
+          if LC_ALL=C.UTF-8 grep -RInP '(shadcnstudio\.com/(api|download|private)|mobbin\.com/(api|token)|magicui(pro)?\.(com|design)/(download|license|api)|(MOBBIN|STUDIO)_(TOKEN|API|LICENSE)[_A-Z]*"?\s*[:=]\s*(?:"(?!\$\{)|(?!\$|")\S)|license[_-]?key"?\s*[:=]\s*(?:"(?!\$\{)|(?!\$|")\S))' \
+            --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=.turbo \
+            --exclude-dir=dist --exclude-dir=.source --exclude=bun.lock --exclude='*.tsbuildinfo' \
+            apps packages ops package.json biome.json turbo.json docker-compose.yml; then
+            echo "Prohibited premium-license credential or private download URL found" >&2
             exit 1
           fi
           if grep -RIn "@latest" --include='*.json' --include='*.jsonc' --include='*.yml' --include='*.yaml' \
@@ -229,7 +250,7 @@ jobs:
 
       - name: Retain browser evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-evidence
           path: |

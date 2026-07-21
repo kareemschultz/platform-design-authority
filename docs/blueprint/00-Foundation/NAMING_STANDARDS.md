@@ -1,11 +1,11 @@
 ---
 document_id: PDA-FND-010
 title: Naming Standards
-version: 0.2.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-10
-related_adrs: [ADR-0016]
+last_reviewed: 2026-07-16
+related_adrs: [ADR-0016, ADR-0026]
 ---
 
 # Naming Standards
@@ -24,6 +24,21 @@ Consistent language is essential for a platform that spans many domains. This do
 - Do not use marketing names inside core domain models.
 - Record approved synonyms in the glossary rather than creating duplicate concepts.
 - Query `registry/domains.json` before inventing an identifier prefix.
+
+## Internal Codename and Public Brand Boundary
+
+“Meridian” is an internal engineering codename under ADR-0026, not the commercial product name. It may identify the private workspace, internal `@meridian/*` packages, service and database labels, CI workflows, internal prototype slugs/schemes and private prototype bundle identifiers. It must not appear in:
+
+- capability, event, permission, schema, endpoint, operation or other canonical public identifiers;
+- tenant-visible application strings, installed-app display names, receipts, documents, notifications, sender identities or support presentation;
+- release-preview or published product documentation, public API descriptions, public package names/scopes, product domains, app-store listings or commercial claims;
+- default white-label fallbacks that a tenant, partner, customer or external developer could see.
+
+Customer-visible surfaces use configured platform, partner or tenant branding, or a neutral description such as “Platform” or “Platform Prototype” until FDR-011 is decided. A generic description is not a commercial name and grants no trademark or publishing authority.
+
+All internal `meridian` and `@meridian/*` packages set `private: true`. Public package, domain, app-store, sender or documentation publication requires FDR-002 ownership, FDR-005 publication/licensing posture, FDR-011 founder selection, qualified clearance and channel-specific ownership evidence. A commercial-name decision never renames canonical capability, event or permission identifiers.
+
+`scripts/validate_codename_boundary.py` enforces the machine-verifiable subset: canonical registries and public contracts remain codename-neutral; visible application source and installed-app display name do not embed the codename; release-preview/published product docs remain neutral; internal packages remain private; and the FDR-011 register/packet gate remains present. Review is still required for rendered assets, images, compiled dependencies, externally configured domains/senders, app-store metadata and semantic brand implication.
 
 ## Platform Hierarchy Terms
 
@@ -188,6 +203,8 @@ Reference formats support tenant configuration, collision prevention, fiscal per
 - Avoid dates in filenames unless the document is inherently periodic evidence.
 - Periodic evidence uses `DESCRIPTIVE_NAME-YYYY-MM-DD.md`.
 - Version and status belong in front matter, not filenames.
+
+Governed architecture documents use their registered `PDA-*` or `ADR-*` identifier. Product, administrator, developer, migration, troubleshooting, and release pages under `apps/docs/content/docs/` use a route-independent `PDOC-NNNN` identifier. A `PDOC-*` identifier supports contextual help, redirects, version binding, and publication controls; it does not place product content in the architecture authority plane or grant permission to a reader.
 
 ## Prohibited Patterns
 

@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "status": "Draft",
+  "source_document": "docs/blueprint/00-Foundation/DOCUMENT_DEPTH_AND_READINESS_STANDARD.md",
+  "depths": [
+    "indexed",
+    "ownership-defined",
+    "architecture-specified",
+    "contract-specified",
+    "prototype-ready",
+    "implementation-ready",
+    "operationally-evidenced"
+  ],
+  "evidence_states": [
+    "planned",
+    "documented",
+    "observed",
+    "implemented",
+    "verified",
+    "externally-gated",
+    "contradicted",
+    "superseded"
+  ],
+  "dimensions": [
+    { "id": "purpose", "question": "Why does the artifact exist and what outcome or decision does it serve?" },
+    { "id": "authority-and-scope", "question": "Who owns it, what does it govern, and what is excluded or deferred?" },
+    { "id": "data-and-integrity", "question": "What data, identity, money, time, quantity, lifecycle, correction, retention, or integrity rules apply?" },
+    { "id": "contracts-and-compatibility", "question": "What commands, APIs, schemas, events, consumers, versions, and compatibility rules apply?" },
+    { "id": "authority-controls", "question": "What permissions, entitlements, context, approval, audit, support, AI, or extension authority applies?" },
+    { "id": "experience-and-accessibility", "question": "What user, information, responsive, accessibility, white-label, and canonical-state behavior applies?" },
+    { "id": "offline-and-degraded", "question": "What offline, sync, stale, disconnected, uncertain, or degraded behavior applies?" },
+    { "id": "failure-and-recovery", "question": "How are failures detected, contained, corrected, recovered, escalated, and evidenced?" },
+    { "id": "security-and-privacy", "question": "What threats, isolation, classification, privacy, secrets, abuse, and safe-diagnostic controls apply?" },
+    { "id": "migration-and-extensibility", "question": "What rollout, migration, rollback, upgrade, deprecation, integration, extension, and exit rules apply?" },
+    { "id": "verification-and-evidence", "question": "What tests, reviews, exercises, measurements, fixtures, cutoffs, confidence, and evidence support the claim?" },
+    { "id": "external-dependencies", "question": "Which founder, legal, regulatory, provider, commercial, customer, or professional inputs remain?" },
+    { "id": "references-and-traceability", "question": "Which document IDs, ADRs, capabilities, events, permissions, contracts, registries, plans, and owners connect the artifact?" }
+  ],
+  "classes": [
+    {
+      "id": "foundation-authority",
+      "required_dimensions": ["purpose", "authority-and-scope", "migration-and-extensibility", "verification-and-evidence", "external-dependencies", "references-and-traceability"]
+    },
+    {
+      "id": "architecture-decision",
+      "required_dimensions": ["purpose", "authority-and-scope", "migration-and-extensibility", "verification-and-evidence", "external-dependencies", "references-and-traceability"]
+    },
+    {
+      "id": "specification",
+      "required_dimensions": ["purpose", "authority-and-scope", "data-and-integrity", "contracts-and-compatibility", "authority-controls", "experience-and-accessibility", "offline-and-degraded", "failure-and-recovery", "security-and-privacy", "migration-and-extensibility", "verification-and-evidence", "external-dependencies", "references-and-traceability"]
+    },
+    {
+      "id": "machine-contract",
+      "required_dimensions": ["authority-and-scope", "data-and-integrity", "contracts-and-compatibility", "authority-controls", "security-and-privacy", "migration-and-extensibility", "verification-and-evidence", "references-and-traceability"]
+    },
+    {
+      "id": "plan-roadmap-register",
+      "required_dimensions": ["purpose", "authority-and-scope", "failure-and-recovery", "verification-and-evidence", "external-dependencies", "references-and-traceability"]
+    },
+    {
+      "id": "research-review-evidence",
+      "required_dimensions": ["purpose", "authority-and-scope", "verification-and-evidence", "external-dependencies", "references-and-traceability"]
+    },
+    {
+      "id": "operations-runbook",
+      "required_dimensions": ["authority-and-scope", "data-and-integrity", "contracts-and-compatibility", "authority-controls", "offline-and-degraded", "failure-and-recovery", "security-and-privacy", "verification-and-evidence", "references-and-traceability"]
+    },
+    {
+      "id": "product-documentation",
+      "required_dimensions": ["purpose", "authority-and-scope", "contracts-and-compatibility", "authority-controls", "experience-and-accessibility", "offline-and-degraded", "failure-and-recovery", "security-and-privacy", "verification-and-evidence", "references-and-traceability"]
+    },
+    {
+      "id": "index-template-derived-evidence",
+      "required_dimensions": ["authority-and-scope", "verification-and-evidence", "references-and-traceability"]
+    }
+  ]
+}

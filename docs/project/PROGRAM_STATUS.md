@@ -4,9 +4,9 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at `15417950925b78ad267e54fe6b3550010a46f60d`, which includes WS2 PR7 merged as `81e903b27bf41785106775afb33f9f88738e39b9`, the independent exact-`main` whole-project audit PDA-REV-013, PR #80's audited remediation, PR #89's founder-decision recording, and PR #91's independently concurred P-W2a closeout synchronization
+**Evidence cutoff:** `main` at `5e0fc149b3636561c1ff90e7fbd900101d48a41e`, which includes WS2 PR7 merged as `81e903b27bf41785106775afb33f9f88738e39b9`, the independent exact-`main` whole-project audit PDA-REV-013, PR #80's audited remediation, PR #89's founder-decision recording, PR #91's independently concurred P-W2a closeout synchronization, the competitive-intelligence and domain-research program (PR #75), and the governance-remediation program's tooling and documentation PRs (#112–#179, all eight phases complete per `docs/project/GOVERNANCE_REMEDIATION_PROGRAM_PLAN.md`)
 
-**Last updated:** 2026-07-17
+**Last updated:** 2026-07-20 — the governance-remediation program plan closed its final phase (Phase 8: best-practices coverage audit `PDA-REV-025`, three matrix-confirmed remediation PRs, and the mechanical edits making competitive research load-bearing going forward). No workstream stage, capability-evidence count, or weighted percentage changed, since this program is governance tooling and documentation, not workstream implementation — WS3 remains blocked exactly as recorded below.
 
 This dashboard is a non-authoritative program-control summary. It is subordinate to the authority order in `AGENTS.md`, and it cannot ratify a document, close a risk, or replace evidence in an ADR, approved specification, registry, review disposition, issue, or pull request.
 
@@ -18,7 +18,7 @@ This dashboard is a non-authoritative program-control summary. It is subordinate
 | First-slice implementation | **42.0% provisional weighted completion** | WS0, WS1, and WS2 are complete at controlled-prototype depth. PDA-REV-019 records the controlled-prototype repository disclosure review, subject to exact-head concurrence and merge; WS3 remains blocked on restricted evidence handling and retained real-world customer evidence. WS4–WS7 have not begun implementation. |
 | WS1 progress | **100% stage-weighted** | PR1–PR9 implement contracts, persistence, identity/tenancy/Party, authorization, entitlements, Audit/revocation, the real shell, and governed closeout evidence. This is not pilot or production readiness. |
 | WS2 progress | **100% stage-weighted** | PR1–PR7 implement and evidence Catalog, Inventory, durable event delivery, bounded import/numbering, and the Product/Inventory experience at controlled-prototype depth. The historical PR #79 review-sequence deviation is retained below. |
-| Capability evidence coverage | **25/103 capabilities; 325/1,294 required cells** | The generated registry computes evidence coverage. All 11 WS1 and 14 WS2 capabilities are evidenced at their registered first-slice depth; this is not pilot or production evidence. |
+| Capability evidence coverage | **25 fully evidenced + 0 partially evidenced / 103 capabilities; 325/1,294 required cells** | The generated registry computes evidence coverage. All 11 WS1 and 14 WS2 capabilities are evidenced at their registered first-slice depth; this is not pilot or production evidence. |
 | Production readiness | **Not claimed** | Founder, legal, customer, provider, security, accessibility, operational, pilot, and other external gates remain authoritative. |
 
 ## Blueprint baseline

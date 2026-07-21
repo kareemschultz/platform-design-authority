@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-021
 title: Interactive Analytics and Visualization
-version: 0.1.0
+version: 0.1.2
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-20
 ---
 
 # Interactive Analytics and Visualization
@@ -16,6 +16,10 @@ Interactive analytics levels L3–L5 are outside the first-slice implementation 
 Define responsive, accessible, interactive charts, graphs, analytical canvases, insight panels, drill paths, comparison tools, and visualization-to-action workflows across operational dashboards, reports, mobile experiences, and executive workspaces.
 
 This document extends `DASHBOARD_AND_DATA_VISUALIZATION.md`. Metric definitions and analytical ownership remain governed by the Data Platform semantic layer.
+
+## Scope relative to Dashboard and Data Visualization
+
+Standard operational dashboards, KPI surfaces, and first-slice charts/tables are governed by `DASHBOARD_AND_DATA_VISUALIZATION.md` (PDA-UX-012) — read this document only once a surface needs exploratory or canvas-level interaction beyond that baseline.
 
 ## Experience Principle
 
@@ -90,6 +94,8 @@ Every drill path preserves:
 - Sort and selected dimensions
 - Permission-safe context
 
+Drill-through to an underlying record or workflow reauthorizes at that boundary — the chart's aggregate-level permission does not carry forward as authority to view or act on the individual record; the request revalidates current permission for the specific record before revealing it. This operationalizes `docs/blueprint/19-Competitive-Research/ANALYTICS_WORKFLOW_REFERENCE.md`'s (`PDA-CIR-073`) reference workflow, which allows "drill-down only after reauthorization."
+
 ### Brushing, Zoom, and Pan
 
 Use brushing and zoom only for dense time series, distributions, maps, or high-volume operational traces.
@@ -114,7 +120,7 @@ Supported comparisons may include:
 - Peer location or category
 - Before and after a known event
 
-The comparison definition must remain visible. Percent change shows its denominator, base period, and handling of zero or missing values.
+The comparison definition must remain visible. Percent change shows its denominator, base period, and handling of zero or missing values. This operationalizes AIR-008 and `docs/blueprint/19-Competitive-Research/ANALYTICS_WORKFLOW_REFERENCE.md` (`PDA-CIR-073`).
 
 ### Annotations
 

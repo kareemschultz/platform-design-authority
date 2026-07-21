@@ -20,8 +20,6 @@ IGNORED_TREE_PARTS = {"node_modules", ".next", ".turbo", ".source", "dist"}
 
 CAPABILITY_SOURCES = [
     ROOT / "docs" / "blueprint" / "04-Business-Domains" / "BUSINESS_CAPABILITY_MAP.md",
-    ROOT / "docs" / "blueprint" / "04-Business-Domains" / "CAPABILITY_MAP_AMENDMENT-2026-07-11.md",
-    ROOT / "docs" / "blueprint" / "08-Marketplace" / "MARKETPLACE_ARCHITECTURE.md",
 ]
 
 TEST_DIMENSIONS = [
@@ -115,9 +113,13 @@ def build_documents_registry() -> dict[str, Any]:
             "last_reviewed": metadata.get("last_reviewed"),
             "related_adrs": metadata.get("related_adrs", []),
             "review_evidence": metadata.get("review_evidence"),
+            "document_class": metadata.get("document_class"),
+            "declared_depth": metadata.get("declared_depth"),
+            "evidence_state": metadata.get("evidence_state"),
+            "applicable_dimensions": metadata.get("applicable_dimensions", []),
         })
     records.sort(key=lambda item: item["document_id"])
-    return {"schema_version": "1.2.0", "documents": records}
+    return {"schema_version": "1.3.0", "documents": records}
 
 
 def load_namespaces() -> dict[str, dict[str, Any]]:
@@ -162,7 +164,7 @@ def is_capability_heading(heading: str) -> bool:
     approved = {
         "platform kernel", "shared engine registrations", "ai orchestration", "loyalty",
         "fiscalization and statutory reporting", "security platform", "developer platform",
-        "commercial control plane", "capability family", "party and relationships",
+        "marketplace", "commercial control plane", "capability family", "party and relationships",
         "payment orchestration", "business dna",
         "commerce", "product catalog", "inventory", "warehouse", "procurement", "finance",
         "crm", "workforce", "payroll", "supply chain and logistics", "manufacturing",
@@ -348,7 +350,7 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
     first_slice_ids = {str(item["id"]) for item in first_slice}
     evidence_catalog: dict[str, dict[str, Any]] = {}
     evidence_coverage: dict[tuple[str, str], list[str]] = {}
-    evidenced_capabilities: set[str] = set()
+    registered_capabilities: set[str] = set()
     evidence_workstreams: set[str] = set()
 
     for source_path in FIRST_SLICE_EVIDENCE_SOURCES:
@@ -359,16 +361,16 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
         if not workstream_id or workstream_id in evidence_workstreams:
             raise ValueError(f"duplicate or empty evidence workstream: {workstream_id!r}")
         evidence_workstreams.add(workstream_id)
-        declared_capabilities = source.get("capabilities", [])
-        if not isinstance(declared_capabilities, list):
+        source_capabilities = source.get("capabilities", [])
+        if not isinstance(source_capabilities, list):
             raise ValueError(f"evidence capabilities must be an array: {source_path}")
-        declared_capability_ids = {str(value) for value in declared_capabilities}
+        declared_capability_ids = {str(value) for value in source_capabilities}
         for capability_id in declared_capability_ids:
             if capability_id not in first_slice_ids:
                 raise ValueError(
                     f"evidence source references a non-first-slice capability: {capability_id}"
                 )
-            evidenced_capabilities.add(capability_id)
+            registered_capabilities.add(capability_id)
 
         for evidence in source.get("evidence", []):
             evidence_id = str(evidence.get("id", "")).strip()
@@ -419,6 +421,8 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
     records: list[dict[str, Any]] = []
     required_cell_count = 0
     evidenced_cell_count = 0
+    fully_evidenced_capability_count = 0
+    partially_evidenced_capability_count = 0
     for item in first_slice:
         depth = item["first_slice_depth"]
         dimensions = {dimension: "required" for dimension in TEST_DIMENSIONS}
@@ -444,20 +448,35 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
             dimension: evidence_coverage.get((capability_id, dimension), [])
             for dimension in TEST_DIMENSIONS
         }
-        if capability_id in evidenced_capabilities:
-            missing = [
-                dimension
-                for dimension in required_dimensions
-                if not dimension_evidence[dimension]
-            ]
-            if missing:
-                raise ValueError(
-                    f"evidenced capability {capability_id} lacks required cells: {', '.join(missing)}"
-                )
+        evidenced_required_dimensions = [
+            dimension
+            for dimension in required_dimensions
+            if dimension_evidence[dimension]
+        ]
+        unproven_required_dimensions = [
+            dimension
+            for dimension in required_dimensions
+            if not dimension_evidence[dimension]
+        ]
+        evidenced_cell_count += len(evidenced_required_dimensions)
+        if required_dimensions and len(evidenced_required_dimensions) == len(required_dimensions):
             evidence_status = "Evidenced"
-            evidenced_cell_count += len(required_dimensions)
+            fully_evidenced_capability_count += 1
+        elif evidenced_required_dimensions:
+            evidence_status = "Partially Evidenced"
+            partially_evidenced_capability_count += 1
         else:
             evidence_status = "Planned"
+        dimension_status = {
+            dimension: (
+                "evidenced"
+                if dimension_evidence[dimension]
+                else "planned"
+                if dimensions[dimension] == "required"
+                else dimensions[dimension]
+            )
+            for dimension in TEST_DIMENSIONS
+        }
         evidence_ids = sorted(
             {
                 evidence_id
@@ -473,7 +492,9 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
             "dimensions": dimensions,
             "dimension_reasons": dimension_reasons,
             "evidence_status": evidence_status,
+            "dimension_status": dimension_status,
             "dimension_evidence": dimension_evidence,
+            "unproven_required_dimensions": unproven_required_dimensions,
             "evidence_paths": sorted(
                 {evidence_catalog[evidence_id]["path"] for evidence_id in evidence_ids}
             ),
@@ -481,7 +502,7 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
         })
     records.sort(key=lambda item: item["capability_id"])
     return {
-        "schema_version": "1.1.0",
+        "schema_version": "1.2.0",
         "source_document": "docs/blueprint/16-Testing/FIRST_SLICE_CAPABILITY_TEST_MATRIX.md",
         "source_registry": "registry/first-slice.json",
         "evidence_sources": [
@@ -490,9 +511,12 @@ def build_first_slice_tests_registry(capabilities: dict[str, Any]) -> dict[str, 
         "dimensions": TEST_DIMENSIONS,
         "evidence_catalog": [evidence_catalog[key] for key in sorted(evidence_catalog)],
         "coverage": {
-            "capabilities_evidenced": len(evidenced_capabilities),
+            "capabilities_declared": len(registered_capabilities),
+            "capabilities_evidenced": fully_evidenced_capability_count,
+            "capabilities_partially_evidenced": partially_evidenced_capability_count,
             "capabilities_total": len(first_slice),
             "required_cells_evidenced": evidenced_cell_count,
+            "required_cells_planned": required_cell_count - evidenced_cell_count,
             "required_cells_total": required_cell_count,
         },
         "tests": records,

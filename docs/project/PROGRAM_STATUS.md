@@ -4,9 +4,9 @@
 
 **Status basis:** provisional reporting convention in `PROGRESS_MEASUREMENT_STANDARD.md`
 
-**Evidence cutoff:** `main` at `5e0fc149b3636561c1ff90e7fbd900101d48a41e`, which includes WS2 PR7 merged as `81e903b27bf41785106775afb33f9f88738e39b9`, the independent exact-`main` whole-project audit PDA-REV-013, PR #80's audited remediation, PR #89's founder-decision recording, PR #91's independently concurred P-W2a closeout synchronization, the competitive-intelligence and domain-research program (PR #75), and the governance-remediation program's tooling and documentation PRs (#112–#134)
+**Evidence cutoff:** `main` at `5e0fc149b3636561c1ff90e7fbd900101d48a41e`, which includes WS2 PR7 merged as `81e903b27bf41785106775afb33f9f88738e39b9`, the independent exact-`main` whole-project audit PDA-REV-013, PR #80's audited remediation, PR #89's founder-decision recording, PR #91's independently concurred P-W2a closeout synchronization, the competitive-intelligence and domain-research program (PR #75), and the governance-remediation program's tooling and documentation PRs (#112–#179, all eight phases complete per `docs/project/GOVERNANCE_REMEDIATION_PROGRAM_PLAN.md`)
 
-**Last updated:** 2026-07-20 — re-verified against this cutoff: all 15 issue numbers this document cites were checked live and every closed/open state matches; no workstream stage, capability-evidence count, or weighted percentage changed, since the intervening PRs are governance tooling and research documentation, not workstream implementation.
+**Last updated:** 2026-07-20 — the governance-remediation program plan closed its final phase (Phase 8: best-practices coverage audit `PDA-REV-025`, three matrix-confirmed remediation PRs, and the mechanical edits making competitive research load-bearing going forward). No workstream stage, capability-evidence count, or weighted percentage changed, since this program is governance tooling and documentation, not workstream implementation — WS3 remains blocked exactly as recorded below.
 
 This dashboard is a non-authoritative program-control summary. It is subordinate to the authority order in `AGENTS.md`, and it cannot ratify a document, close a risk, or replace evidence in an ADR, approved specification, registry, review disposition, issue, or pull request.
 

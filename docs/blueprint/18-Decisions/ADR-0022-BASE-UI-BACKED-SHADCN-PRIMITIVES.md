@@ -1,11 +1,11 @@
 ---
 document_id: ADR-0022
 title: Prefer Base UI-Backed shadcn Primitives for New Web Components
-version: 0.2.0
+version: 0.3.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
-last_reviewed: 2026-07-12
+last_reviewed: 2026-07-21
 supersedes: null
 superseded_by: null
 related_adrs: [ADR-0005, ADR-0021]
@@ -35,6 +35,7 @@ Prefer Base UI-backed shadcn source for new platform web components and the docu
 - Do not mix primitive families inside one owned component.
 - Uber Base Web is not selected because its styled/Styletron model conflicts with Tailwind and source ownership.
 - `@fumadocs/base-ui` is the Fumadocs theme package backed by `@base-ui/react`; it is not the platform business-component package.
+- **React Aria hook packages (`@react-aria/*` and `@react-stately/*`) are approved as the lower-level primitive source for exactly three families where Base UI and Radix both ship no first-party primitive: date/calendar/range picking, tree/hierarchical selection, and virtualized-collection keyboard and selection behavior.** This is not an adoption of shadcn's `react-aria-components` package or its `--base aria` project-level CLI option — those install a second, pre-styled competing base and were evaluated and rejected (see `SHADCN_CONFIGURATION_DECISION_MATRIX.md`). React Aria's own architecture separates the pre-styled `react-aria-components` layer from the independently usable `react-aria`/`react-stately` hook layer beneath it; only the hook layer is approved here, composed under fully owned, Tailwind-token-styled DOM exactly as this ADR already requires for `@base-ui/react` direct use. Combobox, autocomplete, and every other family already assigned to Base UI in `PREFERRED_COMPONENT_CATALOG.md` are unaffected and remain Base UI-default. Virtualized-collection use pairs these hooks' selection/keyboard behavior with the platform's existing TanStack Virtual windowing commitment (`ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`); the two are complementary layers, not alternatives.
 
 ## Consequences
 
@@ -59,6 +60,7 @@ Prefer Base UI-backed shadcn source for new platform web components and the docu
 - Normalize tokens, state APIs, portal stacking, responsive behavior, and error/loading/denied/offline states.
 - Test keyboard, focus, screen readers, zoom, contrast, touch, RTL, reduced motion, iOS viewport behavior, and form submission.
 - Migrate one component at a time with behavior reports and rollback commits.
+- A component built on the React Aria hook exception records provenance the same way as any other source-owned component (source package names and versions, modifications, review status); it is not a premium source, so it does not require the paid-source license/redistribution fields.
 
 ## Validation
 
@@ -85,3 +87,4 @@ Prototype Dialog, Menu, Popover, Select, Combobox, Field, Tabs, Toast, Drawer, a
 |---|---|---|---|
 | 0.1.0 | 2026-07-12 | Platform Design Authority | Initial proposal |
 | 0.2.0 | 2026-07-12 | Platform Design Authority | Link governed shadcn bootstrap configuration and reproducibility controls |
+| 0.3.0 | 2026-07-21 | Platform Design Authority | Named React Aria's `@react-aria/*`/`@react-stately/*` hook packages as the approved lower-level primitive source for date/calendar/range picking, tree/hierarchical selection, and virtualized-collection keyboard/selection behavior — the three families confirmed absent from both Base UI's and Radix's first-party component sets. Evaluated and rejected shadcn's `react-aria-components` package and `--base aria` CLI option as a project-wide base switch; every other family remains Base UI-default. |

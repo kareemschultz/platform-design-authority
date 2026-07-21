@@ -156,6 +156,22 @@ The `/rui` theme-install capability and `npx shadcn add @ss-themes/<name>` are t
 8. Normalize source into platform variants, states, tokens, accessibility contracts, and tests; the preset code is provenance, not runtime configuration.
 9. Keep the web component package independent of Vercel hosting and compatible with the approved container deployment.
 
+## React Aria Hook Packages for Base UI Primitive Gaps (added 2026-07-21)
+
+shadcn/ui shipped React Aria as a third project-level component base (`--base aria` at `init`, installing the pre-styled `react-aria-components` package) in July 2026. **This platform does not adopt it.** Verified directly against shadcn's own documentation: the base choice is project-wide and set once at `init`; the `add` command has no per-component override; "existing projects stay on their current base." Switching to it would mean replacing this platform's entire Base UI bootstrap, and every component family it would typically serve — combobox, autocomplete, date picking, tree, virtualized collections — is already assigned to the Base UI track below and in `PREFERRED_COMPONENT_CATALOG.md`. There is no demonstrated Base UI failure to justify that, and `TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`'s existing "explicit need and technology disposition" gate for any such dependency is not met by the mere existence of a new CLI flag.
+
+What the same research surfaced instead, per ADR-0022 §"Decision": React Aria's architecture separates the pre-styled `react-aria-components` layer from an independently usable, lower-level `react-aria` (behavior hooks) / `react-stately` (state) layer beneath it — official guidance describes this as "drop down to the low-level Hook-based API... Mix and match components and hooks as needed." Checked against Base UI's own published component index, Base UI ships Combobox and Autocomplete (no gap — these stay Base UI) but ships **no** Calendar/DatePicker/DateRangePicker, Tree/TreeView, or virtualized List/Grid primitive. Radix does not appear to ship these either (no corresponding package found under any expected name on the npm registry). React Aria's hook packages for exactly these three gaps are real, independently installable, and actively maintained: `@react-aria/calendar` + `@react-stately/calendar`, `@react-aria/datepicker` + `@react-stately/datepicker`, `@react-aria/tree` + `@react-stately/tree`, `@react-aria/listbox` + `@react-stately/list`. Peer dependencies accept this platform's pinned React (`^19.0.0-rc.1` range against `react@^19.2.7`); license is Apache-2.0.
+
+**Approved:** use these hook packages — never `react-aria-components`, never the shadcn `--base aria` flag — as the lower-level primitive source for exactly:
+
+1. Date, calendar, and date-range picking
+2. Tree and hierarchical selection
+3. Virtualized-collection keyboard and selection behavior — composed with the platform's existing TanStack Virtual windowing commitment (`ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`), not in place of it; the hooks supply selection/keyboard/ARIA semantics, TanStack Virtual supplies DOM windowing
+
+Every other component family remains Base UI-default; this exception does not reopen combobox, autocomplete, or anything else already assigned. A component built this way is composed under fully owned, Tailwind-token-styled DOM — the hooks supply behavior, never rendered markup or styling — and records provenance the same way as any other source-owned component (source package names and versions, modifications, review status), without the paid-source license/redistribution fields, since this is an ordinary open-source dependency, not a premium source. A Studio Pro block that transitively depends on `react-aria-components` (several have been observed and one explicitly rejected in `docs/implementation/ECOMMERCE_DASHBOARD_AND_SHADCN_STUDIO_CANDIDATE_AUDIT.md`) is unaffected by this exception and remains presumptively out of scope outside these three named families — this approves using react-aria's hooks directly and deliberately, not inheriting the pre-styled package incidentally through an unrelated block.
+
+See `docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md` (v0.3.0) for the recorded decision and `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for the underlying verification evidence.
+
 ## Prototype Gates
 
 The selection remains Draft until the prototype covers:

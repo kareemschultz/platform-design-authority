@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-021
 title: Interactive Analytics and Visualization
-version: 0.1.1
+version: 0.1.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-20
@@ -93,6 +93,8 @@ Every drill path preserves:
 - Source and freshness
 - Sort and selected dimensions
 - Permission-safe context
+
+Drill-through to an underlying record or workflow reauthorizes at that boundary — the chart's aggregate-level permission does not carry forward as authority to view or act on the individual record; the request revalidates current permission for the specific record before revealing it. This operationalizes `docs/blueprint/19-Competitive-Research/ANALYTICS_WORKFLOW_REFERENCE.md`'s (`PDA-CIR-073`) reference workflow, which allows "drill-down only after reauthorization."
 
 ### Brushing, Zoom, and Pan
 

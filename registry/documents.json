@@ -4511,10 +4511,10 @@
       "document_id": "PDA-ENG-002",
       "path": "docs/blueprint/03-Business-Engines/WORKFLOW_ENGINE.md",
       "title": "Workflow Engine",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-12",
+      "last_reviewed": "2026-07-20",
       "related_adrs": [
         "ADR-0023"
       ],
@@ -8152,7 +8152,7 @@
       "document_id": "PDA-UX-037",
       "path": "docs/blueprint/09-UX/PROGRESSIVE_DISCLOSURE_PATTERN_LIBRARY.md",
       "title": "Progressive Disclosure Pattern Library",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "status": "Draft",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-20",

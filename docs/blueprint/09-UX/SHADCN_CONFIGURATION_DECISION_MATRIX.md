@@ -1,11 +1,11 @@
 ---
 document_id: PDA-UX-028
 title: shadcn Configuration Decision Matrix
-version: 0.2.1
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-20
-verified_as_of: 2026-07-12
+last_reviewed: 2026-07-21
+verified_as_of: 2026-07-21
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -160,17 +160,18 @@ The `/rui` theme-install capability and `npx shadcn add @ss-themes/<name>` are t
 
 shadcn/ui shipped React Aria as a third project-level component base (`--base aria` at `init`, installing the pre-styled `react-aria-components` package) in July 2026. **This platform does not adopt it.** Verified directly against shadcn's own documentation: the base choice is project-wide and set once at `init`; the `add` command has no per-component override; "existing projects stay on their current base." Switching to it would mean replacing this platform's entire Base UI bootstrap, and every component family it would typically serve — combobox, autocomplete, date picking, tree, virtualized collections — is already assigned to the Base UI track below and in `PREFERRED_COMPONENT_CATALOG.md`. There is no demonstrated Base UI failure to justify that, and `TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`'s existing "explicit need and technology disposition" gate for any such dependency is not met by the mere existence of a new CLI flag.
 
-What the same research surfaced instead, per ADR-0022 §"Decision": React Aria's architecture separates the pre-styled `react-aria-components` layer from an independently usable, lower-level `react-aria` (behavior hooks) / `react-stately` (state) layer beneath it — official guidance describes this as "drop down to the low-level Hook-based API... Mix and match components and hooks as needed." Checked against Base UI's own published component index, Base UI ships Combobox and Autocomplete (no gap — these stay Base UI) but ships **no** Calendar/DatePicker/DateRangePicker, Tree/TreeView, or virtualized List/Grid primitive. Radix does not appear to ship these either (no corresponding package found under any expected name on the npm registry). React Aria's hook packages for exactly these three gaps are real, independently installable, and actively maintained: `@react-aria/calendar` + `@react-stately/calendar`, `@react-aria/datepicker` + `@react-stately/datepicker`, `@react-aria/tree` + `@react-stately/tree`, `@react-aria/listbox` + `@react-stately/list`. Peer dependencies accept this platform's pinned React (`^19.0.0-rc.1` range against `react@^19.2.7`); license is Apache-2.0.
+What the same research surfaced instead, per ADR-0022 §"Decision": React Aria's architecture separates the pre-styled `react-aria-components` layer from an independently usable, lower-level `react-aria` (behavior hooks) / `react-stately` (state) layer beneath it — official guidance describes this as "drop down to the low-level Hook-based API... Mix and match components and hooks as needed." Checked against Base UI's own published component index, Base UI ships Combobox and Autocomplete (no gap — these stay Base UI) but ships **no** Tree/TreeView or virtualized List/Grid primitive. Radix does not appear to ship these either (no corresponding package found under any expected name on the npm registry). React Aria's hook packages for exactly these two gaps are real, independently installable, and actively maintained: `@react-aria/tree` + `@react-stately/tree`, `@react-aria/listbox` + `@react-stately/list`. Peer dependencies accept this platform's pinned React (`^19.0.0-rc.1` range against `react@^19.2.7`); license is Apache-2.0.
 
-**Approved:** use these hook packages — never `react-aria-components`, never the shadcn `--base aria` flag — as the lower-level primitive source for exactly:
+**Excluded from this exception: date, calendar, and date-range picking.** A Codex review of the original 0.3.0 amendment found that premise false — shadcn ships a first-party Base UI-variant `Calendar` (built on React DayPicker) and a `Date Picker` composed from `Popover` + `Calendar`, verified directly against `ui.shadcn.com/docs/components/base/calendar` and `.../base/date-picker` on 2026-07-21. Date/calendar/range picking stays on that existing Base UI-variant shadcn source; it is not part of the React Aria hook exception.
 
-1. Date, calendar, and date-range picking
-2. Tree and hierarchical selection
-3. Virtualized-collection keyboard and selection behavior — composed with the platform's existing TanStack Virtual windowing commitment (`ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`), not in place of it; the hooks supply selection/keyboard/ARIA semantics, TanStack Virtual supplies DOM windowing
+**Proposed (controlled-prototype exception):** use these hook packages — never `react-aria-components`, never the shadcn `--base aria` flag — as the lower-level primitive source for exactly:
 
-Every other component family remains Base UI-default; this exception does not reopen combobox, autocomplete, or anything else already assigned. A component built this way is composed under fully owned, Tailwind-token-styled DOM — the hooks supply behavior, never rendered markup or styling — and records provenance the same way as any other source-owned component (source package names and versions, modifications, review status), without the paid-source license/redistribution fields, since this is an ordinary open-source dependency, not a premium source. A Studio Pro block that transitively depends on `react-aria-components` (several have been observed and one explicitly rejected in `docs/implementation/ECOMMERCE_DASHBOARD_AND_SHADCN_STUDIO_CANDIDATE_AUDIT.md`) is unaffected by this exception and remains presumptively out of scope outside these three named families — this approves using react-aria's hooks directly and deliberately, not inheriting the pre-styled package incidentally through an unrelated block.
+1. Tree and hierarchical selection
+2. Virtualized-collection keyboard and selection behavior — composed with the platform's existing TanStack Virtual windowing commitment (`ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md`), not in place of it; the hooks supply selection/keyboard/ARIA semantics, TanStack Virtual supplies DOM windowing
 
-See `docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md` (v0.3.0) for the recorded decision and `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for the underlying verification evidence.
+Every other component family remains Base UI-default; this exception does not reopen combobox, autocomplete, date/calendar/range picking, or anything else already assigned. A component built this way is composed under fully owned, Tailwind-token-styled DOM — the hooks supply behavior, never rendered markup or styling — and records provenance the same way as any other source-owned component (source package names and versions, modifications, review status), without the paid-source license/redistribution fields, since this is an ordinary open-source dependency, not a premium source. A Studio Pro block that transitively depends on `react-aria-components` (several have been observed and one explicitly rejected in `docs/implementation/ECOMMERCE_DASHBOARD_AND_SHADCN_STUDIO_CANDIDATE_AUDIT.md`) is unaffected by this exception and remains presumptively out of scope outside these two named families — this proposes using react-aria's hooks directly and deliberately, not inheriting the pre-styled package incidentally through an unrelated block. Like ADR-0022 itself, this remains a controlled-prototype-depth proposal; no component code is written here, and adopting it for an actual component still requires its own review.
+
+See `docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md` (v0.4.0) for the recorded decision and `docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` for the underlying verification evidence.
 
 ## Prototype Gates
 

@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.7.2
+version: 0.8.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-18
+last_reviewed: 2026-07-21
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -132,6 +132,7 @@ Preferred primitive families include:
 - Toast, inline alert, banner, status indicator, progress
 - Calendar, date picker, date range, time input
 - Avatar, badge, card, separator, skeleton, scroll area
+- Tree/hierarchical selection, virtualized-collection keyboard and selection behavior — sourced per ADR-0022's React Aria hook exception (`@react-aria/tree`+`@react-stately/tree`, `@react-aria/listbox`+`@react-stately/list`), since neither Base UI nor Radix ships a first-party primitive for either family; composed under fully owned, Tailwind-token-styled DOM, never the pre-styled `react-aria-components` package
 
 Primitive source may change only through a reviewed decision. New work should not mix primitive systems casually within the same interaction family.
 

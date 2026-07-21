@@ -84,7 +84,7 @@
 - Repository license conclusion: `NOASSERTION`
 - Permitted-use evidence: `not-established-for-exact-assets`
 - Distribution status: `legal-review-required`
-- Modifications: Studio Pro statistics-component variant statistics-card-03 was normalized into a reusable platform component: renamed to MetricCard, trend (arrow direction) split from tone (positive/negative/neutral interpretation) mapped to governed status-role tokens, unowned Avatar primitive replaced with a styled span, loading/error/stale canonical states added, Card/Badge/Skeleton imports switched to the platform-owned package, and the source's route wrapper and demo data dropped. Full change list in the referenced UI provenance record.
+- Modifications: Studio Pro statistics-component variant statistics-card-03 was normalized into a reusable platform component: renamed to MetricCard, trend (arrow direction) split from tone (positive/negative/neutral interpretation, rendered as visible text, not color alone), unowned Avatar primitive replaced with a styled span, loading/error/stale canonical states added via one persistent aria-live announcement region, Card and Badge imports switched to the platform-owned package with a newly added owned Skeleton import for the new loading state, and the source's route wrapper and demo data dropped. Full change list in the referenced UI provenance record.
 - Covered paths:
 
   - `packages/ui-web/core/src/components/metric-card.tsx`

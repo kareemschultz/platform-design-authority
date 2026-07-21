@@ -225,7 +225,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/metric-card.tsx",
       "record_id": "source.shadcn-studio.statistics-card-03",
-      "sha256": "33d0f7562ea1a3c0443336f905c26e180e0636271b7d8b89d0fc56a15dbbc9ef"
+      "sha256": "d29af0afdb168b44e43acbcf03d935c9055badbdd9571474774261601f3bc03c"
     },
     {
       "declared_upstream_license": "NOASSERTION",

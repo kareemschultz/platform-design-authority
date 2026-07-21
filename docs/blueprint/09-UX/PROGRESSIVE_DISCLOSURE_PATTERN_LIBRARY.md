@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-037
 title: Progressive Disclosure Pattern Library
-version: 0.2.1
+version: 0.2.2
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-20
@@ -113,7 +113,7 @@ Tooltips, hover cards, animation, color, icons, and marketing copy cannot carry 
 
 ### Human tasks and review queues
 
-- A shared review queue or inbox aggregating tasks from multiple owning domains (accounting, payments, inventory, service, AI) shows filter/sort/group/saved-view controls without exposing unauthorized counts or autocomplete suggestions.
+- A shared review queue or inbox aggregating tasks from multiple owning domains (accounting, payments, inventory, service) shows filter/sort/group/saved-view controls without exposing unauthorized counts or autocomplete suggestions. AI-generated items are proposals routed to an owning domain for review, never an owning domain themselves — `AI_ORCHESTRATION_ENGINE.md` is domain-neutral and owns no authoritative business records.
 - Assign, accept, delegate, snooze, and escalate are explicit interactions with a visible SLA effect — never an implicit side effect of opening or closing an item.
 - Opening a queue item previews the underlying source-domain command; committing it reauthorizes against the current record version rather than trusting the queue's own cached copy. A "resolve" control that only marks a notification read, without executing the underlying command, is a prohibited design.
 - Stale, already-resolved, permission-lost, partially-failed, provider-unknown, and conflicted outcomes are distinct, explicit states — never folded into a generic error.

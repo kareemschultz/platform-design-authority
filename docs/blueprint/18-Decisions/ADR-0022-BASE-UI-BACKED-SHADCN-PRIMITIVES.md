@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0022
 title: Prefer Base UI-Backed shadcn Primitives for New Web Components
-version: 0.6.0
+version: 0.7.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
@@ -66,6 +66,8 @@ Prefer Base UI-backed shadcn source for new platform web components and the docu
 
 Prototype Dialog, Menu, Popover, Select, Combobox, Field, Tabs, Toast, Drawer, and one complex searchable multi-select against the platform accessibility and form matrices.
 
+For the React Aria hook exception specifically (added 2026-07-21): before this ADR can promote past Proposed, prototype at least one tree/hierarchical-selection component (`@react-aria/tree`) and one virtualized-collection component covering both the listbox/gridlist row-behavior split and the table case (`@react-aria/listbox` or `@react-aria/gridlist`, and `@react-aria/table`, composed with TanStack Virtual) against the same accessibility and form matrices — proving the actual keyboard, ARIA, and virtualization behavior the exception was granted for, not just the package research behind it.
+
 ## References
 
 - `docs/blueprint/09-UX/TAILWIND_SHADCN_AND_PREMIUM_UI_SOURCE_POLICY.md`
@@ -91,3 +93,4 @@ Prototype Dialog, Menu, Popover, Select, Combobox, Field, Tabs, Toast, Drawer, a
 | 0.4.0 | 2026-07-21 | Platform Design Authority | Codex review of the 0.3.0 amendment found its date/calendar/range-picking primitive-gap premise false: shadcn ships a first-party Base UI-variant `Calendar`/`Date Picker` (React DayPicker-backed), verified directly against `ui.shadcn.com`. Removed that family from the exception — it stays Base UI-default; only tree/hierarchical selection and virtualized-collection behavior remain. Reworded the exception from "approved" to a controlled-prototype-depth proposal, consistent with this ADR's own still-Proposed status and the rest of this repo's lifecycle discipline. |
 | 0.5.0 | 2026-07-21 | Platform Design Authority | A further Codex review found virtualized-collection behavior named only `@react-aria/listbox`, which implements the ARIA listbox pattern for static content — the wrong contract for collections with interactive row children (buttons, checkboxes, menus), which React Aria's own docs route to `useGridList`/`@react-aria/gridlist` (grid ARIA pattern) instead. Added `@react-aria/gridlist` alongside `@react-aria/listbox`, both pairing with `@react-stately/list`, and named the ARIA-contract distinction explicitly. Empirically verified via `bun install` that all named hook packages resolve and install cleanly against this platform's `react@^19.2.7` pin. |
 | 0.6.0 | 2026-07-21 | Platform Design Authority | A fourth Codex review found `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md` routing actual multi-column data-grid/table cases to `gridlist`, which React Aria's own docs define as a single-column contract with no header, column, or sort infrastructure. Added `@react-aria/table`+`@react-stately/table` (`useTable`) as the third, correct family for tabular grids with column navigation and sorting; `listbox`/`gridlist` remain correct for single-column collections. Verified `@react-aria/table` exists on npm (v3.18.1, same peer range) and installs cleanly via the same `bun install` test. |
+| 0.7.0 | 2026-07-21 | Platform Design Authority | A fifth Codex review found the Validation section's prototype list unchanged since before the React Aria hook exception existed, letting this Proposed ADR promote without ever prototyping the tree/listbox/gridlist/table behavior the exception was granted for. Added explicit tree and virtualized-collection/data-grid prototype requirements to Validation, gating promotion on proving the actual keyboard/ARIA/virtualization behavior, not just the package research. |

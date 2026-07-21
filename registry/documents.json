@@ -362,7 +362,7 @@
       "document_id": "ADR-0022",
       "path": "docs/blueprint/18-Decisions/ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md",
       "title": "Prefer Base UI-Backed shadcn Primitives for New Web Components",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "status": "Proposed",
       "owner": "Platform Design Authority",
       "last_reviewed": "2026-07-21",

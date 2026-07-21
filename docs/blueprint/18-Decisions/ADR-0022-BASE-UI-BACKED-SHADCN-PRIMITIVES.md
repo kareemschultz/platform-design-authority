@@ -1,7 +1,7 @@
 ---
 document_id: ADR-0022
 title: Prefer Base UI-Backed shadcn Primitives for New Web Components
-version: 0.8.0
+version: 0.9.0
 status: Proposed
 owner: Platform Design Authority
 created: 2026-07-12
@@ -66,7 +66,7 @@ Prefer Base UI-backed shadcn source for new platform web components and the docu
 
 Prototype Dialog, Menu, Popover, Select, Combobox, Field, Tabs, Toast, Drawer, and one complex searchable multi-select against the platform accessibility and form matrices.
 
-For the React Aria hook exception specifically (added 2026-07-21): before this ADR can promote past Proposed, prototype at least one tree/hierarchical-selection component (`@react-aria/tree`) and one virtualized-collection component covering both the listbox/gridlist row-behavior split and the table case (`@react-aria/listbox` or `@react-aria/gridlist`, and `@react-aria/table`, composed with TanStack Virtual) against the same accessibility and form matrices — proving the actual keyboard, ARIA, and virtualization behavior the exception was granted for, not just the package research behind it.
+For the React Aria hook exception specifically (added 2026-07-21): before this ADR can promote past Proposed, prototype at least one tree/hierarchical-selection component (`@react-aria/tree`) and, covering all three virtualized-collection contracts, one static-content component (`@react-aria/listbox`), one interactive-row component (`@react-aria/gridlist`), and one tabular component (`@react-aria/table`, composed with TanStack Virtual) — against the same accessibility and form matrices, proving the actual keyboard, ARIA, and virtualization behavior for every named branch of the exception, not just the package research behind it.
 
 ## References
 
@@ -95,3 +95,4 @@ For the React Aria hook exception specifically (added 2026-07-21): before this A
 | 0.6.0 | 2026-07-21 | Platform Design Authority | A fourth Codex review found `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md` routing actual multi-column data-grid/table cases to `gridlist`, which React Aria's own docs define as a single-column contract with no header, column, or sort infrastructure. Added `@react-aria/table`+`@react-stately/table` (`useTable`) as the third, correct family for tabular grids with column navigation and sorting; `listbox`/`gridlist` remain correct for single-column collections. Verified `@react-aria/table` exists on npm (v3.18.1, same peer range) and installs cleanly via the same `bun install` test. |
 | 0.7.0 | 2026-07-21 | Platform Design Authority | A fifth Codex review found the Validation section's prototype list unchanged since before the React Aria hook exception existed, letting this Proposed ADR promote without ever prototyping the tree/listbox/gridlist/table behavior the exception was granted for. Added explicit tree and virtualized-collection/data-grid prototype requirements to Validation, gating promotion on proving the actual keyboard/ARIA/virtualization behavior, not just the package research. |
 | 0.8.0 | 2026-07-21 | Platform Design Authority | A sixth Codex review found the table hooks' own state management (`useTableState`) overlapping TanStack Table's existing selection/sort state ownership — two competing authorities for one grid. Rather than invent an unverified adapter, recorded the boundary as an open question deferred to the required prototype: TanStack Table remains the single state authority, and any React Aria table-hook adoption must drive `useTable`'s keyboard/ARIA layer from that external state rather than `useTableState`'s own, or use a plain Base UI `Table` composition absent that resolution. A seventh review also caught this section's own version cross-reference going stale again after this bump; removed the hardcoded version pin from `SHADCN_CONFIGURATION_DECISION_MATRIX.md` instead of re-fixing it each time. |
+| 0.9.0 | 2026-07-21 | Platform Design Authority | An eighth Codex review found the Validation section's prototype requirement letting either the listbox branch or the gridlist branch stay unprototyped ("listbox or gridlist"), even though the exception approves both. Changed to require all three virtualized-collection contracts prototyped explicitly (static-content listbox, interactive-row gridlist, tabular table), not one-of. A parallel review of `TECHNOLOGY_LIFECYCLE_AND_LESSONS.md` found TECH-LESSON-052's peer-range string using unescaped `\|\|` inside a markdown table row, which splits the row into extra cells and misaligns every later column; escaped it. |

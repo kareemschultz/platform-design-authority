@@ -244,6 +244,13 @@
       "reason": "Conventional contributor file describing the public-safe UI-provenance evidence contract scripts/validate_ui_governance.py enforces.",
       "owner": "Platform Design Authority",
       "review_date": "2026-10-20"
+    },
+    {
+      "path": "docs/project/DECISION_AND_RATIFICATION_PROGRAM_PLAN.md",
+      "rule": "document_front_matter",
+      "reason": "Program-control plan in the non-authoritative docs/project plane, consistent with its sibling documents.",
+      "owner": "Platform Design Authority",
+      "review_date": "2026-10-21"
     }
   ]
 }

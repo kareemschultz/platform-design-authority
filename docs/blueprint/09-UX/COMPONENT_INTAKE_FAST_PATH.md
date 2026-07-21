@@ -22,6 +22,8 @@ For automation, use the `component-intake` skill (`.claude/skills/component-inta
 
 Read `docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md` and this repository's `frontend-implementation` skill first (`.claude/skills/frontend-implementation/`) for the token and hard-rule baseline every component must meet regardless of source. Then identify which family in `PREFERRED_COMPONENT_CATALOG.md`'s "Preferred Shared Components" tables the need belongs to, and check its current `Catalog Statuses` — a `Custom Required` or `Restricted` family stops here; do not search further sources for it.
 
+For a domain-specific surface, also check `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md` for a relevant AIR-### entry and the owning domain's competitive capability matrix and workflow reference before searching — an existing disposition should inform the intake decision, not be rediscovered from scratch.
+
 ## Step 1 — Acquisition order
 
 Search in this order and record which step actually supplied the component:

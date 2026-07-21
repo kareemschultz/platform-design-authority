@@ -19,6 +19,8 @@ This skill automates `docs/blueprint/09-UX/COMPONENT_INTAKE_FAST_PATH.md`'s six-
 
 Check `docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md` for the family this need belongs to and its current `Catalog Statuses`. `Custom Required` or `Restricted` stops here — do not proceed to search.
 
+For a domain-specific surface, also check `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md` for a relevant AIR-### entry and the owning domain's competitive capability matrix and workflow reference — an existing disposition (Adopt/Improve/Reject/Defer) should inform the intake decision, not be rediscovered from scratch.
+
 ### 2. Search, in order
 
 1. **Platform-owned first.** Search the catalog's existing entries and `packages/ui-web/core/src/components/` (or the equivalent native package). If found, use it; stop here.

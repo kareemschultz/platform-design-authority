@@ -32,6 +32,7 @@ Then read what matches the surface you are touching:
 - Marketing/public website surfaces → `docs/blueprint/09-UX/MARKETING_WEBSITE_ARCHITECTURE.md`
 - First-slice scope questions → `docs/blueprint/09-UX/FIRST_SLICE_UX_AND_ACCESSIBILITY.md`; POS tender scope specifically → `docs/blueprint/09-UX/FIRST_SLICE_TENDER_SCOPE_CLARIFICATION.md`
 - Stories/visual regression → `docs/blueprint/09-UX/STORYBOOK_AND_VISUAL_REGRESSION_STANDARD.md`
+- Domain-specific surface (a workflow, dashboard, or pattern owned by a specific business domain) → check `docs/blueprint/19-Competitive-Research/ADOPT_IMPROVE_REJECT_REGISTER.md` for a relevant AIR-### entry and the owning domain's competitive capability matrix and workflow reference
 
 For architecture-level questions (page composition, state ownership, component boundaries), invoke the `frontend-architecture` skill first and plan before implementing.
 

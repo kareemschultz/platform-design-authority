@@ -94,6 +94,8 @@ Every drill path preserves:
 - Sort and selected dimensions
 - Permission-safe context
 
+Drill-through to an underlying record or workflow reauthorizes at that boundary — the chart's aggregate-level permission does not carry forward as authority to view or act on the individual record; the request revalidates current permission for the specific record before revealing it. This operationalizes `docs/blueprint/19-Competitive-Research/ANALYTICS_WORKFLOW_REFERENCE.md`'s (`PDA-CIR-073`) reference workflow, which allows "drill-down only after reauthorization."
+
 ### Brushing, Zoom, and Pan
 
 Use brushing and zoom only for dense time series, distributions, maps, or high-volume operational traces.

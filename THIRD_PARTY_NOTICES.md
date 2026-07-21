@@ -76,6 +76,19 @@
 
   - `packages/ui-web/core/src/components/metric-empty-state.tsx`
 
+### shadcn/studio Pro (source.shadcn-studio.statistics-card-03)
+
+- Source/version: https://shadcnstudio.com — Studio inspiration-block catalog entry, retrieved 2026-07-21 via MCP get-inspiration-block-content
+- Upstream-declared license: `NOASSERTION`
+- Public license evidence: not established for exact assets
+- Repository license conclusion: `NOASSERTION`
+- Permitted-use evidence: `not-established-for-exact-assets`
+- Distribution status: `legal-review-required`
+- Modifications: Studio Pro statistics-component variant statistics-card-03 was normalized into a reusable platform component: renamed to MetricCard, trend (arrow direction) split from tone (positive/negative/neutral interpretation, rendered as visible text, not color alone), unowned Avatar primitive replaced with a styled span, loading/error/stale canonical states added via one persistent aria-live announcement region, Card and Badge imports switched to the platform-owned package with a newly added owned Skeleton import for the new loading state, and the source's route wrapper and demo data dropped. Full change list in the referenced UI provenance record.
+- Covered paths:
+
+  - `packages/ui-web/core/src/components/metric-card.tsx`
+
 ### shadcn/ui CLI (source.shadcn.ui.4.13.0)
 
 - Source/version: https://github.com/shadcn-ui/ui/tree/d0fae528221011f75a8c64a917073904c2847493 — 4.13.0 / commit d0fae528221011f75a8c64a917073904c2847493

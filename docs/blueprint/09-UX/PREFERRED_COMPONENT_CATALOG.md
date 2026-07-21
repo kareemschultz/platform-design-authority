@@ -382,6 +382,31 @@ Preferred Candidate authorizes a bounded normalization prototype only.
 - Review date: 2026-07-20
 - Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, and test evidence), or when a real dashboard surface adopts this component, whichever comes first.
 
+### MetricCard
+
+- Status: Prototype Approved
+- User task: Read one KPI at a glance — label, preformatted value, governed time window, textual delta, freshness — on a dashboard or overview surface.
+- Surfaces and roles: Any authenticated dashboard, reporting, or overview surface; every role that can view metrics. Not for cashier/POS transactional screens, which remain task-first per the operational visual grammar.
+- Risk class: Low — presentation-only, no data mutation, no domain authority; value formatting, currency, and units stay upstream.
+- Platform family: Dashboard metric cards and accessible chart frames (Data, operations, and analytics; catalog priority 6).
+- Preferred source: shadcn/studio Pro, Dashboard and Application > statistics-component.
+- Source item and version: `statistics-card-03` (Studio inspiration-block catalog); retrieved 2026-07-21 via the shadcn-studio-mcp inspiration-content tool — same sanctioned MCP route as MetricEmptyState, no private registry URL committed.
+- Alternative candidates: `statistics-card-01` (string-only delta, no trend prop) and `statistics-card-02` (embeds a days-selector `useState` inside the display card — rejected: period selection is surface state, not card state) evaluated and passed over; `statistics-card-04` through `-06` (sparkline/SVG variants) remain Researching pending the chart-frame direction.
+- Why preferred: Purely presentational with the richest structured API of the family (explicit trend direction separate from the delta text, period badge); source was already token-clean, and the normalized form maps interpretation to the governed status-role tokens.
+- Required modifications: recorded in `evidence/ui-provenance/metric-card.json`'s `modifications` field — most notably the trend/tone split (arrow direction is a fact; positive/negative interpretation is separate, so a falling defect count can be good), replacement of the unowned Avatar primitive with a styled span, and the added loading/error/stale canonical states with a single persistent `aria-live` announcement region per the compact-KPI anatomy in `DASHBOARD_AND_DATA_VISUALIZATION.md`.
+- Canonical states: Implements loading (aria-hidden Skeleton, `aria-busy`), error (`errorText`, aria-hidden visible text), stale (aria-hidden visible "Stale" text), and populated. All three non-populated states announce through one always-mounted `aria-live="polite"` region carrying label-scoped text ("Revenue is stale", not bare "Stale") — deliberately not a conditionally-mounted `role="status"` element, since a live region must already exist in the DOM for content changes to be reliably announced. Empty/no-data is deliberately not implemented here — compose `MetricEmptyState` for that, per its entry.
+- **Known gap, disclosed not silently omitted:** the compact-KPI anatomy also names a required "evidence link" and a "partial" data state. Neither is implemented. No real adopting surface exists yet to validate what an evidence link should point to (a raw record, a drill-down report, an audit trail), and committing to that shape without a consumer risks an interface the first real adopter has to work around. Revisit when the first surface adopts this component.
+- Accessibility evidence: Not yet performed; pending before Platform Approved promotion. Delta direction (sr-only text) and meaning (`Improving`/`Worsening`/`Steady` visible text, not color alone — "green or red alone is insufficient" per the compact-KPI grammar) are both stated in text.
+- Responsive and density evidence: Not yet performed; pending before Platform Approved promotion.
+- Offline/degraded behavior: Presentation-only, no network calls; `stale` and `freshnessText` exist so composing surfaces can express degraded data honestly. `freshnessText` is optional pending a real adopting surface — see the disclosed gap above.
+- Performance evidence: Not yet performed; pending.
+- License/provenance record: `evidence/ui-provenance/metric-card.json`.
+- Storybook stories: Not yet written; pending.
+- Tests: Not yet written; pending.
+- Owner: Platform Design Authority
+- Review date: 2026-07-21
+- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, and test evidence), when a real dashboard surface adopts this component, or when the chart-frame direction settles the sparkline variants, whichever comes first.
+
 ### Researching
 
 | Candidate | Research value | Boundary before promotion |

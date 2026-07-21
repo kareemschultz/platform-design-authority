@@ -4882,10 +4882,10 @@
       "document_id": "PDA-ENGR-013",
       "path": "docs/blueprint/14-Engineering/TECHNOLOGY_LIFECYCLE_AND_LESSONS.md",
       "title": "Technology Lifecycle Compatibility and Lessons Ledger",
-      "version": "0.29.2",
+      "version": "0.29.3",
       "status": "Draft",
       "owner": "Platform Engineering",
-      "last_reviewed": "2026-07-18",
+      "last_reviewed": "2026-07-21",
       "related_adrs": [
         "ADR-0004",
         "ADR-0005",

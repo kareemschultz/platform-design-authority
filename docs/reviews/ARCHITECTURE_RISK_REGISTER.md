@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.10.0
+version: 0.11.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-17
+last_reviewed: 2026-07-21
 ---
 
 # Architecture Risk Register
@@ -197,8 +197,8 @@ The immutable finding set and closure tests remain in `evidence/audit/fable5-who
 
 | ID | Title | Status | Evidence | Re-open trigger |
 |---|---|---|---|---|
-| F-A-001 | WS2 PR7 merged without its required pre-merge exact-head concurrence | Founder decision recorded; P-W2a implemented pending independent review | PDA-REV-013 exact-`main` audit at `81e903b`; issue #81 comment `5008157609`; PR #89 concurrence comment `5008646684` and merge `7de0688`; issue #90 | P-W2a fails independent review, the superseding-review decision is changed, or a governed source again claims PR #79 had pre-merge concurrence |
-| F-A-002 | Post-PR7 tracking sources contradict merged state and registry-derived counts | Implemented pending independent review | FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md §Implementation status; issue #90 | P-W2a fails independent review or merged tracking sources drift from the registry-derived evidence |
+| F-A-001 | WS2 PR7 merged without its required pre-merge exact-head concurrence | Closed — P-W2a independently reviewed and merged | PDA-REV-013 exact-`main` audit at `81e903b`; issue #81 comment `5008157609`; PR #89 concurrence comment `5008646684` and merge `7de0688`; PR #91 independent concurrence comment `5009220014` (exact head `ff9816e`) and merge `1541795`; issue #90 | The superseding-review decision is changed, or a governed source again claims PR #79 had pre-merge concurrence |
+| F-A-002 | Post-PR7 tracking sources contradict merged state and registry-derived counts | Closed — P-W2a independently reviewed and merged | FABLE5_FIFTH_AUDIT_REMEDIATION_PLAN_V1.md §Implementation status; PR #91 independent concurrence comment `5009220014` (exact head `ff9816e`) and merge `1541795`; issue #90 | Merged tracking sources drift from the registry-derived evidence |
 | F-L-005 | Eleven production-readiness gate families were not individually tracked | Closed | PROGRAM_STATUS.md §Production-readiness gates; PR #80 concurrence comment `5008076728` and merge `24d28e6` | The eleven-family table loses a family, owner, status, or evidence pointer |
 
 ## Currently Open Risks
@@ -219,8 +219,6 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | FA4-014 | Marketplace payout gating (FDR-008 plus legal/tax/provider review) | Founder | Paid marketplace phase |
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
 | FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |
-| F-A-001 | Superseding WS2 exact-`main` review tracking propagation | PDA + independent reviewer | P-W2a exact-head review and merge |
-| F-A-002 | Post-PR7 tracking synchronization | PDA + independent reviewer | P-W2a exact-head review and merge |
 | RR-001 | Expo auth plugin approval per the BETTER_AUTH plugin matrix | PDA | Native app authentication implementation |
 | RR-002 | PWA manifest theme-color tokens decision | PDA | Web app shell and PWA manifest implementation |
 | RR-003 | apps/native Biome lint exclusion | Implementation | Uniform lint enforcement across workspaces |
@@ -259,3 +257,4 @@ This register is updated in the same pull request as any disposition change: a s
 ## Change Log
 
 - **0.10.0 (2026-07-17):** Added the P-W2a fifth-audit status pointers for F-A-001, F-A-002, and F-L-005; recorded FDR-004 ratification on TA-002 while retaining the historical M0 deviation; preserved all external, pilot, and production blockers.
+- **0.11.0 (2026-07-21):** Closed F-A-001 and F-A-002 — both stale rows still read "implemented pending independent review" after PR #91 (P-W2a) had already completed exact-head independent review (concurrence comment `5009220014`, reviewed head `ff9816e`) and merged (`1541795`, an ancestor of every later `main` commit). Reconciliation only; no new review commissioned. Removed both rows from the Currently Open Risks list.

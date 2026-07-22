@@ -1,6 +1,13 @@
 "use client";
 
 import { buttonVariants } from "@meridian/ui-web/components/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+} from "@meridian/ui-web/components/card";
 import { ArrowRight, Boxes, ClipboardCheck, PackageSearch } from "lucide-react";
 import Link from "next/link";
 
@@ -45,42 +52,55 @@ export function OperationsOverview() {
 			description="Task-focused Catalog and Inventory workflows. Every operation is revalidated by the server."
 			title="Operations"
 		>
-			<section
-				aria-labelledby="scope-heading"
-				className="mb-6 rounded-2xl border p-5"
-			>
-				<h2 className="font-medium" id="scope-heading">
-					Current operating scope
-				</h2>
-				<p className="mt-2 text-muted-foreground text-sm">
-					{organization?.name ?? "No active organization"} ·{" "}
-					{location?.name ?? "All authorized locations"}
-				</p>
-				<p className="mt-2 text-sm">
-					Projection timestamps are evidence only; commands always re-check
-					current authority and owner state.
-				</p>
-			</section>
+			<Card aria-labelledby="scope-heading" className="mb-6" role="region">
+				<CardHeader>
+					<h2
+						className="cn-font-heading font-medium text-sm"
+						data-slot="card-title"
+						id="scope-heading"
+					>
+						Current operating scope
+					</h2>
+					<CardDescription className="text-sm">
+						{organization?.name ?? "No active organization"} ·{" "}
+						{location?.name ?? "All authorized locations"}
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<p className="text-sm">
+						Projection timestamps are evidence only; commands always re-check
+						current authority and owner state.
+					</p>
+				</CardContent>
+			</Card>
 			<div className="grid gap-4 lg:grid-cols-3">
 				{workspaces.map((item) => {
 					const Icon = item.icon;
 					return (
-						<section
-							className="flex flex-col rounded-2xl border p-5"
-							key={item.href}
-						>
-							<Icon aria-hidden="true" className="mb-3 text-primary" />
-							<h2 className="font-medium">{item.label}</h2>
-							<p className="mt-2 flex-1 text-muted-foreground text-sm">
-								{item.description}
-							</p>
-							<Link
-								className={buttonVariants({ className: "mt-5 min-h-10" })}
-								href={item.href}
-							>
-								Open {item.label.toLowerCase()} <ArrowRight />
-							</Link>
-						</section>
+						<Card className="flex flex-col" key={item.href}>
+							<CardHeader>
+								<Icon aria-hidden="true" className="mb-1 text-primary" />
+								<h2
+									className="cn-font-heading font-medium text-sm"
+									data-slot="card-title"
+								>
+									{item.label}
+								</h2>
+								<CardDescription className="text-sm">
+									{item.description}
+								</CardDescription>
+							</CardHeader>
+							<CardFooter className="mt-auto border-t-0 pt-0">
+								<Link
+									className={buttonVariants({
+										className: "min-h-10 w-full",
+									})}
+									href={item.href}
+								>
+									Open {item.label.toLowerCase()} <ArrowRight />
+								</Link>
+							</CardFooter>
+						</Card>
 					);
 				})}
 			</div>

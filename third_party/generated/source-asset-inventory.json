@@ -171,7 +171,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/card.tsx",
       "record_id": "source.better-t-stack.ui.3.36.3",
-      "sha256": "03444345df376621d967bf15a3225a5095dc203691f36a9cfb0fff49ce44ffb6"
+      "sha256": "1b85cf9e6bf4ec37f3f64b04d2e6645abaacf3dea288984c08e73f4d4c20e5fb"
     },
     {
       "declared_upstream_license": "MIT",

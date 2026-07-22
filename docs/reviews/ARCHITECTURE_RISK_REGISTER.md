@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.11.0
+version: 0.12.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-21
+last_reviewed: 2026-07-22
 ---
 
 # Architecture Risk Register
@@ -220,7 +220,6 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
 | FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |
 | RR-001 | Expo auth plugin approval per the BETTER_AUTH plugin matrix | PDA | Native app authentication implementation |
-| RR-002 | PWA manifest theme-color tokens decision | PDA | Web app shell and PWA manifest implementation |
 | RR-003 | apps/native Biome lint exclusion | Implementation | Uniform lint enforcement across workspaces |
 | RR-004 | Design-token-to-CSS generation pipeline | Implementation | Token registry as the single styling source in code |
 | RR-005 | packages/ui catalog completion versus PDA-UX-028 | Implementation | Component catalog conformance |
@@ -228,6 +227,8 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | RR-008 | Production OTP delivery and provider evidence remain blocked by FDR-007 | Founder/External evidence | Production factor delivery and recovery |
 | RR-009 | Independent assistive-technology conformance, penetration testing, and production-content review remain open | External evidence | Pilot and production accessibility/security claims |
 | RR-010 | Party merge, rich identifiers/relationships, duplicate resolution, and privacy-request execution remain beyond WS1 prototype depth | Platform/Party | Any claim or workflow requiring full Party depth |
+
+**RR-002 — Closed.** The theme-color decision was already made and recorded in code: `apps/web/src/app/manifest.ts` carries a comment recording it as a deliberate white-label seam (fifth-audit F-H-007) — literal hex is required because web manifests cannot consume CSS variables, `registry/design-tokens.json` remains the governed source for in-app color, and the two literals are replaced per tenant brand when white-label packaging lands. Recorded in commit `0841136` (fifth-audit W3 wave), part of PR #80's already independently-concurred and merged remediation (concurrence comment `5008076728`, merge `24d28e68cd7766a50523bee871efa3d2582b88c3`). Commissioning a new decision here would be redundant — the decision exists; this reconciles the register to it. Reopen RR-002 only if white-label packaging work needs a different manifest-color mechanism than the one recorded.
 
 **RR-006 — Closed at controlled-prototype depth.** PR #74 merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de` after exact-head concurrence at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` and green Documentation Governance plus Meridian Prototype workflows. PDA-APP-023 proves bounded claim/lease recovery, retry/dead-letter behavior, replay authority and replay-scoped receipts, consumer idempotency, safe observability, tenant isolation, and rebuildable Catalog/Inventory consumers. Claude Code's final independent re-audit recorded zero remaining actionable findings in PR #74 comment `4991097241`. This closes only the missing controlled-prototype delivery-runtime risk; RR-007, production capacity/SLO/alerting, multi-replica topology, production retention, restore exercises, and external webhook delivery remain open under their named owners. Reopen RR-006 only if new evidence invalidates the merged delivery or idempotency controls.
 
@@ -258,3 +259,4 @@ This register is updated in the same pull request as any disposition change: a s
 
 - **0.10.0 (2026-07-17):** Added the P-W2a fifth-audit status pointers for F-A-001, F-A-002, and F-L-005; recorded FDR-004 ratification on TA-002 while retaining the historical M0 deviation; preserved all external, pilot, and production blockers.
 - **0.11.0 (2026-07-21):** Closed F-A-001 and F-A-002 — both stale rows still read "implemented pending independent review" after PR #91 (P-W2a) had already completed exact-head independent review (concurrence comment `5009220014`, reviewed head `ff9816e`) and merged (`1541795`, an ancestor of every later `main` commit). Reconciliation only; no new review commissioned. Removed both rows from the Currently Open Risks list.
+- **0.12.0 (2026-07-22):** Closed RR-002 — the PWA manifest theme-color decision this risk asked for was already made and recorded in `apps/web/src/app/manifest.ts`'s own comment (fifth-audit F-H-007), committed as `0841136` and merged as part of PR #80's already independently-concurred remediation. Reconciliation only; no new decision made. Removed RR-002 from the Currently Open Risks list.

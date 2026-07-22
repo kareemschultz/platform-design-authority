@@ -41,7 +41,7 @@ Create `evidence/ui-provenance/<component-name>.json`, matching `registry/premiu
 
 - `id`: `ui-source.<source>.<item>` (e.g. `ui-source.shadcn-studio.empty-state-01`)
 - `source_product`, `source_item`, `source_version`, `retrieved_at`: factual, from the MCP metadata
-- `license_owner`, `permitted_entity`, `permitted_products`: **always `null`** — never populate these in this public repository
+- `license_owner`, `permitted_entity`, `permitted_products`: **always empty** (`null`, `[]`, or `""` — the template defaults `permitted_products` to `[]`, the other two to `null`; all are equivalent "nothing recorded") — never populate these in this public repository
 - `repository_paths`, `platform_component_name`: where it landed
 - `modifications`: an honest list of every change from the source (renames, prop parameterization, import-path changes, dropped route wrappers)
 - `dependencies_added`, `external_network_calls_removed`, `token_normalization`: factual

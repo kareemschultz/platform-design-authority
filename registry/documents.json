@@ -8231,10 +8231,10 @@
       "document_id": "PDA-UX-040",
       "path": "docs/blueprint/09-UX/COMPONENT_INTAKE_FAST_PATH.md",
       "title": "Component Intake Fast Path",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-20",
+      "last_reviewed": "2026-07-21",
       "related_adrs": [
         "ADR-0005",
         "ADR-0022"

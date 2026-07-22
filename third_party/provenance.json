@@ -190,7 +190,7 @@
     },
     {
       "package": "@img/sharp-win32-x64",
-      "version": "0.34.5"
+      "version": "0.35.3"
     },
     {
       "package": "fb-dotslash",
@@ -307,12 +307,12 @@
     },
     {
       "package": "@img/sharp-win32-x64",
-      "version": "0.34.5",
+      "version": "0.35.3",
       "observed_expression": "Apache-2.0 AND LGPL-3.0-or-later",
       "expression_kind": "and-conjunctive",
       "review_status": "qualified-review-required",
       "license_conclusion": "NOASSERTION",
-      "source_context": "installed-package-manifest-observation-windows-2026-07-18",
+      "source_context": "installed-package-manifest-observation-windows-2026-07-21",
       "limitation": "Windows optional binary; artifact reachability and cumulative obligations require review."
     },
     {

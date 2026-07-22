@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-013
 title: Forms Selection and Multiselect
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-11
+last_reviewed: 2026-07-21
 ---
 
 # Forms, Selection, and Multiselect
@@ -89,6 +89,8 @@ Rules:
 | Bulk selection from current result set | Table/list selection model |
 
 Do not use a dropdown for a binary choice when a checkbox or switch communicates the state better.
+
+A tree selector's keyboard/selection/ARIA behavior is sourced per `ADR-0022-BASE-UI-BACKED-SHADCN-PRIMITIVES.md`'s React Aria hook exception (`@react-aria/tree`+`@react-stately/tree`), since neither Base UI nor Radix ships a first-party Tree primitive — composed under fully owned, Tailwind-token-styled DOM, not the pre-styled `react-aria-components` package. A staged combobox stays on the existing Base UI Combobox source.
 
 ## Multi-Select Combobox
 

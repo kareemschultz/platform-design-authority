@@ -224,7 +224,8 @@ test("Barcode entry and exact lookup preserve keyboard focus, reflow, and access
 	await page
 		.getByLabel("Tenant SKU (optional)")
 		.fill(`BARCODE-${testInfo.project.name.toUpperCase()}-${suffix}`);
-	await page.getByLabel("GTIN scheme").selectOption("GTIN-13");
+	await page.getByLabel("GTIN scheme").click();
+	await page.getByRole("option", { name: "GTIN-13" }).click();
 	const barcodeEntry = page.getByLabel("Barcode (optional)");
 	await expect(barcodeEntry).toHaveAttribute("inputmode", "numeric");
 	await barcodeEntry.focus();

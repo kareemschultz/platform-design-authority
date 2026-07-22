@@ -21,6 +21,13 @@ import {
 	DialogTitle,
 } from "@meridian/ui-web/components/dialog";
 import { Label } from "@meridian/ui-web/components/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@meridian/ui-web/components/select";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import {
 	type QueryClient,
@@ -374,46 +381,52 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 						<div className="grid gap-3 sm:grid-cols-2">
 							<div className="grid gap-1">
 								<Label htmlFor="organization-context">Organization</Label>
-								<select
-									className="min-h-10 min-w-56 rounded-xl border bg-background px-3 text-sm"
+								<Select
 									disabled={setContext.isPending}
-									id="organization-context"
-									onChange={(event) =>
+									onValueChange={(next) =>
 										requestContextChange({
-											organizationId: event.target.value,
+											organizationId: next as string,
 										})
 									}
 									value={organizationId}
 								>
-									{value.organizations.map((organization) => (
-										<option key={organization.id} value={organization.id}>
-											{organization.name}
-										</option>
-									))}
-								</select>
+									<SelectTrigger className="min-w-56" id="organization-context">
+										<SelectValue placeholder="Select an organization" />
+									</SelectTrigger>
+									<SelectContent>
+										{value.organizations.map((organization) => (
+											<SelectItem key={organization.id} value={organization.id}>
+												{organization.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 							</div>
 							<div className="grid gap-1">
 								<Label htmlFor="location-context">Location</Label>
-								<select
-									className="min-h-10 min-w-56 rounded-xl border bg-background px-3 text-sm"
+								<Select
 									disabled={setContext.isPending}
-									id="location-context"
-									onChange={(event) =>
+									onValueChange={(next) =>
 										organizationId &&
 										requestContextChange({
-											locationId: event.target.value || null,
+											locationId: (next as string) || null,
 											organizationId,
 										})
 									}
 									value={identityQuery.data?.activeContext?.locationId ?? ""}
 								>
-									<option value="">All locations</option>
-									{value.locations.map((location) => (
-										<option key={location.id} value={location.id}>
-											{location.name}
-										</option>
-									))}
-								</select>
+									<SelectTrigger className="min-w-56" id="location-context">
+										<SelectValue placeholder="All locations" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="">All locations</SelectItem>
+										{value.locations.map((location) => (
+											<SelectItem key={location.id} value={location.id}>
+												{location.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 							</div>
 						</div>
 					) : null}

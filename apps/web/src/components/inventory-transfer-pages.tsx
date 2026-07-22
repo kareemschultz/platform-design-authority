@@ -133,7 +133,7 @@ function TransferFilters() {
 					))}
 				</select>
 			</div>
-			<Button className="min-h-10" type="submit" variant="outline">
+			<Button type="submit" variant="outline">
 				Apply filters
 			</Button>
 		</form>
@@ -190,7 +190,7 @@ export function TransferListPage() {
 		<OperationsPageFrame
 			actions={
 				<Link
-					className={buttonVariants({ className: "min-h-10" })}
+					className={buttonVariants()}
 					href="/operations/inventory/transfers/new"
 				>
 					<Plus /> Create transfer
@@ -337,7 +337,7 @@ export function TransferCreatePage() {
 				</p>
 				<MutationError error={create.error} isOnline={workspace.isOnline} />
 				<Button
-					className="min-h-10 w-fit"
+					className="w-fit"
 					disabled={
 						create.isPending ||
 						!workspace.contextId ||

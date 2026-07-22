@@ -57,9 +57,7 @@ const copy: Record<ShellFailure, { description: string; title: string }> = {
 	},
 };
 
-export const reauthenticateLinkClassName = buttonVariants({
-	className: "min-h-10",
-});
+export const reauthenticateLinkClassName = buttonVariants();
 
 export function QueryFailure({
 	error,
@@ -97,15 +95,12 @@ export function QueryFailure({
 							Go to sign in
 						</Link>
 					) : (
-						<Button className="min-h-10" onClick={onRetry} variant="outline">
+						<Button onClick={onRetry} variant="outline">
 							Try again
 						</Button>
 					)}
 					<Link
-						className={buttonVariants({
-							className: "min-h-10",
-							variant: "ghost",
-						})}
+						className={buttonVariants({ variant: "ghost" })}
 						href={overviewHref}
 					>
 						Return to overview

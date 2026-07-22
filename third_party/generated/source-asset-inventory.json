@@ -162,7 +162,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/button.tsx",
       "record_id": "source.better-t-stack.ui.3.36.3",
-      "sha256": "c0e0b7f7906dff4c31f5d1acb71982100912a95e39c077ca175dbfba8e51493d"
+      "sha256": "8bc37823212b95aec1290bc44f6acd3b4b013f8ce437ac38227d45ab1e0f2e16"
     },
     {
       "declared_upstream_license": "MIT",

@@ -153,7 +153,7 @@ export default function SignInForm({
 				>
 					{({ canSubmit, isSubmitting }) => (
 						<Button
-							className="min-h-10 w-full"
+							className="w-full"
 							disabled={!canSubmit || isSubmitting}
 							type="submit"
 						>
@@ -164,7 +164,7 @@ export default function SignInForm({
 			</form>
 
 			<div className="mt-4 text-center">
-				<Button className="min-h-10" onClick={onSwitchToSignUp} variant="link">
+				<Button onClick={onSwitchToSignUp} variant="link">
 					Need an account? Sign Up
 				</Button>
 			</div>

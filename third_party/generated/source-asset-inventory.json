@@ -243,7 +243,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/select.tsx",
       "record_id": "source.shadcn.ui.4.14.0",
-      "sha256": "aaf065f5ebd42551c31b234f42cb7fbe8c2af689c61abeb6ffb869e80d3aaf87"
+      "sha256": "ec8b16342348fdde41865cd6aeee34b1fb9ab116530238b1fd8f36179249582c"
     },
     {
       "declared_upstream_license": "MIT",

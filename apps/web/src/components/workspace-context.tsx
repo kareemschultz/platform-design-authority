@@ -305,6 +305,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		]);
 	}, [identityQuery, locationsQuery, organizationsQuery]);
 
+	const contextDataLoading =
+		organizationsQuery.isLoading || locationsQuery.isLoading;
+
 	const value = useMemo<WorkspaceValue>(
 		() => ({
 			contextId,
@@ -377,12 +380,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 						<p className="font-medium text-sm">Current workspace</p>
 						{contextSummary}
 					</div>
-					{contextId ? (
+					{contextId && !contextDataLoading ? (
 						<div className="grid gap-3 sm:grid-cols-2">
 							<div className="grid gap-1">
 								<Label htmlFor="organization-context">Organization</Label>
 								<Select
-									disabled={setContext.isPending}
 									items={Object.fromEntries(
 										value.organizations.map((organization) => [
 											organization.id,
@@ -411,7 +413,6 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 							<div className="grid gap-1">
 								<Label htmlFor="location-context">Location</Label>
 								<Select
-									disabled={setContext.isPending}
 									items={{
 										all: "All locations",
 										...Object.fromEntries(
@@ -445,6 +446,15 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 							</div>
 						</div>
 					) : null}
+					{contextId && contextDataLoading ? (
+						<div className="grid gap-3 sm:grid-cols-2">
+							<Skeleton className="h-10 w-full" />
+							<Skeleton className="h-10 w-full" />
+						</div>
+					) : null}
+					<p aria-live="polite" className="sr-only" role="status">
+						{setContext.isPending ? "Switching workspace…" : null}
+					</p>
 				</div>
 			</section>
 			{connectivityAlert}

@@ -115,7 +115,7 @@
 - `@biomejs/cli-win32-x64@2.5.2` — observed `MIT OR Apache-2.0`; kind `or-choice`; conclusion `NOASSERTION`; qualified review required.
 - `@biomejs/cli-win32-x64@2.5.3` — observed `MIT OR Apache-2.0`; kind `or-choice`; conclusion `NOASSERTION`; qualified review required.
 - `@expo-google-fonts/material-symbols@0.4.38` — observed `MIT AND Apache-2.0`; kind `and-conjunctive`; conclusion `NOASSERTION`; qualified review required.
-- `@img/sharp-win32-x64@0.34.5` — observed `Apache-2.0 AND LGPL-3.0-or-later`; kind `and-conjunctive`; conclusion `NOASSERTION`; qualified review required.
+- `@img/sharp-win32-x64@0.35.3` — observed `Apache-2.0 AND LGPL-3.0-or-later`; kind `and-conjunctive`; conclusion `NOASSERTION`; qualified review required.
 - `@yuku-codegen/binding-win32-x64@0.6.1` — observed `missing package metadata`; kind `metadata-missing`; conclusion `NOASSERTION`; qualified review required.
 - `@yuku-parser/binding-win32-x64@0.6.1` — observed `missing package metadata`; kind `metadata-missing`; conclusion `NOASSERTION`; qualified review required.
 - `axe-core@4.12.1` — observed `MPL-2.0`; kind `obligation-review`; conclusion `NOASSERTION`; qualified review required.
@@ -137,7 +137,7 @@
 
 ## Locked JavaScript packages
 
-The lock inventory contains 1479 resolution records and 1393 unique package/version pairs. Lock presence is not runtime
+The lock inventory contains 1480 resolution records and 1394 unique package/version pairs. Lock presence is not runtime
 reachability or permission to distribute. Every conclusion below is `NOASSERTION`.
 
 | Package | Version | License conclusion |
@@ -354,38 +354,39 @@ reachability or permission to distribute. Every conclusion below is `NOASSERTION
 | `@fumadocs/base-ui` | `16.11.3` | `NOASSERTION` |
 | `@fumadocs/tailwind` | `0.1.1` | `NOASSERTION` |
 | `@hexagon/base64` | `1.1.28` | `NOASSERTION` |
-| `@hono/node-server` | `1.19.14` | `NOASSERTION` |
-| `@hono/node-server` | `2.0.8` | `NOASSERTION` |
+| `@hono/node-server` | `2.0.11` | `NOASSERTION` |
 | `@humanfs/core` | `0.19.2` | `NOASSERTION` |
 | `@humanfs/node` | `0.16.8` | `NOASSERTION` |
 | `@humanfs/types` | `0.15.0` | `NOASSERTION` |
 | `@humanwhocodes/module-importer` | `1.0.1` | `NOASSERTION` |
 | `@humanwhocodes/retry` | `0.4.3` | `NOASSERTION` |
 | `@img/colour` | `1.1.0` | `NOASSERTION` |
-| `@img/sharp-darwin-arm64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-darwin-x64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-libvips-darwin-arm64` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-darwin-x64` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-linux-arm` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-linux-arm64` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-linux-ppc64` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-linux-riscv64` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-linux-s390x` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-linux-x64` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-linuxmusl-arm64` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-libvips-linuxmusl-x64` | `1.2.4` | `NOASSERTION` |
-| `@img/sharp-linux-arm` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-linux-arm64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-linux-ppc64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-linux-riscv64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-linux-s390x` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-linux-x64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-linuxmusl-arm64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-linuxmusl-x64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-wasm32` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-win32-arm64` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-win32-ia32` | `0.34.5` | `NOASSERTION` |
-| `@img/sharp-win32-x64` | `0.34.5` | `NOASSERTION` |
+| `@img/sharp-darwin-arm64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-darwin-x64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-freebsd-wasm32` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-libvips-darwin-arm64` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-darwin-x64` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-linux-arm` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-linux-arm64` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-linux-ppc64` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-linux-riscv64` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-linux-s390x` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-linux-x64` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-linuxmusl-arm64` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-libvips-linuxmusl-x64` | `1.3.2` | `NOASSERTION` |
+| `@img/sharp-linux-arm` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-linux-arm64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-linux-ppc64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-linux-riscv64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-linux-s390x` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-linux-x64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-linuxmusl-arm64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-linuxmusl-x64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-wasm32` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-webcontainers-wasm32` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-win32-arm64` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-win32-ia32` | `0.35.3` | `NOASSERTION` |
+| `@img/sharp-win32-x64` | `0.35.3` | `NOASSERTION` |
 | `@inquirer/external-editor` | `1.0.3` | `NOASSERTION` |
 | `@isaacs/ttlcache` | `1.4.1` | `NOASSERTION` |
 | `@jest/schemas` | `29.6.3` | `NOASSERTION` |
@@ -869,7 +870,7 @@ reachability or permission to distribute. Every conclusion below is `NOASSERTION
 | `fast-levenshtein` | `2.0.6` | `NOASSERTION` |
 | `fast-string-truncated-width` | `3.0.3` | `NOASSERTION` |
 | `fast-string-width` | `3.0.2` | `NOASSERTION` |
-| `fast-uri` | `3.1.3` | `NOASSERTION` |
+| `fast-uri` | `4.1.1` | `NOASSERTION` |
 | `fast-wrap-ansi` | `0.2.2` | `NOASSERTION` |
 | `fastq` | `1.20.1` | `NOASSERTION` |
 | `fb-dotslash` | `0.5.8` | `NOASSERTION` |
@@ -1358,7 +1359,7 @@ reachability or permission to distribute. Every conclusion below is `NOASSERTION
 | `sf-symbols-typescript` | `2.2.0` | `NOASSERTION` |
 | `shadcn` | `4.13.0` | `NOASSERTION` |
 | `shallowequal` | `1.1.0` | `NOASSERTION` |
-| `sharp` | `0.34.5` | `NOASSERTION` |
+| `sharp` | `0.35.3` | `NOASSERTION` |
 | `shebang-command` | `2.0.0` | `NOASSERTION` |
 | `shebang-regex` | `3.0.0` | `NOASSERTION` |
 | `shell-quote` | `1.10.0` | `NOASSERTION` |

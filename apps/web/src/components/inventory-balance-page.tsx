@@ -83,12 +83,7 @@ function BalanceFilters() {
 					value={productId}
 				/>
 			</div>
-			<Button
-				className="min-h-10"
-				disabled={!locationId}
-				type="submit"
-				variant="outline"
-			>
+			<Button disabled={!locationId} type="submit" variant="outline">
 				Load projection
 			</Button>
 		</form>

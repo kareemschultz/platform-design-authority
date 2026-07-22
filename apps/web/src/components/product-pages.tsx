@@ -130,7 +130,7 @@ function ProductFilters() {
 					))}
 				</select>
 			</div>
-			<Button className="min-h-10" type="submit" variant="outline">
+			<Button type="submit" variant="outline">
 				<Search /> Apply filters
 			</Button>
 		</form>
@@ -199,10 +199,7 @@ export function ProductsPage() {
 	return (
 		<OperationsPageFrame
 			actions={
-				<Link
-					className={buttonVariants({ className: "min-h-10" })}
-					href="/operations/products/new"
-				>
+				<Link className={buttonVariants()} href="/operations/products/new">
 					<PackagePlus /> Create Product
 				</Link>
 			}
@@ -379,7 +376,7 @@ function ProductCreateForm() {
 			>
 				{({ canSubmit, isSubmitting }) => (
 					<Button
-						className="min-h-10 w-fit"
+						className="w-fit"
 						disabled={
 							!canSubmit ||
 							isSubmitting ||
@@ -505,7 +502,6 @@ function ProductNameEditor({ product }: { product: Product }) {
 				/>
 			</div>
 			<Button
-				className="min-h-10"
 				disabled={update.isPending || !name.trim() || !workspace.isOnline}
 				type="submit"
 			>

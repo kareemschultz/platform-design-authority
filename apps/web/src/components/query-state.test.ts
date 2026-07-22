@@ -4,6 +4,6 @@ import { reauthenticateLinkClassName } from "./query-state";
 
 describe("query failure controls", () => {
 	test("keeps the reauthentication action at the governed minimum height", () => {
-		expect(reauthenticateLinkClassName.split(" ")).toContain("min-h-10");
+		expect(reauthenticateLinkClassName.split(" ")).toContain("h-10");
 	});
 });

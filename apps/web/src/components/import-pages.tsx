@@ -130,7 +130,7 @@ function ImportFilters({ selectedTarget }: { selectedTarget: ImportTarget }) {
 					))}
 				</select>
 			</div>
-			<Button className="min-h-10" type="submit" variant="outline">
+			<Button type="submit" variant="outline">
 				Apply filters
 			</Button>
 		</form>
@@ -200,7 +200,7 @@ export function ImportsPage() {
 		<OperationsPageFrame
 			actions={
 				<Link
-					className={buttonVariants({ className: "min-h-10" })}
+					className={buttonVariants()}
 					href={`/operations/imports/new?target=${target}`}
 				>
 					<Upload /> Start import
@@ -516,7 +516,7 @@ export function ImportCreatePage() {
 					<MutationError error={error} isOnline={workspace.isOnline} />
 				) : null}
 				<Button
-					className="min-h-10 w-fit"
+					className="w-fit"
 					disabled={
 						isSubmitting ||
 						!file ||

@@ -100,9 +100,7 @@ export function InventoryOverviewPage() {
 							</CardHeader>
 							<CardFooter className="mt-auto border-t-0 pt-0">
 								<Link
-									className={buttonVariants({
-										className: "min-h-10 w-full",
-									})}
+									className={buttonVariants({ className: "w-full" })}
 									href={task.href}
 								>
 									Open {task.label.toLowerCase()} <ArrowRight />

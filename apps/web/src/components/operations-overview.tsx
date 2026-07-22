@@ -92,9 +92,7 @@ export function OperationsOverview() {
 							</CardHeader>
 							<CardFooter className="mt-auto border-t-0 pt-0">
 								<Link
-									className={buttonVariants({
-										className: "min-h-10 w-full",
-									})}
+									className={buttonVariants({ className: "w-full" })}
 									href={item.href}
 								>
 									Open {item.label.toLowerCase()} <ArrowRight />

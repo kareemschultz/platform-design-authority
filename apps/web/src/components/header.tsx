@@ -38,11 +38,7 @@ export default function Header() {
 				<Sheet>
 					<SheetTrigger
 						render={
-							<Button
-								className="size-10 md:hidden"
-								size="icon"
-								variant="outline"
-							/>
+							<Button className="md:hidden" size="icon" variant="outline" />
 						}
 					>
 						<Menu />

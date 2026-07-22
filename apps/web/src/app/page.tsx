@@ -46,28 +46,16 @@ export default function Home() {
 				</section>
 			</div>
 			<div className="mt-6 flex flex-wrap gap-3">
-				<Link
-					className={buttonVariants({ className: "min-h-10" })}
-					href="/operations"
-				>
+				<Link className={buttonVariants()} href="/operations">
 					Open operations
 				</Link>
 				<Link
-					className={buttonVariants({
-						className: "min-h-10",
-						variant: "outline",
-					})}
+					className={buttonVariants({ variant: "outline" })}
 					href="/administration"
 				>
 					Open administration
 				</Link>
-				<Link
-					className={buttonVariants({
-						className: "min-h-10",
-						variant: "outline",
-					})}
-					href="/login"
-				>
+				<Link className={buttonVariants({ variant: "outline" })} href="/login">
 					Sign in
 				</Link>
 			</div>

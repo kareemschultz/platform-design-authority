@@ -137,10 +137,7 @@ function CursorNext({ nextCursor }: { nextCursor: string | null }) {
 	return (
 		<div className="mt-4 flex justify-end">
 			<Link
-				className={buttonVariants({
-					className: "min-h-10",
-					variant: "outline",
-				})}
+				className={buttonVariants({ variant: "outline" })}
 				href={`?cursor=${encodeURIComponent(nextCursor)}`}
 			>
 				Next page <ArrowRight />
@@ -495,7 +492,7 @@ function RevokeSessionButton({ session }: { session: SessionSummary }) {
 	);
 	return (
 		<Dialog>
-			<DialogTrigger render={<Button className="min-h-10" variant="outline" />}>
+			<DialogTrigger render={<Button variant="outline" />}>
 				Revoke
 			</DialogTrigger>
 			<DialogContent>
@@ -515,13 +512,10 @@ function RevokeSessionButton({ session }: { session: SessionSummary }) {
 					</p>
 				) : null}
 				<DialogFooter>
-					<DialogClose
-						render={<Button className="min-h-10" variant="outline" />}
-					>
+					<DialogClose render={<Button variant="outline" />}>
 						Cancel
 					</DialogClose>
 					<Button
-						className="min-h-10"
 						disabled={revoke.isPending}
 						onClick={() =>
 							revoke.mutate({

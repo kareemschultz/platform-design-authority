@@ -383,6 +383,12 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 								<Label htmlFor="organization-context">Organization</Label>
 								<Select
 									disabled={setContext.isPending}
+									items={Object.fromEntries(
+										value.organizations.map((organization) => [
+											organization.id,
+											organization.name,
+										])
+									)}
 									onValueChange={(next) =>
 										requestContextChange({
 											organizationId: next as string,
@@ -390,7 +396,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 									}
 									value={organizationId}
 								>
-									<SelectTrigger className="min-w-56" id="organization-context">
+									<SelectTrigger id="organization-context">
 										<SelectValue placeholder="Select an organization" />
 									</SelectTrigger>
 									<SelectContent>
@@ -406,20 +412,29 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 								<Label htmlFor="location-context">Location</Label>
 								<Select
 									disabled={setContext.isPending}
+									items={{
+										all: "All locations",
+										...Object.fromEntries(
+											value.locations.map((location) => [
+												location.id,
+												location.name,
+											])
+										),
+									}}
 									onValueChange={(next) =>
 										organizationId &&
 										requestContextChange({
-											locationId: (next as string) || null,
+											locationId: next === "all" ? null : (next as string),
 											organizationId,
 										})
 									}
-									value={identityQuery.data?.activeContext?.locationId ?? ""}
+									value={identityQuery.data?.activeContext?.locationId ?? "all"}
 								>
-									<SelectTrigger className="min-w-56" id="location-context">
-										<SelectValue placeholder="All locations" />
+									<SelectTrigger id="location-context">
+										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="">All locations</SelectItem>
+										<SelectItem value="all">All locations</SelectItem>
 										{value.locations.map((location) => (
 											<SelectItem key={location.id} value={location.id}>
 												{location.name}

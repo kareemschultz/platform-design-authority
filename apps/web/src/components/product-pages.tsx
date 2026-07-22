@@ -72,7 +72,7 @@ function ProductFilters() {
 	const [query, setQuery] = useState(searchParams.get("query") ?? "");
 	const [sku, setSku] = useState(searchParams.get("sku") ?? "");
 	const [barcode, setBarcode] = useState(searchParams.get("barcode") ?? "");
-	const [state, setState] = useState(searchParams.get("state") ?? "");
+	const [state, setState] = useState(searchParams.get("state") ?? "all");
 	return (
 		<form
 			aria-label="Product filters"
@@ -124,14 +124,18 @@ function ProductFilters() {
 			<div className="grid gap-1">
 				<Label htmlFor="product-state">Lifecycle state</Label>
 				<Select
+					items={{
+						all: "All states",
+						...Object.fromEntries(PRODUCT_STATES.map((item) => [item, item])),
+					}}
 					onValueChange={(next) => setState(next as string)}
 					value={state}
 				>
 					<SelectTrigger id="product-state">
-						<SelectValue placeholder="All states" />
+						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="">All states</SelectItem>
+						<SelectItem value="all">All states</SelectItem>
 						{PRODUCT_STATES.map((item) => (
 							<SelectItem key={item} value={item}>
 								{item}
@@ -352,6 +356,12 @@ function ProductCreateForm() {
 							<>
 								<Label htmlFor={field.name}>GTIN scheme</Label>
 								<Select
+									items={{
+										"GTIN-8": "GTIN-8",
+										"GTIN-12": "GTIN-12",
+										"GTIN-13": "GTIN-13",
+										"GTIN-14": "GTIN-14",
+									}}
 									onValueChange={(next) =>
 										field.handleChange(next as typeof field.state.value)
 									}

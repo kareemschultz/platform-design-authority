@@ -18146,14 +18146,14 @@
     {
       "cpu": null,
       "dependencies": [],
-      "integrity": "sha512-YPOs1zD5TG2+EZt+r88LwF6mclA7TPkpwMP7ZN3TO2HiHS8TXvq7QA/17iJsV9dubcLo/f8eEYqMBruyQV21hQ==",
+      "integrity": "sha512-8JnbkQ4juDyvYs4mgFGQqg4yCYtFDtUtmp2QIQq11ZZe5CFQ5wcqm1rqDgAh/QdMySuBnPzMUiJUNZG5N/AiQw==",
       "license_conclusion": "NOASSERTION",
       "lock_key": "fast-uri",
       "name": "fast-uri",
       "optional_dependencies": [],
       "os": null,
       "peer_dependencies": [],
-      "version": "4.1.1"
+      "version": "3.1.4"
     },
     {
       "cpu": null,

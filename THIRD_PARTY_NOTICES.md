@@ -870,7 +870,7 @@ reachability or permission to distribute. Every conclusion below is `NOASSERTION
 | `fast-levenshtein` | `2.0.6` | `NOASSERTION` |
 | `fast-string-truncated-width` | `3.0.3` | `NOASSERTION` |
 | `fast-string-width` | `3.0.2` | `NOASSERTION` |
-| `fast-uri` | `4.1.1` | `NOASSERTION` |
+| `fast-uri` | `3.1.4` | `NOASSERTION` |
 | `fast-wrap-ansi` | `0.2.2` | `NOASSERTION` |
 | `fastq` | `1.20.1` | `NOASSERTION` |
 | `fb-dotslash` | `0.5.8` | `NOASSERTION` |

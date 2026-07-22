@@ -51,7 +51,7 @@
 - Repository license conclusion: `NOASSERTION`
 - Permitted-use evidence: `public-upstream-license-observed-not-legally-reviewed`
 - Distribution status: `legal-review-required`
-- Modifications: Scaffold-generated components were normalized into repository-maintained TypeScript source paths and subsequently modified for the governed UI system.
+- Modifications: Scaffold-generated components were normalized into repository-maintained TypeScript source paths and subsequently modified for the governed UI system. card.tsx: root radius changed from rounded-none to rounded-2xl (2026-07-22) to align with Button/Badge/Alert's shared --radius-2xl token per docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md's radius/elevation family guidance; CardHeader/CardFooter's internal rounded-none (corner-clipping under the root's overflow-hidden) is unchanged.
 - Covered paths:
 
   - `packages/ui-web/core/src/components/button.tsx`

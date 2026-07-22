@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-040
 title: Component Intake Fast Path
-version: 0.1.0
+version: 0.2.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-20
+last_reviewed: 2026-07-21
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -83,7 +83,7 @@ Invoke the `ui-pattern-audit` skill for pattern-selection review once normalizat
 
 ## Step 3 — Provenance
 
-Write a record to `evidence/ui-provenance/<component-name>.json` conforming to `registry/premium-ui-provenance-template.json`'s field set. `license_owner`, `permitted_entity`, and `permitted_products` must stay `null` — sensitive commercial and licensing detail belongs in a private inventory per `COMPONENT_ACQUISITION_POLICY.md`, never in this public repository. `scripts/validate_ui_governance.py` enforces both the field-set conformance and the null requirement.
+Write a record to `evidence/ui-provenance/<component-name>.json` conforming to `registry/premium-ui-provenance-template.json`'s field set. `license_owner`, `permitted_entity`, and `permitted_products` must stay empty — `null`, `[]`, or `""` are all accepted as "nothing recorded" (the template defaults `license_owner`/`permitted_entity` to `null` and `permitted_products` to `[]`; either empty form carries the same meaning and neither enumerates licensed products) — sensitive commercial and licensing detail belongs in a private inventory per `COMPONENT_ACQUISITION_POLICY.md`, never in this public repository. `scripts/validate_ui_governance.py` enforces both the field-set conformance and the empty-value requirement.
 
 ## Step 4 — Catalog and acceptance
 

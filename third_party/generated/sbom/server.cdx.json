@@ -2,11 +2,11 @@
   "bomFormat": "CycloneDX",
   "components": [
     {
-      "bom-ref": "pkg:npm/%40hono/node-server@2.0.8",
+      "bom-ref": "pkg:npm/%40hono/node-server@2.0.11",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "1ae096ccbc70836d7c7f2d4968772e945b1d72e635da1c62b7cdd5f9a960a334cf9f084d8cbad12ff02583d3988cb64ba14675af0fd2e0275332c9e448a0a614"
+          "content": "6e30f6db528f2e8253594c2ca3527a7c62a24d711415e746fecd2f8ac6af638cda9053e4786511311365cbe161047b3b4fc0f3e2a1da648317f59a091d226d28"
         }
       ],
       "name": "@hono/node-server",
@@ -21,12 +21,12 @@
         },
         {
           "name": "pda:declared-dependencies-json",
-          "value": "[{\"name\":\"@hono/node-server\",\"selector\":\"2.0.8\"}]"
+          "value": "[{\"name\":\"@hono/node-server\",\"selector\":\"2.0.11\"}]"
         }
       ],
-      "purl": "pkg:npm/%40hono/node-server@2.0.8",
+      "purl": "pkg:npm/%40hono/node-server@2.0.11",
       "type": "library",
-      "version": "2.0.8"
+      "version": "2.0.11"
     },
     {
       "bom-ref": "pkg:npm/%40orpc/openapi@1.14.7",
@@ -256,7 +256,7 @@
   "dependencies": [
     {
       "dependsOn": [
-        "pkg:npm/%40hono/node-server@2.0.8",
+        "pkg:npm/%40hono/node-server@2.0.11",
         "pkg:npm/%40orpc/openapi@1.14.7",
         "pkg:npm/%40orpc/server@1.14.7",
         "pkg:npm/%40orpc/zod@1.14.7",

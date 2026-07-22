@@ -37,7 +37,7 @@ audit:
 
 findings:
   - id: F-A-001
-    status: "founder-decision-recorded (issue #81; PR #89 concurrence comment 5008646684 and merge 7de0688); P-W2a implemented-pending-independent-review (issue #90)"
+    status: "closed (issue #81; PR #89 concurrence comment 5008646684 and merge 7de0688; P-W2a independently reviewed via PR #91 concurrence comment 5009220014, reviewed head ff9816e, and merged 1541795)"
     lens: A-governance
     severity: P1
     confidence: confirmed
@@ -91,7 +91,7 @@ findings:
     wave: W1
 
   - id: F-A-002
-    status: "implemented-pending-independent-review (issue #90)"
+    status: "closed (P-W2a independently reviewed via PR #91 concurrence comment 5009220014, reviewed head ff9816e, and merged 1541795; closure_test verified against current docs/project/PROGRAM_STATUS.md — no live '11/103'/'final head pending' claims remain, and evidence cutoff 5e0fc149 postdates 81e903b)"
     lens: A-governance
     severity: P2
     confidence: confirmed

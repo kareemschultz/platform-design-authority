@@ -350,7 +350,8 @@
         "platform_import_row",
         "platform_import_finding",
         "platform_import_wave",
-        "platform_import_command_receipt"
+        "platform_import_command_receipt",
+        "platform_export_job"
       ],
       "migration_directory": "packages/persistence/platform-import-export-postgres/src/migrations"
     },
@@ -415,6 +416,29 @@
         "platform_number_allocation"
       ],
       "migration_directory": "packages/persistence/platform-numbering-postgres/src/migrations"
+    },
+    {
+      "id": "pos-postgres",
+      "package": "packages/persistence/pos-postgres",
+      "package_name": "@meridian/persistence-pos-postgres",
+      "owner": "pos",
+      "owner_package": "@meridian/domain-pos",
+      "tables": [
+        "pos_register_session",
+        "pos_cash_movement",
+        "pos_command_receipt",
+        "pos_sale",
+        "pos_sale_line",
+        "pos_price_override",
+        "pos_receipt",
+        "pos_return",
+        "pos_return_line",
+        "pos_refund",
+        "pos_deposit",
+        "pos_deposit_source_shift",
+        "pos_deposit_custody_transfer"
+      ],
+      "migration_directory": "packages/persistence/pos-postgres/src/migrations"
     }
   ],
   "exceptions": [],

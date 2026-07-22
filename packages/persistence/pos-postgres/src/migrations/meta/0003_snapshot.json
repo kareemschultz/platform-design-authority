@@ -1,0 +1,1367 @@
+{
+  "id": "adfa8729-e321-4175-b521-bfba5f412393",
+  "prevId": "a31ae39f-8642-4737-aae6-b13b6a7c1824",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.pos_cash_movement": {
+      "name": "pos_cash_movement",
+      "schema": "",
+      "columns": {
+        "actor_party_id": {
+          "name": "actor_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "actor_user_id": {
+          "name": "actor_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount_minor": {
+          "name": "amount_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "direction": {
+          "name": "direction",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason_code": {
+          "name": "reason_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reference_id": {
+          "name": "reference_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "register_id": {
+          "name": "register_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "session_id": {
+          "name": "session_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "pos_cash_movement_tenant_session_idx": {
+          "name": "pos_cash_movement_tenant_session_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "session_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pos_cash_movement_tenant_register_idx": {
+          "name": "pos_cash_movement_tenant_register_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "register_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pos_cash_movement_session_fk": {
+          "name": "pos_cash_movement_session_fk",
+          "tableFrom": "pos_cash_movement",
+          "tableTo": "pos_register_session",
+          "columnsFrom": ["tenant_id", "session_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pos_cash_movement_pk": {
+          "name": "pos_cash_movement_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pos_cash_movement_currency_check": {
+          "name": "pos_cash_movement_currency_check",
+          "value": "\"pos_cash_movement\".\"currency\" ~ '^[A-Z]{3}$'"
+        },
+        "pos_cash_movement_amount_check": {
+          "name": "pos_cash_movement_amount_check",
+          "value": "\"pos_cash_movement\".\"amount_minor\" > 0"
+        },
+        "pos_cash_movement_direction_check": {
+          "name": "pos_cash_movement_direction_check",
+          "value": "\"pos_cash_movement\".\"direction\" in ('PaidIn', 'PaidOut')"
+        },
+        "pos_cash_movement_reason_code_check": {
+          "name": "pos_cash_movement_reason_code_check",
+          "value": "\"pos_cash_movement\".\"reason_code\" in ('PaidIn', 'PaidOut', 'SafeDrop', 'Refund', 'Other')"
+        },
+        "pos_cash_movement_direction_reason_pairing_check": {
+          "name": "pos_cash_movement_direction_reason_pairing_check",
+          "value": "(\"pos_cash_movement\".\"reason_code\" = 'PaidIn' and \"pos_cash_movement\".\"direction\" = 'PaidIn') or (\"pos_cash_movement\".\"reason_code\" = 'PaidOut' and \"pos_cash_movement\".\"direction\" = 'PaidOut') or (\"pos_cash_movement\".\"reason_code\" = 'SafeDrop' and \"pos_cash_movement\".\"direction\" = 'PaidOut') or (\"pos_cash_movement\".\"reason_code\" = 'Refund' and \"pos_cash_movement\".\"direction\" = 'PaidOut') or (\"pos_cash_movement\".\"reason_code\" = 'Other')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pos_command_receipt": {
+      "name": "pos_command_receipt",
+      "schema": "",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "operation": {
+          "name": "operation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "request_fingerprint": {
+          "name": "request_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resource_id": {
+          "name": "resource_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "result": {
+          "name": "result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "pos_command_receipt_resource_idx": {
+          "name": "pos_command_receipt_resource_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "operation",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "resource_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "pos_command_receipt_pk": {
+          "name": "pos_command_receipt_pk",
+          "columns": ["tenant_id", "operation", "idempotency_key"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pos_price_override": {
+      "name": "pos_price_override",
+      "schema": "",
+      "columns": {
+        "approved_at": {
+          "name": "approved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_by_actor_user_id": {
+          "name": "approved_by_actor_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_by_party_id": {
+          "name": "approved_by_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "line_id": {
+          "name": "line_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "requested_at": {
+          "name": "requested_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "requested_by_actor_user_id": {
+          "name": "requested_by_actor_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "requested_by_party_id": {
+          "name": "requested_by_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "requested_price_minor": {
+          "name": "requested_price_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sale_id": {
+          "name": "sale_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Pending'"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {
+        "pos_price_override_tenant_sale_state_idx": {
+          "name": "pos_price_override_tenant_sale_state_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sale_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pos_price_override_sale_fk": {
+          "name": "pos_price_override_sale_fk",
+          "tableFrom": "pos_price_override",
+          "tableTo": "pos_sale",
+          "columnsFrom": ["tenant_id", "sale_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pos_price_override_pk": {
+          "name": "pos_price_override_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pos_price_override_currency_check": {
+          "name": "pos_price_override_currency_check",
+          "value": "\"pos_price_override\".\"currency\" ~ '^[A-Z]{3}$'"
+        },
+        "pos_price_override_state_check": {
+          "name": "pos_price_override_state_check",
+          "value": "\"pos_price_override\".\"state\" in ('Pending', 'Approved')"
+        },
+        "pos_price_override_requested_price_check": {
+          "name": "pos_price_override_requested_price_check",
+          "value": "\"pos_price_override\".\"requested_price_minor\" > 0"
+        },
+        "pos_price_override_approval_check": {
+          "name": "pos_price_override_approval_check",
+          "value": "(\"pos_price_override\".\"state\" = 'Approved') = (\"pos_price_override\".\"approved_at\" is not null and \"pos_price_override\".\"approved_by_actor_user_id\" is not null and \"pos_price_override\".\"approved_by_party_id\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pos_receipt": {
+      "name": "pos_receipt",
+      "schema": "",
+      "columns": {
+        "cashier_party_id": {
+          "name": "cashier_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "issued_at": {
+          "name": "issued_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lines": {
+          "name": "lines",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "original_receipt_id": {
+          "name": "original_receipt_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_suppressed": {
+          "name": "price_suppressed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "receipt_number": {
+          "name": "receipt_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "register_id": {
+          "name": "register_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "return_id": {
+          "name": "return_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sale_id": {
+          "name": "sale_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenders": {
+          "name": "tenders",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_minor": {
+          "name": "total_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "pos_receipt_tenant_register_number_uidx": {
+          "name": "pos_receipt_tenant_register_number_uidx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "register_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "receipt_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pos_receipt_tenant_sale_idx": {
+          "name": "pos_receipt_tenant_sale_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sale_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "pos_receipt_pk": {
+          "name": "pos_receipt_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pos_receipt_currency_check": {
+          "name": "pos_receipt_currency_check",
+          "value": "\"pos_receipt\".\"currency\" ~ '^[A-Z]{3}$'"
+        },
+        "pos_receipt_kind_check": {
+          "name": "pos_receipt_kind_check",
+          "value": "\"pos_receipt\".\"kind\" in ('Sale', 'Return', 'Reissue')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pos_register_session": {
+      "name": "pos_register_session",
+      "schema": "",
+      "columns": {
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "closed_at": {
+          "name": "closed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closed_by_actor_user_id": {
+          "name": "closed_by_actor_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closed_by_party_id": {
+          "name": "closed_by_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "close_reason": {
+          "name": "close_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "close_requested_at": {
+          "name": "close_requested_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "counted_cash_minor": {
+          "name": "counted_cash_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expected_cash_minor": {
+          "name": "expected_cash_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opened_at": {
+          "name": "opened_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opened_by_actor_user_id": {
+          "name": "opened_by_actor_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opened_by_party_id": {
+          "name": "opened_by_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opening_float_minor": {
+          "name": "opening_float_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "register_id": {
+          "name": "register_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Open'"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "variance_approval_required": {
+          "name": "variance_approval_required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "variance_approved_at": {
+          "name": "variance_approved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "variance_approved_by_actor_user_id": {
+          "name": "variance_approved_by_actor_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "variance_approved_by_party_id": {
+          "name": "variance_approved_by_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "variance_minor": {
+          "name": "variance_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {
+        "pos_register_session_open_register_uidx": {
+          "name": "pos_register_session_open_register_uidx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "register_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"pos_register_session\".\"state\" in ('Open', 'Closing')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pos_register_session_tenant_register_idx": {
+          "name": "pos_register_session_tenant_register_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "register_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "pos_register_session_pk": {
+          "name": "pos_register_session_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pos_register_session_currency_check": {
+          "name": "pos_register_session_currency_check",
+          "value": "\"pos_register_session\".\"currency\" ~ '^[A-Z]{3}$'"
+        },
+        "pos_register_session_state_check": {
+          "name": "pos_register_session_state_check",
+          "value": "\"pos_register_session\".\"state\" in ('Open', 'Closing', 'Closed')"
+        },
+        "pos_register_session_opening_float_check": {
+          "name": "pos_register_session_opening_float_check",
+          "value": "\"pos_register_session\".\"opening_float_minor\" >= 0"
+        },
+        "pos_register_session_close_fields_check": {
+          "name": "pos_register_session_close_fields_check",
+          "value": "(\"pos_register_session\".\"state\" = 'Open' and \"pos_register_session\".\"closed_by_actor_user_id\" is null and \"pos_register_session\".\"closed_by_party_id\" is null and \"pos_register_session\".\"counted_cash_minor\" is null and \"pos_register_session\".\"expected_cash_minor\" is null and \"pos_register_session\".\"variance_minor\" is null and \"pos_register_session\".\"close_requested_at\" is null and \"pos_register_session\".\"closed_at\" is null) or (\"pos_register_session\".\"state\" in ('Closing', 'Closed') and \"pos_register_session\".\"closed_by_actor_user_id\" is not null and \"pos_register_session\".\"closed_by_party_id\" is not null and \"pos_register_session\".\"counted_cash_minor\" is not null and \"pos_register_session\".\"expected_cash_minor\" is not null and \"pos_register_session\".\"variance_minor\" is not null and \"pos_register_session\".\"close_requested_at\" is not null)"
+        },
+        "pos_register_session_closed_at_check": {
+          "name": "pos_register_session_closed_at_check",
+          "value": "(\"pos_register_session\".\"state\" = 'Closed') = (\"pos_register_session\".\"closed_at\" is not null)"
+        },
+        "pos_register_session_variance_approval_check": {
+          "name": "pos_register_session_variance_approval_check",
+          "value": "(\"pos_register_session\".\"variance_approved_at\" is null and \"pos_register_session\".\"variance_approved_by_actor_user_id\" is null and \"pos_register_session\".\"variance_approved_by_party_id\" is null) or (\"pos_register_session\".\"variance_approved_at\" is not null and \"pos_register_session\".\"variance_approved_by_actor_user_id\" is not null and \"pos_register_session\".\"variance_approved_by_party_id\" is not null and \"pos_register_session\".\"state\" = 'Closed')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pos_sale_line": {
+      "name": "pos_sale_line",
+      "schema": "",
+      "columns": {
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "discount_minor": {
+          "name": "discount_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gross_minor": {
+          "name": "gross_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "line_total_minor": {
+          "name": "line_total_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "non_statutory": {
+          "name": "non_statutory",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "price_override_id": {
+          "name": "price_override_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_override_state": {
+          "name": "price_override_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "product_name": {
+          "name": "product_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "numeric(38, 6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sale_id": {
+          "name": "sale_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tax_amount_minor": {
+          "name": "tax_amount_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "taxable_base_minor": {
+          "name": "taxable_base_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tax_category": {
+          "name": "tax_category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit": {
+          "name": "unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_price_minor": {
+          "name": "unit_price_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "variant_id": {
+          "name": "variant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "pos_sale_line_tenant_sale_idx": {
+          "name": "pos_sale_line_tenant_sale_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sale_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pos_sale_line_sale_fk": {
+          "name": "pos_sale_line_sale_fk",
+          "tableFrom": "pos_sale_line",
+          "tableTo": "pos_sale",
+          "columnsFrom": ["tenant_id", "sale_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pos_sale_line_pk": {
+          "name": "pos_sale_line_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pos_sale_line_quantity_check": {
+          "name": "pos_sale_line_quantity_check",
+          "value": "\"pos_sale_line\".\"quantity\" > 0"
+        },
+        "pos_sale_line_tax_category_check": {
+          "name": "pos_sale_line_tax_category_check",
+          "value": "\"pos_sale_line\".\"tax_category\" in ('GY_STANDARD_14', 'GY_ZERO_RATED', 'GY_EXEMPT', 'GY_OUT_OF_SCOPE')"
+        },
+        "pos_sale_line_price_override_state_check": {
+          "name": "pos_sale_line_price_override_state_check",
+          "value": "\"pos_sale_line\".\"price_override_state\" is null or \"pos_sale_line\".\"price_override_state\" in ('Pending', 'Approved')"
+        },
+        "pos_sale_line_non_statutory_check": {
+          "name": "pos_sale_line_non_statutory_check",
+          "value": "\"pos_sale_line\".\"non_statutory\" = true"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pos_sale": {
+      "name": "pos_sale",
+      "schema": "",
+      "columns": {
+        "change_minor": {
+          "name": "change_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "classification": {
+          "name": "classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Confidential'"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_by_actor_user_id": {
+          "name": "created_by_actor_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_by_party_id": {
+          "name": "created_by_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "customer_party_id": {
+          "name": "customer_party_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "discount_minor": {
+          "name": "discount_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gross_minor": {
+          "name": "gross_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "held_at": {
+          "name": "held_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "receipt_id": {
+          "name": "receipt_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "register_id": {
+          "name": "register_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "session_id": {
+          "name": "session_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Open'"
+        },
+        "tax_minor": {
+          "name": "tax_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tendered_minor": {
+          "name": "tendered_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenders": {
+          "name": "tenders",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_minor": {
+          "name": "total_minor",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {
+        "pos_sale_tenant_register_state_idx": {
+          "name": "pos_sale_tenant_register_state_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "register_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pos_sale_session_fk": {
+          "name": "pos_sale_session_fk",
+          "tableFrom": "pos_sale",
+          "tableTo": "pos_register_session",
+          "columnsFrom": ["tenant_id", "session_id"],
+          "columnsTo": ["tenant_id", "id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pos_sale_pk": {
+          "name": "pos_sale_pk",
+          "columns": ["tenant_id", "id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pos_sale_currency_check": {
+          "name": "pos_sale_currency_check",
+          "value": "\"pos_sale\".\"currency\" ~ '^[A-Z]{3}$'"
+        },
+        "pos_sale_state_check": {
+          "name": "pos_sale_state_check",
+          "value": "\"pos_sale\".\"state\" in ('Open', 'Held', 'Completed')"
+        },
+        "pos_sale_held_check": {
+          "name": "pos_sale_held_check",
+          "value": "(\"pos_sale\".\"state\" <> 'Held') or (\"pos_sale\".\"held_at\" is not null)"
+        },
+        "pos_sale_completed_check": {
+          "name": "pos_sale_completed_check",
+          "value": "(\"pos_sale\".\"state\" = 'Completed') = (\"pos_sale\".\"completed_at\" is not null and \"pos_sale\".\"receipt_id\" is not null and \"pos_sale\".\"tendered_minor\" is not null and \"pos_sale\".\"change_minor\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

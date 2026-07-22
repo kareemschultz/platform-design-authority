@@ -1,0 +1,2 @@
+DROP INDEX "pos_register_session_open_register_uidx";--> statement-breakpoint
+CREATE UNIQUE INDEX "pos_register_session_open_register_uidx" ON "pos_register_session" USING btree ("tenant_id","register_id") WHERE "pos_register_session"."state" in ('Open', 'Closing');

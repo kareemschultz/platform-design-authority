@@ -4,9 +4,14 @@ import {
 	ActiveContextRequestSchema,
 	appApiContract,
 	CatalogSkuLookupSchema,
+	CompleteSaleRequestSchema,
+	CreateCashMovementRequestSchema,
 	CreateProductSchema,
+	CreateReturnSchema,
+	CreateSaleSchema,
 	CurrentIdentitySchema,
 	IdentifierSchema,
+	MoneySchema,
 	PagedStockBalancesSchema,
 	PLATFORM_OPENAPI_OPERATION_METADATA,
 	PositiveDecimalQuantitySchema,
@@ -19,7 +24,9 @@ import {
 	UpdateProductSchema,
 	WS2_EVENT_OPENAPI_OPERATION_METADATA,
 	WS2_OPENAPI_OPERATION_METADATA,
+	WS3_OPENAPI_OPERATION_METADATA,
 	ws2CatalogInventoryApiContract,
+	ws3PosApiContract,
 } from "./index";
 
 interface ContractProcedureShape {
@@ -328,5 +335,244 @@ describe("WS2 Event Backbone API contract", () => {
 			);
 		expect(actual).toEqual(WS2_EVENT_OPENAPI_OPERATION_METADATA);
 		expect(actual).toHaveLength(1);
+	});
+});
+
+const PR3_PERMISSION_NAMESPACE_PATTERN = /^commerce\.(receipt|refund|return)\./;
+
+describe("WS3 POS Cash Workflow API contract", () => {
+	test("is semantically aligned with every generated commerce.*/platform.export.* operation implemented through PR4", () => {
+		const actual = collectProcedures(ws3PosApiContract)
+			.map((procedure) => ({
+				...procedure["~orpc"].meta,
+				method: procedure["~orpc"].route.method,
+				path: procedure["~orpc"].route.path,
+			}))
+			.sort((left, right) =>
+				String((left as Record<string, unknown>).operationId).localeCompare(
+					String((right as Record<string, unknown>).operationId)
+				)
+			);
+		const expected = [...WS3_OPENAPI_OPERATION_METADATA].sort((left, right) =>
+			left.operationId.localeCompare(right.operationId)
+		);
+
+		expect(actual).toEqual(expected);
+		// WS3 remediation R3, Findings I and J: +7 pre-commit consequence-
+		// preview / receipt-to-return-lookup reads (getReturnsByReturnId,
+		// getRefundsByRefundId, getDepositsByDepositId,
+		// getRegisterSessionsBySessionId, getCashVariancesByVarianceId,
+		// getRegistersByRegisterIdReceiptsByReceiptNumber,
+		// getRegistersByRegisterIdReceiptsByReceiptNumberSale), 21 -> 28.
+		// WS3 remediation R3b, Item 7: +5 server-backed pending-approval/
+		// confirmation queue reads (listPriceOverrides, listReturns,
+		// listRefunds, listDeposits, listCashVariances), 28 -> 33.
+		expect(actual).toHaveLength(33);
+	});
+
+	test("every PR3 operation declares a commerce.return/refund/receipt permission, never a bare authenticated-session read", () => {
+		const pr3OperationIds = [
+			"createReturn",
+			"postReturnsByReturnIdApprove",
+			"postRefunds",
+			"postRefundsByRefundIdApprove",
+			"postReceiptsByReceiptIdReissue",
+			"postReceiptsByReceiptIdVoid",
+		];
+		const pr3Operations = WS3_OPENAPI_OPERATION_METADATA.filter((operation) =>
+			pr3OperationIds.includes(operation.operationId)
+		);
+		expect(pr3Operations).toHaveLength(pr3OperationIds.length);
+		for (const operation of pr3Operations) {
+			expect("permission" in operation).toBe(true);
+			expect((operation as { permission: string }).permission).toMatch(
+				PR3_PERMISSION_NAMESPACE_PATTERN
+			);
+		}
+	});
+
+	test("WS3 remediation R1 cycle 2 (advisor-flagged load-bearing invariant): the manual cash-movement command's reasonCode CANNOT be 'Refund' or 'SafeDrop' — closes the load-bearing assumption behind queryFinanceHandoffSourceData's Refund-vs-Void classification (packages/persistence/pos-postgres/src/index.ts), which relies on 'approveRefund' and 'voidReceipt' being the ONLY two domain-internal producers of a reasonCode:'Refund' cash movement. If a caller could submit reasonCode:'Refund' through this manual endpoint with an arbitrary referenceId, that movement would be misclassified sourceKind:'Void' by the LEFT JOIN's not-a-real-refund fallback.", () => {
+		const rejectedRefund = CreateCashMovementRequestSchema.safeParse({
+			amount: { amountMinor: 1000, currency: "GYD" },
+			direction: "PaidOut",
+			reasonCode: "Refund",
+			referenceId: "arbitrary_not_a_real_refund_id",
+		});
+		expect(rejectedRefund.success).toBe(false);
+
+		const rejectedSafeDrop = CreateCashMovementRequestSchema.safeParse({
+			amount: { amountMinor: 1000, currency: "GYD" },
+			direction: "PaidOut",
+			reasonCode: "SafeDrop",
+		});
+		expect(rejectedSafeDrop.success).toBe(false);
+
+		// The only three reasonCode values the manual command accepts —
+		// SafeDrop is fixed server-side by the dedicated safe-drops
+		// endpoint (apps/server/composition/pos.ts), never caller-chosen.
+		const acceptedPaidIn = CreateCashMovementRequestSchema.safeParse({
+			amount: { amountMinor: 1000, currency: "GYD" },
+			direction: "PaidIn",
+			reasonCode: "PaidIn",
+		});
+		expect(acceptedPaidIn.success).toBe(true);
+		const acceptedOther = CreateCashMovementRequestSchema.safeParse({
+			amount: { amountMinor: 1000, currency: "GYD" },
+			direction: "PaidOut",
+			reasonCode: "Other",
+		});
+		expect(acceptedOther.success).toBe(true);
+	});
+
+	test("realizes maker/checker self-approval separation as an application-layer rule, not a distinct deny permission (frozen control plan §6)", () => {
+		const operationIds = WS3_OPENAPI_OPERATION_METADATA.map(
+			(operation) => operation.operationId
+		);
+		expect(operationIds).toContain("createReturn");
+		expect(operationIds).toContain("postReturnsByReturnIdApprove");
+		expect(operationIds).not.toContain("commerce.return.reject");
+		expect(operationIds).toContain("postRefunds");
+		expect(operationIds).toContain("postRefundsByRefundIdApprove");
+		expect(operationIds).not.toContain("commerce.refund.reject");
+	});
+
+	test("realizes exchange composition and gift receipts without inventing a dedicated permission or endpoint (frozen control plan §5, §6.5)", () => {
+		const paths = WS3_OPENAPI_OPERATION_METADATA.map(
+			(operation) => operation.path
+		);
+		expect(paths.some((path) => path.includes("exchange"))).toBe(false);
+		expect(paths.some((path) => path.includes("gift"))).toBe(false);
+	});
+
+	test("every PR4 deposit/export operation declares its exact frozen permission, never a bare authenticated-session read", () => {
+		const expectedPermissions: Record<string, string> = {
+			createAccountantHandoffExport: "platform.export.create",
+			createDeposit: "commerce.deposit.create",
+			getExportsByExportId: "platform.export.read",
+			postDepositsByDepositIdConfirm: "commerce.deposit.confirm",
+		};
+		const pr4Operations = WS3_OPENAPI_OPERATION_METADATA.filter((operation) =>
+			Object.keys(expectedPermissions).includes(operation.operationId)
+		);
+		expect(pr4Operations).toHaveLength(4);
+		for (const operation of pr4Operations) {
+			expect("permission" in operation).toBe(true);
+			const expected: string | undefined =
+				expectedPermissions[operation.operationId];
+			expect(expected).toBeDefined();
+			expect((operation as { permission: string }).permission).toBe(
+				expected as string
+			);
+		}
+	});
+
+	test("realizes the deposit maker/checker pair as create/confirm (matching the registered permission pair exactly), self-approval separation an application-layer rule (frozen control plan §6.6)", () => {
+		const operationIds = WS3_OPENAPI_OPERATION_METADATA.map(
+			(operation) => operation.operationId
+		);
+		expect(operationIds).toContain("createDeposit");
+		expect(operationIds).toContain("postDepositsByDepositIdConfirm");
+		expect(operationIds).not.toContain("commerce.deposit.reject");
+	});
+
+	// WS3 remediation R4, P2 item 1 ("bounded array lengths, quantity
+	// precision/digit limits, safe-integer money checks ... at every
+	// relevant boundary"). Adversarial framing: every `.max(...)`/`.safe()`/
+	// digit-count bound below did NOT exist before this fix — each
+	// `rejects` assertion is a request shape that PASSED validation on the
+	// pre-fix schema (proven by constructing it one bound-unit past the new
+	// limit; removing the bound reproduces the pre-fix accept).
+	test("MoneySchema.amountMinor rejects an out-of-safe-integer-range amount but keeps ordinary negative amounts valid (sign is not the bound)", () => {
+		expect(
+			MoneySchema.safeParse({ amountMinor: 1000, currency: "GYD" }).success
+		).toBe(true);
+		expect(
+			MoneySchema.safeParse({ amountMinor: -1000, currency: "GYD" }).success
+		).toBe(true);
+		expect(
+			MoneySchema.safeParse({
+				amountMinor: Number.MAX_SAFE_INTEGER,
+				currency: "GYD",
+			}).success
+		).toBe(true);
+		expect(
+			MoneySchema.safeParse({
+				amountMinor: Number.MAX_SAFE_INTEGER + 2,
+				currency: "GYD",
+			}).success
+		).toBe(false);
+		expect(
+			MoneySchema.safeParse({
+				amountMinor: Number.MIN_SAFE_INTEGER - 2,
+				currency: "GYD",
+			}).success
+		).toBe(false);
+	});
+
+	test("PositiveDecimalQuantitySchema/NonNegativeDecimalQuantitySchema/DecimalQuantitySchema bound the integer part to 12 digits while still accepting realistic quantities", () => {
+		expect(
+			PositiveDecimalQuantitySchema.safeParse("999999999999").success
+		).toBe(true);
+		expect(
+			PositiveDecimalQuantitySchema.safeParse("9999999999999").success
+		).toBe(false);
+		expect(
+			PositiveDecimalQuantitySchema.safeParse("1000000000000.5").success
+		).toBe(false);
+		expect(PositiveDecimalQuantitySchema.safeParse("5.5").success).toBe(true);
+	});
+
+	test("CreateSaleSchema.lines is bounded to 500; CompleteSaleRequestSchema.tenders is bounded to 20; CreateReturnSchema.lines is bounded to 500", () => {
+		const saleLine = {
+			productId: "product_bound_test",
+			quantity: "1",
+			unit: "each",
+			unitPrice: { amountMinor: 100, currency: "GYD" },
+		};
+		expect(
+			CreateSaleSchema.safeParse({
+				currency: "GYD",
+				lines: Array.from({ length: 500 }, () => saleLine),
+				registerId: "register_bound_test",
+			}).success
+		).toBe(true);
+		expect(
+			CreateSaleSchema.safeParse({
+				currency: "GYD",
+				lines: Array.from({ length: 501 }, () => saleLine),
+				registerId: "register_bound_test",
+			}).success
+		).toBe(false);
+
+		const tender = {
+			amount: { amountMinor: 100, currency: "GYD" },
+			type: "Cash" as const,
+		};
+		expect(
+			CompleteSaleRequestSchema.safeParse({
+				tenders: Array.from({ length: 20 }, () => tender),
+			}).success
+		).toBe(true);
+		expect(
+			CompleteSaleRequestSchema.safeParse({
+				tenders: Array.from({ length: 21 }, () => tender),
+			}).success
+		).toBe(false);
+
+		const returnLine = { quantity: "1", saleLineId: "sale_line_bound_test" };
+		expect(
+			CreateReturnSchema.safeParse({
+				lines: Array.from({ length: 500 }, () => returnLine),
+				reason: "bound test",
+				saleId: "sale_bound_test",
+			}).success
+		).toBe(true);
+		expect(
+			CreateReturnSchema.safeParse({
+				lines: Array.from({ length: 501 }, () => returnLine),
+				reason: "bound test",
+				saleId: "sale_bound_test",
+			}).success
+		).toBe(false);
 	});
 });

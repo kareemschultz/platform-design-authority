@@ -1,0 +1,10 @@
+import { SaleResumePage } from "@/components/sale-pages";
+
+export default async function Page({
+	params,
+}: {
+	params: Promise<{ saleId: string }>;
+}) {
+	const { saleId } = await params;
+	return <SaleResumePage saleId={saleId} />;
+}

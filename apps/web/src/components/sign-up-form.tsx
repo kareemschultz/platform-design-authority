@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
+import { dedupedToastError, sanitizeErrorMessage } from "@/lib/toast";
 
 export default function SignUpForm({
 	onSwitchToSignIn,
@@ -32,7 +33,15 @@ export default function SignUpForm({
 				},
 				{
 					onError: (error) => {
-						toast.error(error.error.message || error.error.statusText);
+						// WS3 remediation R3b, Item 11: see sign-in-form.tsx's
+						// identical guard.
+						dedupedToastError(
+							sanitizeErrorMessage(
+								error.error.message || error.error.statusText,
+								"Sign up failed. Check the entered values and try again."
+							),
+							toast.error
+						);
 					},
 					onSuccess: () => {
 						router.push("/administration");

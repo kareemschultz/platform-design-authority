@@ -1,9 +1,11 @@
 import type { PermissionId } from "@meridian/contracts-permissions";
 import type {
+	AccountantHandoffExport,
 	ActiveContext,
 	ActiveContextRequest,
 	AuditRecord,
 	AuthorizationDecision,
+	CashMovement,
 	CreateCsvImport,
 	CreateEventReplayRequest,
 	CreateInventoryAdjustment,
@@ -16,6 +18,7 @@ import type {
 	CreateStockTransfer,
 	CreateUserInvitationRequest,
 	CurrentIdentity,
+	Deposit,
 	Entitlement,
 	EventReplayRequest,
 	ImportCorrectionReport,
@@ -24,14 +27,21 @@ import type {
 	ImportPurgeResult,
 	InventoryAdjustment,
 	Location,
+	Money,
 	Organization,
 	PagedImports,
 	Party,
 	PlatformIdentityLink,
+	PriceOverride,
 	Product,
+	Receipt,
 	ReceiveStockTransfer,
+	Refund,
+	RegisterSession,
+	Return,
 	Role,
 	RoleAssignment,
+	Sale,
 	SaveStockCountDraftLines,
 	SessionSummary,
 	StockBalance,
@@ -476,6 +486,347 @@ export interface InventoryApplication {
 	}) => Promise<StockCount>;
 }
 
+export interface PosApplication {
+	approveCashVariance: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		registerSessionId: string;
+		sessionId: string;
+		version: number;
+	}) => Promise<RegisterSession>;
+
+	// -- WS3 PR3: Return, Refund, Void, Reissue ------------------------------
+	approveRefund: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		refundId: string;
+		sessionId: string;
+	}) => Promise<Refund>;
+	approveReturn: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		returnId: string;
+		sessionId: string;
+	}) => Promise<Return>;
+
+	// -- WS3 PR2: Sale, PriceOverride, Receipt -------------------------------
+	approveSalePriceOverride: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		overrideId: string;
+		saleId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
+	closeRegister: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		countedCash: Money;
+		idempotencyKey: string;
+		reason?: string | null;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<RegisterSession>;
+	completeSale: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		/** Realizes `commerce.exchanges` (frozen control plan §6.5) — see
+		 * `CompleteSaleRequestSchema`'s doc comment. */
+		exchangeOfReturnId?: string | null;
+		idempotencyKey: string;
+		saleId: string;
+		sessionId: string;
+		tenders: Array<{
+			amountMinor: number;
+			currency: string;
+			referenceId?: string | null;
+			type: "Cash" | "PaymentIntent" | "StoredValue";
+		}>;
+	}) => Promise<Sale>;
+
+	// -- WS3 PR4: Deposit -----------------------------------------------------
+	confirmDeposit: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		depositId: string;
+		idempotencyKey: string;
+		sessionId: string;
+	}) => Promise<Deposit>;
+	createCashMovement: (input: {
+		actorUserId: string;
+		amount: Money;
+		contextId: string;
+		correlationId: string;
+		direction: "PaidIn" | "PaidOut";
+		idempotencyKey: string;
+		note?: string | null;
+		reasonCode: "Other" | "PaidIn" | "PaidOut";
+		referenceId?: string | null;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<CashMovement>;
+	createDeposit: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		countedAmountMinor: number;
+		currency: string;
+		idempotencyKey: string;
+		sessionId: string;
+		sourceShiftIds: string[];
+	}) => Promise<Deposit>;
+	createRefund: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		returnId: string;
+		sessionId: string;
+	}) => Promise<Refund>;
+	createReturn: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		lines: Array<{ quantity: string; saleLineId: string }>;
+		reason: string;
+		saleId: string;
+		sessionId: string;
+	}) => Promise<Return>;
+	createSafeDrop: (input: {
+		actorUserId: string;
+		amount: Money;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		note?: string | null;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<CashMovement>;
+	createSale: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		currency: string;
+		customerPartyId?: string | null;
+		idempotencyKey: string;
+		lines: Array<{
+			discountAmount?: Money | null;
+			productId: string;
+			quantity: string;
+			taxCategory?:
+				| "GY_STANDARD_14"
+				| "GY_ZERO_RATED"
+				| "GY_EXEMPT"
+				| "GY_OUT_OF_SCOPE";
+			unit: string;
+			unitPrice: Money;
+			variantId?: string | null;
+		}>;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
+	/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+	 * `commerce.cash-variance.approve` — same underlying register session
+	 * `getRegisterSession` below reads, gated on the variance-approver's own
+	 * permission instead of the closer's. */
+	getCashVariance: (input: {
+		actorUserId: string;
+		contextId: string;
+		sessionId: string;
+		varianceId: string;
+	}) => Promise<RegisterSession>;
+	/** WS3 remediation R3, Finding I. */
+	getDeposit: (input: {
+		actorUserId: string;
+		contextId: string;
+		depositId: string;
+		sessionId: string;
+	}) => Promise<Deposit>;
+	getReceipt: (input: {
+		actorUserId: string;
+		contextId: string;
+		receiptId: string;
+		sessionId: string;
+	}) => Promise<Receipt>;
+	/** WS3 remediation R3, Finding J. */
+	getReceiptByNumber: (input: {
+		actorUserId: string;
+		contextId: string;
+		receiptNumber: string;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<Receipt>;
+	/** WS3 remediation R3, Finding I. */
+	getRefund: (input: {
+		actorUserId: string;
+		contextId: string;
+		refundId: string;
+		sessionId: string;
+	}) => Promise<Refund>;
+	/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+	 * `commerce.register.close` (the closer's own upcoming action). */
+	getRegisterSession: (input: {
+		actorUserId: string;
+		contextId: string;
+		registerSessionId: string;
+		sessionId: string;
+	}) => Promise<RegisterSession>;
+	/** WS3 remediation R3, Finding I. */
+	getReturn: (input: {
+		actorUserId: string;
+		contextId: string;
+		returnId: string;
+		sessionId: string;
+	}) => Promise<Return>;
+	/** WS3 remediation R3, Finding J (part 2): completes the
+	 * receipt-to-return path `getReceiptByNumber` starts. */
+	getSaleForReturn: (input: {
+		actorUserId: string;
+		contextId: string;
+		receiptNumber: string;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
+	holdSale: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		reason?: string | null;
+		saleId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.cash-variance.approve` exactly, the SAME permission
+	 * `getCashVariance` above already requires — no new identifier
+	 * invented. */
+	listCashVariances: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: {
+			cursor?: string;
+			limit: number;
+			locationId?: string;
+			state?: RegisterSession["state"];
+		};
+		sessionId: string;
+	}) => Promise<Page<RegisterSession>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.deposit.confirm` exactly, the SAME permission `getDeposit`
+	 * above already requires — no new identifier invented. */
+	listDeposits: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number; state?: Deposit["state"] };
+		sessionId: string;
+	}) => Promise<Page<Deposit>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.price-override.approve` exactly, the SAME permission
+	 * `approveSalePriceOverride` already requires — no new identifier
+	 * invented. */
+	listPriceOverrides: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: {
+			cursor?: string;
+			limit: number;
+			state?: PriceOverride["state"];
+		};
+		sessionId: string;
+	}) => Promise<Page<PriceOverride>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.refund.approve` exactly, the SAME permission `getRefund`
+	 * above already requires — no new identifier invented. */
+	listRefunds: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number; state?: Refund["state"] };
+		sessionId: string;
+	}) => Promise<Page<Refund>>;
+	/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+	 * `commerce.return.approve` exactly, the SAME permission `getReturn`
+	 * above already requires — no new identifier invented. */
+	listReturns: (input: {
+		actorUserId: string;
+		contextId: string;
+		page: { cursor?: string; limit: number; state?: Return["state"] };
+		sessionId: string;
+	}) => Promise<Page<Return>>;
+	openRegister: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		currency: string;
+		idempotencyKey: string;
+		locationId: string;
+		openingFloat: Money;
+		registerId: string;
+		sessionId: string;
+	}) => Promise<RegisterSession>;
+	reissueReceipt: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		priceSuppressed?: boolean;
+		receiptId: string;
+		sessionId: string;
+	}) => Promise<Receipt>;
+	requestSalePriceOverride: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		lineId: string;
+		reason: string;
+		requestedPrice: Money;
+		saleId: string;
+		sessionId: string;
+	}) => Promise<Sale>;
+	voidReceipt: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		idempotencyKey: string;
+		reason?: string | null;
+		receiptId: string;
+		sessionId: string;
+	}) => Promise<Return>;
+}
+
+/** WS3 PR4: accountant-handoff export (`platform.export.create`/`.read`). */
+export interface FinanceHandoffApplication {
+	createAccountantHandoffExport: (input: {
+		actorUserId: string;
+		contextId: string;
+		correlationId: string;
+		currency: string;
+		idempotencyKey: string;
+		legalEntityId: string;
+		periodEnd: string;
+		periodStart: string;
+		sessionId: string;
+		timezone: string;
+	}) => Promise<AccountantHandoffExport>;
+	getAccountantHandoffExport: (input: {
+		actorUserId: string;
+		contextId: string;
+		exportId: string;
+		sessionId: string;
+	}) => Promise<AccountantHandoffExport>;
+}
+
 export interface ImportApplication {
 	acceptImport: (input: {
 		actorUserId: string;
@@ -565,10 +916,12 @@ export interface ServerApplication
 		CatalogApplication,
 		EntitlementsApplication,
 		EventReplayApplication,
+		FinanceHandoffApplication,
 		IdentitySessionsApplication,
 		ImportApplication,
 		InventoryApplication,
 		PartyApplication,
+		PosApplication,
 		TenancyApplication {}
 
 export interface PermissionAuthorizer {

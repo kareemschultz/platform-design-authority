@@ -42,7 +42,10 @@ import {
 
 import { ACTIVE_CONTEXT_STORAGE_KEY } from "@/lib/shell";
 import {
+	isGuardableInternalNavigation,
 	isLatestWorkspaceRequest,
+	isPlainLeftClick,
+	shouldWarnBeforeLeaving,
 	type WorkspaceWorkState,
 	workspaceSwitchDisposition,
 } from "@/lib/workspace-change";
@@ -51,6 +54,21 @@ import { orpc } from "@/utils/orpc";
 import { useOnlineStatus } from "./use-online-status";
 
 interface WorkspaceValue {
+	/** WS3 remediation R4: the SAME "unsaved changes — leave anyway?"
+	 * question the in-app anchor-click guard (below) answers automatically
+	 * for `<a href>` navigation, exposed for a caller that triggers
+	 * navigation through something OTHER than a plain anchor click — the
+	 * mobile section `<select>` (`PosNavigation`/`OperationsNavigation`)
+	 * is exactly this case: its `onChange` calls `router.push` directly,
+	 * which the document-level anchor click-listener never sees at all
+	 * (confirmed: it only ever inspects `event.target.closest("a[href]")`),
+	 * so a dirty sale-cart draft silently discarded with zero warning on a
+	 * narrow viewport, while the identical navigation intent on a wide
+	 * viewport (an actual `<a>` click) already correctly warned. Returns
+	 * `true` when it is safe to proceed (nothing unsaved/in-flight, or the
+	 * user explicitly confirmed discarding it) and `false` when the caller
+	 * must NOT navigate (the user cancelled). */
+	confirmLeaveIfDirty: () => boolean;
 	contextId: string | null;
 	identity: CurrentIdentity | undefined;
 	isLoading: boolean;
@@ -96,6 +114,42 @@ export function useWorkspace(): WorkspaceValue {
 	return value;
 }
 
+/**
+ * WS3 remediation R3b, Item 10 (accessible route state).
+ *
+ * Before this fix, the loading branch below was a bare `<Skeleton>` with
+ * no heading and no accessible name at all — the WS1 workspace-context
+ * fix already ensures the EVENTUAL content is correct, but this loading
+ * WINDOW itself (which every hard navigation/reload into `/operations/*`
+ * or `/administration/*` passes through, since `identityQuery` always
+ * starts unresolved) rendered with ZERO `<h1>` anywhere in the DOM —
+ * `Header` has no h1, and the eventual page's own h1 (from
+ * `OperationsPageFrame` / administration's `PageFrame`) does not exist
+ * yet because `children` is not mounted during loading. This is the
+ * "intermittent missing-h1 landing state": intermittent because ordinary
+ * in-app navigation within the same layout subtree does not remount
+ * `WorkspaceProvider` (so most navigations never hit this window), but
+ * every fresh reload or deep link does, unconditionally.
+ *
+ * A separate, directly-testable component (matching `loader.tsx`'s own
+ * `renderToStaticMarkup`-tested pattern) so the exact markup asserted in
+ * `workspace-context.test.ts` is the exact markup actually rendered, not
+ * a re-implementation the test could drift from.
+ */
+export function WorkspaceLoadingState() {
+	return (
+		<div className="mx-auto max-w-screen-2xl px-4 py-10">
+			{/* A real (visually-hidden, not decorative) heading — guarantees
+			 * this window always has exactly one accessible h1, closing the
+			 * intermittent gap regardless of how long the window lasts. */}
+			<h1 className="sr-only">Loading workspace</h1>
+			<div aria-label="Loading workspace" className="grid gap-3" role="status">
+				<Skeleton className="h-24 w-full" />
+			</div>
+		</div>
+	);
+}
+
 export function useWorkspaceWorkGuard(state: WorkspaceWorkState) {
 	const { registerWorkState } = useWorkspace();
 	const key = useId();
@@ -114,7 +168,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 	const queryClient = useQueryClient();
 	const isOnline = useOnlineStatus();
 	const [storedContextId, setStoredContextId] = useState<string | null>(null);
-	const storageLoaded = useRef(false);
+	const [hasReadStorage, setHasReadStorage] = useState(false);
 	const initialContextAttempted = useRef(false);
 	const contextRequestSequence = useRef(0);
 	const workStates = useRef(new Map<string, WorkspaceWorkState>());
@@ -126,7 +180,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		setStoredContextId(sessionStorage.getItem(ACTIVE_CONTEXT_STORAGE_KEY));
-		storageLoaded.current = true;
+		setHasReadStorage(true);
 	}, []);
 
 	const identityQuery = useQuery({
@@ -153,6 +207,18 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, []);
 
+	// WS3 remediation R3b, Item 8 (recoverable task state — dirty carts and
+	// mutation forms must be protected across navigation, back, reload, and
+	// tab close, not just workspace change). Tracks whether an extra
+	// "sentinel" history entry is currently absorbing the browser Back
+	// button's next `popstate` — see the `popstate` effect below for the
+	// full mechanism. Reset to `false` whenever every registered work state
+	// returns to "clean" (including on a successful commit, which clears
+	// its own guard key), so a LATER dirty episode pushes a fresh sentinel
+	// rather than being silently skipped because a stale one was never
+	// reset.
+	const historySentinelPushedRef = useRef(false);
+
 	const registerWorkState = useCallback(
 		(key: string, state: WorkspaceWorkState) => {
 			if (state === "clean") {
@@ -160,10 +226,149 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			} else {
 				workStates.current.set(key, state);
 			}
+			if (shouldWarnBeforeLeaving(workStates.current.values())) {
+				if (!historySentinelPushedRef.current) {
+					historySentinelPushedRef.current = true;
+					window.history.pushState(
+						{ workGuardSentinel: true },
+						"",
+						window.location.href
+					);
+				}
+			} else {
+				historySentinelPushedRef.current = false;
+			}
 			return () => workStates.current.delete(key);
 		},
 		[]
 	);
+
+	// WS3 remediation R4: see `WorkspaceValue.confirmLeaveIfDirty`'s own
+	// doc comment for why this exists — the SAME synchronous `window.
+	// confirm` prompt the anchor click-guard below shows, exposed for a
+	// non-anchor navigation trigger.
+	const confirmLeaveIfDirty = useCallback(() => {
+		if (!shouldWarnBeforeLeaving(workStates.current.values())) {
+			return true;
+		}
+		// biome-ignore lint/suspicious/noAlert: synchronous confirmation required, matching the identical anchor-click and popstate guards elsewhere in this file
+		return window.confirm(
+			"You have unsaved changes in this workspace. Leave this page and discard them?"
+		);
+	}, []);
+
+	// Native `beforeunload` covers reload and tab/window close — the ONE
+	// exit path a client-side `popstate`/click-capture guard can never
+	// intercept, since the page is actually about to be torn down.
+	useEffect(() => {
+		function handleBeforeUnload(event: BeforeUnloadEvent) {
+			if (shouldWarnBeforeLeaving(workStates.current.values())) {
+				event.preventDefault();
+				// Legacy requirement some browsers still honor for showing
+				// their own native "leave site?" prompt; the string itself is
+				// never actually displayed by modern browsers.
+				event.returnValue = "";
+			}
+		}
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+	}, []);
+
+	// In-app navigation guard: Next.js App Router exposes no built-in
+	// "confirm before navigating away" hook, so this intercepts real
+	// anchor clicks (which is what every `next/link` `<Link>` renders,
+	// including `PosNavigation`/`OperationsNavigation`'s own links) in the
+	// CAPTURE phase — before the Link's own bubble-phase click handler
+	// (which calls the router) ever runs — so `stopPropagation` here
+	// genuinely prevents the navigation, not just this listener's own view
+	// of it.
+	useEffect(() => {
+		function findGuardableAnchor(event: MouseEvent): HTMLAnchorElement | null {
+			const { target } = event;
+			if (!(target instanceof Element)) {
+				return null;
+			}
+			const anchor = target.closest("a[href]");
+			if (!(anchor instanceof HTMLAnchorElement)) {
+				return null;
+			}
+			const guardable = isGuardableInternalNavigation(
+				{
+					hasDownloadAttribute: anchor.hasAttribute("download"),
+					href: anchor.href,
+					target: anchor.target,
+				},
+				window.location.href
+			);
+			return guardable ? anchor : null;
+		}
+
+		function handleClick(event: MouseEvent) {
+			if (
+				!(
+					shouldWarnBeforeLeaving(workStates.current.values()) &&
+					isPlainLeftClick(event)
+				)
+			) {
+				return;
+			}
+			if (!findGuardableAnchor(event)) {
+				return;
+			}
+			// This must be a SYNCHRONOUS decision made inside the click
+			// handler itself, before the browser's own default navigation
+			// proceeds — a stateful/async dialog (e.g. the app's own Base UI
+			// AlertDialog, used everywhere else per CLAUDE.md §8) cannot
+			// answer in time to still call `preventDefault()` on THIS event.
+			// Matches the native `beforeunload` prompt this same guard
+			// already shows for the SAME question at a different exit point.
+			// biome-ignore lint/suspicious/noAlert: synchronous confirmation required, see comment above
+			const confirmed = window.confirm(
+				"You have unsaved changes in this workspace. Leave this page and discard them?"
+			);
+			if (!confirmed) {
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+		document.addEventListener("click", handleClick, true);
+		return () => document.removeEventListener("click", handleClick, true);
+	}, []);
+
+	// Browser Back/Forward guard: `registerWorkState` (above) pushes one
+	// extra history entry the moment work first becomes dirty/pending, so
+	// the user's next Back press pops THAT sentinel entry first (landing
+	// back on the SAME url) and fires `popstate` here instead of actually
+	// leaving. Confirmed => genuinely go back (one more `history.back()`,
+	// past the sentinel this handler's own pop just consumed). Cancelled
+	// => push the sentinel again so a repeated Back press is still guarded.
+	useEffect(() => {
+		function handlePopState() {
+			if (!shouldWarnBeforeLeaving(workStates.current.values())) {
+				return;
+			}
+			// See the click-guard effect's identical comment above — a
+			// `popstate` handler must answer synchronously too; the browser
+			// has already popped the history entry by the time this runs.
+			// biome-ignore lint/suspicious/noAlert: synchronous confirmation required, see comment above
+			const confirmed = window.confirm(
+				"You have unsaved changes in this workspace. Leave this page and discard them?"
+			);
+			if (confirmed) {
+				historySentinelPushedRef.current = false;
+				window.history.back();
+			} else {
+				historySentinelPushedRef.current = true;
+				window.history.pushState(
+					{ workGuardSentinel: true },
+					"",
+					window.location.href
+				);
+			}
+		}
+		window.addEventListener("popstate", handlePopState);
+		return () => window.removeEventListener("popstate", handlePopState);
+	}, []);
 
 	const activate = useCallback(
 		async (nextOrganizationId: string, locationId?: string | null) => {
@@ -235,7 +440,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		if (
-			!storageLoaded.current ||
+			!hasReadStorage ||
 			initialContextAttempted.current ||
 			identityQuery.isLoading
 		) {
@@ -261,6 +466,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [
 		activate,
+		hasReadStorage,
 		identityQuery.data,
 		identityQuery.isError,
 		identityQuery.isLoading,
@@ -300,6 +506,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	const value = useMemo<WorkspaceValue>(
 		() => ({
+			confirmLeaveIfDirty,
 			contextId,
 			identity: identityQuery.data,
 			isLoading: identityQuery.isLoading || setContext.isPending,
@@ -310,6 +517,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			registerWorkState,
 		}),
 		[
+			confirmLeaveIfDirty,
 			contextId,
 			identityQuery.data,
 			identityQuery.isLoading,
@@ -340,7 +548,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 	let connectivityAlert: React.ReactNode = null;
 	if (!isOnline) {
 		connectivityAlert = (
-			<Alert className="mx-auto my-3 max-w-screen-2xl" role="status">
+			<Alert
+				className="mx-auto my-3 max-w-screen-2xl print:hidden"
+				role="status"
+			>
 				<CloudOff />
 				<AlertTitle>Offline</AlertTitle>
 				<AlertDescription>
@@ -351,7 +562,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		);
 	} else if (identityQuery.isError && !storedContextId) {
 		connectivityAlert = (
-			<Alert className="mx-auto my-3 max-w-screen-2xl" variant="destructive">
+			<Alert
+				className="mx-auto my-3 max-w-screen-2xl print:hidden"
+				variant="destructive"
+			>
 				<CircleAlert />
 				<AlertTitle>Workspace unavailable</AlertTitle>
 				<AlertDescription>Refresh the page or sign in again.</AlertDescription>
@@ -361,9 +575,12 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	return (
 		<WorkspaceContext.Provider value={value}>
+			{/* WS3 remediation R3b, Item 12 (print composition): application
+			 * chrome — the workspace switcher bar never belongs on a printed
+			 * receipt or any other printed page. */}
 			<section
 				aria-label="Current workspace"
-				className="border-b bg-muted/30 px-4 py-3"
+				className="border-b bg-muted/30 px-4 py-3 print:hidden"
 			>
 				<div className="mx-auto flex max-w-screen-2xl flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
 					<div>
@@ -421,13 +638,30 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 			</section>
 			{connectivityAlert}
 			{contextChangeMessage ? (
-				<Alert className="mx-auto my-3 max-w-screen-2xl" role="alert">
+				<Alert
+					className="mx-auto my-3 max-w-screen-2xl print:hidden"
+					role="alert"
+				>
 					<CircleAlert />
 					<AlertTitle>Workspace not changed</AlertTitle>
 					<AlertDescription>{contextChangeMessage}</AlertDescription>
 				</Alert>
 			) : null}
-			<div key={contextId ?? "no-active-context"}>{children}</div>
+			{value.isLoading ? (
+				// `key={contextId}` below intentionally remounts `children` on a
+				// genuine context change, discarding any workspace-scoped form
+				// state (the switch-confirmation dialog above says as much). But
+				// `contextId` starts `null` on every hard navigation until
+				// `identityQuery` resolves with the persisted context header —
+				// mounting `children` against that transient `null` key first,
+				// then swapping to the real key moments later, remounts a page
+				// the user may already be mid-interaction with. Holding off
+				// until the identity query has actually settled means `children`
+				// only ever mounts once, against the already-resolved contextId.
+				<WorkspaceLoadingState />
+			) : (
+				<div key={contextId ?? "no-active-context"}>{children}</div>
+			)}
 			<Dialog
 				onOpenChange={(open) => {
 					if (!open) {

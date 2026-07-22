@@ -1,0 +1,1 @@
+ALTER TABLE "platform_export_job" ADD COLUMN "request_fingerprint" text DEFAULT 'legacy-unverified' NOT NULL;

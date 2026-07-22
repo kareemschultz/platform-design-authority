@@ -23,6 +23,7 @@ The active delivery sequence is governed by [First Slice Implementation Plan](..
 - [WS1 Verification and Controlled-Prototype Closeout](WS1_VERIFICATION_AND_CONTROLLED_PROTOTYPE_CLOSEOUT.md) — `PDA-IMPL-005` · Draft
 - [Ecommerce Dashboard and shadcn Studio Candidate Audit](ECOMMERCE_DASHBOARD_AND_SHADCN_STUDIO_CANDIDATE_AUDIT.md) — `PDA-IMPL-006` · Draft
 - [Mobbin UX Pattern Discovery Audit](MOBBIN_UX_PATTERN_DISCOVERY_AUDIT.md) — `PDA-UX-039` · Draft
+- [WS3 POS Cash Implementation Evidence](WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md) — `PDA-IMPL-009` · Draft (controlled prototype on `claude/ws3-integration`; not a WS3 entry or merge-to-`main` record)
 
 ## Non-Governed Provenance Records
 

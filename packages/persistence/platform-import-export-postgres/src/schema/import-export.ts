@@ -278,3 +278,81 @@ export const importCommandReceipts = pgTable(
 		),
 	]
 );
+
+/**
+ * `platform_export_job` (WS3 PR4, frozen control plan §8.1 / PDA-DOM-026)
+ * is the durable record of a generated accountant-handoff export. No
+ * `platform.export.*` event is registered (WS3 control plan §4: "the
+ * export artifact and its manifest/hash are the durable record") — this
+ * row IS the record, not a projection of an event. `payload` is the full
+ * deterministic `AccountantHandoffPayload` (posting batch + package
+ * siblings); `content_hash` is `sha256(canonicalJsonStringify(payload))`,
+ * reproducible for identical inputs regardless of `generated_at`/`id`
+ * (frozen control plan Tests: "export determinism").
+ */
+export const exportJobs = pgTable(
+	"platform_export_job",
+	{
+		classification: text("classification").default("Confidential").notNull(),
+		contentHash: text("content_hash").notNull(),
+		createdByActorUserId: text("created_by_actor_user_id").notNull(),
+		currency: text("currency").notNull(),
+		generatedAt: timestamp("generated_at", { withTimezone: true }).notNull(),
+		id: text("id").notNull(),
+		idempotencyKey: text("idempotency_key").notNull(),
+		kind: text("kind").notNull(),
+		legalEntityId: text("legal_entity_id").notNull(),
+		organizationId: text("organization_id").notNull(),
+		payload: jsonb("payload").notNull(),
+		periodEndUtc: timestamp("period_end_utc", {
+			withTimezone: true,
+		}).notNull(),
+		periodStartUtc: timestamp("period_start_utc", {
+			withTimezone: true,
+		}).notNull(),
+		/** WS3 remediation R2, Finding D: the canonical normalized-request
+		 * fingerprint an idempotency-key reuse is bound to (mirrors
+		 * `platform_import_job.request_fingerprint` in this same package and
+		 * `pos_command_receipt`'s `request_fingerprint` in
+		 * `@meridian/persistence-pos-postgres`). Existing pre-remediation
+		 * rows backfill to the `'legacy-unverified'` sentinel — a value that
+		 * can never equal a real computed fingerprint, so any future replay
+		 * attempt against a legacy row fails closed into
+		 * `idempotency_conflict` (forcing a fresh idempotency key) instead of
+		 * silently treating an unverified legacy row as a match. */
+		requestFingerprint: text("request_fingerprint")
+			.default("legacy-unverified")
+			.notNull(),
+		ruleVersion: text("rule_version").notNull(),
+		schemaVersion: text("schema_version").notNull(),
+		tenantId: text("tenant_id").notNull(),
+		timezone: text("timezone").notNull(),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.tenantId, table.id],
+			name: "platform_export_job_pk",
+		}),
+		uniqueIndex("platform_export_job_idempotency_uidx").on(
+			table.tenantId,
+			table.idempotencyKey
+		),
+		index("platform_export_job_tenant_org_period_idx").on(
+			table.tenantId,
+			table.organizationId,
+			table.periodStartUtc
+		),
+		check(
+			"platform_export_job_kind_ck",
+			sql`${table.kind} IN ('AccountantHandoff')`
+		),
+		check(
+			"platform_export_job_currency_ck",
+			sql`${table.currency} ~ '^[A-Z]{3}$'`
+		),
+		check(
+			"platform_export_job_period_ck",
+			sql`${table.periodStartUtc} < ${table.periodEndUtc}`
+		),
+	]
+);

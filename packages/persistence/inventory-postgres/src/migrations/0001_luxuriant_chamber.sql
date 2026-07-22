@@ -1,0 +1,4 @@
+ALTER TABLE "inventory_stock_movement" DROP CONSTRAINT "inventory_stock_movement_type_check";--> statement-breakpoint
+ALTER TABLE "inventory_stock_movement" DROP CONSTRAINT "inventory_stock_movement_source_type_check";--> statement-breakpoint
+ALTER TABLE "inventory_stock_movement" ADD CONSTRAINT "inventory_stock_movement_type_check" CHECK ("inventory_stock_movement"."movement_type" in ('Adjustment', 'CountVariance', 'TransferOut', 'TransferIn', 'Reversal', 'Offline', 'Sale'));--> statement-breakpoint
+ALTER TABLE "inventory_stock_movement" ADD CONSTRAINT "inventory_stock_movement_source_type_check" CHECK ("inventory_stock_movement"."source_type" in ('Adjustment', 'Count', 'Transfer', 'OfflineCommand', 'Sale'));

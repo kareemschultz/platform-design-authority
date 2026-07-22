@@ -3,13 +3,23 @@ import {
 	acceptOpeningStockImportContract,
 	acceptProductImportContract,
 	activateProductContract,
+	approveCashVarianceContract,
 	approveInventoryAdjustmentContract,
 	approveOpeningStockImportContract,
 	approveProductImportContract,
+	approveRefundContract,
+	approveReturnContract,
+	approveSalePriceOverrideContract,
 	approveStockCountContract,
 	archiveProductContract,
 	cancelOpeningStockImportContract,
 	cancelProductImportContract,
+	closeRegisterContract,
+	completeSaleContract,
+	confirmDepositContract,
+	createAccountantHandoffExportContract,
+	createCashMovementContract,
+	createDepositContract,
 	createEventReplayContract,
 	createInventoryAdjustmentContract,
 	createOpeningStockImportContract,
@@ -18,12 +28,19 @@ import {
 	createPersonPartyContract,
 	createProductContract,
 	createProductImportContract,
+	createRefundContract,
+	createReturnContract,
 	createRoleAssignmentContract,
+	createSafeDropContract,
+	createSaleContract,
 	createStockCountContract,
 	createStockTransferContract,
 	createUserInvitationContract,
 	dispatchStockTransferContract,
+	getCashVarianceContract,
 	getCurrentIdentityContract,
+	getDepositContract,
+	getExportContract,
 	getInventoryAdjustmentContract,
 	getOpeningStockImportContract,
 	getOpeningStockImportCorrectionReportContract,
@@ -32,10 +49,19 @@ import {
 	getProductContract,
 	getProductImportContract,
 	getProductImportCorrectionReportContract,
+	getReceiptByNumberContract,
+	getReceiptContract,
+	getRefundContract,
+	getRegisterSessionContract,
+	getReturnContract,
+	getSaleForReturnContract,
 	getStockCountContract,
 	getStockTransferContract,
+	holdSaleContract,
 	listAuditRecordsContract,
+	listCashVariancesContract,
 	listCurrentUserSessionsContract,
+	listDepositsContract,
 	listEntitlementsContract,
 	listInventoryAdjustmentsContract,
 	listLocationsContract,
@@ -43,17 +69,23 @@ import {
 	listOpeningStockImportsContract,
 	listOrganizationsContract,
 	listPartiesContract,
+	listPriceOverridesContract,
 	listProductImportFindingsContract,
 	listProductImportsContract,
 	listProductsContract,
+	listRefundsContract,
+	listReturnsContract,
 	listRolesContract,
 	listStockBalancesContract,
 	listStockCountsContract,
 	listStockTransfersContract,
 	listUsersContract,
+	openRegisterContract,
 	purgeOpeningStockImportStagingContract,
 	purgeProductImportStagingContract,
 	receiveStockTransferContract,
+	reissueReceiptContract,
+	requestSalePriceOverrideContract,
 	reverseInventoryAdjustmentContract,
 	revokeCurrentUserSessionContract,
 	saveStockCountDraftLinesContract,
@@ -63,6 +95,7 @@ import {
 	updateOrganizationContract,
 	updatePartyContract,
 	updateProductContract,
+	voidReceiptContract,
 } from "@meridian/contracts-platform-api";
 import type { RouterClient } from "@orpc/server";
 import { implement, ORPCError } from "@orpc/server";
@@ -260,7 +293,8 @@ function mapApplicationError(context: Context, error: unknown): never {
 		code === "approval_separation" ||
 		code === "segregation_of_duties" ||
 		code === "invalid_state" ||
-		code === "negative_stock"
+		code === "negative_stock" ||
+		code === "insufficient_cash"
 	) {
 		throw new ORPCError("CONFLICT", {
 			data: problem(context, {
@@ -1487,6 +1521,941 @@ const createInventoryAdjustment = implement(createInventoryAdjustmentContract)
 		}
 	});
 
+// ---------------------------------------------------------------------------
+// WS3 PR1: registers, cash movements, safe drops, cash-variance approval.
+// Every procedure revalidates active context and enforces its declared
+// permission BEFORE application dispatch (WS1/WS2 pattern); the POS
+// application layer independently re-enforces the same checks in depth.
+// ---------------------------------------------------------------------------
+
+const openRegister = implement(openRegisterContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { activeContext, session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.register.open",
+			input.headers["x-active-context-id"]
+		);
+		if (!activeContext.locationId) {
+			throw new ORPCError("BAD_REQUEST", {
+				data: problem(context, {
+					code: "validation",
+					status: 400,
+					title: "Register open requires a location-scoped active context",
+				}),
+			});
+		}
+		try {
+			return await context.application.openRegister({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				currency: input.body.currency,
+				idempotencyKey: input.headers["idempotency-key"],
+				locationId: activeContext.locationId,
+				openingFloat: input.body.openingFloat,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const closeRegister = implement(closeRegisterContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.register.close",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.closeRegister({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				countedCash: input.body.countedCash,
+				idempotencyKey: input.headers["idempotency-key"],
+				reason: input.body.reason ?? null,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createCashMovement = implement(createCashMovementContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-movement.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createCashMovement({
+				actorUserId: session.user.id,
+				amount: input.body.amount,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				direction: input.body.direction,
+				idempotencyKey: input.headers["idempotency-key"],
+				note: input.body.note ?? null,
+				reasonCode: input.body.reasonCode,
+				referenceId: input.body.referenceId ?? null,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createSafeDrop = implement(createSafeDropContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-movement.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createSafeDrop({
+				actorUserId: session.user.id,
+				amount: input.body.amount,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				note: input.body.note ?? null,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveCashVariance = implement(approveCashVarianceContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-variance.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveCashVariance({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				registerSessionId: input.params.varianceId,
+				sessionId: session.session.id,
+				version: Number(input.headers["if-match"]),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.cash-variance.approve` — same underlying register session
+ * `getRegisterSession` below reads, gated on the variance-approver's own
+ * permission instead of the closer's. */
+const getCashVariance = implement(getCashVarianceContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-variance.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getCashVariance({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				sessionId: session.session.id,
+				varianceId: input.params.varianceId,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.cash-variance.approve` exactly, the SAME permission
+ * `getCashVariance` above already requires — no new identifier invented. */
+const listCashVariances = implement(listCashVariancesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.cash-variance.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listCashVariances({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.register.close` (the closer's own upcoming action). */
+const getRegisterSession = implement(getRegisterSessionContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.register.close",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getRegisterSession({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				registerSessionId: input.params.sessionId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+// ---------------------------------------------------------------------------
+// WS3 PR2: sales, receipts, price overrides. Every procedure revalidates
+// active context and enforces its declared permission BEFORE application
+// dispatch (WS1/WS2 pattern, matching PR1 above); the POS application
+// layer independently re-enforces the same checks in depth.
+// ---------------------------------------------------------------------------
+
+const createSale = implement(createSaleContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.sale.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createSale({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				currency: input.body.currency,
+				customerPartyId: input.body.customerPartyId,
+				idempotencyKey: input.headers["idempotency-key"],
+				lines: input.body.lines,
+				registerId: input.body.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const completeSale = implement(completeSaleContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.sale.complete",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.completeSale({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				exchangeOfReturnId: input.body.exchangeOfReturnId,
+				idempotencyKey: input.headers["idempotency-key"],
+				saleId: input.params.saleId,
+				sessionId: session.session.id,
+				tenders: input.body.tenders.map((tender) => ({
+					amountMinor: tender.amount.amountMinor,
+					currency: tender.amount.currency,
+					referenceId: tender.referenceId,
+					type: tender.type,
+				})),
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const holdSale = implement(holdSaleContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.sale.hold",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.holdSale({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				saleId: input.params.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const requestSalePriceOverride = implement(requestSalePriceOverrideContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.price-override.request",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.requestSalePriceOverride({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				lineId: input.body.lineId,
+				reason: input.body.reason,
+				requestedPrice: input.body.requestedPrice,
+				saleId: input.params.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveSalePriceOverride = implement(approveSalePriceOverrideContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.price-override.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveSalePriceOverride({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				overrideId: input.params.overrideId,
+				saleId: input.params.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.price-override.approve` exactly, the SAME permission
+ * `approveSalePriceOverride` above already requires — no new identifier
+ * invented. */
+const listPriceOverrides = implement(listPriceOverridesContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.price-override.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listPriceOverrides({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getReceipt = implement(getReceiptContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.receipt.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getReceipt({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				receiptId: input.params.receiptId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding J. */
+const getReceiptByNumber = implement(getReceiptByNumberContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.receipt.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getReceiptByNumber({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				receiptNumber: input.params.receiptNumber,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding J (part 2): completes the receipt-to-return
+ * path — gated on `commerce.return.create`, not `commerce.receipt.read`. */
+const getSaleForReturn = implement(getSaleForReturnContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getSaleForReturn({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				receiptNumber: input.params.receiptNumber,
+				registerId: input.params.registerId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+// ---------------------------------------------------------------------------
+// WS3 PR3: Return, Refund, Void, Reissue. Exchange has no dedicated
+// procedure — it rides `completeSale`'s `exchangeOfReturnId` above.
+// ---------------------------------------------------------------------------
+
+const createReturn = implement(createReturnContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createReturn({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				lines: input.body.lines,
+				reason: input.body.reason,
+				saleId: input.body.saleId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.return.approve`, gated on that exact permission. */
+const getReturn = implement(getReturnContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getReturn({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				returnId: input.params.returnId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.return.approve` exactly, the SAME permission `getReturn` above
+ * already requires — no new identifier invented. */
+const listReturns = implement(listReturnsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listReturns({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveReturn = implement(approveReturnContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.return.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveReturn({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				returnId: input.params.returnId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createRefund = implement(createRefundContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.refund.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createRefund({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				returnId: input.body.returnId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.refund.approve`, gated on that exact permission. */
+const getRefund = implement(getRefundContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.refund.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getRefund({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				refundId: input.params.refundId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.refund.approve` exactly, the SAME permission `getRefund` above
+ * already requires — no new identifier invented. */
+const listRefunds = implement(listRefundsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.refund.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listRefunds({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const approveRefund = implement(approveRefundContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.refund.approve",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.approveRefund({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				refundId: input.params.refundId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const reissueReceipt = implement(reissueReceiptContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.receipt.reissue",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.reissueReceipt({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				priceSuppressed: input.body.priceSuppressed,
+				receiptId: input.params.receiptId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const voidReceipt = implement(voidReceiptContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.receipt.void",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.voidReceipt({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				idempotencyKey: input.headers["idempotency-key"],
+				reason: input.body.reason,
+				receiptId: input.params.receiptId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+// ---------------------------------------------------------------------------
+// WS3 PR4: Deposit (commerce.deposit.create/.confirm) and the accountant
+// handoff export (platform.export.create/.read).
+// ---------------------------------------------------------------------------
+
+const createDeposit = implement(createDepositContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.deposit.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createDeposit({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				countedAmountMinor: input.body.countedAmount.amountMinor,
+				currency: input.body.currency,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+				sourceShiftIds: input.body.sourceShiftIds,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.deposit.confirm`, gated on that exact permission. */
+const getDeposit = implement(getDepositContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.deposit.confirm",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getDeposit({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				depositId: input.params.depositId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery): reuses
+ * `commerce.deposit.confirm` exactly, the SAME permission `getDeposit` above
+ * already requires — no new identifier invented. */
+const listDeposits = implement(listDepositsContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.deposit.confirm",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.listDeposits({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				page: input.query,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const confirmDeposit = implement(confirmDepositContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"commerce.deposit.confirm",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.confirmDeposit({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				depositId: input.params.depositId,
+				idempotencyKey: input.headers["idempotency-key"],
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const createAccountantHandoffExport = implement(
+	createAccountantHandoffExportContract
+)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.export.create",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.createAccountantHandoffExport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				correlationId: context.correlationId,
+				currency: input.body.currency,
+				idempotencyKey: input.headers["idempotency-key"],
+				legalEntityId: input.body.legalEntityId,
+				periodEnd: input.body.periodEnd,
+				periodStart: input.body.periodStart,
+				sessionId: session.session.id,
+				timezone: input.body.timezone,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
+const getExport = implement(getExportContract)
+	.$context<Context>()
+	.handler(async ({ context, input }) => {
+		const { session } = await requireActiveIdentity(
+			context,
+			input.headers["x-active-context-id"]
+		);
+		await requirePermission(
+			context,
+			"platform.export.read",
+			input.headers["x-active-context-id"]
+		);
+		try {
+			return await context.application.getAccountantHandoffExport({
+				actorUserId: session.user.id,
+				contextId: input.headers["x-active-context-id"],
+				exportId: input.params.exportId,
+				sessionId: session.session.id,
+			});
+		} catch (error) {
+			return mapApplicationError(context, error);
+		}
+	});
+
 const approveInventoryAdjustment = implement(approveInventoryAdjustmentContract)
 	.$context<Context>()
 	.handler(async ({ context, input }) => {
@@ -1940,103 +2909,192 @@ const listAuditRecords = implement(listAuditRecordsContract)
 		}
 	});
 
+/** Extracted from `appRouter` below (rather than inlined) so its type is
+ * resolved and named once — adding Finding I/J's 6 new procedures pushed
+ * the single giant `appRouter` object literal over TS's type-serialization
+ * limit (TS7056, "type too complex to serialize"); splitting the largest
+ * sub-tree into its own named const keeps the top-level `typeof appRouter`
+ * cheap to re-derive. Purely a compiler-ergonomics split — the router
+ * shape (and `AppRouterClient`) is unchanged. */
+export const commerceRouter = {
+	cashMovements: { create: createCashMovement },
+	cashVariances: {
+		approve: approveCashVariance,
+		get: getCashVariance,
+		list: listCashVariances,
+	},
+	deposits: {
+		confirm: confirmDeposit,
+		create: createDeposit,
+		get: getDeposit,
+		list: listDeposits,
+	},
+	priceOverrides: {
+		approve: approveSalePriceOverride,
+		list: listPriceOverrides,
+		request: requestSalePriceOverride,
+	},
+	receipts: {
+		get: getReceipt,
+		getByNumber: getReceiptByNumber,
+		reissue: reissueReceipt,
+		void: voidReceipt,
+	},
+	refunds: {
+		approve: approveRefund,
+		create: createRefund,
+		get: getRefund,
+		list: listRefunds,
+	},
+	registerSessions: { get: getRegisterSession },
+	registers: {
+		close: closeRegister,
+		open: openRegister,
+	},
+	returns: {
+		approve: approveReturn,
+		create: createReturn,
+		get: getReturn,
+		list: listReturns,
+	},
+	safeDrops: { create: createSafeDrop },
+	sales: {
+		complete: completeSale,
+		create: createSale,
+		getForReturn: getSaleForReturn,
+		hold: holdSale,
+	},
+};
+
+export const catalogRouter = {
+	imports: {
+		accept: acceptProductImport,
+		approve: approveProductImport,
+		cancel: cancelProductImport,
+		correctionReport: getProductImportCorrectionReport,
+		create: createProductImport,
+		findings: listProductImportFindings,
+		get: getProductImport,
+		list: listProductImports,
+		purgeStaging: purgeProductImportStaging,
+	},
+	products: {
+		activate: activateProduct,
+		archive: archiveProduct,
+		create: createProduct,
+		get: getProduct,
+		list: listProducts,
+		update: updateProduct,
+	},
+};
+
+export const inventoryRouter = {
+	adjustments: {
+		approve: approveInventoryAdjustment,
+		create: createInventoryAdjustment,
+		get: getInventoryAdjustment,
+		list: listInventoryAdjustments,
+		reverse: reverseInventoryAdjustment,
+	},
+	balances: { list: listStockBalances },
+	counts: {
+		approve: approveStockCount,
+		create: createStockCount,
+		get: getStockCount,
+		list: listStockCounts,
+		saveDraft: saveStockCountDraft,
+		submit: submitStockCount,
+	},
+	imports: {
+		acceptOpeningStock: acceptOpeningStockImport,
+		approveOpeningStock: approveOpeningStockImport,
+		cancelOpeningStock: cancelOpeningStockImport,
+		createOpeningStock: createOpeningStockImport,
+		getOpeningStock: getOpeningStockImport,
+		listOpeningStock: listOpeningStockImports,
+		openingStockCorrectionReport: getOpeningStockImportCorrectionReport,
+		openingStockFindings: listOpeningStockImportFindings,
+		purgeOpeningStockStaging: purgeOpeningStockImportStaging,
+	},
+	transfers: {
+		create: createStockTransfer,
+		dispatch: dispatchStockTransfer,
+		get: getStockTransfer,
+		list: listStockTransfers,
+		receive: receiveStockTransfer,
+	},
+};
+
+const auditRouter = { list: listAuditRecords };
+const entitlementsRouter = { list: listEntitlements };
+const eventsRouter = { createReplay: createEventReplay };
+const exportsRouter = {
+	createAccountantHandoff: createAccountantHandoffExport,
+	get: getExport,
+};
+const healthCheckProcedure = publicProcedure.handler(() => "OK");
+const identityRouter = {
+	getCurrent: currentIdentity,
+	setActiveContext,
+};
+const organizationsRouter = {
+	get: getOrganization,
+	list: listOrganizations,
+	listLocations,
+	update: updateOrganization,
+};
+const partiesRouter = {
+	createIdentityLink: createPartyIdentityLink,
+	createOrganization: createOrganizationParty,
+	createPerson: createPersonParty,
+	get: getParty,
+	list: listParties,
+	update: updateParty,
+};
+const privateDataProcedure = protectedProcedure.handler(({ context }) => ({
+	message: "This is private",
+	user: context.session.user,
+}));
+const rolesRouter = {
+	assign: createRoleAssignment,
+	list: listRoles,
+};
+const sessionsRouter = {
+	list: listCurrentUserSessions,
+	revoke: revokeCurrentUserSession,
+};
+const usersRouter = {
+	invite: inviteUser,
+	list: listUsers,
+	suspendMembership,
+};
+
+/** WS3 remediation R3: adding Findings I/J's 6 new procedures pushed the
+ * top-level router object past TS7056's "type too complex to serialize"
+ * limit under `apps/server`'s `composite: true` (declaration-emission)
+ * tsconfig. Every branch above is now a separately named const (instead of
+ * one giant inline nested literal) SPECIFICALLY so `typeof appRouter`
+ * below only has to reference each already-resolved named type instead of
+ * re-inferring and re-printing the whole tree as one anonymous structural
+ * type in one pass — this alone (no explicit annotation, no `Router<...>`
+ * cast) is what keeps the checker under the limit. `AppRouterClient` (the
+ * typed API client apps/web consumes) is unchanged in shape. */
 export const appRouter = {
-	audit: { list: listAuditRecords },
-	catalog: {
-		imports: {
-			accept: acceptProductImport,
-			approve: approveProductImport,
-			cancel: cancelProductImport,
-			correctionReport: getProductImportCorrectionReport,
-			create: createProductImport,
-			findings: listProductImportFindings,
-			get: getProductImport,
-			list: listProductImports,
-			purgeStaging: purgeProductImportStaging,
-		},
-		products: {
-			activate: activateProduct,
-			archive: archiveProduct,
-			create: createProduct,
-			get: getProduct,
-			list: listProducts,
-			update: updateProduct,
-		},
-	},
-	entitlements: { list: listEntitlements },
-	events: { createReplay: createEventReplay },
-	healthCheck: publicProcedure.handler(() => "OK"),
-	identity: {
-		getCurrent: currentIdentity,
-		setActiveContext,
-	},
-	inventory: {
-		adjustments: {
-			approve: approveInventoryAdjustment,
-			create: createInventoryAdjustment,
-			get: getInventoryAdjustment,
-			list: listInventoryAdjustments,
-			reverse: reverseInventoryAdjustment,
-		},
-		balances: { list: listStockBalances },
-		counts: {
-			approve: approveStockCount,
-			create: createStockCount,
-			get: getStockCount,
-			list: listStockCounts,
-			saveDraft: saveStockCountDraft,
-			submit: submitStockCount,
-		},
-		imports: {
-			acceptOpeningStock: acceptOpeningStockImport,
-			approveOpeningStock: approveOpeningStockImport,
-			cancelOpeningStock: cancelOpeningStockImport,
-			createOpeningStock: createOpeningStockImport,
-			getOpeningStock: getOpeningStockImport,
-			listOpeningStock: listOpeningStockImports,
-			openingStockCorrectionReport: getOpeningStockImportCorrectionReport,
-			openingStockFindings: listOpeningStockImportFindings,
-			purgeOpeningStockStaging: purgeOpeningStockImportStaging,
-		},
-		transfers: {
-			create: createStockTransfer,
-			dispatch: dispatchStockTransfer,
-			get: getStockTransfer,
-			list: listStockTransfers,
-			receive: receiveStockTransfer,
-		},
-	},
-	organizations: {
-		get: getOrganization,
-		list: listOrganizations,
-		listLocations,
-		update: updateOrganization,
-	},
-	parties: {
-		createIdentityLink: createPartyIdentityLink,
-		createOrganization: createOrganizationParty,
-		createPerson: createPersonParty,
-		get: getParty,
-		list: listParties,
-		update: updateParty,
-	},
-	privateData: protectedProcedure.handler(({ context }) => ({
-		message: "This is private",
-		user: context.session.user,
-	})),
-	roles: {
-		assign: createRoleAssignment,
-		list: listRoles,
-	},
-	sessions: {
-		list: listCurrentUserSessions,
-		revoke: revokeCurrentUserSession,
-	},
-	users: {
-		invite: inviteUser,
-		list: listUsers,
-		suspendMembership,
-	},
+	audit: auditRouter,
+	catalog: catalogRouter,
+	commerce: commerceRouter,
+	entitlements: entitlementsRouter,
+	events: eventsRouter,
+	exports: exportsRouter,
+	healthCheck: healthCheckProcedure,
+	identity: identityRouter,
+	inventory: inventoryRouter,
+	organizations: organizationsRouter,
+	parties: partiesRouter,
+	privateData: privateDataProcedure,
+	roles: rolesRouter,
+	sessions: sessionsRouter,
+	users: usersRouter,
 };
 
 export type AppRouter = typeof appRouter;

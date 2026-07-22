@@ -150,6 +150,18 @@ export const ENDPOINTS = [
 		permission: "platform.audit.read",
 	},
 	{
+		method: "GET",
+		operationId: "listCashVariances",
+		path: "/v1/cash-variances",
+		permission: "commerce.cash-variance.approve",
+	},
+	{
+		method: "GET",
+		operationId: "getCashVariancesByVarianceId",
+		path: "/v1/cash-variances/{varianceId}",
+		permission: "commerce.cash-variance.approve",
+	},
+	{
 		method: "POST",
 		operationId: "postCashVariancesByVarianceIdApprove",
 		path: "/v1/cash-variances/{varianceId}/approve",
@@ -186,10 +198,22 @@ export const ENDPOINTS = [
 		permission: "finance.bank-reconciliation.create",
 	},
 	{
+		method: "GET",
+		operationId: "listDeposits",
+		path: "/v1/deposits",
+		permission: "commerce.deposit.confirm",
+	},
+	{
 		method: "POST",
 		operationId: "createDeposit",
 		path: "/v1/deposits",
 		permission: "commerce.deposit.create",
+	},
+	{
+		method: "GET",
+		operationId: "getDepositsByDepositId",
+		path: "/v1/deposits/{depositId}",
+		permission: "commerce.deposit.confirm",
 	},
 	{
 		method: "POST",
@@ -432,6 +456,12 @@ export const ENDPOINTS = [
 		permission: "payment.reconciliation.create",
 	},
 	{
+		method: "GET",
+		operationId: "listPriceOverrides",
+		path: "/v1/price-overrides",
+		permission: "commerce.price-override.approve",
+	},
+	{
 		method: "POST",
 		operationId: "postPrivacyActionsByIdApprove",
 		path: "/v1/privacy-actions/{id}/approve",
@@ -564,16 +594,34 @@ export const ENDPOINTS = [
 		permission: "commerce.receipt.void",
 	},
 	{
+		method: "GET",
+		operationId: "listRefunds",
+		path: "/v1/refunds",
+		permission: "commerce.refund.approve",
+	},
+	{
 		method: "POST",
 		operationId: "postRefunds",
 		path: "/v1/refunds",
 		permission: "commerce.refund.create",
 	},
 	{
+		method: "GET",
+		operationId: "getRefundsByRefundId",
+		path: "/v1/refunds/{refundId}",
+		permission: "commerce.refund.approve",
+	},
+	{
 		method: "POST",
 		operationId: "postRefundsByRefundIdApprove",
 		path: "/v1/refunds/{refundId}/approve",
 		permission: "commerce.refund.approve",
+	},
+	{
+		method: "GET",
+		operationId: "getRegisterSessionsBySessionId",
+		path: "/v1/register-sessions/{sessionId}",
+		permission: "commerce.register.close",
 	},
 	{
 		method: "POST",
@@ -594,16 +642,40 @@ export const ENDPOINTS = [
 		permission: "commerce.register.open",
 	},
 	{
+		method: "GET",
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumber",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}",
+		permission: "commerce.receipt.read",
+	},
+	{
+		method: "GET",
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumberSale",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}/sale",
+		permission: "commerce.return.create",
+	},
+	{
 		method: "POST",
 		operationId: "postRegistersByRegisterIdSafeDrops",
 		path: "/v1/registers/{registerId}/safe-drops",
 		permission: "commerce.cash-movement.create",
 	},
 	{
+		method: "GET",
+		operationId: "listReturns",
+		path: "/v1/returns",
+		permission: "commerce.return.approve",
+	},
+	{
 		method: "POST",
 		operationId: "createReturn",
 		path: "/v1/returns",
 		permission: "commerce.return.create",
+	},
+	{
+		method: "GET",
+		operationId: "getReturnsByReturnId",
+		path: "/v1/returns/{returnId}",
+		permission: "commerce.return.approve",
 	},
 	{
 		method: "POST",
@@ -640,6 +712,18 @@ export const ENDPOINTS = [
 		operationId: "postSalesBySaleIdHold",
 		path: "/v1/sales/{saleId}/hold",
 		permission: "commerce.sale.hold",
+	},
+	{
+		method: "POST",
+		operationId: "requestSalePriceOverride",
+		path: "/v1/sales/{saleId}/price-overrides",
+		permission: "commerce.price-override.request",
+	},
+	{
+		method: "POST",
+		operationId: "approveSalePriceOverride",
+		path: "/v1/sales/{saleId}/price-overrides/{overrideId}/approve",
+		permission: "commerce.price-override.approve",
 	},
 	{
 		authorization: "authenticated_membership",

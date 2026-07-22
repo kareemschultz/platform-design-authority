@@ -108,7 +108,7 @@ jobs:
       - name: Migration freshness
         run: |
           bun run db:generate
-          git diff --exit-code -- packages/persistence/platform-identity-postgres/src/migrations packages/persistence/platform-tenancy-postgres/src/migrations packages/persistence/platform-entitlements-postgres/src/migrations packages/persistence/platform-audit-postgres/src/migrations packages/persistence/platform-events-postgres/src/migrations packages/persistence/platform-import-export-postgres/src/migrations packages/persistence/platform-numbering-postgres/src/migrations packages/persistence/party-postgres/src/migrations packages/persistence/catalog-postgres/src/migrations packages/persistence/inventory-postgres/src/migrations
+          git diff --exit-code -- packages/persistence/platform-identity-postgres/src/migrations packages/persistence/platform-tenancy-postgres/src/migrations packages/persistence/platform-entitlements-postgres/src/migrations packages/persistence/platform-audit-postgres/src/migrations packages/persistence/platform-events-postgres/src/migrations packages/persistence/platform-import-export-postgres/src/migrations packages/persistence/platform-numbering-postgres/src/migrations packages/persistence/party-postgres/src/migrations packages/persistence/catalog-postgres/src/migrations packages/persistence/inventory-postgres/src/migrations packages/persistence/pos-postgres/src/migrations
 
       - name: Tests
         run: bun run test
@@ -137,6 +137,7 @@ jobs:
           python scripts/generate_registries.py --check
           bun run ws1:evidence:check
           bun run ws2:evidence:check
+          bun run ws3:evidence:check
 
       - name: Generated contract freshness
         run: python scripts/generate_contracts.py --check

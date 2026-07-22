@@ -87,7 +87,8 @@ export type InventoryMovementType =
 	| "TransferOut"
 	| "TransferIn"
 	| "Reversal"
-	| "Offline";
+	| "Offline"
+	| "Sale";
 
 export interface InventoryMovementRecord {
 	actorUserId: string;
@@ -107,7 +108,7 @@ export interface InventoryMovementRecord {
 	quantity: DecimalQuantity;
 	reversalOfMovementId: string | null;
 	sourceId: string;
-	sourceType: "Adjustment" | "Count" | "Transfer" | "OfflineCommand";
+	sourceType: "Adjustment" | "Count" | "Transfer" | "OfflineCommand" | "Sale";
 	tenantId: string;
 	unit: string;
 	variantId: string | null;
@@ -327,8 +328,16 @@ export interface InventoryRepository {
 	createTransfer: (
 		record: InventoryTransferRecord
 	) => Promise<InventoryTransferRecord>;
+	/** WS3 remediation R2, Finding B: `organizationId` is REQUIRED (not
+	 * optional) — filtered in the SQL `WHERE` clause itself, mirroring
+	 * `@meridian/domain-pos`'s `PosRepository` fix for the same class of
+	 * defect. A row that exists but belongs to a different organization in
+	 * the same tenant is indistinguishable from a nonexistent one: both
+	 * return `null`, and callers reject with the SAME governed
+	 * `InventoryError("not_found", ...)` denial (non-disclosing). */
 	getAdjustment: (
 		tenantId: string,
+		organizationId: string,
 		id: string
 	) => Promise<InventoryAdjustmentRecord | null>;
 	getBalance: (
@@ -344,29 +353,41 @@ export interface InventoryRepository {
 	) => Promise<InventoryCommandReceipt | null>;
 	getCount: (
 		tenantId: string,
+		organizationId: string,
 		id: string
 	) => Promise<InventoryCountRecord | null>;
 	getTransfer: (
 		tenantId: string,
+		organizationId: string,
 		id: string
 	) => Promise<InventoryTransferRecord | null>;
+	/** WS3 remediation R2 cycle 2, Finding B (list surface): `organizationId`
+	 * is REQUIRED (not optional) and filtered in the SQL `WHERE` clause
+	 * itself, mirroring the `get*` fix immediately above. Without it, any
+	 * actor holding the read permission in their OWN organization could omit
+	 * `filters.locationId` (or supply another organization's `locationId`)
+	 * and receive every organization's rows in the same tenant. */
 	listAdjustments: (
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: InventoryAdjustmentFilters
 	) => Promise<InventoryPage<InventoryAdjustmentRecord>>;
 	listBalances: (
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: InventoryBalanceFilters
 	) => Promise<InventoryPage<InventoryBalanceRecord>>;
 	listCounts: (
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: InventoryCountFilters
 	) => Promise<InventoryPage<InventoryCountRecord>>;
 	listTransfers: (
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: InventoryTransferFilters
 	) => Promise<InventoryPage<InventoryTransferRecord>>;
@@ -471,6 +492,18 @@ function itemKey(productId: string, variantId?: string | null): string {
 	return variantId ? `${productId}:${variantId}` : productId;
 }
 
+/**
+ * WS3 remediation R4B, item 2 (idempotency replay scope, lead-session
+ * finding, NOT part of the original A-L directive). Every
+ * `requestFingerprint` computed below MUST include `tenantId`,
+ * `organizationId`, and (for a location-scoped command) `locationId` — not
+ * only the command's own business fields. `replay()` below runs BEFORE the
+ * org/location-scoped aggregate lookup, keyed only by `(tenantId,
+ * operation, idempotencyKey)`. See the matching comment above
+ * `packages/domains/pos/src/index.ts`'s own `fingerprint()` for the full
+ * disposition — the same class of gap, fixed the same way, in this
+ * package's command set.
+ */
 async function fingerprint(value: unknown): Promise<string> {
 	const digest = await crypto.subtle.digest(
 		"SHA-256",
@@ -769,8 +802,10 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				facts: input.facts,
 				locationId: input.locationId,
+				organizationId: input.organizationId,
 				productId: input.productId,
 				quantity: input.quantity,
+				tenantId: input.tenantId,
 				unit: input.unit,
 				variantId: input.variantId ?? null,
 			});
@@ -838,11 +873,14 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			adjustmentId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<InventoryAdjustment> {
 			const requestFingerprint = await fingerprint({
 				adjustmentId: input.adjustmentId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
@@ -857,6 +895,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getAdjustment(
 					input.tenantId,
+					input.organizationId,
 					input.adjustmentId
 				);
 				if (!current) {
@@ -965,11 +1004,14 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			correlationId: string;
 			countId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<StockCount> {
 			const requestFingerprint = await fingerprint({
 				countId: input.countId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: count posting deliberately keeps validation, balance derivation, movement creation, and aggregate transition in one atomic command.
@@ -985,6 +1027,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getCount(
 					input.tenantId,
+					input.organizationId,
 					input.countId
 				);
 				if (!current) {
@@ -1127,7 +1170,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 					variantId: input.body.variantId,
 				}),
 			]);
-			const requestFingerprint = await fingerprint(input.body);
+			const requestFingerprint = await fingerprint({
+				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
+			});
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const prior = await replay<InventoryAdjustment>(repository, {
 					idempotencyKey: input.idempotencyKey,
@@ -1192,7 +1239,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				organizationId: input.organizationId,
 				tenantId: input.tenantId,
 			});
-			const requestFingerprint = await fingerprint(input.body);
+			const requestFingerprint = await fingerprint({
+				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
+			});
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const prior = await replay<StockCount>(repository, {
 					idempotencyKey: input.idempotencyKey,
@@ -1371,7 +1422,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			for (const line of input.body.lines) {
 				requirePositive(line.quantity);
 			}
-			const requestFingerprint = await fingerprint(input.body);
+			const requestFingerprint = await fingerprint({
+				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
+			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
 				const prior = await replay<StockTransfer>(repository, {
 					idempotencyKey: input.idempotencyKey,
@@ -1473,11 +1528,14 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			actorUserId: string;
 			correlationId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			transferId: string;
 			version: number;
 		}): Promise<StockTransfer> {
 			const requestFingerprint = await fingerprint({
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				transferId: input.transferId,
 				version: input.version,
 			});
@@ -1493,6 +1551,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getTransfer(
 					input.tenantId,
+					input.organizationId,
 					input.transferId
 				);
 				if (!current) {
@@ -1594,28 +1653,37 @@ export function createInventoryService(options: InventoryServiceOptions) {
 
 		async getAdjustment(
 			tenantId: string,
+			organizationId: string,
 			id: string
 		): Promise<InventoryAdjustment> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getAdjustment(tenantId, id)
+				repository.getAdjustment(tenantId, organizationId, id)
 			);
 			if (!record) {
 				throw new InventoryError("not_found", "Adjustment was not found");
 			}
 			return adjustmentView(record);
 		},
-		async getCount(tenantId: string, id: string): Promise<StockCount> {
+		async getCount(
+			tenantId: string,
+			organizationId: string,
+			id: string
+		): Promise<StockCount> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getCount(tenantId, id)
+				repository.getCount(tenantId, organizationId, id)
 			);
 			if (!record) {
 				throw new InventoryError("not_found", "Stock Count was not found");
 			}
 			return countView(record);
 		},
-		async getTransfer(tenantId: string, id: string): Promise<StockTransfer> {
+		async getTransfer(
+			tenantId: string,
+			organizationId: string,
+			id: string
+		): Promise<StockTransfer> {
 			const record = await options.unitOfWork.execute(({ repository }) =>
-				repository.getTransfer(tenantId, id)
+				repository.getTransfer(tenantId, organizationId, id)
 			);
 			if (!record) {
 				throw new InventoryError("not_found", "Transfer was not found");
@@ -1624,11 +1692,17 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		},
 		async listAdjustments(input: {
 			filters?: InventoryAdjustmentFilters;
+			organizationId: string;
 			page: InventoryPageRequest;
 			tenantId: string;
 		}): Promise<InventoryPage<InventoryAdjustment>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listAdjustments(input.tenantId, input.page, input.filters)
+				repository.listAdjustments(
+					input.tenantId,
+					input.organizationId,
+					input.page,
+					input.filters
+				)
 			);
 			return {
 				items: result.items.map(adjustmentView),
@@ -1637,12 +1711,14 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		},
 		listBalances(input: {
 			filters?: InventoryBalanceFilters;
+			organizationId: string;
 			tenantId: string;
 			page: InventoryPageRequest;
 		}): Promise<InventoryPage<StockBalance>> {
 			return options.unitOfWork.execute(async ({ repository }) => {
 				const page = await repository.listBalances(
 					input.tenantId,
+					input.organizationId,
 					input.page,
 					input.filters
 				);
@@ -1679,11 +1755,17 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		},
 		async listCounts(input: {
 			filters?: InventoryCountFilters;
+			organizationId: string;
 			page: InventoryPageRequest;
 			tenantId: string;
 		}): Promise<InventoryPage<StockCount>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listCounts(input.tenantId, input.page, input.filters)
+				repository.listCounts(
+					input.tenantId,
+					input.organizationId,
+					input.page,
+					input.filters
+				)
 			);
 			return {
 				items: result.items.map(countView),
@@ -1692,11 +1774,17 @@ export function createInventoryService(options: InventoryServiceOptions) {
 		},
 		async listTransfers(input: {
 			filters?: InventoryTransferFilters;
+			organizationId: string;
 			page: InventoryPageRequest;
 			tenantId: string;
 		}): Promise<InventoryPage<StockTransfer>> {
 			const result = await options.unitOfWork.execute(({ repository }) =>
-				repository.listTransfers(input.tenantId, input.page, input.filters)
+				repository.listTransfers(
+					input.tenantId,
+					input.organizationId,
+					input.page,
+					input.filters
+				)
 			);
 			return {
 				items: result.items.map(transferView),
@@ -1714,12 +1802,15 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			body: ReceiveStockTransfer;
 			correlationId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			transferId: string;
 			version: number;
 		}): Promise<StockTransfer> {
 			const requestFingerprint = await fingerprint({
 				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				transferId: input.transferId,
 				version: input.version,
 			});
@@ -1736,6 +1827,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getTransfer(
 					input.tenantId,
+					input.organizationId,
 					input.transferId
 				);
 				if (!current) {
@@ -1899,6 +1991,147 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				);
 			});
 		},
+		/**
+		 * WS3 PR3's compensating stock effect (frozen control plan §6.3, "Read
+		 * first" — "via the same Inventory contract path PR2 chose"). Mirrors
+		 * `recordSaleMovement` exactly, except the posted quantity is
+		 * POSITIVE (stock comes back in) and the movement is typed
+		 * `Reversal` with a mandatory `reversalOfMovementId` pointing at the
+		 * ORIGINAL `Sale` movement it compensates — required by this table's
+		 * own `inventory_stock_movement_reversal_check` CHECK constraint
+		 * (`movementType = 'Reversal'` requires a non-null
+		 * `reversalOfMovementId`; see `@meridian/persistence-inventory-postgres`'s
+		 * schema). `sourceType` stays `"Sale"` (no dedicated "Return" source
+		 * type is registered on this table, and none is invented — the
+		 * compensating fact is still "about" the original Sale). Like
+		 * `recordSaleMovement`, this runs INSIDE the caller's own
+		 * transaction and does not use Inventory's own idempotency wrapper:
+		 * POS's `return.approve` already claims idempotency once for the
+		 * whole Return before this runs.
+		 */
+		async recordReturnMovement(input: {
+			actorUserId: string;
+			correlationId: string;
+			locationId: string;
+			organizationId: string;
+			productId: string;
+			quantity: DecimalQuantity;
+			returnId: string;
+			reversalOfMovementId: string;
+			tenantId: string;
+			unit: string;
+			variantId?: string | null;
+		}): Promise<InventoryMovementRecord> {
+			requirePositive(input.quantity);
+			await Promise.all([
+				options.references.requireLocation({
+					locationId: input.locationId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				}),
+				options.references.requireProduct({
+					productId: input.productId,
+					tenantId: input.tenantId,
+					variantId: input.variantId,
+				}),
+			]);
+			const posted = movement({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				locationId: input.locationId,
+				movementType: "Reversal",
+				organizationId: input.organizationId,
+				productId: input.productId,
+				quantity: input.quantity,
+				reversalOfMovementId: input.reversalOfMovementId,
+				sourceId: input.returnId,
+				sourceType: "Sale",
+				tenantId: input.tenantId,
+				unit: input.unit,
+				variantId: input.variantId,
+			});
+			const applied = await options.unitOfWork.execute(({ repository }) =>
+				repository.applyMovement(posted)
+			);
+			if (applied === "negative_stock") {
+				// Unreachable in practice — the posted quantity is always
+				// positive, and `applyMovement` only ever returns
+				// `"negative_stock"` on the negative-quantity branch. Guarded
+				// explicitly rather than asserted away, so a future change to
+				// `applyMovement`'s balance semantics fails loudly here
+				// instead of silently returning a malformed
+				// `InventoryMovementRecord`.
+				throw new InventoryError(
+					"invalid_state",
+					"Return movement unexpectedly reported negative stock"
+				);
+			}
+			return applied.movement;
+		},
+		/**
+		 * WS3 PR2's mandated synchronous stock effect (frozen control plan §6.3,
+		 * "Read first"): a completed cash sale posts an immediate,
+		 * single-actor `Sale` movement decrementing on-hand stock, run inside
+		 * the SAME transaction as the sale commit, receipt numbering, and
+		 * outbox write. This is deliberately NOT the `Adjustment`
+		 * maker/checker pair (creator cannot approve their own Adjustment —
+		 * wrong fit for a single cashier completing one sale) and NOT
+		 * `applyOfflineMovement` (WS5 lease-facts only). It also does not run
+		 * Inventory's own idempotency wrapper (`replay`/`recordResult`): the
+		 * caller (POS `sale.complete`) already claims idempotency once for
+		 * the whole sale before this runs, inside the same transaction, so a
+		 * retried or concurrently-raced command rolls back the entire
+		 * transaction (including this movement) rather than needing a second
+		 * command-receipt here. No dedicated Inventory event is registered
+		 * for a sale movement (`registry/events.json` has no
+		 * `inventory.stock-movement.sale.*` entry); the movement ledger row
+		 * itself is the durable record, and `commerce.sale.completed.v1` is
+		 * the outbox fact downstream consumers observe.
+		 */
+		async recordSaleMovement(input: {
+			actorUserId: string;
+			correlationId: string;
+			locationId: string;
+			organizationId: string;
+			productId: string;
+			quantity: DecimalQuantity;
+			saleId: string;
+			tenantId: string;
+			unit: string;
+			variantId?: string | null;
+		}): Promise<InventoryMovementRecord | "negative_stock"> {
+			requirePositive(input.quantity);
+			await Promise.all([
+				options.references.requireLocation({
+					locationId: input.locationId,
+					organizationId: input.organizationId,
+					tenantId: input.tenantId,
+				}),
+				options.references.requireProduct({
+					productId: input.productId,
+					tenantId: input.tenantId,
+					variantId: input.variantId,
+				}),
+			]);
+			const posted = movement({
+				actorUserId: input.actorUserId,
+				correlationId: input.correlationId,
+				locationId: input.locationId,
+				movementType: "Sale",
+				organizationId: input.organizationId,
+				productId: input.productId,
+				quantity: negateQuantity(input.quantity),
+				sourceId: input.saleId,
+				sourceType: "Sale",
+				tenantId: input.tenantId,
+				unit: input.unit,
+				variantId: input.variantId,
+			});
+			const applied = await options.unitOfWork.execute(({ repository }) =>
+				repository.applyMovement(posted)
+			);
+			return applied === "negative_stock" ? applied : applied.movement;
+		},
 		async releaseReservation(input: {
 			actorUserId: string;
 			correlationId: string;
@@ -1907,8 +2140,11 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			reservation: InventoryReservationRecord;
 		}): Promise<InventoryReservationRecord> {
 			const requestFingerprint = await fingerprint({
+				locationId: input.reservation.locationId,
+				organizationId: input.reservation.organizationId,
 				reason: input.reason,
 				reservationId: input.reservation.id,
+				tenantId: input.reservation.tenantId,
 				version: input.reservation.version,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
@@ -1995,12 +2231,15 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			body: TransitionReason;
 			correlationId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<InventoryAdjustment> {
 			const requestFingerprint = await fingerprint({
 				adjustmentId: input.adjustmentId,
 				body: input.body,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ events, repository }) => {
@@ -2015,6 +2254,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getAdjustment(
 					input.tenantId,
+					input.organizationId,
 					input.adjustmentId
 				);
 				if (!current) {
@@ -2112,6 +2352,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			body: SaveStockCountDraftLines;
 			countId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<StockCount> {
@@ -2127,6 +2368,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				body: input.body,
 				countId: input.countId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {
@@ -2141,6 +2384,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getCount(
 					input.tenantId,
+					input.organizationId,
 					input.countId
 				);
 				if (!current) {
@@ -2217,6 +2461,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			body: SubmitStockCount;
 			countId: string;
 			idempotencyKey: string;
+			organizationId: string;
 			tenantId: string;
 			version: number;
 		}): Promise<StockCount> {
@@ -2232,6 +2477,8 @@ export function createInventoryService(options: InventoryServiceOptions) {
 			const requestFingerprint = await fingerprint({
 				body: input.body,
 				countId: input.countId,
+				organizationId: input.organizationId,
+				tenantId: input.tenantId,
 				version: input.version,
 			});
 			return options.unitOfWork.execute(async ({ repository }) => {
@@ -2246,6 +2493,7 @@ export function createInventoryService(options: InventoryServiceOptions) {
 				}
 				const current = await repository.getCount(
 					input.tenantId,
+					input.organizationId,
 					input.countId
 				);
 				if (!current) {
@@ -2448,6 +2696,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.approveAdjustment({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2470,6 +2719,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.approveCount({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2585,6 +2835,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.dispatchTransfer({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2604,6 +2855,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.getAdjustment(
 				context.tenantId,
+				context.organizationId,
 				input.adjustmentId
 			);
 		},
@@ -2621,7 +2873,11 @@ export function createInventoryApplication(options: {
 				permission: "inventory.count.read",
 				sessionId: input.sessionId,
 			});
-			return options.service.getCount(context.tenantId, input.countId);
+			return options.service.getCount(
+				context.tenantId,
+				context.organizationId,
+				input.countId
+			);
 		},
 		async getTransfer(input: {
 			authUserId: string;
@@ -2637,7 +2893,11 @@ export function createInventoryApplication(options: {
 				permission: "inventory.transfer.read",
 				sessionId: input.sessionId,
 			});
-			return options.service.getTransfer(context.tenantId, input.transferId);
+			return options.service.getTransfer(
+				context.tenantId,
+				context.organizationId,
+				input.transferId
+			);
 		},
 		async listAdjustments(input: {
 			authUserId: string;
@@ -2656,6 +2916,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.listAdjustments({
 				filters: input.filters,
+				organizationId: context.organizationId,
 				page: input.page,
 				tenantId: context.tenantId,
 			});
@@ -2677,6 +2938,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.listBalances({
 				filters: input.filters,
+				organizationId: context.organizationId,
 				page: input.page,
 				tenantId: context.tenantId,
 			});
@@ -2698,6 +2960,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.listCounts({
 				filters: input.filters,
+				organizationId: context.organizationId,
 				page: input.page,
 				tenantId: context.tenantId,
 			});
@@ -2719,6 +2982,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.listTransfers({
 				filters: input.filters,
+				organizationId: context.organizationId,
 				page: input.page,
 				tenantId: context.tenantId,
 			});
@@ -2743,6 +3007,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.receiveTransfer({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2791,6 +3056,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.reverseAdjustment({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2813,6 +3079,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.saveCountDraft({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},
@@ -2835,6 +3102,7 @@ export function createInventoryApplication(options: {
 			});
 			return options.service.submitCount({
 				...input,
+				organizationId: context.organizationId,
 				tenantId: context.tenantId,
 			});
 		},

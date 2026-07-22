@@ -144,7 +144,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 124,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 3
     },
     {
       "id": "commerce.deposit.confirm",
@@ -156,7 +156,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 126,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 3
     },
     {
       "id": "commerce.deposit.create",
@@ -180,7 +180,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 116,
       "status": "Draft",
-      "endpoint_count": 0
+      "endpoint_count": 2
     },
     {
       "id": "commerce.price-override.request",
@@ -192,7 +192,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 115,
       "status": "Draft",
-      "endpoint_count": 0
+      "endpoint_count": 1
     },
     {
       "id": "commerce.receipt.read",
@@ -204,7 +204,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 127,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.receipt.reissue",
@@ -240,7 +240,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 120,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 3
     },
     {
       "id": "commerce.refund.create",
@@ -264,7 +264,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 122,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.register.open",
@@ -288,7 +288,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 118,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 3
     },
     {
       "id": "commerce.return.create",
@@ -300,7 +300,7 @@
       "source_heading": "Commerce and Registers",
       "source_line": 117,
       "status": "Draft",
-      "endpoint_count": 1
+      "endpoint_count": 2
     },
     {
       "id": "commerce.sale.complete",

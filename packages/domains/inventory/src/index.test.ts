@@ -115,9 +115,10 @@ class MemoryInventoryRepository implements InventoryRepository {
 		);
 		return record;
 	}
-	async getAdjustment(tenantId: string, id: string) {
+	async getAdjustment(tenantId: string, organizationId: string, id: string) {
+		const record = this.adjustments.get(this.key(tenantId, id));
 		return structuredClone(
-			this.adjustments.get(this.key(tenantId, id)) ?? null
+			record && record.organizationId === organizationId ? record : null
 		);
 	}
 	async getBalance(
@@ -141,21 +142,29 @@ class MemoryInventoryRepository implements InventoryRepository {
 				null
 		);
 	}
-	async getCount(tenantId: string, id: string) {
-		return structuredClone(this.counts.get(this.key(tenantId, id)) ?? null);
+	async getCount(tenantId: string, organizationId: string, id: string) {
+		const record = this.counts.get(this.key(tenantId, id));
+		return structuredClone(
+			record && record.organizationId === organizationId ? record : null
+		);
 	}
-	async getTransfer(tenantId: string, id: string) {
-		return structuredClone(this.transfers.get(this.key(tenantId, id)) ?? null);
+	async getTransfer(tenantId: string, organizationId: string, id: string) {
+		const record = this.transfers.get(this.key(tenantId, id));
+		return structuredClone(
+			record && record.organizationId === organizationId ? record : null
+		);
 	}
 	async listAdjustments(
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
-		filters?: Parameters<InventoryRepository["listAdjustments"]>[2]
+		filters?: Parameters<InventoryRepository["listAdjustments"]>[3]
 	) {
 		return this.page(
 			[...this.adjustments.values()].filter(
 				(record) =>
 					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
 					(!filters?.locationId || record.locationId === filters.locationId) &&
 					(!filters?.state || record.state === filters.state)
 			),
@@ -165,6 +174,7 @@ class MemoryInventoryRepository implements InventoryRepository {
 	}
 	async listBalances(
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
 		filters?: { locationId?: string; productId?: string }
 	) {
@@ -172,6 +182,7 @@ class MemoryInventoryRepository implements InventoryRepository {
 			[...this.balances.values()].filter(
 				(record) =>
 					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
 					(!filters?.locationId || record.locationId === filters.locationId) &&
 					(!filters?.productId || record.productId === filters.productId)
 			),
@@ -181,13 +192,15 @@ class MemoryInventoryRepository implements InventoryRepository {
 	}
 	async listCounts(
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
-		filters?: Parameters<InventoryRepository["listCounts"]>[2]
+		filters?: Parameters<InventoryRepository["listCounts"]>[3]
 	) {
 		return this.page(
 			[...this.counts.values()].filter(
 				(record) =>
 					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
 					(!filters?.locationId || record.locationId === filters.locationId) &&
 					(!filters?.state || record.state === filters.state)
 			),
@@ -197,13 +210,15 @@ class MemoryInventoryRepository implements InventoryRepository {
 	}
 	async listTransfers(
 		tenantId: string,
+		organizationId: string,
 		page: InventoryPageRequest,
-		filters?: Parameters<InventoryRepository["listTransfers"]>[2]
+		filters?: Parameters<InventoryRepository["listTransfers"]>[3]
 	) {
 		return this.page(
 			[...this.transfers.values()].filter(
 				(record) =>
 					record.tenantId === tenantId &&
+					record.organizationId === organizationId &&
 					(!filters?.locationId ||
 						record.sourceLocationId === filters.locationId ||
 						record.destinationLocationId === filters.locationId) &&
@@ -440,6 +455,7 @@ describe("Inventory adjustment ledger", () => {
 				adjustmentId: created.id,
 				correlationId: command.correlationId,
 				idempotencyKey: "approve-self",
+				organizationId: command.organizationId,
 				tenantId: command.tenantId,
 				version: 1,
 			})
@@ -449,6 +465,7 @@ describe("Inventory adjustment ledger", () => {
 			adjustmentId: created.id,
 			correlationId: command.correlationId,
 			idempotencyKey: "approve",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 1,
 		});
@@ -459,6 +476,7 @@ describe("Inventory adjustment ledger", () => {
 			adjustmentId: created.id,
 			correlationId: command.correlationId,
 			idempotencyKey: "approve",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 1,
 		});
@@ -470,6 +488,7 @@ describe("Inventory adjustment ledger", () => {
 			body: { reason: "approved in error" },
 			correlationId: command.correlationId,
 			idempotencyKey: "reverse",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 2,
 		});
@@ -497,6 +516,7 @@ describe("Inventory adjustment ledger", () => {
 				adjustmentId: created.id,
 				correlationId: command.correlationId,
 				idempotencyKey: "negative",
+				organizationId: command.organizationId,
 				tenantId: command.tenantId,
 				version: 1,
 			})
@@ -512,6 +532,88 @@ describe("Inventory adjustment ledger", () => {
 				body: { ...adjustment, quantity: "2" },
 			})
 		).rejects.toMatchObject({ code: "idempotency_conflict" });
+	});
+});
+
+describe("Inventory Return compensating movement (WS3 PR3)", () => {
+	test("posts a positive Reversal movement referencing the original Sale movement, restoring on-hand stock", async () => {
+		const { repository, service } = harness();
+		// Seed positive on-hand stock via an ordinary Adjustment (a Sale
+		// movement itself only ever decrements) so the subsequent Sale
+		// movement below has stock to draw down without crossing negative.
+		const openingAdjustment = await service.createAdjustment({
+			...command,
+			body: adjustment,
+		});
+		await service.approveAdjustment({
+			actorUserId: "user_approver",
+			adjustmentId: openingAdjustment.id,
+			correlationId: command.correlationId,
+			idempotencyKey: "approve-opening",
+			organizationId: command.organizationId,
+			tenantId: command.tenantId,
+			version: 1,
+		});
+		expect([...repository.balances.values()][0]?.onHand).toBe("10.125");
+
+		const sale = await service.recordSaleMovement({
+			actorUserId: "user_cashier",
+			correlationId: "correlation_sale",
+			locationId: "loc_a",
+			organizationId: "org_a",
+			productId: "prod_a",
+			quantity: "3",
+			saleId: "sale_1",
+			tenantId: "tenant_a",
+			unit: "each",
+		});
+		if (sale === "negative_stock") {
+			throw new Error("unexpected negative_stock");
+		}
+		expect([...repository.balances.values()][0]?.onHand).toBe("7.125");
+
+		const reversal = await service.recordReturnMovement({
+			actorUserId: "user_checker",
+			correlationId: "correlation_return",
+			locationId: "loc_a",
+			organizationId: "org_a",
+			productId: "prod_a",
+			quantity: "1",
+			returnId: "return_1",
+			reversalOfMovementId: sale.id,
+			tenantId: "tenant_a",
+			unit: "each",
+		});
+		expect(reversal).toMatchObject({
+			movementType: "Reversal",
+			quantity: "1",
+			reversalOfMovementId: sale.id,
+			sourceId: "return_1",
+			sourceType: "Sale",
+		});
+		expect([...repository.balances.values()][0]?.onHand).toBe("8.125");
+		expect(repository.movements.at(-1)).toMatchObject({
+			movementType: "Reversal",
+			reversalOfMovementId: sale.id,
+		});
+	});
+
+	test("requires a positive quantity", async () => {
+		const { service } = harness();
+		await expect(
+			service.recordReturnMovement({
+				actorUserId: "user_checker",
+				correlationId: "correlation_return",
+				locationId: "loc_a",
+				organizationId: "org_a",
+				productId: "prod_a",
+				quantity: "0",
+				returnId: "return_1",
+				reversalOfMovementId: "movement_x",
+				tenantId: "tenant_a",
+				unit: "each",
+			})
+		).rejects.toMatchObject({ code: "invalid_quantity" });
 	});
 });
 
@@ -534,6 +636,7 @@ describe("Inventory blind counts", () => {
 			},
 			countId: count.id,
 			idempotencyKey: "count-draft-save",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 1,
 		};
@@ -544,7 +647,9 @@ describe("Inventory blind counts", () => {
 			observedQuantity: "7.500001",
 			varianceQuantity: null,
 		});
-		expect(await service.getCount("tenant_a", count.id)).toEqual(saved);
+		expect(await service.getCount("tenant_a", "org_a", count.id)).toEqual(
+			saved
+		);
 		expect(await service.saveCountDraft(input)).toEqual(saved);
 		expect(repository.counts.size).toBe(1);
 		await expect(
@@ -561,7 +666,9 @@ describe("Inventory blind counts", () => {
 				idempotencyKey: "count-draft-stale",
 			})
 		).rejects.toMatchObject({ code: "version_conflict" });
-		await expect(service.getCount("tenant_b", count.id)).rejects.toMatchObject({
+		await expect(
+			service.getCount("tenant_b", "org_a", count.id)
+		).rejects.toMatchObject({
 			code: "not_found",
 		});
 		const submitted = await service.submitCount({
@@ -569,6 +676,7 @@ describe("Inventory blind counts", () => {
 			body: input.body,
 			countId: count.id,
 			idempotencyKey: "count-submit-after-draft",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 2,
 		});
@@ -592,6 +700,7 @@ describe("Inventory blind counts", () => {
 			adjustmentId: seed.id,
 			correlationId: command.correlationId,
 			idempotencyKey: "seed",
+			organizationId: command.organizationId,
 			tenantId: command.tenantId,
 			version: 1,
 		});
@@ -611,6 +720,7 @@ describe("Inventory blind counts", () => {
 			},
 			countId: count.id,
 			idempotencyKey: "count-submit",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 1,
 		});
@@ -624,6 +734,7 @@ describe("Inventory blind counts", () => {
 				correlationId: "corr_count",
 				countId: count.id,
 				idempotencyKey: "count-self",
+				organizationId: "org_a",
 				tenantId: "tenant_a",
 				version: 2,
 			})
@@ -633,6 +744,7 @@ describe("Inventory blind counts", () => {
 			correlationId: "corr_count",
 			countId: count.id,
 			idempotencyKey: "count-post",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 2,
 		});
@@ -657,6 +769,7 @@ describe("Inventory transfer conservation", () => {
 			adjustmentId: seed.id,
 			correlationId: "seed",
 			idempotencyKey: "seed",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			version: 1,
 		});
@@ -682,6 +795,7 @@ describe("Inventory transfer conservation", () => {
 			actorUserId: "dispatcher",
 			correlationId: "transfer",
 			idempotencyKey: "dispatch",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 1,
@@ -696,6 +810,7 @@ describe("Inventory transfer conservation", () => {
 			body: { lines: [{ lineId, receivedQuantity: "2" }], outcome: "Accepted" },
 			correlationId: "receive",
 			idempotencyKey: "receive-1",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 2,
@@ -707,6 +822,7 @@ describe("Inventory transfer conservation", () => {
 			body: { lines: [{ lineId, receivedQuantity: "4" }], outcome: "Accepted" },
 			correlationId: "receive",
 			idempotencyKey: "receive-2",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 3,
@@ -728,6 +844,7 @@ describe("Inventory transfer conservation", () => {
 			actorUserId: "dispatcher",
 			correlationId: "transfer",
 			idempotencyKey: "dispatch",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 1,
@@ -741,6 +858,7 @@ describe("Inventory transfer conservation", () => {
 			},
 			correlationId: "receive",
 			idempotencyKey: "exception",
+			organizationId: "org_a",
 			tenantId: "tenant_a",
 			transferId: transfer.id,
 			version: 2,
@@ -770,8 +888,229 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 			body: adjustment,
 		});
 		await expect(
-			service.getAdjustment("tenant_b", created.id)
+			service.getAdjustment("tenant_b", "org_a", created.id)
 		).rejects.toMatchObject({ code: "not_found" });
+	});
+
+	test("WS3 remediation R2, Finding B: two organizations in the SAME tenant — org_b cannot read or approve org_a's adjustment, cannot read org_a's count, and cannot read or dispatch org_a's transfer, using their real known ids; every org_a record is left completely unchanged", async () => {
+		const { repository, service } = harness();
+
+		// -- Adjustment: create under org_a, attempt cross-org read + approve
+		// (mutation) from org_b in the SAME tenant, using the real known id.
+		const createdAdjustment = await service.createAdjustment({
+			...command,
+			body: adjustment,
+		});
+		await expect(
+			service.getAdjustment("tenant_a", "org_b", createdAdjustment.id)
+		).rejects.toMatchObject({ code: "not_found" });
+		await expect(
+			service.approveAdjustment({
+				actorUserId: "org_b_approver",
+				adjustmentId: createdAdjustment.id,
+				correlationId: "cross-org-correlation",
+				idempotencyKey: "cross-org-approve-adjustment",
+				organizationId: "org_b",
+				tenantId: "tenant_a",
+				version: createdAdjustment.version,
+			})
+		).rejects.toMatchObject({ code: "not_found" });
+		// org_a's adjustment is completely unchanged: still PendingApproval,
+		// same version, never posted to the balance ledger.
+		const adjustmentAfter = await repository.getAdjustment(
+			"tenant_a",
+			"org_a",
+			createdAdjustment.id
+		);
+		expect(adjustmentAfter?.state).toBe("PendingApproval");
+		expect(adjustmentAfter?.version).toBe(createdAdjustment.version);
+		expect(repository.balances.size).toBe(0);
+
+		// -- Count: create under org_a, attempt cross-org read from org_b.
+		const createdCount = await service.createCount({
+			actorUserId: command.actorUserId,
+			body: { blind: true, locationId: "loc_a" },
+			idempotencyKey: "cross-org-count-create",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		await expect(
+			service.getCount("tenant_a", "org_b", createdCount.id)
+		).rejects.toMatchObject({ code: "not_found" });
+
+		// -- Transfer: create (dispatch) under org_a, attempt cross-org read +
+		// dispatch (mutation) from org_b using the real known id.
+		const openingForTransfer = await service.createAdjustment({
+			actorUserId: command.actorUserId,
+			body: { ...adjustment, quantity: "10" },
+			correlationId: "cross-org-transfer-seed",
+			idempotencyKey: "cross-org-transfer-seed",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		await service.approveAdjustment({
+			actorUserId: "org_a_approver",
+			adjustmentId: openingForTransfer.id,
+			correlationId: "cross-org-transfer-seed",
+			idempotencyKey: "cross-org-transfer-seed-approve",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+			version: openingForTransfer.version,
+		});
+		const createdTransfer = await service.createTransfer({
+			actorUserId: command.actorUserId,
+			body: {
+				destinationLocationId: "loc_b",
+				lines: [{ productId: "prod_a", quantity: "3", unit: "each" }],
+				sourceLocationId: "loc_a",
+			},
+			correlationId: "cross-org-transfer",
+			idempotencyKey: "cross-org-transfer-create",
+			organizationId: "org_a",
+			tenantId: "tenant_a",
+		});
+		await expect(
+			service.getTransfer("tenant_a", "org_b", createdTransfer.id)
+		).rejects.toMatchObject({ code: "not_found" });
+		await expect(
+			service.dispatchTransfer({
+				actorUserId: "org_b_dispatcher",
+				correlationId: "cross-org-transfer-dispatch",
+				idempotencyKey: "cross-org-transfer-cross-dispatch",
+				organizationId: "org_b",
+				tenantId: "tenant_a",
+				transferId: createdTransfer.id,
+				version: createdTransfer.version,
+			})
+		).rejects.toMatchObject({ code: "not_found" });
+		const transferAfter = await repository.getTransfer(
+			"tenant_a",
+			"org_a",
+			createdTransfer.id
+		);
+		expect(transferAfter?.state).toBe("Draft");
+		expect(transferAfter?.version).toBe(createdTransfer.version);
+	});
+
+	test("WS3 remediation R2 cycle 2, Finding B (list surface): listAdjustments, listCounts, listTransfers, and listBalances do not leak another organization's rows in the same tenant when the caller omits any locationId filter", async () => {
+		const { service } = harness();
+		let activeOrganizationId = "org_a";
+		const application = createInventoryApplication({
+			activeContexts: {
+				// Mirrors the real composition layer: `organizationId` comes
+				// ONLY from the caller's own active tenancy context, never
+				// from anything the request body supplies.
+				async requireActiveContext() {
+					return { organizationId: activeOrganizationId, tenantId: "tenant_a" };
+				},
+			},
+			// Both ports are no-ops here: this test proves data-layer
+			// (SQL/repository) organization scoping, not permission or
+			// entitlement evaluation, which are covered elsewhere.
+			entitlements: {
+				async requireEntitlement() {
+					// Always authorized; not under test here.
+				},
+			},
+			permissions: {
+				async requirePermission() {
+					// Always authorized; not under test here.
+				},
+			},
+			service,
+		});
+		const seed = async (organizationId: "org_a" | "org_b") => {
+			activeOrganizationId = organizationId;
+			const locationId = organizationId === "org_a" ? "loc_a" : "loc_b";
+			const createdAdjustment = await application.createAdjustment({
+				actorUserId: `${organizationId}_creator`,
+				body: {
+					locationId,
+					productId: "prod_shared",
+					quantity: "5",
+					reason: `${organizationId} list-leak seed`,
+					unit: "each",
+				},
+				contextId: "context",
+				correlationId: `list-leak-${organizationId}`,
+				idempotencyKey: `list-leak-adjustment-${organizationId}`,
+				sessionId: "session",
+			});
+			await application.approveAdjustment({
+				actorUserId: `${organizationId}_approver`,
+				adjustmentId: createdAdjustment.id,
+				contextId: "context",
+				correlationId: `list-leak-${organizationId}`,
+				idempotencyKey: `list-leak-adjustment-${organizationId}-approve`,
+				sessionId: "session",
+				version: createdAdjustment.version,
+			});
+			const count = await application.createCount({
+				actorUserId: `${organizationId}_counter`,
+				body: { blind: true, locationId },
+				contextId: "context",
+				idempotencyKey: `list-leak-count-${organizationId}`,
+				sessionId: "session",
+			});
+			const transfer = await application.createTransfer({
+				actorUserId: `${organizationId}_transfer_maker`,
+				body: {
+					destinationLocationId: `${locationId}_dest`,
+					lines: [{ productId: "prod_shared", quantity: "1", unit: "each" }],
+					sourceLocationId: locationId,
+				},
+				contextId: "context",
+				correlationId: `list-leak-transfer-${organizationId}`,
+				idempotencyKey: `list-leak-transfer-${organizationId}`,
+				sessionId: "session",
+			});
+			return { adjustment: createdAdjustment, count, transfer };
+		};
+		const seededA = await seed("org_a");
+		const seededB = await seed("org_b");
+
+		// The exploit shape the finding describes: the caller supplies NO
+		// locationId filter at all (a normal, unprivileged request) while
+		// authenticated into org_b's own active context.
+		activeOrganizationId = "org_b";
+		const listInput = {
+			authUserId: "org_b_reader",
+			contextId: "context",
+			page: { limit: 50 },
+			sessionId: "session",
+		};
+		const adjustments = await application.listAdjustments(listInput);
+		expect(adjustments.items.map((item) => item.id)).toContain(
+			seededB.adjustment.id
+		);
+		expect(adjustments.items.map((item) => item.id)).not.toContain(
+			seededA.adjustment.id
+		);
+
+		const counts = await application.listCounts(listInput);
+		expect(counts.items.map((item) => item.id)).toContain(seededB.count.id);
+		expect(counts.items.map((item) => item.id)).not.toContain(seededA.count.id);
+
+		const transfers = await application.listTransfers(listInput);
+		expect(transfers.items.map((item) => item.id)).toContain(
+			seededB.transfer.id
+		);
+		expect(transfers.items.map((item) => item.id)).not.toContain(
+			seededA.transfer.id
+		);
+
+		const balances = await application.listBalances({
+			authUserId: "org_b_reader",
+			contextId: "context",
+			page: { limit: 50 },
+			sessionId: "session",
+		});
+		expect(balances.items.some((item) => item.locationId === "loc_b")).toBe(
+			true
+		);
+		expect(balances.items.some((item) => item.locationId === "loc_a")).toBe(
+			false
+		);
 	});
 
 	test("evaluates active context, permission, and entitlement separately", async () => {
@@ -1200,6 +1539,65 @@ describe("Inventory tenancy, application authority, and offline seam", () => {
 		expect(new InventoryError("invalid_state", "bad")).toMatchObject({
 			code: "invalid_state",
 			name: "InventoryError",
+		});
+	});
+});
+
+/**
+ * WS3 remediation R4B, item 2 (idempotency replay scope, lead-session
+ * finding, NOT part of the original A-L directive). See the matching
+ * describe block in `packages/domains/pos/src/index.test.ts` for the full
+ * disposition — the same class of gap, fixed the same way, in this
+ * package's command set. Before this fix, `createAdjustment`'s
+ * `requestFingerprint` was `await fingerprint(input.body)` — the adjustment
+ * body ONLY, never `organizationId`/`tenantId`. `MemoryInventoryRepository`'s
+ * own `receiptKey` above (`${tenantId}:${operation}:${idempotencyKey}`)
+ * mirrors the real Postgres command-receipt table's key exactly: NOT
+ * organization-scoped, matching the production gap this test reproduces.
+ *
+ * PRE-FIX REPRODUCTION (documented, not re-executed here against a
+ * checkout): with the pre-fix fingerprint (`fingerprint(input.body)` only),
+ * organization B's request below computes the IDENTICAL fingerprint to
+ * organization A's already-claimed receipt (the body is byte-for-byte the
+ * same object), so `replay()` would return organization A's real
+ * `InventoryAdjustment` — including its real `id` — to organization B
+ * without ever calling `repository.getAdjustment` (which DOES filter by
+ * `organizationId`, per this file's other cross-organization-denial
+ * assertions). This was verified directly: temporarily reverting
+ * `packages/domains/inventory/src/index.ts`'s `createAdjustment`
+ * fingerprint call to `await fingerprint(input.body)` and re-running this
+ * exact test makes `crossOrgReplay` RESOLVE with organization A's
+ * adjustment (not reject) instead of throwing `idempotency_conflict`.
+ */
+describe("Inventory domain: WS3 remediation R4B item 2 (idempotency replay cannot cross organizations)", () => {
+	test("createAdjustment: a same-tenant, different-organization replay of a real created adjustment's exact idempotencyKey/body is denied, never returns organization A's adjustment", async () => {
+		const { service } = harness();
+		const sharedIdempotencyKey = "r4b-item2-adjustment-shared-key";
+
+		const createdA = await service.createAdjustment({
+			actorUserId: command.actorUserId,
+			body: adjustment,
+			correlationId: command.correlationId,
+			idempotencyKey: sharedIdempotencyKey,
+			organizationId: "org_r4b_adjustment_a",
+			tenantId: command.tenantId,
+		});
+		expect(createdA.state).toBe("PendingApproval");
+
+		// Organization B (same tenant) reuses the EXACT idempotencyKey AND the
+		// EXACT fingerprint-covered field (`body`, byte-for-byte identical)
+		// from organization A's request above — only `organizationId` differs,
+		// and organization B never actually owns `createdA.id`.
+		const crossOrgReplay = service.createAdjustment({
+			actorUserId: command.actorUserId,
+			body: adjustment,
+			correlationId: command.correlationId,
+			idempotencyKey: sharedIdempotencyKey,
+			organizationId: "org_r4b_adjustment_b",
+			tenantId: command.tenantId,
+		});
+		await expect(crossOrgReplay).rejects.toMatchObject({
+			code: "idempotency_conflict",
 		});
 	});
 });

@@ -1,6 +1,9 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
+	AccountantHandoffPayload,
+	ExportJobRecord,
+	ExportRepository,
 	ImportFinding,
 	ImportJobRecord,
 	ImportRepository,
@@ -13,6 +16,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool, PoolClient } from "pg";
 
 import {
+	exportJobs,
 	importCommandReceipts,
 	importFindings,
 	importJobs,
@@ -639,6 +643,114 @@ export function createImportRepository(client: PoolClient): ImportRepository {
 					tenantId: input.tenantId,
 				})
 				.onConflictDoNothing();
+		},
+	};
+}
+
+// ---------------------------------------------------------------------------
+// WS3 PR4: Accountant handoff export (frozen control plan §8.1). No
+// registered `platform.export.*` event exists — this table is the durable
+// record on its own, matching `packages/platform/import-export`'s
+// `createExportService` doc comment.
+// ---------------------------------------------------------------------------
+
+function mapExportJob(row: typeof exportJobs.$inferSelect): ExportJobRecord {
+	return {
+		contentHash: row.contentHash,
+		createdByActorUserId: row.createdByActorUserId,
+		currency: row.currency,
+		generatedAt: row.generatedAt,
+		id: row.id,
+		idempotencyKey: row.idempotencyKey,
+		kind: row.kind as ExportJobRecord["kind"],
+		legalEntityId: row.legalEntityId,
+		organizationId: row.organizationId,
+		payload: row.payload as AccountantHandoffPayload,
+		periodEndUtc: row.periodEndUtc,
+		periodStartUtc: row.periodStartUtc,
+		requestFingerprint: row.requestFingerprint,
+		ruleVersion: row.ruleVersion,
+		schemaVersion: row.schemaVersion,
+		tenantId: row.tenantId,
+		timezone: row.timezone,
+	};
+}
+
+export type ImportExportConnection = Pool | PoolClient;
+
+export function createExportRepository(
+	connection: ImportExportConnection
+): ExportRepository {
+	const database = drizzle(connection);
+	async function findByIdempotencyKey(
+		tenantId: string,
+		idempotencyKey: string
+	): Promise<ExportJobRecord | null> {
+		const rows = await database
+			.select()
+			.from(exportJobs)
+			.where(
+				and(
+					eq(exportJobs.tenantId, tenantId),
+					eq(exportJobs.idempotencyKey, idempotencyKey)
+				)
+			)
+			.limit(1);
+		return rows[0] ? mapExportJob(rows[0]) : null;
+	}
+	return {
+		async createExportJob(record) {
+			const rows = await database
+				.insert(exportJobs)
+				.values({
+					classification: "Confidential",
+					contentHash: record.contentHash,
+					createdByActorUserId: record.createdByActorUserId,
+					currency: record.currency,
+					generatedAt: record.generatedAt,
+					id: record.id,
+					idempotencyKey: record.idempotencyKey,
+					kind: record.kind,
+					legalEntityId: record.legalEntityId,
+					organizationId: record.organizationId,
+					payload: record.payload,
+					periodEndUtc: record.periodEndUtc,
+					periodStartUtc: record.periodStartUtc,
+					requestFingerprint: record.requestFingerprint,
+					ruleVersion: record.ruleVersion,
+					schemaVersion: record.schemaVersion,
+					tenantId: record.tenantId,
+					timezone: record.timezone,
+				})
+				.onConflictDoNothing({
+					target: [exportJobs.tenantId, exportJobs.idempotencyKey],
+				})
+				.returning();
+			const [row] = rows;
+			if (row) {
+				return { inserted: true, record: mapExportJob(row) };
+			}
+			// The insert conflicted on the (tenantId, idempotencyKey) unique
+			// index — re-select the winning row by that same key (never by
+			// `id`: the conflicting row's `id` is a DIFFERENT generated value
+			// than this call's own `record.id`).
+			const existing = await findByIdempotencyKey(
+				record.tenantId,
+				record.idempotencyKey
+			);
+			if (!existing) {
+				throw new Error("Export command receipt conflict could not be loaded");
+			}
+			return { inserted: false, record: existing };
+		},
+		findByIdempotencyKey,
+		async getExportJob(tenantId, id) {
+			const rows = await database
+				.select()
+				.from(exportJobs)
+				.where(and(eq(exportJobs.tenantId, tenantId), eq(exportJobs.id, id)))
+				.limit(1);
+			return rows[0] ? mapExportJob(rows[0]) : null;
 		},
 	};
 }

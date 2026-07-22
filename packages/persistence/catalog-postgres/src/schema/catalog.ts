@@ -55,6 +55,11 @@ export const catalogProducts = pgTable(
 			table.state,
 			table.id
 		),
+		index("catalog_product_tenant_created_id_idx").on(
+			table.tenantId,
+			table.createdAt,
+			table.id
+		),
 	]
 );
 

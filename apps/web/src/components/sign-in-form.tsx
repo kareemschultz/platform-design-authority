@@ -10,6 +10,7 @@ import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
 import { safeReturnPath } from "@/lib/shell";
+import { dedupedToastError, sanitizeErrorMessage } from "@/lib/toast";
 
 export default function SignInForm({
 	onSwitchToSignUp,
@@ -33,7 +34,19 @@ export default function SignInForm({
 				},
 				{
 					onError: (error) => {
-						toast.error(error.error.message || error.error.statusText);
+						// WS3 remediation R3b, Item 11: never surface raw,
+						// unbounded provider error text directly — bound it and
+						// guarantee a governed fallback, and suppress an
+						// identical toast repeated within the dedupe window
+						// (e.g. a slow network causing more than one failed
+						// submit attempt in quick succession).
+						dedupedToastError(
+							sanitizeErrorMessage(
+								error.error.message || error.error.statusText,
+								"Sign in failed. Check your email and password and try again."
+							),
+							toast.error
+						);
 					},
 					onSuccess: () => {
 						router.push(safeReturnPath(returnTo));

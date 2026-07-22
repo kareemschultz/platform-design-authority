@@ -5,7 +5,8 @@
   "evidence_sources": [
     "evidence/first-slice/ws1-capability-evidence.json",
     "evidence/first-slice/ws2-capability-evidence.json",
-    "evidence/first-slice/ws2-interim-capability-evidence.json"
+    "evidence/first-slice/ws2-interim-capability-evidence.json",
+    "evidence/first-slice/ws3-capability-evidence.json"
   ],
   "dimensions": [
     "happy_path",
@@ -611,15 +612,320 @@
         "PostgreSQL 18"
       ],
       "command": "bun test apps/server/composition/inventory.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-audit-instrumentation-scope-disclosure",
+      "path": "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+      "kind": "deferred-pending",
+      "runtimes": [
+        "n/a (disclosed gap, not an executable runtime)"
+      ],
+      "command": "n/a — disclosed gap, not an executable test; see P2 item 3 scope and the cited change-log entry"
+    },
+    {
+      "id": "ws3-browser-accessibility",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "kind": "live-browser-test",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts"
+    },
+    {
+      "id": "ws3-browser-accessibility-hardened",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "kind": "live-browser-test",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts"
+    },
+    {
+      "id": "ws3-browser-export",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "kind": "live-browser-test",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts"
+    },
+    {
+      "id": "ws3-browser-offline",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "kind": "live-browser-test",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts"
+    },
+    {
+      "id": "ws3-browser-workflows",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "kind": "live-browser-test",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts"
+    },
+    {
+      "id": "ws3-closeout-deposit-application-boundary",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-closeout-register-perf",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "kind": "live-postgresql-performance-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-closeout-return-refund-deposit-perf",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "kind": "live-postgresql-performance-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-closeout-scenarios",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-closeout-tenant-isolation",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-denial-audit-evidence",
+      "path": "apps/server/composition/pos-denial-audit.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "PostgreSQL 18",
+        "Bun 1.3.14",
+        "Node.js (ws3-critical.node-check.ts)"
+      ],
+      "command": "bun run --cwd apps/server db:test -- pos-denial-audit.integration.test.ts"
+    },
+    {
+      "id": "ws3-deposit-org-location-isolation",
+      "path": "apps/server/composition/deposits.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "PostgreSQL 18",
+        "Bun 1.3.14"
+      ],
+      "command": "bun run --cwd apps/server db:test -- deposits.integration.test.ts"
+    },
+    {
+      "id": "ws3-domain-application-authority",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts"
+    },
+    {
+      "id": "ws3-domain-deposit",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts"
+    },
+    {
+      "id": "ws3-domain-register-cash",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts"
+    },
+    {
+      "id": "ws3-domain-return-refund-exchange",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts"
+    },
+    {
+      "id": "ws3-domain-sale",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts"
+    },
+    {
+      "id": "ws3-finance-handoff-cash-support",
+      "path": "apps/server/composition/finance-handoff.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/finance-handoff.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-livepg-deposit",
+      "path": "apps/server/composition/deposits.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/deposits.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-livepg-register",
+      "path": "apps/server/composition/pos.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/pos.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-livepg-return-refund-exchange",
+      "path": "apps/server/composition/returns.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/returns.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-livepg-sale",
+      "path": "apps/server/composition/pos.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/pos.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-livepg-sale-perf",
+      "path": "apps/server/composition/pos.integration.test.ts",
+      "kind": "live-postgresql-performance-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/server/composition/pos.integration.test.ts --timeout 30000"
+    },
+    {
+      "id": "ws3-manual-at-review-disclosure",
+      "path": "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+      "kind": "deferred-pending",
+      "runtimes": [
+        "n/a (disclosed gap, not an executable runtime)"
+      ],
+      "command": "n/a — disclosed gap, not an executable test; see the dated v0.2.1 change-log entry"
+    },
+    {
+      "id": "ws3-owner-data-classification",
+      "path": "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+      "kind": "governance-validation",
+      "runtimes": [
+        "Python 3.12",
+        "GitHub Actions"
+      ],
+      "command": "python scripts/validate_docs.py"
+    },
+    {
+      "id": "ws3-persistence-migration",
+      "path": "packages/persistence/pos-postgres/src/index.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/persistence/pos-postgres/src/index.test.ts"
+    },
+    {
+      "id": "ws3-persistence-schema-tenant-scope",
+      "path": "packages/persistence/pos-postgres/src/schema.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test packages/persistence/pos-postgres/src/schema.test.ts"
+    },
+    {
+      "id": "ws3-router-authority",
+      "path": "apps/server/src/router.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test apps/server/src/router.test.ts"
+    },
+    {
+      "id": "ws3-web-unit-pos",
+      "path": "apps/web/src/lib/pos.test.ts",
+      "kind": "automated-test",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "command": "bun test apps/web/src/lib/pos.test.ts"
+    },
+    {
+      "id": "ws3-worker-no-consumer-replay",
+      "path": "apps/worker/composition/ws3-closeout.integration.test.ts",
+      "kind": "live-postgresql-test",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "command": "bun test apps/worker/composition/ws3-closeout.integration.test.ts --timeout 30000"
     }
   ],
   "coverage": {
-    "capabilities_declared": 25,
-    "capabilities_evidenced": 25,
+    "capabilities_declared": 37,
+    "capabilities_evidenced": 37,
     "capabilities_partially_evidenced": 0,
     "capabilities_total": 103,
-    "required_cells_evidenced": 325,
-    "required_cells_planned": 969,
+    "required_cells_evidenced": 481,
+    "required_cells_planned": 813,
     "required_cells_total": 1294
   },
   "tests": [
@@ -1294,53 +1600,118 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-register-cash",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-deposit",
+          "ws3-closeout-scenarios",
+          "ws3-web-unit-pos",
+          "ws3-browser-workflows",
+          "ws3-browser-export"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-register-cash",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-deposit",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority",
+          "ws3-web-unit-pos"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-register",
+          "ws3-deposit-org-location-isolation",
+          "ws3-finance-handoff-cash-support",
+          "ws3-closeout-tenant-isolation",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority",
+          "ws3-closeout-deposit-application-boundary",
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-domain-register-cash",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-deposit"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-register",
+          "ws3-livepg-deposit"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-register-cash",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-deposit",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-denial-audit-evidence"
+        ],
+        "privacy_and_classification": [
+          "ws3-finance-handoff-cash-support",
+          "ws3-closeout-tenant-isolation",
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-browser-accessibility-hardened",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-closeout-register-perf",
+          "ws3-closeout-return-refund-deposit-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-register-cash",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-deposit",
+          "ws3-finance-handoff-cash-support",
+          "ws3-closeout-scenarios",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/deposits.integration.test.ts",
+        "apps/server/composition/finance-handoff.integration.test.ts",
+        "apps/server/composition/pos-denial-audit.integration.test.ts",
+        "apps/server/composition/pos.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "apps/web/src/lib/pos.test.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1364,53 +1735,89 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-return-refund-exchange",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-audit-instrumentation-scope-disclosure"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-closeout-return-refund-deposit-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/returns.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1504,53 +1911,85 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-router-authority"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-return-refund-exchange",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-audit-instrumentation-scope-disclosure"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-closeout-return-refund-deposit-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/returns.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1574,53 +2013,96 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-sale",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-sale",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-domain-sale",
+          "ws3-livepg-register",
+          "ws3-livepg-sale"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-register",
+          "ws3-livepg-sale"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-sale",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-audit-instrumentation-scope-disclosure"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-livepg-sale-perf",
+          "ws3-closeout-register-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-sale",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/pos.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1644,53 +2126,92 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-sale",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-worker-no-consumer-replay"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-sale"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-worker-no-consumer-replay",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-audit-instrumentation-scope-disclosure"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-livepg-sale-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-worker-no-consumer-replay",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/pos.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "apps/worker/composition/ws3-closeout.integration.test.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1714,53 +2235,98 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-web-unit-pos",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority",
+          "ws3-web-unit-pos"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-sale",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority",
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-worker-no-consumer-replay"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-sale"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-worker-no-consumer-replay",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-audit-instrumentation-scope-disclosure"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-livepg-sale-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-closeout-scenarios",
+          "ws3-worker-no-consumer-replay",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/pos.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "apps/web/src/lib/pos.test.ts",
+        "apps/worker/composition/ws3-closeout.integration.test.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1784,53 +2350,126 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-register-cash",
+          "ws3-domain-sale",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-livepg-deposit",
+          "ws3-closeout-scenarios",
+          "ws3-web-unit-pos",
+          "ws3-browser-workflows",
+          "ws3-browser-export"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-register-cash",
+          "ws3-domain-sale",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-livepg-deposit",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority",
+          "ws3-web-unit-pos"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-deposit-org-location-isolation",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority",
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-domain-register-cash",
+          "ws3-domain-sale",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-livepg-deposit",
+          "ws3-worker-no-consumer-replay"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-livepg-deposit"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-register-cash",
+          "ws3-domain-sale",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-livepg-deposit",
+          "ws3-closeout-scenarios",
+          "ws3-worker-no-consumer-replay",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-denial-audit-evidence"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-livepg-sale-perf",
+          "ws3-closeout-register-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-register-cash",
+          "ws3-domain-sale",
+          "ws3-domain-deposit",
+          "ws3-livepg-register",
+          "ws3-livepg-sale",
+          "ws3-livepg-deposit",
+          "ws3-closeout-scenarios",
+          "ws3-worker-no-consumer-replay",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/deposits.integration.test.ts",
+        "apps/server/composition/pos-denial-audit.integration.test.ts",
+        "apps/server/composition/pos.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "apps/web/src/lib/pos.test.ts",
+        "apps/worker/composition/ws3-closeout.integration.test.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1854,53 +2493,107 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-sale",
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-sale",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-web-unit-pos",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-sale",
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-sale",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority",
+          "ws3-web-unit-pos"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-sale",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority",
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-domain-sale",
+          "ws3-livepg-sale",
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-sale",
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-sale",
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-sale",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-audit-instrumentation-scope-disclosure"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-livepg-sale-perf",
+          "ws3-closeout-return-refund-deposit-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-sale",
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-sale",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/pos.integration.test.ts",
+        "apps/server/composition/returns.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "apps/web/src/lib/pos.test.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1924,53 +2617,93 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-tenant-isolation",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority",
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-denial-audit-evidence"
+        ],
+        "privacy_and_classification": [
+          "ws3-closeout-tenant-isolation",
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-closeout-return-refund-deposit-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/pos-denial-audit.integration.test.ts",
+        "apps/server/composition/returns.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -1994,53 +2727,95 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register",
+          "ws3-closeout-scenarios",
+          "ws3-web-unit-pos",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority",
+          "ws3-web-unit-pos"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-register",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority",
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-register"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-audit-instrumentation-scope-disclosure"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-browser-accessibility-hardened",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-closeout-register-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register",
+          "ws3-closeout-scenarios",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/pos.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "apps/web/src/lib/pos.test.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -2064,53 +2839,91 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-return-refund-exchange",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority",
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-return-refund-exchange"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-denial-audit-evidence"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-closeout-return-refund-deposit-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-return-refund-exchange",
+          "ws3-livepg-return-refund-exchange",
+          "ws3-closeout-scenarios",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/pos-denial-audit.integration.test.ts",
+        "apps/server/composition/returns.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {
@@ -2134,53 +2947,92 @@
         "recovery_replay_and_reconciliation": "required"
       },
       "dimension_reasons": {},
-      "evidence_status": "Planned",
+      "evidence_status": "Evidenced",
       "dimension_status": {
-        "happy_path": "planned",
-        "validation_and_denial": "planned",
-        "tenant_isolation": "planned",
-        "permission_and_entitlement": "planned",
-        "idempotency_and_duplicate": "planned",
-        "concurrency_and_conflict": "planned",
-        "events_jobs_and_projections": "planned",
-        "audit_and_observability": "planned",
-        "privacy_and_classification": "planned",
-        "offline_and_degraded": "planned",
-        "accessibility_and_responsive": "planned",
-        "performance_and_capacity": "planned",
-        "recovery_replay_and_reconciliation": "planned"
+        "happy_path": "evidenced",
+        "validation_and_denial": "evidenced",
+        "tenant_isolation": "evidenced",
+        "permission_and_entitlement": "evidenced",
+        "idempotency_and_duplicate": "evidenced",
+        "concurrency_and_conflict": "evidenced",
+        "events_jobs_and_projections": "evidenced",
+        "audit_and_observability": "evidenced",
+        "privacy_and_classification": "evidenced",
+        "offline_and_degraded": "evidenced",
+        "accessibility_and_responsive": "evidenced",
+        "performance_and_capacity": "evidenced",
+        "recovery_replay_and_reconciliation": "evidenced"
       },
       "dimension_evidence": {
-        "happy_path": [],
-        "validation_and_denial": [],
-        "tenant_isolation": [],
-        "permission_and_entitlement": [],
-        "idempotency_and_duplicate": [],
-        "concurrency_and_conflict": [],
-        "events_jobs_and_projections": [],
-        "audit_and_observability": [],
-        "privacy_and_classification": [],
-        "offline_and_degraded": [],
-        "accessibility_and_responsive": [],
-        "performance_and_capacity": [],
-        "recovery_replay_and_reconciliation": []
+        "happy_path": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "validation_and_denial": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register",
+          "ws3-closeout-scenarios",
+          "ws3-router-authority"
+        ],
+        "tenant_isolation": [
+          "ws3-livepg-register",
+          "ws3-persistence-schema-tenant-scope"
+        ],
+        "permission_and_entitlement": [
+          "ws3-domain-application-authority",
+          "ws3-router-authority"
+        ],
+        "idempotency_and_duplicate": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register"
+        ],
+        "concurrency_and_conflict": [
+          "ws3-livepg-register"
+        ],
+        "events_jobs_and_projections": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register",
+          "ws3-closeout-scenarios",
+          "ws3-browser-workflows"
+        ],
+        "audit_and_observability": [
+          "ws3-audit-instrumentation-scope-disclosure"
+        ],
+        "privacy_and_classification": [
+          "ws3-owner-data-classification"
+        ],
+        "offline_and_degraded": [
+          "ws3-browser-offline"
+        ],
+        "accessibility_and_responsive": [
+          "ws3-browser-accessibility",
+          "ws3-browser-accessibility-hardened",
+          "ws3-manual-at-review-disclosure"
+        ],
+        "performance_and_capacity": [
+          "ws3-closeout-register-perf"
+        ],
+        "recovery_replay_and_reconciliation": [
+          "ws3-domain-register-cash",
+          "ws3-livepg-register",
+          "ws3-closeout-scenarios",
+          "ws3-persistence-migration"
+        ]
       },
-      "unproven_required_dimensions": [
-        "happy_path",
-        "validation_and_denial",
-        "tenant_isolation",
-        "permission_and_entitlement",
-        "idempotency_and_duplicate",
-        "concurrency_and_conflict",
-        "events_jobs_and_projections",
-        "audit_and_observability",
-        "privacy_and_classification",
-        "offline_and_degraded",
-        "accessibility_and_responsive",
-        "performance_and_capacity",
-        "recovery_replay_and_reconciliation"
+      "unproven_required_dimensions": [],
+      "evidence_paths": [
+        "apps/server/composition/pos.integration.test.ts",
+        "apps/server/composition/ws3-closeout.integration.test.ts",
+        "apps/server/src/router.test.ts",
+        "apps/web/e2e/ws3-pos.spec.ts",
+        "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+        "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+        "packages/domains/pos/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/index.test.ts",
+        "packages/persistence/pos-postgres/src/schema.test.ts"
       ],
-      "evidence_paths": [],
       "blocking_defects": []
     },
     {

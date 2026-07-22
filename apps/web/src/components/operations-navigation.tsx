@@ -3,17 +3,29 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { isNavigationCurrent, OPERATIONS_NAVIGATION } from "@/lib/shell";
+import { currentNavigationItem, OPERATIONS_NAVIGATION } from "@/lib/shell";
+
+import { useWorkspace } from "./workspace-context";
 
 export function OperationsNavigation() {
 	const pathname = usePathname();
 	const router = useRouter();
-	const current =
-		OPERATIONS_NAVIGATION.find((item) =>
-			isNavigationCurrent(pathname, item.href)
-		) ?? OPERATIONS_NAVIGATION[0];
+	// WS3 remediation R4: the mobile `<select>` below drives navigation via
+	// `router.push` directly, which the document-level unsaved-work guard
+	// (workspace-context.tsx) never sees — it only intercepts `<a href>`
+	// clicks. Without this, a dirty draft was silently discarded with zero
+	// warning on a narrow viewport while the SAME navigation intent on a
+	// wide viewport (an actual link click) already correctly warned.
+	const { confirmLeaveIfDirty } = useWorkspace();
+	// WS3 remediation R3b, Item 9: resolves EXACTLY ONE current item (see
+	// `currentNavigationItem`'s doc comment) rather than each link
+	// independently re-deciding its own `aria-current` — both the mobile
+	// `<select>`'s value and the desktop links' `aria-current` now derive
+	// from this single source of truth.
+	const current = currentNavigationItem(pathname, OPERATIONS_NAVIGATION);
 	return (
-		<nav aria-label="Operations" className="border-b">
+		// WS3 remediation R3b, Item 12 (print composition): application chrome.
+		<nav aria-label="Operations" className="border-b print:hidden">
 			<div className="mx-auto max-w-screen-2xl px-4 py-2 sm:hidden">
 				<label
 					className="grid gap-1 font-medium text-sm"
@@ -27,7 +39,7 @@ export function OperationsNavigation() {
 							const destination = OPERATIONS_NAVIGATION.find(
 								(item) => item.href === event.target.value
 							);
-							if (destination) {
+							if (destination && confirmLeaveIfDirty()) {
 								router.push(destination.href);
 							}
 						}}
@@ -44,9 +56,7 @@ export function OperationsNavigation() {
 			<div className="mx-auto hidden max-w-screen-2xl gap-1 overflow-x-auto px-4 py-2 sm:flex">
 				{OPERATIONS_NAVIGATION.map((item) => (
 					<Link
-						aria-current={
-							isNavigationCurrent(pathname, item.href) ? "page" : undefined
-						}
+						aria-current={item.href === current.href ? "page" : undefined}
 						className="flex min-h-10 shrink-0 items-center rounded-xl px-3 font-medium text-sm hover:bg-muted aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
 						href={item.href}
 						key={item.href}

@@ -18,6 +18,125 @@ export const numberingService = createNumberingService({
 	})),
 });
 
+/**
+ * WS3 PR2's online receipt-numbering path (frozen control plan "Read
+ * first": reuse `platform/numbering`'s online allocation-in-transaction
+ * pattern; the offline-safe path is EXPLICITLY PENDING WS5). Mirrors
+ * `createImportReferenceAllocator` immediately below: a Numbering service
+ * instance bound to the SAME transactional `PoolClient` as the sale
+ * commit, so the number allocation, the sale row, the synchronous
+ * Inventory movement, and the outbox writes all commit or roll back
+ * together. Scoped per REGISTER (not per tenant/organization) — one
+ * sequence per register — so receipt-number monotonicity holds per
+ * register under concurrency, matching the frozen Tests requirement.
+ */
+export function createReceiptNumberAllocator(client: PoolClient) {
+	const service = createNumberingService({
+		clock: () => new Date(),
+		ids: {
+			create: (kind) => `numbering_${kind}_${randomUUID().replaceAll("-", "")}`,
+		},
+		unitOfWork: {
+			execute: (operation) =>
+				operation({
+					events: createPostgresOutbox(client),
+					repository: createNumberingRepository(client),
+				}),
+		},
+	});
+	return {
+		async allocate(input: {
+			actorUserId: string;
+			correlationId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			registerId: string;
+			saleId: string;
+			tenantId: string;
+		}) {
+			const sequenceId = `sequence_receipt_${input.registerId}`;
+			await service.ensureSystemSequence({
+				id: sequenceId,
+				organizationId: input.organizationId,
+				ownerNamespace: "commerce",
+				padding: 6,
+				prefix: `R-${input.registerId}-`,
+				recordType: "Receipt",
+				sequenceKey: `commerce.receipt.${input.registerId}`,
+				tenantId: input.tenantId,
+			});
+			const allocation = await service.allocate({
+				actorUserId: input.actorUserId,
+				businessRecordId: input.saleId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: input.organizationId,
+				sequenceId,
+				sourceCommandId: input.idempotencyKey,
+				tenantId: input.tenantId,
+			});
+			return { value: allocation.value };
+		},
+	};
+}
+
+/**
+ * WS3 PR4's deposit-reference allocation path (frozen control plan §6.6).
+ * Scoped per ORGANIZATION (not per register, unlike
+ * `createReceiptNumberAllocator`) — a deposit draws safe custody from a
+ * set of register sessions, not one register, so the reference sequence
+ * is organization-wide, mirroring `createImportReferenceAllocator`'s
+ * scoping exactly.
+ */
+export function createDepositReferenceAllocator(client: PoolClient) {
+	const service = createNumberingService({
+		clock: () => new Date(),
+		ids: {
+			create: (kind) => `numbering_${kind}_${randomUUID().replaceAll("-", "")}`,
+		},
+		unitOfWork: {
+			execute: (operation) =>
+				operation({
+					events: createPostgresOutbox(client),
+					repository: createNumberingRepository(client),
+				}),
+		},
+	});
+	return {
+		async allocate(input: {
+			actorUserId: string;
+			correlationId: string;
+			depositId: string;
+			idempotencyKey: string;
+			organizationId: string;
+			tenantId: string;
+		}) {
+			const sequenceId = `sequence_deposit_${input.organizationId}`;
+			await service.ensureSystemSequence({
+				id: sequenceId,
+				organizationId: input.organizationId,
+				ownerNamespace: "commerce",
+				padding: 6,
+				prefix: "DEP-",
+				recordType: "Deposit",
+				sequenceKey: `commerce.deposit.${input.organizationId}`,
+				tenantId: input.tenantId,
+			});
+			const allocation = await service.allocate({
+				actorUserId: input.actorUserId,
+				businessRecordId: input.depositId,
+				correlationId: input.correlationId,
+				idempotencyKey: input.idempotencyKey,
+				organizationId: input.organizationId,
+				sequenceId,
+				sourceCommandId: input.idempotencyKey,
+				tenantId: input.tenantId,
+			});
+			return { value: allocation.value };
+		},
+	};
+}
+
 export function createImportReferenceAllocator(client: PoolClient) {
 	const service = createNumberingService({
 		clock: () => new Date(),

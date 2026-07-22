@@ -20,6 +20,7 @@ import {
 import { ArrowLeft, ArrowRight, Clock3, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 import {
 	appendCursorTrail,
@@ -29,33 +30,68 @@ import {
 	parseCursorTrail,
 	previousCursorState,
 } from "@/lib/operations";
+import { statusBadgeVariant } from "@/lib/status";
 
 import { EmptyState, QueryFailure } from "./query-state";
-
-const POSITIVE_STATE_PATTERN =
-	/active|posted|approved|completed|reconciled|received/u;
-const NEGATIVE_STATE_PATTERN =
-	/failed|rejected|mismatch|reversed|exception|cancelled/u;
 
 export interface DataColumn<T> {
 	label: string;
 	render: (item: T) => React.ReactNode;
 }
 
+/** WS3 remediation R3b, Item 10 (accessible route state — route-specific
+ * titles). Before this fix, `apps/web/src/app/layout.tsx` declared a
+ * `title.template` ("%s | Platform Prototype") but NO `page.tsx` anywhere
+ * in the tree (checked directly — zero `export const metadata` /
+ * `generateMetadata` outside the root layout) ever supplied the "%s"
+ * part, so EVERY route — all 49 audited routes, not just POS — showed
+ * the exact same generic browser-tab title. Server-side
+ * `generateMetadata` can't easily know record-specific titles here (this
+ * app's content is client-fetched via TanStack Query, not
+ * server-rendered per route), so this mirrors the SAME string this
+ * component already renders as its own visible `<h1>` into
+ * `document.title` — one fix, applied where every POS/Operations page
+ * already flows through `OperationsPageFrame`, giving all of them a
+ * real, specific, already-correct-content title with no per-page
+ * changes needed. */
+export function pageDocumentTitle(title: string): string {
+	return `${title} | Platform Prototype`;
+}
+
 export function OperationsPageFrame({
 	actions,
 	children,
 	description,
+	/** WS3 remediation R3b, Item 12 (print composition). Most pages want
+	 * their own `<h1>`/description IN the printed output (ordinary print
+	 * of an operations page is just printing that page's content). The
+	 * receipt view is the one exception this run scopes: its own internal,
+	 * developer-facing description text ("Realizes commerce.receipt.read
+	 * …") has no place on a printed receipt, and its `<h1>` ("Receipt") is
+	 * redundant with `ReceiptLayout`'s own title
+	 * (`Receipt {receiptNumber}`). Opt-in per page, not a global default —
+	 * this must never silently remove another page's printed title. */
+	hideHeaderOnPrint = false,
 	title,
 }: {
 	actions?: React.ReactNode;
 	children: React.ReactNode;
 	description: string;
+	hideHeaderOnPrint?: boolean;
 	title: string;
 }) {
+	useEffect(() => {
+		document.title = pageDocumentTitle(title);
+	}, [title]);
 	return (
 		<div className="mx-auto max-w-screen-2xl px-4 py-6">
-			<header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+			<header
+				className={
+					hideHeaderOnPrint
+						? "mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between print:hidden"
+						: "mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"
+				}
+			>
 				<div className="min-w-0 max-w-3xl">
 					<h1 className="break-words font-heading font-semibold text-2xl">
 						{title}
@@ -230,14 +266,7 @@ export function CollectionState<T>({
 }
 
 export function StateBadge({ state }: { state: string }) {
-	const lowered = state.toLowerCase();
-	let variant: "destructive" | "outline" | "secondary" = "outline";
-	if (POSITIVE_STATE_PATTERN.test(lowered)) {
-		variant = "secondary";
-	} else if (NEGATIVE_STATE_PATTERN.test(lowered)) {
-		variant = "destructive";
-	}
-	return <Badge variant={variant}>{state}</Badge>;
+	return <Badge variant={statusBadgeVariant(state)}>{state}</Badge>;
 }
 
 export function FreshnessBadge({

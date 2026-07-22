@@ -40,7 +40,7 @@
     "dev:native": "turbo run dev -F native",
     "dev:web": "turbo run dev -F web",
     "dev:server": "turbo run dev -F server",
-    "db:generate": "bun run --cwd packages/persistence/platform-identity-postgres db:generate && bun run --cwd packages/persistence/platform-tenancy-postgres db:generate && bun run --cwd packages/persistence/platform-entitlements-postgres db:generate && bun run --cwd packages/persistence/platform-audit-postgres db:generate && bun run --cwd packages/persistence/platform-events-postgres db:generate && bun run --cwd packages/persistence/platform-import-export-postgres db:generate && bun run --cwd packages/persistence/platform-numbering-postgres db:generate && bun run --cwd packages/persistence/party-postgres db:generate && bun run --cwd packages/persistence/catalog-postgres db:generate && bun run --cwd packages/persistence/inventory-postgres db:generate",
+    "db:generate": "bun run --cwd packages/persistence/platform-identity-postgres db:generate && bun run --cwd packages/persistence/platform-tenancy-postgres db:generate && bun run --cwd packages/persistence/platform-entitlements-postgres db:generate && bun run --cwd packages/persistence/platform-audit-postgres db:generate && bun run --cwd packages/persistence/platform-events-postgres db:generate && bun run --cwd packages/persistence/platform-import-export-postgres db:generate && bun run --cwd packages/persistence/platform-numbering-postgres db:generate && bun run --cwd packages/persistence/party-postgres db:generate && bun run --cwd packages/persistence/catalog-postgres db:generate && bun run --cwd packages/persistence/inventory-postgres db:generate && bun run --cwd packages/persistence/pos-postgres db:generate",
     "db:migrate": "bun run --cwd apps/server db:migrate",
     "db:test": "bun run --cwd apps/server db:test",
     "db:start": "docker compose up -d postgres",
@@ -64,6 +64,7 @@
     "gates:test": "python -m unittest scripts/test_run_gates.py",
     "ws1:evidence:check": "python scripts/check_ws1_evidence.py",
     "ws2:evidence:check": "python -m unittest scripts/test_check_ws2_evidence.py && python scripts/check_ws2_evidence.py",
+    "ws3:evidence:check": "python -m unittest scripts/test_check_ws3_evidence.py && python scripts/check_ws3_evidence.py",
     "changeset": "changeset",
     "changeset:status": "changeset status"
   },

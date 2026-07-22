@@ -577,13 +577,14 @@ export function createInventoryRepository(
 			return loadTransfer(row);
 		},
 
-		async getAdjustment(tenantId, id) {
+		async getAdjustment(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(inventoryAdjustments)
 				.where(
 					and(
 						eq(inventoryAdjustments.tenantId, tenantId),
+						eq(inventoryAdjustments.organizationId, organizationId),
 						eq(inventoryAdjustments.id, id)
 					)
 				)
@@ -619,26 +620,28 @@ export function createInventoryRepository(
 				.limit(1);
 			return rows[0] ? mapReceipt(rows[0]) : null;
 		},
-		async getCount(tenantId, id) {
+		async getCount(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(inventoryCounts)
 				.where(
 					and(
 						eq(inventoryCounts.tenantId, tenantId),
+						eq(inventoryCounts.organizationId, organizationId),
 						eq(inventoryCounts.id, id)
 					)
 				)
 				.limit(1);
 			return rows[0] ? loadCount(rows[0]) : null;
 		},
-		async getTransfer(tenantId, id) {
+		async getTransfer(tenantId, organizationId, id) {
 			const rows = await database
 				.select()
 				.from(inventoryTransfers)
 				.where(
 					and(
 						eq(inventoryTransfers.tenantId, tenantId),
+						eq(inventoryTransfers.organizationId, organizationId),
 						eq(inventoryTransfers.id, id)
 					)
 				)
@@ -648,6 +651,7 @@ export function createInventoryRepository(
 
 		async listAdjustments(
 			tenantId: string,
+			organizationId: string,
 			page: InventoryPageRequest,
 			filters?: InventoryAdjustmentFilters
 		): Promise<InventoryPage<InventoryAdjustmentRecord>> {
@@ -657,6 +661,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryAdjustments.tenantId, tenantId),
+						eq(inventoryAdjustments.organizationId, organizationId),
 						filters?.locationId
 							? eq(inventoryAdjustments.locationId, filters.locationId)
 							: undefined,
@@ -676,6 +681,7 @@ export function createInventoryRepository(
 		},
 		async listBalances(
 			tenantId: string,
+			organizationId: string,
 			page: InventoryPageRequest,
 			filters?: InventoryBalanceFilters
 		): Promise<InventoryPage<InventoryBalanceRecord>> {
@@ -705,6 +711,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryStockBalances.tenantId, tenantId),
+						eq(inventoryStockBalances.organizationId, organizationId),
 						filters?.locationId
 							? eq(inventoryStockBalances.locationId, filters.locationId)
 							: undefined,
@@ -736,6 +743,7 @@ export function createInventoryRepository(
 		},
 		async listCounts(
 			tenantId: string,
+			organizationId: string,
 			page: InventoryPageRequest,
 			filters?: InventoryCountFilters
 		): Promise<InventoryPage<InventoryCountRecord>> {
@@ -745,6 +753,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryCounts.tenantId, tenantId),
+						eq(inventoryCounts.organizationId, organizationId),
 						filters?.locationId
 							? eq(inventoryCounts.locationId, filters.locationId)
 							: undefined,
@@ -765,6 +774,7 @@ export function createInventoryRepository(
 		},
 		async listTransfers(
 			tenantId: string,
+			organizationId: string,
 			page: InventoryPageRequest,
 			filters?: InventoryTransferFilters
 		): Promise<InventoryPage<InventoryTransferRecord>> {
@@ -774,6 +784,7 @@ export function createInventoryRepository(
 				.where(
 					and(
 						eq(inventoryTransfers.tenantId, tenantId),
+						eq(inventoryTransfers.organizationId, organizationId),
 						filters?.locationId
 							? or(
 									eq(inventoryTransfers.sourceLocationId, filters.locationId),

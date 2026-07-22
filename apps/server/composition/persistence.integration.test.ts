@@ -42,6 +42,7 @@ import {
 	runMigrationStreams,
 	WS1_MIGRATION_STREAMS,
 	WS2_MIGRATION_STREAMS,
+	WS3_MIGRATION_STREAMS,
 } from "./migrations";
 import { createPostgresUnitOfWork } from "./postgres-unit-of-work";
 
@@ -117,9 +118,11 @@ describe.serial("WS1 persistence orchestration", () => {
 			"catalog",
 			"inventory",
 		]);
+		expect(WS3_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual(["pos"]);
 		expect(ALL_MIGRATION_STREAMS.map((stream) => stream.id)).toEqual([
 			...WS1_MIGRATION_STREAMS.map((stream) => stream.id),
 			...WS2_MIGRATION_STREAMS.map((stream) => stream.id),
+			...WS3_MIGRATION_STREAMS.map((stream) => stream.id),
 		]);
 	});
 
@@ -168,6 +171,7 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_event_delivery_attempt",
 			"platform_event_outbox",
 			"platform_event_replay_request",
+			"platform_export_job",
 			"platform_identity_session_command_receipt",
 			"platform_import_command_receipt",
 			"platform_import_finding",
@@ -184,6 +188,19 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_role_assignment",
 			"platform_tenancy_command_receipt",
 			"platform_tenant",
+			"pos_cash_movement",
+			"pos_command_receipt",
+			"pos_deposit",
+			"pos_deposit_custody_transfer",
+			"pos_deposit_source_shift",
+			"pos_price_override",
+			"pos_receipt",
+			"pos_refund",
+			"pos_register_session",
+			"pos_return",
+			"pos_return_line",
+			"pos_sale",
+			"pos_sale_line",
 			"session",
 			"two_factor",
 			"user",
@@ -204,6 +221,7 @@ describe.serial("WS1 persistence orchestration", () => {
 			"platform_import_export_migrations",
 			"platform_numbering_migrations",
 			"platform_tenancy_migrations",
+			"pos_migrations",
 		]);
 	});
 

@@ -21,6 +21,7 @@ last_reviewed: 2026-07-21
 - [WS2 Implementation Plan: Catalog and Inventory Ledger](WS2_CATALOG_AND_INVENTORY_IMPLEMENTATION_PLAN.md) — `PDA-RDM-009` · Draft
 - [Ratification Wave Manifest and Review Standard](RATIFICATION_WAVE_MANIFEST_AND_REVIEW_STANDARD.md) — `PDA-RDM-010` · Draft
 - [WS4 Implementation Plan: Stored Value](WS4_STORED_VALUE_IMPLEMENTATION_PLAN.md) — `PDA-RDM-011` · Draft (preparatory; WS4 entry not recorded)
+- [WS3 Implementation Plan: POS Cash Workflow](WS3_POS_CASH_IMPLEMENTATION_PLAN.md) — `PDA-RDM-012` · Draft (controlled prototype on `claude/ws3-integration`; WS3 entry to `main` and program status remain blocked on issues #94/#82 per FDR-012)
 
 ## Related Authority and Contracts
 

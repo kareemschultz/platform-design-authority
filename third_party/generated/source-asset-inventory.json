@@ -142,6 +142,15 @@
       "distribution_status": "legal-review-required",
       "kind": "copied-source",
       "license_conclusion": "NOASSERTION",
+      "path": "packages/ui-web/core/src/components/alert-dialog.tsx",
+      "record_id": "source.shadcn.ui.4.13.0",
+      "sha256": "e5e485ce2a5ae6c5c3bcd238a45d0315fe5f2e199ff738595b3643ae4791e317"
+    },
+    {
+      "declared_upstream_license": "MIT",
+      "distribution_status": "legal-review-required",
+      "kind": "copied-source",
+      "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/alert.tsx",
       "record_id": "source.shadcn.ui.4.13.0",
       "sha256": "6fbb781fdd693bd596ba21a1b430e46a7d0cec624fc4878fffff26b0e8d960de"

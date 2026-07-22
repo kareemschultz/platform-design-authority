@@ -104,6 +104,9 @@
         "@meridian/domain-catalog": "workspace:*",
         "@meridian/domain-inventory": "workspace:*",
         "@meridian/domain-party": "workspace:*",
+        "@meridian/domain-pos": "workspace:*",
+        "@meridian/engine-pricing": "workspace:*",
+        "@meridian/engine-tax": "workspace:*",
         "@meridian/persistence-catalog-postgres": "workspace:*",
         "@meridian/persistence-inventory-postgres": "workspace:*",
         "@meridian/persistence-party-postgres": "workspace:*",
@@ -114,6 +117,7 @@
         "@meridian/persistence-platform-import-export-postgres": "workspace:*",
         "@meridian/persistence-platform-numbering-postgres": "workspace:*",
         "@meridian/persistence-platform-tenancy-postgres": "workspace:*",
+        "@meridian/persistence-pos-postgres": "workspace:*",
         "@meridian/platform-audit": "workspace:*",
         "@meridian/platform-authorization": "workspace:*",
         "@meridian/platform-entitlements": "workspace:*",
@@ -137,6 +141,8 @@
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/pg": "catalog:",
+        "ajv": "8.20.0",
+        "ajv-formats": "3.0.1",
         "drizzle-orm": "catalog:",
         "tsdown": "^0.22.3",
         "tsx": "4.21.0",
@@ -279,6 +285,37 @@
         "@meridian/contracts-events": "workspace:*",
         "@meridian/contracts-platform-api": "workspace:*",
       },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/domains/pos": {
+      "name": "@meridian/domain-pos",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/contracts-events": "workspace:*",
+        "@meridian/contracts-platform-api": "workspace:*",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/engines/pricing": {
+      "name": "@meridian/engine-pricing",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "^6",
+      },
+    },
+    "packages/engines/tax": {
+      "name": "@meridian/engine-tax",
+      "version": "0.0.0",
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",
         "@types/bun": "catalog:",
@@ -444,6 +481,22 @@
       "version": "0.0.0",
       "dependencies": {
         "@meridian/platform-tenancy": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "pg": "8.22.0",
+      },
+      "devDependencies": {
+        "@meridian/tooling-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "0.31.10",
+        "typescript": "^6",
+      },
+    },
+    "packages/persistence/pos-postgres": {
+      "name": "@meridian/persistence-pos-postgres",
+      "version": "0.0.0",
+      "dependencies": {
+        "@meridian/domain-pos": "workspace:*",
         "drizzle-orm": "catalog:",
         "pg": "8.22.0",
       },
@@ -1157,6 +1210,12 @@
 
     "@meridian/domain-party": ["@meridian/domain-party@workspace:packages/domains/party"],
 
+    "@meridian/domain-pos": ["@meridian/domain-pos@workspace:packages/domains/pos"],
+
+    "@meridian/engine-pricing": ["@meridian/engine-pricing@workspace:packages/engines/pricing"],
+
+    "@meridian/engine-tax": ["@meridian/engine-tax@workspace:packages/engines/tax"],
+
     "@meridian/foundation-core": ["@meridian/foundation-core@workspace:packages/foundation/core"],
 
     "@meridian/persistence-catalog-postgres": ["@meridian/persistence-catalog-postgres@workspace:packages/persistence/catalog-postgres"],
@@ -1178,6 +1237,8 @@
     "@meridian/persistence-platform-numbering-postgres": ["@meridian/persistence-platform-numbering-postgres@workspace:packages/persistence/platform-numbering-postgres"],
 
     "@meridian/persistence-platform-tenancy-postgres": ["@meridian/persistence-platform-tenancy-postgres@workspace:packages/persistence/platform-tenancy-postgres"],
+
+    "@meridian/persistence-pos-postgres": ["@meridian/persistence-pos-postgres@workspace:packages/persistence/pos-postgres"],
 
     "@meridian/platform-audit": ["@meridian/platform-audit@workspace:packages/platform/audit"],
 

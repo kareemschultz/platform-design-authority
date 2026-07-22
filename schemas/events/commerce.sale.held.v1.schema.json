@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/commerce.sale.held.v1.schema.json",
+  "title": "commerce.sale.held.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "commerce.sale.held.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["saleId", "registerId", "actorPartyId"],
+          "properties": {
+            "saleId": {"type": "string"},
+            "registerId": {"type": "string"},
+            "actorPartyId": {"type": "string"},
+            "reason": {"type": ["string", "null"], "maxLength": 500}
+          }
+        }
+      }
+    }
+  ]
+}

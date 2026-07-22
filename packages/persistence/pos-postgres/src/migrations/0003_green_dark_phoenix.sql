@@ -1,0 +1,2 @@
+ALTER TABLE "pos_sale_line" ADD COLUMN "non_statutory" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+ALTER TABLE "pos_sale_line" ADD CONSTRAINT "pos_sale_line_non_statutory_check" CHECK ("pos_sale_line"."non_statutory" = true);

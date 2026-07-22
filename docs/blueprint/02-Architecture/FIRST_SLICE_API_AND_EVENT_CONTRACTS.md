@@ -130,6 +130,8 @@ Inventory adjustment approval approves and posts the adjustment atomically under
 |---|---|
 | `POST /v1/sales` | `commerce.sale.create` |
 | `POST /v1/sales/{saleId}/hold` | `commerce.sale.hold` |
+| `POST /v1/sales/{saleId}/price-overrides` | `commerce.price-override.request` |
+| `POST /v1/sales/{saleId}/price-overrides/{overrideId}/approve` | `commerce.price-override.approve` |
 | `POST /v1/sales/{saleId}/complete` | `commerce.sale.complete` |
 | `POST /v1/returns` | `commerce.return.create` |
 | `POST /v1/returns/{returnId}/approve` | `commerce.return.approve` |

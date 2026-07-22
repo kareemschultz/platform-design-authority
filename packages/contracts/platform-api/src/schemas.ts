@@ -478,17 +478,26 @@ export const TransitionReasonSchema = z.object({
 	reason: z.string().min(1).max(500),
 });
 
+// WS3 remediation R4, P2 item 1 ("quantity precision/digit limits"): the
+// integer part is bounded to at most 12 digits (0-999,999,999,999) — the
+// fraction part was already bounded to 6 digits. Neither bound existed
+// before this fix, so an unbounded numeric-string integer part could reach
+// the request boundary and only be rejected (or worse, silently truncated
+// by a later `Number(...)` parse) deep inside the domain layer instead of
+// at the Zod boundary CLAUDE.md §11 requires. No real POS/Inventory
+// quantity approaches this bound; it is a hardening ceiling, not a
+// business rule.
 export const DecimalQuantitySchema = z
 	.string()
-	.regex(/^-?(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+	.regex(/^-?(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,6})?$/);
 
 export const PositiveDecimalQuantitySchema = z
 	.string()
-	.regex(/^(?!0(?:\.0{1,6})?$)(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+	.regex(/^(?!0(?:\.0{1,6})?$)(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,6})?$/);
 
 export const NonNegativeDecimalQuantitySchema = z
 	.string()
-	.regex(/^(?:0|[1-9][0-9]*)(?:\.[0-9]{1,6})?$/);
+	.regex(/^(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,6})?$/);
 
 export const QuantityLineSchema = z.object({
 	conversionSourceId: NullableIdentifierSchema.optional(),
@@ -676,6 +685,391 @@ export const StockTransferSchema = z.object({
 	version: z.number().int().min(1),
 });
 
+// ---------------------------------------------------------------------------
+// WS3 PR1: RegisterSession and CashMovement (commerce.register-management,
+// commerce.cash-management). Money uses explicit currency and integer
+// minor-unit semantics per CLAUDE.md §7 — never binary floating point.
+// ---------------------------------------------------------------------------
+
+// WS3 remediation R4, P2 item 1 ("safe-integer money checks ... at every
+// relevant boundary"): `.safe()` (int + within [MIN_SAFE_INTEGER,
+// MAX_SAFE_INTEGER]) matches the SAME `Number.MAX_SAFE_INTEGER` ceiling
+// `packages/domains/pos/src/index.ts`'s `MAX_MINOR_AMOUNT` already
+// enforces deep inside the domain layer — before this fix, an
+// out-of-safe-range `amountMinor` passed THIS Zod boundary and only
+// failed several layers later. Sign is intentionally left unconstrained
+// here (direction is carried by a separate field, e.g. CashMovement's
+// `direction`, not by the sign of `amountMinor`) — this bounds magnitude
+// only, matching the domain layer's own non-negating check shape.
+export const MoneySchema = z.object({
+	amountMinor: z.number().safe(),
+	currency: z.string().regex(/^[A-Z]{3}$/),
+});
+
+export const OpenRegisterRequestSchema = z
+	.object({
+		currency: z.string().regex(/^[A-Z]{3}$/),
+		openingFloat: MoneySchema,
+	})
+	.strict();
+
+export const CloseRegisterRequestSchema = z
+	.object({
+		countedCash: MoneySchema,
+		reason: z.string().min(1).max(500).optional(),
+	})
+	.strict();
+
+export const RegisterSessionSchema = z.object({
+	closedAt: InstantSchema.nullable(),
+	closeReason: z.string().max(500).nullable(),
+	countedCash: MoneySchema.nullable(),
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	expectedCash: MoneySchema.nullable(),
+	id: IdentifierSchema,
+	locationId: IdentifierSchema,
+	openedAt: InstantSchema,
+	openerPartyId: IdentifierSchema,
+	openingFloat: MoneySchema,
+	registerId: IdentifierSchema,
+	state: z.enum(["Open", "Closing", "Closed"]),
+	variance: MoneySchema.nullable(),
+	varianceApprovalRequired: z.boolean(),
+	varianceApprovedAt: InstantSchema.nullable(),
+	varianceApproverPartyId: NullableIdentifierSchema,
+	version: z.number().int().min(1),
+});
+
+export const CreateCashMovementRequestSchema = z
+	.object({
+		amount: MoneySchema,
+		direction: z.enum(["PaidIn", "PaidOut"]),
+		note: z.string().min(1).max(500).optional(),
+		reasonCode: z.enum(["PaidIn", "PaidOut", "Other"]),
+		referenceId: NullableIdentifierSchema.optional(),
+	})
+	.strict();
+
+export const CreateSafeDropRequestSchema = z
+	.object({
+		amount: MoneySchema,
+		note: z.string().min(1).max(500).optional(),
+	})
+	.strict();
+
+export const CashMovementSchema = z.object({
+	amount: MoneySchema,
+	createdAt: InstantSchema,
+	direction: z.enum(["PaidIn", "PaidOut"]),
+	id: IdentifierSchema,
+	note: z.string().max(500).nullable(),
+	reasonCode: z.enum(["PaidIn", "PaidOut", "SafeDrop", "Refund", "Other"]),
+	referenceId: NullableIdentifierSchema,
+	registerId: IdentifierSchema,
+	sessionId: IdentifierSchema,
+});
+
+// ---------------------------------------------------------------------------
+// WS3 PR2: Sale, PriceOverride, Receipt (commerce.order-management,
+// commerce.receipts). Quantity follows the same PositiveDecimalQuantity
+// convention Inventory already uses; money stays integer-minor-unit per
+// CLAUDE.md §7.
+// ---------------------------------------------------------------------------
+
+export const SaleTaxCategorySchema = z.enum([
+	"GY_STANDARD_14",
+	"GY_ZERO_RATED",
+	"GY_EXEMPT",
+	"GY_OUT_OF_SCOPE",
+]);
+
+export const SaleLineInputSchema = z.object({
+	discountAmount: MoneySchema.nullable().optional(),
+	productId: IdentifierSchema,
+	quantity: PositiveDecimalQuantitySchema,
+	taxCategory: SaleTaxCategorySchema.optional(),
+	unit: z.string().min(1).max(40),
+	unitPrice: MoneySchema,
+	variantId: NullableIdentifierSchema.optional(),
+});
+
+// WS3 remediation R4, P2 item 1 ("bounded array lengths ... at every
+// relevant boundary"): matches the bound Inventory's
+// `ReceiveStockTransferLineSchema` array already carries (`.max(500)`) —
+// before this fix, `CreateSaleSchema.lines` had NO upper bound at all.
+export const CreateSaleSchema = z
+	.object({
+		currency: z.string().regex(/^[A-Z]{3}$/),
+		customerPartyId: NullableIdentifierSchema.optional(),
+		lines: z.array(SaleLineInputSchema).min(1).max(500),
+		registerId: IdentifierSchema,
+	})
+	.strict();
+
+export const TenderReferenceSchema = z.object({
+	amount: MoneySchema,
+	referenceId: NullableIdentifierSchema.optional(),
+	type: z.enum(["Cash", "PaymentIntent", "StoredValue"]),
+});
+
+export const CompleteSaleRequestSchema = z
+	.object({
+		/** Realizes `commerce.exchanges` (frozen control plan §6.5): names
+		 * an ALREADY-`Completed` Return this sale replaces, sharing the
+		 * same register. No dedicated exchange permission or endpoint
+		 * exists; omitting this field is an ordinary sale completion. */
+		exchangeOfReturnId: NullableIdentifierSchema.optional(),
+		// WS3 remediation R4, P2 item 1: bounded — a real split-tender sale
+		// never approaches this; before this fix `tenders` had no upper bound.
+		tenders: z.array(TenderReferenceSchema).min(1).max(20),
+	})
+	.strict();
+
+export const RequestPriceOverrideSchema = z
+	.object({
+		lineId: IdentifierSchema,
+		reason: z.string().min(1).max(500),
+		requestedPrice: MoneySchema,
+	})
+	.strict();
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Surfaces the
+ * `pos_price_override` row `getPriceOverride`/`createPriceOverride` already
+ * persist (WS3 PR2) as a first-class read for `listPriceOverridesContract`
+ * — until this addition no endpoint ever returned a PriceOverride on its
+ * own; only the owning `Sale.lines[].priceOverrideId`/`priceOverrideState`
+ * disclosed its existence. */
+export const PriceOverrideSchema = z.object({
+	approvedAt: InstantSchema.nullable(),
+	id: IdentifierSchema,
+	lineId: IdentifierSchema,
+	reason: z.string(),
+	requestedAt: InstantSchema,
+	requestedPrice: MoneySchema,
+	saleId: IdentifierSchema,
+	state: z.enum(["Pending", "Approved"]),
+	version: z.number().int().min(1),
+});
+
+export const SaleLineSchema = z.object({
+	discount: MoneySchema,
+	gross: MoneySchema,
+	id: IdentifierSchema,
+	lineTotal: MoneySchema,
+	nonStatutory: z.literal(true),
+	priceOverrideId: NullableIdentifierSchema,
+	priceOverrideState: z.enum(["Pending", "Approved"]).nullable(),
+	productId: IdentifierSchema,
+	productName: z.string(),
+	quantity: PositiveDecimalQuantitySchema,
+	tax: MoneySchema,
+	taxableBase: MoneySchema,
+	taxCategory: SaleTaxCategorySchema,
+	unit: z.string(),
+	unitPrice: MoneySchema,
+	variantId: NullableIdentifierSchema,
+});
+
+export const SaleSchema = z.object({
+	change: MoneySchema.nullable(),
+	completedAt: InstantSchema.nullable(),
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	customerPartyId: NullableIdentifierSchema,
+	discount: MoneySchema,
+	gross: MoneySchema,
+	heldAt: InstantSchema.nullable(),
+	id: IdentifierSchema,
+	lines: z.array(SaleLineSchema),
+	receiptId: NullableIdentifierSchema,
+	registerId: IdentifierSchema,
+	sessionId: IdentifierSchema,
+	state: z.enum(["Open", "Held", "Completed"]),
+	tax: MoneySchema,
+	tendered: MoneySchema.nullable(),
+	total: MoneySchema,
+	version: z.number().int().min(1),
+});
+
+export const ReceiptLineSchema = z.object({
+	discount: MoneySchema,
+	lineTotal: MoneySchema,
+	nonStatutory: z.literal(true),
+	productName: z.string(),
+	quantity: PositiveDecimalQuantitySchema,
+	tax: MoneySchema,
+	taxableBase: MoneySchema,
+	taxCategory: SaleTaxCategorySchema,
+	unit: z.string(),
+	unitPrice: MoneySchema,
+});
+
+export const ReceiptSchema = z.object({
+	cashierPartyId: IdentifierSchema,
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	id: IdentifierSchema,
+	issuedAt: InstantSchema,
+	kind: z.enum(["Sale", "Return", "Reissue"]),
+	lines: z.array(ReceiptLineSchema),
+	originalReceiptId: NullableIdentifierSchema,
+	priceSuppressed: z.boolean(),
+	receiptNumber: z.string(),
+	registerId: IdentifierSchema,
+	returnId: NullableIdentifierSchema,
+	saleId: NullableIdentifierSchema,
+	tenders: z.array(TenderReferenceSchema),
+	total: MoneySchema.nullable(),
+});
+
+// ---------------------------------------------------------------------------
+// WS3 PR3: Return, Refund, Void, Reissue, Exchange (commerce.returns,
+// commerce.refunds, commerce.receipts). Exchange has no dedicated schema:
+// it rides `CompleteSaleRequestSchema`'s optional `exchangeOfReturnId` and
+// surfaces on the ordinary `SaleSchema` response, per frozen control plan
+// §6.5 (no new permission or endpoint is invented for it).
+// ---------------------------------------------------------------------------
+
+export const ReturnLineInputSchema = z
+	.object({
+		quantity: PositiveDecimalQuantitySchema,
+		saleLineId: IdentifierSchema,
+	})
+	.strict();
+
+export const CreateReturnSchema = z
+	.object({
+		// WS3 remediation R4, P2 item 1: bounded to the SAME 500-line ceiling
+		// as `CreateSaleSchema.lines` — a return can never exceed its
+		// originating sale's own (now-bounded) line count.
+		lines: z.array(ReturnLineInputSchema).min(1).max(500),
+		reason: z.string().min(1).max(500),
+		saleId: IdentifierSchema,
+	})
+	.strict();
+
+export const ReturnLineSchema = z.object({
+	discount: MoneySchema,
+	gross: MoneySchema,
+	id: IdentifierSchema,
+	lineTotal: MoneySchema,
+	nonStatutory: z.literal(true),
+	productId: IdentifierSchema,
+	productName: z.string(),
+	quantity: PositiveDecimalQuantitySchema,
+	saleLineId: IdentifierSchema,
+	tax: MoneySchema,
+	taxableBase: MoneySchema,
+	taxCategory: SaleTaxCategorySchema,
+	unit: z.string(),
+	unitPrice: MoneySchema,
+	variantId: NullableIdentifierSchema,
+});
+
+export const ReturnSchema = z.object({
+	approvedAt: InstantSchema.nullable(),
+	createdAt: InstantSchema,
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	exchangeSaleId: NullableIdentifierSchema,
+	id: IdentifierSchema,
+	lines: z.array(ReturnLineSchema),
+	mode: z.enum(["Return", "Void"]),
+	reason: z.string(),
+	receiptId: NullableIdentifierSchema,
+	registerId: IdentifierSchema,
+	saleId: IdentifierSchema,
+	state: z.enum(["Pending", "Completed"]),
+	totalRefundable: MoneySchema,
+	version: z.number().int().min(1),
+});
+
+export const CreateRefundSchema = z
+	.object({
+		returnId: IdentifierSchema,
+	})
+	.strict();
+
+export const RefundSchema = z.object({
+	amount: MoneySchema,
+	approvedAt: InstantSchema.nullable(),
+	cashMovementId: NullableIdentifierSchema,
+	id: IdentifierSchema,
+	registerId: IdentifierSchema,
+	requestedAt: InstantSchema,
+	returnId: IdentifierSchema,
+	state: z.enum(["Requested", "Posted"]),
+	version: z.number().int().min(1),
+});
+
+export const ReissueReceiptRequestSchema = z
+	.object({
+		priceSuppressed: z.boolean().optional(),
+	})
+	.strict();
+
+export const VoidReceiptRequestSchema = z
+	.object({
+		reason: z.string().min(1).max(500).optional(),
+	})
+	.strict();
+
+// ---------------------------------------------------------------------------
+// WS3 PR4: Deposit (commerce.deposit.create/.confirm, frozen control plan
+// §6.6) and the accountant-handoff export (platform.export.create/.read,
+// FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md/PDA-DOM-026).
+// ---------------------------------------------------------------------------
+
+export const CreateDepositSchema = z
+	.object({
+		countedAmount: MoneySchema,
+		currency: z.string().regex(/^[A-Z]{3}$/),
+		sourceShiftIds: z.array(IdentifierSchema).min(1),
+	})
+	.strict();
+
+export const DepositSchema = z.object({
+	amount: MoneySchema,
+	confirmedAt: InstantSchema.nullable(),
+	confirmerPartyId: NullableIdentifierSchema,
+	depositReference: z.string(),
+	id: IdentifierSchema,
+	preparedAt: InstantSchema,
+	preparerPartyId: IdentifierSchema,
+	sourceShiftIds: z.array(IdentifierSchema),
+	state: z.enum(["Prepared", "Reconciled"]),
+	version: z.number().int().min(1),
+});
+
+export const AccountantHandoffRequestSchema = z
+	.object({
+		currency: z.string().regex(/^[A-Z]{3}$/),
+		legalEntityId: IdentifierSchema,
+		periodEnd: InstantSchema,
+		periodStart: InstantSchema,
+		timezone: z.string().min(1).max(100),
+	})
+	.strict();
+
+export const AccountantHandoffExportSchema = z.object({
+	contentHash: z.string(),
+	currency: z.string().regex(/^[A-Z]{3}$/),
+	generatedAt: InstantSchema,
+	id: IdentifierSchema,
+	idempotencyKey: z.string(),
+	kind: z.literal("AccountantHandoff"),
+	legalEntityId: IdentifierSchema,
+	organizationId: IdentifierSchema,
+	// The full accountant export package; `payload.postingBatch` validates
+	// against schemas/finance/finance-handoff-v1.schema.json — that JSON
+	// Schema file remains the single source of truth for its shape, not
+	// re-encoded a second time as zod here.
+	payload: z.record(z.string(), z.unknown()),
+	periodEnd: InstantSchema,
+	periodStart: InstantSchema,
+	ruleVersion: z.string(),
+	schemaVersion: z.string(),
+	tenantId: IdentifierSchema,
+	timezone: z.string(),
+});
+
 export const CsvImportManifestSchema = z.object({
 	decimalSeparator: z.enum([".", ","]),
 	defaultUnit: z.string().min(1).max(50).optional(),
@@ -844,6 +1238,14 @@ export const PagedInventoryAdjustmentsSchema = pageOf(
 );
 export const PagedStockCountsSchema = pageOf(StockCountSchema);
 export const PagedStockTransfersSchema = pageOf(StockTransferSchema);
+/** WS3 remediation R3b, Item 7 (server-backed discovery — pending
+ * approval/read queues). One `pageOf(...)` per approval/confirm surface
+ * that previously required copying an opaque ID between users/browsers. */
+export const PagedPriceOverridesSchema = pageOf(PriceOverrideSchema);
+export const PagedReturnsSchema = pageOf(ReturnSchema);
+export const PagedRefundsSchema = pageOf(RefundSchema);
+export const PagedDepositsSchema = pageOf(DepositSchema);
+export const PagedRegisterSessionsSchema = pageOf(RegisterSessionSchema);
 
 export type ActiveContext = z.infer<typeof ActiveContextSchema>;
 export type ActiveContextRequest = z.infer<typeof ActiveContextRequestSchema>;
@@ -923,3 +1325,39 @@ export type StockCount = z.infer<typeof StockCountSchema>;
 export type StockTransfer = z.infer<typeof StockTransferSchema>;
 export type ReceiveStockTransfer = z.infer<typeof ReceiveStockTransferSchema>;
 export type SubmitStockCount = z.infer<typeof SubmitStockCountSchema>;
+export type Money = z.infer<typeof MoneySchema>;
+export type OpenRegisterRequest = z.infer<typeof OpenRegisterRequestSchema>;
+export type CloseRegisterRequest = z.infer<typeof CloseRegisterRequestSchema>;
+export type RegisterSession = z.infer<typeof RegisterSessionSchema>;
+export type CreateCashMovementRequest = z.infer<
+	typeof CreateCashMovementRequestSchema
+>;
+export type CreateSafeDropRequest = z.infer<typeof CreateSafeDropRequestSchema>;
+export type CashMovement = z.infer<typeof CashMovementSchema>;
+export type SaleTaxCategory = z.infer<typeof SaleTaxCategorySchema>;
+export type SaleLineInput = z.infer<typeof SaleLineInputSchema>;
+export type CreateSale = z.infer<typeof CreateSaleSchema>;
+export type TenderReference = z.infer<typeof TenderReferenceSchema>;
+export type CompleteSaleRequest = z.infer<typeof CompleteSaleRequestSchema>;
+export type RequestPriceOverride = z.infer<typeof RequestPriceOverrideSchema>;
+export type SaleLine = z.infer<typeof SaleLineSchema>;
+export type Sale = z.infer<typeof SaleSchema>;
+export type ReceiptLine = z.infer<typeof ReceiptLineSchema>;
+export type Receipt = z.infer<typeof ReceiptSchema>;
+export type ReturnLineInput = z.infer<typeof ReturnLineInputSchema>;
+export type CreateReturn = z.infer<typeof CreateReturnSchema>;
+export type ReturnLine = z.infer<typeof ReturnLineSchema>;
+export type Return = z.infer<typeof ReturnSchema>;
+export type CreateRefund = z.infer<typeof CreateRefundSchema>;
+export type Refund = z.infer<typeof RefundSchema>;
+export type ReissueReceiptRequest = z.infer<typeof ReissueReceiptRequestSchema>;
+export type VoidReceiptRequest = z.infer<typeof VoidReceiptRequestSchema>;
+export type CreateDeposit = z.infer<typeof CreateDepositSchema>;
+export type Deposit = z.infer<typeof DepositSchema>;
+export type PriceOverride = z.infer<typeof PriceOverrideSchema>;
+export type AccountantHandoffRequest = z.infer<
+	typeof AccountantHandoffRequestSchema
+>;
+export type AccountantHandoffExport = z.infer<
+	typeof AccountantHandoffExportSchema
+>;

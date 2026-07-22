@@ -399,6 +399,9 @@ paths:
       responses:
         '200':
           description: Register opened
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
   /registers/{registerId}/close:
     post:
       tags: [Commerce]
@@ -415,6 +418,9 @@ paths:
       responses:
         '200':
           description: Register closed or variance review required
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
   /sales:
     post:
       tags: [Commerce]
@@ -453,6 +459,21 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/Sale'}
   /returns:
+    get:
+      tags: [Commerce]
+      operationId: listReturns
+      x-permission: commerce.return.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Pending, Completed]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-approval queue for commerce.return.approve, reusing that exact permission (no new identifier invented). Replaces copying an opaque Return ID between users/browsers.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedReturns'}
     post:
       tags: [Commerce]
       operationId: createReturn
@@ -466,8 +487,26 @@ paths:
             schema: {$ref: '#/components/schemas/CreateReturn'}
       responses:
         '201':
-          description: Return created
+          description: Return created, Pending checker approval
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Return'}
   /deposits:
+    get:
+      tags: [Commerce]
+      operationId: listDeposits
+      x-permission: commerce.deposit.confirm
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Prepared, Reconciled]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-confirmation queue for commerce.deposit.confirm, reusing that exact permission (no new identifier invented). Replaces copying an opaque Deposit ID between users/browsers.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedDeposits'}
     post:
       tags: [Commerce]
       operationId: createDeposit
@@ -481,7 +520,10 @@ paths:
             schema: {$ref: '#/components/schemas/CreateDeposit'}
       responses:
         '201':
-          description: Deposit created
+          description: Deposit prepared (effect-free); reserves the counted amount against available safe custody, no custody transfer posted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Deposit'}
   /payment-intents:
     post:
       tags: [Payment]
@@ -599,7 +641,10 @@ paths:
             schema: {$ref: '#/components/schemas/AccountantHandoffRequest'}
       responses:
         '202':
-          description: Export job created
+          description: Export job created; deterministic and idempotent for the same bounded range and source data
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AccountantHandoffExport'}
   /webhook-subscriptions:
     post:
       tags: [Webhooks]
@@ -1476,7 +1521,73 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Sale parked to Held
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
+  /sales/{saleId}/price-overrides:
+    post:
+      tags: [Commerce]
+      operationId: requestSalePriceOverride
+      x-permission: commerce.price-override.request
+      parameters:
+        - {name: saleId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RequestPriceOverride'}
+      responses:
+        '201':
+          description: Price override requested and pending approval
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
+  /sales/{saleId}/price-overrides/{overrideId}/approve:
+    post:
+      tags: [Commerce]
+      operationId: approveSalePriceOverride
+      x-permission: commerce.price-override.approve
+      parameters:
+        - {name: saleId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: overrideId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Price override approved and the requested price applied
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
+  /price-overrides:
+    get:
+      tags: [Commerce]
+      operationId: listPriceOverrides
+      x-permission: commerce.price-override.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Pending, Approved]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-approval queue for commerce.price-override.approve, reusing that exact permission (no new identifier invented). Replaces "type the Sale ID and Override ID your colleague read off their own screen".
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedPriceOverrides'}
+  /returns/{returnId}:
+    get:
+      tags: [Commerce]
+      operationId: getReturnsByReturnId
+      x-permission: commerce.return.approve
+      parameters:
+        - {name: returnId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.return.approve, gated on that exact permission (an approver may preview what they can approve)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Return'}
   /returns/{returnId}/approve:
     post:
       tags: [Commerce]
@@ -1487,17 +1598,56 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Return approved by a checker other than its creator; posts the compensating Inventory movement
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Return'}
   /refunds:
+    get:
+      tags: [Commerce]
+      operationId: listRefunds
+      x-permission: commerce.refund.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: state, in: query, schema: {type: string, enum: [Requested, Posted]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-approval queue for commerce.refund.approve, reusing that exact permission (no new identifier invented). Replaces copying an opaque Refund ID between users/browsers.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedRefunds'}
     post:
       tags: [Commerce]
       operationId: postRefunds
       x-permission: commerce.refund.create
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateRefund'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Refund Requested against an approved Return; amount derived from the Return, no register cash effect yet
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Refund'}
+  /refunds/{refundId}:
+    get:
+      tags: [Commerce]
+      operationId: getRefundsByRefundId
+      x-permission: commerce.refund.approve
+      parameters:
+        - {name: refundId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.refund.approve
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Refund'}
   /refunds/{refundId}/approve:
     post:
       tags: [Commerce]
@@ -1508,7 +1658,10 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Refund approved by a checker other than its requester; posts a paid-out cash movement (reason Refund) on the referenced open register
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Refund'}
   /registers/{registerId}/cash-movements:
     post:
       tags: [Commerce]
@@ -1517,9 +1670,17 @@ paths:
       parameters:
         - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateCashMovementRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Cash movement posted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CashMovement'}
   /registers/{registerId}/safe-drops:
     post:
       tags: [Commerce]
@@ -1528,9 +1689,30 @@ paths:
       parameters:
         - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateSafeDropRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Safe drop posted as a paid-out cash movement
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CashMovement'}
+  /deposits/{depositId}:
+    get:
+      tags: [Commerce]
+      operationId: getDepositsByDepositId
+      x-permission: commerce.deposit.confirm
+      parameters:
+        - {name: depositId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.deposit.confirm
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Deposit'}
   /deposits/{depositId}/confirm:
     post:
       tags: [Commerce]
@@ -1541,7 +1723,53 @@ paths:
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Deposit confirmed; posts the safe-to-bank custody transfer atomically, by an actor other than the preparer
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Deposit'}
+  /register-sessions/{sessionId}:
+    get:
+      tags: [Commerce]
+      operationId: getRegisterSessionsBySessionId
+      x-permission: commerce.register.close
+      parameters:
+        - {name: sessionId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.register.close (the closer's own upcoming action)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
+  /cash-variances:
+    get:
+      tags: [Commerce]
+      operationId: listCashVariances
+      x-permission: commerce.cash-variance.approve
+      parameters:
+        - $ref: '#/components/parameters/RequiredActiveContextId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+        - {name: locationId, in: query, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: state, in: query, schema: {type: string, enum: [Open, Closing, Closed]}}
+      responses:
+        '200':
+          description: WS3 remediation R3b, Item 7 - server-backed pending-approval queue for commerce.cash-variance.approve, reusing that exact permission (no new identifier invented). A session only holds state=Closing while a non-zero close variance awaits approval, so that is exactly the pending queue.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PagedRegisterSessions'}
+  /cash-variances/{varianceId}:
+    get:
+      tags: [Commerce]
+      operationId: getCashVariancesByVarianceId
+      x-permission: commerce.cash-variance.approve
+      parameters:
+        - {name: varianceId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding I - pre-commit consequence preview for commerce.cash-variance.approve; varianceId is the register session id, matching the approve operation and VarianceApproveForm exactly
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
   /cash-variances/{varianceId}/approve:
     post:
       tags: [Commerce]
@@ -1549,10 +1777,14 @@ paths:
       x-permission: commerce.cash-variance.approve
       parameters:
         - {name: varianceId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - $ref: '#/components/parameters/ExpectedVersion'
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Cash variance approved; the register session is now Closed
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RegisterSession'}
   /receipts/{receiptId}:
     get:
       tags: [Commerce]
@@ -1562,7 +1794,38 @@ paths:
         - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Receipt found
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Receipt'}
+  /registers/{registerId}/receipts/{receiptNumber}:
+    get:
+      tags: [Commerce]
+      operationId: getRegistersByRegisterIdReceiptsByReceiptNumber
+      x-permission: commerce.receipt.read
+      parameters:
+        - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: receiptNumber, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding J - resolves the human-legible receiptNumber+registerId printed on ReceiptLayout to the Receipt (and its saleId), so a cashier in a fresh browser can start a return without an opaque cached Sale ID
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Receipt'}
+  /registers/{registerId}/receipts/{receiptNumber}/sale:
+    get:
+      tags: [Commerce]
+      operationId: getRegistersByRegisterIdReceiptsByReceiptNumberSale
+      x-permission: commerce.return.create
+      parameters:
+        - {name: registerId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
+        - {name: receiptNumber, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: WS3 remediation R3, Finding J - completes the receipt-to-return path the sibling receiptNumber lookup starts. `CreateReturnSchema` requires per-line `saleLineId`, which `ReceiptLineSnapshot` never carries (an immutable receipt snapshot, not a live sale projection) - so resolving only as far as the Receipt's `saleId` is not enough to build a return. Gated on `commerce.return.create` (the permission the return this preview leads to actually requires), not `commerce.receipt.read`, so a single permission check covers the whole receipt-to-return path with no second permission seam. Returns the full Sale (with real `lines[].id`) a returnable Sale-kind receipt resolves to.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Sale'}
   /receipts/{receiptId}/reissue:
     post:
       tags: [Commerce]
@@ -1571,9 +1834,17 @@ paths:
       parameters:
         - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReissueReceiptRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: New numbered Reissue-kind receipt linked to the original; no monetary effect. priceSuppressed realizes the gift-receipt variant
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Receipt'}
   /receipts/{receiptId}/void:
     post:
       tags: [Commerce]
@@ -1582,9 +1853,17 @@ paths:
       parameters:
         - {name: receiptId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
         - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/VoidReceiptRequest'}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Same-day/open-session full compensating reversal of the original Sale; own permission, not a maker/checker pair, not a delete
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Return'}
   /payment-intents/{id}:
     get:
       tags: [Payment]
@@ -1725,14 +2004,17 @@ paths:
           description: Contract response; the owning specification defines state and error semantics
   /exports/{exportId}:
     get:
-      tags: [Identity]
+      tags: [Exports]
       operationId: getExportsByExportId
       x-permission: platform.export.read
       parameters:
         - {name: exportId, in: path, required: true, schema: {$ref: '#/components/schemas/Identifier'}}
       responses:
         '200':
-          description: Contract response; the owning specification defines state and error semantics
+          description: Export job found
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AccountantHandoffExport'}
   /deposit-reconciliations:
     post:
       tags: [Exports]
@@ -2676,6 +2958,61 @@ components:
       properties:
         countedCash: {$ref: '#/components/schemas/Money'}
         reason: {type: string, maxLength: 500}
+    RegisterSession:
+      type: object
+      required: [id, registerId, locationId, currency, openingFloat, state, openedAt, openerPartyId, varianceApprovalRequired, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        locationId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        openingFloat: {$ref: '#/components/schemas/Money'}
+        state: {type: string, enum: [Open, Closing, Closed]}
+        openedAt: {type: string, format: date-time}
+        openerPartyId: {$ref: '#/components/schemas/Identifier'}
+        closedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        closeReason: {oneOf: [{type: string, maxLength: 500}, {type: 'null'}]}
+        countedCash: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        expectedCash: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        variance: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        varianceApprovalRequired: {type: boolean}
+        varianceApprovedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        varianceApproverPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    PagedRegisterSessions:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/RegisterSession'}}
+        nextCursor: {type: [string, 'null']}
+    CreateCashMovementRequest:
+      type: object
+      required: [amount, direction, reasonCode]
+      properties:
+        amount: {$ref: '#/components/schemas/Money'}
+        direction: {type: string, enum: [PaidIn, PaidOut]}
+        reasonCode: {type: string, enum: [PaidIn, PaidOut, Other]}
+        note: {type: string, maxLength: 500}
+        referenceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+    CreateSafeDropRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: {$ref: '#/components/schemas/Money'}
+        note: {type: string, maxLength: 500}
+    CashMovement:
+      type: object
+      required: [id, registerId, sessionId, amount, direction, reasonCode, createdAt]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        sessionId: {$ref: '#/components/schemas/Identifier'}
+        amount: {$ref: '#/components/schemas/Money'}
+        direction: {type: string, enum: [PaidIn, PaidOut]}
+        reasonCode: {type: string, enum: [PaidIn, PaidOut, SafeDrop, Refund, Other]}
+        note: {oneOf: [{type: string, maxLength: 500}, {type: 'null'}]}
+        referenceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        createdAt: {type: string, format: date-time}
     CreateSale:
       type: object
       required: [registerId, currency, lines]
@@ -2684,17 +3021,54 @@ components:
         customerPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
         currency: {type: string, pattern: '^[A-Z]{3}$'}
         lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/SaleLineInput'}}
+    SaleTaxCategory:
+      type: string
+      enum: [GY_STANDARD_14, GY_ZERO_RATED, GY_EXEMPT, GY_OUT_OF_SCOPE]
+      description: Prototype, non-statutory Guyana tax pack category (PDA-IND-090). Defaults to GY_STANDARD_14 when omitted.
     SaleLineInput:
       type: object
-      required: [productId, quantity]
+      required: [productId, quantity, unit, unitPrice]
       properties:
         productId: {$ref: '#/components/schemas/Identifier'}
-        quantity: {type: number, exclusiveMinimum: 0}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        unit: {type: string, minLength: 1, maxLength: 40}
+        unitPrice: {$ref: '#/components/schemas/Money'}
+        discountAmount: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
     CompleteSaleRequest:
       type: object
+      additionalProperties: false
       required: [tenders]
       properties:
         tenders: {type: array, minItems: 1, items: {$ref: '#/components/schemas/TenderReference'}}
+        exchangeOfReturnId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}], description: 'Realizes commerce.exchanges (frozen control plan §6.5): names an already-Completed Return this sale replaces, sharing the same register. No dedicated exchange permission or endpoint exists.'}
+    RequestPriceOverride:
+      type: object
+      required: [lineId, requestedPrice, reason]
+      properties:
+        lineId: {$ref: '#/components/schemas/Identifier'}
+        requestedPrice: {$ref: '#/components/schemas/Money'}
+        reason: {type: string, minLength: 1, maxLength: 500}
+    PriceOverride:
+      type: object
+      required: [id, saleId, lineId, requestedPrice, reason, state, requestedAt, approvedAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        saleId: {$ref: '#/components/schemas/Identifier'}
+        lineId: {$ref: '#/components/schemas/Identifier'}
+        requestedPrice: {$ref: '#/components/schemas/Money'}
+        reason: {type: string}
+        state: {type: string, enum: [Pending, Approved]}
+        requestedAt: {type: string, format: date-time}
+        approvedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    PagedPriceOverrides:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/PriceOverride'}}
+        nextCursor: {type: [string, 'null']}
     TenderReference:
       type: object
       required: [type, amount]
@@ -2702,22 +3076,172 @@ components:
         type: {type: string, enum: [Cash, PaymentIntent, StoredValue]}
         amount: {$ref: '#/components/schemas/Money'}
         referenceId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
-    Sale:
+    SaleLine:
       type: object
-      required: [id, state, currency, total]
+      required: [id, productId, productName, quantity, unit, unitPrice, gross, discount, taxableBase, taxCategory, tax, lineTotal, nonStatutory, priceOverrideId, priceOverrideState]
       properties:
         id: {$ref: '#/components/schemas/Identifier'}
-        state: {type: string}
-        currency: {type: string}
+        productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        productName: {type: string}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        unit: {type: string}
+        unitPrice: {$ref: '#/components/schemas/Money'}
+        gross: {$ref: '#/components/schemas/Money'}
+        discount: {$ref: '#/components/schemas/Money'}
+        taxableBase: {$ref: '#/components/schemas/Money'}
+        taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
+        tax: {$ref: '#/components/schemas/Money'}
+        lineTotal: {$ref: '#/components/schemas/Money'}
+        nonStatutory: {type: boolean, enum: [true], description: 'Always true — this line was computed by the prototype, non-statutory Guyana tax pack (PDA-IND-090). Never verified for statutory filing or production use.'}
+        priceOverrideId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        priceOverrideState: {oneOf: [{type: string, enum: [Pending, Approved]}, {type: 'null'}]}
+    Sale:
+      type: object
+      required: [id, registerId, sessionId, currency, state, lines, gross, discount, tax, total, receiptId, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        sessionId: {$ref: '#/components/schemas/Identifier'}
+        customerPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        state: {type: string, enum: [Open, Held, Completed]}
+        lines: {type: array, items: {$ref: '#/components/schemas/SaleLine'}}
+        gross: {$ref: '#/components/schemas/Money'}
+        discount: {$ref: '#/components/schemas/Money'}
+        tax: {$ref: '#/components/schemas/Money'}
         total: {$ref: '#/components/schemas/Money'}
+        tendered: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+        change: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
         receiptId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        heldAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        completedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    ReceiptLine:
+      type: object
+      required: [productName, quantity, unit, unitPrice, discount, taxableBase, taxCategory, tax, lineTotal, nonStatutory]
+      properties:
+        productName: {type: string}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        unit: {type: string}
+        unitPrice: {$ref: '#/components/schemas/Money'}
+        discount: {$ref: '#/components/schemas/Money'}
+        taxableBase: {$ref: '#/components/schemas/Money'}
+        taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
+        tax: {$ref: '#/components/schemas/Money'}
+        lineTotal: {$ref: '#/components/schemas/Money'}
+        nonStatutory: {type: boolean, enum: [true], description: 'Always true — this line was computed by the prototype, non-statutory Guyana tax pack (PDA-IND-090). Never verified for statutory filing or production use.'}
+    Receipt:
+      type: object
+      required: [id, receiptNumber, kind, registerId, currency, priceSuppressed, issuedAt, lines, tenders, total]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        receiptNumber: {type: string}
+        kind: {type: string, enum: [Sale, Return, Reissue]}
+        saleId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        returnId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        originalReceiptId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        cashierPartyId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        priceSuppressed: {type: boolean}
+        issuedAt: {type: string, format: date-time}
+        lines: {type: array, items: {$ref: '#/components/schemas/ReceiptLine'}}
+        tenders: {type: array, items: {$ref: '#/components/schemas/TenderReference'}}
+        total: {oneOf: [{$ref: '#/components/schemas/Money'}, {type: 'null'}]}
+    ReturnLineInput:
+      type: object
+      additionalProperties: false
+      required: [saleLineId, quantity]
+      properties:
+        saleLineId: {$ref: '#/components/schemas/Identifier'}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
     CreateReturn:
       type: object
+      additionalProperties: false
       required: [saleId, lines, reason]
       properties:
         saleId: {$ref: '#/components/schemas/Identifier'}
-        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/QuantityLine'}}
-        reason: {type: string, maxLength: 500}
+        lines: {type: array, minItems: 1, items: {$ref: '#/components/schemas/ReturnLineInput'}}
+        reason: {type: string, minLength: 1, maxLength: 500}
+    ReturnLine:
+      type: object
+      required: [id, saleLineId, productId, productName, quantity, unit, unitPrice, gross, discount, taxableBase, taxCategory, tax, lineTotal, nonStatutory]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        saleLineId: {$ref: '#/components/schemas/Identifier'}
+        productId: {$ref: '#/components/schemas/Identifier'}
+        variantId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        productName: {type: string}
+        quantity: {$ref: '#/components/schemas/PositiveDecimalQuantity'}
+        unit: {type: string}
+        unitPrice: {$ref: '#/components/schemas/Money'}
+        gross: {$ref: '#/components/schemas/Money'}
+        discount: {$ref: '#/components/schemas/Money'}
+        taxableBase: {$ref: '#/components/schemas/Money'}
+        taxCategory: {$ref: '#/components/schemas/SaleTaxCategory'}
+        tax: {$ref: '#/components/schemas/Money'}
+        lineTotal: {$ref: '#/components/schemas/Money'}
+        nonStatutory: {type: boolean, enum: [true], description: 'Always true — this line was priced by apportioning the prototype, non-statutory Guyana tax pack (PDA-IND-090) amounts already locked on the original sale line. Never verified for statutory filing or production use.'}
+    Return:
+      type: object
+      required: [id, saleId, registerId, currency, mode, state, reason, lines, totalRefundable, receiptId, exchangeSaleId, createdAt, approvedAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        saleId: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        mode: {type: string, enum: [Return, Void], description: 'Void realizes the same-day/open-session administrative reversal permission (commerce.receipt.void) on this same Return shape — see frozen control plan §6.3 Scope.'}
+        state: {type: string, enum: [Pending, Completed]}
+        reason: {type: string}
+        lines: {type: array, items: {$ref: '#/components/schemas/ReturnLine'}}
+        totalRefundable: {$ref: '#/components/schemas/Money'}
+        receiptId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        exchangeSaleId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}], description: 'Set once this Return has been consumed as the compensating leg of an Exchange via sale.complete''s exchangeOfReturnId (frozen control plan §6.5). No dedicated exchange permission or endpoint exists.'}
+        createdAt: {type: string, format: date-time}
+        approvedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    PagedReturns:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Return'}}
+        nextCursor: {type: [string, 'null']}
+    CreateRefund:
+      type: object
+      additionalProperties: false
+      required: [returnId]
+      properties:
+        returnId: {$ref: '#/components/schemas/Identifier'}
+    Refund:
+      type: object
+      required: [id, returnId, registerId, amount, state, cashMovementId, requestedAt, approvedAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        returnId: {$ref: '#/components/schemas/Identifier'}
+        registerId: {$ref: '#/components/schemas/Identifier'}
+        amount: {$ref: '#/components/schemas/Money', description: 'Always derived from the referenced Return''s totalRefundable — never caller-supplied.'}
+        state: {type: string, enum: [Requested, Posted]}
+        cashMovementId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        requestedAt: {type: string, format: date-time}
+        approvedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    PagedRefunds:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Refund'}}
+        nextCursor: {type: [string, 'null']}
+    ReissueReceiptRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        priceSuppressed: {type: boolean, description: 'true realizes the commerce.gift-receipts capability as a price-suppressed variant of this same reissue command — no separate gift-receipt endpoint exists (frozen control plan §5).'}
+    VoidReceiptRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        reason: {type: string, minLength: 1, maxLength: 500}
     CreateDeposit:
       type: object
       required: [currency, sourceShiftIds, countedAmount]
@@ -2725,6 +3249,26 @@ components:
         currency: {type: string, pattern: '^[A-Z]{3}$'}
         sourceShiftIds: {type: array, minItems: 1, items: {$ref: '#/components/schemas/Identifier'}}
         countedAmount: {$ref: '#/components/schemas/Money'}
+    Deposit:
+      type: object
+      required: [id, depositReference, amount, sourceShiftIds, state, preparerPartyId, preparedAt, confirmerPartyId, confirmedAt, version]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        depositReference: {type: string, description: 'Human-facing reference number (platform/numbering, organization-scoped), separate from the opaque id.'}
+        amount: {$ref: '#/components/schemas/Money'}
+        sourceShiftIds: {type: array, items: {$ref: '#/components/schemas/Identifier'}}
+        state: {type: string, enum: [Prepared, Reconciled], description: 'Prepared is effect-free (reserves safe custody, posts no custody transfer); Reconciled posts the safe-to-bank custody transfer atomically (commerce.deposit.confirm, frozen control plan §6.6).'}
+        preparerPartyId: {$ref: '#/components/schemas/Identifier'}
+        preparedAt: {type: string, format: date-time}
+        confirmerPartyId: {oneOf: [{$ref: '#/components/schemas/Identifier'}, {type: 'null'}]}
+        confirmedAt: {oneOf: [{type: string, format: date-time}, {type: 'null'}]}
+        version: {type: integer, minimum: 1}
+    PagedDeposits:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Deposit'}}
+        nextCursor: {type: [string, 'null']}
     CreatePaymentIntent:
       type: object
       required: [saleId, rail, amount]
@@ -2763,12 +3307,32 @@ components:
         locationId: {$ref: '#/components/schemas/Identifier'}
     AccountantHandoffRequest:
       type: object
-      required: [legalEntityId, periodStart, periodEnd, currency]
+      required: [legalEntityId, periodStart, periodEnd, currency, timezone]
       properties:
         legalEntityId: {$ref: '#/components/schemas/Identifier'}
+        periodStart: {type: string, format: date-time, description: 'Exact UTC instant lower bound (inclusive) of the export range. The caller derives this from the desired local calendar boundary using timezone; the server performs plain instant-range comparisons, never a local-date truncation.'}
+        periodEnd: {type: string, format: date-time, description: 'Exact UTC instant upper bound (exclusive) of the export range.'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        timezone: {type: string, description: 'IANA timezone the caller used to derive periodStart/periodEnd from local calendar dates (e.g. America/Guyana). Carried through to finance-handoff-v1''s period.timezone for legally relevant local-date interpretation (CLAUDE.md §7) — never used to re-derive the UTC bounds server-side.'}
+    AccountantHandoffExport:
+      type: object
+      required: [id, idempotencyKey, kind, tenantId, legalEntityId, organizationId, currency, timezone, ruleVersion, schemaVersion, contentHash, generatedAt, periodStart, periodEnd, payload]
+      properties:
+        id: {$ref: '#/components/schemas/Identifier'}
+        idempotencyKey: {type: string}
+        kind: {type: string, enum: [AccountantHandoff]}
+        tenantId: {$ref: '#/components/schemas/Identifier'}
+        legalEntityId: {$ref: '#/components/schemas/Identifier'}
+        organizationId: {$ref: '#/components/schemas/Identifier'}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        timezone: {type: string}
+        ruleVersion: {type: string}
+        schemaVersion: {type: string}
+        contentHash: {type: string, description: 'sha256 of the canonical (recursively key-sorted) JSON serialization of payload — deterministic and reproducible for identical inputs (frozen control plan Tests: "export determinism"), excludes generatedAt/id.'}
+        generatedAt: {type: string, format: date-time, description: 'Wall-clock generation time of THIS job record; excluded from contentHash so two independent generations over identical inputs still hash identically.'}
         periodStart: {type: string, format: date-time}
         periodEnd: {type: string, format: date-time}
-        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        payload: {type: object, description: 'The full accountant export package (PDA-DOM-026): payload.postingBatch validates against schemas/finance/finance-handoff-v1.schema.json exactly; sibling fields (manifest-adjacent summaries, reconciliation, exceptions) are documented in FIRST_SLICE_FINANCE_HANDOFF_CONTRACT.md''s "Accountant Export Package" section. Left as a free-form object here rather than fully inlining finance-handoff-v1''s schema a second time — the JSON Schema file remains the single source of truth for postingBatch''s shape.'}
     CreateWebhookSubscription:
       type: object
       required: [endpoint, eventNames]

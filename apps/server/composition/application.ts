@@ -6,10 +6,12 @@ import { catalogTransportApplication } from "./catalog";
 import { createCurrentIdentityResolver } from "./current-identity";
 import { entitlementTransportApplication } from "./entitlements";
 import { eventReplayTransportApplication } from "./events";
+import { financeHandoffTransportApplication } from "./finance-handoff";
 import { identitySessionTransportApplication } from "./identity";
 import { importTransportApplication } from "./imports";
 import { inventoryTransportApplication } from "./inventory";
 import { partyIdentityLinkDirectory, partyTransportApplication } from "./party";
+import { posTransportApplication } from "./pos";
 import {
 	identityDirectory,
 	identityOrganizationProjection,
@@ -33,10 +35,12 @@ export const serverApplication = {
 	...catalogTransportApplication,
 	...entitlementTransportApplication,
 	...eventReplayTransportApplication,
+	...financeHandoffTransportApplication,
 	...identitySessionTransportApplication,
 	...importTransportApplication,
 	...inventoryTransportApplication,
 	...tenancyApplication,
 	...partyTransportApplication,
+	...posTransportApplication,
 	getCurrentIdentity,
 };

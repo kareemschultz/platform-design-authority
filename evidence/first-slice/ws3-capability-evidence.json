@@ -1,0 +1,919 @@
+{
+  "schema_version": "1.0.0",
+  "workstream_id": "WS3",
+  "status": "controlled-prototype-evidence",
+  "verified_on": "2026-07-20",
+  "capabilities": [
+    "commerce.cash-management",
+    "commerce.exchanges",
+    "commerce.gift-receipts",
+    "commerce.mobile-pos",
+    "commerce.offline-sales",
+    "commerce.order-management",
+    "commerce.pos",
+    "commerce.receipts",
+    "commerce.refunds",
+    "commerce.register-management",
+    "commerce.returns",
+    "commerce.shift-management"
+  ],
+  "evidence": [
+    {
+      "id": "ws3-domain-register-cash",
+      "kind": "automated-test",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "contains": [
+        "opens a register and rejects a concurrent second open on the same register",
+        "computes zero, short, and over cash variance and gates approval only on non-zero",
+        "denies self-approval of a cash variance and allows a different approver to close it",
+        "replays an idempotent open and cash-movement command without duplicating effects",
+        "validates money and direction/reason-code pairing at the domain boundary"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.cash-management",
+        "commerce.pos"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-domain-sale",
+      "kind": "automated-test",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "contains": [
+        "applies a per-line discount before computing tax",
+        "rejects sale creation when the register has no open session",
+        "rejects completion when tendered cash is less than the sale total",
+        "holds an Open sale and completes it after hold via implicit resume",
+        "replays an idempotent sale.create and sale.complete without duplicating a receipt or stock movement",
+        "reads back a persisted receipt by id",
+        "rejects a non-Cash tender politely at the completion boundary (WS4/WS6 scope)"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.order-management",
+        "commerce.pos",
+        "commerce.receipts",
+        "commerce.offline-sales",
+        "commerce.mobile-pos"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-domain-return-refund-exchange",
+      "kind": "automated-test",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "contains": [
+        "uses Pending -> Completed for a return and Requested -> Posted for a refund, never pre-approved",
+        "prevents an over-return, cumulative across two partial returns",
+        "rejects a return referencing a sale that has not yet completed",
+        "rejects a refund approval once the referenced register's session is no longer open",
+        "rejects reissuing a Reissue receipt",
+        "rejects voiding a non-Sale receipt",
+        "rejects an exchange whose return is still Pending",
+        "derives a refund's amount solely from the Return, never from caller input"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.receipts"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-domain-deposit",
+      "kind": "automated-test",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "contains": [
+        "Prepared precedes Reconciled and preparation never starts confirmed",
+        "prepares a deposit that reserves safe custody and posts NO custody transfer",
+        "rejects a deposit that exceeds available safe custody",
+        "caps cumulative reservation across two deposits against the same safe-drop pool",
+        "denies self-confirmation by the preparer",
+        "rejects confirming an already-Reconciled deposit",
+        "idempotency-key replay returns the identical prepared and confirmed result"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.pos"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-domain-application-authority",
+      "kind": "automated-test",
+      "path": "packages/domains/pos/src/index.test.ts",
+      "contains": [
+        "checks permission before dispatching to the service",
+        "dispatches to the service once permission and entitlement are granted",
+        "application layer requires permission and denies self-confirmation before dispatch"
+      ],
+      "command": "bun test packages/domains/pos/src/index.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.cash-management",
+        "commerce.order-management",
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.receipts",
+        "commerce.pos",
+        "commerce.mobile-pos",
+        "commerce.offline-sales"
+      ],
+      "dimensions": [
+        "permission_and_entitlement"
+      ]
+    },
+    {
+      "id": "ws3-livepg-register",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/pos.integration.test.ts",
+      "contains": [
+        "rejects a genuine concurrent double-open race on the same register via the DB partial unique index",
+        "writes the opened-register outbox row atomically in the owning transaction (raw SQL)",
+        "rolls back the register-session row when the outbox append fails in the same transaction",
+        "isolates two tenants sharing the same register id: cannot read or close each other's session",
+        "denies before dispatch when permission is not granted, and dispatches once granted",
+        "replays a cash-movement command idempotently and rejects a conflicting body reusing the same key",
+        "routes a non-zero cash variance through maker/checker approval end-to-end with the DB row",
+        "WS3 remediation R2, Finding B: two organizations and two locations in the SAME tenant — a caller cannot read or close another organization's register session via its real known id, and the other organization's session is left completely unchanged",
+        "listCashVariances is organization-scoped: the variance-approval queue never leaks another organization's Closing session",
+        "listCashVariances, called through the application layer with a location-scoped active context, excludes another location's Closing session in the SAME organization — and a client-supplied locationId filter cannot override the server-derived scope",
+        "getRegisterSession and getCashVariance read the same session but stay strictly organization-scoped (Finding B's non-disclosing not_found, applied to the new reads)",
+        "getCashVariance and getRegisterSession (application-layer preview reads), under a location-scoped active context, deny another location's session by ID even within the SAME organization"
+      ],
+      "command": "bun test apps/server/composition/pos.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.cash-management",
+        "commerce.pos",
+        "commerce.mobile-pos"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-livepg-sale",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/pos.integration.test.ts",
+      "contains": [
+        "completes a cash sale atomically: sale row, numbered receipt, synchronous Inventory movement, and both outbox events commit together (raw SQL)",
+        "rolls back the sale, receipt, receipt-number allocation, and Inventory movement together when an injected failure occurs before commit (raw SQL)",
+        "completes a sale exactly once under a genuine 10-way concurrent idempotent replay race",
+        "issues monotonic, non-duplicate receipt numbers per register under genuine concurrent sale completions",
+        "isolates two tenants sharing the same register id: cannot read each other's sale or receipt, and receipt numbering never leaks across tenants",
+        "denies sale completion before dispatch when permission is not granted, and dispatches once granted",
+        "WS3 remediation R2, Finding B: two organizations and two locations in the SAME tenant — a caller cannot read another organization's sale, and cannot approve a price override that organization created, using their real known ids; the override and sale line are left completely unchanged",
+        "listPriceOverrides is organization-scoped: the approval queue never leaks another organization's pending price override"
+      ],
+      "command": "bun test apps/server/composition/pos.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.order-management",
+        "commerce.pos",
+        "commerce.receipts",
+        "commerce.offline-sales",
+        "commerce.mobile-pos"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-livepg-sale-perf",
+      "kind": "live-postgresql-performance-test",
+      "path": "apps/server/composition/pos.integration.test.ts",
+      "contains": [
+        "measures add-scanned-item lookup and platform sale-processing latency against the named governing targets, with retained samples and an explicit disposition"
+      ],
+      "command": "bun test apps/server/composition/pos.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.order-management",
+        "commerce.pos",
+        "commerce.receipts",
+        "commerce.offline-sales",
+        "commerce.mobile-pos"
+      ],
+      "dimensions": [
+        "performance_and_capacity"
+      ]
+    },
+    {
+      "id": "ws3-livepg-return-refund-exchange",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/returns.integration.test.ts",
+      "contains": [
+        "completes return -> refund atomically end to end: Return/lines, compensating Inventory movement, Return receipt, Refund, cash movement, and every outbox event commit together (raw SQL)",
+        "posts two SEPARATE compensating movements for two sequential partial returns against the SAME original sale movement (Inventory's per-original one-reversal cap is scoped to Adjustment, not Sale)",
+        "rolls back the compensating Inventory movement, Return receipt, and Return state together when an injected failure occurs before commit (raw SQL)",
+        "prevents an over-return under a genuine concurrent double-return race: the cumulative cap holds across both attempts",
+        "replays a return-approval command idempotently under a genuine concurrent race: exactly one compensating movement, one receipt",
+        "keeps returns strictly tenant-scoped: tenant B cannot reference tenant A's sale, and cannot see or approve tenant A's return",
+        "denies return approval before application dispatch when permission is not granted, and dispatches once granted",
+        "realizes an exchange atomically: the replacement sale completes, the Return is marked consumed, and commerce.exchange.completed.v1 commits together with the sale (raw SQL)",
+        "voids a completed sale on an open session atomically — including its own compensating cash-ledger entry (WS3 remediation R1 cycle 2, closing the gap adversarial re-review found in the original Finding A fix) — and rejects the void once the register session has closed",
+        "reissues a receipt with no monetary effect, and priceSuppressed realizes a gift receipt",
+        "getReturn and getRefund carry real server-derived data (amount, register, state) and stay non-disclosing across organizations",
+        "listReturns and listRefunds are organization-scoped: a pending queue never leaks another organization's return/refund"
+      ],
+      "command": "bun test apps/server/composition/returns.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.receipts"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "tenant_isolation",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-livepg-deposit",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/deposits.integration.test.ts",
+      "contains": [
+        "prepares a deposit with NO custody-transfer row (effect-free preparation, raw SQL)",
+        "posts exactly one custody-transfer row on confirm, atomic with the state transition",
+        "concurrent double-confirm of the same deposit: exactly one posts (round-3 P1-4)",
+        "concurrent preparations over-reserving the same safe balance: the cumulative cap holds (round-3 P1-4)",
+        "idempotency-key replay on prepare returns the identical deposit, inserting no second row",
+        "idempotency-key replay on confirm returns the identical result, posting no second custody transfer",
+        "rejects a deposit that exceeds available safe custody (live-PG custody conservation)",
+        "denies self-confirmation through the application layer and never dispatches"
+      ],
+      "command": "bun test apps/server/composition/deposits.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.pos"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "idempotency_and_duplicate",
+        "concurrency_and_conflict",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-deposit-org-location-isolation",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/deposits.integration.test.ts",
+      "contains": [
+        "getDeposit carries real server-derived data (amount, preparer, state) and stays non-disclosing across organizations",
+        "listDeposits is organization-scoped: the confirmation queue never leaks another organization's prepared deposit"
+      ],
+      "command": "bun run --cwd apps/server db:test -- deposits.integration.test.ts",
+      "runtimes": [
+        "PostgreSQL 18",
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.pos"
+      ],
+      "dimensions": [
+        "tenant_isolation"
+      ]
+    },
+    {
+      "id": "ws3-denial-audit-evidence",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/pos-denial-audit.integration.test.ts",
+      "contains": [
+        "a self-approval denial (approval_separation) persists exactly one REAL Audit row, outcome=denied, and rethrows the ORIGINAL error unchanged",
+        "a denied permission attempt (AuthorizationError) ALSO persists a real Audit row with reasonCode permission_denied, scoped to a DIFFERENT tenant with zero cross-tenant leakage",
+        "classifyApprovalDenial correctly distinguishes denial errors from ordinary business errors (not_found does NOT count as a denial)"
+      ],
+      "command": "bun run --cwd apps/server db:test -- pos-denial-audit.integration.test.ts",
+      "runtimes": [
+        "PostgreSQL 18",
+        "Bun 1.3.14",
+        "Node.js (ws3-critical.node-check.ts)"
+      ],
+      "capabilities": [
+        "commerce.refunds",
+        "commerce.returns",
+        "commerce.cash-management",
+        "commerce.pos"
+      ],
+      "dimensions": [
+        "audit_and_observability"
+      ]
+    },
+    {
+      "id": "ws3-audit-instrumentation-scope-disclosure",
+      "kind": "deferred-pending",
+      "path": "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+      "contains": [
+        "WS3 remediation R4 audit-instrumentation disclosure"
+      ],
+      "command": "n/a — disclosed gap, not an executable test; see P2 item 3 scope and the cited change-log entry",
+      "runtimes": [
+        "n/a (disclosed gap, not an executable runtime)"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.order-management",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.mobile-pos",
+        "commerce.offline-sales",
+        "commerce.receipts"
+      ],
+      "dimensions": [
+        "audit_and_observability"
+      ]
+    },
+    {
+      "id": "ws3-finance-handoff-cash-support",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/finance-handoff.integration.test.ts",
+      "contains": [
+        "completeness reconciliation: exported control totals equal independently-computed raw SQL sums",
+        "cross-tenant isolation: an export for one tenant never includes another tenant's sales, and reads deny across tenants",
+        "date-boundary correctness: a sale at local midnight (America/Guyana, UTC-4) lands in the correct local day"
+      ],
+      "command": "bun test apps/server/composition/finance-handoff.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.cash-management"
+      ],
+      "dimensions": [
+        "tenant_isolation",
+        "privacy_and_classification",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-closeout-scenarios",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "contains": [
+        "Scenario 3 (\"Open a register and complete GYD cash and mixed-tender sales\")",
+        "Scenario 4 (\"Issue a receipt using offline-safe numbering\")",
+        "Scenario 6 (\"Return a sale to original tender or Commerce-owned store credit\")",
+        "Scenario 9 (\"Close the register, count cash, prepare a deposit, and explain variance\")",
+        "Scenario 10 (\"Export an accountant handoff with source references\")"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.cash-management",
+        "commerce.order-management",
+        "commerce.receipts",
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.exchanges",
+        "commerce.offline-sales",
+        "commerce.pos",
+        "commerce.mobile-pos"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial",
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation"
+      ]
+    },
+    {
+      "id": "ws3-closeout-tenant-isolation",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "contains": [
+        "keeps refund and deposit strictly tenant-scoped: tenant B cannot reference or approve/confirm tenant A's refund or deposit"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.refunds",
+        "commerce.cash-management"
+      ],
+      "dimensions": [
+        "tenant_isolation",
+        "privacy_and_classification"
+      ]
+    },
+    {
+      "id": "ws3-closeout-deposit-application-boundary",
+      "kind": "live-postgresql-test",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "contains": [
+        "denies deposit creation and confirmation through the application layer before dispatch, and dispatches once granted"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.cash-management"
+      ],
+      "dimensions": [
+        "permission_and_entitlement"
+      ]
+    },
+    {
+      "id": "ws3-closeout-register-perf",
+      "kind": "live-postgresql-performance-test",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "contains": [
+        "records bounded register-open and zero-variance register-close command samples (performance_and_capacity, real reproduced numbers)"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.cash-management",
+        "commerce.pos",
+        "commerce.mobile-pos"
+      ],
+      "dimensions": [
+        "performance_and_capacity"
+      ]
+    },
+    {
+      "id": "ws3-closeout-return-refund-deposit-perf",
+      "kind": "live-postgresql-performance-test",
+      "path": "apps/server/composition/ws3-closeout.integration.test.ts",
+      "contains": [
+        "records bounded return-approval, refund-approval, and deposit-confirmation command samples (performance_and_capacity, real reproduced numbers)"
+      ],
+      "command": "bun test apps/server/composition/ws3-closeout.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.cash-management",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.receipts"
+      ],
+      "dimensions": [
+        "performance_and_capacity"
+      ]
+    },
+    {
+      "id": "ws3-worker-no-consumer-replay",
+      "kind": "live-postgresql-test",
+      "path": "apps/worker/composition/ws3-closeout.integration.test.ts",
+      "contains": [
+        "a commerce.sale.completed.v1 event with no registered consumer is marked delivered exactly once via the no_consumers disposition, proving no worker-side stock-movement path exists to double-move anything on redelivery",
+        "duplicate commerce.sale.completed.v1 delivery (two separately-appended rows for a retried publish) both resolve no_consumers with zero consumer executions and zero duplicate business effects, since no worker consumer path exists to duplicate"
+      ],
+      "command": "bun test apps/worker/composition/ws3-closeout.integration.test.ts --timeout 30000",
+      "runtimes": [
+        "Bun 1.3.14",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.order-management",
+        "commerce.pos",
+        "commerce.offline-sales"
+      ],
+      "dimensions": [
+        "events_jobs_and_projections",
+        "recovery_replay_and_reconciliation",
+        "idempotency_and_duplicate"
+      ]
+    },
+    {
+      "id": "ws3-router-authority",
+      "kind": "automated-test",
+      "path": "apps/server/src/router.test.ts",
+      "contains": [
+        "dispatches openRegister only after permission enforcement, deriving locationId from the active context",
+        "denies register open before application dispatch when permission fails",
+        "dispatches sale completion with the saleId and flattened cash tenders from the request",
+        "denies sale completion before application dispatch when permission fails",
+        "dispatches return creation with the sale, lines, and reason from the request body",
+        "dispatches refund approval with the refundId from the request path",
+        "dispatches deposit creation with the currency, countedAmount, and sourceShiftIds from the request body",
+        "realizes commerce.exchanges by threading exchangeOfReturnId from completeSale's request body (frozen control plan §6.5)",
+        "dispatches receipt reissue with priceSuppressed from the request body (gift-receipt variant)"
+      ],
+      "command": "bun test apps/server/src/router.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.order-management",
+        "commerce.receipts",
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.cash-management",
+        "commerce.pos"
+      ],
+      "dimensions": [
+        "permission_and_entitlement",
+        "validation_and_denial"
+      ]
+    },
+    {
+      "id": "ws3-web-unit-pos",
+      "kind": "automated-test",
+      "path": "apps/web/src/lib/pos.test.ts",
+      "contains": [
+        "formats GYD minor units as currency",
+        "changeDueMinor never returns negative",
+        "canCompleteSale blocks completion while an override is Pending (frozen control plan §6.2)",
+        "ledgerEntryMinor signs paid-out, safe-drop, and refund negative"
+      ],
+      "command": "bun test apps/web/src/lib/pos.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.pos",
+        "commerce.order-management",
+        "commerce.cash-management",
+        "commerce.register-management",
+        "commerce.receipts"
+      ],
+      "dimensions": [
+        "happy_path",
+        "validation_and_denial"
+      ]
+    },
+    {
+      "id": "ws3-browser-workflows",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "contains": [
+        "full cash sale: open register, complete a sale, view the receipt, close the register at zero variance",
+        "sale hold and resume: a Held sale can be completed after navigating away and back",
+        "price-override request on a sale line, approved by a second identity, unblocks completion",
+        "return flow: creating a return against a completed sale leaves it Pending with no inventory effect yet",
+        "return approval by a second identity (approver != creator) posts the compensating inventory movement",
+        "refund create and approve: a second identity's approval posts the paid-out cash movement",
+        "deposit create and confirm: a second identity's confirmation reconciles the deposit",
+        "receipt reissue produces a new numbered artifact",
+        "receipt void reverses the sale through the receipt view"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.cash-management",
+        "commerce.order-management",
+        "commerce.receipts",
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.pos",
+        "commerce.mobile-pos",
+        "commerce.offline-sales"
+      ],
+      "dimensions": [
+        "happy_path",
+        "events_jobs_and_projections"
+      ]
+    },
+    {
+      "id": "ws3-browser-accessibility",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "contains": [
+        "accessibility: register open, the sale cart builder, and the receipt view have no automated WCAG A/AA violations",
+        "accessibility: the return-creation, refund-request, and deposit-preparation landing forms have no automated WCAG A/AA violations"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.cash-management",
+        "commerce.order-management",
+        "commerce.receipts",
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.pos",
+        "commerce.mobile-pos",
+        "commerce.offline-sales"
+      ],
+      "dimensions": [
+        "accessibility_and_responsive"
+      ]
+    },
+    {
+      "id": "ws3-browser-accessibility-hardened",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "contains": [
+        "accessibility (all settled states): close-register's empty form, validation-error, confirm-dialog-open, and success states each pass automated WCAG A/AA with zero violations",
+        "keyboard-only close-register: the approval commit itself completes with ZERO mouse clicks, landing on the destructive control only via Tab, never by default focus",
+        "200% and 400% zoom reflow (WCAG 1.4.10): close-register's form and confirm dialog show no horizontal scroll and keep key controls reachable",
+        "forced-colors mode (Windows High Contrast equivalent): close-register still renders and stays operable",
+        "prefers-reduced-motion actually suppresses the ConsequencePreviewDialog's real CSS animation, proven by comparing WITH vs WITHOUT the emulation on the SAME dialog element shape"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.register-management",
+        "commerce.shift-management"
+      ],
+      "dimensions": [
+        "accessibility_and_responsive"
+      ]
+    },
+    {
+      "id": "ws3-manual-at-review-disclosure",
+      "kind": "deferred-pending",
+      "path": "docs/implementation/WS3_POS_CASH_IMPLEMENTATION_EVIDENCE.md",
+      "contains": [
+        "WS3 remediation R4 manual assistive-technology disclosure"
+      ],
+      "command": "n/a — disclosed gap, not an executable test; see the dated v0.2.1 change-log entry",
+      "runtimes": [
+        "n/a (disclosed gap, not an executable runtime)"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.mobile-pos",
+        "commerce.offline-sales",
+        "commerce.order-management",
+        "commerce.pos",
+        "commerce.receipts",
+        "commerce.refunds",
+        "commerce.register-management",
+        "commerce.returns",
+        "commerce.shift-management"
+      ],
+      "dimensions": [
+        "accessibility_and_responsive"
+      ]
+    },
+    {
+      "id": "ws3-browser-offline",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "contains": [
+        "online-only WS3 mutations fail closed and remain understandable when connectivity drops"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.cash-management",
+        "commerce.order-management",
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.receipts",
+        "commerce.pos",
+        "commerce.mobile-pos",
+        "commerce.offline-sales"
+      ],
+      "dimensions": [
+        "offline_and_degraded"
+      ]
+    },
+    {
+      "id": "ws3-browser-export",
+      "kind": "live-browser-test",
+      "path": "apps/web/e2e/ws3-pos.spec.ts",
+      "contains": [
+        "handoff export: generating an accountant export triggers a real download"
+      ],
+      "command": "bun run --cwd apps/web test:e2e -- ws3-pos.spec.ts",
+      "runtimes": [
+        "Chromium",
+        "Next.js 16.2.10",
+        "PostgreSQL 18"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.pos"
+      ],
+      "dimensions": [
+        "happy_path"
+      ]
+    },
+    {
+      "id": "ws3-owner-data-classification",
+      "kind": "governance-validation",
+      "path": "docs/blueprint/10-Data/WS3_POS_CASH_SCHEMA_CLASSIFICATION.md",
+      "contains": [
+        "pos_register_session",
+        "pos_sale",
+        "pos_deposit",
+        "Confidential"
+      ],
+      "command": "python scripts/validate_docs.py",
+      "runtimes": [
+        "Python 3.12",
+        "GitHub Actions"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.mobile-pos",
+        "commerce.offline-sales",
+        "commerce.order-management",
+        "commerce.pos",
+        "commerce.receipts",
+        "commerce.refunds",
+        "commerce.register-management",
+        "commerce.returns",
+        "commerce.shift-management"
+      ],
+      "dimensions": [
+        "privacy_and_classification"
+      ]
+    },
+    {
+      "id": "ws3-persistence-schema-tenant-scope",
+      "kind": "automated-test",
+      "path": "packages/persistence/pos-postgres/src/schema.test.ts",
+      "contains": [
+        "requires tenant scope on every authoritative POS table",
+        "requires tenant scope on every PR3 return/refund table",
+        "requires tenant scope on every PR4 deposit table"
+      ],
+      "command": "bun test packages/persistence/pos-postgres/src/schema.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.register-management",
+        "commerce.shift-management",
+        "commerce.order-management",
+        "commerce.receipts",
+        "commerce.returns",
+        "commerce.refunds",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.cash-management",
+        "commerce.pos",
+        "commerce.mobile-pos",
+        "commerce.offline-sales"
+      ],
+      "dimensions": [
+        "tenant_isolation"
+      ]
+    },
+    {
+      "id": "ws3-persistence-migration",
+      "kind": "automated-test",
+      "path": "packages/persistence/pos-postgres/src/index.test.ts",
+      "contains": [
+        "uses an owner-specific migration history"
+      ],
+      "command": "bun test packages/persistence/pos-postgres/src/index.test.ts",
+      "runtimes": [
+        "Bun 1.3.14"
+      ],
+      "capabilities": [
+        "commerce.cash-management",
+        "commerce.exchanges",
+        "commerce.gift-receipts",
+        "commerce.mobile-pos",
+        "commerce.offline-sales",
+        "commerce.order-management",
+        "commerce.pos",
+        "commerce.receipts",
+        "commerce.refunds",
+        "commerce.register-management",
+        "commerce.returns",
+        "commerce.shift-management"
+      ],
+      "dimensions": [
+        "recovery_replay_and_reconciliation"
+      ]
+    }
+  ]
+}

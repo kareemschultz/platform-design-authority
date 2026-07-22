@@ -39,10 +39,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 import { authClient } from "@/lib/auth-client";
+import { statusBadgeVariant } from "@/lib/status";
 import { orpc } from "@/utils/orpc";
 
+import { pageDocumentTitle } from "./operations-shared";
 import { EmptyState, ListSkeleton, QueryFailure } from "./query-state";
 import { useWorkspace } from "./workspace-context";
 
@@ -50,9 +53,6 @@ interface Column<T> {
 	label: string;
 	render: (item: T) => React.ReactNode;
 }
-
-const POSITIVE_STATE = /active|success|trial/i;
-const NEGATIVE_STATE = /suspend|revoke|expired|failure|denied/i;
 
 function PageFrame({
 	children,
@@ -63,6 +63,12 @@ function PageFrame({
 	description: string;
 	title: string;
 }) {
+	// WS3 remediation R3b, Item 10: see operations-shared.tsx's
+	// `pageDocumentTitle` doc comment — same gap, same fix, for
+	// Administration's separate page-frame component.
+	useEffect(() => {
+		document.title = pageDocumentTitle(title);
+	}, [title]);
 	return (
 		<div className="mx-auto max-w-screen-2xl px-4 py-6">
 			<header className="mb-6 max-w-3xl">
@@ -154,13 +160,11 @@ function useCursor() {
 }
 
 function stateBadge(state: string) {
-	let variant: "destructive" | "outline" | "secondary" = "outline";
-	if (POSITIVE_STATE.test(state)) {
-		variant = "secondary";
-	} else if (NEGATIVE_STATE.test(state)) {
-		variant = "destructive";
-	}
-	return <Badge variant={variant}>{state}</Badge>;
+	// WS3 remediation R3b, Item 11: was a second, independently-drifted
+	// regex classifier (POSITIVE_STATE = /active|success|trial/i matched
+	// "Inactive" via its "active" substring, coloring a deactivated Role
+	// success-green) — now delegates to the one exhaustive, shared map.
+	return <Badge variant={statusBadgeVariant(state)}>{state}</Badge>;
 }
 
 function QueryListState<T>({

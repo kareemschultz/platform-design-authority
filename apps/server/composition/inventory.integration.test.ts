@@ -184,6 +184,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			adjustmentId: created.id,
 			correlationId: base.correlationId,
 			idempotencyKey: "adjustment-approve",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			version: 1,
 		});
@@ -192,6 +193,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			adjustmentId: created.id,
 			correlationId: base.correlationId,
 			idempotencyKey: "adjustment-approve",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			version: 1,
 		});
@@ -202,6 +204,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			body: { reason: "incorrect opening balance" },
 			correlationId: base.correlationId,
 			idempotencyKey: "adjustment-reverse",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			version: 2,
 		});
@@ -252,6 +255,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 				adjustmentId: first.id,
 				correlationId: base.correlationId,
 				idempotencyKey: "concurrent-approve-1",
+				organizationId: base.organizationId,
 				tenantId: base.tenantId,
 				version: 1,
 			}),
@@ -260,11 +264,13 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 				adjustmentId: second.id,
 				correlationId: base.correlationId,
 				idempotencyKey: "concurrent-approve-2",
+				organizationId: base.organizationId,
 				tenantId: base.tenantId,
 				version: 1,
 			}),
 		]);
 		let balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 100 },
 			tenantId: base.tenantId,
 		});
@@ -278,6 +284,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		);
 		expect(await inventory.rebuildBalances(base.tenantId)).toBeGreaterThan(0);
 		balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 100 },
 			tenantId: base.tenantId,
 		});
@@ -313,12 +320,14 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 				adjustmentId: adjustment.id,
 				correlationId: base.correlationId,
 				idempotencyKey: `cursor-adjustment-approve-${index}`,
+				organizationId: base.organizationId,
 				tenantId,
 				version: 1,
 			});
 		}
 
 		const firstPage = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId,
 		});
@@ -326,6 +335,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstPage.items[0]?.unit).toBe(delimiterUnit);
 		expect(firstPage.nextCursor).toContain('"version":1');
 		const secondPage = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { cursor: firstPage.nextCursor ?? undefined, limit: 1 },
 			tenantId,
 		});
@@ -392,6 +402,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		}
 		const firstAdjustments = await inventory.listAdjustments({
 			filters: { locationId: "target_location", state: "PendingApproval" },
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId,
 		});
@@ -400,6 +411,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstAdjustments.nextCursor).not.toBeNull();
 		const secondAdjustments = await inventory.listAdjustments({
 			filters: { locationId: "target_location", state: "PendingApproval" },
+			organizationId: base.organizationId,
 			page: { cursor: firstAdjustments.nextCursor ?? undefined, limit: 1 },
 			tenantId,
 		});
@@ -425,6 +437,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		}
 		const firstCounts = await inventory.listCounts({
 			filters: { locationId: "target_location", state: "Draft" },
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId,
 		});
@@ -433,6 +446,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstCounts.nextCursor).not.toBeNull();
 		const secondCounts = await inventory.listCounts({
 			filters: { locationId: "target_location", state: "Draft" },
+			organizationId: base.organizationId,
 			page: { cursor: firstCounts.nextCursor ?? undefined, limit: 1 },
 			tenantId,
 		});
@@ -466,6 +480,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		}
 		const firstTransfers = await inventory.listTransfers({
 			filters: { locationId: "target_location", state: "Draft" },
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId,
 		});
@@ -473,6 +488,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstTransfers.nextCursor).not.toBeNull();
 		const secondTransfers = await inventory.listTransfers({
 			filters: { locationId: "target_location", state: "Draft" },
+			organizationId: base.organizationId,
 			page: { cursor: firstTransfers.nextCursor ?? undefined, limit: 1 },
 			tenantId,
 		});
@@ -505,13 +521,18 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 					actorUserId: "dispatcher",
 					correlationId: base.correlationId,
 					idempotencyKey: "negative-dispatch",
+					organizationId: base.organizationId,
 					tenantId: base.tenantId,
 					transferId: transfer.id,
 					version: 1,
 				})
 			)
 		).toMatchObject({ code: "negative_stock" });
-		const loaded = await inventory.getTransfer(base.tenantId, transfer.id);
+		const loaded = await inventory.getTransfer(
+			base.tenantId,
+			base.organizationId,
+			transfer.id
+		);
 		expect(loaded.state).toBe("Draft");
 	});
 
@@ -533,6 +554,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			},
 			countId: count.id,
 			idempotencyKey: "count-submit",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			version: 1,
 		});
@@ -542,6 +564,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			correlationId: base.correlationId,
 			countId: count.id,
 			idempotencyKey: "count-approve",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			version: 2,
 		});
@@ -582,6 +605,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			},
 			countId: count.id,
 			idempotencyKey: "draft-count-save",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			version: 1,
 		};
@@ -591,9 +615,10 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		]);
 		expect(right).toEqual(left);
 		expect(left).toMatchObject({ state: "InProgress", version: 2 });
-		expect((await second.getCount(base.tenantId, count.id)).lines).toEqual(
-			left.lines
-		);
+		expect(
+			(await second.getCount(base.tenantId, base.organizationId, count.id))
+				.lines
+		).toEqual(left.lines);
 		const rows = await testPool.query<{ operation: string; result: unknown }>(
 			"SELECT operation, result FROM inventory_command_receipt WHERE tenant_id = $1 AND idempotency_key = $2",
 			[base.tenantId, input.idempotencyKey]
@@ -641,13 +666,18 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 					adjustmentId: adjustment.id,
 					correlationId: base.correlationId,
 					idempotencyKey: "separation-adjustment-self-approve",
+					organizationId: base.organizationId,
 					tenantId: base.tenantId,
 					version: 1,
 				})
 			)
 		).toMatchObject({ code: "approval_separation" });
 		expect(
-			await inventory.getAdjustment(base.tenantId, adjustment.id)
+			await inventory.getAdjustment(
+				base.tenantId,
+				base.organizationId,
+				adjustment.id
+			)
 		).toMatchObject({ state: "PendingApproval", version: 1 });
 
 		const count = await inventory.createCount({
@@ -670,6 +700,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			},
 			countId: count.id,
 			idempotencyKey: "separation-count-submit",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			version: 1,
 		});
@@ -680,12 +711,15 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 					correlationId: base.correlationId,
 					countId: count.id,
 					idempotencyKey: "separation-count-self-approve",
+					organizationId: base.organizationId,
 					tenantId: base.tenantId,
 					version: submitted.version,
 				})
 			)
 		).toMatchObject({ code: "approval_separation" });
-		expect(await inventory.getCount(base.tenantId, count.id)).toMatchObject({
+		expect(
+			await inventory.getCount(base.tenantId, base.organizationId, count.id)
+		).toMatchObject({
 			state: "Submitted",
 			version: submitted.version,
 		});
@@ -710,6 +744,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			adjustmentId: seed.id,
 			correlationId: base.correlationId,
 			idempotencyKey: "transfer-seed-approve",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			version: 1,
 		});
@@ -726,6 +761,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			actorUserId: "dispatcher",
 			correlationId: base.correlationId,
 			idempotencyKey: "transfer-dispatch",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			transferId: transfer.id,
 			version: 1,
@@ -740,6 +776,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			},
 			correlationId: base.correlationId,
 			idempotencyKey: "transfer-receive",
+			organizationId: base.organizationId,
 			tenantId: base.tenantId,
 			transferId: transfer.id,
 			version: 2,
@@ -751,6 +788,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			remainingQuantity: "0",
 		});
 		const balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 50 },
 			tenantId: base.tenantId,
 		});
@@ -765,6 +803,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		).toBe("5.000000");
 		const firstPage = await inventory.listBalances({
 			filters: { productId: "transfer_product" },
+			organizationId: base.organizationId,
 			page: { limit: 1 },
 			tenantId: base.tenantId,
 		});
@@ -772,6 +811,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(firstPage.nextCursor).not.toBeNull();
 		const secondPage = await inventory.listBalances({
 			filters: { productId: "transfer_product" },
+			organizationId: base.organizationId,
 			page: { cursor: firstPage.nextCursor ?? undefined, limit: 1 },
 			tenantId: base.tenantId,
 		});
@@ -804,6 +844,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			unit: "each",
 		});
 		let balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 50 },
 			tenantId: base.tenantId,
 		});
@@ -838,6 +879,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 			reservation,
 		});
 		balances = await inventory.listBalances({
+			organizationId: base.organizationId,
 			page: { limit: 50 },
 			tenantId: base.tenantId,
 		});
@@ -864,6 +906,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(
 			(
 				await inventory.listBalances({
+					organizationId: base.organizationId,
 					page: { limit: 50 },
 					tenantId: base.tenantId,
 				})
@@ -927,6 +970,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(
 			(
 				await inventory.listBalances({
+					organizationId: base.organizationId,
 					page: { limit: 50 },
 					tenantId: base.tenantId,
 				})
@@ -1016,6 +1060,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		const inventory = service();
 		const [own] = (
 			await inventory.listAdjustments({
+				organizationId: base.organizationId,
 				page: { limit: 50 },
 				tenantId: base.tenantId,
 			})
@@ -1023,7 +1068,11 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		expect(own).toBeDefined();
 		expect(
 			await captureError(
-				inventory.getAdjustment("tenant_inventory_b", own?.id ?? "")
+				inventory.getAdjustment(
+					"tenant_inventory_b",
+					base.organizationId,
+					own?.id ?? ""
+				)
 			)
 		).toMatchObject({ code: "not_found" });
 		const invalid = await captureError(
@@ -1061,6 +1110,7 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 					adjustmentId: created.id,
 					correlationId: base.correlationId,
 					idempotencyKey: "rollback-approve",
+					organizationId: base.organizationId,
 					tenantId: base.tenantId,
 					version: 1,
 				})
@@ -1071,7 +1121,13 @@ describe.serial("Inventory PostgreSQL controlled prototype", () => {
 		);
 		expect(after.rows[0]?.count).toBe(before.rows[0]?.count);
 		expect(
-			(await service().getAdjustment(base.tenantId, created.id)).state
+			(
+				await service().getAdjustment(
+					base.tenantId,
+					base.organizationId,
+					created.id
+				)
+			).state
 		).toBe("PendingApproval");
 	});
 });

@@ -3,20 +3,32 @@ import { z } from "zod";
 
 import { OPENAPI_OPERATION_METADATA } from "./generated";
 import {
+	AccountantHandoffExportSchema,
+	AccountantHandoffRequestSchema,
 	ActiveContextRequestSchema,
 	ActiveContextSchema,
+	CashMovementSchema,
+	CloseRegisterRequestSchema,
+	CompleteSaleRequestSchema,
+	CreateCashMovementRequestSchema,
 	CreateCsvImportSchema,
+	CreateDepositSchema,
 	CreateEventReplayRequestSchema,
 	CreateInventoryAdjustmentSchema,
 	CreateOrganizationPartySchema,
 	CreatePartyIdentityLinkRequestSchema,
 	CreatePersonPartySchema,
 	CreateProductSchema,
+	CreateRefundSchema,
+	CreateReturnSchema,
 	CreateRoleAssignmentRequestSchema,
+	CreateSafeDropRequestSchema,
+	CreateSaleSchema,
 	CreateStockCountSchema,
 	CreateStockTransferSchema,
 	CreateUserInvitationRequestSchema,
 	CurrentIdentitySchema,
+	DepositSchema,
 	EventReplayRequestSchema,
 	IdentifierSchema,
 	ImportCorrectionReportSchema,
@@ -24,15 +36,21 @@ import {
 	ImportJobSchema,
 	ImportPurgeResultSchema,
 	InventoryAdjustmentSchema,
+	OpenRegisterRequestSchema,
 	OrganizationSchema,
 	PagedAuditRecordsSchema,
+	PagedDepositsSchema,
 	PagedEntitlementsSchema,
 	PagedImportsSchema,
 	PagedInventoryAdjustmentsSchema,
 	PagedLocationsSchema,
 	PagedOrganizationsSchema,
 	PagedPartiesSchema,
+	PagedPriceOverridesSchema,
 	PagedProductsSchema,
+	PagedRefundsSchema,
+	PagedRegisterSessionsSchema,
+	PagedReturnsSchema,
 	PagedRolesSchema,
 	PagedSessionsSchema,
 	PagedStockBalancesSchema,
@@ -41,11 +59,19 @@ import {
 	PagedUsersSchema,
 	PartySchema,
 	PlatformIdentityLinkSchema,
+	PriceOverrideSchema,
 	ProblemSchema,
 	ProductSchema,
 	ProductStateSchema,
+	ReceiptSchema,
 	ReceiveStockTransferSchema,
+	RefundSchema,
+	RegisterSessionSchema,
+	ReissueReceiptRequestSchema,
+	RequestPriceOverrideSchema,
+	ReturnSchema,
 	RoleAssignmentSchema,
+	SaleSchema,
 	SaveStockCountDraftLinesSchema,
 	StockCountSchema,
 	StockTransferSchema,
@@ -57,6 +83,7 @@ import {
 	UpdateProductSchema,
 	UserInvitationSchema,
 	UserSummarySchema,
+	VoidReceiptRequestSchema,
 } from "./schemas";
 
 // biome-ignore lint/performance/noBarrelFile: this is the deliberate public contract-package entry point.
@@ -920,6 +947,778 @@ export const reverseInventoryAdjustmentContract = base
 	)
 	.output(InventoryAdjustmentSchema);
 
+// ---------------------------------------------------------------------------
+// WS3 PR1: registers, cash movements, safe drops, cash-variance approval.
+// ---------------------------------------------------------------------------
+
+export const openRegisterContract = base
+	.route({
+		method: "POST",
+		path: "/v1/registers/{registerId}/open",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "openRegister",
+		permission: "commerce.register.open",
+		requestRef: "#/components/schemas/OpenRegisterRequest",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: OpenRegisterRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ registerId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
+export const closeRegisterContract = base
+	.route({
+		method: "POST",
+		path: "/v1/registers/{registerId}/close",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "closeRegister",
+		permission: "commerce.register.close",
+		requestRef: "#/components/schemas/CloseRegisterRequest",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CloseRegisterRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ registerId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
+export const createCashMovementContract = base
+	.route({
+		method: "POST",
+		path: "/v1/registers/{registerId}/cash-movements",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postRegistersByRegisterIdCashMovements",
+		permission: "commerce.cash-movement.create",
+		requestRef: "#/components/schemas/CreateCashMovementRequest",
+		responseRef: "#/components/schemas/CashMovement",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CreateCashMovementRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ registerId: IdentifierSchema }),
+		})
+	)
+	.output(CashMovementSchema);
+
+export const createSafeDropContract = base
+	.route({
+		method: "POST",
+		path: "/v1/registers/{registerId}/safe-drops",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postRegistersByRegisterIdSafeDrops",
+		permission: "commerce.cash-movement.create",
+		requestRef: "#/components/schemas/CreateSafeDropRequest",
+		responseRef: "#/components/schemas/CashMovement",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CreateSafeDropRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ registerId: IdentifierSchema }),
+		})
+	)
+	.output(CashMovementSchema);
+
+export const approveCashVarianceContract = base
+	.route({
+		method: "POST",
+		path: "/v1/cash-variances/{varianceId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postCashVariancesByVarianceIdApprove",
+		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: VersionedTenantCommandHeadersSchema,
+			params: z.object({ varianceId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
+// ---------------------------------------------------------------------------
+// WS3 PR2: Sale, PriceOverride, Receipt.
+// ---------------------------------------------------------------------------
+
+export const createSaleContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales",
+		successStatus: 201,
+	})
+	.meta({
+		operationId: "createSale",
+		permission: "commerce.sale.create",
+		requestRef: "#/components/schemas/CreateSale",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateSaleSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(SaleSchema);
+
+export const completeSaleContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales/{saleId}/complete",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "completeSale",
+		permission: "commerce.sale.complete",
+		requestRef: "#/components/schemas/CompleteSaleRequest",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CompleteSaleRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ saleId: IdentifierSchema }),
+		})
+	)
+	.output(SaleSchema);
+
+export const holdSaleContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales/{saleId}/hold",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postSalesBySaleIdHold",
+		permission: "commerce.sale.hold",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ saleId: IdentifierSchema }),
+		})
+	)
+	.output(SaleSchema);
+
+export const requestSalePriceOverrideContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales/{saleId}/price-overrides",
+		successStatus: 201,
+	})
+	.meta({
+		operationId: "requestSalePriceOverride",
+		permission: "commerce.price-override.request",
+		requestRef: "#/components/schemas/RequestPriceOverride",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: RequestPriceOverrideSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ saleId: IdentifierSchema }),
+		})
+	)
+	.output(SaleSchema);
+
+export const approveSalePriceOverrideContract = base
+	.route({
+		method: "POST",
+		path: "/v1/sales/{saleId}/price-overrides/{overrideId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "approveSalePriceOverride",
+		permission: "commerce.price-override.approve",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({
+				overrideId: IdentifierSchema,
+				saleId: IdentifierSchema,
+			}),
+		})
+	)
+	.output(SaleSchema);
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.price-override.approve` exactly — no new permission invented;
+ * an approver may, by definition, list what they can approve. Replaces the
+ * prior "type the Sale ID and Override ID your colleague read off their own
+ * screen" pattern `PriceOverrideApprovePage` disclosed as its only path. */
+export const listPriceOverridesContract = base
+	.route({ method: "GET", path: "/v1/price-overrides", successStatus: 200 })
+	.meta({
+		operationId: "listPriceOverrides",
+		permission: "commerce.price-override.approve",
+		responseRef: "#/components/schemas/PagedPriceOverrides",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: PriceOverrideSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedPriceOverridesSchema);
+
+export const getReceiptContract = base
+	.route({
+		method: "GET",
+		path: "/v1/receipts/{receiptId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getReceiptsByReceiptId",
+		permission: "commerce.receipt.read",
+		responseRef: "#/components/schemas/Receipt",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ receiptId: IdentifierSchema }),
+		})
+	)
+	.output(ReceiptSchema);
+
+/** WS3 remediation R3, Finding J: resolves a human-legible reference
+ * actually printed on the receipt — `receiptNumber` and `registerId`, both
+ * shown by `ReceiptLayout` (apps/web) — to the Receipt (and, via its
+ * nullable `saleId`, the return path), instead of requiring the opaque Sale
+ * ID a cashier can only have if it happens to still be cached in THEIR OWN
+ * browser's sessionStorage. Reuses `commerce.receipt.read`, the same
+ * permission `getReceiptContract` already requires — no new identifier
+ * invented. `receiptNumber` is unique only per (tenantId, registerId) —
+ * `pos_receipt_tenant_register_number_uidx` — so `registerId` is a required
+ * path segment, not an optional disambiguator; both values are printed
+ * together on every receipt. */
+export const getReceiptByNumberContract = base
+	.route({
+		method: "GET",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumber",
+		permission: "commerce.receipt.read",
+		responseRef: "#/components/schemas/Receipt",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({
+				receiptNumber: z.string().min(1).max(200),
+				registerId: IdentifierSchema,
+			}),
+		})
+	)
+	.output(ReceiptSchema);
+
+/** WS3 remediation R3, Finding J (part 2): completes the receipt-to-return
+ * path `getReceiptByNumberContract` starts. `CreateReturnSchema` requires a
+ * real `saleLineId` per line (matched server-side against the Sale's own
+ * line records — `buildReturnLines` in `packages/domains/pos/src/index.ts`),
+ * and `ReceiptLineSnapshot` carries no line id (an immutable point-in-time
+ * receipt snapshot, not a live Sale projection) — so a receiptNumber ->
+ * Receipt resolution alone can never populate a return form. Gated on
+ * `commerce.return.create`, the permission the return this preview leads to
+ * actually requires (mirroring Finding I's "the consuming mutation's own
+ * permission also authorizes the preview read" pattern), not
+ * `commerce.receipt.read` — one permission covers the whole
+ * receipt-to-return path, avoiding a second permission seam a
+ * return-creating role might not separately hold. No new permission
+ * invented; reuses the existing `commerce.return.create` from
+ * `registry/permissions.json`. */
+export const getSaleForReturnContract = base
+	.route({
+		method: "GET",
+		path: "/v1/registers/{registerId}/receipts/{receiptNumber}/sale",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getRegistersByRegisterIdReceiptsByReceiptNumberSale",
+		permission: "commerce.return.create",
+		responseRef: "#/components/schemas/Sale",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({
+				receiptNumber: z.string().min(1).max(200),
+				registerId: IdentifierSchema,
+			}),
+		})
+	)
+	.output(SaleSchema);
+
+// ---------------------------------------------------------------------------
+// WS3 PR3: Return, Refund, Void, Reissue. Exchange has no dedicated
+// contract — it rides `completeSaleContract`'s `exchangeOfReturnId` (§6.5).
+// ---------------------------------------------------------------------------
+
+export const createReturnContract = base
+	.route({
+		method: "POST",
+		path: "/v1/returns",
+		successStatus: 201,
+	})
+	.meta({
+		operationId: "createReturn",
+		permission: "commerce.return.create",
+		requestRef: "#/components/schemas/CreateReturn",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateReturnSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(ReturnSchema);
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.return.approve`. Reuses that exact permission — no new
+ * identifier invented; an approver may, by definition, preview what they
+ * can approve. */
+export const getReturnContract = base
+	.route({
+		method: "GET",
+		path: "/v1/returns/{returnId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getReturnsByReturnId",
+		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ returnId: IdentifierSchema }),
+		})
+	)
+	.output(ReturnSchema);
+
+export const approveReturnContract = base
+	.route({
+		method: "POST",
+		path: "/v1/returns/{returnId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postReturnsByReturnIdApprove",
+		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ returnId: IdentifierSchema }),
+		})
+	)
+	.output(ReturnSchema);
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.return.approve` exactly, the SAME permission `getReturnContract`
+ * above already requires — no new identifier invented. Callers filter to
+ * `state=Pending` for the approval queue; the server does not hardcode that
+ * filter so a completed-returns lookup remains possible with the same
+ * permission. */
+export const listReturnsContract = base
+	.route({ method: "GET", path: "/v1/returns", successStatus: 200 })
+	.meta({
+		operationId: "listReturns",
+		permission: "commerce.return.approve",
+		responseRef: "#/components/schemas/PagedReturns",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: ReturnSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedReturnsSchema);
+
+export const createRefundContract = base
+	.route({
+		method: "POST",
+		path: "/v1/refunds",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postRefunds",
+		permission: "commerce.refund.create",
+		requestRef: "#/components/schemas/CreateRefund",
+		responseRef: "#/components/schemas/Refund",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: CreateRefundSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(RefundSchema);
+
+/** WS3 remediation R3, Finding I. */
+export const getRefundContract = base
+	.route({
+		method: "GET",
+		path: "/v1/refunds/{refundId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getRefundsByRefundId",
+		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/Refund",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ refundId: IdentifierSchema }),
+		})
+	)
+	.output(RefundSchema);
+
+export const approveRefundContract = base
+	.route({
+		method: "POST",
+		path: "/v1/refunds/{refundId}/approve",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postRefundsByRefundIdApprove",
+		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/Refund",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ refundId: IdentifierSchema }),
+		})
+	)
+	.output(RefundSchema);
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.refund.approve` exactly, the SAME permission `getRefundContract`
+ * above already requires — no new identifier invented. Callers filter to
+ * `state=Requested` for the approval queue (`RefundSchema`'s pending state
+ * is named `"Requested"`, not `"Pending"` — see `RefundSchema.state`). */
+export const listRefundsContract = base
+	.route({ method: "GET", path: "/v1/refunds", successStatus: 200 })
+	.meta({
+		operationId: "listRefunds",
+		permission: "commerce.refund.approve",
+		responseRef: "#/components/schemas/PagedRefunds",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: RefundSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedRefundsSchema);
+
+export const reissueReceiptContract = base
+	.route({
+		method: "POST",
+		path: "/v1/receipts/{receiptId}/reissue",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postReceiptsByReceiptIdReissue",
+		permission: "commerce.receipt.reissue",
+		requestRef: "#/components/schemas/ReissueReceiptRequest",
+		responseRef: "#/components/schemas/Receipt",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: ReissueReceiptRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ receiptId: IdentifierSchema }),
+		})
+	)
+	.output(ReceiptSchema);
+
+export const voidReceiptContract = base
+	.route({
+		method: "POST",
+		path: "/v1/receipts/{receiptId}/void",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postReceiptsByReceiptIdVoid",
+		permission: "commerce.receipt.void",
+		requestRef: "#/components/schemas/VoidReceiptRequest",
+		responseRef: "#/components/schemas/Return",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			body: VoidReceiptRequestSchema,
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ receiptId: IdentifierSchema }),
+		})
+	)
+	.output(ReturnSchema);
+
+// ---------------------------------------------------------------------------
+// WS3 PR4: Deposit (commerce.deposit.create/.confirm) and the accountant
+// handoff export (platform.export.create/.read).
+// ---------------------------------------------------------------------------
+
+export const createDepositContract = base
+	.route({
+		method: "POST",
+		path: "/v1/deposits",
+		successStatus: 201,
+	})
+	.meta({
+		operationId: "createDeposit",
+		permission: "commerce.deposit.create",
+		requestRef: "#/components/schemas/CreateDeposit",
+		responseRef: "#/components/schemas/Deposit",
+		successStatus: 201,
+	})
+	.input(
+		z.object({
+			body: CreateDepositSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(DepositSchema);
+
+/** WS3 remediation R3, Finding I. */
+export const getDepositContract = base
+	.route({
+		method: "GET",
+		path: "/v1/deposits/{depositId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getDepositsByDepositId",
+		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/Deposit",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ depositId: IdentifierSchema }),
+		})
+	)
+	.output(DepositSchema);
+
+export const confirmDepositContract = base
+	.route({
+		method: "POST",
+		path: "/v1/deposits/{depositId}/confirm",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "postDepositsByDepositIdConfirm",
+		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/Deposit",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: TenantCommandHeadersSchema,
+			params: z.object({ depositId: IdentifierSchema }),
+		})
+	)
+	.output(DepositSchema);
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.deposit.confirm` exactly, the SAME permission `getDepositContract`
+ * above already requires — no new identifier invented. Callers filter to
+ * `state=Prepared` for the confirmation queue. */
+export const listDepositsContract = base
+	.route({ method: "GET", path: "/v1/deposits", successStatus: 200 })
+	.meta({
+		operationId: "listDeposits",
+		permission: "commerce.deposit.confirm",
+		responseRef: "#/components/schemas/PagedDeposits",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				state: DepositSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedDepositsSchema);
+
+/** WS3 remediation R3, Finding I: pre-commit consequence preview for
+ * `commerce.register.close` (the closer's own upcoming action). */
+export const getRegisterSessionContract = base
+	.route({
+		method: "GET",
+		path: "/v1/register-sessions/{sessionId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getRegisterSessionsBySessionId",
+		permission: "commerce.register.close",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ sessionId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
+/** WS3 remediation R3, Finding I: the SAME register-session read as
+ * `getRegisterSessionContract` above, gated on `commerce.cash-variance.
+ * approve` instead — the closer and the variance approver are different
+ * Parties by Finding C's separation-of-duties rule and are not guaranteed
+ * to hold each other's permission, so this is a second thin operation over
+ * the identical underlying resource rather than one operation gated on
+ * either permission (this contract surface authorizes one permission per
+ * operation throughout). `varianceId` IS the register session id, matching
+ * `approveCashVarianceContract`'s existing `{varianceId}` param exactly. */
+export const getCashVarianceContract = base
+	.route({
+		method: "GET",
+		path: "/v1/cash-variances/{varianceId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getCashVariancesByVarianceId",
+		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/RegisterSession",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ varianceId: IdentifierSchema }),
+		})
+	)
+	.output(RegisterSessionSchema);
+
+/** WS3 remediation R3b, Item 7 (server-backed discovery). Reuses
+ * `commerce.cash-variance.approve` exactly, the SAME permission
+ * `getCashVarianceContract` above already requires — no new identifier
+ * invented. A "cash variance" has no separate table/id (`varianceId` IS the
+ * register session id, per `getCashVarianceContract`'s own doc comment); a
+ * session only ever holds `state="Closing"` while a non-zero close variance
+ * awaits approval (`registerClose`: `zeroVariance ? "Closed" : "Closing"`,
+ * and `cashVariances.approve` is the only transition out of `Closing`), so
+ * `state=Closing` is exactly the pending-variance queue — no separate
+ * `varianceApprovalRequired`/`varianceApprovedAt` filter is needed. */
+export const listCashVariancesContract = base
+	.route({ method: "GET", path: "/v1/cash-variances", successStatus: 200 })
+	.meta({
+		operationId: "listCashVariances",
+		permission: "commerce.cash-variance.approve",
+		responseRef: "#/components/schemas/PagedRegisterSessions",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			query: PageQuerySchema.extend({
+				locationId: IdentifierSchema.optional(),
+				state: RegisterSessionSchema.shape.state.optional(),
+			}),
+		})
+	)
+	.output(PagedRegisterSessionsSchema);
+
+export const createAccountantHandoffExportContract = base
+	.route({
+		method: "POST",
+		path: "/v1/exports/accountant-handoff",
+		successStatus: 202,
+	})
+	.meta({
+		operationId: "createAccountantHandoffExport",
+		permission: "platform.export.create",
+		requestRef: "#/components/schemas/AccountantHandoffRequest",
+		responseRef: "#/components/schemas/AccountantHandoffExport",
+		successStatus: 202,
+	})
+	.input(
+		z.object({
+			body: AccountantHandoffRequestSchema,
+			headers: TenantCommandHeadersSchema,
+		})
+	)
+	.output(AccountantHandoffExportSchema);
+
+export const getExportContract = base
+	.route({
+		method: "GET",
+		path: "/v1/exports/{exportId}",
+		successStatus: 200,
+	})
+	.meta({
+		operationId: "getExportsByExportId",
+		permission: "platform.export.read",
+		responseRef: "#/components/schemas/AccountantHandoffExport",
+		successStatus: 200,
+	})
+	.input(
+		z.object({
+			headers: RequiredActiveContextHeadersSchema,
+			params: z.object({ exportId: IdentifierSchema }),
+		})
+	)
+	.output(AccountantHandoffExportSchema);
+
 export const createOpeningStockImportContract = base
 	.route({
 		method: "POST",
@@ -1379,6 +2178,62 @@ export const ws2CatalogInventoryApiContract = {
 	},
 };
 
+export const ws3PosApiContract = {
+	commerce: {
+		cashMovements: { create: createCashMovementContract },
+		cashVariances: {
+			approve: approveCashVarianceContract,
+			get: getCashVarianceContract,
+			list: listCashVariancesContract,
+		},
+		deposits: {
+			confirm: confirmDepositContract,
+			create: createDepositContract,
+			get: getDepositContract,
+			list: listDepositsContract,
+		},
+		priceOverrides: {
+			approve: approveSalePriceOverrideContract,
+			list: listPriceOverridesContract,
+			request: requestSalePriceOverrideContract,
+		},
+		receipts: {
+			get: getReceiptContract,
+			getByNumber: getReceiptByNumberContract,
+			reissue: reissueReceiptContract,
+			void: voidReceiptContract,
+		},
+		refunds: {
+			approve: approveRefundContract,
+			create: createRefundContract,
+			get: getRefundContract,
+			list: listRefundsContract,
+		},
+		registerSessions: { get: getRegisterSessionContract },
+		registers: {
+			close: closeRegisterContract,
+			open: openRegisterContract,
+		},
+		returns: {
+			approve: approveReturnContract,
+			create: createReturnContract,
+			get: getReturnContract,
+			list: listReturnsContract,
+		},
+		safeDrops: { create: createSafeDropContract },
+		sales: {
+			complete: completeSaleContract,
+			create: createSaleContract,
+			getForReturn: getSaleForReturnContract,
+			hold: holdSaleContract,
+		},
+	},
+	exports: {
+		createAccountantHandoff: createAccountantHandoffExportContract,
+		get: getExportContract,
+	},
+};
+
 export const platformApiContract = {
 	audit: { list: listAuditRecordsContract },
 	entitlements: { list: listEntitlementsContract },
@@ -1426,6 +2281,7 @@ export const appApiContract = {
 	),
 	...platformApiContract,
 	...ws2CatalogInventoryApiContract,
+	...ws3PosApiContract,
 };
 
 export const WS1_OPERATION_IDS = [
@@ -1476,3 +2332,70 @@ export const WS2_EVENT_OPENAPI_OPERATION_METADATA =
 	OPENAPI_OPERATION_METADATA.filter(
 		(operation) => operation.operationId === "createEventReplay"
 	);
+
+/** WS3 PR1 scope only (registers/cash-movements/safe-drops/cash-variance
+ * approval); PR2-PR4 add the remaining `commerce.*` operations in later
+ * stages and are not yet implemented behind this branch's router. */
+export const WS3_PR1_OPERATION_IDS = [
+	"openRegister",
+	"closeRegister",
+	"postRegistersByRegisterIdCashMovements",
+	"postRegistersByRegisterIdSafeDrops",
+	"postCashVariancesByVarianceIdApprove",
+] as const;
+
+export const WS3_PR1_OPENAPI_OPERATION_METADATA =
+	OPENAPI_OPERATION_METADATA.filter((operation) =>
+		(WS3_PR1_OPERATION_IDS as readonly string[]).includes(operation.operationId)
+	);
+
+/** WS3 PR1-PR4 scope: every `commerce.*`/`platform.export.*` operation
+ * implemented behind this branch's router as of PR4 (registers/cash/sale/
+ * receipt/return/refund/void/reissue/deposit/accountant-handoff export).
+ * `ws3PosApiContract`'s procedure tree is asserted against exactly this
+ * set (see `index.test.ts`), the same parity discipline
+ * `PLATFORM_OPENAPI_OPERATION_METADATA` and `WS2_OPENAPI_OPERATION_
+ * METADATA` already use. */
+export const WS3_OPERATION_IDS = [
+	...WS3_PR1_OPERATION_IDS,
+	"createSale",
+	"completeSale",
+	"postSalesBySaleIdHold",
+	"requestSalePriceOverride",
+	"approveSalePriceOverride",
+	"getReceiptsByReceiptId",
+	"createReturn",
+	"postReturnsByReturnIdApprove",
+	"postRefunds",
+	"postRefundsByRefundIdApprove",
+	"postReceiptsByReceiptIdReissue",
+	"postReceiptsByReceiptIdVoid",
+	"createDeposit",
+	"postDepositsByDepositIdConfirm",
+	"createAccountantHandoffExport",
+	"getExportsByExportId",
+	// WS3 remediation R3: Findings I and J's pre-commit consequence-preview
+	// and receipt-to-return server-lookup reads, all reusing an already-
+	// registered commerce.* permission (no new identifier invented).
+	"getReturnsByReturnId",
+	"getRefundsByRefundId",
+	"getDepositsByDepositId",
+	"getRegisterSessionsBySessionId",
+	"getCashVariancesByVarianceId",
+	"getRegistersByRegisterIdReceiptsByReceiptNumber",
+	"getRegistersByRegisterIdReceiptsByReceiptNumberSale",
+	// WS3 remediation R3b, Item 7: server-backed pending-approval/
+	// confirmation queues, each reusing an already-registered commerce.*
+	// approve/confirm permission (no new identifier invented) — replaces
+	// copying an opaque ID between users/browsers.
+	"listPriceOverrides",
+	"listReturns",
+	"listRefunds",
+	"listDeposits",
+	"listCashVariances",
+] as const;
+
+export const WS3_OPENAPI_OPERATION_METADATA = OPENAPI_OPERATION_METADATA.filter(
+	(operation) =>
+		(WS3_OPERATION_IDS as readonly string[]).includes(operation.operationId)
+);

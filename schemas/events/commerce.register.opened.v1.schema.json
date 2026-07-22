@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.invalid/events/commerce.register.opened.v1.schema.json",
+  "title": "commerce.register.opened.v1",
+  "allOf": [
+    {"$ref": "./event-envelope-v1.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "name": {"const": "commerce.register.opened.v1"},
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["registerId", "locationId", "currency", "openingFloatMinor", "openerPartyId"],
+          "properties": {
+            "registerId": {"type": "string"},
+            "locationId": {"type": "string"},
+            "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+            "openingFloatMinor": {"type": "integer", "minimum": 0},
+            "openerPartyId": {"type": "string"}
+          }
+        }
+      }
+    }
+  ]
+}

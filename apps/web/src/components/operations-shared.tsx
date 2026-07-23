@@ -13,6 +13,7 @@ import {
 	TableBody,
 	TableCaption,
 	TableCell,
+	type TableDensity,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -84,18 +85,20 @@ export function OperationsPageFrame({
 export function ResponsiveDataList<T>({
 	caption,
 	columns,
+	density = "comfortable",
 	items,
 	rowKey,
 }: {
 	caption: string;
 	columns: DataColumn<T>[];
+	density?: TableDensity;
 	items: T[];
 	rowKey: (item: T) => string;
 }) {
 	return (
 		<>
 			<div className="hidden overflow-x-auto rounded-2xl border md:block">
-				<Table>
+				<Table density={density}>
 					<TableCaption className="sr-only">{caption}</TableCaption>
 					<TableHeader>
 						<TableRow>

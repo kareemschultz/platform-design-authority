@@ -24,6 +24,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
 	appendCursorTrail,
 	freshnessState,
+	type MutationFailureKind,
 	mutationFailurePresentation,
 	operationsHref,
 	parseCursorTrail,
@@ -32,10 +33,21 @@ import {
 
 import { EmptyState, QueryFailure } from "./query-state";
 
-const POSITIVE_STATE_PATTERN =
-	/active|posted|approved|completed|reconciled|received/u;
+// Checked before SUCCESS_STATE_PATTERN: "PartiallyReceived" contains
+// "received" and must classify as pending, not success.
+const PENDING_STATE_PATTERN =
+	/committing|dispatched|draft|inprogress|invited|partiallyreceived|pending|provisioning|readyforapproval|submitted|uploaded|validating/u;
+const WARNING_STATE_PATTERN = /grace|requiresreview|suspended|warning/u;
 const NEGATIVE_STATE_PATTERN =
-	/failed|rejected|mismatch|reversed|exception|cancelled/u;
+	/cancelled|denied|error|exception|expired|failed|failure|mismatch|rejected|reversed|revoked/u;
+// \bactive\b, not a plain substring: "Inactive" must fall through to the
+// neutral outline bucket, not match as a false-positive success state.
+// "trial" belongs here, not in the pending bucket: the entitlement engine's
+// accessStatus() (packages/platform/entitlements/src/index.ts) treats Trial
+// identically to Active for access -- badging it as pending would mislead
+// operators into thinking a usable capability isn't active yet.
+const SUCCESS_STATE_PATTERN =
+	/accepted|approved|\bactive\b|completed|current|posted|received|reconciled|success|trial/u;
 
 export interface DataColumn<T> {
 	label: string;
@@ -231,11 +243,17 @@ export function CollectionState<T>({
 
 export function StateBadge({ state }: { state: string }) {
 	const lowered = state.toLowerCase();
-	let variant: "destructive" | "outline" | "secondary" = "outline";
-	if (POSITIVE_STATE_PATTERN.test(lowered)) {
-		variant = "secondary";
+	let variant: React.ComponentProps<typeof Badge>["variant"] = "outline";
+	if (PENDING_STATE_PATTERN.test(lowered)) {
+		variant = "pending";
+	} else if (WARNING_STATE_PATTERN.test(lowered)) {
+		variant = "warning";
 	} else if (NEGATIVE_STATE_PATTERN.test(lowered)) {
 		variant = "destructive";
+	} else if (SUCCESS_STATE_PATTERN.test(lowered)) {
+		variant = "success";
+	} else if (lowered === "info") {
+		variant = "info";
 	}
 	return <Badge variant={variant}>{state}</Badge>;
 }
@@ -266,6 +284,22 @@ export function FreshnessBadge({
 	);
 }
 
+const VARIANT_BY_MUTATION_FAILURE_KIND: Record<
+	MutationFailureKind,
+	React.ComponentProps<typeof Alert>["variant"]
+> = {
+	"approval-required": "pending",
+	conflict: "warning",
+	domain: "warning",
+	entitlement: "warning",
+	network: "offline",
+	permission: "destructive",
+	reauthenticate: "warning",
+	"step-up": "warning",
+	unavailable: "warning",
+	validation: "destructive",
+};
+
 export function MutationError({
 	error,
 	isOnline = true,
@@ -280,11 +314,7 @@ export function MutationError({
 	return (
 		<Alert
 			role="alert"
-			variant={
-				presentation.kind === "permission" || presentation.kind === "validation"
-					? "destructive"
-					: "default"
-			}
+			variant={VARIANT_BY_MUTATION_FAILURE_KIND[presentation.kind]}
 		>
 			<AlertTitle>{presentation.title}</AlertTitle>
 			<AlertDescription>

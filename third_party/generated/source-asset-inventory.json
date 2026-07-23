@@ -144,7 +144,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/alert.tsx",
       "record_id": "source.shadcn.ui.4.13.0",
-      "sha256": "6fbb781fdd693bd596ba21a1b430e46a7d0cec624fc4878fffff26b0e8d960de"
+      "sha256": "9d24d62b3b4b65c308a0c0525bdccd9cdbe3c59d76cf7d356685c523722177ef"
     },
     {
       "declared_upstream_license": "MIT",
@@ -153,7 +153,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/badge.tsx",
       "record_id": "source.shadcn.ui.4.13.0",
-      "sha256": "16d1816ff96cfe67685e68a298d10e5000799800fe64d2d5cfefdf678496a2bc"
+      "sha256": "b2cbc7fc719c2775dce7870610d99bd442644ffebcaa59682dd8c062d9608c7d"
     },
     {
       "declared_upstream_license": "MIT",

@@ -340,7 +340,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 	let connectivityAlert: React.ReactNode = null;
 	if (!isOnline) {
 		connectivityAlert = (
-			<Alert className="mx-auto my-3 max-w-screen-2xl" role="status">
+			<Alert
+				className="mx-auto my-3 max-w-screen-2xl"
+				role="status"
+				variant="offline"
+			>
 				<CloudOff />
 				<AlertTitle>Offline</AlertTitle>
 				<AlertDescription>

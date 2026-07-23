@@ -79,9 +79,21 @@ export function QueryFailure({
 		"step-up-required": KeyRound,
 		unavailable: CircleAlert,
 	};
+	const variantByFailure: Record<
+		ShellFailure,
+		React.ComponentProps<typeof Alert>["variant"]
+	> = {
+		"approval-required": "pending",
+		"entitlement-unavailable": "warning",
+		offline: "offline",
+		"permission-denied": "destructive",
+		reauthenticate: "warning",
+		"step-up-required": "warning",
+		unavailable: "warning",
+	};
 	const Icon = iconByFailure[kind];
 	return (
-		<Alert variant={kind === "permission-denied" ? "destructive" : "default"}>
+		<Alert variant={variantByFailure[kind]}>
 			<Icon />
 			<AlertTitle>{copy[kind].title}</AlertTitle>
 			<AlertDescription>

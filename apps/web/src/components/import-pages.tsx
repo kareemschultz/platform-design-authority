@@ -1085,7 +1085,7 @@ export function ImportDetailPage({
 				<StateBadge state={job.reconciliationState} />
 				<Badge variant="outline">Version {job.version}</Badge>
 				{workspace.isOnline ? null : (
-					<Badge variant="destructive">Offline · read-only</Badge>
+					<Badge variant="offline">Offline · read-only</Badge>
 				)}
 			</div>
 

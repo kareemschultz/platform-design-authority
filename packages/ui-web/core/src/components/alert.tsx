@@ -13,6 +13,21 @@ const alertVariants = cva(
 				default: "bg-card text-card-foreground",
 				destructive:
 					"bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
+				info: "bg-card text-status-info *:data-[slot=alert-description]:text-status-info *:[svg]:text-current",
+				offline:
+					"bg-card text-status-offline *:data-[slot=alert-description]:text-status-offline *:[svg]:text-current",
+				pending:
+					"bg-card text-status-pending *:data-[slot=alert-description]:text-status-pending *:[svg]:text-current",
+				success:
+					"bg-card text-status-success *:data-[slot=alert-description]:text-status-success *:[svg]:text-current",
+				// Border + icon carry the warning color; title/description stay
+				// neutral. --status-warning fails 4.5:1 AA as colored text once
+				// tinted or blended (verified: 4.09:1 at /90, 4.32:1 on a 10%
+				// tinted Badge background) -- a token-level gap (no paired
+				// warning-foreground role), not fixable per-component while
+				// keeping colored text. Border only needs 3:1 (passes at 4.92:1).
+				warning:
+					"border-status-warning bg-card text-card-foreground *:[svg]:text-status-warning",
 			},
 		},
 	}

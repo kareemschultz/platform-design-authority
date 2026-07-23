@@ -43,6 +43,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { orpc } from "@/utils/orpc";
 
+import { StateBadge } from "./operations-shared";
 import { EmptyState, ListSkeleton, QueryFailure } from "./query-state";
 import { useWorkspace } from "./workspace-context";
 
@@ -50,9 +51,6 @@ interface Column<T> {
 	label: string;
 	render: (item: T) => React.ReactNode;
 }
-
-const POSITIVE_STATE = /active|success|trial/i;
-const NEGATIVE_STATE = /suspend|revoke|expired|failure|denied/i;
 
 function PageFrame({
 	children,
@@ -148,16 +146,6 @@ function CursorNext({ nextCursor }: { nextCursor: string | null }) {
 
 function useCursor() {
 	return useSearchParams().get("cursor") ?? undefined;
-}
-
-function stateBadge(state: string) {
-	let variant: "destructive" | "outline" | "secondary" = "outline";
-	if (POSITIVE_STATE.test(state)) {
-		variant = "secondary";
-	} else if (NEGATIVE_STATE.test(state)) {
-		variant = "destructive";
-	}
-	return <Badge variant={variant}>{state}</Badge>;
 }
 
 function QueryListState<T>({
@@ -336,7 +324,7 @@ export function UsersPage() {
 		},
 		{
 			label: "Authentication",
-			render: (item) => stateBadge(item.authenticationState),
+			render: (item) => <StateBadge state={item.authenticationState} />,
 		},
 		{
 			label: "Memberships",
@@ -392,7 +380,7 @@ export function RolesPage() {
 				</>
 			),
 		},
-		{ label: "State", render: (item) => stateBadge(item.state) },
+		{ label: "State", render: (item) => <StateBadge state={item.state} /> },
 		{
 			label: "Permissions",
 			render: (item) => `${item.permissionIds.length} assigned`,
@@ -441,7 +429,7 @@ export function EntitlementsPage() {
 				<span className="font-medium">{item.capabilityId}</span>
 			),
 		},
-		{ label: "State", render: (item) => stateBadge(item.state) },
+		{ label: "State", render: (item) => <StateBadge state={item.state} /> },
 		{ label: "Provisioning source", render: (item) => item.source },
 		{
 			label: "Limits",
@@ -623,7 +611,7 @@ export function AuditPage() {
 				</>
 			),
 		},
-		{ label: "Outcome", render: (item) => stateBadge(item.outcome) },
+		{ label: "Outcome", render: (item) => <StateBadge state={item.outcome} /> },
 		{ label: "Actor", render: (item) => item.actorType },
 		{ label: "Classification", render: (item) => item.classification },
 		{

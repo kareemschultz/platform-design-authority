@@ -2,6 +2,13 @@
 
 import { buttonVariants } from "@meridian/ui-web/components/button";
 import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+} from "@meridian/ui-web/components/card";
+import {
 	ArrowRight,
 	ClipboardList,
 	Scale,
@@ -53,38 +60,53 @@ export function InventoryOverviewPage() {
 			description="Task-focused Inventory workflows. Projections are evidence; every command rechecks current authority and owner state."
 			title="Inventory"
 		>
-			<section
+			<Card
 				aria-labelledby="inventory-scope-heading"
-				className="mb-6 rounded-2xl border p-5"
+				className="mb-6"
+				role="region"
 			>
-				<h2 className="font-medium" id="inventory-scope-heading">
-					Selected location
-				</h2>
-				<p className="mt-2 text-muted-foreground text-sm">
-					{location?.name ??
-						"All authorized locations. Select a location above for location-specific work."}
-				</p>
-			</section>
+				<CardHeader>
+					<h2
+						className="cn-font-heading font-medium text-sm"
+						data-slot="card-title"
+						id="inventory-scope-heading"
+					>
+						Selected location
+					</h2>
+				</CardHeader>
+				<CardContent>
+					<p className="text-muted-foreground text-sm">
+						{location?.name ??
+							"All authorized locations. Select a location above for location-specific work."}
+					</p>
+				</CardContent>
+			</Card>
 			<div className="grid gap-4 md:grid-cols-2">
 				{INVENTORY_TASKS.map((task) => {
 					const Icon = task.icon;
 					return (
-						<section
-							className="flex flex-col rounded-2xl border p-5"
-							key={task.href}
-						>
-							<Icon aria-hidden="true" className="mb-3 text-primary" />
-							<h2 className="font-medium">{task.label}</h2>
-							<p className="mt-2 flex-1 text-muted-foreground text-sm">
-								{task.description}
-							</p>
-							<Link
-								className={buttonVariants({ className: "mt-5 min-h-10" })}
-								href={task.href}
-							>
-								Open {task.label.toLowerCase()} <ArrowRight />
-							</Link>
-						</section>
+						<Card className="flex flex-col" key={task.href}>
+							<CardHeader>
+								<Icon aria-hidden="true" className="mb-1 text-primary" />
+								<h2
+									className="cn-font-heading font-medium text-sm"
+									data-slot="card-title"
+								>
+									{task.label}
+								</h2>
+								<CardDescription className="text-sm">
+									{task.description}
+								</CardDescription>
+							</CardHeader>
+							<CardFooter className="mt-auto border-t-0 pt-0">
+								<Link
+									className={buttonVariants({ className: "w-full" })}
+									href={task.href}
+								>
+									Open {task.label.toLowerCase()} <ArrowRight />
+								</Link>
+							</CardFooter>
+						</Card>
 					);
 				})}
 			</div>

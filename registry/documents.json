@@ -4885,7 +4885,7 @@
       "version": "0.29.11",
       "status": "Draft",
       "owner": "Platform Engineering",
-      "last_reviewed": "2026-07-22",
+      "last_reviewed": "2026-07-23",
       "related_adrs": [
         "ADR-0004",
         "ADR-0005",

@@ -184,7 +184,7 @@ export function CountListPage() {
 		<OperationsPageFrame
 			actions={
 				<Link
-					className={buttonVariants({ className: "min-h-10" })}
+					className={buttonVariants()}
 					href="/operations/inventory/counts/new"
 				>
 					<Plus /> Create count
@@ -284,7 +284,7 @@ export function CountCreatePage() {
 				</p>
 				<MutationError error={create.error} />
 				<Button
-					className="min-h-10 w-fit"
+					className="w-fit"
 					disabled={
 						create.isPending ||
 						!locationId ||

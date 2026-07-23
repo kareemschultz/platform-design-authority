@@ -51,7 +51,7 @@
 - Repository license conclusion: `NOASSERTION`
 - Permitted-use evidence: `public-upstream-license-observed-not-legally-reviewed`
 - Distribution status: `legal-review-required`
-- Modifications: Scaffold-generated components were normalized into repository-maintained TypeScript source paths and subsequently modified for the governed UI system.
+- Modifications: Scaffold-generated components were normalized into repository-maintained TypeScript source paths and subsequently modified for the governed UI system. card.tsx: root radius changed from rounded-none to rounded-2xl (2026-07-22) to align with Button/Badge/Alert's shared --radius-2xl token per docs/blueprint/09-UX/DESIGN_TOKENS_AND_VISUAL_SYSTEM.md's radius/elevation family guidance; CardHeader/CardFooter's internal rounded-none (corner-clipping under the root's overflow-hidden) is unchanged. button.tsx: default size changed from h-8 (32px) to h-10 (40px) and lg size from h-9 (36px) to h-11 (44px) to preserve a distinct step above the new default (2026-07-22), meeting the registered 40x40 CSS px preferred product touch target in docs/blueprint/09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md; icon and icon-lg (the plain icon-button sizes that pair with default/lg) changed from size-8/size-9 to size-10/size-11 to match, since both existing call sites were already manually overriding icon to size-10 to work around the same gap; icon-sm/icon-xs (intentionally sub-40px compact/dense options, paired with sm/xs) are unchanged.
 - Covered paths:
 
   - `packages/ui-web/core/src/components/button.tsx`
@@ -416,15 +416,15 @@ reachability or permission to distribute. Every conclusion below is `NOASSERTION
 | `@mdx-js/mdx` | `3.1.1` | `NOASSERTION` |
 | `@modelcontextprotocol/sdk` | `1.29.0` | `NOASSERTION` |
 | `@napi-rs/wasm-runtime` | `1.1.6` | `NOASSERTION` |
-| `@next/env` | `16.2.10` | `NOASSERTION` |
-| `@next/swc-darwin-arm64` | `16.2.10` | `NOASSERTION` |
-| `@next/swc-darwin-x64` | `16.2.10` | `NOASSERTION` |
-| `@next/swc-linux-arm64-gnu` | `16.2.10` | `NOASSERTION` |
-| `@next/swc-linux-arm64-musl` | `16.2.10` | `NOASSERTION` |
-| `@next/swc-linux-x64-gnu` | `16.2.10` | `NOASSERTION` |
-| `@next/swc-linux-x64-musl` | `16.2.10` | `NOASSERTION` |
-| `@next/swc-win32-arm64-msvc` | `16.2.10` | `NOASSERTION` |
-| `@next/swc-win32-x64-msvc` | `16.2.10` | `NOASSERTION` |
+| `@next/env` | `16.2.11` | `NOASSERTION` |
+| `@next/swc-darwin-arm64` | `16.2.11` | `NOASSERTION` |
+| `@next/swc-darwin-x64` | `16.2.11` | `NOASSERTION` |
+| `@next/swc-linux-arm64-gnu` | `16.2.11` | `NOASSERTION` |
+| `@next/swc-linux-arm64-musl` | `16.2.11` | `NOASSERTION` |
+| `@next/swc-linux-x64-gnu` | `16.2.11` | `NOASSERTION` |
+| `@next/swc-linux-x64-musl` | `16.2.11` | `NOASSERTION` |
+| `@next/swc-win32-arm64-msvc` | `16.2.11` | `NOASSERTION` |
+| `@next/swc-win32-x64-msvc` | `16.2.11` | `NOASSERTION` |
 | `@noble/ciphers` | `2.2.0` | `NOASSERTION` |
 | `@noble/hashes` | `2.2.0` | `NOASSERTION` |
 | `@nodelib/fs.scandir` | `2.1.5` | `NOASSERTION` |
@@ -1176,7 +1176,7 @@ reachability or permission to distribute. Every conclusion below is `NOASSERTION
 | `negotiator` | `0.6.3` | `NOASSERTION` |
 | `negotiator` | `0.6.4` | `NOASSERTION` |
 | `negotiator` | `1.0.0` | `NOASSERTION` |
-| `next` | `16.2.10` | `NOASSERTION` |
+| `next` | `16.2.11` | `NOASSERTION` |
 | `next-themes` | `0.4.6` | `NOASSERTION` |
 | `node-fetch` | `2.7.0` | `NOASSERTION` |
 | `node-forge` | `1.4.0` | `NOASSERTION` |

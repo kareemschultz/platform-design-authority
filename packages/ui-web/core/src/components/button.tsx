@@ -12,12 +12,12 @@ const buttonVariants = cva(
 		variants: {
 			size: {
 				default:
-					"h-8 gap-1.5 px-3 has-data-[icon=inline-start]:ps-2.5 has-data-[icon=inline-end]:pe-2.5",
-				icon: "size-8",
-				"icon-lg": "size-9",
+					"h-10 gap-1.5 px-3 has-data-[icon=inline-start]:ps-2.5 has-data-[icon=inline-end]:pe-2.5",
+				icon: "size-10",
+				"icon-lg": "size-11",
 				"icon-sm": "size-7",
 				"icon-xs": "size-6 [&_svg:not([class*='size-'])]:size-3",
-				lg: "h-9 gap-1.5 px-4 has-data-[icon=inline-start]:ps-3 has-data-[icon=inline-end]:pe-3",
+				lg: "h-11 gap-1.5 px-4 has-data-[icon=inline-start]:ps-3 has-data-[icon=inline-end]:pe-3",
 				sm: "h-7 gap-1 px-3 has-data-[icon=inline-start]:ps-2 has-data-[icon=inline-end]:pe-2",
 				xs: "h-6 gap-1 px-2.5 text-xs has-data-[icon=inline-start]:ps-2 has-data-[icon=inline-end]:pe-2 [&_svg:not([class*='size-'])]:size-3",
 			},

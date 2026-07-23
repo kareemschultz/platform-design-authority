@@ -265,7 +265,7 @@ function AdjustmentFilters() {
 					))}
 				</select>
 			</div>
-			<Button className="min-h-10" type="submit" variant="outline">
+			<Button type="submit" variant="outline">
 				<Search /> Apply filters
 			</Button>
 		</form>
@@ -344,7 +344,7 @@ export function InventoryAdjustmentsPage() {
 		<OperationsPageFrame
 			actions={
 				<Link
-					className={buttonVariants({ className: "min-h-10" })}
+					className={buttonVariants()}
 					href="/operations/inventory/adjustments/new"
 				>
 					<Plus /> Create Adjustment
@@ -612,7 +612,7 @@ function InventoryAdjustmentCreateForm() {
 			>
 				{({ canSubmit, isSubmitting }) => (
 					<Button
-						className="min-h-10 w-fit"
+						className="w-fit"
 						disabled={
 							!canSubmit ||
 							isSubmitting ||

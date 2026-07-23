@@ -36,14 +36,18 @@ import { EmptyState, QueryFailure } from "./query-state";
 // Checked before SUCCESS_STATE_PATTERN: "PartiallyReceived" contains
 // "received" and must classify as pending, not success.
 const PENDING_STATE_PATTERN =
-	/committing|dispatched|draft|inprogress|invited|partiallyreceived|pending|provisioning|readyforapproval|submitted|trial|uploaded|validating/u;
+	/committing|dispatched|draft|inprogress|invited|partiallyreceived|pending|provisioning|readyforapproval|submitted|uploaded|validating/u;
 const WARNING_STATE_PATTERN = /grace|requiresreview|suspended|warning/u;
 const NEGATIVE_STATE_PATTERN =
 	/cancelled|denied|error|exception|expired|failed|failure|mismatch|rejected|reversed|revoked/u;
 // \bactive\b, not a plain substring: "Inactive" must fall through to the
 // neutral outline bucket, not match as a false-positive success state.
+// "trial" belongs here, not in the pending bucket: the entitlement engine's
+// accessStatus() (packages/platform/entitlements/src/index.ts) treats Trial
+// identically to Active for access -- badging it as pending would mislead
+// operators into thinking a usable capability isn't active yet.
 const SUCCESS_STATE_PATTERN =
-	/accepted|approved|\bactive\b|completed|current|posted|received|reconciled|success/u;
+	/accepted|approved|\bactive\b|completed|current|posted|received|reconciled|success|trial/u;
 
 export interface DataColumn<T> {
 	label: string;

@@ -218,11 +218,11 @@
       "version": "1.24.0"
     },
     {
-      "bom-ref": "pkg:npm/next@16.2.10",
+      "bom-ref": "pkg:npm/next@16.2.11",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "daca26e405576f7904e988e29dedff98d6c16b2605e7c7a0b8158855551daf5cbf2f8dbac72544818c60046fb5402df83f6c7913eb5c0eea7a5e4b8e017ddd08"
+          "content": "077dfdcdaa9bc8af1c9b186802f2eb730a1a6f008fd70cf6d734b37eac6a5c07a64eed815e71fbb509df72094abf5be731420305cf87b61ed738342b89366245"
         }
       ],
       "name": "next",
@@ -237,12 +237,12 @@
         },
         {
           "name": "pda:declared-dependencies-json",
-          "value": "[{\"name\":\"next\",\"selector\":\"16.2.10\"}]"
+          "value": "[{\"name\":\"next\",\"selector\":\"16.2.11\"}]"
         }
       ],
-      "purl": "pkg:npm/next@16.2.10",
+      "purl": "pkg:npm/next@16.2.11",
       "type": "library",
-      "version": "16.2.10"
+      "version": "16.2.11"
     },
     {
       "bom-ref": "pkg:npm/react-dom@19.2.7",
@@ -453,7 +453,7 @@
         "pkg:npm/fumadocs-mdx@15.1.0",
         "pkg:npm/hast-util-to-jsx-runtime@2.3.6",
         "pkg:npm/lucide-react@1.24.0",
-        "pkg:npm/next@16.2.10",
+        "pkg:npm/next@16.2.11",
         "pkg:npm/react-dom@19.2.7",
         "pkg:npm/react@19.2.7",
         "pkg:npm/remark-gfm@4.0.1",

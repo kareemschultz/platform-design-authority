@@ -1,10 +1,10 @@
 ---
 document_id: PDA-REV-009
 title: Architecture Risk Register
-version: 0.12.0
+version: 0.13.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-22
+last_reviewed: 2026-07-23
 ---
 
 # Architecture Risk Register
@@ -220,7 +220,6 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | FA4-016 | Customer evidence and FDR-010 external gates from corrected dispositions | External evidence | Pilot |
 | FA4-032 | Constitution and ADR ratification waves | PDA and named reviewers | Ratified authority tiers and later pilot/production readiness claims |
 | RR-001 | Expo auth plugin approval per the BETTER_AUTH plugin matrix | PDA | Native app authentication implementation |
-| RR-003 | apps/native Biome lint exclusion | Implementation | Uniform lint enforcement across workspaces |
 | RR-004 | Design-token-to-CSS generation pipeline | Implementation | Token registry as the single styling source in code |
 | RR-005 | packages/ui catalog completion versus PDA-UX-028 | Implementation | Component catalog conformance |
 | RR-007 | Production PostgreSQL RLS role topology and evidence remain deferred | Security/Data | Pilot and production tenant-isolation defense in depth |
@@ -229,6 +228,8 @@ Consolidated list of every register entry not fully closed (status Partially clo
 | RR-010 | Party merge, rich identifiers/relationships, duplicate resolution, and privacy-request execution remain beyond WS1 prototype depth | Platform/Party | Any claim or workflow requiring full Party depth |
 
 **RR-002 — Closed.** The theme-color decision was already made and recorded in code: `apps/web/src/app/manifest.ts` carries a comment recording it as a deliberate white-label seam (fifth-audit F-H-007) — literal hex is required because web manifests cannot consume CSS variables, `registry/design-tokens.json` remains the governed source for in-app color, and the two literals are replaced per tenant brand when white-label packaging lands. Recorded in commit `0841136` (fifth-audit W3 wave), part of PR #80's already independently-concurred and merged remediation (concurrence comment `5008076728`, merge `24d28e68cd7766a50523bee871efa3d2582b88c3`). Commissioning a new decision here would be redundant — the decision exists; this reconciles the register to it. Reopen RR-002 only if white-label packaging work needs a different manifest-color mechanism than the one recorded.
+
+**RR-003 — Closed.** The `"!apps/native"` exclusion in `biome.json` (issue #20) is removed, restoring `apps/native` to the standard `ultracite check`/`bun run check` lint gate. A scoped `ultracite check apps/native` run against the unexcluded config surfaced exactly three violations across 19 files — `lint/style/noNestedTernary` in `apps/native/app/(drawer)/index.tsx`, `lint/complexity/noUselessFragments` in `apps/native/app/_layout.tsx`, and `lint/suspicious/noReactForwardRef` in `apps/native/components/header-button.tsx` — each fixed by hand (extracting the nested ternary into a named helper, dropping the redundant root fragment, and converting `forwardRef` to React 19's ref-as-prop, matching Biome's suggested rewrite since no caller actually consumed the ref). `ultracite check apps packages` (424 files), `bun run check-types` (35/35 packages including a fresh, non-cached `native:check-types`), and the full `bun run gates` (47/47 local gates) all pass with the exclusion removed. Closes issue #20. Reopen RR-003 only if new native-specific lint findings require re-excluding the app rather than fixing them.
 
 **RR-006 — Closed at controlled-prototype depth.** PR #74 merged as `7202fc819b70982c013e1ca11a4fcc136e01e2de` after exact-head concurrence at `8b676bc4df140acf9c0a2a40aa44cb9e94c46e26` and green Documentation Governance plus Meridian Prototype workflows. PDA-APP-023 proves bounded claim/lease recovery, retry/dead-letter behavior, replay authority and replay-scoped receipts, consumer idempotency, safe observability, tenant isolation, and rebuildable Catalog/Inventory consumers. Claude Code's final independent re-audit recorded zero remaining actionable findings in PR #74 comment `4991097241`. This closes only the missing controlled-prototype delivery-runtime risk; RR-007, production capacity/SLO/alerting, multi-replica topology, production retention, restore exercises, and external webhook delivery remain open under their named owners. Reopen RR-006 only if new evidence invalidates the merged delivery or idempotency controls.
 
@@ -244,7 +245,7 @@ Distinct from risk: a debt entry records a deliberate suboptimal choice accepted
 |---|---|---|---|---|
 | TD-001 | **Closed 2026-07-13.** packages/api dissolved into `apps/server` transport (router/context/procedures) plus a generated client type surface in `packages/platform-clients/api-client` during WS0's package restructuring. Evidence: `FIRST_SLICE_IMPLEMENTATION_PLAN.md` §2/§5 WS0; fresh install/typecheck (12/12)/test (126/126)/lint/build all green. | Scaffold expedience to unblock initial workspace wiring | WS0 execution | Implementation |
 | TD-002 | **Closed 2026-07-13 (one workstream early).** `@meridian/db`'s Better Auth tables moved to `packages/platform/identity` (`@meridian/platform-identity`) ownership during WS0 rather than waiting for WS1, since no domain code yet depends on the shared connection. Evidence: same as TD-001. | Single-migration-owner rule keeps one migration stream during scaffold phase | WS1 identity workstream | Implementation |
-| TD-003 | apps/native excluded from Biome linting | Better-T-Stack scaffold default; no native work is active yet | Native app work starts | Implementation |
+| TD-003 | **Closed 2026-07-23.** apps/native excluded from Biome linting. Evidence: `biome.json`'s `"!apps/native"` exclusion removed; the three surfaced violations fixed; `ultracite check apps packages`, `bun run check-types`, and `bun run gates` (47/47) all green. See RR-003. | Better-T-Stack scaffold default; no native work is active yet | Native app work starts | Implementation |
 | TD-004 | Status-token CSS variables are hand-copied literals pending the token-generation pipeline | Pipeline (PDA-UX-023) not yet built; literals unblock UI work | Token-generation pipeline lands (PDA-UX-023) | Implementation |
 | TD-005 | Registry capability governance fields (packaging_class and similar) remain namespace defaults pending curation | Curated overlay exists but per-capability curation is deferred to workstream owners | Capability curation pass per workstream | PDA |
 | TD-008 | `apps/web/src/app/error.tsx` logs client errors to `console.error`; no structured client error-reporting sink exists | Prototype-only diagnostics; no reporting infrastructure is selected yet (fifth-audit F-H-008) | Client error-reporting decision at WS7 operational readiness, or first pilot-candidate build | Implementation |
@@ -260,3 +261,4 @@ This register is updated in the same pull request as any disposition change: a s
 - **0.10.0 (2026-07-17):** Added the P-W2a fifth-audit status pointers for F-A-001, F-A-002, and F-L-005; recorded FDR-004 ratification on TA-002 while retaining the historical M0 deviation; preserved all external, pilot, and production blockers.
 - **0.11.0 (2026-07-21):** Closed F-A-001 and F-A-002 — both stale rows still read "implemented pending independent review" after PR #91 (P-W2a) had already completed exact-head independent review (concurrence comment `5009220014`, reviewed head `ff9816e`) and merged (`1541795`, an ancestor of every later `main` commit). Reconciliation only; no new review commissioned. Removed both rows from the Currently Open Risks list.
 - **0.12.0 (2026-07-22):** Closed RR-002 — the PWA manifest theme-color decision this risk asked for was already made and recorded in `apps/web/src/app/manifest.ts`'s own comment (fifth-audit F-H-007), committed as `0841136` and merged as part of PR #80's already independently-concurred remediation. Reconciliation only; no new decision made. Removed RR-002 from the Currently Open Risks list.
+- **0.13.0 (2026-07-23):** Closed RR-003/TD-003 — removed `biome.json`'s `"!apps/native"` exclusion (issue #20), fixed the three violations it surfaced (`noNestedTernary`, `noUselessFragments`, `noReactForwardRef`), and verified `ultracite check apps packages`, `bun run check-types`, and `bun run gates` (47/47) all green with `apps/native` in scope. Removed RR-003 from the Currently Open Risks list; TD-003 marked closed in place.

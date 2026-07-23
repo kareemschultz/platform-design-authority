@@ -359,9 +359,10 @@ function ProductCreateForm() {
 										"GTIN-13": "GTIN-13",
 										"GTIN-14": "GTIN-14",
 									}}
-									onValueChange={(next) =>
-										field.handleChange(next as typeof field.state.value)
-									}
+									onValueChange={(next) => {
+										field.handleChange(next as typeof field.state.value);
+										setIsDirty(true);
+									}}
 									value={field.state.value}
 								>
 									<SelectTrigger id={field.name}>

@@ -112,6 +112,56 @@ export function useWorkspaceWorkGuard(state: WorkspaceWorkState) {
 	);
 }
 
+type ContextPanelState = "dataError" | "loading" | "none" | "selects";
+
+function deriveContextPanelState({
+	contextDataError,
+	contextDataLoading,
+	contextId,
+}: {
+	contextDataError: boolean;
+	contextDataLoading: boolean;
+	contextId: string | null;
+}): ContextPanelState {
+	if (!contextId) {
+		return "none";
+	}
+	if (contextDataLoading) {
+		return "loading";
+	}
+	if (contextDataError) {
+		return "dataError";
+	}
+	return "selects";
+}
+
+function WorkspaceContextDataError({
+	locationsQuery,
+	organizationsQuery,
+}: {
+	locationsQuery: { isError: boolean; refetch: () => void };
+	organizationsQuery: { isError: boolean; refetch: () => void };
+}) {
+	const retry = () => {
+		if (organizationsQuery.isError) {
+			organizationsQuery.refetch();
+		}
+		if (locationsQuery.isError) {
+			locationsQuery.refetch();
+		}
+	};
+	return (
+		<div className="flex items-center gap-3">
+			<p className="text-destructive text-sm" role="alert">
+				Organization and location options could not be loaded.
+			</p>
+			<Button onClick={retry} size="sm" variant="outline">
+				Retry
+			</Button>
+		</div>
+	);
+}
+
 interface ContextTarget {
 	locationId?: string | null;
 	organizationId: string;
@@ -307,6 +357,12 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
 	const contextDataLoading =
 		organizationsQuery.isLoading || locationsQuery.isLoading;
+	const contextDataError = organizationsQuery.isError || locationsQuery.isError;
+	const contextPanel = deriveContextPanelState({
+		contextDataError,
+		contextDataLoading,
+		contextId,
+	});
 
 	const value = useMemo<WorkspaceValue>(
 		() => ({
@@ -380,7 +436,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 						<p className="font-medium text-sm">Current workspace</p>
 						{contextSummary}
 					</div>
-					{contextId && !contextDataLoading ? (
+					{contextPanel === "selects" ? (
 						<div className="grid gap-3 sm:grid-cols-2">
 							<div className="grid gap-1">
 								<Label htmlFor="organization-context">Organization</Label>
@@ -446,11 +502,17 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 							</div>
 						</div>
 					) : null}
-					{contextId && contextDataLoading ? (
+					{contextPanel === "loading" ? (
 						<div className="grid gap-3 sm:grid-cols-2">
 							<Skeleton className="h-10 w-full" />
 							<Skeleton className="h-10 w-full" />
 						</div>
+					) : null}
+					{contextPanel === "dataError" ? (
+						<WorkspaceContextDataError
+							locationsQuery={locationsQuery}
+							organizationsQuery={organizationsQuery}
+						/>
 					) : null}
 					<p aria-live="polite" className="sr-only" role="status">
 						{setContext.isPending ? "Switching workspace…" : null}

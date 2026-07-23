@@ -10,20 +10,32 @@ import { createContext, useContext } from "react";
  * registry/design-tokens.json (`size.row-comfortable`, `size.row-compact`):
  * comfortable is 44px (`row-comfortable`), compact is 34px (`row-compact`
  * exactly, not a value picked independently within the doc's 32-36px prose
- * range), touch is the 52px POS row figure the Density section states
- * under Comfortable. No `size.row-touch` registry token exists yet — 52px
- * is taken directly from the doc's own POS-row prose rather than the
- * more generic 48px `size.target-pos` touch-target minimum, since a row
- * height and a minimum tap-target size are different things and the doc
- * gives a specific row figure. TableHead and TableCell use the same fixed
- * height per tier (not independent padding-derived heights) so head and
- * body rows cannot drift apart within one density. Threaded via context
- * (not a className prop on each cell) so TableHead/TableCell can react to
- * the density chosen on the enclosing Table without every call site
- * repeating density-specific classes. RR-004 (no design-token-to-CSS
- * generation pipeline exists yet) means these are literal pixel values
- * copied from the token source, not a live binding to it — recheck this
- * comment against the registry if either changes.
+ * range), touch is the 52px POS row figure the Density section now states
+ * in its own Touch/POS subsection. No `size.row-touch` registry token
+ * exists yet — 52px is taken directly from the doc's own POS-row prose
+ * rather than the more generic 48px `size.target-pos` touch-target
+ * minimum, since a row height and a minimum tap-target size are different
+ * things and the doc gives a specific row figure.
+ *
+ * IMPORTANT scope limit (Codex review, PR 218): `density="touch"` only
+ * sets row/cell height. It does NOT enlarge nested buttons, links,
+ * checkboxes, or their widths, and a taller row does not by itself
+ * satisfy the platform's 48x48 touch-target requirement for any
+ * interactive control placed inside a row — that requires sizing the
+ * control itself. No current consumer places interactive controls in a
+ * touch-density row; if one does, size those controls explicitly and
+ * re-verify against DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md's Touch
+ * Targets section rather than assuming row height alone covers it.
+ *
+ * TableHead and TableCell use the same fixed height per tier (not
+ * independent padding-derived heights) so head and body rows cannot
+ * drift apart within one density. Threaded via context (not a className
+ * prop on each cell) so TableHead/TableCell can react to the density
+ * chosen on the enclosing Table without every call site repeating
+ * density-specific classes. RR-004 (no design-token-to-CSS generation
+ * pipeline exists yet) means these are literal pixel values copied from
+ * the token source, not a live binding to it — recheck this comment
+ * against the registry if either changes.
  */
 type TableDensity = "comfortable" | "compact" | "touch";
 
@@ -101,13 +113,18 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
 }
 
 /**
- * rem, not px: matches the existing `--density-compact-control` /
- * `--density-comfortable-control` / `--density-touch-control` tokens in
- * globals.css and lets row height grow with text-only font-size scaling
- * instead of clipping content against a pinned pixel height (a real
- * accessibility-review finding on this change — a px height stays fixed
+ * rem, not px: uses the same unit choice as the existing
+ * `--density-compact-control` / `--density-comfortable-control` /
+ * `--density-touch-control` tokens in globals.css for the same reason
+ * (lets row height grow with text-only font-size scaling instead of
+ * clipping content against a pinned pixel height — a real
+ * accessibility-review finding on this change: a px height stays fixed
  * while rem-based text grows under OS/browser text-size settings that
- * aren't full-page zoom).
+ * aren't full-page zoom). The actual pixel values are NOT the same
+ * numbers as those control tokens (32/40/48px) — these are the row
+ * heights from `size.row-comfortable`/`size.row-compact`/the Touch/POS
+ * doc figure (34/44/52px), a different token family for a different
+ * dimension (row height, not a generic control's box size).
  */
 const tableRowDensityClass: Record<TableDensity, string> = {
 	comfortable: "h-11",

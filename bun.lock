@@ -609,6 +609,7 @@
       "devDependencies": {
         "@meridian/tooling-config": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
+        "@types/bun": "catalog:",
         "@types/react": "^19.2.17",
         "@types/react-dom": "catalog:",
         "tailwindcss": "catalog:",

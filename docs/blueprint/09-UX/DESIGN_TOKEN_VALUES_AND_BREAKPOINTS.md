@@ -189,7 +189,7 @@ The registry provides provisional light and dark values. Brand colors map into a
 ### Touch / POS
 
 - Standard table row: 52 px or greater — named as its own density tier here (moved out of Comfortable, second-review 2026-07-23) because component implementations offer it as an independently selectable option, not a Comfortable sub-case. The figure is unchanged; only the structure changed.
-- This is distinct from `size.target-pos` (48 px) in `registry/design-tokens.json`, which is the general minimum touch-target size (matching the Touch Targets section's "POS and frequent touch target: 48 × 48 CSS px minimum"). A 52 px row already satisfies that 48 px floor with margin; the registry has no separate row-specific dimension token for this figure yet.
+- This is distinct from `size.target-pos` (48 px) in `registry/design-tokens.json`, which is the general minimum touch-target size (matching the Touch Targets section's "POS and frequent touch target: 48 × 48 CSS px minimum"); the registry has no separate row-specific dimension token for this row figure yet. A taller row does not by itself satisfy the 48×48 target requirement for any interactive control placed inside it — row height and control size are separate properties, and any row-level interactive control (a button, checkbox, or link within a touch-density row) still needs its own dimensions verified against the 48×48 minimum independently of the row's height.
 
 ## Z-Index Layers
 

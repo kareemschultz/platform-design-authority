@@ -7,6 +7,7 @@ import {
 	CardDescription,
 	CardFooter,
 	CardHeader,
+	CardTitle,
 } from "@meridian/ui-web/components/card";
 import { ArrowRight, Boxes, ClipboardCheck, PackageSearch } from "lucide-react";
 import Link from "next/link";
@@ -54,13 +55,14 @@ export function OperationsOverview() {
 		>
 			<Card aria-labelledby="scope-heading" className="mb-6" role="region">
 				<CardHeader>
-					<h2
-						className="cn-font-heading font-medium text-sm"
-						data-slot="card-title"
-						id="scope-heading"
+					<CardTitle
+						render={
+							// biome-ignore lint/a11y/useHeadingContent: useRender merges CardTitle's children into this element at runtime; the static h2 literal is the render-prop target, not the final content.
+							<h2 id="scope-heading" />
+						}
 					>
 						Current operating scope
-					</h2>
+					</CardTitle>
 					<CardDescription className="text-sm">
 						{organization?.name ?? "No active organization"} ·{" "}
 						{location?.name ?? "All authorized locations"}
@@ -76,16 +78,24 @@ export function OperationsOverview() {
 			<div className="grid gap-4 lg:grid-cols-3">
 				{workspaces.map((item) => {
 					const Icon = item.icon;
+					const headingId = `${item.label.toLowerCase()}-workspace-heading`;
 					return (
-						<Card className="flex flex-col" key={item.href}>
+						<Card
+							aria-labelledby={headingId}
+							className="flex flex-col"
+							key={item.href}
+							role="region"
+						>
 							<CardHeader>
 								<Icon aria-hidden="true" className="mb-1 text-primary" />
-								<h2
-									className="cn-font-heading font-medium text-sm"
-									data-slot="card-title"
+								<CardTitle
+									render={
+										// biome-ignore lint/a11y/useHeadingContent: useRender merges CardTitle's children into this element at runtime; the static h2 literal is the render-prop target, not the final content.
+										<h2 id={headingId} />
+									}
 								>
 									{item.label}
-								</h2>
+								</CardTitle>
 								<CardDescription className="text-sm">
 									{item.description}
 								</CardDescription>

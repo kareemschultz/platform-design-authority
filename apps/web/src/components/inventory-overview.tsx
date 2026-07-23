@@ -7,6 +7,7 @@ import {
 	CardDescription,
 	CardFooter,
 	CardHeader,
+	CardTitle,
 } from "@meridian/ui-web/components/card";
 import {
 	ArrowRight,
@@ -66,13 +67,14 @@ export function InventoryOverviewPage() {
 				role="region"
 			>
 				<CardHeader>
-					<h2
-						className="cn-font-heading font-medium text-sm"
-						data-slot="card-title"
-						id="inventory-scope-heading"
+					<CardTitle
+						render={
+							// biome-ignore lint/a11y/useHeadingContent: useRender merges CardTitle's children into this element at runtime; the static h2 literal is the render-prop target, not the final content.
+							<h2 id="inventory-scope-heading" />
+						}
 					>
 						Selected location
-					</h2>
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<p className="text-muted-foreground text-sm">
@@ -84,16 +86,24 @@ export function InventoryOverviewPage() {
 			<div className="grid gap-4 md:grid-cols-2">
 				{INVENTORY_TASKS.map((task) => {
 					const Icon = task.icon;
+					const headingId = `${task.label.toLowerCase()}-task-heading`;
 					return (
-						<Card className="flex flex-col" key={task.href}>
+						<Card
+							aria-labelledby={headingId}
+							className="flex flex-col"
+							key={task.href}
+							role="region"
+						>
 							<CardHeader>
 								<Icon aria-hidden="true" className="mb-1 text-primary" />
-								<h2
-									className="cn-font-heading font-medium text-sm"
-									data-slot="card-title"
+								<CardTitle
+									render={
+										// biome-ignore lint/a11y/useHeadingContent: useRender merges CardTitle's children into this element at runtime; the static h2 literal is the render-prop target, not the final content.
+										<h2 id={headingId} />
+									}
 								>
 									{task.label}
-								</h2>
+								</CardTitle>
 								<CardDescription className="text-sm">
 									{task.description}
 								</CardDescription>

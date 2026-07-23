@@ -6,6 +6,7 @@ import type {
 } from "@meridian/contracts-platform-api";
 import { Badge } from "@meridian/ui-web/components/badge";
 import { Button, buttonVariants } from "@meridian/ui-web/components/button";
+import { Card } from "@meridian/ui-web/components/card";
 import {
 	Dialog,
 	DialogClose,
@@ -1129,20 +1130,22 @@ export function ImportDetailPage({
 				>
 					Source and authority evidence
 				</h2>
-				<dl className="grid gap-3 rounded-2xl border p-4 sm:grid-cols-2 lg:grid-cols-3">
-					<Definition label="Source file" value={job.sourceFileName} />
-					<Definition label="Scanner" value={job.scannerResult} />
-					<Definition label="Created" value={formatDateTime(job.createdAt)} />
-					<Definition label="Uploader" value={job.createdByUserId} />
-					<Definition
-						label="Approver"
-						value={job.approvedByUserId ?? "Not approved"}
-					/>
-					<Definition
-						label="Last completed row"
-						value={String(job.lastCompletedRow)}
-					/>
-				</dl>
+				<Card className="px-4">
+					<dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+						<Definition label="Source file" value={job.sourceFileName} />
+						<Definition label="Scanner" value={job.scannerResult} />
+						<Definition label="Created" value={formatDateTime(job.createdAt)} />
+						<Definition label="Uploader" value={job.createdByUserId} />
+						<Definition
+							label="Approver"
+							value={job.approvedByUserId ?? "Not approved"}
+						/>
+						<Definition
+							label="Last completed row"
+							value={String(job.lastCompletedRow)}
+						/>
+					</dl>
+				</Card>
 			</section>
 
 			<section
@@ -1187,10 +1190,10 @@ export function ImportDetailPage({
 
 function Metric({ label, value }: { label: string; value: number }) {
 	return (
-		<div className="rounded-2xl border p-4">
+		<Card className="gap-1 px-4">
 			<dt className="text-muted-foreground text-sm">{label}</dt>
 			<dd className="font-semibold text-2xl tabular-nums">{value}</dd>
-		</div>
+		</Card>
 	);
 }
 

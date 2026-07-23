@@ -3,6 +3,7 @@
 import type { StockCount } from "@meridian/contracts-platform-api";
 import { Badge } from "@meridian/ui-web/components/badge";
 import { Button, buttonVariants } from "@meridian/ui-web/components/button";
+import { Card } from "@meridian/ui-web/components/card";
 import {
 	Dialog,
 	DialogClose,
@@ -599,30 +600,32 @@ export function CountDetailPage({ countId }: { countId: string }) {
 					{current.blind ? "Blind Count" : "Non-blind Count"}
 				</Badge>
 			</div>
-			<dl className="mb-6 grid gap-3 rounded-2xl border p-4 sm:grid-cols-2 lg:grid-cols-4">
-				<div>
-					<dt className="text-muted-foreground text-sm">Location</dt>
-					<dd className="break-all">{current.locationId}</dd>
-				</div>
-				<div>
-					<dt className="text-muted-foreground text-sm">Created by</dt>
-					<dd>
-						{current.createdByUserId === actorId ? "You" : "Another operator"}
-					</dd>
-				</div>
-				<div>
-					<dt className="text-muted-foreground text-sm">Submitted by</dt>
-					<dd>
-						{actorLabel(current.submittedByUserId, actorId, "Not submitted")}
-					</dd>
-				</div>
-				<div>
-					<dt className="text-muted-foreground text-sm">Approved by</dt>
-					<dd>
-						{actorLabel(current.approvedByUserId, actorId, "Not approved")}
-					</dd>
-				</div>
-			</dl>
+			<Card className="mb-6 px-4">
+				<dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+					<div>
+						<dt className="text-muted-foreground text-sm">Location</dt>
+						<dd className="break-all">{current.locationId}</dd>
+					</div>
+					<div>
+						<dt className="text-muted-foreground text-sm">Created by</dt>
+						<dd>
+							{current.createdByUserId === actorId ? "You" : "Another operator"}
+						</dd>
+					</div>
+					<div>
+						<dt className="text-muted-foreground text-sm">Submitted by</dt>
+						<dd>
+							{actorLabel(current.submittedByUserId, actorId, "Not submitted")}
+						</dd>
+					</div>
+					<div>
+						<dt className="text-muted-foreground text-sm">Approved by</dt>
+						<dd>
+							{actorLabel(current.approvedByUserId, actorId, "Not approved")}
+						</dd>
+					</div>
+				</dl>
+			</Card>
 			{current.state === "Draft" || current.state === "InProgress" ? (
 				<CountScanner count={current} />
 			) : null}
@@ -636,27 +639,29 @@ export function CountDetailPage({ countId }: { countId: string }) {
 				{current.lines.length ? (
 					<ul className="mt-3 grid gap-3">
 						{current.lines.map((line) => (
-							<li className="rounded-2xl border p-4" key={line.id}>
-								<p className="break-all font-medium">{line.productId}</p>
-								<p className="text-muted-foreground text-sm">
-									Observed {line.observedQuantity} {line.unit}
-								</p>
-								{current.state === "Posted" ? (
-									<dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-										<div>
-											<dt>Expected</dt>
-											<dd>{line.expectedQuantity}</dd>
-										</div>
-										<div>
-											<dt>Variance</dt>
-											<dd>{line.varianceQuantity}</dd>
-										</div>
-									</dl>
-								) : (
-									<p className="mt-2 text-sm">
-										Expected quantity remains hidden until posting.
+							<li key={line.id}>
+								<Card className="px-4">
+									<p className="break-all font-medium">{line.productId}</p>
+									<p className="text-muted-foreground text-sm">
+										Observed {line.observedQuantity} {line.unit}
 									</p>
-								)}
+									{current.state === "Posted" ? (
+										<dl className="grid grid-cols-2 gap-3 text-sm">
+											<div>
+												<dt>Expected</dt>
+												<dd>{line.expectedQuantity}</dd>
+											</div>
+											<div>
+												<dt>Variance</dt>
+												<dd>{line.varianceQuantity}</dd>
+											</div>
+										</dl>
+									) : (
+										<p className="text-sm">
+											Expected quantity remains hidden until posting.
+										</p>
+									)}
+								</Card>
 							</li>
 						))}
 					</ul>

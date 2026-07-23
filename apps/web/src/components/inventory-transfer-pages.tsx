@@ -3,6 +3,7 @@
 import type { StockTransfer } from "@meridian/contracts-platform-api";
 import { Badge } from "@meridian/ui-web/components/badge";
 import { Button, buttonVariants } from "@meridian/ui-web/components/button";
+import { Card } from "@meridian/ui-web/components/card";
 import {
 	Dialog,
 	DialogClose,
@@ -701,22 +702,26 @@ export function TransferDetailPage({ transferId }: { transferId: string }) {
 				<StateBadge state={transfer.data.state} />
 				<Badge variant="outline">Version {transfer.data.version}</Badge>
 			</div>
-			<dl className="mb-6 grid gap-3 rounded-2xl border p-4 sm:grid-cols-2">
-				<div>
-					<dt className="text-muted-foreground text-sm">Source</dt>
-					<dd>{transfer.data.sourceLocationId}</dd>
-				</div>
-				<div>
-					<dt className="text-muted-foreground text-sm">Destination</dt>
-					<dd>{transfer.data.destinationLocationId}</dd>
-				</div>
-				{transfer.data.exceptionReason ? (
-					<div className="sm:col-span-2">
-						<dt className="text-muted-foreground text-sm">Exception reason</dt>
-						<dd>{transfer.data.exceptionReason}</dd>
+			<Card className="mb-6 px-4">
+				<dl className="grid gap-3 sm:grid-cols-2">
+					<div>
+						<dt className="text-muted-foreground text-sm">Source</dt>
+						<dd>{transfer.data.sourceLocationId}</dd>
 					</div>
-				) : null}
-			</dl>
+					<div>
+						<dt className="text-muted-foreground text-sm">Destination</dt>
+						<dd>{transfer.data.destinationLocationId}</dd>
+					</div>
+					{transfer.data.exceptionReason ? (
+						<div className="sm:col-span-2">
+							<dt className="text-muted-foreground text-sm">
+								Exception reason
+							</dt>
+							<dd>{transfer.data.exceptionReason}</dd>
+						</div>
+					) : null}
+				</dl>
+			</Card>
 			<section aria-labelledby="transfer-lines-heading">
 				<h2
 					className="font-heading font-semibold text-xl"
@@ -726,41 +731,43 @@ export function TransferDetailPage({ transferId }: { transferId: string }) {
 				</h2>
 				<ul className="mt-3 grid gap-3">
 					{transfer.data.lines.map((line) => (
-						<li className="rounded-2xl border p-4" key={line.id}>
-							<p className="font-medium">{line.productId}</p>
-							<p className="text-muted-foreground text-sm">Line {line.id}</p>
-							<dl className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
-								<div>
-									<dt>Requested</dt>
-									<dd>
-										{line.requestedQuantity} {line.unit}
-									</dd>
-								</div>
-								<div>
-									<dt>Dispatched</dt>
-									<dd>{`${line.dispatchedQuantity} ${line.unit}`}</dd>
-								</div>
-								<div>
-									<dt>Received</dt>
-									<dd>{`${line.receivedQuantity} ${line.unit}`}</dd>
-								</div>
-								<div>
-									<dt>Exception</dt>
-									<dd>{`${line.exceptionQuantity} ${line.unit}`}</dd>
-								</div>
-								<div>
-									<dt>Remaining</dt>
-									<dd>{`${line.remainingQuantity} ${line.unit}`}</dd>
-								</div>
-							</dl>
-							{transfer.data.state === "Exception" ? (
-								<Link
-									className="mt-3 inline-flex underline"
-									href={`/operations/inventory/adjustments/new?locationId=${encodeURIComponent(transfer.data.destinationLocationId)}&productId=${encodeURIComponent(line.productId)}${line.variantId ? `&variantId=${encodeURIComponent(line.variantId)}` : ""}&reason=${encodeURIComponent(`Correction for transfer ${transfer.data.id}, line ${line.id}`)}`}
-								>
-									Create compensating Adjustment
-								</Link>
-							) : null}
+						<li key={line.id}>
+							<Card className="px-4">
+								<p className="font-medium">{line.productId}</p>
+								<p className="text-muted-foreground text-sm">Line {line.id}</p>
+								<dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
+									<div>
+										<dt>Requested</dt>
+										<dd>
+											{line.requestedQuantity} {line.unit}
+										</dd>
+									</div>
+									<div>
+										<dt>Dispatched</dt>
+										<dd>{`${line.dispatchedQuantity} ${line.unit}`}</dd>
+									</div>
+									<div>
+										<dt>Received</dt>
+										<dd>{`${line.receivedQuantity} ${line.unit}`}</dd>
+									</div>
+									<div>
+										<dt>Exception</dt>
+										<dd>{`${line.exceptionQuantity} ${line.unit}`}</dd>
+									</div>
+									<div>
+										<dt>Remaining</dt>
+										<dd>{`${line.remainingQuantity} ${line.unit}`}</dd>
+									</div>
+								</dl>
+								{transfer.data.state === "Exception" ? (
+									<Link
+										className="inline-flex underline"
+										href={`/operations/inventory/adjustments/new?locationId=${encodeURIComponent(transfer.data.destinationLocationId)}&productId=${encodeURIComponent(line.productId)}${line.variantId ? `&variantId=${encodeURIComponent(line.variantId)}` : ""}&reason=${encodeURIComponent(`Correction for transfer ${transfer.data.id}, line ${line.id}`)}`}
+									>
+										Create compensating Adjustment
+									</Link>
+								) : null}
+							</Card>
 						</li>
 					))}
 				</ul>

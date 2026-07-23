@@ -3,6 +3,7 @@
 import type { Product } from "@meridian/contracts-platform-api";
 import { Badge } from "@meridian/ui-web/components/badge";
 import { Button, buttonVariants } from "@meridian/ui-web/components/button";
+import { Card } from "@meridian/ui-web/components/card";
 import {
 	Dialog,
 	DialogClose,
@@ -705,23 +706,25 @@ export function ProductDetailPage({ productId }: { productId: string }) {
 				</h2>
 				<ul className="mt-3 grid gap-3">
 					{product.data.variants.map((variant) => (
-						<li className="rounded-2xl border p-4" key={variant.id}>
-							<h3 className="font-medium">{variant.name}</h3>
-							{variant.identifiers.length ? (
-								<ul className="mt-2 flex flex-wrap gap-2">
-									{variant.identifiers.map((identifier) => (
-										<li key={identifier.id}>
-											<Badge variant="outline">
-												{identifier.type}: {identifier.value}
-											</Badge>
-										</li>
-									))}
-								</ul>
-							) : (
-								<p className="mt-2 text-muted-foreground text-sm">
-									Identifierless Variant
-								</p>
-							)}
+						<li key={variant.id}>
+							<Card className="px-4">
+								<h3 className="font-medium">{variant.name}</h3>
+								{variant.identifiers.length ? (
+									<ul className="flex flex-wrap gap-2">
+										{variant.identifiers.map((identifier) => (
+											<li key={identifier.id}>
+												<Badge variant="outline">
+													{identifier.type}: {identifier.value}
+												</Badge>
+											</li>
+										))}
+									</ul>
+								) : (
+									<p className="text-muted-foreground text-sm">
+										Identifierless Variant
+									</p>
+								)}
+							</Card>
 						</li>
 					))}
 				</ul>

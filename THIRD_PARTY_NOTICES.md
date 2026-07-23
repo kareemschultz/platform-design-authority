@@ -107,6 +107,19 @@
   - `packages/ui-web/core/src/components/sheet.tsx`
   - `packages/ui-web/core/src/components/table.tsx`
 
+### shadcn/ui CLI (source.shadcn.ui.4.14.0)
+
+- Source/version: https://github.com/shadcn-ui/ui — 4.14.0 (npm; no gitHead metadata published for this release, commit reference unavailable)
+- Upstream-declared license: `MIT`
+- Public license evidence: https://github.com/shadcn-ui/ui/blob/main/LICENSE.md
+- Repository license conclusion: `NOASSERTION`
+- Permitted-use evidence: `public-upstream-license-observed-not-legally-reviewed`
+- Distribution status: `legal-review-required`
+- Modifications: CLI-generated component was copied into repository-maintained source path and normalized: trigger height changed from h-8/h-7 to h-10/h-9 to match the platform's 40px comfortable-density target and the owned Input primitive's sizing; trigger border/background changed from border-transparent+bg-input/50 to border-input+bg-transparent to match Input's bordered treatment; trigger and popup radius changed from rounded-2xl to rounded-xl/rounded-none respectively, matching Input and the platform's established DropdownMenu floating-listbox convention; formatted via the platform's own ultracite/Biome formatter (tabs, sorted props). SelectItem's className added data-highlighted:bg-accent/text-accent-foreground (2026-07-23, Codex review finding) -- the original CLI output only styled :focus, leaving keyboard/hover navigation via Base UI's separate highlighted state (present without DOM focus, e.g. hover) with no visible active-row indicator.
+- Covered paths:
+
+  - `packages/ui-web/core/src/components/select.tsx`
+
 ## License-review observations
 
 - `@axe-core/playwright@4.12.1` — observed `MPL-2.0`; kind `obligation-review`; conclusion `NOASSERTION`; qualified review required.

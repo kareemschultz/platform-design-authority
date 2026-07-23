@@ -15,6 +15,13 @@ import {
 } from "@meridian/ui-web/components/dialog";
 import { Input } from "@meridian/ui-web/components/input";
 import { Label } from "@meridian/ui-web/components/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@meridian/ui-web/components/select";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, PackagePlus, Search } from "lucide-react";
@@ -65,7 +72,7 @@ function ProductFilters() {
 	const [query, setQuery] = useState(searchParams.get("query") ?? "");
 	const [sku, setSku] = useState(searchParams.get("sku") ?? "");
 	const [barcode, setBarcode] = useState(searchParams.get("barcode") ?? "");
-	const [state, setState] = useState(searchParams.get("state") ?? "");
+	const [state, setState] = useState(searchParams.get("state") ?? "all");
 	return (
 		<form
 			aria-label="Product filters"
@@ -116,19 +123,26 @@ function ProductFilters() {
 			</div>
 			<div className="grid gap-1">
 				<Label htmlFor="product-state">Lifecycle state</Label>
-				<select
-					className="min-h-10 rounded-xl border bg-background px-3 text-sm"
-					id="product-state"
-					onChange={(event) => setState(event.target.value)}
+				<Select
+					items={{
+						all: "All states",
+						...Object.fromEntries(PRODUCT_STATES.map((item) => [item, item])),
+					}}
+					onValueChange={(next) => setState(next as string)}
 					value={state}
 				>
-					<option value="">All states</option>
-					{PRODUCT_STATES.map((item) => (
-						<option key={item} value={item}>
-							{item}
-						</option>
-					))}
-				</select>
+					<SelectTrigger id="product-state">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All states</SelectItem>
+						{PRODUCT_STATES.map((item) => (
+							<SelectItem key={item} value={item}>
+								{item}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</div>
 			<Button type="submit" variant="outline">
 				<Search /> Apply filters
@@ -338,21 +352,29 @@ function ProductCreateForm() {
 						{(field) => (
 							<>
 								<Label htmlFor={field.name}>GTIN scheme</Label>
-								<select
-									className="min-h-10 rounded-xl border bg-background px-3 text-sm"
-									id={field.name}
-									onChange={(event) =>
-										field.handleChange(
-											event.target.value as typeof field.state.value
-										)
-									}
+								<Select
+									items={{
+										"GTIN-8": "GTIN-8",
+										"GTIN-12": "GTIN-12",
+										"GTIN-13": "GTIN-13",
+										"GTIN-14": "GTIN-14",
+									}}
+									onValueChange={(next) => {
+										field.handleChange(next as typeof field.state.value);
+										setIsDirty(true);
+									}}
 									value={field.state.value}
 								>
-									<option>GTIN-8</option>
-									<option>GTIN-12</option>
-									<option>GTIN-13</option>
-									<option>GTIN-14</option>
-								</select>
+									<SelectTrigger id={field.name}>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="GTIN-8">GTIN-8</SelectItem>
+										<SelectItem value="GTIN-12">GTIN-12</SelectItem>
+										<SelectItem value="GTIN-13">GTIN-13</SelectItem>
+										<SelectItem value="GTIN-14">GTIN-14</SelectItem>
+									</SelectContent>
+								</Select>
 							</>
 						)}
 					</form.Field>

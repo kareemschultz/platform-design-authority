@@ -47,8 +47,8 @@ test("an authenticated operator creates and reads a tenant-scoped Product", asyn
 	await expect(
 		page.getByText("Tenant context is server-validated for this browser tab.")
 	).toBeVisible();
-	await expect(page.getByLabel("Organization")).toHaveValue(
-		"organization_ws2_browser_0001"
+	await expect(page.getByLabel("Organization")).toContainText(
+		"Georgetown Browser Organization"
 	);
 
 	const commandSuffix = crypto.randomUUID().slice(0, 8);
@@ -156,8 +156,8 @@ test("an in-session Operations authorization loss surfaces client reauthenticati
 	await expect(
 		page.getByText("Tenant context is server-validated for this browser tab.")
 	).toBeVisible();
-	await expect(page.getByLabel("Organization")).toHaveValue(
-		"organization_ws2_browser_0001"
+	await expect(page.getByLabel("Organization")).toContainText(
+		"Georgetown Browser Organization"
 	);
 	const commandSuffix = crypto.randomUUID().slice(0, 8);
 	const productName = `Session Expiry Product ${testInfo.project.name} ${commandSuffix}`;

@@ -224,7 +224,8 @@ test("Barcode entry and exact lookup preserve keyboard focus, reflow, and access
 	await page
 		.getByLabel("Tenant SKU (optional)")
 		.fill(`BARCODE-${testInfo.project.name.toUpperCase()}-${suffix}`);
-	await page.getByLabel("GTIN scheme").selectOption("GTIN-13");
+	await page.getByLabel("GTIN scheme").click();
+	await page.getByRole("option", { name: "GTIN-13" }).click();
 	const barcodeEntry = page.getByLabel("Barcode (optional)");
 	await expect(barcodeEntry).toHaveAttribute("inputmode", "numeric");
 	await barcodeEntry.focus();
@@ -366,8 +367,8 @@ test("Inventory routes preserve URL history, expose context and projection seman
 	await expect(
 		page.getByText("Current authority rechecked on commands", { exact: true })
 	).toBeVisible();
-	await expect(page.getByLabel("Organization")).toHaveValue(
-		"organization_ws2_browser_0001"
+	await expect(page.getByLabel("Organization")).toContainText(
+		"Georgetown Browser Organization"
 	);
 	await page
 		.getByLabel("Location", { exact: true })

@@ -68,6 +68,28 @@
       ]
     },
     {
+      "id": "source.shadcn.ui.4.14.0",
+      "kind": "copied-source",
+      "source_name": "shadcn/ui CLI",
+      "source_version": "4.14.0 (npm; no gitHead metadata published for this release, commit reference unavailable)",
+      "source_url": "https://github.com/shadcn-ui/ui",
+      "declared_upstream_license": "MIT",
+      "upstream_license_url": "https://github.com/shadcn-ui/ui/blob/main/LICENSE.md",
+      "license_conclusion": "NOASSERTION",
+      "notice_status": "included-in-generated-baseline",
+      "permitted_use_evidence": {
+        "status": "public-upstream-license-observed-not-legally-reviewed",
+        "references": [
+          "docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md"
+        ]
+      },
+      "distribution_status": "legal-review-required",
+      "modifications": "CLI-generated component was copied into repository-maintained source path and normalized: trigger height changed from h-8/h-7 to h-10/h-9 to match the platform's 40px comfortable-density target and the owned Input primitive's sizing; trigger border/background changed from border-transparent+bg-input/50 to border-input+bg-transparent to match Input's bordered treatment; trigger and popup radius changed from rounded-2xl to rounded-xl/rounded-none respectively, matching Input and the platform's established DropdownMenu floating-listbox convention; formatted via the platform's own ultracite/Biome formatter (tabs, sorted props). SelectItem's className added data-highlighted:bg-accent/text-accent-foreground (2026-07-23, Codex review finding) -- the original CLI output only styled :focus, leaving keyboard/hover navigation via Base UI's separate highlighted state (present without DOM focus, e.g. hover) with no visible active-row indicator.",
+      "files": [
+        "packages/ui-web/core/src/components/select.tsx"
+      ]
+    },
+    {
       "id": "source.shadcn-studio.empty-state-01",
       "kind": "copied-source",
       "source_name": "shadcn/studio Pro",

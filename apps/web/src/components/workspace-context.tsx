@@ -21,6 +21,13 @@ import {
 	DialogTitle,
 } from "@meridian/ui-web/components/dialog";
 import { Label } from "@meridian/ui-web/components/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@meridian/ui-web/components/select";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import {
 	type QueryClient,
@@ -102,6 +109,56 @@ export function useWorkspaceWorkGuard(state: WorkspaceWorkState) {
 	useEffect(
 		() => registerWorkState(key, state),
 		[key, registerWorkState, state]
+	);
+}
+
+type ContextPanelState = "dataError" | "loading" | "none" | "selects";
+
+function deriveContextPanelState({
+	contextDataError,
+	contextDataLoading,
+	contextId,
+}: {
+	contextDataError: boolean;
+	contextDataLoading: boolean;
+	contextId: string | null;
+}): ContextPanelState {
+	if (!contextId) {
+		return "none";
+	}
+	if (contextDataLoading) {
+		return "loading";
+	}
+	if (contextDataError) {
+		return "dataError";
+	}
+	return "selects";
+}
+
+function WorkspaceContextDataError({
+	locationsQuery,
+	organizationsQuery,
+}: {
+	locationsQuery: { isError: boolean; refetch: () => void };
+	organizationsQuery: { isError: boolean; refetch: () => void };
+}) {
+	const retry = () => {
+		if (organizationsQuery.isError) {
+			organizationsQuery.refetch();
+		}
+		if (locationsQuery.isError) {
+			locationsQuery.refetch();
+		}
+	};
+	return (
+		<div className="flex items-center gap-3">
+			<p className="text-destructive text-sm" role="alert">
+				Organization and location options could not be loaded.
+			</p>
+			<Button onClick={retry} size="sm" variant="outline">
+				Retry
+			</Button>
+		</div>
 	);
 }
 
@@ -298,6 +355,15 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 		]);
 	}, [identityQuery, locationsQuery, organizationsQuery]);
 
+	const contextDataLoading =
+		organizationsQuery.isLoading || locationsQuery.isLoading;
+	const contextDataError = organizationsQuery.isError || locationsQuery.isError;
+	const contextPanel = deriveContextPanelState({
+		contextDataError,
+		contextDataLoading,
+		contextId,
+	});
+
 	const value = useMemo<WorkspaceValue>(
 		() => ({
 			contextId,
@@ -374,53 +440,87 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 						<p className="font-medium text-sm">Current workspace</p>
 						{contextSummary}
 					</div>
-					{contextId ? (
+					{contextPanel === "selects" ? (
 						<div className="grid gap-3 sm:grid-cols-2">
 							<div className="grid gap-1">
 								<Label htmlFor="organization-context">Organization</Label>
-								<select
-									className="min-h-10 min-w-56 rounded-xl border bg-background px-3 text-sm"
-									disabled={setContext.isPending}
-									id="organization-context"
-									onChange={(event) =>
+								<Select
+									items={Object.fromEntries(
+										value.organizations.map((organization) => [
+											organization.id,
+											organization.name,
+										])
+									)}
+									onValueChange={(next) =>
 										requestContextChange({
-											organizationId: event.target.value,
+											organizationId: next as string,
 										})
 									}
 									value={organizationId}
 								>
-									{value.organizations.map((organization) => (
-										<option key={organization.id} value={organization.id}>
-											{organization.name}
-										</option>
-									))}
-								</select>
+									<SelectTrigger id="organization-context">
+										<SelectValue placeholder="Select an organization" />
+									</SelectTrigger>
+									<SelectContent>
+										{value.organizations.map((organization) => (
+											<SelectItem key={organization.id} value={organization.id}>
+												{organization.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 							</div>
 							<div className="grid gap-1">
 								<Label htmlFor="location-context">Location</Label>
-								<select
-									className="min-h-10 min-w-56 rounded-xl border bg-background px-3 text-sm"
-									disabled={setContext.isPending}
-									id="location-context"
-									onChange={(event) =>
+								<Select
+									items={{
+										all: "All locations",
+										...Object.fromEntries(
+											value.locations.map((location) => [
+												location.id,
+												location.name,
+											])
+										),
+									}}
+									onValueChange={(next) =>
 										organizationId &&
 										requestContextChange({
-											locationId: event.target.value || null,
+											locationId: next === "all" ? null : (next as string),
 											organizationId,
 										})
 									}
-									value={identityQuery.data?.activeContext?.locationId ?? ""}
+									value={identityQuery.data?.activeContext?.locationId ?? "all"}
 								>
-									<option value="">All locations</option>
-									{value.locations.map((location) => (
-										<option key={location.id} value={location.id}>
-											{location.name}
-										</option>
-									))}
-								</select>
+									<SelectTrigger id="location-context">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">All locations</SelectItem>
+										{value.locations.map((location) => (
+											<SelectItem key={location.id} value={location.id}>
+												{location.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 							</div>
 						</div>
 					) : null}
+					{contextPanel === "loading" ? (
+						<div className="grid gap-3 sm:grid-cols-2">
+							<Skeleton className="h-10 w-full" />
+							<Skeleton className="h-10 w-full" />
+						</div>
+					) : null}
+					{contextPanel === "dataError" ? (
+						<WorkspaceContextDataError
+							locationsQuery={locationsQuery}
+							organizationsQuery={organizationsQuery}
+						/>
+					) : null}
+					<p aria-live="polite" className="sr-only" role="status">
+						{setContext.isPending ? "Switching workspace…" : null}
+					</p>
 				</div>
 			</section>
 			{connectivityAlert}

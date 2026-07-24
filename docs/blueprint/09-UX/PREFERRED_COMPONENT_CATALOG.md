@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.8.2
+version: 0.8.3
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-21
+last_reviewed: 2026-07-23
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -432,6 +432,31 @@ Preferred Candidate authorizes a bounded normalization prototype only.
 - Owner: Frontend Platform
 - Review date: 2026-07-22
 - Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, and test evidence), when a call site needs search-as-you-type (triggering Combobox evaluation), or when the remaining ~18 known hand-rolled `<select>` call sites are migrated.
+
+### Table
+
+- Status: Prototype Approved
+- User task: Read and scan tabular operational data (a bounded list of records with named columns — Products, Stock Counts, Transfers, Inventory Adjustments) with clear row/column structure and a density that fits the surface and device.
+- Surfaces and roles: Any authenticated operational list surface composed via `ResponsiveDataList`/`CollectionState` (`operations-shared.tsx`); every role that can view that list. This entry covers the `Table`/`TableHeader`/`TableBody`/`TableRow`/`TableHead`/`TableCell`/`TableCaption`/`TableFooter` primitive family itself, not the "Enterprise data grid and responsive record view" need listed under Custom Required below — that need (bulk scope, server operations, virtualization, permissions, audit, export, accessible alternatives) is broader than this primitive currently implements; see Known gap below.
+- Risk class: Low — presentation-only, no data mutation, no domain authority; row/cell content, sorting, and any bulk action are the composing surface's responsibility.
+- Platform family: Data, operations, and analytics (catalog priority, line 168); also the sole current member of the "Enterprise data grid and responsive record view" Custom Required need (line 451).
+- Preferred source: Official shadcn/ui CLI (Base UI-backed), tracked in `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record alongside `alert.tsx`/`badge.tsx`/`dialog.tsx`/`separator.tsx`/`sheet.tsx`.
+- Source item and version: `table` component, shadcn CLI, part of the same 4.13.0 acquisition batch as the sibling components in that provenance record.
+- Alternative candidates: None sourced externally for the data-grid need itself — `PREFERRED_COMPONENT_CATALOG.md`'s Custom Required table lists "Enterprise data grid and responsive record view" precisely because external table/data-grid sources cannot own bulk scope, server operations, virtualization, permissions, audit, and export; `Restricted` explicitly excludes "DataTable candidates when presented as an enterprise-grid solution." This primitive is the owned foundation those future capabilities compose onto, not a claim that the enterprise-grid need is already met.
+- Why preferred: Governed baseline table markup (`<table>`/`<thead>`/`<tbody>`/`<tr>`/`<th>`/`<td>`) normalized onto the platform's semantic tokens, with an owned `density` variant (`comfortable`/`compact`/`touch`) not present in the unmodified source.
+- Required modifications: recorded in `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record. Density (`comfortable`/`compact`/`touch`) added via `TableDensityContext` so `TableHead`/`TableCell` share one fixed height per tier (rem-based, not px, so rows grow with text-size scaling rather than clipping — an accessibility-review finding) instead of independent padding-derived heights that could drift apart between head and body.
+- Canonical states: Density variants (comfortable/compact/touch) covering the Density section of `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md`. Loading/empty/error/offline states are NOT owned by `Table` itself — they're composed at the `CollectionState`/`ResponsiveDataList` layer in `operations-shared.tsx`, which wraps `Table` with those states; this entry is scoped to the table markup and density primitive only.
+- **Known gap, disclosed not silently omitted:** `density` is currently developer-set only, at the call site (`ResponsiveDataList` in `apps/web/src/components/import-pages.tsx:657` is the only current caller passing `density="compact"`) — issue #214 tracks promoting it to a user-facing toolbar control per `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md:38-51`'s toolbar grammar (saved view/column/density/export controls). `touch` density only sets row/cell height — it does NOT enlarge nested interactive controls to the 48×48 touch-target minimum; see the in-code comment in `table.tsx` for the full scope note. No sorting, column visibility, saved views, export, bulk selection, or virtualization exist yet — those remain the "Enterprise data grid" Custom Required need's unmet scope.
+- Accessibility evidence: Density row-height rem-vs-px choice was reviewed (see Required modifications); full keyboard/screen-reader/zoom/contrast evidence for the table markup itself not yet independently performed — pending before Platform Approved promotion.
+- Responsive and density evidence: Three density tiers implemented and covered by `table.test.tsx` (renders correct height classes on both `TableHead` and `TableCell` for default/compact/touch); no responsive column-collapse or horizontal-scroll evidence beyond the `overflow-x-auto` container performed yet.
+- Offline/degraded behavior: Not applicable to this primitive directly — owned by the composing `CollectionState`/`ResponsiveDataList` layer.
+- Performance evidence: Not yet performed; pending.
+- License/provenance record: `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record.
+- Storybook stories: Not yet written; pending — no Storybook harness exists in this repository yet (no `.storybook/` config, no `storybook` script, zero `.stories.tsx` files repo-wide across every catalog entry). Standing up that harness is a repository-wide tooling decision, tracked separately, not a per-component blocker.
+- Tests: `packages/ui-web/core/src/components/table.test.tsx` — density-class rendering for `TableHead`/`TableCell` via `renderToStaticMarkup`.
+- Owner: Frontend Platform
+- Review date: 2026-07-23
+- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, performance, and Storybook evidence); when issue #214 promotes density to a user-facing control; when the "Enterprise data grid" Custom Required need gains sorting, column visibility, bulk selection, export, or virtualization requirements that this primitive would need to grow into or compose with.
 
 ### Researching
 

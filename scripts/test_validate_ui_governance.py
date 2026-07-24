@@ -127,6 +127,21 @@ class RawPaletteTests(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertIn("hex color literal", errors[0])
 
+    def test_issue_reference_recognized_beyond_the_old_20_character_window(
+        self,
+    ) -> None:
+        """Regression guard for the other half of the cross-line fix: the
+        prefix search must not stop recognizing a legitimate same-line
+        reference just because unusual whitespace pushes it past where the
+        old fixed 20-character window would have cut off."""
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// see issue                                   #218\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            self.assertEqual(check_raw_palette(), [])
+
     def test_issue_reference_does_not_mask_a_real_hex_literal_in_the_same_file(
         self,
     ) -> None:

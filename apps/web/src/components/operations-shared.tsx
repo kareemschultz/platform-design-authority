@@ -72,7 +72,7 @@ const DENSITY_LABELS: Record<TableDensity, string> = {
 	touch: "Touch",
 };
 
-function isTableDensity(value: string | null): value is TableDensity {
+export function isTableDensity(value: string | null): value is TableDensity {
 	return value === "comfortable" || value === "compact" || value === "touch";
 }
 
@@ -350,7 +350,13 @@ export function CollectionState<T>(props: {
 	const [density, setDensity] = useTableDensityPreference();
 	return (
 		<>
-			<div className="mb-3 flex justify-end">
+			{/* Hidden below md: density only affects ResponsiveDataList's
+			 * desktop <Table> (md:block); the mobile card list below md has
+			 * fixed spacing and does not consume density at all, so showing
+			 * this control there would let a user pick Compact/Touch and see
+			 * no visible change -- a real Codex-caught defect on the first
+			 * draft of this control. */}
+			<div className="mb-3 hidden justify-end md:flex">
 				<DensityToggle density={density} onDensityChange={setDensity} />
 			</div>
 			<CollectionStateBody {...props} density={density} />

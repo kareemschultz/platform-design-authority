@@ -21,7 +21,7 @@ Define product language, terminology, instructions, errors, localization, format
 - Explain recovery, not merely failure.
 - Distinguish fact, warning, pending, uncertainty, and recommendation.
 - Avoid internal architecture terms in ordinary user interfaces.
-- An action's label stays identical through its whole flow: a control labeled "Publish" produces a confirmation that says "Published," not "Success" or "Submitted" -- the label is the vocabulary a person uses to recognize what just happened, and switching words on the same action breaks that recognition.
+- An action's vocabulary stays consistent through its whole flow: a control labeled "Publish" produces a confirmation that says "Published," not "Success" or "Submitted" -- the verb is what a person uses to recognize what just happened, and switching to a different word for the same action breaks that recognition, even though the grammatical form (verb to past participle) naturally changes.
 
 ## Error Content
 

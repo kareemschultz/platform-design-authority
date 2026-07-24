@@ -1,11 +1,11 @@
 ---
 document_id: PDA-ENGR-013
 title: Technology Lifecycle Compatibility and Lessons Ledger
-version: 0.29.11
+version: 0.29.12
 status: Draft
 owner: Platform Engineering
-last_reviewed: 2026-07-23
-verified_as_of: 2026-07-23
+last_reviewed: 2026-07-24
+verified_as_of: 2026-07-24
 related_adrs: [ADR-0004, ADR-0005, ADR-0006, ADR-0018, ADR-0020, ADR-0021, ADR-0022, ADR-0023, ADR-0024, ADR-0025, ADR-0027]
 ---
 
@@ -68,6 +68,7 @@ These stable releases were observed from official sources on 2026-07-12 and rech
 | GitHub Actions core actions | `actions/checkout` v4 at `34e114876b0b11c390a56381ad16ebd13914f8d5`; `actions/setup-python` v5 at `a26af69be951a213d495a4c3e4e4022e16d87065`; `actions/upload-artifact` v7.0.1 at `043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` | Selected immutable CI pins | Major-version tags are mutable; workflows use the official tag's verified commit observed on 2026-07-21 for `upload-artifact` (2026-07-18 for the other two) and retain the human-readable major in a comment. `upload-artifact` moved v4→v7.0.1 (issue #100) after GitHub deprecated the Node 20 runner; v5/v6/v7 release notes carry no breaking change to this repository's inputs (`name`, `path`, `if-no-files-found`, `retention-days`) | Documentation, status, prototype, and artifact-upload workflows pass from the pinned commits; re-resolve official refs before any change | Prior independently reviewed full SHA after advisory review | Every upstream major/tag movement, security advisory, or workflow-permission change |
 | OpenTofu | 1.12.3 | Selected infrastructure-as-code engine | CLI, providers, modules, state backends, and Terraform-compatibility claims require independent pinning and review | Plan/apply/destroy, drift, state recovery, provider upgrade, policy and self-hosted installation tests | Reviewed Terraform-compatible workflow or provider-native templates after ADR amendment | Every CLI/provider/module lock |
 | pg_durable | 0.2.3 | Platform Labs only | Pre-1.0, evaluation images, preload/extension, AMD64, database failure-domain coupling | Isolation, HA/PITR, load, upgrade, security, compensation/versioning comparison | Application worker, pg_cron, Temporal | Each release and prototype |
+| Claude Code official plugins (`security-guidance`, `claude-security`, `skill-creator`, `claude-md-management`) | Marketplace `claude-plugins-official`, exact slugs verified 2026-07-24 against `anthropics/claude-plugins-official`'s `plugins/` directory listing | Selected agent tooling (PR #237) | These are trusted executable components: `security-guidance` runs hooks on every edit/commit and sends diffs to a configured model endpoint (Opus by default) for its end-of-turn/commit reviews; `claude-md-management`'s `/revise-claude-md` command is approval-gated but proposes edits to this repository's governance-tier `CLAUDE.md`. Two other marketplace plugins evaluated the same session (`frontend-design`, `code-review`) were rejected as conflicting with or shadowing existing governance/tooling -- see PR #237's description for the full comparison | Confirm each plugin's hook/network behavior against its own repo source before enabling (not just its marketing description, per this same session's `frontend-design` finding); monitor `security-guidance`'s actual per-turn/per-commit Opus usage cost after a few real sessions | Disable via `ENABLE_*=0` env vars (per each plugin's own docs) or remove the entry from `.claude/settings.json`'s `enabledPlugins` | Every marketplace update, newly-considered plugin, or before enabling additional plugins from this or another marketplace |
 
 ## Verified Sources
 

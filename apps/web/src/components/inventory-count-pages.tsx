@@ -94,7 +94,7 @@ function CountFilters() {
 	return (
 		<form
 			aria-label="Stock Count filters"
-			className="mb-5 grid gap-3 rounded-2xl border p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+			className="mb-5 grid gap-3 rounded-2xl p-4 ring-(--border-strong) ring-1 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
 			onSubmit={(event) => {
 				event.preventDefault();
 				router.push(
@@ -334,7 +334,7 @@ function CountScanner({ count }: { count: StockCount }) {
 	return (
 		<form
 			aria-labelledby="count-scanner-heading"
-			className="rounded-2xl border p-4"
+			className="rounded-2xl p-4 ring-(--border-strong) ring-1"
 			onSubmit={async (event) => {
 				event.preventDefault();
 				const key = `${productId.trim()}\u001f${variantId.trim()}\u001f${unit.trim()}`;

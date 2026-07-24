@@ -172,24 +172,28 @@ function ScopeSummary({ locationId }: { locationId?: string | null }) {
 	);
 	const location = workspace.locations.find((item) => item.id === locationId);
 	return (
-		<dl className="grid gap-3 rounded-2xl border bg-muted/20 p-4 sm:grid-cols-2">
-			<div>
-				<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-					Organization scope
-				</dt>
-				<dd className="mt-1 break-words">
-					{organization?.name ?? context?.organizationId ?? "No active context"}
-				</dd>
-			</div>
-			<div>
-				<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-					Location scope
-				</dt>
-				<dd className="mt-1 break-words">
-					{location?.name ?? locationId ?? "All permitted locations"}
-				</dd>
-			</div>
-		</dl>
+		<Card className="px-4">
+			<dl className="grid gap-3 sm:grid-cols-2">
+				<div>
+					<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+						Organization scope
+					</dt>
+					<dd className="mt-1 break-words">
+						{organization?.name ??
+							context?.organizationId ??
+							"No active context"}
+					</dd>
+				</div>
+				<div>
+					<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+						Location scope
+					</dt>
+					<dd className="mt-1 break-words">
+						{location?.name ?? locationId ?? "All permitted locations"}
+					</dd>
+				</div>
+			</dl>
+		</Card>
 	);
 }
 
@@ -220,7 +224,7 @@ function AdjustmentFilters() {
 	return (
 		<form
 			aria-label="Inventory Adjustment filters"
-			className="mb-5 grid gap-3 rounded-2xl border p-4 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
+			className="mb-5 grid gap-3 rounded-2xl p-4 ring-(--border-strong) ring-1 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
 			onSubmit={(event) => {
 				event.preventDefault();
 				router.push(

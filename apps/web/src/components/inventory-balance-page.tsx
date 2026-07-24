@@ -50,7 +50,7 @@ function BalanceFilters() {
 	return (
 		<form
 			aria-label="Balance filters"
-			className="mb-5 grid gap-3 rounded-2xl border p-4 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
+			className="mb-5 grid gap-3 rounded-2xl p-4 ring-(--border-strong) ring-1 lg:grid-cols-[1fr_1fr_auto] lg:items-end"
 			onSubmit={(event) => {
 				event.preventDefault();
 				router.push(
@@ -174,7 +174,7 @@ export function InventoryBalancePage() {
 					}
 				/>
 			) : (
-				<p className="rounded-2xl border p-5 text-muted-foreground">
+				<p className="rounded-2xl p-5 text-muted-foreground ring-(--border-strong) ring-1">
 					Select one authorized location to load its projection.
 				</p>
 			)}

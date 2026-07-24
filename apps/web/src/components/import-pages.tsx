@@ -90,7 +90,7 @@ function ImportFilters({ selectedTarget }: { selectedTarget: ImportTarget }) {
 	return (
 		<form
 			aria-label="Import filters"
-			className="mb-5 grid gap-3 rounded-2xl border p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+			className="mb-5 grid gap-3 rounded-2xl p-4 ring-(--border-strong) ring-1 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
 			onSubmit={(event) => {
 				event.preventDefault();
 				router.push(
@@ -357,7 +357,7 @@ export function ImportCreatePage() {
 					}
 				}}
 			>
-				<fieldset className="grid gap-4 rounded-2xl border p-4">
+				<fieldset className="grid gap-4 rounded-2xl p-4 ring-(--border-strong) ring-1">
 					<legend className="px-2 font-heading font-semibold">
 						Import purpose
 					</legend>
@@ -413,7 +413,7 @@ export function ImportCreatePage() {
 					</div>
 				</fieldset>
 
-				<fieldset className="grid gap-4 rounded-2xl border p-4 sm:grid-cols-2">
+				<fieldset className="grid gap-4 rounded-2xl p-4 ring-(--border-strong) ring-1 sm:grid-cols-2">
 					<legend className="px-2 font-heading font-semibold">
 						CSV manifest
 					</legend>
@@ -903,7 +903,7 @@ function ImportActions({
 			<MutationError error={reportError} isOnline={workspace.isOnline} />
 
 			{isTerminalImport(job) ? (
-				<details className="rounded-2xl border p-4">
+				<details className="rounded-2xl p-4 ring-(--border-strong) ring-1">
 					<summary className="cursor-pointer font-medium">
 						Operator retention controls
 					</summary>

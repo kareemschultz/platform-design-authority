@@ -7,6 +7,10 @@ import { NAV_THEME, STATUS_COLORS } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
 import { orpc } from "@/utils/orpc";
 
+function getConnectionStatusText(isConnected: boolean) {
+	return isConnected ? "Connected to API" : "API Disconnected";
+}
+
 export default function Home() {
 	const { colorScheme } = useColorScheme();
 	const theme = colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light;
@@ -15,6 +19,9 @@ export default function Home() {
 	const healthCheck = useQuery(orpc.healthCheck.queryOptions());
 	const isConnected = healthCheck?.data === "OK";
 	const isLoading = healthCheck?.isLoading;
+	const connectionStatusText = isLoading
+		? "Checking connection..."
+		: getConnectionStatusText(isConnected);
 
 	return (
 		<Container>
@@ -83,11 +90,7 @@ export default function Home() {
 											style={{ opacity: 0.7 }}
 											textStyle={{ color: theme.text, fontSize: 12 }}
 										>
-											{isLoading
-												? "Checking connection..."
-												: isConnected
-													? "Connected to API"
-													: "API Disconnected"}
+											{connectionStatusText}
 										</ExpoUIText>
 									</Column>
 								</Host>

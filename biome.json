@@ -15,7 +15,6 @@
       "!**/.vscode",
       "!bts.jsonc",
       "!**/.expo",
-      "!apps/native",
       "!apps/web/public/favicon",
       "!**/.source",
       "!**/.codex",

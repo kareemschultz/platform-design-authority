@@ -77,7 +77,7 @@ function ProductFilters() {
 	return (
 		<form
 			aria-label="Product filters"
-			className="mb-5 grid gap-3 rounded-2xl border p-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] xl:items-end"
+			className="mb-5 grid gap-3 rounded-2xl p-4 ring-(--border-strong) ring-1 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] xl:items-end"
 			onSubmit={(event) => {
 				event.preventDefault();
 				router.push(
@@ -495,7 +495,7 @@ function ProductNameEditor({ product }: { product: Product }) {
 	);
 	return (
 		<form
-			className="grid gap-3 rounded-2xl border p-4 sm:grid-cols-[1fr_auto] sm:items-end"
+			className="grid gap-3 rounded-2xl p-4 ring-(--border-strong) ring-1 sm:grid-cols-[1fr_auto] sm:items-end"
 			onSubmit={async (event) => {
 				event.preventDefault();
 				const result = await update.mutateAsync({

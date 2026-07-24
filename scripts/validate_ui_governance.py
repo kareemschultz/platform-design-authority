@@ -53,6 +53,31 @@ HEX_ALLOWLIST = {
 }
 
 HEX_PATTERN = re.compile(r"#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b")
+# All-numeric hex matches (0-9 are valid hex digits) collide with GitHub
+# issue/PR references written as "issue #218" or "PR #218" in code comments
+# -- issue #224. Rather than requiring every future comment to awkwardly
+# spell out "issue 218" to dodge this validator, treat a hex-looking match
+# as a false positive only when BOTH: (a) the matched digits are entirely
+# decimal (0-9) -- a genuine issue/PR number is never written with a-f, so
+# `#abcdef`/`#fff` are never exempt regardless of what precedes them,
+# closing an evasion Codex's review of the first draft found (an actual
+# hex literal disguised right after the word "issue"/"pr" would otherwise
+# have slipped through); and (b) "issue"/"pr" appears earlier on the SAME
+# LINE (not found via a fixed character window, which either false-exempts
+# across a line break or stops recognizing a reference once whitespace
+# pushes it out of range).
+ISSUE_OR_PR_REFERENCE_PREFIX_PATTERN = re.compile(
+    r"(?:^|[^A-Za-z])(?:issue|pr)[ \t]*$", re.IGNORECASE
+)
+
+
+def _is_issue_or_pr_reference(content: str, match: re.Match[str]) -> bool:
+    digits = match.group()[1:]
+    if not digits.isdigit():
+        return False
+    line_start = content.rfind("\n", 0, match.start()) + 1
+    prefix = content[line_start : match.start()]
+    return bool(ISSUE_OR_PR_REFERENCE_PREFIX_PATTERN.search(prefix))
 TAILWIND_PALETTE_PATTERN = re.compile(
     r"\b(?:bg|text|border|ring|fill|stroke)-(?:red|blue|green|yellow|purple|pink|indigo|"
     r"gray|grey|slate|zinc|neutral|stone|orange|amber|lime|emerald|teal|cyan|sky|violet|"
@@ -83,6 +108,13 @@ def ui_source_files(roots: tuple[str, ...] = UI_ROOTS) -> list[Path]:
     return sorted(files)
 
 
+def _has_real_hex_literal(content: str) -> bool:
+    for match in HEX_PATTERN.finditer(content):
+        if not _is_issue_or_pr_reference(content, match):
+            return True
+    return False
+
+
 def check_raw_palette() -> list[str]:
     errors: list[str] = []
     for path in ui_source_files():
@@ -93,7 +125,7 @@ def check_raw_palette() -> list[str]:
             content = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        if HEX_PATTERN.search(content):
+        if _has_real_hex_literal(content):
             errors.append(f"{rel}: raw hex color literal found; use a semantic token")
         if TAILWIND_PALETTE_PATTERN.search(content):
             errors.append(

@@ -836,9 +836,16 @@ function AdjustmentFacts({ adjustment }: { adjustment: InventoryAdjustment }) {
 	] as const;
 	return (
 		<div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-			<Card>
+			<Card aria-labelledby="adjustment-facts-heading" role="region">
 				<CardHeader>
-					<CardTitle>Adjustment facts</CardTitle>
+					<CardTitle
+						render={
+							// biome-ignore lint/a11y/useHeadingContent: useRender merges CardTitle's children into this element at runtime; the static h2 literal is the render-prop target, not the final content.
+							<h2 id="adjustment-facts-heading" />
+						}
+					>
+						Adjustment facts
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
@@ -853,9 +860,16 @@ function AdjustmentFacts({ adjustment }: { adjustment: InventoryAdjustment }) {
 					</dl>
 				</CardContent>
 			</Card>
-			<Card>
+			<Card aria-labelledby="adjustment-reason-heading" role="region">
 				<CardHeader>
-					<CardTitle>Reason</CardTitle>
+					<CardTitle
+						render={
+							// biome-ignore lint/a11y/useHeadingContent: useRender merges CardTitle's children into this element at runtime; the static h2 literal is the render-prop target, not the final content.
+							<h2 id="adjustment-reason-heading" />
+						}
+					>
+						Reason
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<p className="whitespace-pre-wrap break-words">{adjustment.reason}</p>

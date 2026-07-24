@@ -8032,10 +8032,10 @@
       "document_id": "PDA-UX-029",
       "path": "docs/blueprint/09-UX/PREFERRED_COMPONENT_CATALOG.md",
       "title": "Preferred Component Catalog",
-      "version": "0.8.2",
+      "version": "0.8.3",
       "status": "Draft",
       "owner": "Platform Design Authority",
-      "last_reviewed": "2026-07-21",
+      "last_reviewed": "2026-07-23",
       "related_adrs": [
         "ADR-0005",
         "ADR-0022"

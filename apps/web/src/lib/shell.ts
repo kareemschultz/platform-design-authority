@@ -1,4 +1,5 @@
 export const ACTIVE_CONTEXT_STORAGE_KEY = "platform.active-context-id";
+export const TABLE_DENSITY_STORAGE_KEY = "platform.table-density";
 
 export const ADMINISTRATION_NAVIGATION = [
 	{ href: "/administration", label: "Overview" },

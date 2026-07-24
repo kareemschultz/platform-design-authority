@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.8.4
+version: 0.9.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-23
+last_reviewed: 2026-07-24
 related_adrs: [ADR-0005, ADR-0022]
 ---
 
@@ -458,6 +458,106 @@ Preferred Candidate authorizes a bounded normalization prototype only.
 - Review date: 2026-07-23
 - Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, performance, and Storybook evidence); when issue #232 migrates `administration-pages.tsx` onto the shared `ResponsiveDataList`/`CollectionState` (extending the density toggle to its consumers too); when the "Enterprise data grid" Custom Required need gains sorting, column visibility, bulk selection, export, or virtualization requirements that this primitive would need to grow into or compose with.
 
+### Dialog
+
+- Status: Prototype Approved
+- User task: Interrupt the current workflow for a bounded, focused task or confirmation (create/edit a record, confirm a consequential action) that must be completed or explicitly dismissed before returning to the underlying surface.
+- Surfaces and roles: Seven current call sites across `apps/web/src/components/` (`import-pages.tsx`, `inventory-adjustment-pages.tsx`, `inventory-count-pages.tsx`, `inventory-transfer-pages.tsx`, `product-pages.tsx`, plus two more in the same operations family); every role that can reach those workflows.
+- Risk class: Low as a primitive — presentation, focus-trap, and dismissal only; any mutating action inside the dialog body is the composing surface's authority, not this primitive's.
+- Platform family: Dialog, alert dialog, drawer, sheet, popover, tooltip (preferred primitive family, line 129).
+- Preferred source: Official shadcn/ui CLI (Base UI-backed, `@base-ui/react/dialog`), tracked in `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record alongside `alert.tsx`/`badge.tsx`/`separator.tsx`/`sheet.tsx`/`table.tsx`.
+- Source item and version: `dialog` component, shadcn CLI, part of the same 4.13.0 acquisition batch as the sibling components in that provenance record.
+- Alternative candidates: None sourced externally — Dialog is a single-primitive ARIA control, matching the same taxonomy reasoning already recorded for Select.
+- Why preferred: Governed baseline (`Dialog`/`DialogTrigger`/`DialogPortal`/`DialogOverlay`/`DialogContent`/`DialogHeader`/`DialogFooter`/`DialogTitle`/`DialogDescription`/`DialogClose`) normalized onto the platform's semantic tokens and `Button` primitive for its built-in close affordance.
+- Required modifications: recorded in `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record — most recently (2026-07-23, issue #226 review) the overlay ring color changed from `--border-strong` to `--border-strong-overlay`, since `--border-strong`'s ring sits directly on the dialog-overlay scrim rather than a solid surface fill and measured only ~2.25:1 against that composited scrim, below the 3:1 non-text-contrast minimum.
+- Canonical states: Open/closed animation states (`data-open`/`data-closed`) via Base UI's own transition data attributes; optional close button (`showCloseButton`) with `sr-only` label; footer optionally renders its own close action. Loading/error/success states inside dialog content are the composing surface's responsibility, not this primitive's.
+- **Known gap, disclosed not silently omitted:** this catalog entry itself did not exist before this reconciliation pass (2026-07-24) even though the component has been in prototype use since the 4.13.0 acquisition — a documentation gap, not a code gap. No alert-dialog (destructive-confirmation) variant exists separately; call sites currently compose plain `Dialog` for confirmation flows.
+- Accessibility evidence: Not yet performed; pending before Platform Approved promotion. Base UI's own Dialog primitive supplies focus trap, `aria-modal`, and Escape/overlay-click dismissal; not independently re-verified by this repository yet.
+- Responsive and density evidence: Not yet performed; pending before Platform Approved promotion.
+- Offline/degraded behavior: Not applicable — presentation and local-state only; the composing surface owns any network-backed content.
+- Performance evidence: Not yet performed; pending.
+- License/provenance record: `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record.
+- Storybook stories: Not yet written; pending — no Storybook harness exists in this repository yet (see Table's entry for the same disclosed gap).
+- Tests: Not yet written; pending.
+- Owner: Frontend Platform
+- Review date: 2026-07-24
+- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, and test evidence); when a destructive-confirmation call site needs a distinct alert-dialog variant.
+
+### DropdownMenu
+
+- Status: Prototype Approved
+- User task: Present a small, bounded set of contextual actions or a single-choice picker (theme toggle, user account menu) anchored to a trigger, with keyboard navigation and submenu support.
+- Surfaces and roles: `mode-toggle.tsx` (light/dark/system theme picker) and `user-menu.tsx` (account actions), both in the global application chrome; every authenticated role.
+- Risk class: Low — presentation and navigation only; any resulting action (theme change, sign-out, navigation) is owned by the composing surface.
+- Platform family: Menu, context menu, navigation menu, tabs, accordion, collapsible (preferred primitive family, line 130).
+- Preferred source: Better-T-Stack scaffold generation, tracked in `third_party/provenance.json`'s `source.better-t-stack.ui.3.36.3` record alongside `button.tsx`/`card.tsx`/`checkbox.tsx`/`input.tsx`/`label.tsx`/`skeleton.tsx`/`sonner.tsx`, subsequently normalized onto Base UI's `@base-ui/react/menu`.
+- Source item and version: part of the same Better-T-Stack `e1bf536` scaffold batch as the sibling components in that provenance record; ring color normalized to `--border-strong` alongside `card.tsx` (2026-07-23, issue #204/#225) for the same non-text-contrast reason recorded on that entry.
+- Alternative candidates: None sourced externally — a single-primitive ARIA menu control.
+- Why preferred: Only owned menu primitive matching the platform's Base UI bootstrap; already normalized to the shared `--border-strong` ring convention.
+- Required modifications: recorded in `third_party/provenance.json`'s `source.better-t-stack.ui.3.36.3` record's `modifications` field (ring color).
+- Canonical states: Open/closed, submenu expansion, checked-item and radio-item variants (`DropdownMenuCheckboxItem`/`DropdownMenuRadioItem`) present in the component file. Disabled-item state supported via Base UI's own `disabled` prop.
+- **Known gap, disclosed not silently omitted:** this catalog entry did not exist before this reconciliation pass (2026-07-24) even though the component is live in the global chrome — a documentation gap, not a code gap.
+- Accessibility evidence: Not yet performed; pending before Platform Approved promotion.
+- Responsive and density evidence: Not yet performed; pending before Platform Approved promotion.
+- Offline/degraded behavior: Not applicable — presentation and local-state only.
+- Performance evidence: Not yet performed; pending.
+- License/provenance record: `third_party/provenance.json`'s `source.better-t-stack.ui.3.36.3` record.
+- Storybook stories: Not yet written; pending (see Table's entry for the same disclosed gap).
+- Tests: Not yet written; pending.
+- Owner: Frontend Platform
+- Review date: 2026-07-24
+- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, and test evidence); when a context-menu (right-click) or navigation-menu call site diverges from the dropdown pattern.
+
+### Sheet
+
+- Status: Prototype Approved
+- User task: Present a contextual side panel (edit form, detail view) that keeps the underlying surface's context partially visible, as an alternative to a centered `Dialog` when the underlying list or record context matters during the task.
+- Surfaces and roles: One current call site in the operations surface family; every role that can reach it.
+- Risk class: Low — presentation only; mutating content inside the sheet is the composing surface's responsibility.
+- Platform family: Dialog, alert dialog, drawer, sheet, popover, tooltip (preferred primitive family, line 129) — this is the platform's drawer implementation; no separately named `Drawer` component exists or is needed, since `Sheet` already covers the same task (a panel sliding in from a screen edge) under Base UI's shared `Dialog` primitive with `side` positioning.
+- Preferred source: Official shadcn/ui CLI (Base UI-backed), tracked in `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record alongside `alert.tsx`/`badge.tsx`/`dialog.tsx`/`separator.tsx`/`table.tsx`.
+- Source item and version: `sheet` component, shadcn CLI, part of the same 4.13.0 acquisition batch as the sibling components in that provenance record.
+- Alternative candidates: None sourced externally — single-primitive ARIA control built on the same Base UI `Dialog` as the `Dialog` entry above, with `side` (`top`/`right`/`bottom`/`left`) positioning instead of centered placement.
+- Why preferred: Reuses the same Base UI dialog contract as `Dialog`, avoiding a second overlay/focus-trap implementation for what is functionally the same interaction pattern with different placement.
+- Required modifications: recorded in `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record.
+- Canonical states: Four-side positioning (`side` prop), open/closed transition states via `data-starting-style`/`data-ending-style`, optional close button. RTL-aware translate direction for left/right sides.
+- **Known gap, disclosed not silently omitted:** this catalog entry did not exist before this reconciliation pass (2026-07-24) — a documentation gap, not a code gap. Only one live call site exists; broader adoption evidence (does the pattern hold for POS/touch density, does content overflow scroll correctly) remains unverified beyond that one surface.
+- Accessibility evidence: Not yet performed; pending before Platform Approved promotion.
+- Responsive and density evidence: Not yet performed; pending before Platform Approved promotion.
+- Offline/degraded behavior: Not applicable — presentation and local-state only.
+- Performance evidence: Not yet performed; pending.
+- License/provenance record: `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record.
+- Storybook stories: Not yet written; pending (see Table's entry for the same disclosed gap).
+- Tests: Not yet written; pending.
+- Owner: Frontend Platform
+- Review date: 2026-07-24
+- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, and test evidence); when a second call site tests the pattern beyond the current single surface.
+
+### Toaster (Sonner)
+
+- Status: Prototype Approved
+- User task: Announce a transient, non-blocking outcome of an action (success, error, info, loading, warning) without interrupting the current workflow.
+- Surfaces and roles: Mounted once globally in `apps/web/src/components/providers.tsx`; available to every authenticated surface and role.
+- Risk class: Low — presentation only; the triggering action's authority and outcome are owned by the caller, not this component.
+- Platform family: Toast, inline alert, banner, status indicator, progress (preferred primitive family, line 132).
+- Preferred source: Better-T-Stack scaffold generation, tracked in `third_party/provenance.json`'s `source.better-t-stack.ui.3.36.3` record; wraps the `sonner` npm package (theme-aware via `next-themes`), not a shadcn/studio composition.
+- Source item and version: part of the same Better-T-Stack `e1bf536` scaffold batch as the sibling components in that provenance record.
+- Alternative candidates: None sourced externally beyond the underlying `sonner` package itself, which is the de facto standard toast library in the shadcn ecosystem.
+- Why preferred: Only owned toast primitive; already wired to the platform's five status icons (`error`/`info`/`loading`/`success`/`warning`) and CSS-variable theme tokens (`--normal-bg`/`--normal-border`/`--normal-text`) rather than hardcoded colors.
+- Required modifications: recorded in `third_party/provenance.json`'s `source.better-t-stack.ui.3.36.3` record's `modifications` field.
+- Canonical states: Five status variants (success/error/info/warning/loading) each with a distinct icon, not color alone. Theme-aware (light/dark/system via `next-themes`).
+- **Known gap, disclosed not silently omitted:** this catalog entry did not exist before this reconciliation pass (2026-07-24) even though the component is mounted globally — a documentation gap, not a code gap. Reduced-motion behavior for toast entry/exit has not been independently verified against the `sonner` package's own defaults.
+- Accessibility evidence: Not yet performed; pending before Platform Approved promotion — toast announcement timing and screen-reader behavior depend on `sonner`'s own `aria-live` implementation, not independently re-verified by this repository yet.
+- Responsive and density evidence: Not yet performed; pending before Platform Approved promotion.
+- Offline/degraded behavior: Not applicable — presentation only; whether a toast fires for a queued/offline action is the caller's decision.
+- Performance evidence: Not yet performed; pending.
+- License/provenance record: `third_party/provenance.json`'s `source.better-t-stack.ui.3.36.3` record.
+- Storybook stories: Not yet written; pending (see Table's entry for the same disclosed gap).
+- Tests: Not yet written; pending.
+- Owner: Frontend Platform
+- Review date: 2026-07-24
+- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, and test evidence); when a reduced-motion or offline-queue call site needs verified toast behavior.
+
 ### Researching
 
 | Candidate | Research value | Boundary before promotion |
@@ -468,6 +568,22 @@ Preferred Candidate authorizes a bounded normalization prototype only.
 | Sprintrix template | Saved views, filters, board, roadmap, and activity composition reference | No whole-template acquisition and no reuse of project-domain, team, security, billing, integration, or authorization behavior. |
 
 Researching authorizes metadata and visual analysis only. It does not authorize source retrieval, installation, dependency addition, or implementation.
+
+### Needed
+
+`SHADCN_CONFIGURATION_DECISION_MATRIX.md`'s (PDA-UX-028) Prototype Gates list Dialog, Menu, Popover, Select, Combobox, Field, Tabs, Toast, Drawer, data grid, complex multi-select, chart, and POS controls as required before that document's own status can leave Draft. This reconciliation pass (2026-07-24, RR-005) found Dialog, Menu, Toast, and Drawer already built and now catalogued above (as `Dialog`, `DropdownMenu`, `Toaster (Sonner)`, and `Sheet`), and Select and the Table foundation already catalogued. The remaining families below are genuinely absent from `packages/ui-web/core/src/components/` — this is a code gap, not a documentation gap — but none currently has a forcing call site in `apps/web`, confirmed by repository search as part of this pass. Consistent with this catalog's own precedent (the `Select` entry above explicitly declined to build Combobox "because no current call site needs it"), these remain **Needed** rather than built ahead of demand:
+
+| Family | Status | Why not yet built |
+|---|---|---|
+| Popover | Needed | No current call site in `apps/web`; the one `Popover`-named reference in the repository (`apps/docs`'s `ViewOptionsPopover`) is a Fumadocs-owned documentation-portal component, not this package's. |
+| Combobox / searchable select | Needed (see also Researching, Studio Autocomplete 10) | All 21 known `Select` call sites use small, bounded option lists with no search-as-you-type need (recorded on the `Select` entry above); build when a call site needs search. |
+| Field (governed form field wrapper) | Needed | No dedicated wrapper exists; current forms compose `Label` plus a local `FieldErrors`-style helper per surface (for example `inventory-adjustment-pages.tsx`). Not yet consolidated into one owned primitive; revisit if hand-rolled field-wrapper duplication grows across surfaces. |
+| Tabs | Needed | No current call site; native app tab layouts (`apps/native/app/(drawer)/(tabs)/_layout.tsx`) are Expo Router navigation, not this package's web `Tabs` primitive. |
+| Complex multi-select | Needed | No current call site; single-choice `Select` covers all 21 known call sites today. |
+| Ordinary operational chart frame (Recharts) | Needed | Direction recorded under Preferred Candidate above ("Official chart/Recharts plus selected Studio visual inspiration"); no owned chart component built yet and no adopting dashboard surface exists yet to validate the required text/table-alternative and freshness contract. |
+| POS controls | Needed (Custom Required, see below) | Deliberately out of built scope — high-volume device workflow, financial consequence, offline leases, and deterministic first-slice operation require dedicated design, not a shadcn/studio starting point; see the Custom Required table below. |
+
+This section does not authorize building any of these. It records, honestly, why PDA-UX-028's Prototype Gates remain unmet at the component-family level, separate from that document's much larger cross-cutting evidence requirements (accessibility, zoom, RTL, theming, Storybook, Playwright, and real-device checks) which remain open regardless of component count. See RR-005 in `docs/reviews/ARCHITECTURE_RISK_REGISTER.md` for the tracked disposition and issue #110 for platform-wide sequencing.
 
 ### Custom Required
 

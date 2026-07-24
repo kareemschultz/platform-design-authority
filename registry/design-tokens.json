@@ -217,6 +217,11 @@
           "$type": "color",
           "$value": "#A16207"
         },
+        "status-warning-foreground": {
+          "$type": "color",
+          "$value": "#92400E",
+          "$description": "Added 2026-07-23 (issue #209): status-warning itself reaches only 4.92:1 against white -- no headroom once tinted/blended. This darker value is for colored text specifically (7.09:1 against white); status-warning is unchanged and remains the source for borders/icons/tints (3:1 requirement, already passes)."
+        },
         "status-critical": {
           "$type": "color",
           "$value": "#B91C1C"
@@ -299,6 +304,11 @@
         "status-warning": {
           "$type": "color",
           "$value": "#FBBF24"
+        },
+        "status-warning-foreground": {
+          "$type": "color",
+          "$value": "#FBBF24",
+          "$description": "Same as status-warning (issue #209): dark mode's base warning color already reaches 10.73:1 against the dark card fill, no separate value needed."
         },
         "status-critical": {
           "$type": "color",

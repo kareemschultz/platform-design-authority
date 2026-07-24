@@ -93,6 +93,16 @@
 	   border-strong: their poppers sit on solid fills with no dimming
 	   scrim, so border-strong's own 4.76:1 already applies unmodified. */
 	--border-strong-overlay: #475569;
+	/* status-warning-foreground (issue #209): --status-warning itself only
+	   reaches 4.92:1 against white -- passes AA's 4.5:1 for text, but with
+	   essentially no headroom (fails outright once tinted/blended, e.g.
+	   Badge's bg-status-warning/10 at 4.32:1). This darker value (amber-800)
+	   is for colored TEXT usage specifically (verified: 7.09:1 against
+	   white); --status-warning itself is unchanged and stays the source for
+	   borders/icons/tints, which only need 3:1 and already pass. Dark mode
+	   needs no separate value -- #fbbf24 already reaches 10.73:1 against the
+	   dark card fill, all headroom to spare. */
+	--status-warning-foreground: #92400e;
 	--density-compact-control: 2rem;
 	--density-comfortable-control: 2.5rem;
 	--density-touch-control: 3rem;
@@ -163,6 +173,12 @@
 	   --border-strong-overlay uniformly across themes without branching,
 	   matching the status-warning-foreground precedent. */
 	--border-strong-overlay: #64748b;
+	/* status-warning-foreground (issue #209): same value as --status-warning
+	   -- dark mode's base warning color already reaches 10.73:1 against the
+	   dark card fill, no separate darker/lighter value needed. Defined here
+	   too so consumers can reference --status-warning-foreground uniformly
+	   across themes rather than branching. */
+	--status-warning-foreground: #fbbf24;
 }
 
 @theme inline {
@@ -181,6 +197,7 @@
 	--color-status-info: var(--status-info);
 	--color-status-success: var(--status-success);
 	--color-status-warning: var(--status-warning);
+	--color-status-warning-foreground: var(--status-warning-foreground);
 	--color-status-critical: var(--status-critical);
 	--color-status-pending: var(--status-pending);
 	--color-status-offline: var(--status-offline);

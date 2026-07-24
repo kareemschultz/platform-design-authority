@@ -28,11 +28,15 @@ const badgeVariants = cva(
 					"bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
 				success:
 					"bg-status-success/10 text-status-success focus-visible:ring-status-success/20 dark:bg-status-success/20 dark:focus-visible:ring-status-success/40 [a]:hover:bg-status-success/20",
-				// Border carries the warning color; text stays neutral (foreground).
-				// --status-warning fails 4.5:1 AA as colored text once tinted
-				// (verified: 4.32:1 on this badge's own bg-status-warning/10) --
-				// a token-level gap, not fixable per-component while keeping
-				// colored text. Border only needs 3:1 (passes at 4.92:1).
+				// Border carries the warning color; text stays neutral rather
+				// than using --status-warning-foreground (issue 209) -- this
+				// treatment already shipped verified-accessible and there's no
+				// need to add colored text here. Border only needs 3:1 (passes
+				// at 4.92:1); --status-warning itself still fails 4.5:1 once
+				// tinted (verified: 4.32:1 on this badge's own
+				// bg-status-warning/10), which is exactly why the separate
+				// -foreground role exists for consumers that do need colored
+				// warning text (see metric-card.tsx).
 				warning:
 					"border-status-warning text-foreground focus-visible:ring-status-warning/20 dark:focus-visible:ring-status-warning/40 [a]:hover:bg-muted [a]:hover:text-muted-foreground",
 			},

@@ -21,11 +21,13 @@ const alertVariants = cva(
 				success:
 					"bg-card text-status-success *:data-[slot=alert-description]:text-status-success *:[svg]:text-current",
 				// Border + icon carry the warning color; title/description stay
-				// neutral. --status-warning fails 4.5:1 AA as colored text once
-				// tinted or blended (verified: 4.09:1 at /90, 4.32:1 on a 10%
-				// tinted Badge background) -- a token-level gap (no paired
-				// warning-foreground role), not fixable per-component while
-				// keeping colored text. Border only needs 3:1 (passes at 4.92:1).
+				// neutral rather than using --status-warning-foreground (issue
+				// 209) -- this treatment already shipped verified-accessible
+				// and there's no need to add colored text here. Border only
+				// needs 3:1 (passes at 4.92:1); --status-warning itself still
+				// fails 4.5:1 once tinted/blended, which is exactly why the
+				// separate -foreground role exists for consumers that do need
+				// colored warning text (see metric-card.tsx).
 				warning:
 					"border-status-warning bg-card text-card-foreground *:[svg]:text-status-warning",
 			},

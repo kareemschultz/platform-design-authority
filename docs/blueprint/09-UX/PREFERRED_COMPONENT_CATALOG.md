@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-029
 title: Preferred Component Catalog
-version: 0.8.3
+version: 0.8.4
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-23
@@ -446,7 +446,7 @@ Preferred Candidate authorizes a bounded normalization prototype only.
 - Why preferred: Governed baseline table markup (`<table>`/`<thead>`/`<tbody>`/`<tr>`/`<th>`/`<td>`) normalized onto the platform's semantic tokens, with an owned `density` variant (`comfortable`/`compact`/`touch`) not present in the unmodified source.
 - Required modifications: recorded in `third_party/provenance.json`'s `source.shadcn.ui.4.13.0` record. Density (`comfortable`/`compact`/`touch`) added via `TableDensityContext` so `TableHead`/`TableCell` share one fixed height per tier (rem-based, not px, so rows grow with text-size scaling rather than clipping — an accessibility-review finding) instead of independent padding-derived heights that could drift apart between head and body.
 - Canonical states: Density variants (comfortable/compact/touch) covering the Density section of `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md`. Loading/empty/error/offline states are NOT owned by `Table` itself — they're composed at the `CollectionState`/`ResponsiveDataList` layer in `operations-shared.tsx`, which wraps `Table` with those states; this entry is scoped to the table markup and density primitive only.
-- **Known gap, disclosed not silently omitted:** `density` is currently developer-set only, at the call site (`ResponsiveDataList` in `apps/web/src/components/import-pages.tsx:657` is the only current caller passing `density="compact"`) — issue #214 tracks promoting it to a user-facing toolbar control per `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md:38-51`'s toolbar grammar (saved view/column/density/export controls). `touch` density only sets row/cell height — it does NOT enlarge nested interactive controls to the 48×48 touch-target minimum; see the in-code comment in `table.tsx` for the full scope note. No sorting, column visibility, saved views, export, bulk selection, or virtualization exist yet — those remain the "Enterprise data grid" Custom Required need's unmet scope.
+- **Known gap, disclosed not silently omitted:** issue #214 added a user-facing density toolbar control (a `Select` offering Comfortable/Compact/Touch, persisted per-session via `sessionStorage`) to `CollectionState` in `operations-shared.tsx`, per `ENTERPRISE_TABLE_AND_DATA_GRID_STANDARD.md:38-51`'s toolbar grammar (saved view/column/density/export controls) — so density is now user-facing for every one of `CollectionState`'s consumers (Products, Stock Counts, Transfers, Inventory Adjustments, Imports, Balance). `administration-pages.tsx` maintains its own separate, un-migrated copy of `ResponsiveDataList`/`OperationsPageFrame` (`ResponsiveList`/`PageFrame`) and does not inherit this control; tracked as its own de-duplication issue, #232. `touch` density still only sets row/cell height — it does NOT enlarge nested interactive controls to the 48×48 touch-target minimum; see the in-code comment in `table.tsx` for the full scope note. No sorting, column visibility, saved views, export, bulk selection, or virtualization exist yet — those remain the "Enterprise data grid" Custom Required need's unmet scope.
 - Accessibility evidence: Density row-height rem-vs-px choice was reviewed (see Required modifications); full keyboard/screen-reader/zoom/contrast evidence for the table markup itself not yet independently performed — pending before Platform Approved promotion.
 - Responsive and density evidence: Three density tiers implemented and covered by `table.test.tsx` (renders correct height classes on both `TableHead` and `TableCell` for default/compact/touch); no responsive column-collapse or horizontal-scroll evidence beyond the `overflow-x-auto` container performed yet.
 - Offline/degraded behavior: Not applicable to this primitive directly — owned by the composing `CollectionState`/`ResponsiveDataList` layer.
@@ -456,7 +456,7 @@ Preferred Candidate authorizes a bounded normalization prototype only.
 - Tests: `packages/ui-web/core/src/components/table.test.tsx` — density-class rendering for `TableHead`/`TableCell` via `renderToStaticMarkup`.
 - Owner: Frontend Platform
 - Review date: 2026-07-23
-- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, performance, and Storybook evidence); when issue #214 promotes density to a user-facing control; when the "Enterprise data grid" Custom Required need gains sorting, column visibility, bulk selection, export, or virtualization requirements that this primitive would need to grow into or compose with.
+- Revisit trigger: Before promotion to Platform Approved (requires accessibility, responsive, performance, and Storybook evidence); when issue #232 migrates `administration-pages.tsx` onto the shared `ResponsiveDataList`/`CollectionState` (extending the density toggle to its consumers too); when the "Enterprise data grid" Custom Required need gains sorting, column visibility, bulk selection, export, or virtualization requirements that this primitive would need to grow into or compose with.
 
 ### Researching
 

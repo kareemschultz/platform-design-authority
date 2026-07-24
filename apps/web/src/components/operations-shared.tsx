@@ -8,6 +8,14 @@ import {
 import { Badge } from "@meridian/ui-web/components/badge";
 import { buttonVariants } from "@meridian/ui-web/components/button";
 import { Card } from "@meridian/ui-web/components/card";
+import { Label } from "@meridian/ui-web/components/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@meridian/ui-web/components/select";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import {
 	Table,
@@ -22,6 +30,7 @@ import {
 import { ArrowLeft, ArrowRight, Clock3, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useId, useState } from "react";
 
 import {
 	appendCursorTrail,
@@ -32,6 +41,7 @@ import {
 	parseCursorTrail,
 	previousCursorState,
 } from "@/lib/operations";
+import { TABLE_DENSITY_STORAGE_KEY } from "@/lib/shell";
 
 import { EmptyState, QueryFailure } from "./query-state";
 
@@ -54,6 +64,74 @@ const SUCCESS_STATE_PATTERN =
 export interface DataColumn<T> {
 	label: string;
 	render: (item: T) => React.ReactNode;
+}
+
+const DENSITY_LABELS: Record<TableDensity, string> = {
+	comfortable: "Comfortable",
+	compact: "Compact",
+	touch: "Touch",
+};
+
+function isTableDensity(value: string | null): value is TableDensity {
+	return value === "comfortable" || value === "compact" || value === "touch";
+}
+
+/**
+ * Density is read from sessionStorage in an effect (not during render) to
+ * avoid an SSR/hydration mismatch -- sessionStorage doesn't exist on the
+ * server, so the first render always assumes "comfortable" and then
+ * reconciles once mounted, matching workspace-context.tsx's
+ * storedContextId/persistContext pattern for the same reason.
+ */
+export function useTableDensityPreference() {
+	const [density, setDensityState] = useState<TableDensity>("comfortable");
+
+	useEffect(() => {
+		const stored = sessionStorage.getItem(TABLE_DENSITY_STORAGE_KEY);
+		if (isTableDensity(stored)) {
+			setDensityState(stored);
+		}
+	}, []);
+
+	const setDensity = useCallback((next: TableDensity) => {
+		setDensityState(next);
+		sessionStorage.setItem(TABLE_DENSITY_STORAGE_KEY, next);
+	}, []);
+
+	return [density, setDensity] as const;
+}
+
+export function DensityToggle({
+	density,
+	onDensityChange,
+}: {
+	density: TableDensity;
+	onDensityChange: (next: TableDensity) => void;
+}) {
+	const id = useId();
+	return (
+		<div className="flex items-center gap-2">
+			<Label className="text-muted-foreground text-xs" htmlFor={id}>
+				Density
+			</Label>
+			<Select
+				items={DENSITY_LABELS}
+				onValueChange={(next) => onDensityChange(next as TableDensity)}
+				value={density}
+			>
+				<SelectTrigger className="w-36" id={id} size="sm">
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent>
+					{(Object.keys(DENSITY_LABELS) as TableDensity[]).map((option) => (
+						<SelectItem key={option} value={option}>
+							{DENSITY_LABELS[option]}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+		</div>
+	);
 }
 
 export function OperationsPageFrame({
@@ -179,22 +257,10 @@ export function CursorControls({ nextCursor }: { nextCursor: string | null }) {
 	);
 }
 
-export function CollectionState<T>({
-	caption,
-	columns,
-	empty,
-	error,
-	isError,
-	isFetching,
-	isLoading,
-	isOnline,
-	items,
-	nextCursor,
-	onRetry,
-	rowKey,
-}: {
+interface CollectionStateBodyProps<T> {
 	caption: string;
 	columns: DataColumn<T>[];
+	density: TableDensity;
 	empty: string;
 	error: unknown;
 	isError: boolean;
@@ -205,7 +271,26 @@ export function CollectionState<T>({
 	nextCursor: string | null | undefined;
 	onRetry: () => void;
 	rowKey: (item: T) => string;
-}) {
+}
+
+// Extracted from CollectionState so the density toggle (rendered once, in
+// CollectionState below) can wrap every state -- loading/error/empty/
+// populated -- without repeating it in each early return.
+function CollectionStateBody<T>({
+	caption,
+	columns,
+	density,
+	empty,
+	error,
+	isError,
+	isFetching,
+	isLoading,
+	isOnline,
+	items,
+	nextCursor,
+	onRetry,
+	rowKey,
+}: CollectionStateBodyProps<T>) {
 	if (isLoading) {
 		return (
 			<div aria-label="Loading results" className="grid gap-3" role="status">
@@ -239,10 +324,36 @@ export function CollectionState<T>({
 			<ResponsiveDataList
 				caption={caption}
 				columns={columns}
+				density={density}
 				items={items}
 				rowKey={rowKey}
 			/>
 			<CursorControls nextCursor={nextCursor ?? null} />
+		</>
+	);
+}
+
+export function CollectionState<T>(props: {
+	caption: string;
+	columns: DataColumn<T>[];
+	empty: string;
+	error: unknown;
+	isError: boolean;
+	isFetching: boolean;
+	isLoading: boolean;
+	isOnline: boolean;
+	items: T[] | undefined;
+	nextCursor: string | null | undefined;
+	onRetry: () => void;
+	rowKey: (item: T) => string;
+}) {
+	const [density, setDensity] = useTableDensityPreference();
+	return (
+		<>
+			<div className="mb-3 flex justify-end">
+				<DensityToggle density={density} onDensityChange={setDensity} />
+			</div>
+			<CollectionStateBody {...props} density={density} />
 		</>
 	);
 }

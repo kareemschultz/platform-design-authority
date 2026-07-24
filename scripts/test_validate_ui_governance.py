@@ -48,6 +48,37 @@ class RawPaletteTests(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertIn("hex color literal", errors[0])
 
+    def test_issue_reference_in_comment_is_not_an_error(self) -> None:
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// fixed border-status-warning contrast, see issue #218\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            self.assertEqual(check_raw_palette(), [])
+
+    def test_pr_reference_in_comment_is_not_an_error(self) -> None:
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// normalized per PR #123456\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            self.assertEqual(check_raw_palette(), [])
+
+    def test_issue_reference_does_not_mask_a_real_hex_literal_in_the_same_file(
+        self,
+    ) -> None:
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// fixed border-status-warning contrast, see issue #218\n"
+            "export const style = { color: '#ff0000' };\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            errors = check_raw_palette()
+        self.assertEqual(len(errors), 1)
+        self.assertIn("hex color literal", errors[0])
+
     def test_tailwind_palette_class_is_an_error(self) -> None:
         self._write(
             "apps/web/src/Button.tsx",

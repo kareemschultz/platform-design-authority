@@ -53,6 +53,16 @@ HEX_ALLOWLIST = {
 }
 
 HEX_PATTERN = re.compile(r"#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b")
+# All-numeric hex matches (0-9 are valid hex digits) collide with GitHub
+# issue/PR references written as "issue #218" or "PR #218" in code comments
+# -- issue #224. Rather than requiring every future comment to awkwardly
+# spell out "issue 218" to dodge this validator, treat a hex-looking match
+# as a false positive when it's immediately preceded by "issue"/"pr" (the
+# only real-world pattern this repository's comments actually use for
+# cross-references). A real hex color literal is never written that way.
+ISSUE_OR_PR_REFERENCE_PREFIX_PATTERN = re.compile(
+    r"(?:^|[^A-Za-z])(?:issue|pr)\s*$", re.IGNORECASE
+)
 TAILWIND_PALETTE_PATTERN = re.compile(
     r"\b(?:bg|text|border|ring|fill|stroke)-(?:red|blue|green|yellow|purple|pink|indigo|"
     r"gray|grey|slate|zinc|neutral|stone|orange|amber|lime|emerald|teal|cyan|sky|violet|"
@@ -83,6 +93,14 @@ def ui_source_files(roots: tuple[str, ...] = UI_ROOTS) -> list[Path]:
     return sorted(files)
 
 
+def _has_real_hex_literal(content: str) -> bool:
+    for match in HEX_PATTERN.finditer(content):
+        prefix = content[max(0, match.start() - 20) : match.start()]
+        if not ISSUE_OR_PR_REFERENCE_PREFIX_PATTERN.search(prefix):
+            return True
+    return False
+
+
 def check_raw_palette() -> list[str]:
     errors: list[str] = []
     for path in ui_source_files():
@@ -93,7 +111,7 @@ def check_raw_palette() -> list[str]:
             content = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        if HEX_PATTERN.search(content):
+        if _has_real_hex_literal(content):
             errors.append(f"{rel}: raw hex color literal found; use a semantic token")
         if TAILWIND_PALETTE_PATTERN.search(content):
             errors.append(

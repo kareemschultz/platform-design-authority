@@ -66,6 +66,67 @@ class RawPaletteTests(unittest.TestCase):
         with mock.patch.object(validator, "ROOT", self.root):
             self.assertEqual(check_raw_palette(), [])
 
+    def test_lowercase_and_no_space_pr_reference_is_not_an_error(self) -> None:
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// normalized per pr#123\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            self.assertEqual(check_raw_palette(), [])
+
+    def test_issue_reference_at_start_of_file_is_not_an_error(self) -> None:
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// issue #218: fixed contrast\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            self.assertEqual(check_raw_palette(), [])
+
+    def test_hex_letters_after_issue_word_are_still_an_error(self) -> None:
+        """Regression guard for a Codex-caught evasion: exempting any hex
+        match preceded by 'issue'/'pr' regardless of its own digits would
+        let a real hex literal disguise itself right after that word. A
+        genuine issue/PR number is always decimal, so a-f content must
+        never be exempt no matter what precedes it."""
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// see issue #abcdef for context\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            errors = check_raw_palette()
+        self.assertEqual(len(errors), 1)
+        self.assertIn("hex color literal", errors[0])
+
+    def test_hex_letters_after_pr_word_are_still_an_error(self) -> None:
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// see PR #fff for context\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            errors = check_raw_palette()
+        self.assertEqual(len(errors), 1)
+        self.assertIn("hex color literal", errors[0])
+
+    def test_issue_word_on_a_previous_line_does_not_exempt_a_later_line(
+        self,
+    ) -> None:
+        """Regression guard for a Codex-caught cross-line false exemption:
+        the prefix check must be scoped to the current line, not a fixed
+        character window that can span a newline."""
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// see issue\n"
+            "export const style = { color: '#218' };\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            errors = check_raw_palette()
+        self.assertEqual(len(errors), 1)
+        self.assertIn("hex color literal", errors[0])
+
     def test_issue_reference_does_not_mask_a_real_hex_literal_in_the_same_file(
         self,
     ) -> None:

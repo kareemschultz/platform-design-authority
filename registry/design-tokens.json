@@ -274,7 +274,8 @@
         },
         "border-strong": {
           "$type": "color",
-          "$value": "#64748B"
+          "$value": "#64748B",
+          "$description": "Recorded value #64748B, verified at 3.76:1 against the dark card fill (oklch(0.205 0 0)) and 4.16:1 against the dark page background -- both clear the 3:1 non-text-contrast minimum. Same value as color.light.border-strong (see that token's description for why light's registry-recorded value needed correcting, not just copying here)."
         },
         "border-strong-overlay": {
           "$type": "color",

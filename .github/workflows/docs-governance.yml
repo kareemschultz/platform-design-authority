@@ -70,6 +70,11 @@ jobs:
           python -m unittest scripts/test_generate_registries.py
           python scripts/generate_registries.py --check
 
+      - name: Verify generated design-token CSS is current
+        run: |
+          python -m unittest scripts/test_generate_design_tokens_css.py
+          python scripts/generate_design_tokens_css.py --check
+
       - name: Test and validate UI governance (provenance, catalog, palette)
         run: |
           python -m unittest scripts/test_validate_ui_governance.py

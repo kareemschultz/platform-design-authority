@@ -188,6 +188,11 @@
           "$value": "#64748B",
           "$description": "Corrected 2026-07-23 (issue #204): #94A3B8 reached only 2.56:1 against a white card, short of the 3:1 non-text-contrast minimum this token exists to satisfy. #64748B (matching the dark-theme value) reaches 4.76:1."
         },
+        "border-strong-overlay": {
+          "$type": "color",
+          "$value": "#475569",
+          "$description": "Added 2026-07-23 (issue #226 review): border-strong itself is not safe for a ring on a dialog-overlay scrim (bg-black/30) -- #64748B reaches only 2.25:1 against a 30%-black scrim composited over this platform's light-theme page background (white), below the 3:1 minimum. #475569 reaches 3.58:1 against that same composited scrim. This value is scoped to the platform's own themed page background under the standard dialog scrim, not claimed safe against arbitrary external backdrop content."
+        },
         "action-primary": {
           "$type": "color",
           "$value": "#1D4ED8"
@@ -265,6 +270,11 @@
         "border-strong": {
           "$type": "color",
           "$value": "#64748B"
+        },
+        "border-strong-overlay": {
+          "$type": "color",
+          "$value": "#64748B",
+          "$description": "Same as border-strong (issue #226 review): this platform's own dark-theme page background converts to a relative luminance of ~0.0027, so the dialog scrim composited over it is near-black (~0.0019); #64748B already reaches ~4.25:1 against that, no darker override needed the way light mode required one."
         },
         "action-primary": {
           "$type": "color",

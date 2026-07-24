@@ -641,10 +641,12 @@ export function CountDetailPage({ countId }: { countId: string }) {
 						{current.lines.map((line) => (
 							<li key={line.id}>
 								<Card className="px-4">
-									<p className="break-all font-medium">{line.productId}</p>
-									<p className="text-muted-foreground text-sm">
-										Observed {line.observedQuantity} {line.unit}
-									</p>
+									<div>
+										<p className="break-all font-medium">{line.productId}</p>
+										<p className="text-muted-foreground text-sm">
+											Observed {line.observedQuantity} {line.unit}
+										</p>
+									</div>
 									{current.state === "Posted" ? (
 										<dl className="grid grid-cols-2 gap-3 text-sm">
 											<div>

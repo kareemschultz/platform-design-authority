@@ -733,8 +733,12 @@ export function TransferDetailPage({ transferId }: { transferId: string }) {
 					{transfer.data.lines.map((line) => (
 						<li key={line.id}>
 							<Card className="px-4">
-								<p className="font-medium">{line.productId}</p>
-								<p className="text-muted-foreground text-sm">Line {line.id}</p>
+								<div>
+									<p className="font-medium">{line.productId}</p>
+									<p className="text-muted-foreground text-sm">
+										Line {line.id}
+									</p>
+								</div>
 								<dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
 									<div>
 										<dt>Requested</dt>

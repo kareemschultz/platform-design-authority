@@ -504,14 +504,14 @@ export function ImportCreatePage() {
 				</fieldset>
 
 				{workspace.isOnline ? null : (
-					<div className="rounded-2xl border p-4" role="status">
+					<Card className="px-4" role="status">
 						<p className="font-medium">Reconnect to upload</p>
 						<p className="text-muted-foreground text-sm">
 							Imports are intentionally online-only because validation,
 							scanning, current authority, and idempotent job creation are
 							server-owned.
 						</p>
-					</div>
+					</Card>
 				)}
 				{error ? (
 					<MutationError error={error} isOnline={workspace.isOnline} />

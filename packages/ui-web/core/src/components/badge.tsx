@@ -33,10 +33,13 @@ const badgeVariants = cva(
 				// treatment already shipped verified-accessible and there's no
 				// need to add colored text here. Border only needs 3:1 (passes
 				// at 4.92:1); --status-warning itself still fails 4.5:1 once
-				// tinted (verified: 4.32:1 on this badge's own
-				// bg-status-warning/10), which is exactly why the separate
-				// -foreground role exists for consumers that do need colored
-				// warning text (see metric-card.tsx).
+				// tinted (verified: 4.32:1 if this variant used the same
+				// bg-status-warning/10 tinted background as the success/info/
+				// pending/offline variants above -- which is exactly why
+				// warning alone dropped that tint in favor of a neutral-text,
+				// border-only treatment, and why the separate -foreground
+				// role exists for consumers that do need colored warning
+				// text (see metric-card.tsx).
 				warning:
 					"border-status-warning text-foreground focus-visible:ring-status-warning/20 dark:focus-visible:ring-status-warning/40 [a]:hover:bg-muted [a]:hover:text-muted-foreground",
 			},

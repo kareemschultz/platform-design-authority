@@ -7,6 +7,7 @@ import {
 } from "@meridian/ui-web/components/alert";
 import { Badge } from "@meridian/ui-web/components/badge";
 import { buttonVariants } from "@meridian/ui-web/components/button";
+import { Card } from "@meridian/ui-web/components/card";
 import { Skeleton } from "@meridian/ui-web/components/skeleton";
 import {
 	Table,
@@ -97,7 +98,7 @@ export function ResponsiveDataList<T>({
 }) {
 	return (
 		<>
-			<div className="hidden overflow-x-auto rounded-2xl border md:block">
+			<Card className="hidden overflow-x-auto py-0 md:block">
 				<Table density={density}>
 					<TableCaption className="sr-only">{caption}</TableCaption>
 					<TableHeader>
@@ -119,20 +120,22 @@ export function ResponsiveDataList<T>({
 						))}
 					</TableBody>
 				</Table>
-			</div>
+			</Card>
 			<ul aria-label={caption} className="grid gap-3 md:hidden">
 				{items.map((item) => (
-					<li className="rounded-2xl border p-4" key={rowKey(item)}>
-						<dl className="grid gap-3">
-							{columns.map((column) => (
-								<div className="grid gap-1" key={column.label}>
-									<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-										{column.label}
-									</dt>
-									<dd>{column.render(item)}</dd>
-								</div>
-							))}
-						</dl>
+					<li key={rowKey(item)}>
+						<Card className="px-4">
+							<dl className="grid gap-3">
+								{columns.map((column) => (
+									<div className="grid gap-1" key={column.label}>
+										<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+											{column.label}
+										</dt>
+										<dd>{column.render(item)}</dd>
+									</div>
+								))}
+							</dl>
+						</Card>
 					</li>
 				))}
 			</ul>

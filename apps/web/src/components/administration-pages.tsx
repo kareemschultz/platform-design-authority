@@ -11,6 +11,11 @@ import type {
 import { Badge } from "@meridian/ui-web/components/badge";
 import { Button, buttonVariants } from "@meridian/ui-web/components/button";
 import {
+	Card,
+	CardContent,
+	CardHeader,
+} from "@meridian/ui-web/components/card";
+import {
 	Dialog,
 	DialogClose,
 	DialogContent,
@@ -85,7 +90,7 @@ function ResponsiveList<T>({
 }) {
 	return (
 		<>
-			<div className="hidden rounded-2xl border md:block">
+			<Card className="hidden overflow-x-auto py-0 md:block">
 				<Table>
 					<TableCaption className="sr-only">{caption}</TableCaption>
 					<TableHeader>
@@ -107,20 +112,22 @@ function ResponsiveList<T>({
 						))}
 					</TableBody>
 				</Table>
-			</div>
+			</Card>
 			<ul aria-label={caption} className="grid gap-3 md:hidden">
 				{items.map((item) => (
-					<li className="rounded-2xl border p-4" key={rowKey(item)}>
-						<dl className="grid gap-3">
-							{columns.map((column) => (
-								<div className="grid gap-1" key={column.label}>
-									<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-										{column.label}
-									</dt>
-									<dd>{column.render(item)}</dd>
-								</div>
-							))}
-						</dl>
+					<li key={rowKey(item)}>
+						<Card className="px-4">
+							<dl className="grid gap-3">
+								{columns.map((column) => (
+									<div className="grid gap-1" key={column.label}>
+										<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+											{column.label}
+										</dt>
+										<dd>{column.render(item)}</dd>
+									</div>
+								))}
+							</dl>
+						</Card>
 					</li>
 				))}
 			</ul>
@@ -228,69 +235,93 @@ export function AdministrationOverview() {
 			title="Administration"
 		>
 			<div className="grid gap-4 lg:grid-cols-3">
-				<section
-					aria-labelledby="identity-summary"
-					className="rounded-2xl border p-5"
-				>
-					<UserRound className="mb-3 text-primary" />
-					<h2 className="font-medium" id="identity-summary">
-						Authenticated person
-					</h2>
-					<p className="mt-2 text-muted-foreground text-sm">
-						{party?.displayName ??
-							(workspace.identity?.partyId
-								? "Party summary is unavailable."
-								: "No Party record is linked to this membership.")}
-					</p>
-					<p className="mt-2 text-xs">
-						Assurance: {workspace.identity?.assuranceLevel ?? "Unknown"}
-					</p>
-				</section>
-				<section
-					aria-labelledby="organization-summary"
-					className="rounded-2xl border p-5"
-				>
-					<Building2 className="mb-3 text-primary" />
-					<h2 className="font-medium" id="organization-summary">
-						Organization
-					</h2>
-					<p className="mt-2 text-muted-foreground text-sm">
-						{organization?.name ?? "No active organization"}
-					</p>
-					<p className="mt-2 text-xs">
-						{organization?.timezone ?? "Timezone unavailable"}
-					</p>
-				</section>
-				<section
-					aria-labelledby="location-summary"
-					className="rounded-2xl border p-5"
-				>
-					<MapPin className="mb-3 text-primary" />
-					<h2 className="font-medium" id="location-summary">
-						Location scope
-					</h2>
-					<p className="mt-2 text-muted-foreground text-sm">
-						{location?.name ?? "All authorized locations"}
-					</p>
-					<p className="mt-2 text-xs">
-						Server checks this scope on every protected request.
-					</p>
-				</section>
+				<Card aria-labelledby="identity-summary-heading" role="region">
+					<CardHeader>
+						<UserRound className="text-primary" />
+						<h2
+							className="cn-font-heading font-medium text-sm"
+							data-slot="card-title"
+							id="identity-summary-heading"
+						>
+							Authenticated person
+						</h2>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-2">
+						<p className="text-muted-foreground text-sm">
+							{party?.displayName ??
+								(workspace.identity?.partyId
+									? "Party summary is unavailable."
+									: "No Party record is linked to this membership.")}
+						</p>
+						<p className="text-xs">
+							Assurance: {workspace.identity?.assuranceLevel ?? "Unknown"}
+						</p>
+					</CardContent>
+				</Card>
+				<Card aria-labelledby="organization-summary-heading" role="region">
+					<CardHeader>
+						<Building2 className="text-primary" />
+						<h2
+							className="cn-font-heading font-medium text-sm"
+							data-slot="card-title"
+							id="organization-summary-heading"
+						>
+							Organization
+						</h2>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-2">
+						<p className="text-muted-foreground text-sm">
+							{organization?.name ?? "No active organization"}
+						</p>
+						<p className="text-xs">
+							{organization?.timezone ?? "Timezone unavailable"}
+						</p>
+					</CardContent>
+				</Card>
+				<Card aria-labelledby="location-summary-heading" role="region">
+					<CardHeader>
+						<MapPin className="text-primary" />
+						<h2
+							className="cn-font-heading font-medium text-sm"
+							data-slot="card-title"
+							id="location-summary-heading"
+						>
+							Location scope
+						</h2>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-2">
+						<p className="text-muted-foreground text-sm">
+							{location?.name ?? "All authorized locations"}
+						</p>
+						<p className="text-xs">
+							Server checks this scope on every protected request.
+						</p>
+					</CardContent>
+				</Card>
 			</div>
-			<section
-				aria-labelledby="authority-note"
-				className="mt-6 rounded-2xl border p-5"
+			<Card
+				aria-labelledby="authority-note-heading"
+				className="mt-6"
+				role="region"
 			>
-				<ShieldCheck className="mb-3 text-primary" />
-				<h2 className="font-medium" id="authority-note">
-					Authority is current-state
-				</h2>
-				<p className="mt-2 max-w-3xl text-muted-foreground text-sm">
-					Navigation is not a security boundary. The server revalidates the
-					session, membership, role assignment, entitlement, and tenant
-					predicate for each operation.
-				</p>
-			</section>
+				<CardHeader>
+					<ShieldCheck className="text-primary" />
+					<h2
+						className="cn-font-heading font-medium text-sm"
+						data-slot="card-title"
+						id="authority-note-heading"
+					>
+						Authority is current-state
+					</h2>
+				</CardHeader>
+				<CardContent>
+					<p className="max-w-3xl text-muted-foreground text-sm">
+						Navigation is not a security boundary. The server revalidates the
+						session, membership, role assignment, entitlement, and tenant
+						predicate for each operation.
+					</p>
+				</CardContent>
+			</Card>
 		</PageFrame>
 	);
 }

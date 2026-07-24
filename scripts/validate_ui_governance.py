@@ -52,7 +52,17 @@ HEX_ALLOWLIST = {
     "packages/ui-web/core/src/styles/globals.css",
 }
 
-HEX_PATTERN = re.compile(r"#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b")
+HEX_PATTERN = re.compile(
+    r"#[0-9a-fA-F]{8}\b|#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{4}\b|#[0-9a-fA-F]{3}\b"
+)
+# CSS Color Module Level 4 permits 3-, 4-, 6-, and 8-digit hex literals
+# (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) -- issue #236. All four lengths
+# are listed longest-first so the alternation prefers the longest literal
+# a position could form; in practice the trailing `\b` alone already forces
+# this, since two adjacent hex digits are both `\w` characters and a
+# boundary can never fall between them, so a shorter alternative can only
+# win when it is genuinely followed by a non-hex-digit character.
+#
 # All-numeric hex matches (0-9 are valid hex digits) collide with GitHub
 # issue/PR references written as "issue #218" or "PR #218" in code comments
 # -- issue #224. Rather than requiring every future comment to awkwardly
@@ -65,7 +75,10 @@ HEX_PATTERN = re.compile(r"#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b")
 # have slipped through); and (b) "issue"/"pr" appears earlier on the SAME
 # LINE (not found via a fixed character window, which either false-exempts
 # across a line break or stops recognizing a reference once whitespace
-# pushes it out of range).
+# pushes it out of range). This check is length-agnostic by construction --
+# `match.group()[1:]` is whatever digits `HEX_PATTERN` captured, 3/4/6/8 of
+# them -- so no length-specific branch is needed for the new 4- and
+# 8-digit alternatives either.
 ISSUE_OR_PR_REFERENCE_PREFIX_PATTERN = re.compile(
     r"(?:^|[^A-Za-z])(?:issue|pr)[ \t]*$", re.IGNORECASE
 )

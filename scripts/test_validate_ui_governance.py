@@ -48,6 +48,34 @@ class RawPaletteTests(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertIn("hex color literal", errors[0])
 
+    def test_4_digit_hex_literal_in_component_is_an_error(self) -> None:
+        """Regression guard for issue #236: a 4-digit `#rgba` hex literal
+        (valid CSS Color Module Level 4 syntax, usable directly as a
+        Tailwind arbitrary value like `bg-[#1234]`) previously matched
+        neither of the old 3- or 6-digit-only alternatives and evaded the
+        check entirely."""
+        self._write(
+            "apps/web/src/Button.tsx",
+            "export const style = { color: '#1234' };\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            errors = check_raw_palette()
+        self.assertEqual(len(errors), 1)
+        self.assertIn("hex color literal", errors[0])
+
+    def test_8_digit_hex_literal_in_component_is_an_error(self) -> None:
+        """Regression guard for issue #236: an 8-digit `#rrggbbaa` hex
+        literal previously evaded the check the same way the 4-digit form
+        did."""
+        self._write(
+            "apps/web/src/Button.tsx",
+            "export const style = { color: '#12345678' };\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            errors = check_raw_palette()
+        self.assertEqual(len(errors), 1)
+        self.assertIn("hex color literal", errors[0])
+
     def test_issue_reference_in_comment_is_not_an_error(self) -> None:
         self._write(
             "apps/web/src/Button.tsx",
@@ -104,6 +132,56 @@ class RawPaletteTests(unittest.TestCase):
         self._write(
             "apps/web/src/Button.tsx",
             "// see PR #fff for context\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            errors = check_raw_palette()
+        self.assertEqual(len(errors), 1)
+        self.assertIn("hex color literal", errors[0])
+
+    def test_4_digit_all_decimal_issue_reference_is_not_an_error(self) -> None:
+        """Regression guard for issue #236: the all-decimal exemption check
+        in `_is_issue_or_pr_reference` is keyed off the matched digits, not
+        their length, so a (admittedly unrealistic in practice) 4-digit
+        all-decimal number right after "issue"/"pr" is exempted exactly like
+        the 3- and 6-digit cases already were."""
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// see issue #1234 for context\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            self.assertEqual(check_raw_palette(), [])
+
+    def test_8_digit_all_decimal_issue_reference_is_not_an_error(self) -> None:
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// see issue #12345678 for context\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            self.assertEqual(check_raw_palette(), [])
+
+    def test_4_digit_hex_letters_after_issue_word_are_still_an_error(self) -> None:
+        """Regression guard for issue #236: the same evasion the 3/6-digit
+        tests guard against -- a real hex literal disguised right after
+        "issue"/"pr" -- must still be caught at the new 4-digit length. Any
+        a-f content anywhere in the matched digits means it is never a
+        genuine issue/PR number, regardless of length."""
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// see issue #12ab for context\n"
+            "export const Button = () => <button className='bg-primary' />;\n",
+        )
+        with mock.patch.object(validator, "ROOT", self.root):
+            errors = check_raw_palette()
+        self.assertEqual(len(errors), 1)
+        self.assertIn("hex color literal", errors[0])
+
+    def test_8_digit_hex_letters_after_pr_word_are_still_an_error(self) -> None:
+        self._write(
+            "apps/web/src/Button.tsx",
+            "// see PR #1234abcd for context\n"
             "export const Button = () => <button className='bg-primary' />;\n",
         )
         with mock.patch.object(validator, "ROOT", self.root):

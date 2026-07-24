@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.3.0
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-23
@@ -161,6 +161,7 @@ The initial semantic roles are:
 - `text.inverse`
 - `border.default`
 - `border.strong`
+- `border.strong-overlay`
 - `action.primary`
 - `action.primary-hover`
 - `focus.ring`
@@ -172,6 +173,8 @@ The initial semantic roles are:
 - `status.offline`
 
 The registry provides provisional light and dark values. Brand colors map into approved action and accent roles; they do not redefine status colors.
+
+`border.strong-overlay` (added 2026-07-23, issue #226 review) exists because `border.strong` is not contrast-safe everywhere it visually appears to apply. A component boundary's WCAG-relevant "adjacent color" is whatever pixels actually touch it -- for Card, Select, and DropdownMenu, that is a solid surface fill, and `border.strong` already clears 3:1 there. For Dialog, the ring sits on the dialog-overlay scrim (a semi-transparent dimming layer over whatever page is behind it), not a solid fill, and `border.strong` measures only ~2.25:1 against that scrim composited over this platform's own light-theme page background -- below the 3:1 minimum. `border.strong-overlay` is the darker light-mode value verified against that specific composited scrim. This guarantee is scoped to the platform's own themed page background under its standard dialog scrim; it is not a claim of safety against arbitrary external backdrop content, since dialogs in this platform open over its own forms, tables, and lists rather than external media. Dark mode needs no separate value: this platform's dark-theme background composited under the same scrim is already dark enough that plain `border.strong` clears 3:1 with room to spare.
 
 ## Density
 

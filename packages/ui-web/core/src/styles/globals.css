@@ -65,6 +65,34 @@
 	--status-critical: #b91c1c;
 	--status-pending: #7c3aed;
 	--status-offline: #475569;
+	/* border-strong (color.light.border-strong, registry/design-tokens.json):
+	   the same #64748B value as the dark-theme record below, not the
+	   registry's previously-recorded #94A3B8 -- that value only reached
+	   2.56:1 against a white card (WCAG relative-luminance formula),
+	   short of the 3:1 non-text-contrast minimum this token exists to
+	   satisfy. #64748B reaches 4.76:1 in light mode; see the .dark block
+	   for the equivalent dark-mode verification. Card (card.tsx) is the
+	   first consumer (issue #204); the registry's light-mode value was
+	   corrected to match in this same change, not left to diverge like the
+	   fifth-audit F-H-003 preset aliases above (those diverge by design
+	   choice, this diverged only because the recorded value was wrong). */
+	--border-strong: #64748b;
+	/* border-strong-overlay (color.light.border-strong-overlay,
+	   registry/design-tokens.json): border-strong itself is NOT safe for
+	   Dialog's ring, because Dialog's ring sits on the dialog-overlay scrim
+	   (bg-black/30), not on a solid card/popover fill -- a different
+	   adjacent color, so it needs its own contrast check. #64748B (L=0.171)
+	   against a 30%-black scrim composited over this platform's light-theme
+	   page background (white, L=1 -> composited scrim L=0.445) measures
+	   only 2.25:1, below the 3:1 minimum. #475569 (L=0.089) reaches 3.58:1
+	   against that same composited scrim. This value is scoped to the
+	   platform's OWN themed page background under the standard dialog
+	   scrim -- dialogs here open over this platform's forms/tables/lists,
+	   not arbitrary external dark media -- not claimed safe against any
+	   possible backdrop content. Select/DropdownMenu/Card keep using plain
+	   border-strong: their poppers sit on solid fills with no dimming
+	   scrim, so border-strong's own 4.76:1 already applies unmodified. */
+	--border-strong-overlay: #475569;
 	--density-compact-control: 2rem;
 	--density-comfortable-control: 2.5rem;
 	--density-touch-control: 3rem;
@@ -116,6 +144,25 @@
 	--status-critical: #f87171;
 	--status-pending: #c4b5fd;
 	--status-offline: #94a3b8;
+	/* border-strong (color.dark.border-strong, registry/design-tokens.json):
+	   the registry's recorded #64748B, verified at 3.76:1 against the dark
+	   card fill (oklch(0.205 0 0)) and 4.16:1 against the dark page
+	   background -- both clear the 3:1 non-text-contrast minimum. Same
+	   value as the light theme above (see that comment for why light's
+	   registry-recorded value needed correcting, not just copying here). */
+	--border-strong: #64748b;
+	/* border-strong-overlay (color.dark.border-strong-overlay,
+	   registry/design-tokens.json): dark mode needs no separate value --
+	   this platform's own dark-theme page background (oklch(0.145 0 0))
+	   converts to a relative luminance of ~0.0027, so the 30%-black dialog
+	   scrim composited over it lands at ~0.0019, close to true black.
+	   #64748B (L=0.171) against that near-black composited scrim measures
+	   ~4.25:1, comfortably above the 3:1 minimum -- no darker override is
+	   needed the way light mode required one. Defined here anyway (equal
+	   to plain border-strong) so Dialog can reference
+	   --border-strong-overlay uniformly across themes without branching,
+	   matching the status-warning-foreground precedent. */
+	--border-strong-overlay: #64748b;
 }
 
 @theme inline {

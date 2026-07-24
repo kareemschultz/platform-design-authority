@@ -171,7 +171,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/card.tsx",
       "record_id": "source.better-t-stack.ui.3.36.3",
-      "sha256": "01fcfca22df17ac7f0ab0bc0dbb7f0b5c6d7bf4489f79549ee3554905962e017"
+      "sha256": "e193e4f153fcf52191f6e24ff0fffb4dce171b8bd4fa7593123d27255e169100"
     },
     {
       "declared_upstream_license": "MIT",
@@ -189,7 +189,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/dialog.tsx",
       "record_id": "source.shadcn.ui.4.13.0",
-      "sha256": "7410e255a7d618a4763fdabc2f597fbd0410849a43faa253f8dc760c9a75c15a"
+      "sha256": "c4eb753d115a34ef63966574521baaab3e7511250dc57099c10a080f9f2b59a6"
     },
     {
       "declared_upstream_license": "MIT",
@@ -198,7 +198,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/dropdown-menu.tsx",
       "record_id": "source.better-t-stack.ui.3.36.3",
-      "sha256": "0117a2712c6fb74508797cab80bb1011f6590aaeed8aec5a1ef11b7f59604ff0"
+      "sha256": "dfd4c3e10ef9cbde5b1a5f9caf5cb99af138a58ff1ec7d13728fccc16abd3754"
     },
     {
       "declared_upstream_license": "MIT",
@@ -243,7 +243,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/select.tsx",
       "record_id": "source.shadcn.ui.4.14.0",
-      "sha256": "3c46fdcafccde05fd77b7937e841ab42fd37d54db83edd5eaf992224546c6964"
+      "sha256": "b54aa8b7ed412e2c6b395d8a183d1a8d6106d059aa1f1fff6c798ea0a46573a5"
     },
     {
       "declared_upstream_license": "MIT",

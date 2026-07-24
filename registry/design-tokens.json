@@ -185,7 +185,8 @@
         },
         "border-strong": {
           "$type": "color",
-          "$value": "#94A3B8"
+          "$value": "#64748B",
+          "$description": "Corrected 2026-07-23 (issue #204): #94A3B8 reached only 2.56:1 against a white card, short of the 3:1 non-text-contrast minimum this token exists to satisfy. #64748B (matching the dark-theme value) reaches 4.76:1."
         },
         "action-primary": {
           "$type": "color",

@@ -65,6 +65,18 @@
 	--status-critical: #b91c1c;
 	--status-pending: #7c3aed;
 	--status-offline: #475569;
+	/* border-strong (color.light.border-strong, registry/design-tokens.json):
+	   the same #64748B value as the dark-theme record below, not the
+	   registry's currently-recorded #94A3B8 -- that value only reaches
+	   2.56:1 against a white card (WCAG relative-luminance formula),
+	   short of the 3:1 non-text-contrast minimum this token exists to
+	   satisfy. #64748B reaches 4.76:1 in light mode; see the .dark block
+	   for the equivalent dark-mode verification. Card (card.tsx) is the
+	   first consumer (issue #204); the registry's light-mode value should
+	   be corrected to match once this lands, not left to diverge like the
+	   fifth-audit F-H-003 preset aliases above (those diverge by design
+	   choice, this diverges because the recorded value was simply wrong). */
+	--border-strong: #64748b;
 	--density-compact-control: 2rem;
 	--density-comfortable-control: 2.5rem;
 	--density-touch-control: 3rem;
@@ -116,6 +128,13 @@
 	--status-critical: #f87171;
 	--status-pending: #c4b5fd;
 	--status-offline: #94a3b8;
+	/* border-strong (color.dark.border-strong, registry/design-tokens.json):
+	   the registry's recorded #64748B, verified at 3.76:1 against the dark
+	   card fill (oklch(0.205 0 0)) and 4.16:1 against the dark page
+	   background -- both clear the 3:1 non-text-contrast minimum. Same
+	   value as the light theme above (see that comment for why light's
+	   registry-recorded value needed correcting, not just copying here). */
+	--border-strong: #64748b;
 }
 
 @theme inline {

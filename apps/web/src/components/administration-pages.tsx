@@ -9,7 +9,7 @@ import type {
 	UserSummary,
 } from "@meridian/contracts-platform-api";
 import { Badge } from "@meridian/ui-web/components/badge";
-import { Button, buttonVariants } from "@meridian/ui-web/components/button";
+import { Button } from "@meridian/ui-web/components/button";
 import {
 	Card,
 	CardContent,
@@ -25,37 +25,19 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@meridian/ui-web/components/dialog";
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@meridian/ui-web/components/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	ArrowRight,
-	Building2,
-	MapPin,
-	ShieldCheck,
-	UserRound,
-} from "lucide-react";
-import Link from "next/link";
+import { Building2, MapPin, ShieldCheck, UserRound } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
 import { orpc } from "@/utils/orpc";
 
-import { StateBadge } from "./operations-shared";
-import { EmptyState, ListSkeleton, QueryFailure } from "./query-state";
+import {
+	CollectionState,
+	type DataColumn,
+	StateBadge,
+} from "./operations-shared";
 import { useWorkspace } from "./workspace-context";
-
-interface Column<T> {
-	label: string;
-	render: (item: T) => React.ReactNode;
-}
 
 function PageFrame({
 	children,
@@ -77,136 +59,8 @@ function PageFrame({
 	);
 }
 
-function ResponsiveList<T>({
-	caption,
-	columns,
-	items,
-	rowKey,
-}: {
-	caption: string;
-	columns: Column<T>[];
-	items: T[];
-	rowKey: (item: T) => string;
-}) {
-	return (
-		<>
-			<Card className="hidden overflow-x-auto py-0 md:block">
-				<Table>
-					<TableCaption className="sr-only">{caption}</TableCaption>
-					<TableHeader>
-						<TableRow>
-							{columns.map((column) => (
-								<TableHead key={column.label}>{column.label}</TableHead>
-							))}
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{items.map((item) => (
-							<TableRow key={rowKey(item)}>
-								{columns.map((column) => (
-									<TableCell key={column.label}>
-										{column.render(item)}
-									</TableCell>
-								))}
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
-			</Card>
-			<ul aria-label={caption} className="grid gap-3 md:hidden">
-				{items.map((item) => (
-					<li key={rowKey(item)}>
-						<Card className="px-4">
-							<dl className="grid gap-3">
-								{columns.map((column) => (
-									<div className="grid gap-1" key={column.label}>
-										<dt className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-											{column.label}
-										</dt>
-										<dd>{column.render(item)}</dd>
-									</div>
-								))}
-							</dl>
-						</Card>
-					</li>
-				))}
-			</ul>
-		</>
-	);
-}
-
-function CursorNext({ nextCursor }: { nextCursor: string | null }) {
-	if (!nextCursor) {
-		return null;
-	}
-	return (
-		<div className="mt-4 flex justify-end">
-			<Link
-				className={buttonVariants({ variant: "outline" })}
-				href={`?cursor=${encodeURIComponent(nextCursor)}`}
-			>
-				Next page <ArrowRight />
-			</Link>
-		</div>
-	);
-}
-
 function useCursor() {
 	return useSearchParams().get("cursor") ?? undefined;
-}
-
-function QueryListState<T>({
-	caption,
-	columns,
-	empty,
-	error,
-	isError,
-	isFetching,
-	isLoading,
-	isOnline,
-	items,
-	nextCursor,
-	onRetry,
-	rowKey,
-}: {
-	caption: string;
-	columns: Column<T>[];
-	empty: string;
-	error: unknown;
-	isError: boolean;
-	isFetching: boolean;
-	isLoading: boolean;
-	isOnline: boolean;
-	items: T[] | undefined;
-	nextCursor: string | null | undefined;
-	onRetry: () => void;
-	rowKey: (item: T) => string;
-}) {
-	if (isLoading) {
-		return <ListSkeleton />;
-	}
-	if (isError) {
-		return <QueryFailure error={error} isOnline={isOnline} onRetry={onRetry} />;
-	}
-	if (!items?.length) {
-		return <EmptyState>{empty}</EmptyState>;
-	}
-	return (
-		<>
-			{isFetching ? (
-				<p className="mb-3 text-muted-foreground text-sm" role="status">
-					Refreshing current information...
-				</p>
-			) : null}
-			<ResponsiveList
-				caption={caption}
-				columns={columns}
-				items={items}
-				rowKey={rowKey}
-			/>
-			<CursorNext nextCursor={nextCursor ?? null} />
-		</>
-	);
 }
 
 export function AdministrationOverview() {
@@ -339,7 +193,7 @@ export function UsersPage() {
 		enabled: Boolean(workspace.contextId),
 		retry: false,
 	});
-	const columns: Column<UserSummary>[] = [
+	const columns: DataColumn<UserSummary>[] = [
 		{
 			label: "Person",
 			render: (item) => (
@@ -368,7 +222,7 @@ export function UsersPage() {
 			description="People with tenant memberships. Authentication and Party identity remain separate records."
 			title="Users"
 		>
-			<QueryListState
+			<CollectionState
 				caption="Tenant users"
 				columns={columns}
 				empty="No users are available in this tenant."
@@ -399,7 +253,7 @@ export function RolesPage() {
 		enabled: Boolean(workspace.contextId),
 		retry: false,
 	});
-	const columns: Column<Role>[] = [
+	const columns: DataColumn<Role>[] = [
 		{
 			label: "Role",
 			render: (item) => (
@@ -422,7 +276,7 @@ export function RolesPage() {
 			description="Tenant-scoped business roles and their governed permission sets."
 			title="Roles"
 		>
-			<QueryListState
+			<CollectionState
 				caption="Tenant roles"
 				columns={columns}
 				empty="No roles are available in this tenant."
@@ -453,7 +307,7 @@ export function EntitlementsPage() {
 		enabled: Boolean(workspace.contextId),
 		retry: false,
 	});
-	const columns: Column<Entitlement>[] = [
+	const columns: DataColumn<Entitlement>[] = [
 		{
 			label: "Capability",
 			render: (item) => (
@@ -477,7 +331,7 @@ export function EntitlementsPage() {
 			description="Provisioned capabilities. Entitlements do not grant an individual permission."
 			title="Entitlements"
 		>
-			<QueryListState
+			<CollectionState
 				caption="Tenant entitlements"
 				columns={columns}
 				empty="No capabilities are provisioned for this tenant."
@@ -561,7 +415,7 @@ export function SessionsPage() {
 		}),
 		retry: false,
 	});
-	const columns: Column<SessionSummary>[] = [
+	const columns: DataColumn<SessionSummary>[] = [
 		{
 			label: "Device",
 			render: (item) => (
@@ -599,7 +453,7 @@ export function SessionsPage() {
 			description="Review signed-in devices and revoke access. Revocation is authoritative, not a UI-only action."
 			title="Sessions"
 		>
-			<QueryListState
+			<CollectionState
 				caption="Your sessions"
 				columns={columns}
 				empty="No active sessions were returned."
@@ -630,7 +484,7 @@ export function AuditPage() {
 		enabled: Boolean(workspace.contextId),
 		retry: false,
 	});
-	const columns: Column<AuditRecord>[] = [
+	const columns: DataColumn<AuditRecord>[] = [
 		{
 			label: "Action",
 			render: (item) => (
@@ -659,7 +513,7 @@ export function AuditPage() {
 			description="Append-only security and administration evidence. Sensitive metadata is not expanded in this shell."
 			title="Audit"
 		>
-			<QueryListState
+			<CollectionState
 				caption="Tenant audit records"
 				columns={columns}
 				empty="No audit records match this page."

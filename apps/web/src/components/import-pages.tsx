@@ -653,6 +653,7 @@ function ImportFindings({
 			<ResponsiveDataList
 				caption="Import validation findings"
 				columns={columns}
+				density="compact"
 				items={items}
 				rowKey={(finding) =>
 					`${finding.rowNumber}:${finding.sourceKey}:${finding.code}`

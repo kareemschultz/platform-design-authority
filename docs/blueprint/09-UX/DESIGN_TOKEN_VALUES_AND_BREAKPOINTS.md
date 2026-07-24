@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.2.3
+version: 0.3.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-20
+last_reviewed: 2026-07-23
 ---
 
 # Design Token Values and Breakpoints
@@ -179,13 +179,17 @@ The registry provides provisional light and dark values. Brand colors map into a
 
 - Standard input height: 40 px
 - Standard table row: 44 px
-- POS touch row: 52 px or greater
 
 ### Compact
 
 - Standard input height: 32 px
 - Standard table row: 32–36 px
 - Minimum interactive target remains accessible through padding, row actions, or expanded hit area.
+
+### Touch / POS
+
+- Standard table row: 52 px or greater — named as its own density tier here (moved out of Comfortable, second-review 2026-07-23) because component implementations offer it as an independently selectable option, not a Comfortable sub-case. The figure is unchanged; only the structure changed.
+- This is distinct from `size.target-pos` (48 px) in `registry/design-tokens.json`, which is the general minimum touch-target size (matching the Touch Targets section's "POS and frequent touch target: 48 × 48 CSS px minimum"); the registry has no separate row-specific dimension token for this row figure yet. A taller row does not by itself satisfy the 48×48 target requirement for any interactive control placed inside it — row height and control size are separate properties, and any row-level interactive control (a button, checkbox, or link within a touch-density row) still needs its own dimensions verified against the 48×48 minimum independently of the row's height.
 
 ## Z-Index Layers
 

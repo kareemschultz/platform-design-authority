@@ -288,7 +288,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/table.tsx",
       "record_id": "source.shadcn.ui.4.13.0",
-      "sha256": "d7e00281951229a9d7ece91d1364ece682cf1a3b9d36e7b5b65148b164d65e42"
+      "sha256": "afc28299e12a87bee4e800f038341fcc9acf25cf928d481cc9bdadda9c5b47c6"
     }
   ],
   "generated_from": "third_party/provenance.json",

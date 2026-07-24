@@ -51,6 +51,19 @@ class BaselineError(ValueError):
     """A deterministic baseline invariant failed."""
 
 
+ORIGINAL_TEST_OR_STORY_SUFFIXES = (
+    ".test.ts", ".test.tsx", ".stories.ts", ".stories.tsx",
+)
+
+
+def _is_original_test_or_story_file(filename: str) -> bool:
+    """Test/story files colocated with a coverage-scope component are
+    always original first-party code, never copied/derived source -- they
+    are out of scope for third-party provenance tracking regardless of
+    which component they exercise."""
+    return filename.endswith(ORIGINAL_TEST_OR_STORY_SUFFIXES)
+
+
 def json_bytes(value: Any) -> bytes:
     text = json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     return text.encode("utf-8")
@@ -396,7 +409,9 @@ def source_asset_inventory(
         matches = {
             path.relative_to(ROOT).as_posix()
             for path in ROOT.glob(pattern)
-            if path.is_file() and not path.is_symlink()
+            if path.is_file()
+            and not path.is_symlink()
+            and not _is_original_test_or_story_file(path.name)
         }
         if not matches:
             raise BaselineError(f"coverage scope matched no files: {pattern}")

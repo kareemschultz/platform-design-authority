@@ -144,7 +144,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/alert.tsx",
       "record_id": "source.shadcn.ui.4.13.0",
-      "sha256": "9d24d62b3b4b65c308a0c0525bdccd9cdbe3c59d76cf7d356685c523722177ef"
+      "sha256": "9e9a18dc9c827b5a5dd0fd4283e056be67b7e1297e3bbdc88441fd72a74b05dd"
     },
     {
       "declared_upstream_license": "MIT",
@@ -153,7 +153,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/badge.tsx",
       "record_id": "source.shadcn.ui.4.13.0",
-      "sha256": "b2cbc7fc719c2775dce7870610d99bd442644ffebcaa59682dd8c062d9608c7d"
+      "sha256": "803285f7ee52152e763dd8de9fb7d8f077dd4c6737e71803469ec60df7fa0ce5"
     },
     {
       "declared_upstream_license": "MIT",
@@ -225,7 +225,7 @@
       "license_conclusion": "NOASSERTION",
       "path": "packages/ui-web/core/src/components/metric-card.tsx",
       "record_id": "source.shadcn-studio.statistics-card-03",
-      "sha256": "d29af0afdb168b44e43acbcf03d935c9055badbdd9571474774261601f3bc03c"
+      "sha256": "643db7c6e0701058159465820fd3012df38d605267acb5c37128ebb809558587"
     },
     {
       "declared_upstream_license": "NOASSERTION",

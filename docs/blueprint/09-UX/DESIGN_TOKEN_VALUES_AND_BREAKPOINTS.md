@@ -168,6 +168,7 @@ The initial semantic roles are:
 - `status.info`
 - `status.success`
 - `status.warning`
+- `status.warning-foreground`
 - `status.critical`
 - `status.pending`
 - `status.offline`
@@ -175,6 +176,8 @@ The initial semantic roles are:
 The registry provides provisional light and dark values. Brand colors map into approved action and accent roles; they do not redefine status colors.
 
 `border.strong-overlay` (added 2026-07-23, issue #226 review) exists because `border.strong` is not contrast-safe everywhere it visually appears to apply. A component boundary's WCAG-relevant "adjacent color" is whatever pixels actually touch it -- for Card, Select, and DropdownMenu, that is a solid surface fill, and `border.strong` already clears 3:1 there. For Dialog, the ring sits on the dialog-overlay scrim (a semi-transparent dimming layer over whatever page is behind it), not a solid fill, and `border.strong` measures only ~2.25:1 against that scrim composited over this platform's own light-theme page background -- below the 3:1 minimum. `border.strong-overlay` is the darker light-mode value verified against that specific composited scrim. This guarantee is scoped to the platform's own themed page background under its standard dialog scrim; it is not a claim of safety against arbitrary external backdrop content, since dialogs in this platform open over its own forms, tables, and lists rather than external media. Dark mode needs no separate value: this platform's dark-theme background composited under the same scrim is already dark enough that plain `border.strong` clears 3:1 with room to spare.
+
+`status.warning-foreground` (added 2026-07-23, issue #209) exists because `status.warning`'s light-mode value has essentially no AA contrast headroom once tinted or blended (4.92:1 against white, failing outright at typical tint opacities) -- it is the AA-safe value for colored *text* specifically. `status.warning` itself is unchanged and remains the correct source for borders, icons, and tints, which only need the 3:1 non-text-contrast minimum and already pass. No other status role currently needs this split; do not add a parallel `-foreground` role for the others without the same contrast evidence.
 
 ## Density
 

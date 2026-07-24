@@ -112,7 +112,10 @@ function MetricCardValue({
 		<p className="flex items-baseline gap-2">
 			<span className="font-semibold text-2xl">{value}</span>
 			{stale ? (
-				<span aria-hidden="true" className="text-status-warning text-xs">
+				<span
+					aria-hidden="true"
+					className="text-status-warning-foreground text-xs"
+				>
 					Stale
 				</span>
 			) : null}

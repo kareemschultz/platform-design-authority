@@ -23,7 +23,8 @@
       "Renamed badgeContent to periodText (the governed time window/comparison basis) and added optional freshnessText; the anatomy's required 'evidence link' and 'partial' state are not implemented, disclosed as an open gap in the catalog entry rather than invented without a real consuming surface",
       "Changed Card and Badge imports from generic shadcn '@/components/ui/*' aliases to the platform's owned '@meridian/ui-web/components/*'; added the owned Skeleton import for the new loading state (the source had no loading state, so this is a new import, not a changed one)",
       "Extracted the value/loading/error branch into a MetricCardValue helper to satisfy the platform's noNestedTernary lint rule",
-      "Dropped the source's page.tsx route wrapper and hardcoded demo data; this is a reusable primitive, not a standalone route"
+      "Dropped the source's page.tsx route wrapper and hardcoded demo data; this is a reusable primitive, not a standalone route",
+      "Changed the 'Stale' indicator's className from text-status-warning to text-status-warning-foreground (2026-07-23, issue #209) -- status-warning itself reaches only 4.92:1 against white with no headroom once tinted/blended; the new -foreground token (7.09:1) is the AA-safe value for colored warning text specifically, per docs/blueprint/09-UX/DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md"
     ],
     "dependencies_added": [],
     "external_network_calls_removed": [],

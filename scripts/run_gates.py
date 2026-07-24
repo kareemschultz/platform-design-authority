@@ -133,6 +133,13 @@ def build_gates() -> list[Gate]:
     )
     gates.append(
         Gate(
+            "generate_design_tokens_css.py --check",
+            [*_python("generate_design_tokens_css.py"), "--check"],
+            "generated",
+        )
+    )
+    gates.append(
+        Gate(
             "generate_api_reference.py --check",
             [*_python("generate_api_reference.py"), "--check"],
             "generated",
@@ -147,6 +154,7 @@ def build_gates() -> list[Gate]:
     for script in (
         "test_generate_registries.py",
         "test_generate_api_reference.py",
+        "test_generate_design_tokens_css.py",
     ):
         gates.append(Gate(script, _unittest(script), "generated"))
 

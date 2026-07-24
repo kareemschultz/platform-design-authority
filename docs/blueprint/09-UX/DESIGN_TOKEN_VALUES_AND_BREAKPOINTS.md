@@ -1,7 +1,7 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.5.0
+version: 0.6.0
 status: Draft
 owner: Platform Design Authority
 last_reviewed: 2026-07-24
@@ -252,9 +252,15 @@ Registry-backed groups are `space`, `radius`, `motion`, `screen`, `size`, and `c
 - Text scaling
 - Touch and POS target measurement
 
+## Generated CSS (RR-004 / TD-004, issue #21)
+
+`scripts/generate_design_tokens_css.py` generates the `status-*`, `border-strong`, and `border-strong-overlay` custom properties inside `globals.css`'s `/* BEGIN generated design tokens */` … `/* END generated design tokens */` markers (one block in `:root`, one in `.dark`) directly from `registry/design-tokens.json`'s `color.light.*` / `color.dark.*` entries, and fails `--check` (wired into `bun run gates` and the Documentation Governance workflow) if the file drifts from the registry. Each generated property's contrast-rationale comment is rendered from that token's `$description` field, so the registry — not a hand-copied CSS comment — is now the single source for both the value and the rationale; a `$description` missing from a commented token fails generation rather than silently emitting no rationale.
+
+This closes **TD-004** (status-token CSS variables were hand-copied literals) at full implementation depth. It only **partially** addresses **RR-004** ("token registry as the single styling source in code"): the generator deliberately never touches the non-status semantic aliases described below (that divergence is a recorded, permanent-by-design exception, not a gap to close), and the registry's `space`, `radius`, `motion`, `screen`, and `size` groups have no CSS custom-property generation yet. See `docs/reviews/ARCHITECTURE_RISK_REGISTER.md` for the recorded, scope-bounded closure language.
+
 ## Recorded prototype drift (fifth-audit F-H-003)
 
-The shipped theme (`packages/ui-web/core/src/styles/globals.css`) resolves the non-status semantic aliases (`--surface-*`, `--action-primary*`, `--text-*`, `--focus-ring`, borders) to the governed shadcn preset values, which differ from this registry's draft values; only the `status-*` roles are registry-synchronized. This is a deliberate controlled-prototype mapping — the governed preset wins until this token registry leaves draft. When it does, either reconcile the CSS aliases to registry values or re-record the exception here; a white-label or contrast change applied only to the registry does not reach the product until then.
+The shipped theme (`packages/ui-web/core/src/styles/globals.css`) resolves the non-status semantic aliases (`--surface-*`, `--action-primary*`, `--text-*`, `--focus-ring`, borders) to the governed shadcn preset values, which differ from this registry's draft values; only the `status-*`, `border-strong`, and `border-strong-overlay` roles are registry-synchronized (and, as of issue #21, generated rather than hand-copied — see the section above). This is a deliberate controlled-prototype mapping — the governed preset wins until this token registry leaves draft. When it does, either reconcile the CSS aliases to registry values or re-record the exception here; a white-label or contrast change applied only to the registry does not reach the product until then.
 
 ### Recorded Non-Status Alias Exceptions
 

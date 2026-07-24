@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-015
 title: Design Tokens and Visual System
-version: 0.3.1
+version: 0.4.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-20
+last_reviewed: 2026-07-24
 ---
 
 # Design Tokens and Visual System
@@ -16,6 +16,8 @@ Define the constrained visual language that makes the platform coherent, accessi
 ## Scope relative to Design Token Values and Breakpoints
 
 This document defines the token *system* — roles, principles, and the visual-language contract: what each token role means and why it exists. `DESIGN_TOKEN_VALUES_AND_BREAKPOINTS.md` (PDA-UX-023) defines this system's provisional *normative values* and breakpoints, machine-represented in `registry/design-tokens.json`. Read this document for the role's meaning; read PDA-UX-023 for its current value and implementation status.
+
+**In practice, for color roles specifically**, PDA-UX-023's "Semantic Color Roles" section is where every role is actually enumerated, and where individual "why" rationale is recorded for roles added or corrected after this document's `## Color` section was last written (`border.strong`, `border.strong-overlay`, `status.warning-foreground`) — not every listed color role has a recorded rationale paragraph yet, only those three. The `## Color` section below stays principle-level (why color is semantic, not arbitrary; how status/dark-mode/brand color relate) rather than an exhaustive per-role list, and the "Semantic Tokens" example list under Token Layers is illustrative, not a complete role inventory. This is a documented reconciliation (issue #230), not an aspiration: don't expect every current color role to have its own entry here, and don't treat a role's absence of rationale in *either* document as evidence it's recorded in the other — it may simply not be recorded anywhere yet.
 
 ## Principle: Invisible Consistency
 
@@ -227,6 +229,14 @@ No product feature should add a raw brand color or spacing value directly to app
 
 ## Change Log
 
+- 2026-07-24 — v0.4.0 reconciled this document's stated role-ownership split
+  with actual practice (issue #230): added an explicit note that PDA-UX-023's
+  "Semantic Color Roles" section is the authoritative per-role enumeration
+  and rationale source for color roles, since this document's own "Semantic
+  Tokens" example list is illustrative, not exhaustive, and several roles
+  added or corrected since (`border.strong`, `border.strong-overlay`,
+  `status.warning-foreground`) were only ever recorded in PDA-UX-023. No
+  token value, meaning, or governance rule changed.
 - 2026-07-19 — v0.3.0 defined the operational surface treatment and explicit
   comfortable, compact, and touch/POS composition profiles following review of
   an external dashboard visual reference. The governed token system and

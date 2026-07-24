@@ -1,10 +1,10 @@
 ---
 document_id: PDA-UX-023
 title: Design Token Values and Breakpoints
-version: 0.4.0
+version: 0.5.0
 status: Draft
 owner: Platform Design Authority
-last_reviewed: 2026-07-23
+last_reviewed: 2026-07-24
 ---
 
 # Design Token Values and Breakpoints
@@ -17,7 +17,9 @@ Values are pre-implementation defaults and may change through design-system gove
 
 ## Scope relative to Design Tokens and Visual System
 
-`DESIGN_TOKENS_AND_VISUAL_SYSTEM.md` (PDA-UX-015) owns the token roles and the principles behind them; it does not carry current values. This document owns the values themselves — read it for what a token role is currently set to, not for why the role exists.
+`DESIGN_TOKENS_AND_VISUAL_SYSTEM.md` (PDA-UX-015) owns the token *system* — general roles and the principles behind them. This document owns the values themselves — read it for what a token role is currently set to.
+
+**Reconciled 2026-07-24 (issue #230):** for color roles specifically, read this document for the "why" too, not only the value. The Semantic Color Roles section below carries individual rationale for roles added or corrected after PDA-UX-015's own "Semantic Tokens" list was last written (`border.strong`, `border.strong-overlay`, `status.warning-foreground`) — that is the actual, current source for those roles' rationale, not PDA-UX-015. This document does *not* yet carry rationale for every listed color role — only the ones with a recorded `$description` or explanatory paragraph below; a role's absence of a paragraph here means no rationale has been recorded yet anywhere, not that PDA-UX-015 has it instead.
 
 ## Token Format
 
